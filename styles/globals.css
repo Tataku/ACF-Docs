@@ -1,0 +1,6 @@
+:root {
+  --acf-max-width: 900px;
+}
+.nextra-content {
+  max-width: var(--acf-max-width);
+}
