@@ -174,7 +174,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'sig-payoff', idx: 'S1', group: 'signature', intendedPlacement: 'both',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Defined downside. Asymmetric upside.', setupLine: 'The payoff shape the whole framework is built to produce',
+    title: 'Shape the Payoff', setupLine:'The payoff shape the whole framework is built to produce',
     claimLabel: 'PAYOFF SHAPE · SIGNATURE',
     frameworkClaim: 'ACF shapes exposure: the left side is capped, the right side is left free to run.',
     readerTakeaway: 'Survive the left tail; stay convex on the right tail.',
@@ -216,7 +216,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'sig-shape', idx: 'S2', group: 'signature', intendedPlacement: 'docs-landing',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'The shape of the strategy', setupLine: 'ACF reshapes the distribution of outcomes, it does not just chase higher returns',
+    title: 'Bend the Tail', setupLine:'ACF reshapes the distribution of outcomes, it does not just chase higher returns',
     claimLabel: 'EXPOSURE SHAPING · SIGNATURE',
     frameworkClaim: 'ACF truncates the left tail and extends the right tail of the outcome distribution.',
     readerTakeaway: 'Same center of gravity, deliberately reshaped tails.',
@@ -237,8 +237,8 @@ export const FRAMEWORK_CHART_SPECS = [
     xTicks: [{ v: -3, label: 'loss' }, { v: 0, label: 'base case' }, { v: 4, label: 'gain' }],
     yTicks: [],
     series: [
-      { key: 'symmetric', tier: 'reference', label: 'Symmetric', pts: shape.symmetric, labelDy: 14 },
-      { key: 'shaped', tier: 'primary', label: 'ACF shaped', pts: shape.shaped, labelDy: -8 },
+      { key: 'symmetric', tier: 'reference', label: 'Symmetric', pts: shape.symmetric, labelDy: 16 },
+      { key: 'shaped', tier: 'primary', label: 'ACF shaped', pts: shape.shaped, labelDy: -10 },
     ],
     areas: [{ id: 'underShaped', topKey: 'shaped', kind: 'under', label: '' }],
     markers: [
@@ -261,7 +261,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'dl-convexity-window', idx: 'L1', group: 'docs-landing', intendedPlacement: 'docs-landing',
     status: 'implemented', wiredPublic: false,
-    title: 'The convexity window', setupLine: 'Compression, then confirmation, then asymmetric release',
+    title: 'The Window Opens', setupLine:'Compression, then confirmation, then asymmetric release',
     claimLabel: 'CONVEXITY · WINDOW',
     frameworkClaim: 'ACF waits for setups where downside is defined and upside can accelerate.',
     readerTakeaway: 'Patience through compression; size into confirmation; let the release run.',
@@ -303,7 +303,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'dl-regime-map', idx: 'L2', group: 'docs-landing', intendedPlacement: 'docs-landing',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Capital has weather', setupLine: 'Same assets, different regime, different behaviour',
+    title: 'Capital Has Weather', setupLine:'Same assets, different regime, different behaviour',
     claimLabel: 'REGIME MAP · CAPITAL WEATHER',
     frameworkClaim: 'Portfolio construction changes with the macro regime.',
     readerTakeaway: 'You are not allocating in a vacuum; you are allocating into weather.',
@@ -340,7 +340,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'wp2', kind: 'waypoint', label: 'Deflation scare', name: 'Deflation scare', why: 'Growth rolls over with low inflation. Duration and quality lead; convexity hides in safety.', claim: 'Different weather, different leaders.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
       { id: 'wp3', kind: 'waypoint', label: 'Reflation', name: 'Reflation', why: 'Growth and inflation rise together. Real assets and energy lead; bonds stop helping.', claim: 'Real assets earn their keep.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
       { id: 'wp4', kind: 'waypoint', label: 'Inflation shock', name: 'Inflation shock', why: 'Weak growth, high inflation. The stagflation corner where 60/40 broke and hard assets and defense led.', claim: 'The regime that breaks the old hedge.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'wp5', kind: 'waypoint', label: 'Now', name: 'Where capital sits now', why: 'The framework keeps re-reading position on this map rather than assuming last season persists.', claim: 'Position is a live reading, not a constant.', concept: 'Adaptation', link: '/part-2-lineage-macro-thesis' },
+      { id: 'wp5', kind: 'waypoint', label: 'Now', persistentLabel: true, name: 'Where capital sits now', why: 'The framework keeps re-reading position on this map rather than assuming last season persists.', claim: 'Position is a live reading, not a constant.', concept: 'Adaptation', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['wp1', 'wp2', 'wp3', 'wp4', 'wp5'],
     implementationNotes: 'Bespoke quadrant layout. Waypoint positions and regime copy are representative; marketing should validate the path narrative.',
@@ -349,7 +349,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'dl-tripwire-loop', idx: 'L3', group: 'docs-landing', intendedPlacement: 'docs-landing',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'A governed loop, not a static allocation', setupLine: 'Thesis creates exposure · exposure creates risk · tripwires govern behaviour',
+    title: 'Govern the Thesis', setupLine:'Thesis creates exposure · exposure creates risk · tripwires govern behaviour',
     claimLabel: 'SYSTEM · GOVERNED LOOP',
     frameworkClaim: 'ACF is a closed-loop operating system, not a fixed set of weights.',
     readerTakeaway: 'Every position is traceable to a thesis and governed by a tripwire.',
@@ -390,7 +390,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p1-hedge-broke', idx: '01', group: 'part-1', intendedPlacement: 'part-1',
     status: 'implemented', wiredPublic: false,
-    title: 'When 60/40 stopped cushioning', setupLine: 'Indexed total return through an inflation shock: stocks, bonds, and the 60/40 blend',
+    title: 'The Hedge Broke', setupLine:'Indexed total return through an inflation shock: stocks, bonds, and the 60/40 blend',
     claimLabel: 'DIVERSIFICATION · FRAGILITY',
     frameworkClaim: 'Stocks and bonds are not always true diversifiers.',
     readerTakeaway: 'When inflation drives the regime, the hedge can fall with the risk.',
@@ -437,7 +437,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p1-correlation', idx: '02', group: 'part-1', intendedPlacement: 'part-1',
     status: 'implemented', wiredPublic: false,
-    title: 'The correlation regime changed', setupLine: 'Rolling 24-month stock–bond correlation across an inflation-shock window',
+    title: 'Correlation Turns', setupLine:'Rolling 24-month stock–bond correlation across an inflation-shock window',
     claimLabel: 'CORRELATION · REGIME',
     frameworkClaim: 'Stock–bond correlation changes when inflation becomes the dominant stress.',
     readerTakeaway: 'The diversifier did not disappear. The regime that produced it did.',
@@ -477,7 +477,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p1-cpi-assets', idx: '03', group: 'part-1', intendedPlacement: 'part-1',
     status: 'implemented', wiredPublic: false,
-    title: 'Inflation was bigger than CPI', setupLine: 'CPI, housing, and a broad-asset proxy, each indexed to 100',
+    title: 'Inflation Was Bigger', setupLine:'CPI, housing, and a broad-asset proxy, each indexed to 100',
     claimLabel: 'INFLATION · MEASUREMENT',
     frameworkClaim: 'CPI alone does not capture the full inflation story.',
     readerTakeaway: 'Consumer prices roughly doubled. The assets that store capital did far more.',
@@ -522,7 +522,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p1-policy-constraint', idx: '04', group: 'part-1', intendedPlacement: 'part-1',
     status: 'implemented', wiredPublic: false,
-    title: 'Policy is constrained by debt and interest burden', setupLine: 'Federal debt and net interest, both as a share of GDP, on a shared timeline',
+    title: 'The Bill Came Due', setupLine:'Federal debt and net interest, both as a share of GDP, on a shared timeline',
     claimLabel: 'POLICY · CONSTRAINT',
     frameworkClaim: 'Debt and interest burden reduce policy freedom.',
     readerTakeaway: 'For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.',
@@ -540,13 +540,13 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerConcept: 'Policy constraint',
     concepts: [{ label: 'Policy constraint', link: '#manifesto' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Fragility', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'dual',
-    ariaSummary: 'Two stacked line charts sharing a 1980-to-2024 timeline. The top panel shows federal debt as a share of GDP rising steeply. The bottom panel shows net interest as a share of GDP easing as rates fall, then inflecting upward past an interest-burden pressure threshold as rates normalize.',
+    ariaSummary: 'Two stacked line charts on a shared 1980-to-2024 timeline. The top panel is context: federal debt as a share of GDP rising steeply. The bottom panel is the story: net interest as a share of GDP eases as rates fall, troughs, then inflects upward through an interest-burden threshold into a pressure zone as rates normalize.',
     xDomain: { xMin: 0, xMax: 40 },
-    xTicks: [{ v: 0, label: 'yr 0' }, { v: 25, label: 'rates trough' }, { v: 40, label: 'now' }],
-    connective: 'as rates normalize, the interest burden accelerates → policy constraint tightens',
+    xTicks: [{ v: 0, label: '1980' }, { v: 25, label: 'rate trough' }, { v: 40, label: '2024' }],
+    connective: 'rates fell for decades and hid the cost',
     panels: [
-      { id: 'debtPanel', label: 'Federal debt / GDP', yUnit: '%', domain: { yMin: 30, yMax: 130 }, yTicks: [{ v: 50 }, { v: 90 }, { v: 120 }], series: [{ key: 'debt', tier: 'reference', label: 'Debt / GDP', pts: fiscal.debt }] },
-      { id: 'intPanel', label: 'Net interest / GDP', yUnit: '%', domain: { yMin: 1, yMax: 4.4 }, yTicks: [{ v: 2 }, { v: 3 }, { v: 4 }], series: [{ key: 'int', tier: 'primary', label: 'Net interest / GDP', pts: fiscal.interest }], guides: [{ id: 'threshold', y: 3, kind: 'threshold', dash: true, label: 'interest-burden pressure' }], markers: [{ id: 'burden', type: 'dot', x: 25, y: R(valueAt(fiscal.interest, 25)), r: 3, label: 'burden inflects', labelAnchor: 'middle', labelDy: 20 }] },
+      { id: 'debtPanel', label: 'Federal debt / GDP · the backdrop', yUnit: '', valueUnit: '% of GDP', domain: { yMin: 30, yMax: 130 }, yTicks: [{ v: 50, label: '50%' }, { v: 90, label: '90%' }, { v: 120, label: '120%' }], series: [{ key: 'debt', tier: 'reference', pts: fiscal.debt }] },
+      { id: 'intPanel', label: 'Net interest / GDP · the cost returns', yUnit: '', valueUnit: '% of GDP', domain: { yMin: 1, yMax: 4.4 }, yTicks: [{ v: 2, label: '2%' }, { v: 3, label: '3%' }, { v: 4, label: '4%' }], series: [{ key: 'int', tier: 'primary', pts: fiscal.interest }], guides: [{ id: 'threshold', y: 3, kind: 'threshold', dash: true, label: 'interest-burden pressure' }], bands: [{ id: 'pressure', kind: 'shock', render: 'pressureField', x0: 32, x1: 40, seed: 53, intensity: 0.5, asymmetric: 0.1 }], markers: [{ id: 'burden', type: 'enso', x: 25, y: R(valueAt(fiscal.interest, 25)), r: 11, label: 'burden inflects', labelAnchor: 'middle', labelDy: -16 }] },
     ],
     primaryKey: 'int',
     hoverTargets: [
@@ -562,7 +562,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p1-sequence-risk', idx: '05', group: 'part-1', intendedPlacement: 'part-1',
     status: 'implemented', wiredPublic: false,
-    title: 'Path matters more than the average', setupLine: 'Identical return set, opposite order, $1.0M start, $40k annual withdrawals',
+    title: 'Path Changes Everything', setupLine:'Identical return set, opposite order, $1.0M start, $40k annual withdrawals',
     claimLabel: 'PATH DEPENDENCY · WITHDRAWALS',
     frameworkClaim: 'Same average return, opposite sequence, opposite survival outcome.',
     readerTakeaway: 'Withdrawal-phase capital does not care about the average. It cares about the order.',
@@ -603,7 +603,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p1-convexity-survival', idx: '06', group: 'part-1', intendedPlacement: 'part-1',
     status: 'implemented', wiredPublic: false,
-    title: 'Convexity requires staying alive', setupLine: 'Cumulative invested versus portfolio value, with drawdown-from-peak shaded',
+    title: 'Survive the Path', setupLine:'Cumulative invested versus portfolio value, with drawdown-from-peak shaded',
     claimLabel: 'CONVEXITY · ENDURANCE',
     frameworkClaim: 'Upside only matters if sizing lets you survive the path.',
     readerTakeaway: 'Volatile assets can still compound — through, not around, the drawdown.',
