@@ -46,9 +46,11 @@ Rules:
 - Simulations say simulation. Conceptual diagrams say conceptual.
 - Representative value read-outs are labelled `· REPRESENTATIVE`, never `TRUE VALUE`.
 
-## 3. The 11 charts
+## 3. The charts (Part 1 + Part 2)
 
-Grouped by where they belong. `chartId` is stable — never rename it.
+Grouped by where they belong. `chartId` is stable — never rename it. Two sets:
+**Part 1** (signature + docs landing + Part 1 framework) and **Part 2** (lineage
+& macro thesis).
 
 ### Signature / reusable (the payoff-shape language)
 | chartId | Title | Layout | Mode |
@@ -73,8 +75,21 @@ Grouped by where they belong. `chartId` is stable — never rename it.
 | `p1-sequence-risk` | Path Changes Everything | single | simulation |
 | `p1-convexity-survival` | Survive the Path | single | representative |
 
-The machine-readable version (with claims, sources, disclosures) is in
-[`chart-inventory.json`](./chart-inventory.json).
+### Part 2 · lineage & macro thesis
+| chartId | Title | Layout | Mode |
+|---|---|---|---|
+| `p2-method-before-macro` | Method Before Macro | dual | conceptual |
+| `p2-ruin-comes-first` | Ruin Comes First | single | conceptual |
+| `p2-conviction-needs-exit` | Conviction Needs an Exit | single | conceptual |
+| `p2-markets-feed-back` | Markets Feed Back | loop | conceptual |
+| `p2-time-changes-prudence` | Time Changes Prudence | single | simulation |
+| `p2-capital-finds-bottleneck` | Capital Finds the Bottleneck | flow | conceptual |
+| `p2-narrative-not-thesis` | Narrative Is Not Thesis | flow | conceptual |
+| `p2-phase-changes-sizing` | Phase Changes Sizing | single | conceptual |
+| `p2-liquidity-sets-tide` | Liquidity Sets the Tide | single | representative |
+
+The machine-readable version of **all** charts (with claims, sources,
+disclosures) is in [`chart-inventory.json`](./chart-inventory.json).
 
 ## 4. File map
 
@@ -83,7 +98,7 @@ Base (browse): `https://github.com/Tataku/ACF-Docs/blob/main/`
 
 | File | Role |
 |---|---|
-| `components/framework-charts/FrameworkChart.jsx` | The chart engine (single/dual/quadrant/loop layouts, hover/tap/keyboard, tooltips, source footer). |
+| `components/framework-charts/FrameworkChart.jsx` | The chart engine (single/dual/quadrant/loop/flow layouts, hover/tap/keyboard, tooltips, source footer). |
 | `components/framework-charts/chart-specs.mjs` | The spec registry — all 11 charts + data generators + disclosure model. Source of truth. |
 | `components/framework-charts/brush.js` | Deterministic SVG brush primitives + the bespoke `pressureField` shock background. |
 | `components/framework-charts/palette.js` | Locked dark/light palette + accents + fonts. |
@@ -110,15 +125,21 @@ import FrameworkChart from "../components/framework-charts";
 ```jsx
 import ChartHandoff from "../components/framework-charts/ChartHandoff";
 
-// embedded (inside docs shell):
+// Part 1 set — embedded (docs shell) and chrome-free export:
 <ChartHandoff />
-
-// chrome-free agency export (full-bleed, dark/light toggle):
 <ChartHandoff variant="export" initialTheme="dark" />
+
+// Part 2 set — same component, part="part-2":
+<ChartHandoff part="part-2" />
+<ChartHandoff part="part-2" variant="export" />
 ```
 
-The export route at `/chart-handoff-export` is a plain page (no docs sidebar,
-navbar, or TOC) — best for screenshots, PDF, and review.
+Routes (all hidden from nav, reachable by URL):
+- Part 1: `/chart-handoff` (docs shell), `/chart-handoff-export` (chrome-free)
+- Part 2: `/chart-handoff-part-2` (docs shell), `/chart-handoff-part-2-export` (chrome-free)
+
+The `*-export` routes are plain pages (no docs sidebar, navbar, or TOC) — best
+for screenshots, PDF, and review.
 
 ## 7. Data honesty rules (do not break)
 

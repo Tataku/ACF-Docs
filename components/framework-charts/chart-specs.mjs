@@ -165,6 +165,45 @@ const window_ = (() => {
   return { value };
 })();
 
+// ── Part 2 — lineage & macro thesis (representative / conceptual) ────────────
+const p2Method = (() => {
+  const n = 100;
+  const thesis = curve(0, 100, n, (t) => 50 + 26 * Math.sin(t * Math.PI * 2.2) + 8 * Math.sin(t * Math.PI * 5), 211, 1.2);
+  const method = curve(0, 100, n, () => 55, 213, 1.0);
+  return { thesis, method };
+})();
+const p2Ruin = (() => {
+  const n = 110;
+  const robust = curve(0, 100, n, (t) => 100 + 6 * Math.sin(t * 16) - 26 * Math.exp(-Math.pow((t - 0.5) / 0.12, 2)), 221, 1.4);
+  const fragile = curve(0, 100, n, (t) => Math.max(12, 100 + 6 * Math.sin(t * 16 + 1) - 88 * ss(clamp((t - 0.52) / 0.12, 0, 1))), 223, 1.4);
+  const crossX = (fragile.find((p) => p.y < 30) || fragile[fragile.length - 1]).x;
+  return { robust, fragile, crossX };
+})();
+const p2Conviction = (() => {
+  const n = 100;
+  const disciplined = curve(0, 100, n, (t) => 20 * ss(clamp(t / 0.7, 0, 1)), 231, 0.4);
+  const reckless = curve(0, 100, n, (t) => 6 + 42 * Math.pow(t, 1.6), 233, 0.5);
+  return { disciplined, reckless };
+})();
+const p2Time = (() => {
+  const n = 140;
+  const prudent = curve(0, 70, n, (t) => Math.pow(1.05, 70 * t), 241, 0);
+  const convex = curve(0, 70, n, (t) => Math.pow(1.08, 70 * t), 243, 0);
+  return { prudent, convex };
+})();
+const p2Phase = (() => {
+  const n = 100;
+  const validity = curve(0, 100, n, () => 88, 251, 0.7);
+  const sizing = curve(0, 100, n, (t) => 15 + 70 * ss(clamp(t / 0.55, 0, 1)) - 30 * ss(clamp((t - 0.7) / 0.3, 0, 1)), 253, 1.0);
+  return { validity, sizing };
+})();
+const p2Liquidity = (() => {
+  const n = 120;
+  const liquidity = curve(0, 100, n, (t) => 50 + 14 * Math.sin(t * Math.PI * 2.0), 261, 0.8);
+  const asset = curve(0, 100, n, (t) => 55 + 34 * Math.sin(t * Math.PI * 2.0 - 0.5), 263, 2.0);
+  return { liquidity, asset };
+})();
+
 // ════════════════════════════════════════════════════════════════════════════
 // SPEC REGISTRY
 // ════════════════════════════════════════════════════════════════════════════
@@ -644,6 +683,340 @@ export const FRAMEWORK_CHART_SPECS = [
     mobileTapTargets: ['value', 'survived', 'endpoint', 'invested'],
     implementationNotes: 'Completes the Part 1 arc. Drawdown-from-peak shaded behind the value line. Representative path; production would wire a provider price series.',
   },
+
+  /* ── PART 2 · LINEAGE & MACRO THESIS ────────────────────────────────────── */
+  {
+    chartId: 'p2-method-before-macro', idx: 'P2-01', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Method Before Macro', setupLine: 'The lineage holds steady while the macro thesis rotates with the regime',
+    claimLabel: 'LINEAGE · METHOD',
+    frameworkClaim: 'The framework’s method persists across regimes; the macro thesis changes with the environment.',
+    readerTakeaway: 'Keep the method fixed; let the thesis move.',
+    chartType: 'Two stacked panels: a rotating macro-thesis line over a stable method baseline.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 2', label: 'Lineage and macro thesis identification', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
+      { provider: 'ACF · Part 1', label: 'Survivable compounding doctrine', role: 'verifies-concept', url: '/part-1-foundation' },
+    ],
+    explainerHeadline: 'The method is constant; the thesis rotates.',
+    explainerBody: 'The lineage — survival first, convexity, regime awareness — does not change with the cycle. What changes is the macro thesis it gets pointed at. Confusing the two is how investors abandon a sound method the moment the regime turns.',
+    explainerConcept: 'Method vs application',
+    concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
+    layout: 'dual',
+    ariaSummary: 'Two stacked conceptual panels sharing a regime timeline. The top panel shows the macro thesis swinging from regime to regime; the bottom panel shows the method as a near-flat, persistent baseline.',
+    xDomain: { xMin: 0, xMax: 100 },
+    xTicks: [{ v: 0, label: 'regime A' }, { v: 50, label: 'regime B' }, { v: 100, label: 'regime C' }],
+    connective: 'the thesis above rotates; the method below does not',
+    panels: [
+      { id: 'thesisPanel', label: 'Macro thesis · rotates with the regime', yUnit: '', domain: { yMin: 0, yMax: 100 }, yTicks: [], series: [{ key: 'thesis', tier: 'primary', pts: p2Method.thesis }] },
+      { id: 'methodPanel', label: 'Method · the lineage that persists', yUnit: '', domain: { yMin: 0, yMax: 100 }, yTicks: [], series: [{ key: 'method', tier: 'reference', pts: p2Method.method }] },
+    ],
+    primaryKey: 'thesis',
+    hoverTargets: [
+      { id: 'thesis', kind: 'series', panel: 'thesisPanel', seriesKey: 'thesis', label: 'Macro thesis', name: 'Macro thesis', why: 'The application layer. It swings with growth, inflation, and liquidity — it is supposed to.', claim: 'The thesis is meant to change.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'method', kind: 'series', panel: 'methodPanel', seriesKey: 'method', label: 'Method', name: 'The method', why: 'Survival first, convexity, regime awareness, governance. It does not rotate when the regime does.', claim: 'The method is the constant.', concept: 'Method vs application', link: '/part-1-foundation' },
+    ],
+    mobileTapTargets: ['thesis', 'method'],
+    implementationNotes: 'Conceptual dual: top rotates, bottom holds. No numeric axes by design. Marketing may prefer a literal two-layer block diagram — flagged for design review.',
+  },
+
+  {
+    chartId: 'p2-ruin-comes-first', idx: 'P2-02', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Ruin Comes First', setupLine: 'Two portfolios, similar volatility, very different left tails',
+    claimLabel: 'FRAGILITY · SURVIVAL',
+    frameworkClaim: 'Fragility is nonlinear and ruin is irreversible; survival must precede optimization.',
+    readerTakeaway: 'You cannot compound from zero.',
+    chartType: 'Two outcome paths with similar volatility but different left-tail ruin.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 1', label: 'Fragility is structural, not statistical', role: 'verifies-concept', url: '/part-1-foundation' },
+      { provider: 'ACF · Part 2', label: 'Taleb lineage · ruin and nonlinearity', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
+    ],
+    explainerHeadline: 'Survival is not one goal among many.',
+    explainerBody: 'Two books can share the same volatility and look equally lively — until one crosses the line it cannot come back from. Ruin is absorbing: there is no compounding after zero. The framework optimizes only inside the set of paths that survive.',
+    explainerConcept: 'Ruin',
+    concepts: [{ label: 'Fragility', link: '/part-1-foundation' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
+    layout: 'single',
+    ariaSummary: 'Two value paths with similar early volatility. One oscillates and recovers; the other crosses a point-of-no-return line and flatlines near zero, never recovering.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 120 }, yUnit: '',
+    xTicks: [{ v: 0, label: 'today' }, { v: 100, label: 'horizon' }], yTicks: [],
+    series: [
+      { key: 'robust', tier: 'primary', label: 'Survives', pts: p2Ruin.robust },
+      { key: 'fragile', tier: 'stress', label: 'Ruined', pts: p2Ruin.fragile, labelDy: 2 },
+    ],
+    levels: [{ id: 'ruin', y: 30, kind: 'charcoal', label: 'point of no return' }],
+    markers: [{ id: 'cross', type: 'enso', x: p2Ruin.crossX, y: R(valueAt(p2Ruin.fragile, p2Ruin.crossX)), r: 12, label: 'ruin · irreversible', labelAnchor: 'end', labelDy: -16 }],
+    primaryKey: 'robust',
+    hoverTargets: [
+      { id: 'cross', kind: 'marker', label: 'Ruin', name: 'The absorbing barrier', why: 'Once a path crosses here it does not return. The math of compounding ends at zero.', claim: 'Ruin is irreversible.', concept: 'Ruin', link: '/part-1-foundation' },
+      { id: 'fragile', kind: 'series', seriesKey: 'fragile', label: 'Ruined path', name: 'Ruined path', why: 'Same volatility as its twin, but one shock past the line and it never compounds again.', claim: 'Volatility hid the fragility.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'robust', kind: 'series', seriesKey: 'robust', label: 'Surviving path', name: 'Surviving path', why: 'It draws down and recovers because it was never allowed near the absorbing barrier.', claim: 'Survival keeps the option open.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'ruin', kind: 'level', label: 'Point of no return', name: 'Point of no return', why: 'The threshold the framework refuses to let a position approach, whatever the upside.', claim: 'Bound the left tail first.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    mobileTapTargets: ['cross', 'fragile', 'robust', 'ruin'],
+    implementationNotes: 'Conceptual; no numeric axes. The two paths share early volatility on purpose — the difference is only the left tail.',
+  },
+
+  {
+    chartId: 'p2-conviction-needs-exit', idx: 'P2-03', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Conviction Needs an Exit', setupLine: 'Position size can scale with conviction only because an exit caps the downside',
+    claimLabel: 'CONCENTRATION · DISCIPLINE',
+    frameworkClaim: 'Concentration only works when paired with monitoring and disciplined exits.',
+    readerTakeaway: 'Size up on conviction, but keep the exit.',
+    chartType: 'Position size versus conviction, with and without an enforced exit cap.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 2', label: 'Druckenmiller lineage · concentration with exits', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
+      { provider: 'ACF · Part 5', label: 'Position sizing and tripwires', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+    ],
+    explainerHeadline: 'Concentration is earned by the exit.',
+    explainerBody: 'High conviction justifies a large position only when a monitored, pre-committed exit bounds the loss. Without that exit, the same concentration that compounds in your favour is the thing that ruins you. Sizing and invalidation are one decision, not two.',
+    explainerConcept: 'Tripwire',
+    concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Tripwire', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'single',
+    ariaSummary: 'Position size rising with conviction. The disciplined line plateaus at a sizing cap enforced by exits; the no-exit line keeps rising without bound into ruin risk.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 50 }, yUnit: '',
+    xTicks: [{ v: 0, label: 'low conviction' }, { v: 100, label: 'high conviction' }], yTicks: [],
+    series: [
+      { key: 'disciplined', tier: 'primary', label: 'With exits', pts: p2Conviction.disciplined },
+      { key: 'reckless', tier: 'stress', label: 'No exit', pts: p2Conviction.reckless, labelDy: -2 },
+    ],
+    levels: [{ id: 'cap', y: 20, kind: 'charcoal', label: 'sizing cap · exits enforce it' }],
+    markers: [{ id: 'unbounded', type: 'dot', x: 78, y: R(valueAt(p2Conviction.reckless, 78)), r: 3.2, label: 'no exit → unbounded risk', labelAnchor: 'end', labelDy: -12 }],
+    primaryKey: 'disciplined',
+    hoverTargets: [
+      { id: 'disciplined', kind: 'series', seriesKey: 'disciplined', label: 'With exits', name: 'Sized with exits', why: 'Conviction scales the position up to a cap. The cap exists because a monitored exit makes the loss bounded.', claim: 'Concentration the framework allows.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'reckless', kind: 'series', seriesKey: 'reckless', label: 'No exit', name: 'Sized without exits', why: 'Same conviction, no invalidation. Size keeps climbing and the left tail goes with it.', claim: 'Conviction without an exit is ruin risk.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'cap', kind: 'level', label: 'Sizing cap', name: 'The sizing cap', why: 'The maximum the framework will run, set by what the exit can defend, not by how good the story feels.', claim: 'The exit sets the cap.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'unbounded', kind: 'marker', label: 'Unbounded risk', name: 'Unbounded risk', why: 'Past the cap, with no exit, the position is one regime turn from a hole it cannot climb out of.', claim: 'This is where conviction becomes danger.', concept: 'Ruin', link: '/part-1-foundation' },
+    ],
+    mobileTapTargets: ['disciplined', 'cap', 'reckless', 'unbounded'],
+    implementationNotes: 'Conceptual; x is conviction, y is position size. The cap (level) is the point — concentration is licensed by the exit.',
+  },
+
+  {
+    chartId: 'p2-markets-feed-back', idx: 'P2-04', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Markets Feed Back', setupLine: 'Price → capital → fundamentals → validation, and back to price',
+    claimLabel: 'REFLEXIVITY · FEEDBACK',
+    frameworkClaim: 'Prices do not only reflect fundamentals; they can change fundamentals.',
+    readerTakeaway: 'Price is an input, not just an output.',
+    chartType: 'Reflexive loop of price, capital, fundamentals, and validation.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [{ provider: 'ACF · Part 2', label: 'Soros lineage · reflexivity', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
+    explainerHeadline: 'Price can write the fundamentals it claims to read.',
+    explainerBody: 'A rising price attracts capital; capital funds the buildout; the buildout improves the fundamentals; better fundamentals validate the price. The loop runs in reverse just as easily. Theses that ignore this feedback misjudge both how far trends run and how fast they break.',
+    explainerConcept: 'Reflexivity',
+    concepts: [{ label: 'Reflexivity', link: '/part-2-lineage-macro-thesis' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }],
+    layout: 'loop',
+    ariaSummary: 'A four-stage reflexive loop — price, capital, fundamentals, validation — connected clockwise, with the understanding that it can also run in reverse.',
+    loop: {
+      centerLabel: 'reflexivity',
+      nodes: [
+        { id: 'price', label: 'Price', sub: 'moves first' },
+        { id: 'capital', label: 'Capital', sub: 'follows price' },
+        { id: 'fundamentals', label: 'Fundamentals', sub: 'reshaped by capital' },
+        { id: 'validation', label: 'Validation', sub: 'confirms the price' },
+      ],
+    },
+    primaryKey: 'price',
+    hoverTargets: [
+      { id: 'price', kind: 'node', label: 'Price', name: 'Price', why: 'Not just a readout of value — a signal that pulls capital toward it.', claim: 'Price moves first.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'capital', label: 'Capital', kind: 'node', name: 'Capital', why: 'Flows toward the rising price and funds the thing the price implied.', claim: 'Capital chases the signal.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
+      { id: 'fundamentals', kind: 'node', label: 'Fundamentals', name: 'Fundamentals', why: 'Genuinely change because capital arrived — the story becomes partly true.', claim: 'The narrative funds itself.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'validation', kind: 'node', label: 'Validation', name: 'Validation', why: 'Improved fundamentals ratify the price, which moves again. In reverse, the same loop breaks trends fast.', claim: 'Confirmation feeds the next move.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+    ],
+    mobileTapTargets: ['price', 'capital', 'fundamentals', 'validation'],
+    implementationNotes: 'Loop layout, 4 nodes. Reversal path is conceptual (explainer) rather than a second drawn ring, to keep it quiet.',
+  },
+
+  {
+    chartId: 'p2-time-changes-prudence', idx: 'P2-05', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Time Changes Prudence', setupLine: 'Conventional versus convex, tax-free compounding over a 70-year horizon',
+    claimLabel: 'HORIZON · PRUDENCE',
+    frameworkClaim: 'Longer horizons change what counts as prudent; tax-free compounding and convex exposure become more important.',
+    readerTakeaway: 'A long horizon rewrites the prudent choice.',
+    chartType: 'Two compounding paths diverging at long horizon (simulation).',
+    visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
+    sources: [
+      { provider: 'Author simulation', label: 'Constant-rate compounding, conventional vs convex/tax-free', role: 'methodology', transform: '70-year horizon, illustrative rates', notes: 'No real-data transform; illustrative compounding only.' },
+      { provider: 'ACF · Part 2', label: 'Edelman / longevity-horizon lineage', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
+    ],
+    explainerHeadline: 'Prudence is a function of horizon.',
+    explainerBody: 'Over ten years the cautious path and the convex path look close enough to call the cautious one prudent. Stretch the horizon toward a lifetime and the gap stops being a gap — it becomes the whole outcome. Longevity makes tax-free convexity the conservative choice.',
+    explainerConcept: 'Survivable compounding',
+    concepts: [{ label: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }],
+    layout: 'single',
+    ariaSummary: 'Two compounding multiples over seventy years. The conventional path grows modestly; the convex, tax-free path hugs it early then pulls dramatically away in the final decades.',
+    domain: { xMin: 0, xMax: 70, yMin: 0, yMax: 230 }, yUnit: '', valueUnit: '× start',
+    xTicks: [{ v: 0, label: 'yr 0' }, { v: 35, label: 'yr 35' }, { v: 70, label: 'yr 70' }],
+    yTicks: [{ v: 50, label: '50×' }, { v: 150, label: '150×' }],
+    series: [
+      { key: 'convex', tier: 'primary', label: 'Convex · tax-free', pts: p2Time.convex },
+      { key: 'prudent', tier: 'reference', label: 'Conventional', pts: p2Time.prudent, labelDy: 12 },
+    ],
+    markers: [{ id: 'flip', type: 'enso', x: 52, y: R(valueAt(p2Time.convex, 52)), r: 12, label: 'horizon reshapes prudence', labelAnchor: 'end', labelDy: -16 }],
+    primaryKey: 'convex',
+    hoverTargets: [
+      { id: 'convex', kind: 'series', seriesKey: 'convex', label: 'Convex · tax-free', name: 'Convex, tax-free path', why: 'Quiet for years, then the compounding and the tax-free wrapper do the work the horizon was always going to reward.', claim: 'Long horizons favour convexity.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'prudent', kind: 'series', seriesKey: 'prudent', label: 'Conventional', name: 'Conventional path', why: 'The “safe” default. Over a lifetime its caution is what costs the most.', claim: 'Caution has a long-horizon price.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'flip', kind: 'marker', label: 'Prudence reshaped', name: 'Where prudence flips', why: 'Past here the convex path is no longer the risky one — the horizon has made it the conservative choice.', claim: 'Time changes the definition.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+    ],
+    mobileTapTargets: ['convex', 'prudent', 'flip'],
+    implementationNotes: 'SIMULATION — illustrative compounding, footer-disclosed. Linear y is bottom-heavy by nature; the late divergence is the message.',
+  },
+
+  {
+    chartId: 'p2-capital-finds-bottleneck', idx: 'P2-06', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Capital Finds the Bottleneck', setupLine: 'A structural force only matters where it is constrained — that is where capital lands',
+    claimLabel: 'THESIS · CAPITAL FLOW',
+    frameworkClaim: 'A valid thesis must map structural force into capital-flow pathways.',
+    readerTakeaway: 'Trace the force to its bottleneck to its instruments.',
+    chartType: 'Flow map: structural force → bottlenecks → where capital lands.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [{ provider: 'ACF · Part 2', label: 'Macro thesis construction', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
+    explainerHeadline: 'Force is not a trade; the bottleneck is.',
+    explainerBody: 'Everyone can see the structural force. The edge is mapping it to the constraint it runs into, and the specific assets that own that constraint. A thesis that stops at the theme never reaches the capital-flow pathway where the return actually accrues.',
+    explainerConcept: 'Capital pathways',
+    concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'flow',
+    ariaSummary: 'A left-to-right flow map. One structural force fans into three bottlenecks — power, compute, capital — which in turn map to where capital lands: energy and grid, semiconductors, and hard assets.',
+    flow: {
+      stages: [
+        { id: 'force', label: 'Structural force', nodes: [{ id: 'f1', label: 'AI + electrification', sub: 'the force everyone sees' }] },
+        { id: 'bottleneck', label: 'Bottlenecks', nodes: [{ id: 'b1', label: 'Power', sub: 'grids, generation' }, { id: 'b2', label: 'Compute', sub: 'fabs, chips' }, { id: 'b3', label: 'Capital', sub: 'funding, rates' }] },
+        { id: 'lands', label: 'Where capital lands', nodes: [{ id: 'i1', label: 'Energy & grid', sub: 'utilities, uranium' }, { id: 'i2', label: 'Semis', sub: 'leaders, equipment' }, { id: 'i3', label: 'Hard assets', sub: 'commodities, BTC' }] },
+      ],
+    },
+    primaryKey: 'f1',
+    hoverTargets: [
+      { id: 'f1', kind: 'node', label: 'Structural force', name: 'The structural force', why: 'The macro driver everyone already agrees on. On its own it is a theme, not a position.', claim: 'The force is the easy part.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'b1', kind: 'node', label: 'Power', name: 'Bottleneck · power', why: 'The force cannot express without electricity it does not yet have. Scarcity concentrates the return.', claim: 'Constraints, not themes, pay.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'b2', kind: 'node', label: 'Compute', name: 'Bottleneck · compute', why: 'Fabrication and leading-edge chips are the choke point the buildout has to buy through.', claim: 'Own the choke point.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'b3', kind: 'node', label: 'Capital', name: 'Bottleneck · capital', why: 'Funding and the cost of money decide which buildouts actually happen.', claim: 'Liquidity gates the buildout.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
+      { id: 'i1', kind: 'node', label: 'Energy & grid', name: 'Where capital lands · energy', why: 'Utilities, generation, and fuels that relieve the power constraint.', claim: 'The pathway, made investable.', concept: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'i2', kind: 'node', label: 'Semis', name: 'Where capital lands · semis', why: 'The leaders and equipment makers that own the compute constraint.', claim: 'The pathway, made investable.', concept: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'i3', kind: 'node', label: 'Hard assets', name: 'Where capital lands · hard assets', why: 'Commodities and Bitcoin that absorb the capital and liquidity the buildout demands.', claim: 'The pathway, made investable.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+    ],
+    mobileTapTargets: ['f1', 'b1', 'b2', 'b3', 'i1', 'i2', 'i3'],
+    implementationNotes: 'Uses the new flow layout (staged nodes + connectors). Fan-out from one force to three bottlenecks to three landing zones.',
+  },
+
+  {
+    chartId: 'p2-narrative-not-thesis', idx: 'P2-07', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Narrative Is Not Thesis', setupLine: 'A story becomes a thesis only after it survives four gates',
+    claimLabel: 'THESIS · VALIDATION',
+    frameworkClaim: 'A valid macro thesis needs persistence, capital-flow implications, falsifiability, and multi-year runway.',
+    readerTakeaway: 'Most narratives never make it through the gates.',
+    chartType: 'Validation gauntlet: narrative through four gates to a thesis.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [{ provider: 'ACF · Part 2', label: 'Valid macro thesis filter', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
+    explainerHeadline: 'A narrative is a candidate, not a conclusion.',
+    explainerBody: 'Compelling stories are cheap. A thesis has to persist beyond the headline, imply a real capital-flow path, be falsifiable enough to break, and run for years. Anything that fails a gate is a trade idea at best — never a structure to build on.',
+    explainerConcept: 'Valid thesis',
+    concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Falsifiability', link: '/part-6-convexity-framework-integrity-scoring' }],
+    layout: 'flow',
+    ariaSummary: 'A left-to-right gauntlet. A narrative passes through four gates — persistence, capital-flow implication, falsifiability, and multi-year runway — and only what survives all four becomes a thesis.',
+    flow: {
+      stages: [
+        { id: 's0', label: 'Input', nodes: [{ id: 'narrative', label: 'Narrative', sub: 'a compelling story' }] },
+        { id: 'g1', label: 'Gate 1', nodes: [{ id: 'persist', label: 'Persistent?', sub: 'beyond the headline' }] },
+        { id: 'g2', label: 'Gate 2', nodes: [{ id: 'flow', label: 'Capital flow?', sub: 'a real pathway' }] },
+        { id: 'g3', label: 'Gate 3', nodes: [{ id: 'falsify', label: 'Falsifiable?', sub: 'able to break' }] },
+        { id: 'g4', label: 'Gate 4', nodes: [{ id: 'runway', label: 'Runway?', sub: 'multi-year' }] },
+        { id: 'out', label: 'Output', nodes: [{ id: 'thesis', label: 'Thesis', sub: 'survived all four' }] },
+      ],
+    },
+    primaryKey: 'thesis',
+    hoverTargets: [
+      { id: 'narrative', kind: 'node', label: 'Narrative', name: 'Narrative', why: 'A compelling story. Necessary, abundant, and on its own worth nothing to allocate against.', claim: 'Stories are the input, not the output.', concept: 'Valid thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'persist', kind: 'node', label: 'Persistent?', name: 'Gate 1 · persistence', why: 'Does it outlast the news cycle, or is it a headline that fades in a quarter?', claim: 'Survive the headline.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'flow', kind: 'node', label: 'Capital flow?', name: 'Gate 2 · capital flow', why: 'Does it imply a concrete pathway capital must travel, or just a vibe?', claim: 'No pathway, no thesis.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'falsify', kind: 'node', label: 'Falsifiable?', name: 'Gate 3 · falsifiability', why: 'Can you state what would prove it wrong? If not, you cannot manage it.', claim: 'If it cannot break, it cannot be governed.', concept: 'Falsifiability', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'runway', kind: 'node', label: 'Runway?', name: 'Gate 4 · runway', why: 'Does it have multi-year runway, or is the move already mostly behind it?', claim: 'Theses need years, not weeks.', concept: 'Macro thesis phase', link: '/part-2-lineage-macro-thesis' },
+      { id: 'thesis', kind: 'node', label: 'Thesis', name: 'A thesis', why: 'Only what clears all four gates earns the right to shape structure and sizing.', claim: 'This is what you build on.', concept: 'Valid thesis', link: '/part-2-lineage-macro-thesis' },
+    ],
+    mobileTapTargets: ['narrative', 'persist', 'flow', 'falsify', 'runway', 'thesis'],
+    implementationNotes: 'Flow layout as a linear gauntlet (one node per stage). The “funnel” reads through labels + the single surviving path rather than a literal taper.',
+  },
+
+  {
+    chartId: 'p2-phase-changes-sizing', idx: 'P2-08', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Phase Changes Sizing', setupLine: 'The same valid thesis carries different sizing early, mid, and late',
+    claimLabel: 'PHASE · SIZING',
+    frameworkClaim: 'A thesis can remain structurally valid while its deployment phase changes sizing and risk posture.',
+    readerTakeaway: 'Right thesis, wrong size, still a loss.',
+    chartType: 'Thesis validity held constant while sizing rises then trims across phases.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 2', label: 'Macro thesis phase / governance', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
+      { provider: 'ACF · Part 5', label: 'Position management across the cycle', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+    ],
+    explainerHeadline: 'Validity is not a sizing instruction.',
+    explainerBody: 'A thesis can be right for a decade and still demand different risk at each stage: small while it is unproven, largest through the buildout, trimmed once it is crowded and priced. Separating thesis validity from deployment phase is what keeps conviction from becoming complacency.',
+    explainerConcept: 'Macro thesis phase',
+    concepts: [{ label: 'Macro thesis phase', link: '/part-2-lineage-macro-thesis' }, { label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'single',
+    ariaSummary: 'Across a thesis lifecycle — early structural, mid-cycle buildout, late expression — validity stays high and flat while sizing starts small, ramps to a peak, then trims into the late phase.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 100 }, yUnit: '',
+    xTicks: [{ v: 0, label: 'early structural' }, { v: 50, label: 'mid-cycle' }, { v: 100, label: 'late expression' }], yTicks: [],
+    series: [
+      { key: 'sizing', tier: 'primary', label: 'Sizing', pts: p2Phase.sizing },
+      { key: 'validity', tier: 'reference', label: 'Thesis validity', pts: p2Phase.validity, labelDy: -4 },
+    ],
+    markers: [{ id: 'trim', type: 'enso', x: 78, y: R(valueAt(p2Phase.sizing, 78)), r: 12, label: 'trim as it gets crowded', labelAnchor: 'end', labelDy: -16 }],
+    primaryKey: 'sizing',
+    hoverTargets: [
+      { id: 'sizing', kind: 'series', seriesKey: 'sizing', label: 'Sizing', name: 'Sizing', why: 'Small while unproven, largest through the buildout, trimmed once the move is crowded and priced.', claim: 'Size tracks the phase, not the conviction.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'validity', kind: 'series', seriesKey: 'validity', label: 'Thesis validity', name: 'Thesis validity', why: 'Flat and high throughout — the thesis stays right even as the correct size changes underneath it.', claim: 'Validity is constant; sizing is not.', concept: 'Macro thesis phase', link: '/part-2-lineage-macro-thesis' },
+      { id: 'trim', kind: 'marker', label: 'Late-phase trim', name: 'Late-phase trim', why: 'The thesis is still valid here, but it is crowded and priced — so risk comes down even as conviction stays.', claim: 'Trim a winner that is now consensus.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['sizing', 'validity', 'trim'],
+    implementationNotes: 'Conceptual; phases live on the x-axis. Validity is a flat reference; sizing is the moving primary.',
+  },
+
+  {
+    chartId: 'p2-liquidity-sets-tide', idx: 'P2-09', group: 'part-2', intendedPlacement: 'part-2',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Liquidity Sets the Tide', setupLine: 'A representative liquidity impulse and the convex asset that amplifies it',
+    claimLabel: 'LIQUIDITY · SENSITIVITY',
+    frameworkClaim: 'In the current thesis, liquidity cycles shape Bitcoin and long-duration asset sensitivity.',
+    readerTakeaway: 'Convex assets ride the liquidity tide, magnified.',
+    chartType: 'Representative liquidity impulse versus convex-asset sensitivity.',
+    visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources',
+    sources: [
+      { provider: 'ACF · Part 2', label: 'Liquidity-cycle lineage (Alden)', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
+      { provider: 'ACF · Part 3', label: 'Bitcoin liquidity sensitivity', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+      { provider: 'Author calculation', label: 'Representative liquidity impulse vs convex sensitivity', role: 'methodology' },
+    ],
+    explainerHeadline: 'Convex assets trade the tide, not the weather.',
+    explainerBody: 'Global liquidity sets the level of the water; long-duration and convex assets like Bitcoin ride it with amplification. Read the liquidity impulse and you read most of the swing — which is why the current thesis treats liquidity as the tide, not background noise.',
+    explainerConcept: 'Liquidity cycle',
+    concepts: [{ label: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' }, { label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }],
+    layout: 'single',
+    ariaSummary: 'Two lines over time. A liquidity impulse oscillates gently around mid-range; a convex asset traces the same rhythm with a lag and a much larger amplitude.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 100 }, yUnit: '', valueUnit: 'index',
+    xTicks: [{ v: 0, label: 'tide out' }, { v: 100, label: 'tide in' }], yTicks: [{ v: 25 }, { v: 50 }, { v: 75 }],
+    series: [
+      { key: 'asset', tier: 'primary', label: 'Convex asset', pts: p2Liquidity.asset },
+      { key: 'liquidity', tier: 'secondary', label: 'Liquidity', pts: p2Liquidity.liquidity, labelDy: 14 },
+    ],
+    markers: [{ id: 'lead', type: 'dot', x: 30, y: R(valueAt(p2Liquidity.liquidity, 30)), r: 3.2, label: 'liquidity turns, asset follows', labelAnchor: 'start', labelDy: -12 }],
+    primaryKey: 'asset',
+    hoverTargets: [
+      { id: 'asset', kind: 'series', seriesKey: 'asset', label: 'Convex asset', name: 'Convex asset', why: 'Long-duration and convex, so it amplifies the liquidity swing rather than merely tracking it.', claim: 'Convexity magnifies the tide.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'liquidity', kind: 'series', seriesKey: 'liquidity', label: 'Liquidity', name: 'Liquidity impulse', why: 'The level of the water. Most of the asset’s swing is just this, magnified and lagged.', claim: 'Liquidity is the driver.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
+      { id: 'lead', kind: 'marker', label: 'Liquidity leads', name: 'Liquidity leads', why: 'The impulse turns first; the convex asset follows and overshoots.', claim: 'Read the tide before the asset.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+    ],
+    mobileTapTargets: ['asset', 'liquidity', 'lead'],
+    implementationNotes: 'Representative shapes (not historical series). Production could wire a real global-liquidity proxy vs BTC behind the same spec.',
+  },
 ];
 
 export const FRAMEWORK_CHART_ORDER = FRAMEWORK_CHART_SPECS.map((s) => s.chartId);
@@ -657,6 +1030,7 @@ export const HANDOFF_GROUPS = [
   { id: 'signature', label: 'Signature · reusable', blurb: 'The payoff-shape language. Belongs on the landing hero and as the Part 1 opener. These define the visual vocabulary for everything else.' },
   { id: 'docs-landing', label: 'Docs landing page', blurb: 'Conceptual, punchy, visually iconic. Built to communicate the framework at a glance before a reader commits to Part 1.' },
   { id: 'part-1', label: 'Part 1 framework', blurb: 'The locked six-chart inventory that carries the Part 1 argument. The first, second, and fourth are already wired into the live page.' },
+  { id: 'part-2', label: 'Part 2 · lineage & macro thesis', blurb: 'How the framework thinks: intellectual lineage, what makes a macro thesis valid, how a structural force becomes capital flow, and how phase separates thesis validity from deployment timing.' },
 ];
 
 export function specsByGroup(groupId) {

@@ -530,6 +530,77 @@ function LoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
   );
 }
 
+/* ── FlowSvg — staged directed flow (bottleneck maps, validation gauntlets) ──*/
+function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const stages = spec.flow.stages;
+  const N = stages.length;
+  const pad = { l: 18, r: 18, t: 42, b: 22 };
+  const colW = (width - pad.l - pad.r) / N;
+  const NW = Math.min(colW - 26, 152), NH = 46;
+  const avail = height - pad.t - pad.b;
+  const pos = [];
+  stages.forEach((st, i) => {
+    const cx = pad.l + colW * (i + 0.5);
+    const m = st.nodes.length;
+    st.nodes.forEach((nd, j) => { pos.push({ ...nd, x: cx, y: pad.t + avail * ((j + 1) / (m + 1)), stageIdx: i }); });
+  });
+  const byId = (id) => pos.find((p) => p.id === id);
+  const connectors = useMemo(() => {
+    const out = [];
+    for (let i = 0; i < N - 1; i++) {
+      stages[i].nodes.forEach((an) => stages[i + 1].nodes.forEach((bn) => {
+        const p1 = byId(an.id), p2 = byId(bn.id);
+        const x1 = p1.x + NW / 2, x2 = p2.x - NW / 2, dx = (x2 - x1) * 0.45;
+        out.push(`M${x1} ${p1.y} C${x1 + dx} ${p1.y} ${x2 - dx} ${p2.y} ${x2} ${p2.y}`);
+      }));
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  const anchorOf = (a) => { const p = byId(a.id); return p ? { x: p.x, y: p.y } : null; };
+  const resolve = (mx, my) => { let best = null, bd = Math.max(coarse ? 40 : 30, NW / 2); pos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.node} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Staged flow diagram" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {stages.map((st, i) => st.label ? <text key={`sl${i}`} x={pad.l + colW * (i + 0.5)} y={pad.t - 18} textAnchor="middle" style={halo(pal, 8.5, pal.text4)}>{st.label.toUpperCase()}</text> : null)}
+        <g style={{ opacity: entered ? 0.5 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 200ms' }}>
+          {connectors.map((d, i) => <path key={`c${i}`} d={d} fill="none" stroke={accent} strokeWidth="1" opacity="0.5" />)}
+        </g>
+        {pos.map((n) => {
+          const on = focusId === n.id;
+          const isP = n.id === spec.primaryKey;
+          return (
+            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${100 + n.stageIdx * 90}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${100 + n.stageIdx * 90}ms` }}>
+              <rect x={n.x - NW / 2} y={n.y - NH / 2} width={NW} height={NH} rx={8} fill={pal.surface} stroke={on || isP ? accent : pal.borderHi} strokeWidth={on ? 1.6 : 1} style={{ transition: trans('stroke') }} />
+              <text x={n.x} y={n.y - 3} textAnchor="middle" style={haloSans(pal, 12.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
+              {n.sub && <text x={n.x} y={n.y + 13} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
+            </g>
+          );
+        })}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
 /* ── Explainer + footer + concepts + mobile sheet ───────────────────────────*/
 function ExplainerBlock({ spec, pal, accent }) {
   return (
@@ -706,6 +777,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
       <div style={{ padding: `2px clamp(8px, 2vw, 14px) 8px` }}>
         {spec.layout === 'quadrant' && <QuadrantSvg spec={spec} height={560} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'loop' && <LoopSvg spec={spec} height={420} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'flow' && <FlowSvg spec={spec} height={400} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}

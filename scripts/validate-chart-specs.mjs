@@ -18,8 +18,8 @@
 import assert from 'node:assert/strict';
 import { FRAMEWORK_CHART_SPECS, footerModel } from '../components/framework-charts/chart-specs.mjs';
 
-const PLACEMENTS = new Set(['docs-landing', 'part-1', 'both']);
-const GROUPS = new Set(['signature', 'docs-landing', 'part-1']);
+const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'both']);
+const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2']);
 const STATUSES = new Set(['implemented', 'needs-design-review', 'spec-only']);
 const MODES = new Set(['representative', 'historical', 'simulation', 'conceptual']);
 const ROLES = new Set(['verifies-concept', 'backs-series', 'methodology', 'target-source']);
@@ -92,6 +92,11 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     const nodeIds = (s.loop.nodes || []).map((n) => n.id);
     ok(nodeIds.length >= 3, `${w} loop needs at least 3 nodes`);
     ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a loop node`);
+  } else if (s.layout === 'flow') {
+    const nodeIds = (s.flow.stages || []).flatMap((st) => st.nodes.map((nd) => nd.id));
+    ok(nodeIds.length >= 3, `${w} flow needs at least 3 nodes`);
+    ok(new Set(nodeIds).size === nodeIds.length, `${w} flow has duplicate node ids`);
+    ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a flow node`);
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);
@@ -104,10 +109,11 @@ for (const s of FRAMEWORK_CHART_SPECS) {
 
 // group coverage (what the agency reviews)
 const byGroup = (g) => FRAMEWORK_CHART_SPECS.filter((s) => s.group === g).map((s) => s.chartId);
-['signature', 'docs-landing', 'part-1'].forEach((g) => ok(byGroup(g).length >= 1, `group ${g} has no charts`));
+['signature', 'docs-landing', 'part-1', 'part-2'].forEach((g) => ok(byGroup(g).length >= 1, `group ${g} has no charts`));
 
 console.log(`✓ framework chart specs valid — ${FRAMEWORK_CHART_SPECS.length} charts, ${checks} assertions passed`);
 console.log(`  signature   : ${byGroup('signature').join(', ')}`);
 console.log(`  docs-landing: ${byGroup('docs-landing').join(', ')}`);
 console.log(`  part-1      : ${byGroup('part-1').join(', ')}`);
-console.log(`  wired public: ${FRAMEWORK_CHART_SPECS.filter((s) => s.wiredPublic).map((s) => s.chartId).join(', ')}`);
+console.log(`  part-2      : ${byGroup('part-2').join(', ')}`);
+console.log(`  wired public: ${FRAMEWORK_CHART_SPECS.filter((s) => s.wiredPublic).map((s) => s.chartId).join(', ') || '(none)'}`);
