@@ -74,6 +74,55 @@ function MetaStrip({ pal, accent, spec }) {
   );
 }
 
+// Central part-nav config — extend for Parts 3–6 by appending entries here.
+const HANDOFF_PART_NAV = [
+  { key: 'part-1', label: 'Part 1', shortTitle: 'Foundation', embeddedHref: '/chart-handoff', exportHref: '/chart-handoff-export' },
+  { key: 'part-2', label: 'Part 2', shortTitle: 'Lineage', embeddedHref: '/chart-handoff-part-2', exportHref: '/chart-handoff-part-2-export' },
+];
+
+// Copy the current handoff URL (export routes only). Client-only, guarded.
+function CopyLinkButton({ pal, accent }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }).catch(() => {});
+    }
+  };
+  return (
+    <button onClick={copy} style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.1em', color: copied ? accent : pal.text3, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, borderBottom: `1px dotted ${copied ? accent : pal.borderHi}`, paddingBottom: 1 }}>
+      {copied ? 'Link copied ✓' : 'Copy link ⧉'}
+    </button>
+  );
+}
+
+// Part switcher — preserves the current viewing mode (export ↔ export, shell ↔ shell).
+function PartNav({ pal, accent, part, variant }) {
+  return (
+    <nav aria-label="Chart handoff parts" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 22 }}>
+      <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.16em', color: pal.text4 }}>PART</span>
+      <div style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap' }}>
+        {HANDOFF_PART_NAV.map((p) => {
+          const active = p.key === part;
+          const href = variant === 'export' ? p.exportHref : p.embeddedHref;
+          return (
+            <a key={p.key} href={href} aria-current={active ? 'page' : undefined}
+              style={{
+                fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.08em', textDecoration: 'none',
+                padding: '5px 11px', borderRadius: 5, whiteSpace: 'nowrap',
+                color: active ? pal.text1 : pal.text3,
+                fontWeight: active ? 600 : 400,
+                background: active ? `${accent}14` : 'transparent',
+                borderBottom: `1.5px solid ${active ? accent : 'transparent'}`,
+              }}>
+              {active ? '› ' : ''}{p.label} · {p.shortTitle}
+            </a>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 // Quiet local theme toggle for agency preview (Dark / Light) + route switch.
 function ViewToggle({ pal, accent, theme, setTheme, variant, shellRoute, exportRoute }) {
   const seg = (val, label) => (
@@ -88,13 +137,14 @@ function ViewToggle({ pal, accent, theme, setTheme, variant, shellRoute, exportR
   const to = variant === 'export' ? shellRoute : exportRoute;
   const toLabel = variant === 'export' ? 'Docs shell ↗' : 'Export view ↗';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 22 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>
       <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.16em', color: pal.text4 }}>VIEW</span>
       <div style={{ display: 'inline-flex', gap: 3, padding: 3, border: `1px solid ${pal.cardBorder}`, borderRadius: 7, background: pal.surface }}>
         {seg('dark', 'Dark')}
         {seg('light', 'Light')}
       </div>
       <a href={to} style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.1em', color: pal.text3, textDecoration: 'none', borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1 }}>{toLabel}</a>
+      {variant === 'export' && <CopyLinkButton pal={pal} accent={accent} />}
     </div>
   );
 }
@@ -181,7 +231,7 @@ const PRESETS = {
     groups: ['part-2'],
     shellRoute: '/chart-handoff-part-2', exportRoute: '/chart-handoff-part-2-export',
     eyebrow: 'ACF · PART 2 CHART HANDOFF · INTERNAL REVIEW',
-    title: 'Lineage & macro thesis, in charts',
+    title: 'Every chart for Part 2',
     intro: 'The Part 2 exhibit set: intellectual lineage, what makes a macro thesis valid, how a structural force becomes capital flow, and how phase separates thesis validity from deployment timing. Representative and conceptual exhibits with honest disclosure — not historical backtests.',
   },
 };
@@ -203,6 +253,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
     <div style={outer}>
       <div style={{ maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 }}>
       <ViewToggle pal={pal} accent={accent} theme={theme} setTheme={setTheme} variant={variant} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
+      <PartNav pal={pal} accent={accent} part={part} variant={variant} />
       {/* header */}
       <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{preset.eyebrow}</div>
       <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{preset.title}</h1>
