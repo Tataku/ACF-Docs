@@ -4,3 +4,8 @@
 .nextra-content {
   max-width: var(--acf-max-width);
 }
+/* Full-bleed safety for the raw-layout agency export route. */
+html,
+body {
+  margin: 0;
+}
