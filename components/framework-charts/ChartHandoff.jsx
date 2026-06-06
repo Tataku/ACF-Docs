@@ -14,7 +14,7 @@ import FrameworkChart from './FrameworkChart';
 import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel } from './chart-specs.mjs';
 import { getPalette, getAccent } from './palette';
 
-const PLACEMENT = { both: 'Docs + Part 1', 'docs-landing': 'Docs landing', 'part-1': 'Part 1' };
+const PLACEMENT = { both: 'Docs + Part 1', 'docs-landing': 'Docs landing', 'part-1': 'Part 1', 'part-2': 'Part 2' };
 const STATUS = {
   implemented: { label: 'Implemented', tone: 'ok' },
   'needs-design-review': { label: 'Needs design review', tone: 'warn' },
@@ -37,7 +37,7 @@ function ModeGlyph({ pal, mode }) {
   return <span aria-hidden style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, display: 'inline-block' }} />;
 }
 
-function InventoryTable({ pal, accent }) {
+function InventoryTable({ pal, accent, specs }) {
   const cols = '54px 1fr 96px 96px 116px 84px';
   const head = { fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: pal.text4 };
   return (
@@ -45,8 +45,8 @@ function InventoryTable({ pal, accent }) {
       <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '0 14px', padding: '11px 16px', background: pal.surface, borderBottom: `1px solid ${pal.cardBorder}`, ...head }} className="acf-hand-row">
         <span>ID</span><span>TITLE · CLAIM</span><span>PLACEMENT</span><span>MODE</span><span>STATUS</span><span style={{ textAlign: 'right' }}>WIRED</span>
       </div>
-      {FRAMEWORK_CHART_SPECS.map((s, i) => (
-        <div key={s.chartId} style={{ display: 'grid', gridTemplateColumns: cols, gap: '0 14px', alignItems: 'baseline', padding: '12px 16px', borderBottom: i < FRAMEWORK_CHART_SPECS.length - 1 ? `1px solid ${pal.cardBorder}` : 'none' }} className="acf-hand-row">
+      {specs.map((s, i) => (
+        <div key={s.chartId} style={{ display: 'grid', gridTemplateColumns: cols, gap: '0 14px', alignItems: 'baseline', padding: '12px 16px', borderBottom: i < specs.length - 1 ? `1px solid ${pal.cardBorder}` : 'none' }} className="acf-hand-row">
           <span style={{ fontFamily: pal.mono, fontSize: 11, color: pal.text3 }}>{s.idx}</span>
           <div style={{ minWidth: 0 }}>
             <a href={`#${s.chartId}`} style={{ fontFamily: pal.sans, fontSize: 13, fontWeight: 600, color: pal.text1, textDecoration: 'none', display: 'block', marginBottom: 2 }}>{s.title}</a>
@@ -75,7 +75,7 @@ function MetaStrip({ pal, accent, spec }) {
 }
 
 // Quiet local theme toggle for agency preview (Dark / Light) + route switch.
-function ViewToggle({ pal, accent, theme, setTheme, variant }) {
+function ViewToggle({ pal, accent, theme, setTheme, variant, shellRoute, exportRoute }) {
   const seg = (val, label) => (
     <button key={val} onClick={() => setTheme(val)} aria-pressed={theme === val} style={{
       fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', cursor: 'pointer',
@@ -85,7 +85,7 @@ function ViewToggle({ pal, accent, theme, setTheme, variant }) {
       transition: 'background .15s ease, color .15s ease',
     }}>{label}</button>
   );
-  const to = variant === 'export' ? '/chart-handoff' : '/chart-handoff-export';
+  const to = variant === 'export' ? shellRoute : exportRoute;
   const toLabel = variant === 'export' ? 'Docs shell ↗' : 'Export view ↗';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 22 }}>
@@ -169,11 +169,31 @@ function ImplementationPackage({ pal, accent }) {
   );
 }
 
-export default function ChartHandoff({ initialTheme = 'dark', accent: accentName = 'green', variant = 'embedded' }) {
+const PRESETS = {
+  'part-1': {
+    groups: ['signature', 'docs-landing', 'part-1'],
+    shellRoute: '/chart-handoff', exportRoute: '/chart-handoff-export',
+    eyebrow: 'ACF · FRAMEWORK CHART HANDOFF · INTERNAL REVIEW',
+    title: 'Every chart for the docs landing page and Part 1',
+    intro: 'The full exhibit set in one place, for the marketing agency to review before production. Charts use art-directed, representative data shapes where exact historical series are not yet wired — every footer discloses that plainly, and the source links verify the underlying concept and data backdrop.',
+  },
+  'part-2': {
+    groups: ['part-2'],
+    shellRoute: '/chart-handoff-part-2', exportRoute: '/chart-handoff-part-2-export',
+    eyebrow: 'ACF · PART 2 CHART HANDOFF · INTERNAL REVIEW',
+    title: 'Lineage & macro thesis, in charts',
+    intro: 'The Part 2 exhibit set: intellectual lineage, what makes a macro thesis valid, how a structural force becomes capital flow, and how phase separates thesis validity from deployment timing. Representative and conceptual exhibits with honest disclosure — not historical backtests.',
+  },
+};
+
+export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', accent: accentName = 'green', variant = 'embedded' }) {
+  const preset = PRESETS[part] || PRESETS['part-1'];
   const [theme, setTheme] = useState(initialTheme);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
   const isExport = variant === 'export';
+  const galleryGroups = HANDOFF_GROUPS.filter((g) => preset.groups.includes(g.id));
+  const specs = FRAMEWORK_CHART_SPECS.filter((s) => preset.groups.includes(s.group));
 
   const outer = isExport
     ? { background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', padding: 'clamp(20px, 4vw, 44px) clamp(16px, 4vw, 32px)', colorScheme: pal.name }
@@ -182,12 +202,12 @@ export default function ChartHandoff({ initialTheme = 'dark', accent: accentName
   return (
     <div style={outer}>
       <div style={{ maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 }}>
-      <ViewToggle pal={pal} accent={accent} theme={theme} setTheme={setTheme} variant={variant} />
+      <ViewToggle pal={pal} accent={accent} theme={theme} setTheme={setTheme} variant={variant} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
       {/* header */}
-      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>ACF · FRAMEWORK CHART HANDOFF · INTERNAL REVIEW</div>
-      <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>Every chart for the docs landing page and Part 1</h1>
+      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{preset.eyebrow}</div>
+      <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{preset.title}</h1>
       <p style={{ margin: '14px 0 18px', fontSize: 14, lineHeight: 1.62, color: pal.text3, maxWidth: 720 }}>
-        The full exhibit set in one place, for the marketing agency to review before production. Charts use art-directed, representative data shapes where exact historical series are not yet wired — every footer discloses that plainly, and the source links verify the underlying concept and data backdrop.
+        {preset.intro}
       </p>
       <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.06em', color: pal.text4, lineHeight: 1.6, marginBottom: 20, maxWidth: 720 }}>
         Internal chart review surface for marketing / design handoff. Charts are not automatically placed in public framework pages; placement is chosen explicitly.
@@ -205,10 +225,10 @@ export default function ChartHandoff({ initialTheme = 'dark', accent: accentName
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 6, height: 6, background: pal.text3 }} /> HISTORICAL (WHEN WIRED)</span>
       </div>
 
-      <InventoryTable pal={pal} accent={accent} />
+      <InventoryTable pal={pal} accent={accent} specs={specs} />
 
       {/* grouped gallery */}
-      {HANDOFF_GROUPS.map((g) => {
+      {galleryGroups.map((g) => {
         const specs = specsByGroup(g.id);
         if (!specs.length) return null;
         return (

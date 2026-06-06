@@ -1,7 +1,7 @@
 {
   "name": "ACF Framework Charts — handoff inventory",
   "note": "Representative/illustrative exhibits. visualDataMode + disclosure define how each chart is presented. See README-agency-chart-handoff.md.",
-  "count": 11,
+  "count": 20,
   "charts": [
     {
       "chartId": "sig-payoff",
@@ -392,6 +392,298 @@
         {
           "provider": "Author calculation",
           "label": "Constant DCA, no rebalancing, no leverage",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        }
+      ]
+    },
+    {
+      "chartId": "p2-method-before-macro",
+      "idx": "P2-01",
+      "title": "Method Before Macro",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "dual",
+      "visualDataMode": "conceptual",
+      "claimLabel": "LINEAGE · METHOD",
+      "frameworkClaim": "The framework’s method persists across regimes; the macro thesis changes with the environment.",
+      "readerTakeaway": "Keep the method fixed; let the thesis move.",
+      "chartType": "Two stacked panels: a rotating macro-thesis line over a stable method baseline.",
+      "setupLine": "The lineage holds steady while the macro thesis rotates with the regime",
+      "explainerHeadline": "The method is constant; the thesis rotates.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 2",
+          "label": "Lineage and macro thesis identification",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        },
+        {
+          "provider": "ACF · Part 1",
+          "label": "Survivable compounding doctrine",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-1-foundation"
+        }
+      ]
+    },
+    {
+      "chartId": "p2-ruin-comes-first",
+      "idx": "P2-02",
+      "title": "Ruin Comes First",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "conceptual",
+      "claimLabel": "FRAGILITY · SURVIVAL",
+      "frameworkClaim": "Fragility is nonlinear and ruin is irreversible; survival must precede optimization.",
+      "readerTakeaway": "You cannot compound from zero.",
+      "chartType": "Two outcome paths with similar volatility but different left-tail ruin.",
+      "setupLine": "Two portfolios, similar volatility, very different left tails",
+      "explainerHeadline": "Survival is not one goal among many.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 1",
+          "label": "Fragility is structural, not statistical",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-1-foundation"
+        },
+        {
+          "provider": "ACF · Part 2",
+          "label": "Taleb lineage · ruin and nonlinearity",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        }
+      ]
+    },
+    {
+      "chartId": "p2-conviction-needs-exit",
+      "idx": "P2-03",
+      "title": "Conviction Needs an Exit",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "conceptual",
+      "claimLabel": "CONCENTRATION · DISCIPLINE",
+      "frameworkClaim": "Concentration only works when paired with monitoring and disciplined exits.",
+      "readerTakeaway": "Size up on conviction, but keep the exit.",
+      "chartType": "Position size versus conviction, with and without an enforced exit cap.",
+      "setupLine": "Position size can scale with conviction only because an exit caps the downside",
+      "explainerHeadline": "Concentration is earned by the exit.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 2",
+          "label": "Druckenmiller lineage · concentration with exits",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        },
+        {
+          "provider": "ACF · Part 5",
+          "label": "Position sizing and tripwires",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        }
+      ]
+    },
+    {
+      "chartId": "p2-markets-feed-back",
+      "idx": "P2-04",
+      "title": "Markets Feed Back",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "loop",
+      "visualDataMode": "conceptual",
+      "claimLabel": "REFLEXIVITY · FEEDBACK",
+      "frameworkClaim": "Prices do not only reflect fundamentals; they can change fundamentals.",
+      "readerTakeaway": "Price is an input, not just an output.",
+      "chartType": "Reflexive loop of price, capital, fundamentals, and validation.",
+      "setupLine": "Price → capital → fundamentals → validation, and back to price",
+      "explainerHeadline": "Price can write the fundamentals it claims to read.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 2",
+          "label": "Soros lineage · reflexivity",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        }
+      ]
+    },
+    {
+      "chartId": "p2-time-changes-prudence",
+      "idx": "P2-05",
+      "title": "Time Changes Prudence",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "simulation",
+      "claimLabel": "HORIZON · PRUDENCE",
+      "frameworkClaim": "Longer horizons change what counts as prudent; tax-free compounding and convex exposure become more important.",
+      "readerTakeaway": "A long horizon rewrites the prudent choice.",
+      "chartType": "Two compounding paths diverging at long horizon (simulation).",
+      "setupLine": "Conventional versus convex, tax-free compounding over a 70-year horizon",
+      "explainerHeadline": "Prudence is a function of horizon.",
+      "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
+      "sources": [
+        {
+          "provider": "Author simulation",
+          "label": "Constant-rate compounding, conventional vs convex/tax-free",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        },
+        {
+          "provider": "ACF · Part 2",
+          "label": "Edelman / longevity-horizon lineage",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        }
+      ]
+    },
+    {
+      "chartId": "p2-capital-finds-bottleneck",
+      "idx": "P2-06",
+      "title": "Capital Finds the Bottleneck",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "flow",
+      "visualDataMode": "conceptual",
+      "claimLabel": "THESIS · CAPITAL FLOW",
+      "frameworkClaim": "A valid thesis must map structural force into capital-flow pathways.",
+      "readerTakeaway": "Trace the force to its bottleneck to its instruments.",
+      "chartType": "Flow map: structural force → bottlenecks → where capital lands.",
+      "setupLine": "A structural force only matters where it is constrained — that is where capital lands",
+      "explainerHeadline": "Force is not a trade; the bottleneck is.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 2",
+          "label": "Macro thesis construction",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        }
+      ]
+    },
+    {
+      "chartId": "p2-narrative-not-thesis",
+      "idx": "P2-07",
+      "title": "Narrative Is Not Thesis",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "flow",
+      "visualDataMode": "conceptual",
+      "claimLabel": "THESIS · VALIDATION",
+      "frameworkClaim": "A valid macro thesis needs persistence, capital-flow implications, falsifiability, and multi-year runway.",
+      "readerTakeaway": "Most narratives never make it through the gates.",
+      "chartType": "Validation gauntlet: narrative through four gates to a thesis.",
+      "setupLine": "A story becomes a thesis only after it survives four gates",
+      "explainerHeadline": "A narrative is a candidate, not a conclusion.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 2",
+          "label": "Valid macro thesis filter",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        }
+      ]
+    },
+    {
+      "chartId": "p2-phase-changes-sizing",
+      "idx": "P2-08",
+      "title": "Phase Changes Sizing",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "conceptual",
+      "claimLabel": "PHASE · SIZING",
+      "frameworkClaim": "A thesis can remain structurally valid while its deployment phase changes sizing and risk posture.",
+      "readerTakeaway": "Right thesis, wrong size, still a loss.",
+      "chartType": "Thesis validity held constant while sizing rises then trims across phases.",
+      "setupLine": "The same valid thesis carries different sizing early, mid, and late",
+      "explainerHeadline": "Validity is not a sizing instruction.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 2",
+          "label": "Macro thesis phase / governance",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        },
+        {
+          "provider": "ACF · Part 5",
+          "label": "Position management across the cycle",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        }
+      ]
+    },
+    {
+      "chartId": "p2-liquidity-sets-tide",
+      "idx": "P2-09",
+      "title": "Liquidity Sets the Tide",
+      "group": "part-2",
+      "intendedPlacement": "part-2",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "LIQUIDITY · SENSITIVITY",
+      "frameworkClaim": "In the current thesis, liquidity cycles shape Bitcoin and long-duration asset sensitivity.",
+      "readerTakeaway": "Convex assets ride the liquidity tide, magnified.",
+      "chartType": "Representative liquidity impulse versus convex-asset sensitivity.",
+      "setupLine": "A representative liquidity impulse and the convex asset that amplifies it",
+      "explainerHeadline": "Convex assets trade the tide, not the weather.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "ACF · Part 2",
+          "label": "Liquidity-cycle lineage (Alden)",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        },
+        {
+          "provider": "ACF · Part 3",
+          "label": "Bitcoin liquidity sensitivity",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        },
+        {
+          "provider": "Author calculation",
+          "label": "Representative liquidity impulse vs convex sensitivity",
           "seriesId": null,
           "role": "methodology",
           "url": null
