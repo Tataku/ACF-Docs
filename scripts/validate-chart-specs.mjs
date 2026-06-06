@@ -88,15 +88,16 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(s.quadrant && s.quadrant.path && s.quadrant.path.length >= 2, `${w} quadrant needs a path`);
     s.quadrant.path.forEach((id) => ok(wps.includes(id), `${w} quadrant path references missing waypoint ${id}`));
     ok(wps.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a waypoint`);
-  } else if (s.layout === 'loop') {
-    const nodeIds = (s.loop.nodes || []).map((n) => n.id);
-    ok(nodeIds.length >= 3, `${w} loop needs at least 3 nodes`);
-    ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a loop node`);
-  } else if (s.layout === 'flow') {
-    const nodeIds = (s.flow.stages || []).flatMap((st) => st.nodes.map((nd) => nd.id));
-    ok(nodeIds.length >= 3, `${w} flow needs at least 3 nodes`);
-    ok(new Set(nodeIds).size === nodeIds.length, `${w} flow has duplicate node ids`);
-    ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a flow node`);
+  } else if (['loop', 'flow', 'systemLoop', 'bridge', 'gate'].includes(s.layout)) {
+    // node-based framework diagrams
+    const nodeIds = s.layout === 'flow' ? (s.flow.stages || []).flatMap((st) => st.nodes.map((nd) => nd.id))
+      : s.layout === 'loop' ? (s.loop.nodes || []).map((n) => n.id)
+        : s.layout === 'systemLoop' ? (s.systemLoop.nodes || []).map((n) => n.id)
+          : s.layout === 'bridge' ? (s.bridge.stages || []).map((n) => n.id)
+            : (s.gate.nodes || []).map((n) => n.id);
+    ok(nodeIds.length >= 3, `${w} ${s.layout} needs at least 3 nodes`);
+    ok(new Set(nodeIds).size === nodeIds.length, `${w} ${s.layout} has duplicate node ids`);
+    ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a ${s.layout} node`);
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);

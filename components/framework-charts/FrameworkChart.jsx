@@ -601,6 +601,245 @@ function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
   );
 }
 
+/* ── ribbonRing — closed ink ribbon of varying thickness (for systemLoop) ────*/
+function ribbonRing(pts) {
+  const n = pts.length, outer = [], inner = [];
+  for (let i = 0; i < n; i++) {
+    const p = pts[i], a = pts[(i - 1 + n) % n], b = pts[(i + 1) % n];
+    const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
+    const nx = -dy / L, ny = dx / L;
+    outer.push({ x: p.x + nx * p.w, y: p.y + ny * p.w });
+    inner.push({ x: p.x - nx * p.w, y: p.y - ny * p.w });
+  }
+  return `${Brush.closedBezier(outer)} ${Brush.closedBezier(inner.reverse())}`;
+}
+
+/* ── SystemLoopSvg — reflexive / self-reinforcing feedback loop ──────────────*
+ * An asymmetric ink ring (not an oval) with nodes integrated into the path,
+ * clockwise reinforcing flow, and a quiet reversal cue. */
+function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const nodes = spec.systemLoop.nodes;
+  const M = nodes.length;
+  const cx = width / 2, cy = height / 2;
+  const rx = Math.min(width * 0.30, 300), ry = height * 0.33;
+  const asymR = (a) => 1 + 0.16 * Math.sin(a * 2 + 0.6) + 0.07 * Math.sin(a * 3); // irregular, not an oval
+  const at = (a) => ({ x: cx + Math.cos(a) * rx * asymR(a), y: cy + Math.sin(a) * ry * asymR(a) * 0.96 });
+  const nodeAng = nodes.map((_, i) => -Math.PI / 2 + (i / M) * Math.PI * 2);
+
+  const geom = useMemo(() => {
+    const S = 132, ring = [];
+    for (let i = 0; i <= S; i++) {
+      const a = -Math.PI / 2 + (i / S) * Math.PI * 2;
+      const p = at(a);
+      ring.push({ ...p, w: 1.5 + 1.5 * (0.5 + 0.5 * Math.sin(a - Math.PI / 4)) }); // thickens through the reinforcing arc
+    }
+    const chev = [];
+    for (let k = 0; k < M; k++) {
+      const a = -Math.PI / 2 + ((k + 0.5) / M) * Math.PI * 2;
+      const p = at(a), tang = a + Math.PI / 2;
+      chev.push(Brush.brushArrow(p.x + Math.cos(tang) * 11, p.y + Math.sin(tang) * 11, 15, tang, { seed: 70 + k * 5, weight: 0.5, intensity: 0.5 }));
+    }
+    // quiet reversal cue: a short counter-clockwise chevron near the top-inner
+    const ra = -Math.PI / 2 + 0.5, rp = at(ra);
+    const rev = Brush.brushArrow(rp.x * 0.55 + cx * 0.45, rp.y * 0.55 + cy * 0.45, 13, ra - Math.PI / 2 + Math.PI, { seed: 130, weight: 0.45, intensity: 0.45 });
+    return { ringD: ribbonRing(ring), chev, rev };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  const npos = nodeAng.map((a, i) => ({ ...nodes[i], a, ...at(a) }));
+  const anchorOf = (act) => { const p = npos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: p.y } : null; };
+  const resolve = (mx, my) => { let best = null, bd = coarse ? 40 : 32; npos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="NODE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Reflexive feedback loop" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 80ms' }}>
+          <path d={geom.ringD} fill={accent} fillRule="evenodd" opacity={pal.name === 'light' ? 0.18 : 0.16} />
+        </g>
+        <g style={{ opacity: entered ? 0.7 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 260ms' }}>
+          {geom.chev.map((d, i) => <path key={`cv${i}`} d={d} fill={accent} opacity="0.75" />)}
+          <path d={geom.rev} fill={pal.text4} opacity="0.6" />
+        </g>
+        {spec.systemLoop.centerLabel && <text x={cx} y={cy - 2} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{spec.systemLoop.centerLabel.toUpperCase()}</text>}
+        {spec.systemLoop.reversalLabel && <text x={cx} y={cy + 14} textAnchor="middle" style={{ ...halo(pal, 8, pal.text4), fontStyle: 'italic' }}>{spec.systemLoop.reversalLabel}</text>}
+        {npos.map((n) => {
+          const on = focusId === n.id;
+          const isP = n.id === spec.primaryKey;
+          const outX = Math.cos(n.a), outY = Math.sin(n.a);
+          const lAnchor = outX > 0.3 ? 'start' : outX < -0.3 ? 'end' : 'middle';
+          return (
+            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transition: trans('opacity') }}>
+              <path d={Brush.inkDot(n.x, n.y, on || isP ? 5 : 4, { seed: 40 + n.id.length * 3, intensity: 0.8 })} fill={isP || on ? accent : pal.markInk} />
+              {on && <circle cx={n.x} cy={n.y} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
+              <text x={n.x + outX * 16} y={n.y + outY * 16 + 3} textAnchor={lAnchor} style={haloSans(pal, 11.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
+            </g>
+          );
+        })}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
+/* ── BridgeSvg — structural force transforming into investable exposure ──────*
+ * A descending cascade; each stage transforms the prior, capital concentrating
+ * into the final, emphasised investable node. */
+function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const stages = spec.bridge.stages;
+  const K = stages.length;
+  const pad = { l: 80, r: 80, t: 48, b: 54 };
+  const X = (i) => pad.l + (K === 1 ? 0 : (i / (K - 1)) * (width - pad.l - pad.r));
+  const Y = (i) => pad.t + (K === 1 ? 0 : (i / (K - 1)) * (height - pad.t - pad.b) * 0.82);
+  const pos = stages.map((s, i) => ({ ...s, x: X(i), y: Y(i), last: i === K - 1, r: 3.4 + (i / (K - 1)) * 3.2 }));
+
+  const geom = useMemo(() => {
+    const conn = [];
+    for (let i = 0; i < K - 1; i++) {
+      const a = { x: X(i), y: Y(i) }, b = { x: X(i + 1), y: Y(i + 1) };
+      conn.push(Brush.brushSegment(a.x + 8, a.y + 6, b.x - 8, b.y - 6, { seed: 50 + i * 7, weight: 0.6, intensity: 0.55, waver: 0.3 }));
+    }
+    return { conn };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  const anchorOf = (act) => { const p = pos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: p.y } : null; };
+  const resolve = (mx, my) => { let best = null, bd = coarse ? 44 : 34; pos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Transformation cascade to investable exposure" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        <g style={{ opacity: entered ? 0.7 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 200ms' }}>
+          {geom.conn.map((d, i) => <path key={`bc${i}`} d={d} fill={accent} opacity="0.55" />)}
+        </g>
+        {pos.map((n, i) => {
+          const on = focusId === n.id;
+          const isP = n.id === spec.primaryKey || n.last;
+          return (
+            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.9)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${100 + i * 80}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${100 + i * 80}ms` }}>
+              {n.last && <circle cx={n.x} cy={n.y} r={n.r + 5} fill="none" stroke={accent} strokeWidth="1" opacity="0.5" />}
+              <path d={Brush.inkDot(n.x, n.y, n.r, { seed: 30 + i * 9, intensity: 0.8 })} fill={isP ? accent : pal.markInk} />
+              {on && <circle cx={n.x} cy={n.y} r={n.r + 6} fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
+              <text x={n.x} y={n.y - n.r - 8} textAnchor="middle" style={haloSans(pal, 12, isP ? accent : pal.text1, 600)}>{n.label}</text>
+              {n.sub && <text x={n.x} y={n.y + n.r + 15} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
+            </g>
+          );
+        })}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
+/* ── GateSvg — sober validation gauntlet (narrative → 4 gates → thesis) ──────*
+ * A survivor band that thins through four vertical gates; only what clears all
+ * four becomes a thesis. Not a marketing funnel. */
+function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const nodes = spec.gate.nodes; // [entry, gate, gate, gate, gate, exit]
+  const K = nodes.length;
+  const pad = { l: 70, r: 86, t: 46, b: 44 };
+  const cy = pad.t + (height - pad.t - pad.b) / 2;
+  const X = (i) => pad.l + (i / (K - 1)) * (width - pad.l - pad.r);
+  const hwAt = (i) => 26 - (i / (K - 1)) * 22; // band thins left → right (survivors filter out)
+  const pos = nodes.map((n, i) => ({ ...n, x: X(i), y: cy, i, hw: hwAt(i), gate: n.kind === 'gate', exit: n.kind === 'exit', entry: n.kind === 'entry' }));
+
+  const geom = useMemo(() => {
+    const top = pos.map((p) => ({ x: p.x, y: cy - p.hw }));
+    const bot = pos.map((p) => ({ x: p.x, y: cy + p.hw }));
+    const band = `${Brush.smoothOpen(top)} L${bot[bot.length - 1].x} ${bot[bot.length - 1].y} ${Brush.smoothOpen([...bot].reverse()).slice(1)} Z`;
+    const gates = pos.filter((p) => p.gate).map((p) => ({
+      x: p.x,
+      line: Brush.brushSegment(p.x, cy - p.hw - 16, p.x, cy + p.hw + 16, { seed: 60 + p.i * 8, weight: 0.7, intensity: 0.6, waver: 0.2 }),
+      reject: Brush.brushSegment(p.x, cy + p.hw + 10, p.x + 16, cy + p.hw + 30, { seed: 90 + p.i * 8, weight: 0.4, intensity: 0.5, waver: 0.1 }),
+    }));
+    return { band, gates };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  const anchorOf = (act) => { const p = pos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: p.gate ? cy - p.hw - 16 : cy } : null; };
+  const resolve = (mx) => { let best = null, bd = coarse ? 60 : 46; pos.forEach((p) => { const d = Math.abs(mx - p.x); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
+  const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="GATE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Thesis validation gauntlet" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 80ms' }}>
+          <path d={geom.band} fill={accent} opacity={pal.name === 'light' ? 0.12 : 0.11} />
+        </g>
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 220ms' }}>
+          {geom.gates.map((g, i) => (
+            <g key={`g${i}`}>
+              <path d={g.line} fill={pal.invalidCharcoal} opacity="0.8" />
+              <path d={g.reject} fill={pal.text4} opacity="0.5" />
+            </g>
+          ))}
+        </g>
+        {pos.map((n) => {
+          const on = focusId === n.id;
+          const isP = n.id === spec.primaryKey || n.exit;
+          const labelY = n.gate ? cy - n.hw - 22 : cy - n.hw - 14;
+          return (
+            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transition: trans('opacity') }}>
+              {(n.entry || n.exit) && <path d={Brush.inkDot(n.x, cy, n.exit ? 5 : 4, { seed: 20 + n.i * 6, intensity: 0.8 })} fill={isP ? accent : pal.markInk} />}
+              {n.exit && <circle cx={n.x} cy={cy} r="10" fill="none" stroke={accent} strokeWidth="1" opacity="0.5" />}
+              {on && (n.gate ? <line x1={n.x} x2={n.x} y1={cy - n.hw - 16} y2={cy + n.hw + 16} stroke={accent} strokeWidth="1.4" opacity="0.9" /> : <circle cx={n.x} cy={cy} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />)}
+              <text x={n.x} y={labelY} textAnchor="middle" style={haloSans(pal, n.entry || n.exit ? 12 : 10.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
+              {n.sub && <text x={n.x} y={n.exit || n.entry ? cy + 18 : labelY + 13} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
+            </g>
+          );
+        })}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
 /* ── Explainer + footer + concepts + mobile sheet ───────────────────────────*/
 function ExplainerBlock({ spec, pal, accent }) {
   return (
@@ -778,6 +1017,9 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'quadrant' && <QuadrantSvg spec={spec} height={560} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'loop' && <LoopSvg spec={spec} height={420} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'flow' && <FlowSvg spec={spec} height={400} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={420} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'gate' && <GateSvg spec={spec} height={380} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}
