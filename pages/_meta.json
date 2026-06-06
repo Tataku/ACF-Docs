@@ -6,5 +6,9 @@
   "part-4-tax-architecture-roc-strategy": "Part 4 \u2014 Tax Architecture & ROC Strategy",
   "part-5-portfolio-construction-position-management": "Part 5 \u2014 Portfolio Construction & Position Management",
   "part-6-convexity-framework-integrity-scoring": "Part 6 \u2014 Convexity & Framework Integrity Scoring",
-  "part-7-intro-deck": "ACF Intro Deck"
+  "part-7-intro-deck": "ACF Intro Deck",
+  "chart-handoff": {
+    "title": "Chart Handoff (internal)",
+    "display": "hidden"
+  }
 }

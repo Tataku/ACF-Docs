@@ -1,0 +1,41 @@
+/* ACF Framework Charts — the few rules that cannot live in inline styles.
+ * Keyboard focus rings, a reduced-motion safety net, and print fallback. */
+
+/* Keyboard focus ring for the in-chart data points (hover parity). */
+.acf-fx-focusable {
+  outline: none;
+}
+.acf-fx-focusable:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Safety net: even if a transition slips through component logic, honor the
+ * user's motion preference. The component already gates animation in JS; this
+ * guarantees it at the platform level. */
+@media (prefers-reduced-motion: reduce) {
+  figure[aria-label] svg g,
+  figure[aria-label] svg path,
+  figure[aria-label] .acf-fx-tooltip {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Print: drop interaction hints, keep the evidence + explainer + source. */
+@media print {
+  .acf-fx-focusable { display: none; }
+}
+
+/* Handoff inventory table: drop the mode/status/wired columns on narrow
+ * screens (the per-chart metadata strip still carries them). */
+@media (max-width: 640px) {
+  .acf-hand-row {
+    grid-template-columns: 40px 1fr 72px !important;
+  }
+  .acf-hand-row > :nth-child(4),
+  .acf-hand-row > :nth-child(5),
+  .acf-hand-row > :nth-child(6) {
+    display: none !important;
+  }
+}
