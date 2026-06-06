@@ -137,3 +137,6 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Lockfile — this project tracks dependency ranges in package.json, not a lockfile
+package-lock.json
