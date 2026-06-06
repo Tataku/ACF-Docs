@@ -614,36 +614,43 @@ function ribbonRing(pts) {
   return `${Brush.closedBezier(outer)} ${Brush.closedBezier(inner.reverse())}`;
 }
 
-/* ── SystemLoopSvg — reflexive / self-reinforcing feedback loop ──────────────*
- * An asymmetric ink ring (not an oval) with nodes integrated into the path,
- * clockwise reinforcing flow, and a quiet reversal cue. */
+/* ── SystemLoopSvg — reflexive flywheel (reinforcement + reversal) ───────────*
+ * An asymmetric momentum ring whose weight, comet trail, and pressure grain
+ * ramp clockwise (self-reinforcement building), with a muted counter-arc and a
+ * break cue showing the loop can run in reverse. Optional governorId marks the
+ * node that forces the reversal (e.g. tripwires). Nodes are stations on the rim. */
 function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
-  const nodes = spec.systemLoop.nodes;
+  const sl = spec.systemLoop;
+  const nodes = sl.nodes;
   const M = nodes.length;
   const cx = width / 2, cy = height / 2;
-  const rx = Math.min(width * 0.30, 300), ry = height * 0.33;
-  const asymR = (a) => 1 + 0.16 * Math.sin(a * 2 + 0.6) + 0.07 * Math.sin(a * 3); // irregular, not an oval
-  const at = (a) => ({ x: cx + Math.cos(a) * rx * asymR(a), y: cy + Math.sin(a) * ry * asymR(a) * 0.96 });
-  const nodeAng = nodes.map((_, i) => -Math.PI / 2 + (i / M) * Math.PI * 2);
+  const rx = Math.min(width * 0.29, 290), ry = height * 0.34;
+  const A0 = -Math.PI / 2;
+  const asymR = (a) => 1 + 0.17 * Math.sin(a * 2 + 0.7) + 0.07 * Math.sin(a * 3 - 0.4); // not an oval
+  const at = (a) => ({ x: cx + Math.cos(a) * rx * asymR(a), y: cy + Math.sin(a) * ry * asymR(a) * 0.94 });
+  const nodeAng = nodes.map((_, i) => A0 + (i / M) * Math.PI * 2);
+  const governorIdx = sl.governorId ? nodes.findIndex((n) => n.id === sl.governorId) : -1;
 
   const geom = useMemo(() => {
-    const S = 132, ring = [];
-    for (let i = 0; i <= S; i++) {
-      const a = -Math.PI / 2 + (i / S) * Math.PI * 2;
-      const p = at(a);
-      ring.push({ ...p, w: 1.5 + 1.5 * (0.5 + 0.5 * Math.sin(a - Math.PI / 4)) }); // thickens through the reinforcing arc
-    }
+    const rng = Brush.mulberry32(7);
+    const S = 140, ring = [];
+    for (let i = 0; i <= S; i++) { const a = A0 + (i / S) * Math.PI * 2; const p = at(a); ring.push({ ...p, w: 1.2 + 2.8 * (i / S) * (i / S) }); }
+    const comet = [];
+    for (let i = 0; i < 56; i++) { const prog = i / 55, a = A0 + prog * Math.PI * 2, p = at(a); comet.push({ x: p.x, y: p.y, r: 0.7 + 2.7 * prog, op: 0.16 + 0.55 * prog }); }
+    const grain = [];
+    for (let i = 0; i < 64; i++) { const prog = 0.52 + 0.48 * rng(); const a = A0 + prog * Math.PI * 2; const p = at(a); const inset = 5 + rng() * 17; grain.push({ x: p.x - Math.cos(a) * inset + (rng() - 0.5) * 9, y: p.y - Math.sin(a) * inset * 0.94 + (rng() - 0.5) * 9, r: 0.5 + rng() * 1.1, op: 0.05 + 0.13 * prog }); }
     const chev = [];
-    for (let k = 0; k < M; k++) {
-      const a = -Math.PI / 2 + ((k + 0.5) / M) * Math.PI * 2;
-      const p = at(a), tang = a + Math.PI / 2;
-      chev.push(Brush.brushArrow(p.x + Math.cos(tang) * 11, p.y + Math.sin(tang) * 11, 15, tang, { seed: 70 + k * 5, weight: 0.5, intensity: 0.5 }));
-    }
-    // quiet reversal cue: a short counter-clockwise chevron near the top-inner
-    const ra = -Math.PI / 2 + 0.5, rp = at(ra);
-    const rev = Brush.brushArrow(rp.x * 0.55 + cx * 0.45, rp.y * 0.55 + cy * 0.45, 13, ra - Math.PI / 2 + Math.PI, { seed: 130, weight: 0.45, intensity: 0.45 });
-    return { ringD: ribbonRing(ring), chev, rev };
+    for (let k = 0; k < 3; k++) { const prog = 0.28 + k * 0.30, a = A0 + prog * Math.PI * 2, p = at(a), tang = a + Math.PI / 2; chev.push(Brush.brushArrow(p.x, p.y, 12 + k * 4, tang, { seed: 70 + k * 5, weight: 0.48 + k * 0.12, intensity: 0.5 })); }
+    const startIdx = governorIdx >= 0 ? governorIdx : M - 1;
+    const sa = nodeAng[startIdx];
+    const inner = [];
+    for (let i = 0; i <= 40; i++) { const a = sa - (i / 40) * Math.PI * 1.05; const p = at(a); inner.push({ x: cx + (p.x - cx) * 0.58, y: cy + (p.y - cy) * 0.58 }); }
+    const rmid = inner[Math.round(inner.length * 0.55)];
+    const rev = Brush.brushArrow(rmid.x, rmid.y, 11, sa - Math.PI - Math.PI / 2, { seed: 131, weight: 0.45, intensity: 0.45 });
+    const gp = at(sa); // break tick across the rim at the governor / last node
+    const brk = `M${(gp.x - cx) * 0.9 + cx} ${(gp.y - cy) * 0.9 + cy} L${(gp.x - cx) * 1.12 + cx} ${(gp.y - cy) * 1.12 + cy}`;
+    return { ringD: ribbonRing(ring), comet, grain, chev, revArc: Brush.smoothOpen(inner), rev, brk };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
@@ -667,25 +674,34 @@ function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coar
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Reflexive feedback loop" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Reflexive feedback flywheel" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 80ms' }}>
-          <path d={geom.ringD} fill={accent} fillRule="evenodd" opacity={pal.name === 'light' ? 0.18 : 0.16} />
+          {/* pressure grain (reinforcement building) */}
+          {geom.grain.map((gr, i) => <circle key={`gr${i}`} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op} />)}
+          {/* momentum ring + comet trail */}
+          <path d={geom.ringD} fill={accent} fillRule="evenodd" opacity={pal.name === 'light' ? 0.16 : 0.14} />
+          {geom.comet.map((c, i) => <circle key={`cm${i}`} cx={c.x} cy={c.y} r={c.r} fill={accent} opacity={c.op} />)}
         </g>
-        <g style={{ opacity: entered ? 0.7 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 260ms' }}>
-          {geom.chev.map((d, i) => <path key={`cv${i}`} d={d} fill={accent} opacity="0.75" />)}
-          <path d={geom.rev} fill={pal.text4} opacity="0.6" />
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 260ms' }}>
+          {geom.chev.map((d, i) => <path key={`cv${i}`} d={d} fill={accent} opacity="0.8" />)}
+          {/* reversal / break path (the loop can run the other way) */}
+          <path d={geom.revArc} fill="none" stroke={pal.bandStress} strokeWidth="1" strokeDasharray="3 5" opacity="0.55" />
+          <path d={geom.rev} fill={pal.bandStress} opacity="0.7" />
+          <path d={geom.brk} stroke={pal.bandStress} strokeWidth="1.4" opacity="0.8" />
         </g>
-        {spec.systemLoop.centerLabel && <text x={cx} y={cy - 2} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{spec.systemLoop.centerLabel.toUpperCase()}</text>}
-        {spec.systemLoop.reversalLabel && <text x={cx} y={cy + 14} textAnchor="middle" style={{ ...halo(pal, 8, pal.text4), fontStyle: 'italic' }}>{spec.systemLoop.reversalLabel}</text>}
+        {sl.centerLabel && <text x={cx} y={cy - 2} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{sl.centerLabel.toUpperCase()}</text>}
+        {sl.reversalLabel && <text x={cx} y={cy + 14} textAnchor="middle" style={{ ...halo(pal, 8, pal.bandStressText), fontStyle: 'italic' }}>{sl.reversalLabel}</text>}
         {npos.map((n) => {
           const on = focusId === n.id;
           const isP = n.id === spec.primaryKey;
+          const isGov = n.id === sl.governorId;
           const outX = Math.cos(n.a), outY = Math.sin(n.a);
           const lAnchor = outX > 0.3 ? 'start' : outX < -0.3 ? 'end' : 'middle';
           return (
             <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transition: trans('opacity') }}>
-              <path d={Brush.inkDot(n.x, n.y, on || isP ? 5 : 4, { seed: 40 + n.id.length * 3, intensity: 0.8 })} fill={isP || on ? accent : pal.markInk} />
-              {on && <circle cx={n.x} cy={n.y} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
+              <line x1={cx + (n.x - cx) * 0.9} y1={cy + (n.y - cy) * 0.9} x2={cx + (n.x - cx) * 1.07} y2={cy + (n.y - cy) * 1.07} stroke={pal.cardBorder} strokeWidth="1" />
+              <path d={Brush.inkDot(n.x, n.y, on || isP || isGov ? 5 : 4, { seed: 40 + n.id.length * 3, intensity: 0.8 })} fill={isP || on ? accent : isGov ? pal.bandStress : pal.markInk} />
+              {(on || isGov) && <circle cx={n.x} cy={n.y} r={on ? 9 : 8} fill="none" stroke={on ? accent : pal.bandStress} strokeWidth="1.1" opacity="0.9" />}
               <text x={n.x + outX * 16} y={n.y + outY * 16 + 3} textAnchor={lAnchor} style={haloSans(pal, 11.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
             </g>
           );
@@ -697,33 +713,47 @@ function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coar
   );
 }
 
-/* ── BridgeSvg — structural force transforming into investable exposure ──────*
- * A descending cascade; each stage transforms the prior, capital concentrating
- * into the final, emphasised investable node. */
+/* ── BridgeSvg — capital compressed through a constraint (venturi / choke) ────*
+ * A flow field of capital streamlines compresses through a dominant bottleneck
+ * and re-concentrates into the investable exposure. The constraint is the star:
+ * pressure grain builds before it, choke walls pinch at it, flow re-emerges
+ * focused after it. Equal-weight process steps are deliberately avoided. */
 function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const stages = spec.bridge.stages;
   const K = stages.length;
-  const pad = { l: 80, r: 80, t: 48, b: 54 };
-  const X = (i) => pad.l + (K === 1 ? 0 : (i / (K - 1)) * (width - pad.l - pad.r));
-  const Y = (i) => pad.t + (K === 1 ? 0 : (i / (K - 1)) * (height - pad.t - pad.b) * 0.82);
-  const pos = stages.map((s, i) => ({ ...s, x: X(i), y: Y(i), last: i === K - 1, r: 3.4 + (i / (K - 1)) * 3.2 }));
+  const chokeIdx = Math.floor((K - 1) / 2); // the bottleneck sits at the centre
+  const pad = { l: 64, r: 74, t: 52, b: 48 };
+  const cy = pad.t + (height - pad.t - pad.b) / 2;
+  const X = (i) => pad.l + (i / (K - 1)) * (width - pad.l - pad.r);
+  const spreadF = (i) => { const d = Math.abs(i - chokeIdx) / Math.max(1, chokeIdx); return i === K - 1 ? 0.06 : 0.1 + 0.9 * d * d; };
+  const SPREAD = (height - pad.t - pad.b) * 0.42;
+  const pos = stages.map((s, i) => ({ ...s, x: X(i), y: cy, i, choke: i === chokeIdx, last: i === K - 1 }));
 
   const geom = useMemo(() => {
-    const conn = [];
-    for (let i = 0; i < K - 1; i++) {
-      const a = { x: X(i), y: Y(i) }, b = { x: X(i + 1), y: Y(i + 1) };
-      conn.push(Brush.brushSegment(a.x + 8, a.y + 6, b.x - 8, b.y - 6, { seed: 50 + i * 7, weight: 0.6, intensity: 0.55, waver: 0.3 }));
+    const NS = 9, streams = [];
+    for (let j = 0; j < NS; j++) {
+      const off = (j - (NS - 1) / 2) / ((NS - 1) / 2); // -1..1
+      const pts = stages.map((_, i) => ({ x: X(i), y: cy + off * SPREAD * spreadF(i) }));
+      streams.push(Brush.smoothOpen(pts));
     }
-    return { conn };
+    // pressure grain building before the choke
+    const rng = Brush.mulberry32(23), grain = [];
+    const x0 = X(Math.max(0, chokeIdx - 1)), x1 = X(chokeIdx);
+    for (let i = 0; i < 90; i++) { const t = rng(); const gx = x0 + (x1 - x0) * t; const dens = t * t; const gy = cy + (rng() - 0.5) * SPREAD * (0.9 - 0.7 * t); grain.push({ x: gx, y: gy, r: 0.5 + rng() * 1.2, op: 0.04 + 0.13 * dens }); }
+    // choke walls pinching at the bottleneck
+    const bx = X(chokeIdx), gap = 16, wall = SPREAD * 0.92, ww = (width - pad.l - pad.r) / (K - 1) * 0.42;
+    const topWall = `M${bx - ww} ${cy - wall} Q${bx - ww * 0.3} ${cy - wall} ${bx} ${cy - gap} Q${bx + ww * 0.3} ${cy - wall} ${bx + ww} ${cy - wall} Z`;
+    const botWall = `M${bx - ww} ${cy + wall} Q${bx - ww * 0.3} ${cy + wall} ${bx} ${cy + gap} Q${bx + ww * 0.3} ${cy + wall} ${bx + ww} ${cy + wall} Z`;
+    return { streams, grain, topWall, botWall, bx };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
-  const anchorOf = (act) => { const p = pos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: p.y } : null; };
-  const resolve = (mx, my) => { let best = null, bd = coarse ? 44 : 34; pos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const anchorOf = (act) => { const p = pos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: cy } : null; };
+  const resolve = (mx) => { let best = null, bd = coarse ? 60 : 46; pos.forEach((p) => { const d = Math.abs(mx - p.x); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
-  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
-  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
+  const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
@@ -738,20 +768,29 @@ function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Transformation cascade to investable exposure" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        <g style={{ opacity: entered ? 0.7 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 200ms' }}>
-          {geom.conn.map((d, i) => <path key={`bc${i}`} d={d} fill={accent} opacity="0.55" />)}
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Capital compressing through a bottleneck into investable exposure" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 80ms' }}>
+          {geom.grain.map((gr, i) => <circle key={`g${i}`} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op} />)}
+          <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1100ms cubic-bezier(0.7,0,0.2,1) 120ms' }}>
+            {geom.streams.map((d, i) => <path key={`s${i}`} d={d} fill="none" stroke={accent} strokeWidth="1" opacity="0.42" strokeLinecap="round" />)}
+          </g>
         </g>
-        {pos.map((n, i) => {
+        {/* choke walls — the constraint is the dominant element */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 260ms' }}>
+          <path d={geom.topWall} fill={pal.invalidCharcoal} opacity={pal.name === 'light' ? 0.20 : 0.18} />
+          <path d={geom.botWall} fill={pal.invalidCharcoal} opacity={pal.name === 'light' ? 0.20 : 0.18} />
+        </g>
+        {pos.map((n) => {
           const on = focusId === n.id;
           const isP = n.id === spec.primaryKey || n.last;
+          const dom = n.choke || n.last; // bottleneck and the investable output read loudest
           return (
-            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.9)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${100 + i * 80}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${100 + i * 80}ms` }}>
-              {n.last && <circle cx={n.x} cy={n.y} r={n.r + 5} fill="none" stroke={accent} strokeWidth="1" opacity="0.5" />}
-              <path d={Brush.inkDot(n.x, n.y, n.r, { seed: 30 + i * 9, intensity: 0.8 })} fill={isP ? accent : pal.markInk} />
-              {on && <circle cx={n.x} cy={n.y} r={n.r + 6} fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
-              <text x={n.x} y={n.y - n.r - 8} textAnchor="middle" style={haloSans(pal, 12, isP ? accent : pal.text1, 600)}>{n.label}</text>
-              {n.sub && <text x={n.x} y={n.y + n.r + 15} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
+            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transition: trans('opacity') }}>
+              {n.last && <circle cx={n.x} cy={cy} r="11" fill="none" stroke={accent} strokeWidth="1" opacity="0.5" />}
+              <path d={Brush.inkDot(n.x, cy, n.choke ? 5.5 : n.last ? 5 : 3, { seed: 30 + n.i * 9, intensity: 0.8 })} fill={isP ? accent : n.choke ? pal.invalidCharcoal : pal.markInk} />
+              {on && <circle cx={n.x} cy={cy} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
+              <text x={n.x} y={n.choke ? cy - 64 : cy - 26} textAnchor="middle" style={haloSans(pal, dom ? 13.5 : 11, isP ? accent : pal.text1, dom ? 700 : 600)}>{n.label}</text>
+              {n.sub && <text x={n.x} y={(n.choke ? cy - 64 : cy - 26) + 14} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
             </g>
           );
         })}
@@ -762,33 +801,45 @@ function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
   );
 }
 
-/* ── GateSvg — sober validation gauntlet (narrative → 4 gates → thesis) ──────*
- * A survivor band that thins through four vertical gates; only what clears all
- * four becomes a thesis. Not a marketing funnel. */
+/* ── GateSvg — thesis gauntlet (a messy field filtered into one thesis) ──────*
+ * A broad scatter of narrative fragments enters from the left; weak fragments
+ * fall away at each of four gates while survivors drift toward the centreline,
+ * concentrating into a single validated thesis. Transformation, not a funnel. */
 function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const nodes = spec.gate.nodes; // [entry, gate, gate, gate, gate, exit]
   const K = nodes.length;
-  const pad = { l: 70, r: 86, t: 46, b: 44 };
+  const pad = { l: 64, r: 80, t: 50, b: 52 };
   const cy = pad.t + (height - pad.t - pad.b) / 2;
   const X = (i) => pad.l + (i / (K - 1)) * (width - pad.l - pad.r);
-  const hwAt = (i) => 26 - (i / (K - 1)) * 22; // band thins left → right (survivors filter out)
-  const pos = nodes.map((n, i) => ({ ...n, x: X(i), y: cy, i, hw: hwAt(i), gate: n.kind === 'gate', exit: n.kind === 'exit', entry: n.kind === 'entry' }));
+  const SPREAD = (height - pad.t - pad.b) * 0.42;
+  const pos = nodes.map((n, i) => ({ ...n, x: X(i), i, gate: n.kind === 'gate', exit: n.kind === 'exit', entry: n.kind === 'entry' }));
+  const lastCol = K - 1;
 
   const geom = useMemo(() => {
-    const top = pos.map((p) => ({ x: p.x, y: cy - p.hw }));
-    const bot = pos.map((p) => ({ x: p.x, y: cy + p.hw }));
-    const band = `${Brush.smoothOpen(top)} L${bot[bot.length - 1].x} ${bot[bot.length - 1].y} ${Brush.smoothOpen([...bot].reverse()).slice(1)} Z`;
-    const gates = pos.filter((p) => p.gate).map((p) => ({
-      x: p.x,
-      line: Brush.brushSegment(p.x, cy - p.hw - 16, p.x, cy + p.hw + 16, { seed: 60 + p.i * 8, weight: 0.7, intensity: 0.6, waver: 0.2 }),
-      reject: Brush.brushSegment(p.x, cy + p.hw + 10, p.x + 16, cy + p.hw + 30, { seed: 90 + p.i * 8, weight: 0.4, intensity: 0.5, waver: 0.1 }),
-    }));
-    return { band, gates };
+    const rng = Brush.mulberry32(29);
+    const N = 26, frags = [], survivors = [];
+    for (let f = 0; f < N; f++) {
+      const startY = cy + (rng() - 0.5) * 2 * SPREAD;
+      const r = rng();
+      const death = r < 0.34 ? 1 : r < 0.60 ? 2 : r < 0.80 ? 3 : r < 0.90 ? 4 : lastCol; // most die early; a few survive
+      const endCol = death;
+      const yAt = (i) => cy + (startY - cy) * (1 - (i / lastCol) * 0.62); // drift toward centre as it survives
+      const pts = []; for (let i = 0; i <= endCol; i++) pts.push({ x: X(i), y: yAt(i) });
+      if (death === lastCol) {
+        const sp = []; for (let i = 0; i <= lastCol; i++) sp.push({ x: X(i), y: cy + (startY - cy) * (1 - i / lastCol) });
+        survivors.push(Brush.brushLine(sp, { seed: 200 + f * 7, weight: 0.5, intensity: 0.5 }));
+      } else {
+        const endX = X(endCol), endY = yAt(endCol);
+        frags.push({ d: `M${X(0)} ${startY} ${Brush.smoothOpen(pts).slice(1)}`, fall: `M${endX} ${endY} Q${endX + 8} ${endY + 16} ${endX + 14} ${endY + 30 + rng() * 14}` });
+      }
+    }
+    const gates = pos.filter((p) => p.gate).map((p) => ({ x: p.x, line: Brush.brushSegment(p.x, cy - SPREAD - 8, p.x, cy + SPREAD + 8, { seed: 60 + p.i * 8, weight: 0.7, intensity: 0.6, waver: 0.15 }) }));
+    return { frags, survivors, gates };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
-  const anchorOf = (act) => { const p = pos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: p.gate ? cy - p.hw - 16 : cy } : null; };
+  const anchorOf = (act) => { const p = pos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: p.gate ? cy - SPREAD - 8 : cy } : null; };
   const resolve = (mx) => { let best = null, bd = coarse ? 60 : 46; pos.forEach((p) => { const d = Math.abs(mx - p.x); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
@@ -807,29 +858,35 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Thesis validation gauntlet" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 80ms' }}>
-          <path d={geom.band} fill={accent} opacity={pal.name === 'light' ? 0.12 : 0.11} />
-        </g>
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 220ms' }}>
-          {geom.gates.map((g, i) => (
-            <g key={`g${i}`}>
-              <path d={g.line} fill={pal.invalidCharcoal} opacity="0.8" />
-              <path d={g.reject} fill={pal.text4} opacity="0.5" />
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Thesis validation gauntlet filtering narratives" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* fragments: weak narratives that fall away at a gate */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 120ms' }}>
+          {geom.frags.map((fr, i) => (
+            <g key={`f${i}`}>
+              <path d={fr.d} fill="none" stroke={pal.text3} strokeWidth="1" opacity="0.34" strokeLinecap="round" />
+              <path d={fr.fall} fill="none" stroke={pal.text4} strokeWidth="0.9" opacity="0.2" strokeLinecap="round" />
             </g>
           ))}
+        </g>
+        {/* survivors: concentrate into the thesis */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 1000ms ease 320ms' }}>
+          {geom.survivors.map((d, i) => <path key={`sv${i}`} d={d} fill={accent} opacity="0.9" />)}
+        </g>
+        {/* gates */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 220ms' }}>
+          {geom.gates.map((g, i) => <path key={`g${i}`} d={g.line} fill={pal.invalidCharcoal} opacity="0.75" />)}
         </g>
         {pos.map((n) => {
           const on = focusId === n.id;
           const isP = n.id === spec.primaryKey || n.exit;
-          const labelY = n.gate ? cy - n.hw - 22 : cy - n.hw - 14;
+          const labelY = n.gate ? cy - SPREAD - 16 : cy - SPREAD - 8;
           return (
             <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transition: trans('opacity') }}>
-              {(n.entry || n.exit) && <path d={Brush.inkDot(n.x, cy, n.exit ? 5 : 4, { seed: 20 + n.i * 6, intensity: 0.8 })} fill={isP ? accent : pal.markInk} />}
-              {n.exit && <circle cx={n.x} cy={cy} r="10" fill="none" stroke={accent} strokeWidth="1" opacity="0.5" />}
-              {on && (n.gate ? <line x1={n.x} x2={n.x} y1={cy - n.hw - 16} y2={cy + n.hw + 16} stroke={accent} strokeWidth="1.4" opacity="0.9" /> : <circle cx={n.x} cy={cy} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />)}
-              <text x={n.x} y={labelY} textAnchor="middle" style={haloSans(pal, n.entry || n.exit ? 12 : 10.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
-              {n.sub && <text x={n.x} y={n.exit || n.entry ? cy + 18 : labelY + 13} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
+              {(n.entry || n.exit) && <path d={Brush.inkDot(n.x, cy, n.exit ? 5.5 : 4, { seed: 20 + n.i * 6, intensity: 0.8 })} fill={isP ? accent : pal.markInk} />}
+              {n.exit && <circle cx={n.x} cy={cy} r="11" fill="none" stroke={accent} strokeWidth="1" opacity="0.55" />}
+              {on && (n.gate ? <line x1={n.x} x2={n.x} y1={cy - SPREAD - 8} y2={cy + SPREAD + 8} stroke={accent} strokeWidth="1.5" opacity="0.9" /> : <circle cx={n.x} cy={cy} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />)}
+              <text x={n.x} y={labelY} textAnchor="middle" style={haloSans(pal, n.entry || n.exit ? 12.5 : 10.5, isP ? accent : pal.text1, isP ? 700 : 600)}>{n.label}</text>
+              {n.sub && <text x={n.x} y={n.exit || n.entry ? cy + 20 : labelY + 13} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
             </g>
           );
         })}
