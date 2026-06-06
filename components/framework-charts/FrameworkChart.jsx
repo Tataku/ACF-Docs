@@ -262,7 +262,8 @@ function PlotSvg({
         ? (sObj.pts[Math.min(active.dataIdx, sObj.pts.length - 1)] || {}).y
         : null;
       const dec = panel.yUnit === '%' || (panel.domain && panel.domain.yMax <= 5) ? 2 : 1;
-      const valueText = showValues && raw != null ? `${raw.toFixed(dec)} ${(panel.yUnit || 'val').toUpperCase()} · ${valueNote}` : null;
+      const unit = (panel.valueUnit || panel.yUnit || 'val').toUpperCase();
+      const valueText = showValues && raw != null ? `${raw.toFixed(dec)} ${unit} · ${valueNote}` : null;
       tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={valueText} />;
     }
   }
@@ -444,7 +445,13 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
           <g key={`wp${i}`} style={{ opacity: entered ? (focusId && focusId !== p.id ? 0.4 : 1) : 0, transition: trans('opacity') }}>
             <path d={Brush.inkDot(p.x, p.y, p.id === spec.primaryKey ? 4.4 : 3.4, { seed: 40 + i * 7, intensity: 0.8 })} fill={p.id === spec.primaryKey ? accent : pal.markInk} />
             {focusId === p.id && <circle cx={p.x} cy={p.y} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
-            {!coarse && <text x={p.x} y={p.y - 11} textAnchor="middle" style={halo(pal, 8.5, p.id === spec.primaryKey ? accent : pal.text3)}>{targets.find((t) => t.id === p.id)?.label}</text>}
+            {(() => {
+              // Persistent text must not collide: waypoint labels are hover-only
+              // by default; only an explicitly-flagged label (e.g. "Now") stays.
+              const tgt = targets.find((t) => t.id === p.id);
+              const show = focusId === p.id || (tgt && tgt.persistentLabel);
+              return show && tgt ? <text x={p.x} y={p.y - 11} textAnchor="middle" style={halo(pal, 8.5, p.id === spec.primaryKey ? accent : pal.text2)}>{tgt.label}</text> : null;
+            })()}
           </g>
         ))}
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
@@ -682,7 +689,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
 
   return (
     <figure className={className} aria-label={`${spec.title}. ${spec.frameworkClaim}`} aria-describedby={`${reactId}-summary`}
-      style={{ margin: '34px 0', background: pal.card, border: `1px solid ${pal.cardBorder}`, borderTop: `2px solid ${accent}`, borderRadius: 7, overflow: 'visible', colorScheme: pal.name, fontFamily: pal.sans, color: pal.text1 }}>
+      style={{ margin: '34px 0', background: pal.card, border: `1px solid ${pal.cardBorder}`, borderRadius: 7, overflow: 'visible', colorScheme: pal.name, fontFamily: pal.sans, color: pal.text1 }}>
       <span id={`${reactId}-summary`} style={SR_ONLY}>{spec.ariaSummary}</span>
 
       {/* topline */}

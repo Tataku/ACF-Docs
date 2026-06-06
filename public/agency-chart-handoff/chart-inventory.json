@@ -1,0 +1,402 @@
+{
+  "name": "ACF Framework Charts — handoff inventory",
+  "note": "Representative/illustrative exhibits. visualDataMode + disclosure define how each chart is presented. See README-agency-chart-handoff.md.",
+  "count": 11,
+  "charts": [
+    {
+      "chartId": "sig-payoff",
+      "idx": "S1",
+      "title": "Shape the Payoff",
+      "group": "signature",
+      "intendedPlacement": "both",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "conceptual",
+      "claimLabel": "PAYOFF SHAPE · SIGNATURE",
+      "frameworkClaim": "ACF shapes exposure: the left side is capped, the right side is left free to run.",
+      "readerTakeaway": "Survive the left tail; stay convex on the right tail.",
+      "chartType": "Conceptual payoff curve vs a symmetric reference line.",
+      "setupLine": "The payoff shape the whole framework is built to produce",
+      "explainerHeadline": "The framework is a payoff shape, not a prediction.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 1",
+          "label": "Survivable compounding under uncertainty",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-1-foundation"
+        },
+        {
+          "provider": "ACF · Part 6",
+          "label": "Convexity Integrity Score",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-6-convexity-framework-integrity-scoring"
+        }
+      ]
+    },
+    {
+      "chartId": "sig-shape",
+      "idx": "S2",
+      "title": "Bend the Tail",
+      "group": "signature",
+      "intendedPlacement": "docs-landing",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "conceptual",
+      "claimLabel": "EXPOSURE SHAPING · SIGNATURE",
+      "frameworkClaim": "ACF truncates the left tail and extends the right tail of the outcome distribution.",
+      "readerTakeaway": "Same center of gravity, deliberately reshaped tails.",
+      "chartType": "Conceptual outcome-distribution reshape vs a symmetric reference.",
+      "setupLine": "ACF reshapes the distribution of outcomes, it does not just chase higher returns",
+      "explainerHeadline": "We reshape the outcomes, not the average.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 1",
+          "label": "Fragility is structural, not statistical",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-1-foundation"
+        },
+        {
+          "provider": "ACF · Part 5",
+          "label": "Carry posture and barbell structure",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        }
+      ]
+    },
+    {
+      "chartId": "dl-convexity-window",
+      "idx": "L1",
+      "title": "The Window Opens",
+      "group": "docs-landing",
+      "intendedPlacement": "docs-landing",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "CONVEXITY · WINDOW",
+      "frameworkClaim": "ACF waits for setups where downside is defined and upside can accelerate.",
+      "readerTakeaway": "Patience through compression; size into confirmation; let the release run.",
+      "chartType": "Representative regime/path chart with a compression field and release marker.",
+      "setupLine": "Compression, then confirmation, then asymmetric release",
+      "explainerHeadline": "Convexity is a window, not a constant.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "ACF · Part 5",
+          "label": "Position management and entry discipline",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        },
+        {
+          "provider": "ACF · Part 6",
+          "label": "Convexity windows and CIS",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-6-convexity-framework-integrity-scoring"
+        }
+      ]
+    },
+    {
+      "chartId": "dl-regime-map",
+      "idx": "L2",
+      "title": "Capital Has Weather",
+      "group": "docs-landing",
+      "intendedPlacement": "docs-landing",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "quadrant",
+      "visualDataMode": "representative",
+      "claimLabel": "REGIME MAP · CAPITAL WEATHER",
+      "frameworkClaim": "Portfolio construction changes with the macro regime.",
+      "readerTakeaway": "You are not allocating in a vacuum; you are allocating into weather.",
+      "chartType": "Growth × inflation quadrant with a representative regime path.",
+      "setupLine": "Same assets, different regime, different behaviour",
+      "explainerHeadline": "The same portfolio behaves differently in different weather.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "ACF · Part 2",
+          "label": "Macro thesis and regime identification",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        },
+        {
+          "provider": "ACF · Part 1",
+          "label": "Regime-agnostic allocation as a failure mode",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-1-foundation"
+        }
+      ]
+    },
+    {
+      "chartId": "dl-tripwire-loop",
+      "idx": "L3",
+      "title": "Govern the Thesis",
+      "group": "docs-landing",
+      "intendedPlacement": "docs-landing",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "loop",
+      "visualDataMode": "conceptual",
+      "claimLabel": "SYSTEM · GOVERNED LOOP",
+      "frameworkClaim": "ACF is a closed-loop operating system, not a fixed set of weights.",
+      "readerTakeaway": "Every position is traceable to a thesis and governed by a tripwire.",
+      "chartType": "Minimal flow/loop diagram of the framework control system.",
+      "setupLine": "Thesis creates exposure · exposure creates risk · tripwires govern behaviour",
+      "explainerHeadline": "Structure flows from a thesis and is governed by tripwires.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 1",
+          "label": "Order of operations · the closed loop",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-1-foundation"
+        },
+        {
+          "provider": "ACF · Part 6",
+          "label": "CIS governance and tripwires",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-6-convexity-framework-integrity-scoring"
+        }
+      ]
+    },
+    {
+      "chartId": "p1-hedge-broke",
+      "idx": "01",
+      "title": "The Hedge Broke",
+      "group": "part-1",
+      "intendedPlacement": "part-1",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "DIVERSIFICATION · FRAGILITY",
+      "frameworkClaim": "Stocks and bonds are not always true diversifiers.",
+      "readerTakeaway": "When inflation drives the regime, the hedge can fall with the risk.",
+      "chartType": "Indexed-return stress chart, 3 series (stocks, bonds, 60/40).",
+      "setupLine": "Indexed total return through an inflation shock: stocks, bonds, and the 60/40 blend",
+      "explainerHeadline": "The hedge can fail with the risk.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "FRED",
+          "label": "S&P 500 total return",
+          "seriesId": "SP500TR",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/SP500TR"
+        },
+        {
+          "provider": "FRED",
+          "label": "Bloomberg US Aggregate total return (ICE proxy)",
+          "seriesId": "BAMLCC0A0CMTRIV",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/BAMLCC0A0CMTRIV"
+        },
+        {
+          "provider": "Author calculation",
+          "label": "60/40 blend, monthly rebalance",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        }
+      ]
+    },
+    {
+      "chartId": "p1-correlation",
+      "idx": "02",
+      "title": "Correlation Turns",
+      "group": "part-1",
+      "intendedPlacement": "part-1",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "CORRELATION · REGIME",
+      "frameworkClaim": "Stock–bond correlation changes when inflation becomes the dominant stress.",
+      "readerTakeaway": "The diversifier did not disappear. The regime that produced it did.",
+      "chartType": "Rolling 24-month stock–bond correlation with a non-rectangular inflation-shock background.",
+      "setupLine": "Rolling 24-month stock–bond correlation across an inflation-shock window",
+      "explainerHeadline": "When inflation runs the regime, correlations flip.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "FRED",
+          "label": "S&P 500 total return",
+          "seriesId": "SP500TR",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/SP500TR"
+        },
+        {
+          "provider": "FRED",
+          "label": "Bloomberg US Aggregate total return (ICE proxy)",
+          "seriesId": "BAMLCC0A0CMTRIV",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/BAMLCC0A0CMTRIV"
+        },
+        {
+          "provider": "Author calculation",
+          "label": "Rolling 24-month Pearson correlation",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        }
+      ]
+    },
+    {
+      "chartId": "p1-cpi-assets",
+      "idx": "03",
+      "title": "Inflation Was Bigger",
+      "group": "part-1",
+      "intendedPlacement": "part-1",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "INFLATION · MEASUREMENT",
+      "frameworkClaim": "CPI alone does not capture the full inflation story.",
+      "readerTakeaway": "Consumer prices roughly doubled. The assets that store capital did far more.",
+      "chartType": "Three normalized index lines with a gap area between assets and CPI.",
+      "setupLine": "CPI, housing, and a broad-asset proxy, each indexed to 100",
+      "explainerHeadline": "The CPI tells one story; capital saw another.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "FRED (BLS)",
+          "label": "CPI-U, all items",
+          "seriesId": "CPIAUCSL",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/CPIAUCSL"
+        },
+        {
+          "provider": "FRED (S&P)",
+          "label": "S&P/Case-Shiller US National Home Price Index",
+          "seriesId": "CSUSHPISA",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/CSUSHPISA"
+        },
+        {
+          "provider": "Author calculation",
+          "label": "Broad-asset blend (equity + housing + gold)",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        }
+      ]
+    },
+    {
+      "chartId": "p1-policy-constraint",
+      "idx": "04",
+      "title": "The Bill Came Due",
+      "group": "part-1",
+      "intendedPlacement": "part-1",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "dual",
+      "visualDataMode": "representative",
+      "claimLabel": "POLICY · CONSTRAINT",
+      "frameworkClaim": "Debt and interest burden reduce policy freedom.",
+      "readerTakeaway": "For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.",
+      "chartType": "Stacked dual-panel chart, shared timeline. Top: debt/GDP. Bottom: net interest/GDP.",
+      "setupLine": "Federal debt and net interest, both as a share of GDP, on a shared timeline",
+      "explainerHeadline": "The cost of debt stopped being free.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "FRED",
+          "label": "Federal debt held by the public / GDP",
+          "seriesId": "GFDEGDQ188S",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/GFDEGDQ188S"
+        },
+        {
+          "provider": "BEA (via FRED)",
+          "label": "Federal net interest outlays",
+          "seriesId": "A091RC1Q027SBEA",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/A091RC1Q027SBEA"
+        },
+        {
+          "provider": "FRED",
+          "label": "Gross domestic product (denominator)",
+          "seriesId": "GDP",
+          "role": "target-source",
+          "url": "https://fred.stlouisfed.org/series/GDP"
+        }
+      ]
+    },
+    {
+      "chartId": "p1-sequence-risk",
+      "idx": "05",
+      "title": "Path Changes Everything",
+      "group": "part-1",
+      "intendedPlacement": "part-1",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "simulation",
+      "claimLabel": "PATH DEPENDENCY · WITHDRAWALS",
+      "frameworkClaim": "Same average return, opposite sequence, opposite survival outcome.",
+      "readerTakeaway": "Withdrawal-phase capital does not care about the average. It cares about the order.",
+      "chartType": "Two-path sequence-of-returns simulation.",
+      "setupLine": "Identical return set, opposite order, $1.0M start, $40k annual withdrawals",
+      "explainerHeadline": "Same returns. Opposite outcomes.",
+      "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
+      "sources": [
+        {
+          "provider": "Author simulation",
+          "label": "Identical annual return set, opposite order",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        }
+      ]
+    },
+    {
+      "chartId": "p1-convexity-survival",
+      "idx": "06",
+      "title": "Survive the Path",
+      "group": "part-1",
+      "intendedPlacement": "part-1",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "CONVEXITY · ENDURANCE",
+      "frameworkClaim": "Upside only matters if sizing lets you survive the path.",
+      "readerTakeaway": "Volatile assets can still compound — through, not around, the drawdown.",
+      "chartType": "Invested-vs-value representative path with drawdown shading.",
+      "setupLine": "Cumulative invested versus portfolio value, with drawdown-from-peak shaded",
+      "explainerHeadline": "Compounding happens through the drawdown.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "ACF · Part 3",
+          "label": "Bitcoin convexity and multi-cycle drawdowns",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        },
+        {
+          "provider": "Author calculation",
+          "label": "Constant DCA, no rebalancing, no leverage",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        }
+      ]
+    }
+  ]
+}

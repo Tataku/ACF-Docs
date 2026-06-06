@@ -99,6 +99,76 @@ function ViewToggle({ pal, accent, theme, setTheme, variant }) {
   );
 }
 
+const REPO_RAW = 'https://raw.githubusercontent.com/Tataku/ACF-Docs/main';
+const REPO_BLOB = 'https://github.com/Tataku/ACF-Docs/blob/main';
+const PKG_README = '/agency-chart-handoff/README-agency-chart-handoff.md';
+const PKG_INVENTORY = '/agency-chart-handoff/chart-inventory.json';
+const PKG_FILES = [
+  'components/framework-charts/FrameworkChart.jsx',
+  'components/framework-charts/chart-specs.mjs',
+  'components/framework-charts/brush.js',
+  'components/framework-charts/palette.js',
+  'components/framework-charts/ChartHandoff.jsx',
+  'components/framework-charts/index.js',
+  'styles/framework-charts.css',
+  'pages/chart-handoff-export.jsx',
+  'public/agency-chart-handoff/README-agency-chart-handoff.md',
+  'public/agency-chart-handoff/chart-inventory.json',
+];
+const PASTE_TEXT = [
+  'Use the ACF Framework Charts as the chart implementation reference.',
+  'Start with public/agency-chart-handoff/README-agency-chart-handoff.md, then components/framework-charts/chart-specs.mjs (the spec registry) and components/framework-charts/FrameworkChart.jsx (the engine).',
+  "Charts are representative/illustrative with honest disclosure footers — do not present them as exact historical data unless a 'historical' source is wired. One chart = one claim. Keep the dark-terminal look; no SaaS card borders or glows.",
+].join('\n');
+
+// Quiet implementation/export package: download links + file map + a paste-ready
+// instruction so the agency / Carlo can hand the exact code to their own AI.
+function ImplementationPackage({ pal, accent }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(PASTE_TEXT).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600); }).catch(() => {});
+    }
+  };
+  const dl = { fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.06em', color: accent, textDecoration: 'none', border: `1px solid ${accent}66`, borderRadius: 5, padding: '7px 12px', whiteSpace: 'nowrap' };
+  return (
+    <section id="implementation-package" style={{ scrollMarginTop: 24, marginTop: 44, borderTop: `1px solid ${pal.cardBorder}`, paddingTop: 24 }}>
+      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.2em', color: accent, marginBottom: 8 }}>IMPLEMENTATION PACKAGE</div>
+      <h2 style={{ margin: 0, fontSize: 'clamp(18px, 2.6vw, 22px)', fontWeight: 600, letterSpacing: '-0.02em', color: pal.text1 }}>Take the exact chart code &amp; specs</h2>
+      <p style={{ margin: '12px 0 16px', fontSize: 13.5, lineHeight: 1.6, color: pal.text3, maxWidth: 720 }}>
+        Everything needed to reproduce these charts, ready to hand to an AI or build environment. The README is the entry point; it links every source file and documents the representative-data model, honesty rules, and the historical-data upgrade path.
+      </p>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 18 }}>
+        <a href={PKG_README} download style={dl}>Download handoff README ↗</a>
+        <a href={PKG_INVENTORY} download style={{ ...dl, color: pal.text2, borderColor: pal.borderHi }}>Chart inventory (JSON) ↗</a>
+      </div>
+
+      {/* paste-to-AI block */}
+      <div style={{ border: `1px solid ${pal.cardBorder}`, borderRadius: 7, background: pal.surface, padding: '12px 14px', marginBottom: 18 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: pal.text4 }}>PASTE INTO YOUR AI</span>
+          <button onClick={copy} style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.08em', color: copied ? accent : pal.text3, background: 'transparent', border: `1px solid ${copied ? accent : pal.cardBorder}`, borderRadius: 4, padding: '3px 9px', cursor: 'pointer' }}>{copied ? 'COPIED ✓' : 'COPY'}</button>
+        </div>
+        <p style={{ margin: 0, fontFamily: pal.mono, fontSize: 11, lineHeight: 1.6, color: pal.text2, whiteSpace: 'pre-wrap' }}>{PASTE_TEXT}</p>
+      </div>
+
+      {/* file map */}
+      <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: pal.text4, marginBottom: 10 }}>FILES</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {PKG_FILES.map((f) => (
+          <div key={f} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: pal.mono, fontSize: 11, color: pal.text2, wordBreak: 'break-all' }}>{f}</span>
+            <span style={{ display: 'inline-flex', gap: 12, flexShrink: 0 }}>
+              <a href={`${REPO_BLOB}/${f}`} target="_blank" rel="noreferrer" style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.06em', color: pal.text3, textDecoration: 'none', borderBottom: `1px dotted ${pal.borderHi}` }}>view</a>
+              <a href={`${REPO_RAW}/${f}`} target="_blank" rel="noreferrer" style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.06em', color: accent, textDecoration: 'none', borderBottom: `1px dotted ${accent}` }}>raw</a>
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function ChartHandoff({ initialTheme = 'dark', accent: accentName = 'green', variant = 'embedded' }) {
   const [theme, setTheme] = useState(initialTheme);
   const pal = getPalette(theme);
@@ -121,6 +191,11 @@ export default function ChartHandoff({ initialTheme = 'dark', accent: accentName
       </p>
       <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.06em', color: pal.text4, lineHeight: 1.6, marginBottom: 20, maxWidth: 720 }}>
         Internal chart review surface for marketing / design handoff. Charts are not automatically placed in public framework pages; placement is chosen explicitly.
+      </div>
+
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 22, fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.08em' }}>
+        <a href="#implementation-package" style={{ color: accent, textDecoration: 'none', borderBottom: `1px dotted ${accent}`, paddingBottom: 1 }}>↓ Implementation package</a>
+        <a href="/agency-chart-handoff/README-agency-chart-handoff.md" download style={{ color: pal.text3, textDecoration: 'none', borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1 }}>Download handoff README ↗</a>
       </div>
 
       {/* legend */}
@@ -151,6 +226,8 @@ export default function ChartHandoff({ initialTheme = 'dark', accent: accentName
           </section>
         );
       })}
+
+      <ImplementationPackage pal={pal} accent={accent} />
 
       <div style={{ marginTop: 36, paddingTop: 16, borderTop: `1px solid ${pal.cardBorder}`, fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.1em', color: pal.text4, display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <span>ACF FRAMEWORK CHARTS · REPRESENTATIVE EXHIBIT SET · INTERNAL HANDOFF</span>
