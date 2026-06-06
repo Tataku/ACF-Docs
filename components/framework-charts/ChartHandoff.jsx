@@ -9,7 +9,7 @@
  *
  * Editorial single column, dark terminal foundation. Not public navigation.
  * ─────────────────────────────────────────────────────────────────────────── */
-import React from 'react';
+import React, { useState } from 'react';
 import FrameworkChart from './FrameworkChart';
 import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel } from './chart-specs.mjs';
 import { getPalette, getAccent } from './palette';
@@ -74,12 +74,45 @@ function MetaStrip({ pal, accent, spec }) {
   );
 }
 
-export default function ChartHandoff({ theme = 'dark', accent: accentName = 'green' }) {
+// Quiet local theme toggle for agency preview (Dark / Light) + route switch.
+function ViewToggle({ pal, accent, theme, setTheme, variant }) {
+  const seg = (val, label) => (
+    <button key={val} onClick={() => setTheme(val)} aria-pressed={theme === val} style={{
+      fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', cursor: 'pointer',
+      padding: '5px 13px', border: 'none', borderRadius: 5,
+      background: theme === val ? accent : 'transparent',
+      color: theme === val ? '#fff' : pal.text3,
+      transition: 'background .15s ease, color .15s ease',
+    }}>{label}</button>
+  );
+  const to = variant === 'export' ? '/chart-handoff' : '/chart-handoff-export';
+  const toLabel = variant === 'export' ? 'Docs shell ↗' : 'Export view ↗';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 22 }}>
+      <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.16em', color: pal.text4 }}>VIEW</span>
+      <div style={{ display: 'inline-flex', gap: 3, padding: 3, border: `1px solid ${pal.cardBorder}`, borderRadius: 7, background: pal.surface }}>
+        {seg('dark', 'Dark')}
+        {seg('light', 'Light')}
+      </div>
+      <a href={to} style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.1em', color: pal.text3, textDecoration: 'none', borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1 }}>{toLabel}</a>
+    </div>
+  );
+}
+
+export default function ChartHandoff({ initialTheme = 'dark', accent: accentName = 'green', variant = 'embedded' }) {
+  const [theme, setTheme] = useState(initialTheme);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
+  const isExport = variant === 'export';
+
+  const outer = isExport
+    ? { background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', padding: 'clamp(20px, 4vw, 44px) clamp(16px, 4vw, 32px)', colorScheme: pal.name }
+    : { background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, padding: 'clamp(16px, 3vw, 28px)', margin: '8px 0 32px', colorScheme: pal.name };
 
   return (
-    <div style={{ background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, padding: 'clamp(16px, 3vw, 28px)', margin: '8px 0 32px', colorScheme: pal.name }}>
+    <div style={outer}>
+      <div style={{ maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 }}>
+      <ViewToggle pal={pal} accent={accent} theme={theme} setTheme={setTheme} variant={variant} />
       {/* header */}
       <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>ACF · FRAMEWORK CHART HANDOFF · INTERNAL REVIEW</div>
       <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>Every chart for the docs landing page and Part 1</h1>
@@ -122,6 +155,7 @@ export default function ChartHandoff({ theme = 'dark', accent: accentName = 'gre
       <div style={{ marginTop: 36, paddingTop: 16, borderTop: `1px solid ${pal.cardBorder}`, fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.1em', color: pal.text4, display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <span>ACF FRAMEWORK CHARTS · REPRESENTATIVE EXHIBIT SET · INTERNAL HANDOFF</span>
         <span>REVIEW → APPROVE SHAPES → WIRE HISTORICAL DATA</span>
+      </div>
       </div>
     </div>
   );
