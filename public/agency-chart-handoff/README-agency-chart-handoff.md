@@ -120,6 +120,15 @@ Two families, one engine:
 
 Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclosure behaviour as the data charts. Default visible text is minimal; detail reveals on hover/tap.
 
+**Framework-diagram design rules** (what makes these bespoke, not flowcharts):
+1. A diagram teaches one mechanism, not a list of steps.
+2. Nodes are not equal unless the concept requires it; the dominant idea is visually dominant (e.g. the bottleneck is the star of `bridge`).
+3. Flow expresses transformation, pressure, filtering, or feedback — not just direction.
+4. Default visible text is minimal and non-duplicative; detail lives on hover/tap.
+5. Space is used with structural purpose — no dead zones.
+6. The visual metaphor matches the framework concept (flywheel for reflexivity, venturi for a constraint, gauntlet for validation).
+7. If it looks like PowerPoint, or the mechanism is not nameable in five seconds, it fails.
+
 ## 5. How to render one chart
 
 ```jsx

@@ -408,6 +408,7 @@ export const FRAMEWORK_CHART_SPECS = [
     systemLoop: {
       centerLabel: 'governed loop',
       reversalLabel: 'tripwires can reverse it',
+      governorId: 'tripwire',
       nodes: [
         { id: 'thesis', label: 'Macro thesis', sub: 'defines exposure' },
         { id: 'portfolio', label: 'Portfolio', sub: 'expresses the thesis' },
