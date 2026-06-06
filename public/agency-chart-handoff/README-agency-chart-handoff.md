@@ -98,7 +98,7 @@ Base (browse): `https://github.com/Tataku/ACF-Docs/blob/main/`
 
 | File | Role |
 |---|---|
-| `components/framework-charts/FrameworkChart.jsx` | The chart engine (single/dual/quadrant/loop/flow layouts, hover/tap/keyboard, tooltips, source footer). |
+| `components/framework-charts/FrameworkChart.jsx` | The chart engine. Data charts (`single`, `dual`, `quadrant`) and bespoke framework diagrams (`systemLoop`, `bridge`, `gate`); hover/tap/keyboard, tooltips, source footer. |
 | `components/framework-charts/chart-specs.mjs` | The spec registry — all 11 charts + data generators + disclosure model. Source of truth. |
 | `components/framework-charts/brush.js` | Deterministic SVG brush primitives + the bespoke `pressureField` shock background. |
 | `components/framework-charts/palette.js` | Locked dark/light palette + accents + fonts. |
@@ -107,6 +107,18 @@ Base (browse): `https://github.com/Tataku/ACF-Docs/blob/main/`
 | `styles/framework-charts.css` | Focus rings, reduced-motion safety, print, responsive table. |
 | `pages/chart-handoff-export.jsx` | The chrome-free agency preview route. |
 | `public/agency-chart-handoff/chart-inventory.json` | Machine-readable inventory. |
+
+### Layout primitives
+
+Two families, one engine:
+
+- **Data charts** — `single` (time series, payoff, distribution), `dual` (stacked panels), `quadrant` (growth × inflation regime map).
+- **Framework diagrams** (bespoke, brush-influenced, not flowcharts):
+  - `systemLoop` — reflexive / self-reinforcing feedback ring with a reversal cue (e.g. *Markets Feed Back*, *Govern the Thesis*).
+  - `bridge` — descending cascade where each stage transforms the prior until the thesis becomes investable (e.g. *Capital Finds the Bottleneck*).
+  - `gate` — a sober validation gauntlet; a survivor band thins through four gates into a thesis (e.g. *Narrative Is Not Thesis*).
+
+Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclosure behaviour as the data charts. Default visible text is minimal; detail reveals on hover/tap.
 
 ## 5. How to render one chart
 

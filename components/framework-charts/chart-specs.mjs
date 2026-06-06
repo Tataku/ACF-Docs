@@ -403,10 +403,11 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'A macro thesis defines exposure. Exposure creates fragility. Tripwires monitor that fragility and gate the response: watch, hedge, trim, or redeploy. The output feeds back into the thesis, so the portfolio adapts instead of drifting.',
     explainerConcept: 'Closed-loop system',
     concepts: [{ label: 'Tripwires', link: '/part-5-portfolio-construction-position-management' }, { label: 'CIS governance', link: '/part-6-convexity-framework-integrity-scoring' }],
-    layout: 'loop',
-    ariaSummary: 'A four-stage governed loop: macro thesis, portfolio exposure, fragility, and tripwires, connected clockwise with the output feeding back into the thesis.',
-    loop: {
+    layout: 'systemLoop',
+    ariaSummary: 'A self-reinforcing governed ring — macro thesis, portfolio exposure, fragility, tripwires — with clockwise flow and a quiet cue that tripwires can force a reversal back into the thesis.',
+    systemLoop: {
       centerLabel: 'governed loop',
+      reversalLabel: 'tripwires can reverse it',
       nodes: [
         { id: 'thesis', label: 'Macro thesis', sub: 'defines exposure' },
         { id: 'portfolio', label: 'Portfolio', sub: 'expresses the thesis' },
@@ -810,10 +811,11 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'A rising price attracts capital; capital funds the buildout; the buildout improves the fundamentals; better fundamentals validate the price. The loop runs in reverse just as easily. Theses that ignore this feedback misjudge both how far trends run and how fast they break.',
     explainerConcept: 'Reflexivity',
     concepts: [{ label: 'Reflexivity', link: '/part-2-lineage-macro-thesis' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }],
-    layout: 'loop',
-    ariaSummary: 'A four-stage reflexive loop — price, capital, fundamentals, validation — connected clockwise, with the understanding that it can also run in reverse.',
-    loop: {
+    layout: 'systemLoop',
+    ariaSummary: 'A self-reinforcing feedback ring — price, capital, fundamentals, validation — with clockwise reinforcing flow and a quiet cue that the same loop can run in reverse.',
+    systemLoop: {
       centerLabel: 'reflexivity',
+      reversalLabel: 'the loop can reverse',
       nodes: [
         { id: 'price', label: 'Price', sub: 'moves first' },
         { id: 'capital', label: 'Capital', sub: 'follows price' },
@@ -883,27 +885,27 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'Everyone can see the structural force. The edge is mapping it to the constraint it runs into, and the specific assets that own that constraint. A thesis that stops at the theme never reaches the capital-flow pathway where the return actually accrues.',
     explainerConcept: 'Capital pathways',
     concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' }],
-    layout: 'flow',
-    ariaSummary: 'A left-to-right flow map. One structural force fans into three bottlenecks — power, compute, capital — which in turn map to where capital lands: energy and grid, semiconductors, and hard assets.',
-    flow: {
+    layout: 'bridge',
+    ariaSummary: 'A five-stage descending cascade: structural force, required buildout, bottleneck, capital pathway, and investable exposure — each stage transforming the previous until the thesis becomes something ownable.',
+    bridge: {
       stages: [
-        { id: 'force', label: 'Structural force', nodes: [{ id: 'f1', label: 'AI + electrification', sub: 'the force everyone sees' }] },
-        { id: 'bottleneck', label: 'Bottlenecks', nodes: [{ id: 'b1', label: 'Power', sub: 'grids, generation' }, { id: 'b2', label: 'Compute', sub: 'fabs, chips' }, { id: 'b3', label: 'Capital', sub: 'funding, rates' }] },
-        { id: 'lands', label: 'Where capital lands', nodes: [{ id: 'i1', label: 'Energy & grid', sub: 'utilities, uranium' }, { id: 'i2', label: 'Semis', sub: 'leaders, equipment' }, { id: 'i3', label: 'Hard assets', sub: 'commodities, BTC' }] },
+        { id: 'force', label: 'Structural force', sub: 'the driver everyone sees' },
+        { id: 'buildout', label: 'Required buildout', sub: 'what it forces to be built' },
+        { id: 'bottleneck', label: 'Bottleneck', sub: 'the binding constraint' },
+        { id: 'pathway', label: 'Capital pathway', sub: 'where money must flow' },
+        { id: 'exposure', label: 'Investable exposure', sub: 'the thesis, made ownable' },
       ],
     },
-    primaryKey: 'f1',
+    primaryKey: 'exposure',
     hoverTargets: [
-      { id: 'f1', kind: 'node', label: 'Structural force', name: 'The structural force', why: 'The macro driver everyone already agrees on. On its own it is a theme, not a position.', claim: 'The force is the easy part.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
-      { id: 'b1', kind: 'node', label: 'Power', name: 'Bottleneck · power', why: 'The force cannot express without electricity it does not yet have. Scarcity concentrates the return.', claim: 'Constraints, not themes, pay.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
-      { id: 'b2', kind: 'node', label: 'Compute', name: 'Bottleneck · compute', why: 'Fabrication and leading-edge chips are the choke point the buildout has to buy through.', claim: 'Own the choke point.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
-      { id: 'b3', kind: 'node', label: 'Capital', name: 'Bottleneck · capital', why: 'Funding and the cost of money decide which buildouts actually happen.', claim: 'Liquidity gates the buildout.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
-      { id: 'i1', kind: 'node', label: 'Energy & grid', name: 'Where capital lands · energy', why: 'Utilities, generation, and fuels that relieve the power constraint.', claim: 'The pathway, made investable.', concept: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'i2', kind: 'node', label: 'Semis', name: 'Where capital lands · semis', why: 'The leaders and equipment makers that own the compute constraint.', claim: 'The pathway, made investable.', concept: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'i3', kind: 'node', label: 'Hard assets', name: 'Where capital lands · hard assets', why: 'Commodities and Bitcoin that absorb the capital and liquidity the buildout demands.', claim: 'The pathway, made investable.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'force', kind: 'node', label: 'Structural force', name: 'Structural force', why: 'The macro driver everyone already agrees on. On its own it is a theme, not a position.', claim: 'The force is the easy part.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'buildout', kind: 'node', label: 'Required buildout', name: 'Required buildout', why: 'What the force actually forces into existence — the physical and financial work it demands.', claim: 'Force becomes spending.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'bottleneck', kind: 'node', label: 'Bottleneck', name: 'The bottleneck', why: 'The binding constraint the buildout runs into. Scarcity here is what concentrates the return.', claim: 'Constraints, not themes, pay.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'pathway', kind: 'node', label: 'Capital pathway', name: 'Capital pathway', why: 'The route money must travel to relieve the constraint — the pathway a real thesis predicts.', claim: 'Follow where capital must go.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
+      { id: 'exposure', kind: 'node', label: 'Investable exposure', name: 'Investable exposure', why: 'The specific assets that own the constraint. This is the point a thesis becomes ownable.', claim: 'A thesis is not investable until here.', concept: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' },
     ],
-    mobileTapTargets: ['f1', 'b1', 'b2', 'b3', 'i1', 'i2', 'i3'],
-    implementationNotes: 'Uses the new flow layout (staged nodes + connectors). Fan-out from one force to three bottlenecks to three landing zones.',
+    mobileTapTargets: ['force', 'buildout', 'bottleneck', 'pathway', 'exposure'],
+    implementationNotes: 'Uses the bridge layout: a descending five-stage cascade where each stage transforms the prior and capital concentrates into the emphasised final investable node.',
   },
 
   {
@@ -920,16 +922,16 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'Compelling stories are cheap. A thesis has to persist beyond the headline, imply a real capital-flow path, be falsifiable enough to break, and run for years. Anything that fails a gate is a trade idea at best — never a structure to build on.',
     explainerConcept: 'Valid thesis',
     concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Falsifiability', link: '/part-6-convexity-framework-integrity-scoring' }],
-    layout: 'flow',
-    ariaSummary: 'A left-to-right gauntlet. A narrative passes through four gates — persistence, capital-flow implication, falsifiability, and multi-year runway — and only what survives all four becomes a thesis.',
-    flow: {
-      stages: [
-        { id: 's0', label: 'Input', nodes: [{ id: 'narrative', label: 'Narrative', sub: 'a compelling story' }] },
-        { id: 'g1', label: 'Gate 1', nodes: [{ id: 'persist', label: 'Persistent?', sub: 'beyond the headline' }] },
-        { id: 'g2', label: 'Gate 2', nodes: [{ id: 'flow', label: 'Capital flow?', sub: 'a real pathway' }] },
-        { id: 'g3', label: 'Gate 3', nodes: [{ id: 'falsify', label: 'Falsifiable?', sub: 'able to break' }] },
-        { id: 'g4', label: 'Gate 4', nodes: [{ id: 'runway', label: 'Runway?', sub: 'multi-year' }] },
-        { id: 'out', label: 'Output', nodes: [{ id: 'thesis', label: 'Thesis', sub: 'survived all four' }] },
+    layout: 'gate',
+    ariaSummary: 'A validation gauntlet. A narrative enters and must pass four gates — structural persistence, capital-flow implication, falsifiable indicators, and multi-year conviction — and only what survives all four emerges as a thesis. A survivor band thins at each gate.',
+    gate: {
+      nodes: [
+        { id: 'narrative', kind: 'entry', label: 'Narrative', sub: 'a compelling story' },
+        { id: 'persist', kind: 'gate', label: 'Persistence', sub: 'structural, not a headline' },
+        { id: 'flow', kind: 'gate', label: 'Capital flow', sub: 'a real pathway' },
+        { id: 'falsify', kind: 'gate', label: 'Falsifiable', sub: 'measurable signals' },
+        { id: 'runway', kind: 'gate', label: 'Conviction', sub: 'multi-year runway' },
+        { id: 'thesis', kind: 'exit', label: 'Thesis', sub: 'survived all four' },
       ],
     },
     primaryKey: 'thesis',
@@ -942,7 +944,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'thesis', kind: 'node', label: 'Thesis', name: 'A thesis', why: 'Only what clears all four gates earns the right to shape structure and sizing.', claim: 'This is what you build on.', concept: 'Valid thesis', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['narrative', 'persist', 'flow', 'falsify', 'runway', 'thesis'],
-    implementationNotes: 'Flow layout as a linear gauntlet (one node per stage). The “funnel” reads through labels + the single surviving path rather than a literal taper.',
+    implementationNotes: 'Uses the gate layout: a survivor band that thins through four vertical gates into the thesis node. Sober gauntlet, not a marketing funnel.',
   },
 
   {
