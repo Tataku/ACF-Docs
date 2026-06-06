@@ -77,7 +77,6 @@ function MetaStrip({ pal, accent, spec }) {
 export default function ChartHandoff({ theme = 'dark', accent: accentName = 'green' }) {
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
-  const wired = FRAMEWORK_CHART_SPECS.filter((s) => s.wiredPublic).length;
 
   return (
     <div style={{ background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, padding: 'clamp(16px, 3vw, 28px)', margin: '8px 0 32px', colorScheme: pal.name }}>
@@ -85,8 +84,11 @@ export default function ChartHandoff({ theme = 'dark', accent: accentName = 'gre
       <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>ACF · FRAMEWORK CHART HANDOFF · INTERNAL REVIEW</div>
       <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>Every chart for the docs landing page and Part 1</h1>
       <p style={{ margin: '14px 0 18px', fontSize: 14, lineHeight: 1.62, color: pal.text3, maxWidth: 720 }}>
-        The full exhibit set in one place, for the marketing agency to review before production. Charts use art-directed, representative data shapes where exact historical series are not yet wired — every footer discloses that plainly, and the source links verify the underlying concept and data backdrop. {wired} of {FRAMEWORK_CHART_SPECS.length} are already live in Part 1.
+        The full exhibit set in one place, for the marketing agency to review before production. Charts use art-directed, representative data shapes where exact historical series are not yet wired — every footer discloses that plainly, and the source links verify the underlying concept and data backdrop.
       </p>
+      <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.06em', color: pal.text4, lineHeight: 1.6, marginBottom: 20, maxWidth: 720 }}>
+        Internal chart review surface for marketing / design handoff. Charts are not automatically placed in public framework pages; placement is chosen explicitly.
+      </div>
 
       {/* legend */}
       <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'center', padding: '12px 16px', border: `1px solid ${pal.cardBorder}`, borderRadius: 7, marginBottom: 22, fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.08em', color: pal.text3 }}>

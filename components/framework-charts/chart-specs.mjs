@@ -389,7 +389,7 @@ export const FRAMEWORK_CHART_SPECS = [
   /* ── PART 1 FRAMEWORK ──────────────────────────────────────────────────── */
   {
     chartId: 'p1-hedge-broke', idx: '01', group: 'part-1', intendedPlacement: 'part-1',
-    status: 'implemented', wiredPublic: true,
+    status: 'implemented', wiredPublic: false,
     title: 'When 60/40 stopped cushioning', setupLine: 'Indexed total return through an inflation shock: stocks, bonds, and the 60/40 blend',
     claimLabel: 'DIVERSIFICATION · FRAGILITY',
     frameworkClaim: 'Stocks and bonds are not always true diversifiers.',
@@ -431,12 +431,12 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'invalidation', kind: 'level', label: 'Flagged drawdown', name: 'Flagged drawdown', why: 'Beyond this line, the balanced label no longer describes the risk being run.', claim: 'Turns a soft worry into a sober threshold.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['band0', 'marker0', 'b', 'p', 'invalidation'],
-    implementationNotes: 'Canonical Part 1 hero, already wired into the public page. Production swaps primary index series behind this spec without touching the engine.',
+    implementationNotes: 'Canonical Part 1 hero. Handoff-only for now; unwired from the public page pending explicit placement. Production swaps primary index series behind this spec without touching the engine.',
   },
 
   {
     chartId: 'p1-correlation', idx: '02', group: 'part-1', intendedPlacement: 'part-1',
-    status: 'implemented', wiredPublic: true,
+    status: 'implemented', wiredPublic: false,
     title: 'The correlation regime changed', setupLine: 'Rolling 24-month stock–bond correlation across an inflation-shock window',
     claimLabel: 'CORRELATION · REGIME',
     frameworkClaim: 'Stock–bond correlation changes when inflation becomes the dominant stress.',
@@ -471,7 +471,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'c', kind: 'series', seriesKey: 'c', label: 'Stock–bond ρ', name: 'Stock–bond ρ', why: 'Two decades negative, then sticky-positive. The diversifier did not vanish; the regime that produced it changed.', claim: 'Correlation is regime-dependent.', concept: 'Correlation regime', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['band0', 'marker0', 'c'],
-    implementationNotes: 'Already wired into the public page. Pressure field is bespoke geometry (brush.pressureField) — never a rectangle, never alters the true stress window.',
+    implementationNotes: 'Handoff-only for now; unwired from the public page pending explicit placement. Pressure field is bespoke geometry (brush.pressureField) — never a rectangle, never alters the true stress window.',
   },
 
   {
@@ -521,7 +521,7 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-policy-constraint', idx: '04', group: 'part-1', intendedPlacement: 'part-1',
-    status: 'implemented', wiredPublic: true,
+    status: 'implemented', wiredPublic: false,
     title: 'Policy is constrained by debt and interest burden', setupLine: 'Federal debt and net interest, both as a share of GDP, on a shared timeline',
     claimLabel: 'POLICY · CONSTRAINT',
     frameworkClaim: 'Debt and interest burden reduce policy freedom.',
@@ -556,7 +556,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'burden', kind: 'marker', panel: 'intPanel', label: 'Burden inflects', name: 'Burden inflects', why: 'The rate trough. From here, normalizing rates turn a falling burden into a rising one.', claim: 'Identifies where the free option expires.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['debt', 'int', 'threshold', 'burden'],
-    implementationNotes: 'Already wired into the public page. Dual-panel = two plots sharing the x-domain, one explainer, one footer. Connective caption composed between panels.',
+    implementationNotes: 'Handoff-only for now; unwired from the public page pending explicit placement. Dual-panel = two plots sharing the x-domain, one explainer, one footer. Connective caption composed between panels.',
   },
 
   {

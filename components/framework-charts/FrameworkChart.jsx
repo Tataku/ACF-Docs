@@ -156,7 +156,7 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
 /* ── PlotSvg — single chart or one dual panel (time-series family) ───────────*/
 function PlotSvg({
   panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse,
-  targets, active, pinned, onActive, onPin, showValues = true,
+  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE',
 }) {
   const svgRef = useRef(null);
   const dom = { ...xDomain, ...panel.domain };
@@ -239,7 +239,7 @@ function PlotSvg({
   const onMove = (e) => { if (coarse || pinned) return; const [mx, my] = toViewBox(e); onActive(resolve(mx, my), 'hover'); };
   const onLeave = () => { if (!coarse && !pinned) onActive(null, 'hover'); };
   const onClick = (e) => { const [mx, my] = toViewBox(e); const res = resolve(mx, my); if (coarse) { onActive(res, 'tap'); return; } if (!res || res.fallback) { onPin(null); return; } onPin(res); };
-  const mkActive = (t) => ({ ...t, dataIdx: t.kind === 'series' ? geom.series[t.seriesKey].px.length - 1 : undefined });
+  const mkActive = (t) => ({ ...t, dataIdx: t.kind === 'series' && geom.series[t.seriesKey] ? geom.series[t.seriesKey].px.length - 1 : undefined });
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
@@ -255,9 +255,14 @@ function PlotSvg({
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
     if (meta) {
-      const raw = active.kind === 'series' && active.dataIdx != null ? seriesByKey[active.seriesKey]?.s.pts[Math.min(active.dataIdx, seriesByKey[active.seriesKey].s.pts.length - 1)]?.y : null;
+      // seriesByKey[key] IS the raw series object (has .pts directly). Read it
+      // defensively so hover never throws for any target kind.
+      const sObj = active.kind === 'series' ? seriesByKey[active.seriesKey] : null;
+      const raw = sObj && Array.isArray(sObj.pts) && active.dataIdx != null
+        ? (sObj.pts[Math.min(active.dataIdx, sObj.pts.length - 1)] || {}).y
+        : null;
       const dec = panel.yUnit === '%' || (panel.domain && panel.domain.yMax <= 5) ? 2 : 1;
-      const valueText = showValues && raw != null ? `${raw.toFixed(dec)} ${(panel.yUnit || 'val').toUpperCase()} · TRUE VALUE` : null;
+      const valueText = showValues && raw != null ? `${raw.toFixed(dec)} ${(panel.yUnit || 'val').toUpperCase()} · ${valueNote}` : null;
       tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={valueText} />;
     }
   }
@@ -604,6 +609,7 @@ function MobileInsight({ spec, pal, accent, active, onStep, onPick }) {
   const targets = spec.hoverTargets;
   const idx = Math.max(0, order.findIndex((id) => active && id === active.id));
   const cur = targets.find((t) => t.id === order[idx]) || targets[0];
+  if (!cur) return null; // no targets → render nothing rather than crash
   const tapBtn = { width: 44, height: 44, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: pal.surface, border: `1px solid ${pal.cardBorder}`, borderRadius: 10, cursor: 'pointer', color: pal.text2, fontSize: 18 };
   return (
     <div style={{ background: pal.cardSolid, borderTop: `1px solid ${pal.borderHi}`, padding: '12px 16px 14px' }}>
@@ -670,7 +676,9 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const badge = coarse ? 'TAP TO EXPLORE' : 'LIVE · HOVER';
   const showValues = spec.visualDataMode !== 'conceptual';
   const W = 1000;
-  const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin };
+  // Representative/simulation values are art-directed: never label them "TRUE VALUE".
+  const valueNote = spec.visualDataMode === 'historical' ? 'TRUE VALUE' : 'REPRESENTATIVE';
+  const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote };
 
   return (
     <figure className={className} aria-label={`${spec.title}. ${spec.frameworkClaim}`} aria-describedby={`${reactId}-summary`}
