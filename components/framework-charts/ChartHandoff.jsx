@@ -80,72 +80,49 @@ const HANDOFF_PART_NAV = [
   { key: 'part-2', label: 'Part 2', shortTitle: 'Lineage', embeddedHref: '/chart-handoff-part-2', exportHref: '/chart-handoff-part-2-export' },
 ];
 
-// Copy the current handoff URL (export routes only). Client-only, guarded.
-function CopyLinkButton({ pal, accent }) {
+// Quiet ACF control bar — editorial, not pills. Groups: VIEW (dark/light),
+// PART (mode-preserving), MODE (export/docs-shell), plus a muted copy-link on
+// export. Active state = brighter text + a thin accent underline (never a filled
+// pill or box). Future-ready: PART scales from HANDOFF_PART_NAV.
+function ControlBar({ pal, accent, theme, setTheme, variant, part, shellRoute, exportRoute }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }).catch(() => {});
     }
   };
-  return (
-    <button onClick={copy} style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.1em', color: copied ? accent : pal.text3, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, borderBottom: `1px dotted ${copied ? accent : pal.borderHi}`, paddingBottom: 1 }}>
-      {copied ? 'Link copied ✓' : 'Copy link ⧉'}
-    </button>
+  const lbl = { fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.18em', color: pal.text4 };
+  const base = { fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.04em', textDecoration: 'none', cursor: 'pointer', background: 'transparent', border: 'none', padding: '3px 2px 1px', lineHeight: 1.4 };
+  const sty = (active) => ({ ...base, color: active ? pal.text1 : pal.text3, fontWeight: active ? 600 : 400, borderBottom: `1.5px solid ${active ? accent : 'transparent'}` });
+  const joinDots = (items) => items.flatMap((it, i) => (i === 0 ? [it] : [<span key={`s${i}`} aria-hidden style={{ color: pal.text4, opacity: 0.4 }}>·</span>, it]));
+  const group = (label, items) => (
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap' }}>
+      <span style={lbl}>{label}</span>
+      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>{joinDots(items)}</span>
+    </span>
   );
-}
+  const navItem = (key, label, active, href) => (active
+    ? <span key={key} aria-current="page" style={sty(true)}>{label}</span>
+    : <a key={key} href={href} style={sty(false)}>{label}</a>);
 
-// Part switcher — preserves the current viewing mode (export ↔ export, shell ↔ shell).
-function PartNav({ pal, accent, part, variant }) {
   return (
-    <nav aria-label="Chart handoff parts" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 22 }}>
-      <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.16em', color: pal.text4 }}>PART</span>
-      <div style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap' }}>
-        {HANDOFF_PART_NAV.map((p) => {
-          const active = p.key === part;
-          const href = variant === 'export' ? p.exportHref : p.embeddedHref;
-          return (
-            <a key={p.key} href={href} aria-current={active ? 'page' : undefined}
-              style={{
-                fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.08em', textDecoration: 'none',
-                padding: '5px 11px', borderRadius: 5, whiteSpace: 'nowrap',
-                color: active ? pal.text1 : pal.text3,
-                fontWeight: active ? 600 : 400,
-                background: active ? `${accent}14` : 'transparent',
-                borderBottom: `1.5px solid ${active ? accent : 'transparent'}`,
-              }}>
-              {active ? '› ' : ''}{p.label} · {p.shortTitle}
-            </a>
-          );
-        })}
-      </div>
+    <nav aria-label="Chart handoff controls" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '10px 22px', marginBottom: 24 }}>
+      {group('VIEW', [
+        <button key="dark" onClick={() => setTheme('dark')} aria-pressed={theme === 'dark'} style={sty(theme === 'dark')}>Dark</button>,
+        <button key="light" onClick={() => setTheme('light')} aria-pressed={theme === 'light'} style={sty(theme === 'light')}>Light</button>,
+      ])}
+      {group('PART', HANDOFF_PART_NAV.map((p) => {
+        const active = p.key === part;
+        const href = variant === 'export' ? p.exportHref : p.embeddedHref;
+        const label = <>{p.label} <span style={{ color: active ? pal.text2 : pal.text4, fontWeight: 400 }}>{p.shortTitle}</span></>;
+        return navItem(p.key, label, active, href);
+      }))}
+      {group('MODE', [
+        navItem('shell', 'Docs shell', variant === 'embedded', shellRoute),
+        navItem('export', 'Export', variant === 'export', exportRoute),
+      ])}
+      {variant === 'export' && <button onClick={copy} style={{ ...base, color: copied ? accent : pal.text4 }}>{copied ? 'Link copied' : 'Copy link ⧉'}</button>}
     </nav>
-  );
-}
-
-// Quiet local theme toggle for agency preview (Dark / Light) + route switch.
-function ViewToggle({ pal, accent, theme, setTheme, variant, shellRoute, exportRoute }) {
-  const seg = (val, label) => (
-    <button key={val} onClick={() => setTheme(val)} aria-pressed={theme === val} style={{
-      fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', cursor: 'pointer',
-      padding: '5px 13px', border: 'none', borderRadius: 5,
-      background: theme === val ? accent : 'transparent',
-      color: theme === val ? '#fff' : pal.text3,
-      transition: 'background .15s ease, color .15s ease',
-    }}>{label}</button>
-  );
-  const to = variant === 'export' ? shellRoute : exportRoute;
-  const toLabel = variant === 'export' ? 'Docs shell ↗' : 'Export view ↗';
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 14 }}>
-      <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.16em', color: pal.text4 }}>VIEW</span>
-      <div style={{ display: 'inline-flex', gap: 3, padding: 3, border: `1px solid ${pal.cardBorder}`, borderRadius: 7, background: pal.surface }}>
-        {seg('dark', 'Dark')}
-        {seg('light', 'Light')}
-      </div>
-      <a href={to} style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.1em', color: pal.text3, textDecoration: 'none', borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1 }}>{toLabel}</a>
-      {variant === 'export' && <CopyLinkButton pal={pal} accent={accent} />}
-    </div>
   );
 }
 
@@ -252,8 +229,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   return (
     <div style={outer}>
       <div style={{ maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 }}>
-      <ViewToggle pal={pal} accent={accent} theme={theme} setTheme={setTheme} variant={variant} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
-      <PartNav pal={pal} accent={accent} part={part} variant={variant} />
+      <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
       {/* header */}
       <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{preset.eyebrow}</div>
       <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{preset.title}</h1>
