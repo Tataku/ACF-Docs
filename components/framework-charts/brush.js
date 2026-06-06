@@ -227,7 +227,42 @@ export function pressureField(xc, yTop, yBot, halfSpan, opts = {}) {
   return { plume, grains, peakX: xc + 2 * halfSpan * asymmetric };
 }
 
+/* ── Ink-wash region — soft rect with organically displaced edges ──────────── *
+ * For NON-shock contextual bands (compression windows, calm regime fields).
+ * Top/bottom edges waver gently; left/right are straight. Render at low opacity.
+ * The inflation-shock window must use pressureField, never this. */
+export function washRect(x0, y0, x1, y1, opts = {}) {
+  const { seed = 1, intensity = 0.6, soft = 'both' } = opts;
+  const rng = mulberry32(seed + 41);
+  const N = 14;
+  const ampT = (soft === 'both' || soft === 'top') ? (y1 - y0) * 0.02 + 2 * intensity : 0;
+  const ampB = (soft === 'both' || soft === 'bottom') ? (y1 - y0) * 0.02 + 2 * intensity : 0;
+  const top = [], bot = [];
+  for (let i = 0; i <= N; i++) { const t = i / N; top.push({ x: lerp(x0, x1, t), y: y0 + (ampT ? (rng() - 0.5) * ampT * 2 : 0) }); }
+  for (let i = 0; i <= N; i++) { const t = i / N; bot.push({ x: lerp(x1, x0, t), y: y1 + (ampB ? (rng() - 0.5) * ampB * 2 : 0) }); }
+  return closedBezier([...top, ...bot]);
+}
+
+/* ── Brush arrow — chevron + stem, tip at (tx,ty), pointing `dir` ──────────── *
+ * dir in radians (0 = +x / right). Used for the governed-loop connectors. */
+export function brushArrow(tx, ty, len, dir, opts = {}) {
+  const { seed = 1, weight = 0.85, intensity = 0.6, head = 0.34 } = opts;
+  const ux = Math.cos(dir), uy = Math.sin(dir);
+  const bx = tx - ux * len, by = ty - uy * len;
+  const headLen = len * head;
+  const px = -uy, py = ux;
+  const N = 16, skel = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    skel.push({ x: lerp(bx, tx, t), y: lerp(by, ty, t), w: weight * (0.45 + t * 0.5) });
+  }
+  const stem = strokeToPath(skel, { seed: seed + 6, jitter: 0.04 * intensity, edge: 0.3 * intensity });
+  const footL = brushSegment(tx, ty, tx - ux * headLen + px * headLen * 0.7, ty - uy * headLen + py * headLen * 0.7, { seed: seed + 12, weight: weight * 1.05, intensity, waver: 0.15 });
+  const footR = brushSegment(tx, ty, tx - ux * headLen - px * headLen * 0.7, ty - uy * headLen - py * headLen * 0.7, { seed: seed + 18, weight: weight * 1.05, intensity, waver: 0.15 });
+  return stem + footL + footR;
+}
+
 export default {
   mulberry32, closedBezier, smoothOpen, strokeToPath, resamplePolyline,
-  brushLine, enso, inkDot, brushSegment, pressureField,
+  brushLine, enso, inkDot, brushSegment, pressureField, washRect, brushArrow,
 };

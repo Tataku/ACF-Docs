@@ -26,3 +26,16 @@
 @media print {
   .acf-fx-focusable { display: none; }
 }
+
+/* Handoff inventory table: drop the mode/status/wired columns on narrow
+ * screens (the per-chart metadata strip still carries them). */
+@media (max-width: 640px) {
+  .acf-hand-row {
+    grid-template-columns: 40px 1fr 72px !important;
+  }
+  .acf-hand-row > :nth-child(4),
+  .acf-hand-row > :nth-child(5),
+  .acf-hand-row > :nth-child(6) {
+    display: none !important;
+  }
+}
