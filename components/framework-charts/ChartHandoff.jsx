@@ -14,7 +14,7 @@ import FrameworkChart from './FrameworkChart';
 import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel } from './chart-specs.mjs';
 import { getPalette, getAccent } from './palette';
 
-const PLACEMENT = { both: 'Docs + Part 1', 'docs-landing': 'Docs landing', 'part-1': 'Part 1', 'part-2': 'Part 2' };
+const PLACEMENT = { both: 'Docs + Part 1', 'docs-landing': 'Docs landing', 'part-1': 'Part 1', 'part-2': 'Part 2', 'part-3': 'Part 3' };
 const STATUS = {
   implemented: { label: 'Implemented', tone: 'ok' },
   'needs-design-review': { label: 'Needs design review', tone: 'warn' },
@@ -78,6 +78,7 @@ function MetaStrip({ pal, accent, spec }) {
 const HANDOFF_PART_NAV = [
   { key: 'part-1', label: 'Part 1', shortTitle: 'Foundation', embeddedHref: '/chart-handoff', exportHref: '/chart-handoff-export' },
   { key: 'part-2', label: 'Part 2', shortTitle: 'Lineage', embeddedHref: '/chart-handoff-part-2', exportHref: '/chart-handoff-part-2-export' },
+  { key: 'part-3', label: 'Part 3', shortTitle: 'Bitcoin', embeddedHref: '/chart-handoff-part-3', exportHref: '/chart-handoff-part-3-export' },
 ];
 
 // Quiet ACF control bar — editorial, not pills. Groups: VIEW (dark/light),
@@ -210,6 +211,13 @@ const PRESETS = {
     eyebrow: 'ACF · PART 2 CHART HANDOFF · INTERNAL REVIEW',
     title: 'Every chart for Part 2',
     intro: 'The Part 2 exhibit set: intellectual lineage, what makes a macro thesis valid, how a structural force becomes capital flow, and how phase separates thesis validity from deployment timing. Representative and conceptual exhibits with honest disclosure — not historical backtests.',
+  },
+  'part-3': {
+    groups: ['part-3'],
+    shellRoute: '/chart-handoff-part-3', exportRoute: '/chart-handoff-part-3-export',
+    eyebrow: 'ACF · PART 3 CHART HANDOFF · INTERNAL REVIEW',
+    title: 'Every chart for Part 3',
+    intro: 'The Part 3 exhibit set: Bitcoin as the convexity backbone — power-law valuation discipline, the ten backbone requirements, volatility as the toll for convexity, and the accumulate-to-borrow reserve lifecycle. Representative and conceptual exhibits with honest disclosure, never exact historical Bitcoin data.',
   },
 };
 

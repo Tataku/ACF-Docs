@@ -1,7 +1,7 @@
 {
   "name": "ACF Framework Charts — handoff inventory",
   "note": "Representative/illustrative exhibits. visualDataMode + disclosure define how each chart is presented. See README-agency-chart-handoff.md.",
-  "count": 20,
+  "count": 28,
   "charts": [
     {
       "chartId": "sig-payoff",
@@ -687,6 +687,257 @@
           "seriesId": null,
           "role": "methodology",
           "url": null
+        }
+      ]
+    },
+    {
+      "chartId": "p3-power-law-holds",
+      "idx": "P3-01",
+      "title": "Power Law Holds",
+      "group": "part-3",
+      "intendedPlacement": "part-3",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "VALUATION · POWER LAW",
+      "frameworkClaim": "Bitcoin’s long-term path can be contextualized by power-law behavior — a regime heuristic, not a prediction.",
+      "readerTakeaway": "A map of where Bitcoin sits on its adoption curve, not a forecast.",
+      "chartType": "Log power-law corridor with price oscillating between euphoria and capitulation bands.",
+      "setupLine": "Price against a log power-law corridor — central tendency, with euphoria and capitulation bands",
+      "explainerHeadline": "Power-law bands map the regime; they do not predict it.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "Santostasi · power-law model",
+          "label": "Bitcoin power-law (log-log regression)",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "https://giovannisantostasi.medium.com/the-bitcoin-power-law-theory-962dfaf99ee9"
+        },
+        {
+          "provider": "ACF · Part 3",
+          "label": "Power-law bands as a regime heuristic",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        }
+      ]
+    },
+    {
+      "chartId": "p3-ten-tests",
+      "idx": "P3-02",
+      "title": "One Asset, Ten Tests",
+      "group": "part-3",
+      "intendedPlacement": "part-3",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "scorecard",
+      "visualDataMode": "conceptual",
+      "claimLabel": "BACKBONE · REQUIREMENTS",
+      "frameworkClaim": "Bitcoin uniquely satisfies the framework’s requirements for a convexity backbone asset.",
+      "readerTakeaway": "No alternative clears all ten at once.",
+      "chartType": "Requirement × asset scorecard (meets / partial / fails).",
+      "setupLine": "The ten backbone requirements, scored across candidate reserve assets",
+      "explainerHeadline": "Ten requirements, derived from the objective — not reverse-engineered.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 3",
+          "label": "Backbone requirements and asset comparison",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        }
+      ]
+    },
+    {
+      "chartId": "p3-volatility-is-the-toll",
+      "idx": "P3-03",
+      "title": "Volatility Is the Toll",
+      "group": "part-3",
+      "intendedPlacement": "part-3",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "VOLATILITY · SIZING",
+      "frameworkClaim": "Bitcoin volatility is the cost of convexity; sizing decides whether it is survivable.",
+      "readerTakeaway": "The drawdown is the price of admission, not a reason to avoid it.",
+      "chartType": "Representative Bitcoin path with deep drawdowns vs the calmer total-portfolio line at managed size.",
+      "setupLine": "Large Bitcoin drawdowns, small total-portfolio impact at a managed allocation",
+      "explainerHeadline": "The volatility is the toll, not the risk.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "ACF · Part 3",
+          "label": "Volatility as the cost of convexity; sizing for survivability",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        },
+        {
+          "provider": "ACF · Part 1",
+          "label": "Survivable compounding",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-1-foundation"
+        }
+      ]
+    },
+    {
+      "chartId": "p3-exposure-not-control",
+      "idx": "P3-04",
+      "title": "Exposure Is Not Control",
+      "group": "part-3",
+      "intendedPlacement": "part-3",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "simulation",
+      "claimLabel": "CONTROL · CONVICTION",
+      "frameworkClaim": "100% Bitcoin can win one favorable cycle; the framework optimizes for control across many.",
+      "readerTakeaway": "The ability to act beats the size of a single bet.",
+      "chartType": "Two-path simulation: maximum exposure vs the framework architecture, through a deep drawdown.",
+      "setupLine": "Maximum exposure can win one cycle; architecture wins across many",
+      "explainerHeadline": "Winning a cycle is not the same as staying in control.",
+      "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
+      "sources": [
+        {
+          "provider": "Author simulation",
+          "label": "Max-exposure vs architected reserve across a cycle",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        },
+        {
+          "provider": "ACF · Part 3",
+          "label": "Operational control across cycles and life events",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        }
+      ]
+    },
+    {
+      "chartId": "p3-models-must-converge",
+      "idx": "P3-05",
+      "title": "Models Must Converge",
+      "group": "part-3",
+      "intendedPlacement": "part-3",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "representative",
+      "claimLabel": "VALUATION · CONVERGENCE",
+      "frameworkClaim": "Power-law, realized price, production cost, and liquidity models are most useful when they converge.",
+      "readerTakeaway": "Agreement strengthens conviction; disagreement is the signal.",
+      "chartType": "Valuation envelope — the spread between models narrows on convergence, widens on divergence.",
+      "setupLine": "The valuation models are most useful where they agree; divergence signals caution",
+      "explainerHeadline": "Conviction lives where the models agree.",
+      "disclosure": "Representative framework exhibit · Sources support the underlying concept",
+      "sources": [
+        {
+          "provider": "ACF · Part 3",
+          "label": "Multi-model valuation: power-law, realized price, production cost, liquidity",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        }
+      ]
+    },
+    {
+      "chartId": "p3-accumulate-dont-trade",
+      "idx": "P3-06",
+      "title": "Accumulate, Don’t Trade",
+      "group": "part-3",
+      "intendedPlacement": "part-3",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "conceptual",
+      "claimLabel": "DISCIPLINE · ACCUMULATION",
+      "frameworkClaim": "Valuation models guide accumulation pacing and conviction, not selling the reserve.",
+      "readerTakeaway": "Models change the pace of buying, never the decision to hold.",
+      "chartType": "Accumulation pace as a function of valuation, with a floor that never sells.",
+      "setupLine": "Valuation paces accumulation; it never sells the cold-storage reserve",
+      "explainerHeadline": "Valuation sets the pace, not the exit.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 3",
+          "label": "Accumulation pacing and the never-sell reserve",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        }
+      ]
+    },
+    {
+      "chartId": "p3-cold-storage-to-borrow",
+      "idx": "P3-07",
+      "title": "Cold Storage to Borrow",
+      "group": "part-3",
+      "intendedPlacement": "part-3",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "flow",
+      "visualDataMode": "conceptual",
+      "claimLabel": "LIFECYCLE · RESERVE",
+      "frameworkClaim": "The Bitcoin reserve moves from accumulation to collateralized borrowing without forced sale.",
+      "readerTakeaway": "Liquidity comes from borrowing against the reserve, not selling it.",
+      "chartType": "Reserve lifecycle flow: accumulate → self-custody → mature → collateralized loan → liquidity.",
+      "setupLine": "The reserve lifecycle: accumulate, self-custody, mature, borrow — without a forced sale",
+      "explainerHeadline": "Liquidity without selling the reserve.",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 3",
+          "label": "Accumulation-to-borrowing reserve lifecycle",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        },
+        {
+          "provider": "ACF · Part 4",
+          "label": "Buy-borrow-die and collateral",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-4-tax-architecture-roc-strategy"
+        }
+      ]
+    },
+    {
+      "chartId": "p3-reserve-share-evolves",
+      "idx": "P3-08",
+      "title": "Reserve Share Evolves",
+      "group": "part-3",
+      "intendedPlacement": "part-3",
+      "status": "needs-design-review",
+      "wiredPublic": false,
+      "layout": "single",
+      "visualDataMode": "simulation",
+      "claimLabel": "ALLOCATION · PHASE",
+      "frameworkClaim": "A 10–15% reserve can evolve into a 30–50% mature share, at which point borrow-phase governance matters.",
+      "readerTakeaway": "Success changes the job: from accumulating to governing the reserve.",
+      "chartType": "Reserve share as a percent of net worth, rising through target, elevated, and mature phases.",
+      "setupLine": "A 10–15% reserve can mature into a 30–50% share, where borrow-phase governance begins",
+      "explainerHeadline": "The reserve outgrows its target — on purpose.",
+      "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
+      "sources": [
+        {
+          "provider": "Author simulation",
+          "label": "Reserve share evolving via accumulation + appreciation",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        },
+        {
+          "provider": "ACF · Part 3",
+          "label": "Reserve ranges and borrow-phase governance",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
         }
       ]
     }

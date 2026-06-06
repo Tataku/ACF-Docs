@@ -14,5 +14,9 @@
   "chart-handoff-part-2": {
     "title": "Chart Handoff — Part 2 (internal)",
     "display": "hidden"
+  },
+  "chart-handoff-part-3": {
+    "title": "Chart Handoff — Part 3 (internal)",
+    "display": "hidden"
   }
 }
