@@ -190,7 +190,7 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
 /* ── PlotSvg — single chart or one dual panel (time-series family) ───────────*/
 function PlotSvg({
   panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse,
-  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE',
+  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1,
 }) {
   const svgRef = useRef(null);
   const dom = { ...xDomain, ...panel.domain };
@@ -335,6 +335,7 @@ function PlotSvg({
             together, so related lines move in tandem and areas/backgrounds grow
             with the line fronts rather than popping in afterward. */}
         <g style={sweep(TM.path, 120)}>
+          <g style={{ opacity: bandReveal, transition: reduce ? 'none' : 'opacity 220ms ease' }}>
           {geom.bands.map((bg, i) => (
             <g key={`band${i}`} style={{ opacity: entered ? (focusId === bg.b.id ? 1 : 0.85) : 0, transition: reduce ? 'opacity 320ms ease' : `opacity ${TM.medium}ms ${EASE} 120ms` }}>
               {bg.field ? (
@@ -352,6 +353,7 @@ function PlotSvg({
               )}
             </g>
           ))}
+          </g>
           {geom.areas.map((ar, i) => {
             const toneC = ar.a.tone === 'muted' ? pal.tierSecondary : ar.a.tone === 'accent' ? accent : null;
             const c = toneC || (ar.a.kind === 'peak' ? pal.bandStress : ar.a.kind === 'under' || ar.a.kind === 'edge' ? accent : pal.tierSecondary);
@@ -1593,6 +1595,74 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   );
 }
 
+/* ── DualPerspectiveSvg — before/after perspective slider for the dual chart ──*
+ * Surface view emphasises the debt backdrop; Hidden-cost view reveals the
+ * interest burden + pressure field. One normalized `perspective` (0..1) drives
+ * panel emphasis and the pressure-field reveal (bandReveal). Drag / tap /
+ * keyboard; mobile snaps to the two meaningful states. Built on PlotSvg. */
+function DualPerspectiveSvg({ spec, width, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, showValues, valueNote, readerContext }) {
+  const top = spec.panels[0], bot = spec.panels[1];
+  const [p, setP] = useState(typeof spec.perspectiveDefault === 'number' ? spec.perspectiveDefault : 0.25);
+  const [drag, setDrag] = useState(false);
+  const trackRef = useRef(null);
+  const c01 = (v) => Math.max(0, Math.min(1, v));
+  const setFromX = (clientX) => { const el = trackRef.current; if (!el) return; const r = el.getBoundingClientRect(); setP(c01((clientX - r.left) / (r.width || 1))); };
+  const onDown = (e) => { setDrag(true); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) { /* noop */ } setFromX(e.clientX); };
+  const onMove = (e) => { if (drag) setFromX(e.clientX); };
+  const onUp = () => { setDrag(false); if (coarse) setP((v) => (v < 0.5 ? 0 : 1)); };
+  const onKey = (e) => {
+    let np = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') np = c01(p + 0.1);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') np = c01(p - 0.1);
+    else if (e.key === 'Home') np = 0; else if (e.key === 'End') np = 1;
+    if (np != null) { e.preventDefault(); setP(np); }
+  };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const topOp = lerp(1, 0.45, p), botOp = lerp(0.55, 1, p), pTrans = drag ? 'none' : 'opacity 220ms ease';
+  const copy = spec.perspectiveCopy || {};
+  const surfaceText = copy.surface || spec.connective || 'surface';
+  const hiddenText = copy.hidden || 'the cost returns';
+  const sOp = c01((0.6 - p) / 0.4), hOp = c01((p - 0.4) / 0.4);
+  const lbl = { fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em' };
+  const cpDown = { pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext };
+
+  return (
+    <div>
+      <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', color: pal.text4, padding: '4px 0 2px 10px' }}>{top.label.toUpperCase()}</div>
+      <div style={{ opacity: topOp, transition: pTrans }}>
+        <PlotSvg panel={top} xDomain={spec.xDomain} xTicks={spec.xTicks} hideX width={width} height={188} targets={spec.hoverTargets.filter((t) => t.panel === top.id)} showValues={showValues} {...cpDown} />
+      </div>
+
+      {/* perspective slider — the interactive spacer */}
+      <div style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 500ms ease 700ms', padding: '2px 14px 4px' }}>
+        <div style={{ position: 'relative', height: 16, marginBottom: 5 }}>
+          <span style={{ position: 'absolute', inset: 0, textAlign: 'center', fontFamily: pal.sans, fontSize: 10.5, fontStyle: 'italic', color: pal.text3, opacity: sOp, transition: 'opacity 160ms ease' }}>{surfaceText}</span>
+          <span style={{ position: 'absolute', inset: 0, textAlign: 'center', fontFamily: pal.sans, fontSize: 10.5, fontStyle: 'italic', color: accent, opacity: hOp, transition: 'opacity 160ms ease' }}>{hiddenText}</span>
+        </div>
+        <div role="slider" aria-label="Reveal hidden debt cost" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(p * 100)} aria-valuetext={p < 0.5 ? 'surface' : 'hidden cost'}
+          tabIndex={0} className="acf-fx-focusable" title="Slide to shift perspective from surface calm to hidden cost"
+          onKeyDown={onKey} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+          style={{ position: 'relative', padding: '9px 0', cursor: 'pointer', touchAction: 'none', outlineOffset: 3 }}>
+          <div ref={trackRef} style={{ position: 'relative', height: 2, background: pal.cardBorder, borderRadius: 2 }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${p * 100}%`, background: accent, opacity: 0.5, transition: drag ? 'none' : 'width 200ms ease' }} />
+            <div aria-hidden style={{ position: 'absolute', left: `${p * 100}%`, top: '50%', width: 10, height: 16, transform: 'translate(-50%,-50%)', borderRadius: 3, background: pal.cardSolid, border: `1.5px solid ${accent}`, transition: drag ? 'none' : 'left 200ms ease' }} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 6 }}>
+          <span style={{ ...lbl, color: p < 0.5 ? pal.text2 : pal.text4 }}>SURFACE</span>
+          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>slide to reveal the hidden cost</span>
+          <span style={{ ...lbl, color: p >= 0.5 ? pal.text2 : pal.text4 }}>HIDDEN COST</span>
+        </div>
+      </div>
+
+      <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', color: pal.text4, padding: '4px 0 2px 10px' }}>{bot.label.toUpperCase()}</div>
+      <div style={{ opacity: botOp, transition: pTrans }}>
+        <PlotSvg panel={bot} xDomain={spec.xDomain} xTicks={spec.xTicks} width={width} height={212} targets={spec.hoverTargets.filter((t) => t.panel === bot.id)} showValues={showValues} bandReveal={p} {...cpDown} />
+      </div>
+    </div>
+  );
+}
+
 /* ── FrameworkChart (orchestrator) ──────────────────────────────────────────*/
 export default function FrameworkChart({ id, spec: specProp, theme = 'dark', accent: accentName = 'green', className, readerContext }) {
   const spec = specProp || getChartSpec(id);
@@ -1674,7 +1744,8 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}
-        {spec.layout === 'dual' && spec.panels.map((p, i) => (
+        {spec.layout === 'dual' && spec.perspectiveSlider && <DualPerspectiveSvg spec={spec} showValues={showValues} {...cp} />}
+        {spec.layout === 'dual' && !spec.perspectiveSlider && spec.panels.map((p, i) => (
           <React.Fragment key={p.id}>
             <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', color: pal.text4, padding: '4px 0 2px 10px' }}>{p.label.toUpperCase()}</div>
             <PlotSvg panel={p} xDomain={spec.xDomain} xTicks={spec.xTicks} hideX={i === 0} width={W} height={i === 0 ? 188 : 212} targets={spec.hoverTargets.filter((t) => t.panel === p.id)} showValues={showValues} {...cp} />
