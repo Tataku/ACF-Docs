@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel } from './chart-specs.mjs';
+import { getChartSpec, footerModel, valueAt } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -1237,6 +1237,116 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   );
 }
 
+/* ── HeartbeatSvg — Bitcoin volatility as a DCA unit-accumulation engine ──────*
+ * Upper register: a representative volatile valuation "heartbeat". Lower
+ * register: DCA unit pulses whose height = representative units per dollar, so
+ * cheap dips buy taller pulses. The accent (framework) pulse stacks above the
+ * muted baseline pulse while undervalued (boost) and falls below it when
+ * extended (slows, never sells). Representative/conceptual — no historical
+ * price, no exact sats. The undervalued window reuses the organic dcaWindow. */
+function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const hb = spec.heartbeat;
+  const pad = { l: 18, r: 96, t: 32, b: 46 };
+  const x = (v) => pad.l + (v / 100) * (width - pad.l - pad.r);
+  const priceTop = pad.t + 10, priceBot = pad.t + (height - pad.t - pad.b) * 0.44;
+  const pulseBase = height - pad.b, pulseTop = priceBot + 40;
+  const pulseH = pulseBase - pulseTop;
+  const priceY = (v) => priceBot - ((v - hb.pmin) / ((hb.pmax - hb.pmin) || 1)) * (priceBot - priceTop);
+  const barH = (u) => Math.max(1.5, (u / hb.maxUnit) * pulseH);
+
+  const geom = useMemo(() => ({
+    ppx: hb.price.map((p) => ({ x: x(p.x), y: priceY(p.y) })),
+    line: Brush.smoothOpen(hb.price.map((p) => ({ x: x(p.x), y: priceY(p.y) }))),
+    win: Brush.dcaWindow(x(hb.windowX0), x(hb.windowX1), priceTop, pulseBase, { seed: 29, intensity: 0.7, grainCount: 26 }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [width, height]);
+
+  const troughPulse = hb.pulses.reduce((a, b) => (b.fw > a.fw ? b : a), hb.pulses[0]);
+  const rightPulse = hb.pulses.reduce((a, b) => (Math.abs(b.x - 84) < Math.abs(a.x - 84) ? b : a), hb.pulses[0]);
+  const anchorOf = (t) => {
+    if (!t) return null;
+    if (t.id === 'heartbeat') return { x: x(58), y: priceY(valueAt(hb.price, 58)) };
+    if (t.id === 'cheap') return { x: x(troughPulse.x), y: pulseBase - barH(troughPulse.fw) - 6 };
+    if (t.id === 'slows') return { x: x(rightPulse.x), y: pulseBase - barH(rightPulse.base) - 6 };
+    return null;
+  };
+  const resolve = (mx, my) => (my <= priceBot + 8 ? targets.find((t) => t.id === 'heartbeat') : targets.find((t) => t.id === (mx >= x(62) ? 'slows' : 'cheap')));
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+  const dim = (id) => (focusId && focusId !== id ? 0.4 : 1);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* undervalued window field (organic ink-wash + sat stipples) */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 900ms ease 120ms' }}>
+          <path d={geom.win.wash} fill={pal.bandRegime} fillOpacity={pal.name === 'light' ? 0.12 : 0.10} />
+          {geom.win.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.7} />)}
+        </g>
+        <line x1={pad.l} x2={width - pad.r} y1={(priceBot + pulseTop) / 2} y2={(priceBot + pulseTop) / 2} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
+        <text x={pad.l} y={pad.t - 2} style={halo(pal, 8.5, pal.text4)}>BTC HEARTBEAT · REPRESENTATIVE</text>
+
+        {/* tie line: price trough → tallest pulses */}
+        <line x1={x(hb.troughX)} x2={x(hb.troughX)} y1={priceY(valueAt(hb.price, hb.troughX))} y2={pulseBase - barH(troughPulse.fw)} stroke={accent} strokeWidth="0.7" strokeDasharray="2 4" opacity={entered ? 0.4 : 0} style={{ transition: trans('opacity', 600) }} />
+
+        {/* price heartbeat (draws left→right) */}
+        <g style={{ opacity: dim('heartbeat'), transition: trans('opacity') }}>
+          <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1100ms cubic-bezier(0.7,0,0.2,1) 120ms, -webkit-clip-path 1100ms cubic-bezier(0.7,0,0.2,1) 120ms' }}>
+            <path d={geom.line} fill="none" stroke={pal.tierSecondary} strokeWidth="1.2" strokeLinecap="round" opacity="0.85" />
+          </g>
+          <text x={x(58)} y={priceY(valueAt(hb.price, 58)) - 10} textAnchor="middle" style={haloSans(pal, 10.5, pal.tierSecondary, 600)}>BTC heartbeat</text>
+        </g>
+
+        {/* DCA unit pulses: muted baseline behind, accent framework in front */}
+        {hb.pulses.map((q, i) => {
+          const cx = x(q.x), bH = barH(q.base), fH = barH(q.fw);
+          return (
+            <g key={`p${i}`} style={{ opacity: entered ? 1 : 0, transform: entered ? 'none' : 'translateY(8px)', transition: reduce ? 'opacity 280ms ease' : `opacity 460ms ease ${260 + i * 26}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${260 + i * 26}ms` }}>
+              <rect x={cx - 4.4} y={pulseBase - bH} width={8.8} height={bH} rx={1.4} fill={pal.tierTertiary} opacity="0.5" />
+              <rect x={cx - 2.2} y={pulseBase - fH} width={4.4} height={fH} rx={1.2} fill={accent} opacity={q.slow ? 0.7 : 0.95} />
+            </g>
+          );
+        })}
+        <line x1={pad.l} x2={width - pad.r} y1={pulseBase} y2={pulseBase} stroke={pal.cardBorder} strokeWidth="1" />
+
+        {/* annotations (appear after the geometry) */}
+        {!coarse && (
+          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 500ms ease 980ms' }}>
+            <text x={x(troughPulse.x)} y={pulseBase - barH(troughPulse.fw) - 12} textAnchor="middle" style={haloSans(pal, 10.5, accent, 600)}>same dollars buy more units when cheap</text>
+            <text x={x(rightPulse.x)} y={pulseBase - barH(rightPulse.base) - 12} textAnchor="end" style={{ ...haloSans(pal, 10, pal.text3, 500), fontStyle: 'italic' }}>slows new buying · never sells</text>
+          </g>
+        )}
+
+        {/* end readout: framework collected more units */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 500ms ease 1100ms' }}>
+          <text x={width - pad.r + 8} y={pulseTop + 6} style={haloSans(pal, 12, accent, 700)}>+{hb.fwPct}%</text>
+          <text x={width - pad.r + 8} y={pulseTop + 19} style={halo(pal, 7.5, pal.text4)}>FRAMEWORK</text>
+          <text x={width - pad.r + 8} y={pulseTop + 29} style={halo(pal, 7.5, pal.text4)}>UNITS</text>
+        </g>
+
+        {/* x ticks */}
+        {(spec.xTicks || []).map((t, i) => { const anc = t.v === 0 ? 'start' : t.v >= 100 ? 'end' : 'middle'; return <text key={`xt${i}`} x={x(t.v)} y={height - pad.b + 22} textAnchor={anc} style={halo(pal, 9, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
+
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
 /* ── Explainer + footer + concepts + mobile sheet ───────────────────────────*/
 function ExplainerBlock({ spec, pal, accent }) {
   return (
@@ -1421,6 +1531,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'gate' && <GateSvg spec={spec} height={380} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={150 + (spec.scorecard?.requirements.length || 8) * 32} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={300} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'heartbeat' && <HeartbeatSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}

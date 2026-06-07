@@ -119,6 +119,11 @@ for (const s of FRAMEWORK_CHART_SPECS) {
       ok(s.scenario.defaultPreset && nodeIds.includes(s.scenario.defaultPreset), `${w} scenario defaultPreset invalid`);
       ok(s.scenario.variants && Object.keys(s.scenario.variants).length >= 2, `${w} scenario needs variants`);
     }
+  } else if (s.layout === 'heartbeat') {
+    // representative valuation heartbeat + DCA unit pulses
+    ok(s.heartbeat && Array.isArray(s.heartbeat.price) && s.heartbeat.price.length > 2, `${w} heartbeat needs a price path`);
+    ok(Array.isArray(s.heartbeat.pulses) && s.heartbeat.pulses.length >= 4, `${w} heartbeat needs pulses`);
+    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);
