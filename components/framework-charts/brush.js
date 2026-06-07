@@ -294,7 +294,33 @@ export function dcaWindow(x0, x1, yTop, yBot, opts = {}) {
   return { wash, grains };
 }
 
+/* ── unitCaptureField — relational accumulation field (shaped by the data) ────
+ * Closes a top contour and a bottom contour (already in pixel space) into one
+ * organic field, with ink stipples biased toward where the field is WIDEST (the
+ * vertical span between the contours is largest). Used for the accumulation
+ * "unit-capture window": the contours are driven by price weakness and pulse
+ * height, so the field bulges where Bitcoin is cheap and the DCA pulses are
+ * tall, and pinches shut as the advantage fades. Not a rectangle, not a wedge. */
+export function unitCaptureField(topPts, botPts, opts = {}) {
+  const { seed = 1, intensity = 0.7, grainCount = 22 } = opts;
+  const rng = mulberry32(seed + 23);
+  const wash = closedBezier([...topPts, ...botPts.slice().reverse()]);
+  const n = topPts.length;
+  const span = (i) => Math.max(0, (botPts[i] ? botPts[i].y : topPts[i].y) - topPts[i].y);
+  let maxSpan = 1; for (let i = 0; i < n; i++) maxSpan = Math.max(maxSpan, span(i));
+  const grains = [];
+  let placed = 0, safety = 0;
+  while (placed < grainCount && safety++ < grainCount * 12) {
+    const i = Math.floor(rng() * n);
+    const w = span(i) / maxSpan;
+    if (rng() > 0.2 + 0.8 * w) continue;            // denser where the field is widest
+    grains.push({ x: topPts[i].x, y: topPts[i].y + rng() * Math.max(2, span(i)), r: 0.5 + rng() * 0.9, op: (0.12 + 0.30 * w) * intensity });
+    placed++;
+  }
+  return { wash, grains };
+}
+
 export default {
   mulberry32, closedBezier, smoothOpen, strokeToPath, resamplePolyline,
-  brushLine, enso, inkDot, brushSegment, pressureField, washRect, brushArrow, dcaWindow,
+  brushLine, enso, inkDot, brushSegment, pressureField, washRect, brushArrow, dcaWindow, unitCaptureField,
 };
