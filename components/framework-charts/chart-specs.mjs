@@ -597,6 +597,13 @@ export const FRAMEWORK_CHART_SPECS = [
   /* ── DOCS LANDING PAGE ─────────────────────────────────────────────────── */
   {
     chartId: 'dl-convexity-window', idx: 'L1', group: 'docs-landing', intendedPlacement: 'docs-landing',
+    claimStack: {
+      primaryClaim: 'ACF waits for setups where downside is defined and upside can accelerate',
+      visualProof: 'A representative path: patient compression, then an accelerating release past a defined-risk marker',
+      interactionRole: 'Hover the compression field, confirmation, and release to read the setup',
+      readerAction: 'See where convexity actually pays',
+      caution: 'Representative exhibit, not historical data',
+    },
     status: 'implemented', wiredPublic: false,
     title: 'The Window Opens', setupLine:'Compression, then confirmation, then asymmetric release',
     claimLabel: 'CONVEXITY · WINDOW',
@@ -728,6 +735,13 @@ export const FRAMEWORK_CHART_SPECS = [
   /* ── PART 1 FRAMEWORK ──────────────────────────────────────────────────── */
   {
     chartId: 'p1-hedge-broke', idx: '01', group: 'part-1', intendedPlacement: 'part-1',
+    claimStack: {
+      primaryClaim: 'Stocks and bonds are not always true diversifiers',
+      visualProof: 'Stocks, bonds, and the 60/40 blend indexed together through an inflation shock — bonds fall with stocks',
+      interactionRole: 'Hover each line and the shock band to watch the hedge fail',
+      readerAction: 'Watch the hedge fall with the risk',
+      caution: 'Representative indexed paths, not historical data',
+    },
     status: 'implemented', wiredPublic: false,
     title: 'The Hedge Broke', setupLine:'Indexed total return through an inflation shock: stocks, bonds, and the 60/40 blend',
     claimLabel: 'DIVERSIFICATION · FRAGILITY',
@@ -775,6 +789,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-correlation', idx: '02', group: 'part-1', intendedPlacement: 'part-1',
+    claimStack: {
+      primaryClaim: 'Stock–bond correlation changes when inflation becomes the dominant stress',
+      visualProof: 'A rolling correlation line crossing from negative to positive through an inflation-shock field',
+      interactionRole: 'Hover the line and the shock field to see the regime flip',
+      readerAction: 'Watch the diversifier sign flip',
+      caution: 'Representative rolling correlation, not historical data',
+    },
     status: 'implemented', wiredPublic: false,
     title: 'Correlation Turns', setupLine:'Rolling 24-month stock–bond correlation across an inflation-shock window',
     claimLabel: 'CORRELATION · REGIME',
@@ -815,6 +836,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-cpi-assets', idx: '03', group: 'part-1', intendedPlacement: 'part-1',
+    claimStack: {
+      primaryClaim: 'CPI alone does not capture the full inflation story',
+      visualProof: 'Assets vs CPI as indexed lines; the widening gap between them is the claim',
+      interactionRole: 'Hover the asset, housing, and CPI lines to compare',
+      readerAction: 'See how far assets outran CPI',
+      caution: 'Representative indexed series, not historical data',
+    },
     status: 'implemented', wiredPublic: false,
     title: 'Inflation Was Bigger', setupLine:'CPI, housing, and a broad-asset proxy, each indexed to 100',
     claimLabel: 'INFLATION · MEASUREMENT',
@@ -956,6 +984,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-convexity-survival', idx: '06', group: 'part-1', intendedPlacement: 'part-1',
+    claimStack: {
+      primaryClaim: 'Upside only matters if sizing lets you survive the path',
+      visualProof: 'A representative portfolio path that compounds through a shaded drawdown rather than around it',
+      interactionRole: 'Hover the value / invested lines and the drawdown to see survival',
+      readerAction: 'See compounding survive the drawdown',
+      caution: 'Representative simulation path, not historical data',
+    },
     status: 'implemented', wiredPublic: false,
     title: 'Survive the Path', setupLine:'Cumulative invested versus portfolio value, with drawdown-from-peak shaded',
     claimLabel: 'CONVEXITY · ENDURANCE',
