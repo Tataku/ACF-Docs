@@ -145,6 +145,13 @@ Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclo
 6. The visual metaphor matches the framework concept (flywheel for reflexivity, venturi for a constraint, gauntlet for validation).
 7. If it looks like PowerPoint, or the mechanism is not nameable in five seconds, it fails.
 
+**At-a-glance design rule** — *"The visible chart must teach the core mechanism before any hover."*
+1. The static chart teaches the mechanism; hover/tap adds nuance, it never carries the whole meaning.
+2. If the author cannot understand the chart in five seconds, the reader will not either.
+3. Background context lines are kept only when they clarify a comparison (e.g. the muted alternative strategies behind the selected one in `scenario`).
+4. Text must never collide; a legend is placed *before* the marks it explains (top of the scorecard, not crammed into the footer) and never competes with the chart.
+5. Background regions explain a regime or mechanism — never decoration, and never a generic rectangular block where an organic field reads better (the accumulation window uses an ink-wash `dcaWindow` field with sat stipples, not a rectangle).
+
 ## 5. How to render one chart
 
 ```jsx
