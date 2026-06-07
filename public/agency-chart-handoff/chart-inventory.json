@@ -858,10 +858,10 @@
       "visualDataMode": "conceptual",
       "claimLabel": "DISCIPLINE · ACCUMULATION",
       "frameworkClaim": "Valuation models guide accumulation pacing and conviction, not selling the reserve.",
-      "readerTakeaway": "For an accumulator, a drawdown is a unit-accumulation window.",
-      "chartType": "Representative valuation heartbeat with DCA unit pulses: more units when cheap, framework leans in, never sells.",
-      "setupLine": "Bitcoin’s volatility is a heartbeat — the same dollars buy more units when it dips",
-      "explainerHeadline": "Volatility is not only pain — it buys units.",
+      "readerTakeaway": "For an accumulator, drawdowns become unit-capture windows — if the plan survives them.",
+      "chartType": "Representative BTC price index with DCA unit bars: units = dollars ÷ price; the framework leans in only when undervalued and never sells.",
+      "setupLine": "Fixed-dollar DCA buys more units when Bitcoin is lower",
+      "explainerHeadline": "Same dollars, more units — when price is lower.",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
