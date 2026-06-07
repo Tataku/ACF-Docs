@@ -116,12 +116,20 @@ const fiscal = (() => {
   return { debt, interest };
 })();
 
-// Sequence-of-returns (simulation)
+// Sequence-of-returns (simulation) — ONE shared representative return set, plotted
+// in two orders. The portfolio paths are generated FROM these returns so the deck
+// and the lines are the same math: v(i+1) = v(i) * (1 + r) − withdrawal.
 const sequence = (() => {
-  const n = 120;
-  const good = curve(0, 30, n, (t) => 1.0 + 0.55 * ss(clamp(t / 0.5, 0, 1)) + 0.2 * ss(clamp((t - 0.5) / 0.5, 0, 1)) - 0.18 * t, 71, 0.012);
-  const bad = curve(0, 30, n, (t) => Math.max(0.04, (1.0 - 0.5 * ss(clamp(t / 0.34, 0, 1))) + 0.62 * ss(clamp((t - 0.34) / 0.66, 0, 1)) - 0.55 * t), 79, 0.012);
-  return { good, bad, divergeX: 7.5 };
+  // representative annual-ish returns, % (good order = gains first / losses last)
+  const good = [30, 24, 19, 15, 11, 8, 5, 1, -4, -10, -17, -25];
+  const bad = [...good].reverse();                       // same set, opposite order
+  const N = good.length;
+  const start = 1, withdraw = 0.04;                       // normalized: $1 start, 4% withdrawal / period
+  const sim = (order) => { const out = [{ x: 0, y: start }]; let v = start; order.forEach((r, i) => { v = Math.max(0, v * (1 + r / 100) - withdraw); out.push({ x: i + 1, y: R(v, 10000) }); }); return out; };
+  const goodPath = sim(good), badPath = sim(bad);
+  let trough = { x: 0, y: 9 }; badPath.forEach((p) => { if (p.y < trough.y) trough = p; });
+  const avgPct = R(good.reduce((a, b) => a + b, 0) / N, 100);
+  return { good, bad, N, start, withdraw, goodPath, badPath, goodEnd: goodPath[N].y, badEnd: badPath[N].y, trough, avgPct, depletion: 0.35 };
 })();
 
 // Convexity / survivability (DCA)
@@ -740,42 +748,36 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p1-sequence-risk', idx: '05', group: 'part-1', intendedPlacement: 'part-1',
     status: 'implemented', wiredPublic: false,
-    title: 'Path Changes Everything', setupLine:'Identical return set, opposite order, $1.0M start, $40k annual withdrawals',
+    title: 'Path Changes Everything', setupLine:'Same returns, same withdrawals — different order',
     claimLabel: 'PATH DEPENDENCY · WITHDRAWALS',
     frameworkClaim: 'Same average return, opposite sequence, opposite survival outcome.',
     readerTakeaway: 'Withdrawal-phase capital does not care about the average. It cares about the order.',
-    chartType: 'Two-path sequence-of-returns simulation.',
+    chartType: 'Shared return-set proof: one set of returns in two orders, with the portfolio paths generated from them.',
     visualDataMode: 'simulation',
     disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
     sources: [
-      { provider: 'Author simulation', label: 'Identical annual return set, opposite order', role: 'methodology', transform: '30-year horizon, $1.0M start, $40k level withdrawals', notes: 'No real-data transform. Pure simulation; method documented in appendix.' },
+      { provider: 'Author simulation', label: 'One return set, opposite order; paths generated from the returns', role: 'methodology', transform: 'v(i+1) = v(i)·(1+r) − withdrawal · $1.0M start · 4% level withdrawal', notes: 'No real-data transform. Pure deterministic simulation; the deck and the paths use the same returns.' },
     ],
-    explainerHeadline: 'Same returns. Opposite outcomes.',
-    explainerBody: 'Two paths, identical set of annual returns, opposite order. The good path front-loaded the returns; the bad path absorbed losses while withdrawals continued. Average return was identical. The bad path emptied; the good path lasted. Path is the variable retirement plans assume away.',
+    personalization: { uses: ['portfolioValue'], kind: 'sequence-scale', note: 'Scales the start, withdrawal, and ending values to the reader-context portfolio. Representative simulation, not a forecast.' },
+    explainerHeadline: 'Same returns. Same withdrawals. Different order.',
+    explainerBody: 'Both paths use the same annual returns and the same withdrawals — the deck above proves it, the same blocks in opposite order. The only difference is sequence. Early losses force withdrawals from a smaller capital base, so later gains compound on less money. Average return did not change; surviving capital did.',
     explainerConcept: 'Sequence risk',
     concepts: [{ label: 'Sequence risk', link: '/part-1-foundation' }, { label: 'Survivable compounding', link: '/part-1-foundation' }, { label: 'Withdrawal policy', link: '/part-4-tax-architecture-roc-strategy' }],
-    layout: 'single',
-    ariaSummary: 'Two portfolio-value paths from a $1M start with level withdrawals. The good sequence front-loads returns and lasts the full 30 years; the bad sequence, the same returns in reverse, draws down through early losses and approaches depletion.',
-    domain: { xMin: 0, xMax: 30, yMin: 0, yMax: 1.7 }, yUnit: '$M',
-    xTicks: [{ v: 0, label: 'retire' }, { v: 15, label: 'yr 15' }, { v: 30, label: 'yr 30' }],
-    yTicks: [{ v: 0.5, label: '$0.5M' }, { v: 1.0, label: '$1.0M' }, { v: 1.5, label: '$1.5M' }],
-    series: [
-      { key: 'good', tier: 'primary', label: 'Good sequence', pts: sequence.good },
-      { key: 'bad', tier: 'stress', label: 'Bad sequence', pts: sequence.bad },
-    ],
-    guides: [{ id: 'depletion', y: 0.15, kind: 'threshold', dash: true, label: 'depletion risk' }],
-    markers: [{ id: 'diverge', type: 'dot', x: sequence.divergeX, y: R(valueAt(sequence.good, sequence.divergeX)), r: 3.2, label: 'same average, order differs', labelAnchor: 'start', labelDy: -14 }],
-    notes: [{ x: 24, y: R(valueAt(sequence.bad, 24) + 0.16), text: 'path dependency emerges', anchor: 'middle' }],
-    levels: [],
+    layout: 'sequenceRisk',
+    ariaSummary: 'A shared return-set proof. A deck of return blocks is shown twice: a good order (gains first) and a bad order (the same blocks reversed, losses first). Below, two portfolio-value paths are generated from those exact returns, starting from the same value with the same level withdrawals marked as ticks. The good order compounds before withdrawing, ending far higher; the bad order withdraws from a base impaired by early losses, falling through the depletion line at its trough and recovering only partially. Same average return, opposite surviving capital.',
+    domain: { xMin: 0, xMax: 12, yMin: 0, yMax: 2.5 }, yUnit: '$M',
+    xTicks: [{ v: 0, label: 'retire' }, { v: 6, label: 'yr 15' }, { v: 12, label: 'yr 30' }],
+    yTicks: [{ v: 0.5, label: '0.5×' }, { v: 1.0, label: '1.0×' }, { v: 2.0, label: '2.0×' }],
+    sequence,
     primaryKey: 'good',
     hoverTargets: [
-      { id: 'good', kind: 'series', seriesKey: 'good', label: 'Good sequence', name: 'Good sequence', why: 'Front-loaded returns let withdrawals come out of gains. The base is never gutted, so it compounds and lasts.', claim: 'Order, not average, did the work.', concept: 'Sequence risk', link: '/part-1-foundation' },
-      { id: 'bad', kind: 'series', seriesKey: 'bad', label: 'Bad sequence', name: 'Bad sequence', why: 'The same returns in reverse. Early losses plus ongoing withdrawals hollow out the base it can never rebuild.', claim: 'Identical average, opposite survival.', concept: 'Sequence risk', link: '/part-1-foundation' },
-      { id: 'depletion', kind: 'level', label: 'Depletion risk', name: 'Depletion risk', why: 'Below this line the portfolio cannot sustain the withdrawal. The bad path approaches it; the good path never does.', claim: 'Survival is a floor, not an average.', concept: 'Withdrawal policy', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'diverge', kind: 'marker', label: 'Divergence', name: 'Divergence point', why: 'Both paths share the same return set, yet they split here and never reconverge. That gap is pure path dependency.', claim: 'The average hid the risk.', concept: 'Path dependency', link: '/part-1-foundation' },
+      { id: 'deck', kind: 'deck', label: 'Same return set', name: 'Same return set, opposite order', why: 'Both rows are the identical set of representative returns — the top in a good order (gains first), the bottom the same blocks reversed (losses first). The portfolio paths below are generated from exactly these returns.', claim: 'Same deck, shuffled differently.', concept: 'Sequence risk', link: '/part-1-foundation' },
+      { id: 'good', kind: 'series', seriesKey: 'good', label: 'Good sequence', name: 'Good sequence', why: 'Gains arrive first, so withdrawals come out of a growing base. It still takes the same later losses — but ends far ahead because it compounded first.', claim: 'Order, not average, did the work.', concept: 'Sequence risk', link: '/part-1-foundation' },
+      { id: 'bad', kind: 'series', seriesKey: 'bad', label: 'Bad sequence', name: 'Bad sequence', why: 'The same returns in reverse. Early losses plus ongoing withdrawals hollow out the base, so the identical later gains compound on far less money.', claim: 'Identical average, opposite survival.', concept: 'Sequence risk', link: '/part-1-foundation' },
+      { id: 'depletion', kind: 'level', label: 'Depletion risk', name: 'Depletion risk', why: 'Below this line the portfolio can no longer sustain the withdrawal. The bad order falls through it at the trough; the good order never approaches it.', claim: 'Survival is a floor, not an average.', concept: 'Withdrawal policy', link: '/part-4-tax-architecture-roc-strategy' },
     ],
-    mobileTapTargets: ['diverge', 'good', 'bad', 'depletion'],
-    implementationNotes: 'SIMULATION — the honesty footer is non-negotiable. This is the chart most likely to be misread as a backtest. Bad path uses the stress tier (muted red).',
+    mobileTapTargets: ['deck', 'bad', 'good', 'depletion'],
+    implementationNotes: 'SIMULATION — the honesty footer is non-negotiable; most likely to be misread as a backtest. New sequenceRisk layout: a shared return DECK (same blocks, two orders, shape- and tone-coded) above two portfolio paths GENERATED from those returns, with level-withdrawal ticks on both. Bad path uses the stress tier (muted clay). Scales to reader-context portfolio value.',
   },
 
   {
