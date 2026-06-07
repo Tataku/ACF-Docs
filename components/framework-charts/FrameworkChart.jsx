@@ -1098,6 +1098,15 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   // decision strain → stat tone + the rust intensity of the drawdown shading (mostly max)
   const strainTone = st.strain === 'Extreme' || st.strain === 'High' ? pal.bandStressText : st.strain === 'Moderate' ? pal.text1 : accent;
   const strainOp = ({ Low: 0.06, Moderate: 0.11, High: 0.17, Extreme: 0.23 })[st.strain] || 0.10;
+  // across-all-paths robustness: every strategy's outcome under ALL shocks — you
+  // commit to a strategy BEFORE the shock is known. Built from existing variants
+  // (no new math): x = terminal, dot quality = whether you stay in control.
+  const SHK = sc.shocks.map((s) => s.id);
+  const allRows = PKS.map((pk) => ({
+    pk, short: byId(pk).short || pk, on: pk === presetId,
+    outs: SHK.map((sh) => { const s = sc.variants[`${pk}|${sh}`].stats; return { terminal: s.terminal, control: s.control, forced: s.forced }; }),
+  }));
+  let tMin = 1e9, tMax = -1e9; allRows.forEach((r) => r.outs.forEach((o) => { tMin = Math.min(tMin, o.terminal); tMax = Math.max(tMax, o.terminal); }));
   const ddPath = useMemo(() => { let mxv = -9; const top = sel.v.value.map((p) => { mxv = Math.max(mxv, p.y); return { x: X(p.x), y: Y(mxv) }; }); return areaPath(top, sel.px); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [presetId, shockId, width, height]);
 
   // trough / intervention zone + shock mark on the selected path
@@ -1244,6 +1253,39 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
           </div>
         </div>
       </div>
+
+      {/* across all paths — you don't get to pick the shock (built from all variants) */}
+      <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: pal.text3 }}>ACROSS ALL PATHS · YOU COMMIT BEFORE THE SHOCK IS KNOWN</span>
+          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.04em', color: pal.text4 }}><span style={{ color: accent }}>●</span> in control · <span style={{ color: pal.text3 }}>●</span> low control · <span style={{ color: pal.bandStressText }}>◌</span> forced sale</span>
+        </div>
+        <svg viewBox={`0 0 ${width} 104`} width="100%" style={{ display: 'block' }} aria-hidden="true">
+          {(() => {
+            const PL = 150, PR = 24, xT = (t) => PL + ((t - tMin) / ((tMax - tMin) || 1)) * (width - PL - PR);
+            const EZ = 'cubic-bezier(0.22,0.61,0.36,1)';
+            return allRows.map((r, i) => {
+              const ry = 22 + i * 28;
+              const xs = r.outs.map((o) => xT(o.terminal));
+              return (
+                <g key={r.pk} style={{ opacity: entered ? (r.on ? 1 : 0.5) : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 520ms ${EZ} ${Math.round(700 + i * 90)}ms` }}>
+                  <text x={8} y={ry + 3.5} style={haloSans(pal, 10.5, r.on ? accent : pal.text3, r.on ? 700 : 500)}>{r.short}</text>
+                  <line x1={Math.min(...xs)} x2={Math.max(...xs)} y1={ry} y2={ry} stroke={r.on ? accent : pal.tierReference} strokeWidth={r.on ? 1.4 : 1} opacity={r.on ? 0.5 : 0.32} strokeLinecap="round" />
+                  {r.outs.map((o, j) => (o.forced
+                    ? <circle key={j} cx={xs[j]} cy={ry} r={4.4} fill="none" stroke={pal.bandStress} strokeWidth="1.4" />
+                    : <circle key={j} cx={xs[j]} cy={ry} r={r.on ? 4.4 : 3.6} fill={o.control >= 80 ? accent : pal.text3} opacity={o.control >= 80 ? 0.95 : 0.8} />))}
+                </g>
+              );
+            });
+          })()}
+          <text x={150} y={99} style={halo(pal, 7.5, pal.text4)}>← lower terminal</text>
+          <text x={width - 24} y={99} textAnchor="end" style={halo(pal, 7.5, pal.text4)}>higher terminal →</text>
+        </svg>
+        <p style={{ margin: '4px 0 0', fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2, maxWidth: 760 }}>
+          <span style={{ color: pal.text1, fontWeight: 600 }}>No line is best on every path.</span> Maximum exposure posts the highest numbers, but on low-control dots with a forced-sale floor; stress-tested is feast-or-famine; the framework holds the tightest, in-control band — the outcome you can count on without predicting the path or timing the trough.
+        </p>
+      </div>
+
       {tooltip}
     </div>
   );
