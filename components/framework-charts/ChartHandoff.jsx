@@ -19,6 +19,7 @@ const STATUS = {
   implemented: { label: 'Implemented', tone: 'ok' },
   'needs-design-review': { label: 'Needs design review', tone: 'warn' },
   'spec-only': { label: 'Spec only', tone: 'mute' },
+  deferred: { label: 'Deferred', tone: 'mute' },
 };
 const MODE = { representative: 'Representative', historical: 'Historical', simulation: 'Simulation', conceptual: 'Conceptual' };
 
@@ -228,7 +229,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   const accent = getAccent(pal, accentName);
   const isExport = variant === 'export';
   const galleryGroups = HANDOFF_GROUPS.filter((g) => preset.groups.includes(g.id));
-  const specs = FRAMEWORK_CHART_SPECS.filter((s) => preset.groups.includes(s.group));
+  const specs = FRAMEWORK_CHART_SPECS.filter((s) => preset.groups.includes(s.group) && s.status !== 'deferred');
 
   const outer = isExport
     ? { background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', padding: 'clamp(20px, 4vw, 44px) clamp(16px, 4vw, 32px)', colorScheme: pal.name }
@@ -264,7 +265,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
 
       {/* grouped gallery */}
       {galleryGroups.map((g) => {
-        const specs = specsByGroup(g.id);
+        const specs = specsByGroup(g.id).filter((s) => s.status !== 'deferred');
         if (!specs.length) return null;
         return (
           <section key={g.id} style={{ marginTop: 40 }}>

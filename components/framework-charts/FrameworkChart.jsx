@@ -601,6 +601,17 @@ function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
   );
 }
 
+// Bespoke brush-influenced scorecard glyphs (shape-coded, not colour-only).
+function scoreCheckPath(cx, cy, r, seed) {
+  return Brush.brushSegment(cx - r, cy + 0.5, cx - r * 0.3, cy + r - 1, { seed, weight: 0.85, intensity: 0.45, taperEnds: true, waver: 0.08 })
+    + Brush.brushSegment(cx - r * 0.3, cy + r - 1, cx + r + 1, cy - r, { seed: seed + 4, weight: 0.85, intensity: 0.45, taperEnds: true, waver: 0.08 });
+}
+function scoreFailPath(cx, cy, r, seed) {
+  const k = r * 0.82;
+  return Brush.brushSegment(cx - k, cy - k, cx + k, cy + k, { seed, weight: 0.7, intensity: 0.45, taperEnds: true, waver: 0.06 })
+    + Brush.brushSegment(cx - k, cy + k, cx + k, cy - k, { seed: seed + 4, weight: 0.7, intensity: 0.45, taperEnds: true, waver: 0.06 });
+}
+
 /* ── ribbonRing — closed ink ribbon of varying thickness (for systemLoop) ────*/
 function ribbonRing(pts) {
   const n = pts.length, outer = [], inner = [];
@@ -925,10 +936,18 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   const glyph = (score, j, key) => {
-    const cx = colX(j), gy = 0;
-    if (score === 2) return <path key={key} d={Brush.inkDot(cx, gy, 4.4, { seed: 12 + j * 5, intensity: 0.7 })} fill={j === focusJ ? accent : pal.text2} />;
-    if (score === 1) return <circle key={key} cx={cx} cy={gy} r="4" fill="none" stroke={pal.text4} strokeWidth="1.1" />;
-    return <line key={key} x1={cx - 4} x2={cx + 4} y1={gy} y2={gy} stroke={pal.text4} strokeWidth="1.1" opacity="0.55" />;
+    const cx = colX(j), gy = 0, r = 5;
+    // ScoreCheck — bespoke brush check
+    if (score === 2) return <path key={key} d={scoreCheckPath(cx, gy, r, 12 + j * 6)} fill={j === focusJ ? accent : pal.text2} />;
+    // ScoreHalf — half-filled disc
+    if (score === 1) return (
+      <g key={key}>
+        <circle cx={cx} cy={gy} r={r - 0.6} fill="none" stroke={pal.text4} strokeWidth="1" />
+        <path d={`M${cx} ${gy - (r - 0.6)} A ${r - 0.6} ${r - 0.6} 0 0 1 ${cx} ${gy + (r - 0.6)} Z`} fill={pal.text4} opacity="0.7" />
+      </g>
+    );
+    // ScoreFail — bespoke brush X
+    return <path key={key} d={scoreFailPath(cx, gy, r, 23 + j * 6)} fill={pal.text4} opacity="0.6" />;
   };
 
   let tooltip = null;
@@ -970,6 +989,91 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
       </svg>
       {tooltip}
+    </div>
+  );
+}
+
+/* ── ScenarioSvg — interactive path-aware strategy comparison ────────────────*
+ * The Part 3 headline. Three preset strategies × an optional shock select
+ * precomputed, deterministic representative paths; the chart + stat read-outs
+ * (terminal, max drawdown, dry powder, forced-sale risk, reserve integrity,
+ * control score) update together. Educational, not a calculator. */
+function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+  const sc = spec.scenario;
+  const svgRef = useRef(null);
+  const [presetId, setPresetId] = useState(sc.defaultPreset);
+  const [shockId, setShockId] = useState(sc.defaultShock);
+  const variant = sc.variants[`${presetId}|${shockId}`] || Object.values(sc.variants)[0];
+  const st = variant.stats;
+  const dom = { yMin: 0, yMax: 100, ...sc.domain };
+  const pad = { l: 16, r: 16, t: 22, b: 26 };
+  const X = (v) => pad.l + (v / 100) * (width - pad.l - pad.r);
+  const Y = (v) => pad.t + (1 - (v - dom.yMin) / (dom.yMax - dom.yMin)) * (height - pad.t - pad.b);
+  const vAt = (arr, xv) => { for (let i = 1; i < arr.length; i++) if (arr[i].x >= xv) { const a = arr[i - 1], b = arr[i], t = (xv - a.x) / ((b.x - a.x) || 1); return a.y + (b.y - a.y) * t; } return arr[arr.length - 1].y; };
+
+  const geom = useMemo(() => {
+    const px = variant.value.map((p) => ({ x: X(p.x), y: Y(p.y) }));
+    let mx = -9; const top = variant.value.map((p, i) => { mx = Math.max(mx, p.y); return { x: X(p.x), y: Y(mx) }; });
+    return { px, line: Brush.brushLine(px, { seed: 31, weight: 1.25, intensity: 0.85 }), dd: areaPath(top, px), end: px[px.length - 1] };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presetId, shockId, width, height]);
+
+  const trough = { x: X(sc.troughX), y: Y(vAt(variant.value, sc.troughX)) };
+  const shockLabel = shockId === 'jobloss' ? (st.forced ? 'forced sale' : 'shock absorbed') : shockId === 'deploy' ? 'deploy at trough' : 'trough';
+  const shockColor = shockId === 'jobloss' && st.forced ? pal.bandStress : accent;
+  const presetLabel = (sc.presets.find((p) => p.id === presetId) || {}).label || '';
+
+  const seg = (val, label, on, set) => (
+    <button key={val} onClick={() => set(val)} aria-pressed={on}
+      style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.04em', cursor: 'pointer', background: 'transparent', border: 'none', padding: '3px 2px 1px', lineHeight: 1.4, color: on ? pal.text1 : pal.text3, fontWeight: on ? 600 : 400, borderBottom: `1.5px solid ${on ? accent : 'transparent'}` }}>{label}</button>
+  );
+  const dot = (i) => (i > 0 ? <span key={`d${i}`} aria-hidden style={{ color: pal.text4, opacity: 0.4 }}>·</span> : null);
+  const ctrlRow = (lbl, items) => (
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+      <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.18em', color: pal.text4, width: 66, flexShrink: 0 }}>{lbl}</span>
+      <div style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', alignItems: 'baseline' }}>{items}</div>
+    </div>
+  );
+  const stat = (label, value, tone) => (
+    <div key={label} style={{ minWidth: 78 }}>
+      <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.13em', color: pal.text4, marginBottom: 3 }}>{label}</div>
+      <div style={{ fontFamily: pal.mono, fontSize: 15, fontWeight: 600, color: tone || pal.text1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+    </div>
+  );
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 10 }}>
+        {ctrlRow('STRATEGY', sc.presets.flatMap((p, i) => [dot(i), seg(p.id, p.label, presetId === p.id, setPresetId)]))}
+        {ctrlRow('SHOCK', sc.shocks.flatMap((s, i) => [dot(i), seg(s.id, s.label, shockId === s.id, setShockId)]))}
+      </div>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', touchAction: 'manipulation' }}>
+        <line x1={pad.l} x2={width - pad.r} y1={Y(100)} y2={Y(100)} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
+        <text x={width - pad.r} y={Y(100) - 5} textAnchor="end" style={halo(pal, 8.5, pal.text4)}>start = 100</text>
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 700ms ease' }}>
+          <path d={geom.dd} fill={pal.bandStress} opacity={pal.name === 'light' ? 0.10 : 0.09} />
+        </g>
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 520ms ease' }}>
+          <path d={geom.line} fill={accent} />
+          <path d={Brush.inkDot(geom.end.x, geom.end.y, 3.4, { seed: 9, intensity: 0.8 })} fill={accent} />
+          <text x={geom.end.x - 6} y={geom.end.y - 6} textAnchor="end" style={haloSans(pal, 11, accent, 600)}>{presetLabel}</text>
+        </g>
+        {shockId !== 'none' && (
+          <g>
+            <path d={Brush.enso(trough.x, trough.y, 11, { seed: 51, weight: 0.85, intensity: 0.8, gapAngle: -Math.PI / 3 })} fill={shockColor} />
+            <text x={trough.x} y={trough.y + 26} textAnchor="middle" style={halo(pal, 9, shockColor)}>{shockLabel}</text>
+          </g>
+        )}
+        {targets[0] && <FocusChip t={targets[0]} anchor={{ x: geom.end.x, y: geom.end.y }} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />}
+      </svg>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 20px', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}` }}>
+        {stat('TERMINAL', st.terminal, pal.text1)}
+        {stat('MAX DRAWDOWN', `${st.maxDD}%`, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
+        {stat('DRY POWDER', `${st.dryPowder}%`, pal.text1)}
+        {stat('FORCED SALE', st.forced ? 'High' : 'None', st.forced ? pal.bandStressText : accent)}
+        {stat('RESERVE INTEGRITY', `${st.integrity}%`, st.integrity < 100 ? pal.bandStressText : accent)}
+        {stat('CONTROL SCORE', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
+      </div>
     </div>
   );
 }
@@ -1155,6 +1259,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={420} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={380} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={120 + (spec.scorecard?.requirements.length || 8) * 32} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={300} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}
@@ -1176,7 +1281,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         )}
       </div>
 
-      {coarse && <MobileInsight spec={spec} pal={pal} accent={accent} active={mobileTarget} onStep={stepMobile} onPick={pickMobile} />}
+      {coarse && spec.layout !== 'scenario' && <MobileInsight spec={spec} pal={pal} accent={accent} active={mobileTarget} onStep={stepMobile} onPick={pickMobile} />}
 
       {/* explainer */}
       <div style={{ height: 1, background: pal.cardBorder }} />
