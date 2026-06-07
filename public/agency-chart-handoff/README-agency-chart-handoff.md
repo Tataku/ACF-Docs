@@ -94,11 +94,13 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 | `p3-power-law-holds` | Power Law Holds | single (log) | representative |
 | `p3-ten-tests` | One Asset, Ten Tests | scorecard | conceptual |
 | `p3-volatility-is-the-toll` | Volatility Is the Toll | single | representative |
-| `p3-exposure-not-control` | Exposure Is Not Control | single | simulation |
+| `p3-exposure-not-control` | Exposure Is Not Control | **scenario (interactive)** | simulation |
 | `p3-models-must-converge` | Models Must Converge | single | representative |
-| `p3-accumulate-dont-trade` | Accumulate, Don’t Trade | single | conceptual |
-| `p3-cold-storage-to-borrow` | Cold Storage to Borrow | flow | conceptual |
-| `p3-reserve-share-evolves` | Reserve Share Evolves | single | simulation |
+| `p3-accumulate-dont-trade` | Accumulate, Don’t Trade | single (cumulative units) | conceptual |
+| `p3-cold-storage-to-borrow` | Cold Storage to Borrow | flow | conceptual · **deferred** |
+| `p3-reserve-share-evolves` | Reserve Share Evolves | single | simulation · **deferred** |
+
+Part 3 ships **6 active** exhibits; the two deferred specs are kept in the registry (`status: deferred`) but hidden from the handoff page pending redesign.
 
 The machine-readable version of **all** charts (with claims, sources,
 disclosures) is in [`chart-inventory.json`](./chart-inventory.json).
@@ -129,7 +131,8 @@ Two families, one engine:
   - `systemLoop` — reflexive / self-reinforcing feedback ring with a reversal cue (e.g. *Markets Feed Back*, *Govern the Thesis*).
   - `bridge` — descending cascade where each stage transforms the prior until the thesis becomes investable (e.g. *Capital Finds the Bottleneck*).
   - `gate` — a sober validation gauntlet; a survivor band thins through four gates into a thesis (e.g. *Narrative Is Not Thesis*).
-  - `scorecard` — a requirement × asset matrix with shape-coded meet/partial/fail glyphs and an emphasised focus column (e.g. *One Asset, Ten Tests*).
+  - `scorecard` — a requirement × asset matrix with bespoke brush meet/partial/fail glyphs and an emphasised focus column (e.g. *One Asset, Ten Tests*).
+  - `scenario` — an interactive, path-aware exhibit: preset strategies × an optional shock select precomputed deterministic paths and update live stat read-outs (e.g. *Exposure Is Not Control*).
 
 Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclosure behaviour as the data charts. Default visible text is minimal; detail reveals on hover/tap.
 

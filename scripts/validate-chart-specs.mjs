@@ -20,7 +20,7 @@ import { FRAMEWORK_CHART_SPECS, footerModel } from '../components/framework-char
 
 const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'both']);
 const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2', 'part-3']);
-const STATUSES = new Set(['implemented', 'needs-design-review', 'spec-only']);
+const STATUSES = new Set(['implemented', 'needs-design-review', 'spec-only', 'deferred']);
 const MODES = new Set(['representative', 'historical', 'simulation', 'conceptual']);
 const ROLES = new Set(['verifies-concept', 'backs-series', 'methodology', 'target-source']);
 
@@ -88,20 +88,25 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(s.quadrant && s.quadrant.path && s.quadrant.path.length >= 2, `${w} quadrant needs a path`);
     s.quadrant.path.forEach((id) => ok(wps.includes(id), `${w} quadrant path references missing waypoint ${id}`));
     ok(wps.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a waypoint`);
-  } else if (['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'scorecard'].includes(s.layout)) {
-    // node-based framework diagrams + scorecard matrix
+  } else if (['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'scorecard', 'scenario'].includes(s.layout)) {
+    // node-based framework diagrams + scorecard matrix + interactive scenario
     const nodeIds = s.layout === 'flow' ? (s.flow.stages || []).flatMap((st) => st.nodes.map((nd) => nd.id))
       : s.layout === 'loop' ? (s.loop.nodes || []).map((n) => n.id)
         : s.layout === 'systemLoop' ? (s.systemLoop.nodes || []).map((n) => n.id)
           : s.layout === 'bridge' ? (s.bridge.stages || []).map((n) => n.id)
             : s.layout === 'gate' ? (s.gate.nodes || []).map((n) => n.id)
-              : (s.scorecard.requirements || []).map((r) => r.id);
+              : s.layout === 'scorecard' ? (s.scorecard.requirements || []).map((r) => r.id)
+                : (s.scenario.presets || []).map((p) => p.id);
     ok(nodeIds.length >= 3, `${w} ${s.layout} needs at least 3 nodes`);
     ok(new Set(nodeIds).size === nodeIds.length, `${w} ${s.layout} has duplicate node ids`);
     ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a ${s.layout} node`);
     if (s.layout === 'scorecard') {
       ok(Array.isArray(s.scorecard.assets) && s.scorecard.assets.length >= 2, `${w} scorecard needs assets`);
       s.scorecard.requirements.forEach((r) => s.scorecard.assets.forEach((a) => ok(typeof r.scores[a.id] === 'number', `${w} scorecard ${r.id} missing score for ${a.id}`)));
+    }
+    if (s.layout === 'scenario') {
+      ok(s.scenario.defaultPreset && nodeIds.includes(s.scenario.defaultPreset), `${w} scenario defaultPreset invalid`);
+      ok(s.scenario.variants && Object.keys(s.scenario.variants).length >= 2, `${w} scenario needs variants`);
     }
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;

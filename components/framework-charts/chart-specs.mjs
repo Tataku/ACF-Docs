@@ -246,13 +246,62 @@ const p3Models = (() => {
 })();
 const p3Accum = (() => {
   const n = 100;
-  const pace = curve(0, 100, n, (t) => 12 + 73 * (1 - ss(t)), 341, 1.2);
-  return { pace };
+  // cumulative BTC units (sats) accumulated. Concave: the same dollar buys more
+  // units when price is low (undervalued, early) than when extended (late).
+  const baseline = curve(0, 100, n, (t) => 84 * Math.pow(t, 0.72), 341, 0.5);
+  const lead = (t) => 26 * ss(clamp(t / 0.42, 0, 1)) - 9 * ss(clamp((t - 0.7) / 0.3, 0, 1)); // guided gains a lead when cheap, then slows new buying when extended (never gives it back)
+  const guided = baseline.map((p, i) => ({ x: p.x, y: R(p.y + lead(i / n)) }));
+  return { baseline, guided };
 })();
 const p3Reserve = (() => {
   const n = 100;
   const reserve = curve(0, 20, n, (t) => 12 + 30 * ss(t), 351, 0.5);
   return { reserve };
+})();
+const p3Scenario = (() => {
+  const n = 96;
+  const T = (i) => i / n;
+  const market = [];
+  for (let i = 0; i <= n; i++) {
+    const t = T(i);
+    const up = 100 + 175 * ss(clamp(t / 0.52, 0, 1));
+    const taper = -50 * ss(clamp((t - 0.52) / 0.2, 0, 1));
+    const crash = -150 * Math.exp(-Math.pow((t - 0.62) / 0.06, 2));
+    const rec = 120 * ss(clamp((t - 0.7) / 0.3, 0, 1));
+    market.push(Math.max(45, up + taper + crash + rec));
+  }
+  let troughI = 0; for (let i = 1; i <= n; i++) if (market[i] < market[troughI]) troughI = i;
+  const stable = (t) => 100 + 30 * t;
+  const presets = {
+    max: { w: 1.0, dp: 0.0, income: false },
+    reserve: { w: 0.18, dp: 0.22, income: true },
+    stress: { w: 0.18, dp: 0.45, income: true },
+  };
+  const build = (pk, shock) => {
+    const p = presets[pk];
+    const value = [];
+    for (let i = 0; i <= n; i++) {
+      const t = T(i);
+      let v = p.w * market[i] + (1 - p.w) * stable(t);
+      if (i >= troughI) {
+        if (shock === 'jobloss') v -= (!p.income && p.dp < 0.2) ? 0.30 * market[i] : 2;
+        else if (shock === 'deploy') v += p.dp * 0.95 * Math.max(0, market[i] - market[troughI]);
+      }
+      value.push({ x: R(t * 100), y: R(Math.max(20, v)) });
+    }
+    let peak = -9, maxDD = 0; value.forEach((q) => { peak = Math.max(peak, q.y); maxDD = Math.max(maxDD, (peak - q.y) / peak); });
+    const forced = shock === 'jobloss' && !p.income && p.dp < 0.2;
+    const dryPowder = Math.round(p.dp * 100);
+    const integrity = forced ? 62 : 100;
+    const control = Math.max(6, Math.min(100, Math.round(100 - maxDD * 72 + dryPowder * 0.32 - (forced ? 34 : 0) - (p.income ? 0 : 8))));
+    return { value, stats: { terminal: Math.round(value[value.length - 1].y), maxDD: Math.round(maxDD * 100), dryPowder, forced, integrity, control } };
+  };
+  const variants = {};
+  let yMax = 0;
+  ['max', 'reserve', 'stress'].forEach((pk) => ['none', 'jobloss', 'deploy'].forEach((sh) => {
+    const r = build(pk, sh); variants[`${pk}|${sh}`] = r; r.value.forEach((q) => { yMax = Math.max(yMax, q.y); });
+  }));
+  return { variants, troughX: R(T(troughI) * 100), yMax: Math.ceil((yMax + 10) / 10) * 10 };
 })();
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1215,39 +1264,40 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p3-exposure-not-control', idx: 'P3-04', group: 'part-3', intendedPlacement: 'part-3',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Exposure Is Not Control', setupLine: 'Maximum exposure can win one cycle; architecture wins across many',
-    claimLabel: 'CONTROL · CONVICTION',
+    title: 'Exposure Is Not Control', setupLine: 'Choose the path. Watch what survives the drawdown.',
+    claimLabel: 'CONTROL · INTERACTIVE',
     frameworkClaim: '100% Bitcoin can win one favorable cycle; the framework optimizes for control across many.',
     readerTakeaway: 'The ability to act beats the size of a single bet.',
-    chartType: 'Two-path simulation: maximum exposure vs the framework architecture, through a deep drawdown.',
+    chartType: 'Interactive path-aware scenario: compare strategies through a drawdown and an optional shock.',
     visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
     sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative paths; no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
     explainerHeadline: 'Winning a cycle is not the same as staying in control.',
-    explainerBody: 'All-in can win a single favorable cycle. But across multiple cycles and real life events — a job loss at a trough, a liquidity need in a 70 percent drawdown — the architected path keeps dry powder and the capacity to act. Control compounds; raw exposure does not.',
+    explainerBody: 'Maximum exposure can win the clean bull case. The framework exists for the messy path: drawdowns, income shocks, and the need to act when opportunity appears. Choose a strategy and a shock, and watch terminal value, drawdown, capacity to act, forced-sale risk, and reserve integrity move together.',
     explainerConcept: 'Operational control',
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
-    layout: 'single',
-    ariaSummary: 'Two simulated paths. Maximum exposure rises highest then craters in a deep drawdown with no capacity to respond; the framework path draws down less and deploys dry powder at the trough.',
-    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 240 }, yUnit: 'idx',
-    xTicks: [{ v: 0, label: 'start' }, { v: 70, label: 'drawdown' }, { v: 100, label: 'next cycle' }],
-    yTicks: [{ v: 50 }, { v: 100 }, { v: 200 }],
-    series: [
-      { key: 'maxE', tier: 'stress', label: 'Max exposure', pts: p3Exposure.maxE },
-      { key: 'framework', tier: 'primary', label: 'Framework', pts: p3Exposure.framework },
-    ],
-    markers: [
-      { id: 'stuck', type: 'enso', x: 70, y: R(valueAt(p3Exposure.maxE, 70)), r: 12, label: 'no capacity to act', labelAnchor: 'start', labelDy: 22 },
-      { id: 'act', type: 'dot', x: 70, y: R(valueAt(p3Exposure.framework, 70)), r: 3.2, label: 'dry powder deployed', labelAnchor: 'end', labelDy: -12 },
-    ],
-    primaryKey: 'framework',
+    layout: 'scenario',
+    ariaSummary: 'An interactive exhibit comparing three strategies — maximum exposure, framework reserve, and stress-tested reserve — through a market drawdown, with an optional job-loss or deploy-at-trough shock. For the selected path it reports terminal value, maximum drawdown, dry powder, forced-sale risk, reserve integrity, and a control score.',
+    scenario: {
+      defaultPreset: 'reserve', defaultShock: 'none',
+      domain: { yMin: 0, yMax: p3Scenario.yMax }, troughX: p3Scenario.troughX,
+      presets: [
+        { id: 'max', label: 'Maximum exposure', sub: '100% BTC' },
+        { id: 'reserve', label: 'Framework reserve', sub: '~15% BTC + income' },
+        { id: 'stress', label: 'Stress-tested reserve', sub: 'reserve + dry powder' },
+      ],
+      shocks: [
+        { id: 'none', label: 'Clean path' },
+        { id: 'jobloss', label: 'Job loss in the drawdown' },
+        { id: 'deploy', label: 'Deploy at the trough' },
+      ],
+      variants: p3Scenario.variants,
+    },
+    primaryKey: 'reserve',
     hoverTargets: [
-      { id: 'framework', kind: 'series', seriesKey: 'framework', label: 'Framework', name: 'Framework architecture', why: 'Smaller drawdown, dry powder kept back, and the capacity to add at the trough or pivot into the next regime.', claim: 'Control across many cycles.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'maxE', kind: 'series', seriesKey: 'maxE', label: 'Max exposure', name: 'Maximum exposure', why: 'Highest peak, but a deep drawdown with nothing left to deploy and no ability to absorb a life event.', claim: 'Wins a cycle, loses control.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'stuck', kind: 'marker', label: 'No capacity', name: 'No capacity to act', why: 'A 70 percent drawdown with no dry powder. If a job loss or liquidity need lands here, there is no move to make.', claim: 'Exposure without control is fragile.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'act', kind: 'marker', label: 'Capacity to act', name: 'Capacity to act', why: 'At the same trough the architected path deploys reserves — turning the drawdown into an opportunity.', claim: 'Dry powder is the option to act.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'path', kind: 'series', label: 'Portfolio path', name: 'Portfolio value path', why: 'The selected strategy through the cycle. Maximum exposure peaks highest and falls hardest; the reserves draw down less and keep the capacity to act.', claim: 'Terminal value is only one of the outputs.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
     ],
-    mobileTapTargets: ['stuck', 'act', 'framework', 'maxE'],
-    implementationNotes: 'SIMULATION — illustrative paths, footer-disclosed. The point is capacity-to-act at the trough, not terminal value.',
+    mobileTapTargets: ['path'],
+    implementationNotes: 'INTERACTIVE SIMULATION — the headline Part 3 exhibit. Three preset strategies × an optional shock select precomputed, deterministic representative paths (no live calc). Reports terminal value, max drawdown, dry powder, forced-sale risk, reserve integrity, and a control score — not just terminal value.',
   },
 
   {
@@ -1291,44 +1341,50 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p3-accumulate-dont-trade', idx: 'P3-06', group: 'part-3', intendedPlacement: 'part-3',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Accumulate, Don’t Trade', setupLine: 'Valuation paces accumulation; it never sells the cold-storage reserve',
+    title: 'Accumulate, Don’t Trade', setupLine: 'More sats when undervalued; baseline when fair; slow new buying when extended — never selling',
     claimLabel: 'DISCIPLINE · ACCUMULATION',
     frameworkClaim: 'Valuation models guide accumulation pacing and conviction, not selling the reserve.',
-    readerTakeaway: 'Models change the pace of buying, never the decision to hold.',
-    chartType: 'Accumulation pace as a function of valuation, with a floor that never sells.',
+    readerTakeaway: 'Valuation changes the pace of buying, not the decision to hold.',
+    chartType: 'Cumulative BTC units accumulated: baseline DCA vs framework-guided DCA across valuation regimes.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 3', label: 'Accumulation pacing and the never-sell reserve', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
     explainerHeadline: 'Valuation sets the pace, not the exit.',
-    explainerBody: 'Undervalued, the framework leans into accumulation; at fair value it holds a baseline DCA; extended, it slows or pauses discretionary buying. What it never does is sell the cold-storage reserve. Models tune the pace of buying; they do not trigger a sale.',
+    explainerBody: 'When Bitcoin is undervalued, the same dollar DCA collects more units — and the framework leans in further as models converge. At fair value it tracks the baseline; when extended it slows new buying. The reserve only ever grows. Valuation changes the pace of buying, never the decision to hold.',
     explainerConcept: 'Valuation discipline',
     concepts: [{ label: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'single',
-    ariaSummary: 'Accumulation pace plotted against valuation from undervalued to extended. The pace is high when undervalued, settles to a baseline at fair value, and falls toward zero when extended — but never crosses below the never-sell floor.',
-    domain: { xMin: 0, xMax: 100, yMin: -8, yMax: 95 }, yUnit: '',
+    ariaSummary: 'Two rising curves of cumulative Bitcoin units accumulated, against valuation from undervalued to extended. Both only ever rise; the framework-guided curve opens a lead in the undervalued window, tracks the baseline at fair value, and flattens — slowing new buying — when extended, never declining.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 130 }, yUnit: '',
     xTicks: [{ v: 0, label: 'undervalued' }, { v: 50, label: 'fair value' }, { v: 100, label: 'extended' }],
     yTicks: [],
-    series: [{ key: 'pace', tier: 'primary', label: 'Accumulation pace', pts: p3Accum.pace }],
-    bands: [{ id: 'caution', kind: 'regime', render: 'wash', x0: 66, x1: 100, label: 'slow / pause', labelAnchor: 'end' }],
-    levels: [{ id: 'neversell', y: 0, kind: 'charcoal', label: 'never sell the reserve' }],
+    series: [
+      { key: 'baseline', tier: 'reference', label: 'Baseline DCA', pts: p3Accum.baseline },
+      { key: 'guided', tier: 'primary', label: 'Framework DCA', pts: p3Accum.guided },
+    ],
+    areas: [{ id: 'held', topKey: 'guided', kind: 'under', label: 'reserve held · only grows' }],
+    bands: [
+      { id: 'window', kind: 'regime', render: 'wash', x0: 0, x1: 33, label: 'accumulation window', labelAnchor: 'start' },
+      { id: 'slow', kind: 'regime', render: 'wash', x0: 66, x1: 100, label: 'slow new buying', labelAnchor: 'end' },
+    ],
     markers: [
-      { id: 'increase', type: 'dot', x: 16, y: R(valueAt(p3Accum.pace, 16)), r: 3.2, label: 'increase accumulation', labelAnchor: 'start', labelDy: -12 },
-      { id: 'baseline', type: 'dot', x: 50, y: R(valueAt(p3Accum.pace, 50)), r: 3.2, label: 'baseline DCA', labelAnchor: 'middle', labelDy: -12 },
+      { id: 'morecheap', type: 'dot', x: 24, y: R(valueAt(p3Accum.guided, 24)), r: 3.2, label: 'more sats when cheap', labelAnchor: 'start', labelDy: -12 },
+      { id: 'slows', type: 'dot', x: 84, y: R(valueAt(p3Accum.guided, 84)), r: 3.2, label: 'slows, never sells', labelAnchor: 'end', labelDy: -12 },
     ],
-    primaryKey: 'pace',
+    primaryKey: 'guided',
     hoverTargets: [
-      { id: 'pace', kind: 'series', seriesKey: 'pace', label: 'Accumulation pace', name: 'Accumulation pace', why: 'High when cheap, baseline at fair value, near zero when extended — and never negative. The reserve is paced, never sold.', claim: 'Models pace buying, not selling.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'increase', kind: 'marker', label: 'Increase', name: 'Undervalued · increase', why: 'Below fair value, conviction and pace rise — the framework leans in.', claim: 'Cheap: accumulate harder.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'baseline', kind: 'marker', label: 'Baseline DCA', name: 'Fair value · baseline DCA', why: 'Around fair value the pace settles to a steady dollar-cost-average baseline.', claim: 'Fair: keep stacking, steadily.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'caution', kind: 'band', label: 'Extended · slow', name: 'Extended · slow or pause', why: 'Stretched valuations slow or pause discretionary accumulation — but still never trigger a sale.', claim: 'Rich: ease off buying, do not sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'neversell', kind: 'level', label: 'Never sell', name: 'Never sell the reserve', why: 'The floor the pace never crosses. Cold storage is borrowed against, not sold.', claim: 'The reserve is permanent.', concept: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'guided', kind: 'series', seriesKey: 'guided', label: 'Framework DCA', name: 'Framework-guided DCA', why: 'Leans in when models converge on undervaluation, tracks baseline at fair value, slows new buying when extended. It only ever adds units.', claim: 'Pace changes; the reserve only grows.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'baseline', kind: 'series', seriesKey: 'baseline', label: 'Baseline DCA', name: 'Baseline DCA', why: 'A constant dollar DCA already collects more units when price is low — the curve is steepest in the undervalued window.', claim: 'Even flat DCA stacks faster when cheap.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'window', kind: 'band', label: 'Accumulation window', name: 'Accumulation window', why: 'Undervalued: the same dollars buy the most units, and the framework adds to the pace.', claim: 'Cheap is when units are won.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'slow', kind: 'band', label: 'Slow new buying', name: 'Slow new buying', why: 'Extended: discretionary buying slows or pauses. The curve flattens — but never turns down.', claim: 'Ease off buying; do not sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'morecheap', kind: 'marker', label: 'More sats when cheap', name: 'More sats when cheap', why: 'The guided curve opens its lead here — extra units bought while Bitcoin is undervalued.', claim: 'The lead is built when cheap.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
     ],
-    mobileTapTargets: ['increase', 'baseline', 'caution', 'neversell', 'pace'],
-    implementationNotes: 'Conceptual; x is valuation, y is accumulation pace. The never-sell floor (level at 0) is the invariant the curve never breaches.',
+    mobileTapTargets: ['window', 'morecheap', 'guided', 'baseline', 'slow'],
+    implementationNotes: 'Cumulative BTC units (not pace): both curves are monotonic — they only ever rise. The shaded area under the guided curve is the never-sell reserve; valuation changes the slope of buying, never the direction of holdings.',
   },
 
   {
     chartId: 'p3-cold-storage-to-borrow', idx: 'P3-07', group: 'part-3', intendedPlacement: 'part-3',
-    status: 'needs-design-review', wiredPublic: false,
+    status: 'deferred', wiredPublic: false,
     title: 'Cold Storage to Borrow', setupLine: 'The reserve lifecycle: accumulate, self-custody, mature, borrow — without a forced sale',
     claimLabel: 'LIFECYCLE · RESERVE',
     frameworkClaim: 'The Bitcoin reserve moves from accumulation to collateralized borrowing without forced sale.',
@@ -1365,7 +1421,7 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-reserve-share-evolves', idx: 'P3-08', group: 'part-3', intendedPlacement: 'part-3',
-    status: 'needs-design-review', wiredPublic: false,
+    status: 'deferred', wiredPublic: false,
     title: 'Reserve Share Evolves', setupLine: 'A 10–15% reserve can mature into a 30–50% share, where borrow-phase governance begins',
     claimLabel: 'ALLOCATION · PHASE',
     frameworkClaim: 'A 10–15% reserve can evolve into a 30–50% mature share, at which point borrow-phase governance matters.',
