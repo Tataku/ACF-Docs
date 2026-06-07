@@ -1279,12 +1279,24 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
   const priceY = (v) => priceBot - ((v - hb.pmin) / ((hb.pmax - hb.pmin) || 1)) * (priceBot - priceTop);
   const barH = (u) => Math.max(1.5, (u / hb.maxUnit) * pulseH);
 
-  const geom = useMemo(() => ({
-    ppx: hb.price.map((p) => ({ x: x(p.x), y: priceY(p.y) })),
-    line: Brush.smoothOpen(hb.price.map((p) => ({ x: x(p.x), y: priceY(p.y) }))),
-    win: Brush.dcaWindow(x(hb.windowX0), x(hb.windowX1), priceTop, pulseBase, { seed: 29, intensity: 0.7, grainCount: 26 }),
+  const geom = useMemo(() => {
+    const ppx = hb.price.map((p) => ({ x: x(p.x), y: priceY(p.y) }));
+    // relational unit-capture field: a lens whose half-height is driven by
+    // cheapness (inverse price) — top contour reaches up toward the price dip,
+    // bottom contour reaches down toward the tall pulses, so it bulges where BTC
+    // is cheapest and pinches shut as the advantage fades.
+    const ssf = (u) => { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+    const cy = (priceBot + pulseTop) / 2, FN = 44, top = [], bot = [];
+    for (let i = 0; i <= FN; i++) {
+      const t = (i / FN) * 0.52, xv = t * 100, pv = valueAt(hb.price, xv);
+      const cheap = (hb.pmax - pv) / ((hb.pmax - hb.pmin) || 1);
+      const opp = Math.max(0, cheap * (1 - ssf((t - 0.3) / 0.18)));
+      top.push({ x: x(xv), y: cy + (priceY(pv) - 8 - cy) * opp });
+      bot.push({ x: x(xv), y: cy + (pulseBase - 4 - cy) * opp });
+    }
+    return { ppx, line: Brush.smoothOpen(ppx), field: Brush.unitCaptureField(top, bot, { seed: 29, intensity: 0.7, grainCount: 24 }) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [width, height]);
+  }, [width, height]);
 
   const troughPulse = hb.pulses.reduce((a, b) => (b.fw > a.fw ? b : a), hb.pulses[0]);
   const rightPulse = hb.pulses.reduce((a, b) => (Math.abs(b.x - 84) < Math.abs(a.x - 84) ? b : a), hb.pulses[0]);
@@ -1315,10 +1327,11 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
   return (
     <div style={{ position: 'relative' }}>
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {/* undervalued window field (organic ink-wash + sat stipples) */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 900ms ease 120ms' }}>
-          <path d={geom.win.wash} fill={pal.bandRegime} fillOpacity={pal.name === 'light' ? 0.12 : 0.10} />
-          {geom.win.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.7} />)}
+        {/* relational unit-capture field — opens where BTC is cheap and pulses are
+            tall, pinches shut as the advantage fades; reveals with the time sweep */}
+        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'clip-path 1500ms cubic-bezier(0.22,0.61,0.36,1) 120ms, -webkit-clip-path 1500ms cubic-bezier(0.22,0.61,0.36,1) 120ms, opacity 700ms ease 120ms' }}>
+          <path d={geom.field.wash} fill={accent} fillOpacity={pal.name === 'light' ? 0.10 : 0.09} />
+          {geom.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.8} />)}
         </g>
         <line x1={pad.l} x2={width - pad.r} y1={(priceBot + pulseTop) / 2} y2={(priceBot + pulseTop) / 2} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
         <text x={pad.l} y={pad.t - 2} style={halo(pal, 8.5, pal.text4)}>BTC HEARTBEAT · REPRESENTATIVE</text>
