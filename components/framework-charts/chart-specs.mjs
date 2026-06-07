@@ -317,9 +317,17 @@ const p3Scenario = (() => {
     const forced = shock === 'jobloss' && !p.income && p.dp < 0.2;
     const deployed = shock === 'deploy' && p.dp > 0;
     const dryPowder = Math.round(p.dp * 100);
+    const remaining = deployed ? Math.round(p.dp * 100 * 0.15) : dryPowder; // deployment spends most of the capacity
     const integrity = forced ? 62 : 100;
-    const control = Math.max(6, Math.min(100, Math.round(100 - maxDD * 72 + dryPowder * 0.32 - (forced ? 34 : 0) - (p.income ? 0 : 8))));
-    return { value, stats: { terminal: Math.round(value[value.length - 1].y), maxDD: Math.round(maxDD * 100), dryPowder, forced, deployed, integrity, control } };
+    // control reflects the POST-scenario state: spending dry powder lowers it,
+    // so a deploy-at-trough win never reads as a free lunch.
+    const control = Math.max(6, Math.min(100, Math.round(100 - maxDD * 72 + remaining * 0.32 - (forced ? 34 : 0) - (p.income ? 0 : 8))));
+    // decision strain: deep drawdowns, forced sales, and no income buffer raise the
+    // behavioural load where panic-selling happens; capacity and income lower it.
+    // Representative behaviour signal, not a clinical measure.
+    const strainN = maxDD * 100 * 0.85 + (forced ? 40 : 0) + (p.income ? 0 : 16) + (shock === 'jobloss' ? 18 : 0) + (deployed ? 18 : 0) - remaining * 0.45;
+    const strain = strainN >= 95 ? 'Extreme' : strainN >= 55 ? 'High' : strainN >= 26 ? 'Moderate' : 'Low';
+    return { value, stats: { terminal: Math.round(value[value.length - 1].y), maxDD: Math.round(maxDD * 100), dryPowder, remaining, forced, deployed, integrity, control, strain } };
   };
   const variants = {};
   let yMax = 0, yMin = 1e9;
@@ -1298,17 +1306,17 @@ export const FRAMEWORK_CHART_SPECS = [
     title: 'Exposure Is Not Control', setupLine: 'Choose the path. Then change the shock.',
     claimLabel: 'CONTROL · INTERACTIVE',
     frameworkClaim: '100% Bitcoin can win one favorable cycle; the framework optimizes for control across many.',
-    readerTakeaway: 'Max exposure wins the clean bull case; control wins the messy path.',
-    chartType: 'Interactive path-aware comparison: all three strategies through a drawdown, with an optional shock.',
+    readerTakeaway: 'Max exposure wins the clean bull case; control wins the messy path — and spent capacity must be rebuilt.',
+    chartType: 'Interactive path-aware comparison of representative portfolio paths through a drawdown, with an optional shock.',
     visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
-    sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative paths; no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative representative portfolio paths; no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
     explainerHeadline: 'Winning a cycle is not the same as staying in control.',
-    explainerBody: 'Maximum exposure can win the clean bull case. The framework exists for the path where drawdowns, income shocks, and deployment opportunities arrive at the same time. All three strategies are drawn together: the selected one is emphasised, the others stay as context. Change the shock and watch which path keeps its capacity to act.',
+    explainerBody: 'Maximum exposure can win the clean bull case. The framework exists for the path where drawdowns, income shocks, and deployment opportunities arrive together — and for the hidden variable underneath them: decision strain. A portfolio only works if its owner can keep thinking clearly while it is down, hold the thesis, and still act. Acting spends capacity, so after deploying at the trough resilience has to be rebuilt. A strategy that cannot be lived through is not robust.',
     explainerConcept: 'Operational control',
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
     personalization: { uses: ['portfolioValue'], kind: 'scenario-scale', note: 'Scales the simulation read-outs (terminal, drawdown, dry powder) to the reader-context portfolio value. Illustrative, not a forecast.' },
     layout: 'scenario',
-    ariaSummary: 'An interactive exhibit. Three strategy paths — maximum exposure, framework reserve, and stress-tested reserve — are drawn together through a market drawdown, with an optional job-loss or deploy-at-trough shock. Maximum exposure peaks highest on a clean path; under a job-loss shock it is forced to sell at the bottom while the reserves absorb it; with dry powder the stress-tested reserve buys the trough. Outcome read-outs cover upside (terminal value) and control (drawdown, dry powder, forced-sale risk, reserve integrity, control score).',
+    ariaSummary: 'An interactive exhibit. Three representative total-portfolio paths, indexed to 100 — maximum exposure, framework reserve, and stress-tested reserve — are drawn together through a market drawdown, with an optional job-loss or deploy-at-trough shock. Maximum exposure peaks highest on a clean path; under a job-loss shock it is forced to sell at the bottom while the reserves absorb it; with dry powder the stress-tested reserve buys the trough, but that deployment spends its capacity, which then has to be rebuilt. Outcome read-outs cover upside (terminal value) and control (drawdown, remaining capacity, forced-sale risk, reserve integrity, control score).',
     scenario: {
       defaultPreset: 'reserve', defaultShock: 'none',
       domain: { yMin: p3Scenario.yMin, yMax: p3Scenario.yMax }, troughX: p3Scenario.troughX, peakX: p3Scenario.peakX,
@@ -1325,17 +1333,17 @@ export const FRAMEWORK_CHART_SPECS = [
       ],
       // annotation shown under the chart; keyed by shock, with a per-strategy nuance.
       notes: {
-        none: { lead: 'Clean bull case rewards exposure.', max: 'Maximum exposure wins the upside — and only this path.', reserve: 'The reserve gives up some clean-path upside to stay in control.', stress: 'The most control, the least clean-path upside — by design.' },
-        jobloss: { lead: 'Messy path rewards control.', max: 'No wage buffer, no dry powder: maximum exposure is forced to sell at the bottom.', reserve: 'Income covers the gap — the reserve is never a forced seller.', stress: 'Income plus dry powder: the shock is absorbed and the reserve stays intact.' },
-        deploy: { lead: 'Opportunity rewards capacity.', max: 'Already all-in: no dry powder to buy the trough.', reserve: 'Dry powder buys the trough others can only watch.', stress: 'The most dry powder turns the drawdown into the best entry.' },
+        none: { lead: 'Clean bull case rewards exposure.', max: 'Maximum exposure wins the upside — but it still rides the full cycle drawdown; the strain only shows once the path stops being clean.', reserve: 'The reserve gives up some clean-path upside to stay in control.', stress: 'The most control, the least clean-path upside — by design.' },
+        jobloss: { lead: 'Messy path rewards control.', max: 'No wage buffer, no dry powder: maximum exposure is forced to sell at the bottom — the deepest drawdown and the highest decision strain.', reserve: 'Income covers the gap — the reserve is never a forced seller, so the strain stays bearable.', stress: 'Income plus dry powder: the shock is absorbed, the reserve stays intact, and the strain stays low.' },
+        deploy: { lead: 'Opportunity rewards capacity — then capacity must be rebuilt.', max: 'Already all-in: no dry powder to buy the trough, and nothing held back for the next one.', reserve: 'Dry powder buys the trough others can only watch — but deployment converts resilience into exposure.', stress: 'The most dry powder makes the best entry; afterwards the capacity is spent and has to be rebuilt.' },
       },
       variants: p3Scenario.variants,
     },
     primaryKey: 'reserve',
     hoverTargets: [
-      { id: 'max', kind: 'strategy', label: 'Maximum exposure', name: 'Maximum exposure', why: 'Wins the clean bull case and nothing else. No wage buffer and no dry powder, so a drawdown plus an income shock forces a sale at the worst possible price.', claim: 'Highest upside, zero capacity to act.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'max', kind: 'strategy', label: 'Maximum exposure', name: 'Maximum exposure', why: 'Wins the clean bull case and nothing else. No wage buffer and no dry powder, so a drawdown plus an income shock forces a sale at the worst price — and the deepest drawdowns carry the highest decision strain, where panic-selling and abandoned theses happen.', claim: 'Highest upside, highest behaviour risk.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
       { id: 'reserve', kind: 'strategy', label: 'Framework reserve', name: 'Framework reserve', why: 'A managed Bitcoin position alongside income. It gives up some clean-path upside to keep drawdowns survivable and to never become a forced seller.', claim: 'Trades some upside to stay in control.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'stress', kind: 'strategy', label: 'Stress-tested reserve', name: 'Stress-tested reserve', why: 'The framework reserve plus deliberate dry powder. The least clean-path upside, but the most capacity to act — it can buy the trough that maximum exposure is forced to sell into.', claim: 'Most control; turns a drawdown into an entry.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'stress', kind: 'strategy', label: 'Stress-tested reserve', name: 'Stress-tested reserve', why: 'The framework reserve plus deliberate dry powder. The least clean-path upside, but the most capacity to act — it can buy the trough maximum exposure is forced to sell into. Deploying that powder spends it: afterwards the position is more exposed and has to rebuild capacity before the next cycle.', claim: 'Buys the trough — then must rebuild what it spent.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['max', 'reserve', 'stress'],
     implementationNotes: 'INTERACTIVE SIMULATION — the headline Part 3 exhibit. All three strategy paths are drawn together under the selected shock; the chosen strategy is emphasised and the others stay as muted context. Click a path to select it. A capacity-to-act gauge, a trough/intervention zone, a forced-sale mark, and an annotation that updates with the shock carry the story; the stat strip (split into UPSIDE and CONTROL) is subordinate. Precomputed, deterministic representative paths — no live calc.',

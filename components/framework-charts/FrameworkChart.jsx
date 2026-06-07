@@ -1088,7 +1088,14 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const maxDrop = (() => { let pk = -9, d = 0; sel.v.value.forEach((q) => { pk = Math.max(pk, q.y); d = Math.max(d, pk - q.y); }); return d; })();
   const termText = scaleP ? fmtMoney(scaleP * st.terminal / 100) : `${st.terminal}`;
   const ddText = scaleP ? `${fmtMoney(scaleP * maxDrop / 100)} · ${st.maxDD}%` : `${st.maxDD}%`;
-  const dpText = scaleP ? `${fmtMoney(scaleP * st.dryPowder / 100)} · ${st.dryPowder}%` : `${st.dryPowder}%`;
+  // dry powder vs remaining capacity: after a deploy, show what's LEFT (spent), in caution tone
+  const capVal = st.deployed ? st.remaining : st.dryPowder;
+  const capLabel = st.deployed ? 'REMAINING CAP.' : 'DRY POWDER';
+  const capText = scaleP ? `${fmtMoney(scaleP * capVal / 100)} · ${capVal}%` : `${capVal}%`;
+  const capTone = st.deployed ? pal.bandStressText : pal.text1;
+  // decision strain → stat tone + the rust intensity of the drawdown shading
+  const strainTone = st.strain === 'Extreme' || st.strain === 'High' ? pal.bandStressText : st.strain === 'Moderate' ? pal.text1 : accent;
+  const strainOp = ({ Low: 0.06, Moderate: 0.11, High: 0.17, Extreme: 0.23 })[st.strain] || 0.10;
   const ddPath = useMemo(() => { let mxv = -9; const top = sel.v.value.map((p) => { mxv = Math.max(mxv, p.y); return { x: X(p.x), y: Y(mxv) }; }); return areaPath(top, sel.px); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [presetId, shockId, width, height]);
 
   // trough / intervention zone + shock mark on the selected path
@@ -1100,7 +1107,8 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 
   // capacity-to-act gauge (top-left, clear of the paths which start low)
   const gx = pad.l + 8, g0 = pad.t + 16, g1 = pad.t + 92, gH = g1 - g0;
-  const cap = Math.min(1, st.dryPowder / 50);
+  const capInit = Math.min(1, st.dryPowder / 50);
+  const capNow = Math.min(1, (st.deployed ? st.remaining : st.dryPowder) / 50);
 
   // de-collided end labels
   const endLabels = (() => {
@@ -1150,7 +1158,8 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         {ctrlRow('STRATEGY', sc.presets.flatMap((p, i) => [dot(i), seg(p.id, p.label, presetId === p.id, setPresetId)]))}
         {ctrlRow('SHOCK', sc.shocks.flatMap((s, i) => [dot(i), seg(s.id, s.label, shockId === s.id, setShockId)]))}
       </div>
-      <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.04em', color: pal.text4, margin: '7px 0 9px' }}>{sc.tradeoff} · <span style={{ color: pal.text3 }}>selected in colour, alternatives faint</span></div>
+      <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.04em', color: pal.text4, margin: '7px 0 3px' }}>{sc.tradeoff} · <span style={{ color: pal.text3 }}>selected in colour, alternatives faint</span></div>
+      <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.06em', color: pal.text4, margin: '0 0 9px' }}>Representative total-portfolio paths · indexed to 100 · not Bitcoin price</div>
 
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary}
         style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}>
@@ -1158,18 +1167,20 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease' }}>
           <path d={Brush.washRect(zone.x0, pad.t, zone.x1, height - pad.b, { seed: 33, intensity: 0.5, soft: 'both' })} fill={pal.bandRegime} fillOpacity={pal.name === 'light' ? 0.12 : 0.10} />
           {!coarse && <text x={(zone.x0 + zone.x1) / 2} y={pad.t + 12} textAnchor="middle" style={halo(pal, 9, pal.bandRegimeText)}>the drawdown</text>}
+          {!coarse && (st.strain === 'High' || st.strain === 'Extreme') && <text x={(zone.x0 + zone.x1) / 2} y={pad.t + 24} textAnchor="middle" style={halo(pal, 8, pal.bandStressText)}>decision strain rises</text>}
         </g>
         {/* start reference */}
         <line x1={pad.l} x2={width - pad.r} y1={Y(100)} y2={Y(100)} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
         <text x={width - pad.r} y={Y(100) - 5} textAnchor="end" style={halo(pal, 8.5, pal.text4)}>start = 100</text>
 
-        {/* capacity-to-act gauge */}
+        {/* capacity-to-act gauge — drains when dry powder is deployed (ghost = what was spent) */}
         <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 300) }}>
           <rect x={gx - 3.5} y={g0} width={7} height={gH} rx={3.5} fill="none" stroke={pal.cardBorder} strokeWidth="1" />
-          {cap > 0 && <rect x={gx - 3.5} y={g1 - gH * cap} width={7} height={gH * cap} rx={3.5} fill={accent} opacity={st.deployed ? 0.92 : 0.5} style={{ transition: trans('all', 260) }} />}
+          {st.deployed && capInit > 0 && <rect x={gx - 3.5} y={g1 - gH * capInit} width={7} height={gH * capInit} rx={3.5} fill={accent} opacity={0.16} />}
+          {capNow > 0 && <rect x={gx - 3.5} y={g1 - gH * capNow} width={7} height={gH * capNow} rx={3.5} fill={st.deployed ? pal.bandStress : accent} opacity={0.6} style={{ transition: trans('all', 260) }} />}
           <text x={gx + 9} y={g0 + 4} style={halo(pal, 8, pal.text4)}>CAPACITY</text>
           <text x={gx + 9} y={g0 + 15} style={halo(pal, 8, pal.text4)}>TO ACT</text>
-          <text x={gx + 9} y={g1} style={halo(pal, 8.5, cap > 0 ? accent : pal.text4, 600)}>{cap > 0 ? (st.deployed ? 'deployed' : 'ready') : 'none'}</text>
+          <text x={gx + 9} y={g1} style={halo(pal, 8.5, st.deployed ? pal.bandStressText : (capNow > 0 ? accent : pal.text4), 600)}>{st.deployed ? 'spent' : (capNow > 0 ? 'ready' : 'none')}</text>
         </g>
 
         {/* comparison paths draw through time together (left→right). The clip is
@@ -1183,7 +1194,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
             </g>
           ))}
           <g>
-            <path d={ddPath} fill={pal.bandStress} opacity={pal.name === 'light' ? 0.11 : 0.10} />
+            <path d={ddPath} fill={pal.bandStress} opacity={strainOp} />
             <path d={sel.brush} fill={accent} />
             <path d={Brush.inkDot(sel.end.x, sel.end.y, 3.4, { seed: 9, intensity: 0.8 })} fill={accent} />
           </g>
@@ -1197,6 +1208,18 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
             {shockText && <text x={trough.x} y={trough.y + 26} textAnchor="middle" style={halo(pal, 9, shockColor)}>{shockText}</text>}
           </g>
         )}
+        {/* deploy-at-trough: capacity is spent, so resilience must be rebuilt + a quiet next-cycle hint */}
+        {shockId === 'deploy' && st.deployed && (() => {
+          const rx = Math.min(94, sc.troughX + 26), ry = Y(vAt(sel.v.value, rx));
+          const delay = Math.round(140 + 1700 * Math.max(0, Math.min(1, (X(rx) - pad.l) / (width - pad.l - pad.r))));
+          return (
+            <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : `opacity 460ms ease ${delay}ms` }}>
+              <path d={Brush.inkDot(X(rx), ry, 2.4, { seed: 17, intensity: 0.7 })} fill={pal.bandStress} />
+              {!coarse && <text x={X(rx)} y={ry - 12} textAnchor="middle" style={halo(pal, 8.5, pal.bandStressText)}>capacity spent · rebuild</text>}
+              <path d={`M${X(96)} ${Y(vAt(sel.v.value, 96))} q 26 30, 30 56`} fill="none" stroke={pal.bandStress} strokeWidth="0.9" strokeDasharray="2 4" opacity="0.45" />
+            </g>
+          );
+        })()}
         {/* focusable strategy ends (keyboard parity: focus previews, Enter selects) */}
         {paths.map((p) => (
           <circle key={`fx${p.pk}`} className="acf-fx-focusable" cx={p.end.x} cy={p.end.y} r={coarse ? 12 : 9} fill="transparent" tabIndex={0} role="button"
@@ -1225,8 +1248,9 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
           <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: pal.text3, marginBottom: 8 }}>CONTROL</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 20px' }}>
             {stat('MAX DRAWDOWN', ddText, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
-            {stat('DRY POWDER', dpText, pal.text1)}
+            {stat(capLabel, capText, capTone)}
             {stat('FORCED SALE', st.forced ? 'High' : 'None', st.forced ? pal.bandStressText : accent)}
+            {stat('DECISION STRAIN', st.strain, strainTone)}
             {stat('RESERVE INTEGRITY', `${st.integrity}%`, st.integrity < 100 ? pal.bandStressText : accent)}
             {stat('CONTROL SCORE', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
           </div>
