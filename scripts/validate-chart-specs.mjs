@@ -163,6 +163,11 @@ for (const s of FRAMEWORK_CHART_SPECS) {
       if (s.claimStack[k] != null) ok(typeof s.claimStack[k] === 'string' && s.claimStack[k].trim(), `${w} claimStack.${k} must be a non-empty string`);
     });
   }
+  // The "done" tier is fully curated: an implemented chart must declare an explicit
+  // claimStack (primaryClaim + visualProof + readerAction), not rely on derivation.
+  if (s.status === 'implemented') {
+    ok(s.claimStack && s.claimStack.primaryClaim && s.claimStack.visualProof && s.claimStack.readerAction, `${w} implemented chart needs an explicit claimStack {primaryClaim, visualProof, readerAction}`);
+  }
 
   // Interaction must match concept. Concept-critical layouts declare it explicitly.
   const it = resolveInteraction(s);
