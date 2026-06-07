@@ -18,8 +18,8 @@
 import assert from 'node:assert/strict';
 import { FRAMEWORK_CHART_SPECS, footerModel } from '../components/framework-charts/chart-specs.mjs';
 
-const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'both']);
-const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2']);
+const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'both']);
+const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2', 'part-3']);
 const STATUSES = new Set(['implemented', 'needs-design-review', 'spec-only']);
 const MODES = new Set(['representative', 'historical', 'simulation', 'conceptual']);
 const ROLES = new Set(['verifies-concept', 'backs-series', 'methodology', 'target-source']);
@@ -88,16 +88,21 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(s.quadrant && s.quadrant.path && s.quadrant.path.length >= 2, `${w} quadrant needs a path`);
     s.quadrant.path.forEach((id) => ok(wps.includes(id), `${w} quadrant path references missing waypoint ${id}`));
     ok(wps.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a waypoint`);
-  } else if (['loop', 'flow', 'systemLoop', 'bridge', 'gate'].includes(s.layout)) {
-    // node-based framework diagrams
+  } else if (['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'scorecard'].includes(s.layout)) {
+    // node-based framework diagrams + scorecard matrix
     const nodeIds = s.layout === 'flow' ? (s.flow.stages || []).flatMap((st) => st.nodes.map((nd) => nd.id))
       : s.layout === 'loop' ? (s.loop.nodes || []).map((n) => n.id)
         : s.layout === 'systemLoop' ? (s.systemLoop.nodes || []).map((n) => n.id)
           : s.layout === 'bridge' ? (s.bridge.stages || []).map((n) => n.id)
-            : (s.gate.nodes || []).map((n) => n.id);
+            : s.layout === 'gate' ? (s.gate.nodes || []).map((n) => n.id)
+              : (s.scorecard.requirements || []).map((r) => r.id);
     ok(nodeIds.length >= 3, `${w} ${s.layout} needs at least 3 nodes`);
     ok(new Set(nodeIds).size === nodeIds.length, `${w} ${s.layout} has duplicate node ids`);
     ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a ${s.layout} node`);
+    if (s.layout === 'scorecard') {
+      ok(Array.isArray(s.scorecard.assets) && s.scorecard.assets.length >= 2, `${w} scorecard needs assets`);
+      s.scorecard.requirements.forEach((r) => s.scorecard.assets.forEach((a) => ok(typeof r.scores[a.id] === 'number', `${w} scorecard ${r.id} missing score for ${a.id}`)));
+    }
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);
@@ -110,11 +115,12 @@ for (const s of FRAMEWORK_CHART_SPECS) {
 
 // group coverage (what the agency reviews)
 const byGroup = (g) => FRAMEWORK_CHART_SPECS.filter((s) => s.group === g).map((s) => s.chartId);
-['signature', 'docs-landing', 'part-1', 'part-2'].forEach((g) => ok(byGroup(g).length >= 1, `group ${g} has no charts`));
+['signature', 'docs-landing', 'part-1', 'part-2', 'part-3'].forEach((g) => ok(byGroup(g).length >= 1, `group ${g} has no charts`));
 
 console.log(`✓ framework chart specs valid — ${FRAMEWORK_CHART_SPECS.length} charts, ${checks} assertions passed`);
 console.log(`  signature   : ${byGroup('signature').join(', ')}`);
 console.log(`  docs-landing: ${byGroup('docs-landing').join(', ')}`);
 console.log(`  part-1      : ${byGroup('part-1').join(', ')}`);
 console.log(`  part-2      : ${byGroup('part-2').join(', ')}`);
+console.log(`  part-3      : ${byGroup('part-3').join(', ')}`);
 console.log(`  wired public: ${FRAMEWORK_CHART_SPECS.filter((s) => s.wiredPublic).map((s) => s.chartId).join(', ') || '(none)'}`);

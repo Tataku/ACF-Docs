@@ -313,7 +313,7 @@ function PlotSvg({
         ))}
 
         {/* secondary / tertiary series */}
-        {(panel.series || []).filter((s) => s.tier !== 'primary').map((s) => {
+        {(panel.series || []).filter((s) => s.tier !== 'primary' && !s.hidden).map((s) => {
           const g = geom.series[s.key];
           return (
             <g key={`sec${s.key}`} style={{ opacity: dimOf(s.key), transition: trans('opacity') }}>
@@ -327,7 +327,7 @@ function PlotSvg({
         })}
 
         {/* primary series */}
-        {(panel.series || []).filter((s) => s.tier === 'primary').map((s) => {
+        {(panel.series || []).filter((s) => s.tier === 'primary' && !s.hidden).map((s) => {
           const g = geom.series[s.key];
           return (
             <g key={`pri${s.key}`} style={{ opacity: dimOf(s.key), transition: trans('opacity') }}>
@@ -365,7 +365,7 @@ function PlotSvg({
         {(panel.series || []).map((s) => {
           const g = geom.series[s.key];
           const c = s.tier === 'primary' ? accent : tierColor(s.tier, pal, accent);
-          return s.label ? <text key={`el${s.key}`} x={g.end.x + 9} y={g.end.y + 3.5 + (s.labelDy || 0)} style={{ ...haloSans(pal, s.tier === 'primary' ? 11.5 : 11, c, s.tier === 'primary' ? 600 : 500), opacity: dimOf(s.key) }}>{s.label}</text> : null;
+          return s.label && !s.hidden ? <text key={`el${s.key}`} x={g.end.x + 9} y={g.end.y + 3.5 + (s.labelDy || 0)} style={{ ...haloSans(pal, s.tier === 'primary' ? 11.5 : 11, c, s.tier === 'primary' ? 600 : 500), opacity: dimOf(s.key) }}>{s.label}</text> : null;
         })}
         {geom.notes.map((n, i) => <text key={`nt${i}`} x={n.x} y={n.y} textAnchor={n.nt.anchor || 'middle'} style={{ ...haloSans(pal, 11.5, pal.text3, 500), fontStyle: 'italic' }}>{n.nt.text}</text>)}
 
@@ -897,6 +897,83 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
   );
 }
 
+/* ── ScorecardSvg — requirement × asset gauntlet ────────────────────────────*
+ * Rows are requirements, columns are candidate assets; cells are shape-coded
+ * (filled disc = meets, hollow ring = partial, dash = fails — not colour-only).
+ * The focus asset's column is quietly emphasised; hovering a row explains it. */
+function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const sc = spec.scorecard;
+  const reqs = sc.requirements, assets = sc.assets;
+  const pad = { l: 18, r: 18, t: 56, b: 42 };
+  const labelW = Math.min(248, width * 0.30);
+  const colW = (width - pad.l - labelW - pad.r) / assets.length;
+  const colX = (j) => pad.l + labelW + colW * (j + 0.5);
+  const rowH = (height - pad.t - pad.b) / reqs.length;
+  const rowY = (i) => pad.t + rowH * (i + 0.5);
+  const focusJ = assets.findIndex((a) => a.focus);
+
+  const anchorOf = (act) => { const i = reqs.findIndex((r) => r.id === act.id); return i < 0 ? null : { x: pad.l + labelW * 0.5, y: rowY(i) }; };
+  const resolve = (my) => { let best = null, bd = rowH * 0.6; reqs.forEach((r, i) => { const d = Math.abs(my - rowY(i)); if (d < bd) { bd = d; best = r; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[1]), 'hover'); };
+  const onClick = (e) => { const res = resolve(toVB(e)[1]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  const glyph = (score, j, key) => {
+    const cx = colX(j), gy = 0;
+    if (score === 2) return <path key={key} d={Brush.inkDot(cx, gy, 4.4, { seed: 12 + j * 5, intensity: 0.7 })} fill={j === focusJ ? accent : pal.text2} />;
+    if (score === 1) return <circle key={key} cx={cx} cy={gy} r="4" fill="none" stroke={pal.text4} strokeWidth="1.1" />;
+    return <line key={key} x1={cx - 4} x2={cx + 4} y1={gy} y2={gy} stroke={pal.text4} strokeWidth="1.1" opacity="0.55" />;
+  };
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="REQUIREMENT" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Backbone requirement scorecard across candidate assets" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* focus column wash */}
+        {focusJ >= 0 && <rect x={colX(focusJ) - colW * 0.46} y={pad.t - 30} width={colW * 0.92} height={height - pad.t - pad.b + 36} rx={6} fill={accent} opacity={pal.name === 'light' ? 0.07 : 0.06} />}
+        {/* asset headers */}
+        {assets.map((a, j) => (
+          <text key={`h${a.id}`} x={colX(j)} y={pad.t - 32} textAnchor="middle" style={haloSans(pal, a.focus ? 12 : 11, a.focus ? accent : pal.text2, a.focus ? 700 : 600)}>{a.label}</text>
+        ))}
+        <line x1={pad.l} x2={width - pad.r} y1={pad.t - 18} y2={pad.t - 18} stroke={pal.cardBorder} strokeWidth="1" />
+        {/* rows */}
+        {reqs.map((r, i) => {
+          const on = focusId === r.id;
+          return (
+            <g key={r.id} style={{ opacity: entered ? (focusId && !on ? 0.42 : 1) : 0, transition: trans('opacity', 160) }}>
+              {on && <rect x={pad.l - 4} y={rowY(i) - rowH / 2 + 2} width={width - pad.l - pad.r + 8} height={rowH - 4} rx={5} fill={pal.text1} opacity={pal.name === 'light' ? 0.04 : 0.05} />}
+              <text x={pad.l + 2} y={rowY(i) + 3.5} style={haloSans(pal, 11, on ? pal.text1 : pal.text2, on ? 600 : 500)}>{r.label}</text>
+              <g transform={`translate(0 ${rowY(i)})`}>
+                {assets.map((a, j) => glyph(r.scores[a.id], j, `${r.id}-${a.id}`))}
+              </g>
+            </g>
+          );
+        })}
+        {/* aggregate row */}
+        <line x1={pad.l} x2={width - pad.r} y1={height - pad.b + 4} y2={height - pad.b + 4} stroke={pal.cardBorder} strokeWidth="1" />
+        <text x={pad.l + 2} y={height - pad.b + 24} style={halo(pal, 9, pal.text4)}>AGGREGATE</text>
+        {assets.map((a, j) => (
+          <text key={`a${a.id}`} x={colX(j)} y={height - pad.b + 24} textAnchor="middle" style={haloSans(pal, a.focus ? 12 : 10.5, a.focus ? accent : pal.text3, a.focus ? 700 : 600)}>{sc.aggregates[a.id]}</text>
+        ))}
+        {/* keyboard focus chips (per requirement row) */}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
 /* ── Explainer + footer + concepts + mobile sheet ───────────────────────────*/
 function ExplainerBlock({ spec, pal, accent }) {
   return (
@@ -1048,7 +1125,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
 
   const padX = 'clamp(14px, 3vw, 22px)';
   const badge = coarse ? 'TAP TO EXPLORE' : 'LIVE · HOVER';
-  const showValues = spec.visualDataMode !== 'conceptual';
+  const showValues = spec.visualDataMode !== 'conceptual' && !spec.suppressValues;
   const W = 1000;
   // Representative/simulation values are art-directed: never label them "TRUE VALUE".
   const valueNote = spec.visualDataMode === 'historical' ? 'TRUE VALUE' : 'REPRESENTATIVE';
@@ -1077,6 +1154,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={420} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={380} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={120 + (spec.scorecard?.requirements.length || 8) * 32} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}

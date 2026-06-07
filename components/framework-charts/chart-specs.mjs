@@ -204,6 +204,57 @@ const p2Liquidity = (() => {
   return { liquidity, asset };
 })();
 
+// ── Part 3 — Bitcoin convexity backbone (representative / conceptual) ─────────
+const p3Power = (() => {
+  const n = 120;
+  const central = curve(0, 100, n, (t) => 3.0 + 2.65 * t, 301, 0); // log10 price, ~$1k → ~$450k
+  const upper = central.map((p) => ({ x: p.x, y: R(p.y + 0.55) }));
+  const lower = central.map((p) => ({ x: p.x, y: R(p.y - 0.55) }));
+  const rng = mulberry32(303);
+  const price = central.map((p, i) => {
+    const t = i / n;
+    let dev = 0.40 * Math.sin(t * Math.PI * 6.2) + 0.15 * Math.sin(t * Math.PI * 12.6);
+    dev += 0.30 * Math.exp(-Math.pow((t - 0.34) / 0.028, 2)) + 0.30 * Math.exp(-Math.pow((t - 0.72) / 0.028, 2)); // euphoria
+    dev -= 0.34 * Math.exp(-Math.pow((t - 0.52) / 0.03, 2)); // capitulation
+    return { x: p.x, y: R(p.y + dev + (rng() - 0.5) * 0.05) };
+  });
+  let euph = { x: 0, y: 0, d: -9 }, cap = { x: 0, y: 0, d: -9 };
+  price.forEach((p, i) => { const a = p.y - upper[i].y; if (a > euph.d) euph = { x: p.x, y: p.y, d: a }; const b = lower[i].y - p.y; if (b > cap.d) cap = { x: p.x, y: p.y, d: b }; });
+  return { central, upper, lower, price, euph, cap, last: price[price.length - 1] };
+})();
+const p3Vol = (() => {
+  const n = 120;
+  const btc = curve(0, 100, n, (t) => Math.max(18, 40 + 150 * ss(t) + 28 * Math.sin(t * Math.PI * 3.4) - 72 * Math.exp(-Math.pow((t - 0.42) / 0.05, 2)) - 84 * Math.exp(-Math.pow((t - 0.8) / 0.05, 2))), 311, 4);
+  const portfolio = curve(0, 100, n, (t) => 100 + 24 * ss(t) + 5 * Math.sin(t * Math.PI * 3.4), 313, 0.8);
+  let peak = -9, tr = { x: 0, y: 999, dd: 0 }; btc.forEach((p) => { peak = Math.max(peak, p.y); const d = (peak - p.y) / peak; if (d > tr.dd) tr = { x: p.x, y: p.y, dd: d }; });
+  return { btc, portfolio, trough: tr };
+})();
+const p3Exposure = (() => {
+  const n = 120;
+  const maxE = curve(0, 100, n, (t) => Math.max(20, 50 + 175 * ss(t) + 32 * Math.sin(t * Math.PI * 3) - 96 * Math.exp(-Math.pow((t - 0.7) / 0.05, 2))), 321, 3);
+  const framework = curve(0, 100, n, (t) => 60 + 108 * ss(t) + 12 * Math.sin(t * Math.PI * 3) - 30 * Math.exp(-Math.pow((t - 0.7) / 0.07, 2)), 323, 1.6);
+  return { maxE, framework };
+})();
+const p3Models = (() => {
+  const n = 120;
+  const center = (t) => 30 + 52 * t;
+  const spread = (t) => 22 - 18 * Math.exp(-Math.pow((t - 0.5) / 0.14, 2)) + 9 * ss(clamp((t - 0.72) / 0.28, 0, 1));
+  const modelMax = curve(0, 100, n, (t) => center(t) + spread(t), 331, 0);
+  const modelMin = curve(0, 100, n, (t) => center(t) - spread(t), 333, 0);
+  const price = curve(0, 100, n, (t) => center(t) + 5 * Math.sin(t * Math.PI * 5), 335, 1.4);
+  return { modelMax, modelMin, price };
+})();
+const p3Accum = (() => {
+  const n = 100;
+  const pace = curve(0, 100, n, (t) => 12 + 73 * (1 - ss(t)), 341, 1.2);
+  return { pace };
+})();
+const p3Reserve = (() => {
+  const n = 100;
+  const reserve = curve(0, 20, n, (t) => 12 + 30 * ss(t), 351, 0.5);
+  return { reserve };
+})();
+
 // ════════════════════════════════════════════════════════════════════════════
 // SPEC REGISTRY
 // ════════════════════════════════════════════════════════════════════════════
@@ -1020,6 +1071,335 @@ export const FRAMEWORK_CHART_SPECS = [
     mobileTapTargets: ['asset', 'liquidity', 'lead'],
     implementationNotes: 'Representative shapes (not historical series). Production could wire a real global-liquidity proxy vs BTC behind the same spec.',
   },
+
+  /* ── PART 3 · BITCOIN — CONVEXITY BACKBONE ──────────────────────────────── */
+  {
+    chartId: 'p3-power-law-holds', idx: 'P3-01', group: 'part-3', intendedPlacement: 'part-3',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Power Law Holds', setupLine: 'Price against a log power-law corridor — central tendency, with euphoria and capitulation bands',
+    claimLabel: 'VALUATION · POWER LAW',
+    frameworkClaim: 'Bitcoin’s long-term path can be contextualized by power-law behavior — a regime heuristic, not a prediction.',
+    readerTakeaway: 'A map of where Bitcoin sits on its adoption curve, not a forecast.',
+    chartType: 'Log power-law corridor with price oscillating between euphoria and capitulation bands.',
+    visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources', suppressValues: true,
+    sources: [
+      { provider: 'Santostasi · power-law model', label: 'Bitcoin power-law (log-log regression)', role: 'verifies-concept', url: 'https://giovannisantostasi.medium.com/the-bitcoin-power-law-theory-962dfaf99ee9' },
+      { provider: 'ACF · Part 3', label: 'Power-law bands as a regime heuristic', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+    ],
+    explainerHeadline: 'Power-law bands map the regime; they do not predict it.',
+    explainerBody: 'Plotted on a log scale, Bitcoin has spent most of its history inside a power-law corridor — roughly 80 percent central, with stretches of euphoria above and capitulation below. The framework reads it as a map of where price sits on the adoption curve, never as a forecast.',
+    explainerConcept: 'Power law',
+    concepts: [{ label: 'Power law', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' }],
+    layout: 'single',
+    ariaSummary: 'A log-scale chart. A power-law corridor rises across the plot; Bitcoin’s price oscillates inside it, spiking into an upper euphoria band twice and dropping below the lower capitulation band once, currently sitting back inside the corridor.',
+    domain: { xMin: 0, xMax: 100, yMin: 2.8, yMax: 6.4 }, yUnit: '',
+    xTicks: [{ v: 0, label: 'early adoption' }, { v: 50, label: 'mid cycle' }, { v: 100, label: 'now' }],
+    yTicks: [{ v: 3, label: '$1k' }, { v: 4, label: '$10k' }, { v: 5, label: '$100k' }, { v: 6, label: '$1M' }],
+    series: [
+      { key: 'upper', tier: 'reference', hidden: true, pts: p3Power.upper },
+      { key: 'lower', tier: 'reference', hidden: true, pts: p3Power.lower },
+      { key: 'central', tier: 'reference', label: 'fair value', pts: p3Power.central },
+      { key: 'price', tier: 'primary', label: 'price', pts: p3Power.price },
+    ],
+    areas: [{ id: 'corridor', topKey: 'upper', botKey: 'lower', kind: 'gap', label: 'power-law corridor' }],
+    markers: [
+      { id: 'euphoria', type: 'enso', x: p3Power.euph.x, y: p3Power.euph.y, r: 12, label: 'euphoria · upper band', labelAnchor: 'end', labelDy: -16 },
+      { id: 'capitulation', type: 'enso', x: p3Power.cap.x, y: p3Power.cap.y, r: 12, label: 'capitulation · lower band', labelAnchor: 'start', labelDy: 20 },
+      { id: 'now', type: 'dot', x: p3Power.last.x, y: p3Power.last.y, r: 3.4, label: 'current regime', labelAnchor: 'end', labelDy: -12 },
+    ],
+    primaryKey: 'price',
+    hoverTargets: [
+      { id: 'price', kind: 'series', seriesKey: 'price', label: 'Price', name: 'Bitcoin price', why: 'Most of the time it lives inside the corridor; the excursions out are the regime signal, not the trend.', claim: 'Price is read against the band, not in isolation.', concept: 'Power law', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'central', kind: 'series', seriesKey: 'central', label: 'Fair value', name: 'Power-law central tendency', why: 'The corridor midline — the framework’s rough sense of fair value on the adoption curve.', claim: 'A heuristic centre, not a target.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'euphoria', kind: 'marker', label: 'Euphoria', name: 'Euphoria · upper band', why: 'Price stretched above the corridor. Historically rare and brief — a signal to slow discretionary accumulation, not to predict a top.', claim: 'Above the band: caution.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'capitulation', kind: 'marker', label: 'Capitulation', name: 'Capitulation · lower band', why: 'Price below the corridor. Rare and short — where the framework leans into accumulation.', claim: 'Below the band: opportunity.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'now', kind: 'marker', label: 'Current regime', name: 'Where it sits now', why: 'The map keeps re-reading position in the corridor rather than forecasting the next move.', claim: 'Position is a reading, not a prediction.', concept: 'Power law', link: '/part-3-bitcoin-convexity-backbone' },
+    ],
+    mobileTapTargets: ['now', 'euphoria', 'capitulation', 'price', 'central'],
+    implementationNotes: 'Signature Part 3 visual. Baked in log space (y = log10 price; ticks are decades) so the corridor reads straight and calm. Representative shape — production can wire a real log-log fit behind the same spec. Restrained green thesis line, no orange/neon.',
+  },
+
+  {
+    chartId: 'p3-ten-tests', idx: 'P3-02', group: 'part-3', intendedPlacement: 'part-3',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'One Asset, Ten Tests', setupLine: 'The ten backbone requirements, scored across candidate reserve assets',
+    claimLabel: 'BACKBONE · REQUIREMENTS',
+    frameworkClaim: 'Bitcoin uniquely satisfies the framework’s requirements for a convexity backbone asset.',
+    readerTakeaway: 'No alternative clears all ten at once.',
+    chartType: 'Requirement × asset scorecard (meets / partial / fails).',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [{ provider: 'ACF · Part 3', label: 'Backbone requirements and asset comparison', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    explainerHeadline: 'Ten requirements, derived from the objective — not reverse-engineered.',
+    explainerBody: 'The backbone requirements come from one objective: survivable multi-decade compounding. Scored honestly, gold and the S&P clear many of them, but only Bitcoin clears all ten at once. If another asset did, it would qualify equally.',
+    explainerConcept: 'Convexity backbone',
+    concepts: [{ label: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
+    layout: 'scorecard',
+    ariaSummary: 'A scorecard of ten backbone requirements scored across Bitcoin, gold, real estate, commodities, and the S&P 500. Bitcoin meets all ten; gold scores eight, the S&P five and a half, real estate four, commodities three.',
+    scorecard: {
+      assets: [
+        { id: 'btc', label: 'Bitcoin', focus: true }, { id: 'gold', label: 'Gold' }, { id: 're', label: 'Real estate' }, { id: 'cmd', label: 'Commodities' }, { id: 'spx', label: 'S&P 500' },
+      ],
+      aggregates: { btc: '10/10', gold: '8/10', re: '4/10', cmd: '3/10', spx: '5.5/10' },
+      requirements: [
+        { id: 'custody', label: 'Dual custody', scores: { btc: 2, gold: 1, re: 0, cmd: 0, spx: 0 } },
+        { id: 'collat', label: 'Collateralization', scores: { btc: 2, gold: 2, re: 2, cmd: 0, spx: 2 } },
+        { id: 'convex', label: '10–100× convexity', scores: { btc: 2, gold: 0, re: 0, cmd: 0, spx: 0 } },
+        { id: 'models', label: 'Quantifiable models', scores: { btc: 2, gold: 1, re: 1, cmd: 1, spx: 1 } },
+        { id: 'single', label: 'Single asset', scores: { btc: 2, gold: 2, re: 0, cmd: 1, spx: 0 } },
+        { id: 'roth', label: 'Roth viable', scores: { btc: 2, gold: 2, re: 0, cmd: 0, spx: 2 } },
+        { id: 'passive', label: 'Passive hold', scores: { btc: 2, gold: 2, re: 0, cmd: 0, spx: 2 } },
+        { id: 'regime', label: 'Regime resilience', scores: { btc: 2, gold: 1, re: 1, cmd: 1, spx: 1 } },
+        { id: 'survive', label: 'Multi-decade survivability', scores: { btc: 2, gold: 2, re: 1, cmd: 1, spx: 2 } },
+        { id: 'liquid', label: 'Instant liquidity', scores: { btc: 2, gold: 2, re: 0, cmd: 2, spx: 2 } },
+      ],
+    },
+    primaryKey: 'convex',
+    hoverTargets: [
+      { id: 'custody', kind: 'row', label: 'Dual custody', name: 'Dual custody', why: 'Held in sovereign self-custody and in regulated wrappers for borrowing, same underlying exposure. Gold only half-meets; equities and property cannot.', claim: 'Sovereign control and institutional borrowing at once.', concept: 'Custody', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'collat', kind: 'row', label: 'Collateralization', name: 'Collateralization', why: 'Mature lending markets let you borrow without forced sales — the basis of the accumulate-to-borrow lifecycle.', claim: 'Borrow against it, never sell it.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'convex', kind: 'row', label: '10–100× convexity', name: '10–100× convexity', why: 'A measurable adoption TAM supporting multi-decade, order-of-magnitude appreciation — not 2–3× mature growth. This is where only Bitcoin clears.', claim: 'The requirement only Bitcoin meets.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'models', kind: 'row', label: 'Quantifiable models', name: 'Quantifiable models', why: 'Multiple independent valuation frameworks (power-law, realized price, production cost, liquidity) rather than pure narrative.', claim: 'Scoreable, so it can be governed.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'single', kind: 'row', label: 'Single asset', name: 'Single asset', why: 'One unified global thing, not location-specific instances with basis risk.', claim: 'One asset, everywhere.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'roth', kind: 'row', label: 'Roth viable', name: 'Tax optimization', why: 'Borrow-borrow-die plus tax-advantaged wrapper compatibility — a functionally low tax rate on the reserve.', claim: 'Compounds tax-efficiently.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'passive', kind: 'row', label: 'Passive hold', name: 'Passive hold-ability', why: 'No active management, storage rotation, or operational attention to hold for decades.', claim: 'Hold, do not tend.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'regime', kind: 'row', label: 'Regime resilience', name: 'Regime resilience', why: 'Appreciates during instability rather than merely surviving it.', claim: 'Works because of the regime, not despite it.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'survive', kind: 'row', label: 'Multi-decade survivability', name: 'Multi-decade survivability', why: 'High probability of 30–60 year persistence — the horizon the reserve is held for.', claim: 'Built to outlast the cycle.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'liquid', kind: 'row', label: 'Instant liquidity', name: 'Instant liquidity', why: 'Add positions or borrow against collateral without multi-month timelines or heavy friction.', claim: 'Act now, not in ninety days.', concept: 'Liquidity', link: '/part-3-bitcoin-convexity-backbone' },
+    ],
+    mobileTapTargets: ['convex', 'custody', 'collat', 'models', 'single', 'roth', 'passive', 'regime', 'survive', 'liquid'],
+    implementationNotes: 'New scorecard primitive: requirement rows × asset columns, quiet meet/partial/fail glyphs (shape-coded, not colour-only), Bitcoin column emphasised. Scores and aggregates taken from the Part 3 comparison table.',
+  },
+
+  {
+    chartId: 'p3-volatility-is-the-toll', idx: 'P3-03', group: 'part-3', intendedPlacement: 'part-3',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Volatility Is the Toll', setupLine: 'Large Bitcoin drawdowns, small total-portfolio impact at a managed allocation',
+    claimLabel: 'VOLATILITY · SIZING',
+    frameworkClaim: 'Bitcoin volatility is the cost of convexity; sizing decides whether it is survivable.',
+    readerTakeaway: 'The drawdown is the price of admission, not a reason to avoid it.',
+    chartType: 'Representative Bitcoin path with deep drawdowns vs the calmer total-portfolio line at managed size.',
+    visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources',
+    sources: [
+      { provider: 'ACF · Part 3', label: 'Volatility as the cost of convexity; sizing for survivability', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+      { provider: 'ACF · Part 1', label: 'Survivable compounding', role: 'verifies-concept', url: '/part-1-foundation' },
+    ],
+    explainerHeadline: 'The volatility is the toll, not the risk.',
+    explainerBody: 'Bitcoin pays in volatility for its convexity, with repeated drawdowns over fifty percent. Held at a managed reserve size, those drawdowns barely move the total portfolio. Sizing — not avoidance — is what makes the volatility survivable.',
+    explainerConcept: 'Position sizing',
+    concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }],
+    layout: 'single',
+    ariaSummary: 'Two lines indexed to 100. A volatile Bitcoin line rises overall but suffers two deep drawdowns; the total-portfolio line, holding Bitcoin at a managed size, rises gently and stays calm through both.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 230 }, yUnit: 'idx',
+    xTicks: [{ v: 0, label: 'start' }, { v: 50, label: 'mid' }, { v: 100, label: 'now' }],
+    yTicks: [{ v: 50 }, { v: 100 }, { v: 200 }],
+    series: [
+      { key: 'btc', tier: 'primary', label: 'Bitcoin', pts: p3Vol.btc },
+      { key: 'portfolio', tier: 'reference', label: 'Portfolio', pts: p3Vol.portfolio },
+    ],
+    areas: [{ id: 'dd', topKey: 'btc', kind: 'peak', label: '' }],
+    markers: [
+      { id: 'toll', type: 'enso', x: p3Vol.trough.x, y: R(p3Vol.trough.y), r: 12, label: 'the toll · 50%+ drawdown', labelAnchor: 'start', labelDy: 22 },
+      { id: 'calm', type: 'dot', x: p3Vol.trough.x, y: R(valueAt(p3Vol.portfolio, p3Vol.trough.x)), r: 3.2, label: 'portfolio barely moves', labelAnchor: 'start', labelDy: -12 },
+    ],
+    primaryKey: 'btc',
+    hoverTargets: [
+      { id: 'btc', kind: 'series', seriesKey: 'btc', label: 'Bitcoin', name: 'Bitcoin', why: 'Convex and volatile. The deep drawdowns are the cost of the upside, paid in full, repeatedly.', claim: 'Volatility is the toll for convexity.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'portfolio', kind: 'series', seriesKey: 'portfolio', label: 'Portfolio', name: 'Total portfolio', why: 'Holding Bitcoin at a managed reserve size, the same 50%+ drawdowns barely register at the portfolio level.', claim: 'Sizing converts toll into something survivable.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'toll', kind: 'marker', label: 'The toll', name: 'The toll', why: 'A 50%+ Bitcoin drawdown. Unavoidable, and not the thing that ruins you if you are sized for it.', claim: 'Pay the toll; do not get ruined by it.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'calm', kind: 'marker', label: 'Portfolio holds', name: 'Portfolio holds', why: 'At the same moment Bitcoin is halved, the total portfolio is nearly flat — because the position was sized to survive it.', claim: 'Size is the shock absorber.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['toll', 'calm', 'btc', 'portfolio'],
+    implementationNotes: 'Representative paths, not historical BTC. Drawdown-from-peak shaded behind the Bitcoin line; the portfolio line stays calm at managed size.',
+  },
+
+  {
+    chartId: 'p3-exposure-not-control', idx: 'P3-04', group: 'part-3', intendedPlacement: 'part-3',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Exposure Is Not Control', setupLine: 'Maximum exposure can win one cycle; architecture wins across many',
+    claimLabel: 'CONTROL · CONVICTION',
+    frameworkClaim: '100% Bitcoin can win one favorable cycle; the framework optimizes for control across many.',
+    readerTakeaway: 'The ability to act beats the size of a single bet.',
+    chartType: 'Two-path simulation: maximum exposure vs the framework architecture, through a deep drawdown.',
+    visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
+    sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative paths; no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    explainerHeadline: 'Winning a cycle is not the same as staying in control.',
+    explainerBody: 'All-in can win a single favorable cycle. But across multiple cycles and real life events — a job loss at a trough, a liquidity need in a 70 percent drawdown — the architected path keeps dry powder and the capacity to act. Control compounds; raw exposure does not.',
+    explainerConcept: 'Operational control',
+    concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'single',
+    ariaSummary: 'Two simulated paths. Maximum exposure rises highest then craters in a deep drawdown with no capacity to respond; the framework path draws down less and deploys dry powder at the trough.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 240 }, yUnit: 'idx',
+    xTicks: [{ v: 0, label: 'start' }, { v: 70, label: 'drawdown' }, { v: 100, label: 'next cycle' }],
+    yTicks: [{ v: 50 }, { v: 100 }, { v: 200 }],
+    series: [
+      { key: 'maxE', tier: 'stress', label: 'Max exposure', pts: p3Exposure.maxE },
+      { key: 'framework', tier: 'primary', label: 'Framework', pts: p3Exposure.framework },
+    ],
+    markers: [
+      { id: 'stuck', type: 'enso', x: 70, y: R(valueAt(p3Exposure.maxE, 70)), r: 12, label: 'no capacity to act', labelAnchor: 'start', labelDy: 22 },
+      { id: 'act', type: 'dot', x: 70, y: R(valueAt(p3Exposure.framework, 70)), r: 3.2, label: 'dry powder deployed', labelAnchor: 'end', labelDy: -12 },
+    ],
+    primaryKey: 'framework',
+    hoverTargets: [
+      { id: 'framework', kind: 'series', seriesKey: 'framework', label: 'Framework', name: 'Framework architecture', why: 'Smaller drawdown, dry powder kept back, and the capacity to add at the trough or pivot into the next regime.', claim: 'Control across many cycles.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'maxE', kind: 'series', seriesKey: 'maxE', label: 'Max exposure', name: 'Maximum exposure', why: 'Highest peak, but a deep drawdown with nothing left to deploy and no ability to absorb a life event.', claim: 'Wins a cycle, loses control.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'stuck', kind: 'marker', label: 'No capacity', name: 'No capacity to act', why: 'A 70 percent drawdown with no dry powder. If a job loss or liquidity need lands here, there is no move to make.', claim: 'Exposure without control is fragile.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'act', kind: 'marker', label: 'Capacity to act', name: 'Capacity to act', why: 'At the same trough the architected path deploys reserves — turning the drawdown into an opportunity.', claim: 'Dry powder is the option to act.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['stuck', 'act', 'framework', 'maxE'],
+    implementationNotes: 'SIMULATION — illustrative paths, footer-disclosed. The point is capacity-to-act at the trough, not terminal value.',
+  },
+
+  {
+    chartId: 'p3-models-must-converge', idx: 'P3-05', group: 'part-3', intendedPlacement: 'part-3',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Models Must Converge', setupLine: 'The valuation models are most useful where they agree; divergence signals caution',
+    claimLabel: 'VALUATION · CONVERGENCE',
+    frameworkClaim: 'Power-law, realized price, production cost, and liquidity models are most useful when they converge.',
+    readerTakeaway: 'Agreement strengthens conviction; disagreement is the signal.',
+    chartType: 'Valuation envelope — the spread between models narrows on convergence, widens on divergence.',
+    visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources',
+    sources: [{ provider: 'ACF · Part 3', label: 'Multi-model valuation: power-law, realized price, production cost, liquidity', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    explainerHeadline: 'Conviction lives where the models agree.',
+    explainerBody: 'Power-law, realized price, production cost, and liquidity-adjusted models each see Bitcoin differently. When their estimates converge, conviction is highest; when they fan apart, the framework reads uncertainty and steps back. The spread itself is the signal.',
+    explainerConcept: 'Model confluence',
+    concepts: [{ label: 'Model confluence', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'CIS scoring', link: '/part-6-convexity-framework-integrity-scoring' }],
+    layout: 'single',
+    ariaSummary: 'A valuation index with a shaded envelope between the highest and lowest model estimates. The envelope starts wide, narrows to a tight convergence mid-chart, then widens again into divergence; the price line tracks through the middle.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 95 }, yUnit: 'idx',
+    xTicks: [{ v: 0, label: 'divergent' }, { v: 50, label: 'convergence' }, { v: 100, label: 'divergent' }],
+    yTicks: [{ v: 25 }, { v: 50 }, { v: 75 }],
+    series: [
+      { key: 'modelMax', tier: 'reference', hidden: true, pts: p3Models.modelMax },
+      { key: 'modelMin', tier: 'reference', hidden: true, pts: p3Models.modelMin },
+      { key: 'price', tier: 'primary', label: 'price', pts: p3Models.price },
+    ],
+    areas: [{ id: 'envelope', topKey: 'modelMax', botKey: 'modelMin', kind: 'gap', label: 'model range' }],
+    markers: [
+      { id: 'converge', type: 'enso', x: 50, y: R(valueAt(p3Models.price, 50)), r: 12, label: 'models converge · conviction', labelAnchor: 'middle', labelDy: -22 },
+    ],
+    notes: [{ x: 86, y: 30, text: 'divergence · caution', anchor: 'middle' }],
+    primaryKey: 'price',
+    hoverTargets: [
+      { id: 'price', kind: 'series', seriesKey: 'price', label: 'Price', name: 'Price vs models', why: 'Where price sits inside the envelope matters less than how wide the envelope is.', claim: 'The spread, not the level, is the signal.', concept: 'Model confluence', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'converge', kind: 'marker', label: 'Convergence', name: 'Convergence', why: 'The four models agree here — the envelope is tight. This is where the framework holds its highest conviction.', claim: 'Agreement is conviction.', concept: 'CIS scoring', link: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    mobileTapTargets: ['converge', 'price'],
+    implementationNotes: 'Representative envelope (min–max of four models), not historical. The band width is the message; avoid drawing four spaghetti lines.',
+  },
+
+  {
+    chartId: 'p3-accumulate-dont-trade', idx: 'P3-06', group: 'part-3', intendedPlacement: 'part-3',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Accumulate, Don’t Trade', setupLine: 'Valuation paces accumulation; it never sells the cold-storage reserve',
+    claimLabel: 'DISCIPLINE · ACCUMULATION',
+    frameworkClaim: 'Valuation models guide accumulation pacing and conviction, not selling the reserve.',
+    readerTakeaway: 'Models change the pace of buying, never the decision to hold.',
+    chartType: 'Accumulation pace as a function of valuation, with a floor that never sells.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [{ provider: 'ACF · Part 3', label: 'Accumulation pacing and the never-sell reserve', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    explainerHeadline: 'Valuation sets the pace, not the exit.',
+    explainerBody: 'Undervalued, the framework leans into accumulation; at fair value it holds a baseline DCA; extended, it slows or pauses discretionary buying. What it never does is sell the cold-storage reserve. Models tune the pace of buying; they do not trigger a sale.',
+    explainerConcept: 'Valuation discipline',
+    concepts: [{ label: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' }],
+    layout: 'single',
+    ariaSummary: 'Accumulation pace plotted against valuation from undervalued to extended. The pace is high when undervalued, settles to a baseline at fair value, and falls toward zero when extended — but never crosses below the never-sell floor.',
+    domain: { xMin: 0, xMax: 100, yMin: -8, yMax: 95 }, yUnit: '',
+    xTicks: [{ v: 0, label: 'undervalued' }, { v: 50, label: 'fair value' }, { v: 100, label: 'extended' }],
+    yTicks: [],
+    series: [{ key: 'pace', tier: 'primary', label: 'Accumulation pace', pts: p3Accum.pace }],
+    bands: [{ id: 'caution', kind: 'regime', render: 'wash', x0: 66, x1: 100, label: 'slow / pause', labelAnchor: 'end' }],
+    levels: [{ id: 'neversell', y: 0, kind: 'charcoal', label: 'never sell the reserve' }],
+    markers: [
+      { id: 'increase', type: 'dot', x: 16, y: R(valueAt(p3Accum.pace, 16)), r: 3.2, label: 'increase accumulation', labelAnchor: 'start', labelDy: -12 },
+      { id: 'baseline', type: 'dot', x: 50, y: R(valueAt(p3Accum.pace, 50)), r: 3.2, label: 'baseline DCA', labelAnchor: 'middle', labelDy: -12 },
+    ],
+    primaryKey: 'pace',
+    hoverTargets: [
+      { id: 'pace', kind: 'series', seriesKey: 'pace', label: 'Accumulation pace', name: 'Accumulation pace', why: 'High when cheap, baseline at fair value, near zero when extended — and never negative. The reserve is paced, never sold.', claim: 'Models pace buying, not selling.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'increase', kind: 'marker', label: 'Increase', name: 'Undervalued · increase', why: 'Below fair value, conviction and pace rise — the framework leans in.', claim: 'Cheap: accumulate harder.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'baseline', kind: 'marker', label: 'Baseline DCA', name: 'Fair value · baseline DCA', why: 'Around fair value the pace settles to a steady dollar-cost-average baseline.', claim: 'Fair: keep stacking, steadily.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'caution', kind: 'band', label: 'Extended · slow', name: 'Extended · slow or pause', why: 'Stretched valuations slow or pause discretionary accumulation — but still never trigger a sale.', claim: 'Rich: ease off buying, do not sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'neversell', kind: 'level', label: 'Never sell', name: 'Never sell the reserve', why: 'The floor the pace never crosses. Cold storage is borrowed against, not sold.', claim: 'The reserve is permanent.', concept: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' },
+    ],
+    mobileTapTargets: ['increase', 'baseline', 'caution', 'neversell', 'pace'],
+    implementationNotes: 'Conceptual; x is valuation, y is accumulation pace. The never-sell floor (level at 0) is the invariant the curve never breaches.',
+  },
+
+  {
+    chartId: 'p3-cold-storage-to-borrow', idx: 'P3-07', group: 'part-3', intendedPlacement: 'part-3',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Cold Storage to Borrow', setupLine: 'The reserve lifecycle: accumulate, self-custody, mature, borrow — without a forced sale',
+    claimLabel: 'LIFECYCLE · RESERVE',
+    frameworkClaim: 'The Bitcoin reserve moves from accumulation to collateralized borrowing without forced sale.',
+    readerTakeaway: 'Liquidity comes from borrowing against the reserve, not selling it.',
+    chartType: 'Reserve lifecycle flow: accumulate → self-custody → mature → collateralized loan → liquidity.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [{ provider: 'ACF · Part 3', label: 'Accumulation-to-borrowing reserve lifecycle', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }, { provider: 'ACF · Part 4', label: 'Buy-borrow-die and collateral', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' }],
+    explainerHeadline: 'Liquidity without selling the reserve.',
+    explainerBody: 'The reserve is accumulated, moved to self-custody, and allowed to mature. Once mature, it becomes collateral: a loan against it provides liquidity without a sale, without a taxable event, and without giving up the long-duration exposure. The asset keeps working while it funds life.',
+    explainerConcept: 'Buy-borrow-die',
+    concepts: [{ label: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' }],
+    layout: 'flow',
+    ariaSummary: 'A five-stage reserve lifecycle, left to right: accumulate, self-custody, mature reserve, collateralized loan, and liquidity without a sale.',
+    flow: {
+      stages: [
+        { id: 's1', label: 'Accumulate', nodes: [{ id: 'accumulate', label: 'Accumulate', sub: 'paced by valuation' }] },
+        { id: 's2', label: 'Custody', nodes: [{ id: 'custody', label: 'Self-custody', sub: 'sovereign control' }] },
+        { id: 's3', label: 'Mature', nodes: [{ id: 'mature', label: 'Mature reserve', sub: 'long-duration hold' }] },
+        { id: 's4', label: 'Collateral', nodes: [{ id: 'loan', label: 'Collateralized loan', sub: 'borrow, do not sell' }] },
+        { id: 's5', label: 'Liquidity', nodes: [{ id: 'liquidity', label: 'Liquidity', sub: 'no sale, no tax event' }] },
+      ],
+    },
+    primaryKey: 'liquidity',
+    hoverTargets: [
+      { id: 'accumulate', kind: 'node', label: 'Accumulate', name: 'Accumulate', why: 'Build the reserve steadily, paced by valuation rather than timing.', claim: 'Start by stacking.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'custody', kind: 'node', label: 'Self-custody', name: 'Self-custody', why: 'Move it to sovereign cold storage — bearer control, no intermediary.', claim: 'Hold your own keys.', concept: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'mature', kind: 'node', label: 'Mature reserve', name: 'Mature reserve', why: 'Let the position age into a long-duration reserve large enough to borrow against.', claim: 'Time turns it into collateral.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'loan', kind: 'node', label: 'Collateralized loan', name: 'Collateralized loan', why: 'Borrow against the reserve for liquidity instead of selling it.', claim: 'Borrow, do not sell.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'liquidity', kind: 'node', label: 'Liquidity', name: 'Liquidity without sale', why: 'Cash to use, with no taxable event and no loss of the long-duration exposure.', claim: 'Liquidity while still holding.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
+    ],
+    mobileTapTargets: ['accumulate', 'custody', 'mature', 'loan', 'liquidity'],
+    implementationNotes: 'Lifecycle flow (linear stages). Conceptual diagram; the final liquidity node is the emphasised output.',
+  },
+
+  {
+    chartId: 'p3-reserve-share-evolves', idx: 'P3-08', group: 'part-3', intendedPlacement: 'part-3',
+    status: 'needs-design-review', wiredPublic: false,
+    title: 'Reserve Share Evolves', setupLine: 'A 10–15% reserve can mature into a 30–50% share, where borrow-phase governance begins',
+    claimLabel: 'ALLOCATION · PHASE',
+    frameworkClaim: 'A 10–15% reserve can evolve into a 30–50% mature share, at which point borrow-phase governance matters.',
+    readerTakeaway: 'Success changes the job: from accumulating to governing the reserve.',
+    chartType: 'Reserve share as a percent of net worth, rising through target, elevated, and mature phases.',
+    visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
+    sources: [{ provider: 'Author simulation', label: 'Reserve share evolving via accumulation + appreciation', role: 'methodology', notes: 'Illustrative trajectory; ranges from the Part 3 allocation guidance.' }, { provider: 'ACF · Part 3', label: 'Reserve ranges and borrow-phase governance', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    explainerHeadline: 'The reserve outgrows its target — on purpose.',
+    explainerBody: 'A starting reserve of 10–15 percent, left to accumulate and appreciate, can grow into 30–50 percent of net worth over fifteen to twenty years. At that point the problem changes from building the reserve to governing it: this is where the borrow phase and its discipline begin.',
+    explainerConcept: 'Reserve governance',
+    concepts: [{ label: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' }],
+    layout: 'single',
+    ariaSummary: 'Reserve share as a percent of net worth rising over twenty years from about twelve percent, through a target ceiling near fifteen percent and an elevated band, into a mature thirty-to-fifty-percent zone where the borrow phase begins.',
+    domain: { xMin: 0, xMax: 20, yMin: 0, yMax: 55 }, yUnit: '', valueUnit: '% of net worth',
+    xTicks: [{ v: 0, label: 'yr 0' }, { v: 10, label: 'yr 10' }, { v: 20, label: 'yr 20' }],
+    yTicks: [{ v: 15, label: '15%' }, { v: 30, label: '30%' }, { v: 45, label: '45%' }],
+    series: [{ key: 'reserve', tier: 'primary', label: 'Reserve share', pts: p3Reserve.reserve }],
+    guides: [
+      { id: 'target', y: 15, kind: 'base', label: 'target 10–15%' },
+      { id: 'mature', y: 30, kind: 'threshold', dash: true, label: 'mature · borrow phase' },
+    ],
+    markers: [
+      { id: 'borrow', type: 'enso', x: 17, y: R(valueAt(p3Reserve.reserve, 17)), r: 12, label: 'borrow-phase governance', labelAnchor: 'end', labelDy: -16 },
+    ],
+    primaryKey: 'reserve',
+    hoverTargets: [
+      { id: 'reserve', kind: 'series', seriesKey: 'reserve', label: 'Reserve share', name: 'Reserve share', why: 'Accumulation plus appreciation grows the reserve from a target sliver into a dominant share of net worth.', claim: 'The share is meant to grow.', concept: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'target', kind: 'level', label: 'Target 10–15%', name: 'Target reserve · 10–15%', why: 'The conservative starting allocation: enough to matter, sized to survive a 30–50% drawdown.', claim: 'Where most should begin.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'mature', kind: 'level', label: 'Mature · borrow phase', name: 'Mature · borrow phase', why: 'Past roughly 30 percent, the reserve dominates net worth and the discipline shifts to borrow-phase governance.', claim: 'Big enough to govern, not just hold.', concept: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'borrow', kind: 'marker', label: 'Borrow phase', name: 'Borrow-phase governance', why: 'A mature reserve becomes collateral; managing leverage, drawdown, and liquidity now matters more than adding to it.', claim: 'The job changes from build to govern.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
+    ],
+    mobileTapTargets: ['borrow', 'mature', 'target', 'reserve'],
+    implementationNotes: 'SIMULATION — illustrative trajectory; ranges (10–15% / 30–50%) from Part 3 allocation guidance. Phase thresholds shown as guides.',
+  },
 ];
 
 export const FRAMEWORK_CHART_ORDER = FRAMEWORK_CHART_SPECS.map((s) => s.chartId);
@@ -1034,6 +1414,7 @@ export const HANDOFF_GROUPS = [
   { id: 'docs-landing', label: 'Docs landing page', blurb: 'Conceptual, punchy, visually iconic. Built to communicate the framework at a glance before a reader commits to Part 1.' },
   { id: 'part-1', label: 'Part 1 framework', blurb: 'The locked six-chart inventory that carries the Part 1 argument. The first, second, and fourth are already wired into the live page.' },
   { id: 'part-2', label: 'Part 2 · lineage & macro thesis', blurb: 'How the framework thinks: intellectual lineage, what makes a macro thesis valid, how a structural force becomes capital flow, and how phase separates thesis validity from deployment timing.' },
+  { id: 'part-3', label: 'Part 3 · Bitcoin convexity backbone', blurb: 'Bitcoin as the reserve asset: power-law valuation discipline, the ten backbone requirements, why volatility is the toll for convexity, and the accumulate-to-borrow reserve lifecycle.' },
 ];
 
 export function specsByGroup(groupId) {
