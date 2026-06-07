@@ -136,7 +136,14 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     seriesList.forEach((ser) => ok(Array.isArray(ser.pts) && ser.pts.length > 2, `${w} series ${ser.key} has no data`));
     ok(seriesList.some((ser) => ser.key === s.primaryKey), `${w} primaryKey ${s.primaryKey} not found`);
     s.hoverTargets.filter((t) => t.kind === 'series').forEach((t) => ok(seriesList.some((ser) => ser.key === t.seriesKey), `${w} hoverTarget ${t.id} references missing series ${t.seriesKey}`));
-    if (s.layout === 'dual') { ok(s.xDomain && typeof s.xDomain.xMin === 'number', `${w} dual chart missing shared xDomain`); ok(s.panels.length === 2, `${w} dual chart expects 2 panels`); }
+    if (s.layout === 'dual') {
+      ok(s.xDomain && typeof s.xDomain.xMin === 'number', `${w} dual chart missing shared xDomain`);
+      ok(s.panels.length === 2, `${w} dual chart expects 2 panels`);
+      if (s.perspectiveSlider) {
+        ok(s.perspectiveSlider === true, `${w} perspectiveSlider must be boolean`);
+        ok(s.perspectiveDefault == null || (typeof s.perspectiveDefault === 'number' && s.perspectiveDefault >= 0 && s.perspectiveDefault <= 1), `${w} perspectiveDefault must be 0..1`);
+      }
+    }
   }
 }
 

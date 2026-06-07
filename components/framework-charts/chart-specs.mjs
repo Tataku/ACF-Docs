@@ -111,7 +111,10 @@ const cpiAssets = (() => {
 // Fiscal pressure (dual)
 const fiscal = (() => {
   const n = 120;
-  const debt = curve(0, 40, n, (t) => 40 + 82 * ss(t) + 6 * Math.sin(t * 7), 61, 1.2);
+  // Representative federal debt / GDP, echoing the real contour (≈34% in 1980 →
+  // gradual rise → post-2008 steepening → >120%). Sober line, low chop; the
+  // under-area reads it as an accumulating liability. NOT exact FRED data.
+  const debt = curve(0, 40, n, (t) => 34 + 58 * ss(clamp(t / 0.72, 0, 1)) + 32 * ss(clamp((t - 0.5) / 0.5, 0, 1)), 61, 0.5);
   const interest = curve(0, 40, n, (t) => (t < 0.62 ? 3.2 - 1.6 * ss(clamp(t / 0.62, 0, 1)) : 1.6 + 2.4 * ss(clamp((t - 0.62) / 0.38, 0, 1))), 67, 0.12);
   return { debt, interest };
 })();
@@ -708,7 +711,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p1-policy-constraint', idx: '04', group: 'part-1', intendedPlacement: 'part-1',
     status: 'implemented', wiredPublic: false,
-    title: 'The Bill Came Due', setupLine:'Federal debt and net interest, both as a share of GDP, on a shared timeline',
+    title: 'The Bill Came Due', setupLine:'Debt rose for decades. The cost returned when rates normalized.',
     claimLabel: 'POLICY · CONSTRAINT',
     frameworkClaim: 'Debt and interest burden reduce policy freedom.',
     readerTakeaway: 'For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.',
@@ -725,13 +728,14 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'Debt rose for forty years while rates fell, hiding the burden. As rates normalize, that bill compounds — and the room for fiscal support in the next downturn narrows. Policy freedom is no longer a free option.',
     explainerConcept: 'Policy constraint',
     concepts: [{ label: 'Policy constraint', link: '#manifesto' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Fragility', link: '/part-6-convexity-framework-integrity-scoring' }],
-    layout: 'dual',
-    ariaSummary: 'Two stacked line charts on a shared 1980-to-2024 timeline. The top panel is context: federal debt as a share of GDP rising steeply. The bottom panel is the story: net interest as a share of GDP eases as rates fall, troughs, then inflects upward through an interest-burden threshold into a pressure zone as rates normalize.',
+    layout: 'dual', perspectiveSlider: true, perspectiveDefault: 0.25,
+    perspectiveCopy: { surface: 'rates fell for decades and hid the cost', hidden: 'the cost returns as rates normalize' },
+    ariaSummary: 'Two stacked line charts on a shared 1980-to-2024 timeline, linked by a before/after perspective slider. The top panel is the backdrop: federal debt as a share of GDP rising steeply past 100 percent, with the area beneath it shaded as an accumulating liability. The bottom panel is the cost: net interest as a share of GDP eases as rates fall, troughs, then inflects upward through an interest-burden threshold into a pressure zone as rates normalize. Sliding from Surface to Hidden cost emphasises the debt backdrop, then reveals the interest burden and its pressure zone.',
     xDomain: { xMin: 0, xMax: 40 },
     xTicks: [{ v: 0, label: '1980' }, { v: 25, label: 'rate trough' }, { v: 40, label: '2024' }],
     connective: 'rates fell for decades and hid the cost',
     panels: [
-      { id: 'debtPanel', label: 'Federal debt / GDP · the backdrop', yUnit: '', valueUnit: '% of GDP', domain: { yMin: 30, yMax: 130 }, yTicks: [{ v: 50, label: '50%' }, { v: 90, label: '90%' }, { v: 120, label: '120%' }], series: [{ key: 'debt', tier: 'reference', pts: fiscal.debt }] },
+      { id: 'debtPanel', label: 'Federal debt / GDP · the backdrop', yUnit: '', valueUnit: '% of GDP', domain: { yMin: 30, yMax: 130 }, yTicks: [{ v: 50, label: '50%' }, { v: 90, label: '90%' }, { v: 120, label: '120%' }], series: [{ key: 'debt', tier: 'reference', pts: fiscal.debt }], areas: [{ id: 'debtFill', topKey: 'debt', kind: 'under', tone: 'muted', opacity: 0.12, label: '' }] },
       { id: 'intPanel', label: 'Net interest / GDP · the cost returns', yUnit: '', valueUnit: '% of GDP', domain: { yMin: 1, yMax: 4.4 }, yTicks: [{ v: 2, label: '2%' }, { v: 3, label: '3%' }, { v: 4, label: '4%' }], series: [{ key: 'int', tier: 'primary', pts: fiscal.interest }], guides: [{ id: 'threshold', y: 3, kind: 'threshold', dash: true, label: 'interest-burden pressure' }], bands: [{ id: 'pressure', kind: 'shock', render: 'pressureField', x0: 32, x1: 40, seed: 53, intensity: 0.5, asymmetric: 0.1 }], markers: [{ id: 'burden', type: 'enso', x: 25, y: R(valueAt(fiscal.interest, 25)), r: 11, label: 'burden inflects', labelAnchor: 'middle', labelDy: -16 }] },
     ],
     primaryKey: 'int',
@@ -740,8 +744,9 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'int', kind: 'series', panel: 'intPanel', seriesKey: 'int', label: 'Net interest / GDP', name: 'Net interest / GDP', why: 'The bill. It eased for decades as rates fell; as rates normalize it compounds and crowds out everything else.', claim: 'The cost of debt stopped being free.', concept: 'Policy constraint', link: '#manifesto' },
       { id: 'threshold', kind: 'level', panel: 'intPanel', label: 'Interest-burden pressure', name: 'Interest-burden pressure', why: 'Past this share of GDP, debt service starts competing directly with the room for fiscal support.', claim: 'A sober threshold, not a forecast.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
       { id: 'burden', kind: 'marker', panel: 'intPanel', label: 'Burden inflects', name: 'Burden inflects', why: 'The rate trough. From here, normalizing rates turn a falling burden into a rising one.', claim: 'Identifies where the free option expires.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'pressure', kind: 'band', panel: 'intPanel', label: 'Interest-burden pressure', name: 'Pressure zone', why: 'As rates normalize the interest bill rises into this zone, where debt service competes directly with the room for fiscal support.', claim: 'Policy constraint tightens here.', concept: 'Policy constraint', link: '#manifesto' },
     ],
-    mobileTapTargets: ['debt', 'int', 'threshold', 'burden'],
+    mobileTapTargets: ['debt', 'int', 'threshold', 'burden', 'pressure'],
     implementationNotes: 'Handoff-only for now; unwired from the public page pending explicit placement. Dual-panel = two plots sharing the x-domain, one explainer, one footer. Connective caption composed between panels.',
   },
 

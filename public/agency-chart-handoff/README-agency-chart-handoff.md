@@ -71,7 +71,7 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 | `p1-hedge-broke` | The Hedge Broke | single | representative |
 | `p1-correlation` | Correlation Turns | single | representative |
 | `p1-cpi-assets` | Inflation Was Bigger | single | representative |
-| `p1-policy-constraint` | The Bill Came Due | dual | representative |
+| `p1-policy-constraint` | The Bill Came Due | dual + perspective slider | representative |
 | `p1-sequence-risk` | Path Changes Everything | sequenceRisk (shared return deck) | simulation |
 | `p1-convexity-survival` | Survive the Path | single | representative |
 
@@ -155,6 +155,8 @@ Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclo
 5. Background regions explain a regime or mechanism — never decoration, and never a generic rectangular block where an organic field reads better (the accumulation window uses an ink-wash field with sat stipples, not a rectangle).
 
 **Relational background fields** — when a background highlight has meaning *in relation to* the data, its shape must be derived from that relationship, not placed as static decoration. A relational field should: align with the elements it explains; **grow where the mechanism strengthens and narrow where it fades**; visually connect cause and effect; never obscure primary data; and grow/fade in sync with the build. *Bad:* a static shaded block behind the undervalued period. *Good:* `unitCaptureField` in *Accumulate, Don't Trade* — a lens whose contours are driven by price weakness (top) and pulse height (bottom), so it bulges where BTC is cheapest and the DCA pulses are tallest and pinches shut as the advantage fades.
+
+**Perspective sliders** — use a slider only when the *same* chart has two valid readings and the reader needs to shift between them. Rules: the slider must reveal meaning, not decorate; **both end states must be truthful**; labels must make each perspective clear; the default invites interaction while preserving comprehension (e.g. a surface-biased `0.25`); mobile snaps between the two meaningful states; motion is tactile and calm (immediate during drag, a short settle on release), no dependency, keyboard-accessible. *Example:* `dual + perspectiveSlider` in *The Bill Came Due* — Surface emphasises the rising debt backdrop while the interest burden is subdued; Hidden cost reveals the interest line and its pressure zone (`bandReveal`), so the reader pulls back the calm surface to expose the accumulating cost.
 
 **Motion rule** — *"Build the chart in the order the idea should be understood."* Charts reveal once they scroll into view (an `IntersectionObserver`, once — `useInViewOnce`); reduced-motion and print reveal immediately and never hide content behind animation. The layered order is:
 1. container settles → 2. frame / axis / structural guide → 3. regime or pressure fields breathe in → 4. context series → 5. primary thesis path draws (clip-path, left→right) → 6. markers and annotations resolve → 7. hover/tap affordances activate → 8. explainer / footer stay readable and stable.
