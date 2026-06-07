@@ -282,10 +282,19 @@ function PlotSvg({
   const dimOf = (id) => (focusId && focusId !== id ? 0.34 : 1);
   const trans = (p, ms = 180) => (reduce ? undefined : `${p} ${ms}ms ease`);
   const anchor = isActiveHere ? anchorOf(active) : null;
-  const drawIn = (delay) => ({
+  // Motion doctrine: a single left→right time-sweep reveals bands, areas and all
+  // related series together (data drawn through time); markers and labels resolve
+  // after the sweep front reaches their x-position. Slower + calmer than a pop.
+  const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
+  const TM = { fast: 560, medium: 1100, path: 1900 };
+  const plotW = width - pad.l - pad.r;
+  const xFrac = (px) => Math.max(0, Math.min(1, (px - pad.l) / (plotW || 1)));
+  const sweep = (dur = TM.path, delay = 0) => ({
     clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)',
-    transition: reduce ? 'none' : `clip-path 1000ms cubic-bezier(0.7,0,0.2,1) ${delay}ms, -webkit-clip-path 1000ms cubic-bezier(0.7,0,0.2,1) ${delay}ms`,
+    transition: reduce ? 'none' : `clip-path ${dur}ms ${EASE} ${delay}ms, -webkit-clip-path ${dur}ms ${EASE} ${delay}ms`,
   });
+  // opacity reveal timed to when the sweep reaches a given x (object exists first).
+  const fadeAt = (px, dur = TM.fast, extra = 0) => ({ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity ${dur}ms ${EASE} ${Math.round(120 + TM.path * xFrac(px) + extra)}ms` });
 
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
@@ -314,79 +323,66 @@ function PlotSvg({
         {panel.yUnit ? <text x={pad.l} y={pad.t - 12} style={halo(pal, 9, pal.axis, 500)}>{panel.yUnit.toUpperCase()}</text> : null}
         {!hideX && (xTicks || []).map((t, i) => { const anc = t.v === dom.xMin ? 'start' : t.v === dom.xMax ? 'end' : 'middle'; return <text key={`xl${i}`} x={x(t.v)} y={height - pad.b + 20} textAnchor={anc} style={halo(pal, 9, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
 
-        {/* bands — pressure field (shock) or feathered wash (regime/compression) */}
-        {geom.bands.map((bg, i) => (
-          <g key={`band${i}`} style={{ opacity: entered ? (focusId === bg.b.id ? 1 : 0.85) : 0, transformOrigin: `${bg.xc}px ${(bg.yTop + bg.yBot) / 2}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 320ms ease' : 'opacity 900ms cubic-bezier(0.2,0.7,0.2,1) 80ms, transform 900ms cubic-bezier(0.2,0.7,0.2,1) 80ms' }}>
-            {bg.field ? (
-              <>
-                <path d={bg.field.plume} fill={pal.bandStress} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.20 : 0.18) : (pal.name === 'light' ? 0.13 : 0.12)} style={{ transition: trans('fill-opacity') }} />
-                {bg.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={pal.bandStress} opacity={gr.op} />)}
-              </>
-            ) : bg.dca ? (
-              <>
-                <path d={bg.dca.wash} fill={pal.bandRegime} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.16 : 0.15) : (pal.name === 'light' ? 0.12 : 0.10)} style={{ transition: trans('fill-opacity') }} />
-                {bg.dca.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.7} />)}
-              </>
-            ) : (
-              <path d={bg.wash} fill={pal.bandRegime} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.16 : 0.16) : (pal.name === 'light' ? 0.10 : 0.09)} style={{ transition: trans('fill-opacity') }} />
-            )}
-          </g>
-        ))}
-
-        {/* areas (gap / drawdown / under / edge) — tone/opacity overridable per spec */}
-        {geom.areas.map((ar, i) => {
-          const toneC = ar.a.tone === 'muted' ? pal.tierSecondary : ar.a.tone === 'accent' ? accent : null;
-          const c = toneC || (ar.a.kind === 'peak' ? pal.bandStress : ar.a.kind === 'under' || ar.a.kind === 'edge' ? accent : pal.tierSecondary);
-          const op = ar.a.opacity != null ? ar.a.opacity : ar.a.kind === 'under' ? 0.10 : ar.a.kind === 'peak' ? 0.10 : ar.a.kind === 'edge' ? 0.13 : 0.09;
-          return (
-            <g key={`ar${i}`} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 360ms' }}>
-              <path d={ar.d} fill={c} opacity={op} />
-              {ar.a.label && <text x={ar.labelX} y={pad.t + 30} textAnchor="middle" style={{ ...halo(pal, 9.5, pal.text3), fontStyle: 'italic' }}>{ar.a.label}</text>}
-            </g>
-          );
-        })}
-
-        {/* guides */}
+        {/* guides — structural thresholds settle early, before the data sweep */}
         {geom.guides.map((g, i) => (
-          <g key={`gd${i}`}>
+          <g key={`gd${i}`} style={fadeAt(pad.l, TM.medium, -100)}>
             <line x1={pad.l} x2={width - pad.r} y1={g.yPx} y2={g.yPx} stroke={g.gd.kind === 'threshold' ? pal.invalidCharcoal : pal.tierReference} strokeWidth="0.9" strokeDasharray={g.gd.dash ? '5 5' : '1 6'} opacity={focusId === g.gd.id ? 0.95 : 0.6} style={{ transition: trans('opacity') }} />
             {g.gd.label && <text x={g.gd.kind === 'threshold' ? width - pad.r : pad.l + 4} y={g.yPx - 6} textAnchor={g.gd.kind === 'threshold' ? 'end' : 'start'} style={halo(pal, 9, g.gd.kind === 'threshold' ? pal.invalidCharcoal : pal.axis, 500)}>{g.gd.label}</text>}
           </g>
         ))}
 
-        {/* secondary / tertiary series */}
-        {(panel.series || []).filter((s) => s.tier !== 'primary' && !s.hidden).map((s) => {
-          const g = geom.series[s.key];
-          return (
-            <g key={`sec${s.key}`} style={{ opacity: dimOf(s.key), transition: trans('opacity') }}>
-              <g style={drawIn(320)}>
+        {/* master time-sweep: bands, areas and all related series grow left→right
+            together, so related lines move in tandem and areas/backgrounds grow
+            with the line fronts rather than popping in afterward. */}
+        <g style={sweep(TM.path, 120)}>
+          {geom.bands.map((bg, i) => (
+            <g key={`band${i}`} style={{ opacity: entered ? (focusId === bg.b.id ? 1 : 0.85) : 0, transition: reduce ? 'opacity 320ms ease' : `opacity ${TM.medium}ms ${EASE} 120ms` }}>
+              {bg.field ? (
+                <>
+                  <path d={bg.field.plume} fill={pal.bandStress} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.20 : 0.18) : (pal.name === 'light' ? 0.13 : 0.12)} style={{ transition: trans('fill-opacity') }} />
+                  {bg.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={pal.bandStress} opacity={gr.op} />)}
+                </>
+              ) : bg.dca ? (
+                <>
+                  <path d={bg.dca.wash} fill={pal.bandRegime} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.16 : 0.15) : (pal.name === 'light' ? 0.12 : 0.10)} style={{ transition: trans('fill-opacity') }} />
+                  {bg.dca.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.7} />)}
+                </>
+              ) : (
+                <path d={bg.wash} fill={pal.bandRegime} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.16 : 0.16) : (pal.name === 'light' ? 0.10 : 0.09)} style={{ transition: trans('fill-opacity') }} />
+              )}
+            </g>
+          ))}
+          {geom.areas.map((ar, i) => {
+            const toneC = ar.a.tone === 'muted' ? pal.tierSecondary : ar.a.tone === 'accent' ? accent : null;
+            const c = toneC || (ar.a.kind === 'peak' ? pal.bandStress : ar.a.kind === 'under' || ar.a.kind === 'edge' ? accent : pal.tierSecondary);
+            const op = ar.a.opacity != null ? ar.a.opacity : ar.a.kind === 'under' ? 0.10 : ar.a.kind === 'peak' ? 0.10 : ar.a.kind === 'edge' ? 0.13 : 0.09;
+            return <path key={`ar${i}`} d={ar.d} fill={c} opacity={op} />;
+          })}
+          {(panel.series || []).filter((s) => s.tier !== 'primary' && !s.hidden).map((s) => {
+            const g = geom.series[s.key];
+            return (
+              <g key={`sec${s.key}`} style={{ opacity: dimOf(s.key), transition: trans('opacity') }}>
                 {g.isStroke
                   ? <path d={g.d} fill="none" stroke={tierColor(s.tier, pal, accent)} strokeWidth="1.1" strokeDasharray={s.tier === 'tertiary' ? '5 5' : '0'} strokeLinecap="round" opacity="0.7" />
                   : <path d={g.d} fill={tierColor(s.tier, pal, accent)} opacity={s.tier === 'stress' ? 0.9 : 0.82} />}
               </g>
-            </g>
-          );
-        })}
-
-        {/* primary series */}
-        {(panel.series || []).filter((s) => s.tier === 'primary' && !s.hidden).map((s) => {
-          const g = geom.series[s.key];
-          return (
-            <g key={`pri${s.key}`} style={{ opacity: dimOf(s.key), transition: trans('opacity') }}>
-              <g style={drawIn(120)}>
+            );
+          })}
+          {(panel.series || []).filter((s) => s.tier === 'primary' && !s.hidden).map((s) => {
+            const g = geom.series[s.key];
+            return (
+              <g key={`pri${s.key}`} style={{ opacity: dimOf(s.key), transition: trans('opacity') }}>
                 <path d={g.d} fill={accent} />
                 {focusId === s.key && <path d={g.center} fill="none" stroke={accent} strokeWidth="1" opacity="0.9" />}
               </g>
-            </g>
-          );
-        })}
+            );
+          })}
+          {geom.levels.map((l, i) => <g key={`lv${i}`} opacity={dimOf(l.lv.id)} style={{ transition: trans('opacity') }}><path d={l.d} fill={pal.invalidCharcoal} opacity={focusId === l.lv.id ? 1 : 0.85} /></g>)}
+        </g>
 
-        {/* levels */}
-        {geom.levels.map((l, i) => <g key={`lv${i}`} opacity={dimOf(l.lv.id)} style={{ transition: trans('opacity') }}><path d={l.d} fill={pal.invalidCharcoal} opacity={focusId === l.lv.id ? 1 : 0.85} /></g>)}
-
-        {/* markers */}
+        {/* markers — resolve as the sweep front reaches their x-position */}
         {geom.markers.map((m, i) => (
-          <g key={`mk${i}`} style={{ opacity: entered ? dimOf(m.m.id) : 0, transformOrigin: `${m.cx}px ${m.cy}px`, transform: entered ? 'none' : 'scale(0.86)', transition: reduce ? 'opacity 240ms ease 460ms' : 'opacity 360ms cubic-bezier(0.2,0.7,0.2,1) 620ms, transform 480ms cubic-bezier(0.2,0.7,0.2,1) 620ms' }}>
+          <g key={`mk${i}`} style={{ opacity: entered ? dimOf(m.m.id) : 0, transformOrigin: `${m.cx}px ${m.cy}px`, transform: entered ? 'none' : 'scale(0.86)', transition: reduce ? 'opacity 240ms ease' : `opacity ${TM.fast}ms ${EASE} ${Math.round(120 + TM.path * xFrac(m.cx))}ms, transform ${TM.fast}ms ${EASE} ${Math.round(120 + TM.path * xFrac(m.cx))}ms` }}>
             <path d={m.d} fill={pal.markInk} />
             {focusId === m.m.id && <circle cx={m.cx} cy={m.cy} r={(m.m.r || 13) + 2} fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
           </g>
@@ -395,21 +391,22 @@ function PlotSvg({
         {/* leader lines for upper-left enso callouts */}
         {geom.markers.map((m, i) => (m.m.label && m.m.labelAnchor === 'end') ? <line key={`ld${i}`} x1={m.cx - (m.m.r || 13) - 4} y1={m.cy - (m.m.r || 13) - 2} x2={m.cx - (m.m.r || 13) - 16} y2={m.cy - (m.m.r || 13) - 10} stroke={pal.text4} strokeWidth="0.75" opacity={entered ? 0.55 : 0} style={{ transition: trans('opacity', 400) }} /> : null)}
 
-        {/* text labels (always above geometry) */}
-        {!coarse && geom.bands.map((bg, i) => bg.b.label ? <text key={`bl${i}`} x={bg.b.labelAnchor === 'peak' ? (bg.field ? bg.field.peakX : bg.xc) : bg.x0 + 10} y={pad.t + 14} textAnchor={bg.b.labelAnchor === 'peak' ? 'middle' : 'start'} style={halo(pal, 9.5, bg.field ? pal.bandStressText : pal.bandRegimeText)}>{bg.b.label}</text> : null)}
+        {/* text labels — appear after the object they describe exists */}
+        {!coarse && geom.bands.map((bg, i) => bg.b.label ? <text key={`bl${i}`} x={bg.b.labelAnchor === 'peak' ? (bg.field ? bg.field.peakX : bg.xc) : bg.x0 + 10} y={pad.t + 14} textAnchor={bg.b.labelAnchor === 'peak' ? 'middle' : 'start'} style={{ ...halo(pal, 9.5, bg.field ? pal.bandStressText : pal.bandRegimeText), ...fadeAt(bg.xc, TM.fast) }}>{bg.b.label}</text> : null)}
+        {geom.areas.map((ar, i) => ar.a.label ? <text key={`al${i}`} x={ar.labelX} y={pad.t + 30} textAnchor="middle" style={{ ...halo(pal, 9.5, pal.text3), fontStyle: 'italic', ...fadeAt(ar.labelX, TM.fast) }}>{ar.a.label}</text> : null)}
         {!coarse && geom.markers.map((m, i) => {
           if (!m.m.label) return null;
           const r = m.m.r || 13;
           const anc = m.m.labelAnchor === 'end' ? 'end' : m.m.labelAnchor === 'start' ? 'start' : 'middle';
           const lx = anc === 'end' ? m.cx - r - 6 : anc === 'start' ? m.cx + r + 6 : m.cx;
-          return <text key={`ml${i}`} x={lx} y={m.cy + (m.m.labelDy ?? -18)} textAnchor={anc} style={halo(pal, 9.5, pal.text2)}>{m.m.label}</text>;
+          return <text key={`ml${i}`} x={lx} y={m.cy + (m.m.labelDy ?? -18)} textAnchor={anc} style={{ ...halo(pal, 9.5, pal.text2), ...fadeAt(m.cx, TM.fast, 220) }}>{m.m.label}</text>;
         })}
         {(panel.series || []).map((s) => {
           const g = geom.series[s.key];
           const c = s.tier === 'primary' ? accent : tierColor(s.tier, pal, accent);
-          return s.label && !s.hidden ? <text key={`el${s.key}`} x={g.end.x + 9} y={g.end.y + 3.5 + (s.labelDy || 0)} style={{ ...haloSans(pal, s.tier === 'primary' ? 11.5 : 11, c, s.tier === 'primary' ? 600 : 500), opacity: dimOf(s.key) }}>{s.label}</text> : null;
+          return s.label && !s.hidden ? <text key={`el${s.key}`} x={g.end.x + 9} y={g.end.y + 3.5 + (s.labelDy || 0)} style={{ ...haloSans(pal, s.tier === 'primary' ? 11.5 : 11, c, s.tier === 'primary' ? 600 : 500), opacity: entered ? dimOf(s.key) : 0, transition: reduce ? 'opacity 300ms ease' : `opacity ${TM.fast}ms ${EASE} ${Math.round(120 + TM.path * xFrac(g.end.x))}ms` }}>{s.label}</text> : null;
         })}
-        {geom.notes.map((n, i) => <text key={`nt${i}`} x={n.x} y={n.y} textAnchor={n.nt.anchor || 'middle'} style={{ ...haloSans(pal, 11.5, pal.text3, 500), fontStyle: 'italic' }}>{n.nt.text}</text>)}
+        {geom.notes.map((n, i) => <text key={`nt${i}`} x={n.x} y={n.y} textAnchor={n.nt.anchor || 'middle'} style={{ ...haloSans(pal, 11.5, pal.text3, 500), fontStyle: 'italic', ...fadeAt(n.x, TM.fast, 120) }}>{n.nt.text}</text>)}
 
         {/* crosshair on series hover */}
         {anchor && isActiveHere && active.kind === 'series' && (
@@ -478,13 +475,13 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
             <text x={x(c.qx * 0.55)} y={y(c.qy * 0.62) + 16} textAnchor="middle" style={halo(pal, 8.5, pal.text4)}>{c.sub}</text>
           </g>
         ))}
-        {/* path */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 900ms ease 120ms' }}>
+        {/* path — settles slowly through regime space */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 1500ms ease 160ms' }}>
           <path d={geom.line} fill={accent} opacity="0.5" />
         </g>
-        {/* waypoints */}
+        {/* waypoints — resolve in journey order; the current marker lands last */}
         {geom.px.map((p, i) => (
-          <g key={`wp${i}`} style={{ opacity: entered ? (focusId && focusId !== p.id ? 0.4 : 1) : 0, transition: trans('opacity') }}>
+          <g key={`wp${i}`} style={{ opacity: entered ? (focusId && focusId !== p.id ? 0.4 : 1) : 0, transformOrigin: `${p.x}px ${p.y}px`, transform: entered ? 'none' : 'scale(0.7)', transition: reduce ? 'opacity 300ms ease' : `opacity 520ms cubic-bezier(0.22,0.61,0.36,1) ${280 + i * 240}ms, transform 520ms cubic-bezier(0.22,0.61,0.36,1) ${280 + i * 240}ms` }}>
             <path d={Brush.inkDot(p.x, p.y, p.id === spec.primaryKey ? 4.4 : 3.4, { seed: 40 + i * 7, intensity: 0.8 })} fill={p.id === spec.primaryKey ? accent : pal.markInk} />
             {focusId === p.id && <circle cx={p.x} cy={p.y} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
             {(() => {
@@ -1024,7 +1021,7 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {reqs.map((r, i) => {
           const on = focusId === r.id;
           return (
-            <g key={r.id} style={{ opacity: entered ? (focusId && !on ? 0.42 : 1) : 0, transition: trans('opacity', 160) }}>
+            <g key={r.id} style={{ opacity: entered ? (focusId && !on ? 0.42 : 1) : 0, transform: entered ? 'none' : 'translateX(-6px)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms cubic-bezier(0.22,0.61,0.36,1) ${220 + i * 130}ms, transform 440ms cubic-bezier(0.22,0.61,0.36,1) ${220 + i * 130}ms` }}>
               {on && <rect x={pad.l - 4} y={rowY(i) - rowH / 2 + 2} width={width - pad.l - pad.r + 8} height={rowH - 4} rx={5} fill={pal.text1} opacity={pal.name === 'light' ? 0.04 : 0.05} />}
               <text x={pad.l + 2} y={rowY(i) + 3.5} style={haloSans(pal, 11, on ? pal.text1 : pal.text2, on ? 600 : 500)}>{r.label}</text>
               <g transform={`translate(0 ${rowY(i)})`}>
@@ -1037,11 +1034,11 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
         <line x1={pad.l} x2={width - pad.r} y1={height - pad.b + 4} y2={height - pad.b + 4} stroke={pal.cardBorder} strokeWidth="1" />
         <text x={pad.l + 2} y={height - pad.b + 24} style={halo(pal, 9, pal.text4)}>AGGREGATE</text>
         {assets.map((a, j) => (
-          <text key={`a${a.id}`} x={colX(j)} y={height - pad.b + 24} textAnchor="middle" style={haloSans(pal, a.focus ? 12 : 10.5, a.focus ? accent : pal.text3, a.focus ? 700 : 600)}>{sc.aggregates[a.id]}</text>
+          <text key={`a${a.id}`} x={colX(j)} y={height - pad.b + 24} textAnchor="middle" style={{ ...haloSans(pal, a.focus ? 12 : 10.5, a.focus ? accent : pal.text3, a.focus ? 700 : 600), opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 520ms ease 1420ms' }}>{sc.aggregates[a.id]}</text>
         ))}
-        {/* "clears all ten" — integrated column footer under the focus aggregate */}
+        {/* "clears all ten" — integrated column footer, resolves last after the row sweep */}
         {focusJ >= 0 && (
-          <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 340) }}>
+          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 600ms ease 1640ms' }}>
             <path d={Brush.brushSegment(colX(focusJ) - colW * 0.3, height - pad.b + 32, colX(focusJ) + colW * 0.3, height - pad.b + 32, { seed: 71, weight: 0.7, intensity: 0.5, waver: 0.1 })} fill={accent} opacity="0.7" />
             <text x={colX(focusJ)} y={height - pad.b + 46} textAnchor="middle" style={halo(pal, 8.5, accent, 600)}>clears all ten</text>
           </g>
@@ -1175,24 +1172,27 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
           <text x={gx + 9} y={g1} style={halo(pal, 8.5, cap > 0 ? accent : pal.text4, 600)}>{cap > 0 ? (st.deployed ? 'deployed' : 'ready') : 'none'}</text>
         </g>
 
-        {/* unselected paths (context) */}
-        {paths.filter((p) => p.pk !== presetId).map((p) => (
-          <g key={p.pk} style={{ opacity: entered ? (hovered && hovered.pk === p.pk ? 0.82 : 0.4) : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 600ms ease, opacity 180ms ease' }}>
-            <path d={p.stroke} fill="none" stroke={pal.tierReference} strokeWidth="1.1" strokeLinecap="round" />
-            <path d={Brush.inkDot(p.end.x, p.end.y, 2.6, { seed: 7, intensity: 0.7 })} fill={pal.tierReference} />
+        {/* comparison paths draw through time together (left→right). The clip is
+            tied to entered, so a strategy/shock change updates instantly without
+            replaying the build. */}
+        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1700ms cubic-bezier(0.22,0.61,0.36,1) 140ms, -webkit-clip-path 1700ms cubic-bezier(0.22,0.61,0.36,1) 140ms' }}>
+          {paths.filter((p) => p.pk !== presetId).map((p) => (
+            <g key={p.pk} style={{ opacity: hovered && hovered.pk === p.pk ? 0.82 : 0.4, transition: 'opacity 180ms ease' }}>
+              <path d={p.stroke} fill="none" stroke={pal.tierReference} strokeWidth="1.1" strokeLinecap="round" />
+              <path d={Brush.inkDot(p.end.x, p.end.y, 2.6, { seed: 7, intensity: 0.7 })} fill={pal.tierReference} />
+            </g>
+          ))}
+          <g>
+            <path d={ddPath} fill={pal.bandStress} opacity={pal.name === 'light' ? 0.11 : 0.10} />
+            <path d={sel.brush} fill={accent} />
+            <path d={Brush.inkDot(sel.end.x, sel.end.y, 3.4, { seed: 9, intensity: 0.8 })} fill={accent} />
           </g>
-        ))}
-        {/* selected path + its drawdown */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 520ms ease' }}>
-          <path d={ddPath} fill={pal.bandStress} opacity={pal.name === 'light' ? 0.11 : 0.10} />
-          <path d={sel.brush} fill={accent} />
-          <path d={Brush.inkDot(sel.end.x, sel.end.y, 3.4, { seed: 9, intensity: 0.8 })} fill={accent} />
         </g>
-        {/* end labels (de-collided) */}
-        {endLabels.map((l) => <text key={l.pk} x={width - pad.r - 4} y={l.y + 3} textAnchor="end" style={haloSans(pal, l.on ? 11 : 10, l.on ? accent : pal.text3, l.on ? 700 : 500)}>{l.short}</text>)}
-        {/* shock mark on the selected path */}
+        {/* end labels (de-collided) — resolve after the paths have drawn */}
+        {endLabels.map((l) => <text key={l.pk} x={width - pad.r - 4} y={l.y + 3} textAnchor="end" style={{ ...haloSans(pal, l.on ? 11 : 10, l.on ? accent : pal.text3, l.on ? 700 : 500), opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 460ms ease 1720ms' }}>{l.short}</text>)}
+        {/* shock mark — appears as the sweep reaches the trough */}
         {shockId !== 'none' && (
-          <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 300) }}>
+          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : `opacity 480ms ease ${Math.round(140 + 1700 * Math.max(0, Math.min(1, (trough.x - pad.l) / (width - pad.l - pad.r))))}ms` }}>
             <path d={Brush.enso(trough.x, trough.y, 11, { seed: 51, weight: 0.85, intensity: 0.8, gapAngle: -Math.PI / 3 })} fill={shockColor} />
             {shockText && <text x={trough.x} y={trough.y + 26} textAnchor="middle" style={halo(pal, 9, shockColor)}>{shockText}</text>}
           </g>

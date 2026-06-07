@@ -156,7 +156,16 @@ Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclo
 **Motion rule** — *"Build the chart in the order the idea should be understood."* Charts reveal once they scroll into view (an `IntersectionObserver`, once — `useInViewOnce`); reduced-motion and print reveal immediately and never hide content behind animation. The layered order is:
 1. container settles → 2. frame / axis / structural guide → 3. regime or pressure fields breathe in → 4. context series → 5. primary thesis path draws (clip-path, left→right) → 6. markers and annotations resolve → 7. hover/tap affordances activate → 8. explainer / footer stay readable and stable.
 
-Interaction comes after comprehension; animation creates comprehension. It is native (CSS transitions + clip-path draw, no animation library), never loops, and never shifts layout. On the `scenario` chart a strategy/shock change updates the paths and stats quickly **without replaying the build**. The figure exposes `data-build="idle|in"`, `data-reduced-motion`, the `acf-chart-build` class, and `--build-duration` / `--build-stagger` CSS variables as hook points.
+Interaction comes after comprehension; animation creates comprehension. It is native (CSS transitions + clip-path draw, no animation library), never loops, and never shifts layout. The figure exposes `data-build="idle|in"`, `data-reduced-motion`, the `acf-chart-build` class, and `--build-fast / --build-medium / --build-path / --build-long / --build-stagger-* / --build-ease` CSS variables as hook points.
+
+**Motion follows comprehension** (the human-paced doctrine):
+- The build is **slow enough to read** — main paths draw over ~1.4–2s, full charts ~2.2–3.6s, with a calm ease (`--build-ease`), never bouncy or abrupt.
+- **Time-series move left→right.** A single master *time-sweep* reveals bands, areas and all series together, so the data is drawn through time as one motion.
+- **Mechanically related lines move together** (baseline + framework, invested + portfolio, band + price, model envelope + price) — never one full line then another.
+- **Backgrounds grow and fade with their data window** — regime/shock/accumulation fields reveal in sync with the time span they cover, not as a popped rectangle.
+- **Markers appear when the sweep reaches them**; **labels appear after the object they describe exists** (opacity + tiny translate only — never at the cost of readability).
+- **Interaction is a quick update, not a replay** — a `scenario` strategy/shock change re-draws paths/stats in place (~250–500ms) and never re-runs the scroll-build.
+- **Reduced motion reveals immediately** — no path drawing, no staged transforms, no blank below-fold charts in print/export.
 
 ## 5. How to render one chart
 
