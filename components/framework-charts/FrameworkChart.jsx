@@ -1098,6 +1098,15 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   // decision strain → stat tone + the rust intensity of the drawdown shading (mostly max)
   const strainTone = st.strain === 'Extreme' || st.strain === 'High' ? pal.bandStressText : st.strain === 'Moderate' ? pal.text1 : accent;
   const strainOp = ({ Low: 0.06, Moderate: 0.11, High: 0.17, Extreme: 0.23 })[st.strain] || 0.10;
+  // across-all-paths robustness: every strategy's outcome under ALL shocks — you
+  // commit to a strategy BEFORE the shock is known. Built from existing variants
+  // (no new math): x = terminal, dot quality = whether you stay in control.
+  const SHK = sc.shocks.map((s) => s.id);
+  const allRows = PKS.map((pk) => ({
+    pk, short: byId(pk).short || pk, on: pk === presetId,
+    outs: SHK.map((sh) => { const s = sc.variants[`${pk}|${sh}`].stats; return { terminal: s.terminal, control: s.control, forced: s.forced }; }),
+  }));
+  let tMin = 1e9, tMax = -1e9; allRows.forEach((r) => r.outs.forEach((o) => { tMin = Math.min(tMin, o.terminal); tMax = Math.max(tMax, o.terminal); }));
   const ddPath = useMemo(() => { let mxv = -9; const top = sel.v.value.map((p) => { mxv = Math.max(mxv, p.y); return { x: X(p.x), y: Y(mxv) }; }); return areaPath(top, sel.px); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [presetId, shockId, width, height]);
 
   // trough / intervention zone + shock mark on the selected path
@@ -1244,6 +1253,39 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
           </div>
         </div>
       </div>
+
+      {/* across all paths — you don't get to pick the shock (built from all variants) */}
+      <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: pal.text3 }}>ACROSS ALL PATHS · YOU COMMIT BEFORE THE SHOCK IS KNOWN</span>
+          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.04em', color: pal.text4 }}><span style={{ color: accent }}>●</span> in control · <span style={{ color: pal.text3 }}>●</span> low control · <span style={{ color: pal.bandStressText }}>◌</span> forced sale</span>
+        </div>
+        <svg viewBox={`0 0 ${width} 104`} width="100%" style={{ display: 'block' }} aria-hidden="true">
+          {(() => {
+            const PL = 150, PR = 24, xT = (t) => PL + ((t - tMin) / ((tMax - tMin) || 1)) * (width - PL - PR);
+            const EZ = 'cubic-bezier(0.22,0.61,0.36,1)';
+            return allRows.map((r, i) => {
+              const ry = 22 + i * 28;
+              const xs = r.outs.map((o) => xT(o.terminal));
+              return (
+                <g key={r.pk} style={{ opacity: entered ? (r.on ? 1 : 0.5) : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 520ms ${EZ} ${Math.round(700 + i * 90)}ms` }}>
+                  <text x={8} y={ry + 3.5} style={haloSans(pal, 10.5, r.on ? accent : pal.text3, r.on ? 700 : 500)}>{r.short}</text>
+                  <line x1={Math.min(...xs)} x2={Math.max(...xs)} y1={ry} y2={ry} stroke={r.on ? accent : pal.tierReference} strokeWidth={r.on ? 1.4 : 1} opacity={r.on ? 0.5 : 0.32} strokeLinecap="round" />
+                  {r.outs.map((o, j) => (o.forced
+                    ? <circle key={j} cx={xs[j]} cy={ry} r={4.4} fill="none" stroke={pal.bandStress} strokeWidth="1.4" />
+                    : <circle key={j} cx={xs[j]} cy={ry} r={r.on ? 4.4 : 3.6} fill={o.control >= 80 ? accent : pal.text3} opacity={o.control >= 80 ? 0.95 : 0.8} />))}
+                </g>
+              );
+            });
+          })()}
+          <text x={150} y={99} style={halo(pal, 7.5, pal.text4)}>← lower terminal</text>
+          <text x={width - 24} y={99} textAnchor="end" style={halo(pal, 7.5, pal.text4)}>higher terminal →</text>
+        </svg>
+        <p style={{ margin: '4px 0 0', fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2, maxWidth: 760 }}>
+          <span style={{ color: pal.text1, fontWeight: 600 }}>No line is best on every path.</span> Maximum exposure posts the highest numbers, but on low-control dots with a forced-sale floor; stress-tested is feast-or-famine; the framework holds the tightest, in-control band — the outcome you can count on without predicting the path or timing the trough.
+        </p>
+      </div>
+
       {tooltip}
     </div>
   );
@@ -1318,11 +1360,15 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {/* relational unit-capture field — opens where BTC is cheap and pulses are
             tall, pinches shut as the advantage fades; reveals with the time sweep */}
         <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'clip-path 1500ms cubic-bezier(0.22,0.61,0.36,1) 120ms, -webkit-clip-path 1500ms cubic-bezier(0.22,0.61,0.36,1) 120ms, opacity 700ms ease 120ms' }}>
-          <path d={geom.field.wash} fill={accent} fillOpacity={pal.name === 'light' ? 0.10 : 0.09} />
-          {geom.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.8} />)}
+          <path d={geom.field.wash} fill={accent} fillOpacity={pal.name === 'light' ? 0.06 : 0.05} />
+          {geom.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.5} />)}
         </g>
-        <line x1={pad.l} x2={width - pad.r} y1={(priceBot + pulseTop) / 2} y2={(priceBot + pulseTop) / 2} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
-        <text x={pad.l} y={pad.t - 2} style={halo(pal, 8.5, pal.text4)}>BTC HEARTBEAT · REPRESENTATIVE</text>
+        <text x={pad.l} y={pad.t - 2} style={halo(pal, 8.5, pal.text4)}>BTC PRICE INDEX · REPRESENTATIVE</text>
+        {/* math anchor in the transition zone — the conversion that drives bar height */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 600ms ease 1000ms' }}>
+          <text x={(pad.l + width - pad.r) / 2} y={(priceBot + pulseTop) / 2 - 3} textAnchor="middle" style={halo(pal, 10, pal.text2, 600)}>DCA $ ÷ BTC price = units received</text>
+          <text x={(pad.l + width - pad.r) / 2} y={(priceBot + pulseTop) / 2 + 10} textAnchor="middle" style={halo(pal, 8, pal.text4)}>lower price → more units</text>
+        </g>
 
         {/* tie line: price trough → tallest pulses */}
         <line x1={x(hb.troughX)} x2={x(hb.troughX)} y1={priceY(valueAt(hb.price, hb.troughX))} y2={pulseBase - barH(troughPulse.fw)} stroke={accent} strokeWidth="0.7" strokeDasharray="2 4" opacity={entered ? 0.4 : 0} style={{ transition: trans('opacity', 600) }} />
@@ -1332,7 +1378,7 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
           <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1100ms cubic-bezier(0.7,0,0.2,1) 120ms, -webkit-clip-path 1100ms cubic-bezier(0.7,0,0.2,1) 120ms' }}>
             <path d={geom.line} fill="none" stroke={pal.tierSecondary} strokeWidth="1.2" strokeLinecap="round" opacity="0.85" />
           </g>
-          <text x={x(58)} y={priceY(valueAt(hb.price, 58)) - 10} textAnchor="middle" style={haloSans(pal, 10.5, pal.tierSecondary, 600)}>BTC heartbeat</text>
+          <text x={x(58)} y={priceY(valueAt(hb.price, 58)) - 10} textAnchor="middle" style={haloSans(pal, 10.5, pal.tierSecondary, 600)}>BTC price index</text>
         </g>
 
         {/* DCA unit pulses: muted baseline behind, accent framework in front */}
@@ -1350,7 +1396,7 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {/* annotations (appear after the geometry) */}
         {!coarse && (
           <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 500ms ease 980ms' }}>
-            <text x={x(troughPulse.x)} y={pulseBase - barH(troughPulse.fw) - 12} textAnchor="middle" style={haloSans(pal, 10.5, accent, 600)}>same dollars buy more units when cheap</text>
+            <text x={x(troughPulse.x)} y={pulseBase - barH(troughPulse.fw) - 12} textAnchor="middle" style={haloSans(pal, 10.5, accent, 600)}>same dollars buy more units</text>
             <text x={x(rightPulse.x)} y={pulseBase - barH(rightPulse.base) - 12} textAnchor="end" style={{ ...haloSans(pal, 10, pal.text3, 500), fontStyle: 'italic' }}>slows new buying · never sells</text>
           </g>
         )}
