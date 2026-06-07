@@ -326,22 +326,24 @@ The handoff/export pages carry **one optional input near the top** — a *simula
 context* — so a reader can feel the framework in their own numbers without the
 charts becoming a calculator:
 
-- **Starting value** (default `$100,000`) — accepts `250000`, `250,000`, or
+- **Starting value** (default `$100,000`) — the page panel is labelled **SIMULATION
+  CONTEXT** (*Starting value* · *Time horizon*). Accepts `250000`, `250,000`, or
   `$250,000`; formats on blur; clamped `$1,000`–`$100,000,000`; empty/invalid
   never crashes or shows `NaN`. Canonical context key `startingValue`
-  (`portfolioValue` is the current alias, normalized by `readStartingValue`).
+  (`portfolioValue` is still accepted as a legacy alias, normalized by `readStartingValue`).
 - **Horizon** — `10 years · 20 years · 30+ years · Legacy` (default `30+ years`).
   Surfaced in the chart-level intro for opted-in charts; only changes a chart's
   *math* if that chart explicitly consumes it.
 
 State is **local only**: no persistence, no cookies/localStorage, no backend; it
 resets on refresh. The context is passed to every `FrameworkChart` as
-`readerContext={{ portfolioValue, horizon }}`.
+`readerContext={{ startingValue, horizon }}`; each opted-in chart renders a quiet
+`getSimulationIntro(...)` line **above its visual**.
 
 A chart opts in with a spec field:
 
 ```js
-personalization: { uses: ['portfolioValue'], kind: 'scenario-scale', note: '…' }
+personalization: { uses: ['startingValue'], kind: 'scenario-scale', note: '…' }
 ```
 
 Charts consuming context (Part 1 + Part 3):
