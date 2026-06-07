@@ -35,8 +35,13 @@
  * no animation library, no looping, no layout shift. The rules below are
  * platform-level safety nets: content is NEVER hidden behind animation. */
 .acf-chart-build {
-  --build-duration: 900ms;
-  --build-stagger: 110ms;
+  --build-fast: 560ms;
+  --build-medium: 1100ms;
+  --build-path: 1900ms;
+  --build-long: 2600ms;
+  --build-stagger-small: 140ms;
+  --build-stagger-medium: 260ms;
+  --build-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 /* If a chart is still in the pre-build (idle) state — reduced motion before the
