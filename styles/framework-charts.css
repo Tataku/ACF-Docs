@@ -27,6 +27,38 @@
   .acf-fx-focusable { display: none; }
 }
 
+/* ── Scroll-build animation system ──────────────────────────────────────────
+ * Charts reveal once they scroll into view (see useInViewOnce). The figure
+ * carries data-build="idle|in", data-reduced-motion, and CSS timing vars
+ * (--build-duration / --build-stagger). The layered entrance itself is
+ * orchestrated in the component with native opacity / transform / clip-path —
+ * no animation library, no looping, no layout shift. The rules below are
+ * platform-level safety nets: content is NEVER hidden behind animation. */
+.acf-chart-build {
+  --build-duration: 900ms;
+  --build-stagger: 110ms;
+}
+
+/* If a chart is still in the pre-build (idle) state — reduced motion before the
+ * effect runs, or below-fold during a print/PDF capture that never scrolled —
+ * reveal it fully so nothing renders blank. Built charts keep their fidelity. */
+@media (prefers-reduced-motion: reduce) {
+  .acf-chart-build[data-build='idle'] svg g,
+  .acf-chart-build[data-build='idle'] svg path {
+    opacity: 1 !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
+}
+@media print {
+  .acf-chart-build[data-build='idle'] svg g,
+  .acf-chart-build[data-build='idle'] svg path {
+    opacity: 1 !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
+}
+
 /* Handoff inventory table: drop the mode/status/wired columns on narrow
  * screens (the per-chart metadata strip still carries them). */
 @media (max-width: 640px) {
