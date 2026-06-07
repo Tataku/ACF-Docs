@@ -1641,70 +1641,197 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   );
 }
 
-/* ── DualPerspectiveSvg — before/after perspective slider for the dual chart ──*
- * Surface view emphasises the debt backdrop; Hidden-cost view reveals the
- * interest burden + pressure field. One normalized `perspective` (0..1) drives
- * panel emphasis and the pressure-field reveal (bandReveal). Drag / tap /
- * keyboard; mobile snaps to the two meaningful states. Built on PlotSvg. */
-function DualPerspectiveSvg({ spec, width, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, showValues, valueNote, readerContext }) {
-  const top = spec.panels[0], bot = spec.panels[1];
-  const [p, setP] = useState(typeof spec.perspectiveDefault === 'number' ? spec.perspectiveDefault : 0.25);
-  const [drag, setDrag] = useState(false);
-  const trackRef = useRef(null);
-  const c01 = (v) => Math.max(0, Math.min(1, v));
-  const setFromX = (clientX) => { const el = trackRef.current; if (!el) return; const r = el.getBoundingClientRect(); setP(c01((clientX - r.left) / (r.width || 1))); };
-  const onDown = (e) => { setDrag(true); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) { /* noop */ } setFromX(e.clientX); };
-  const onMove = (e) => { if (drag) setFromX(e.clientX); };
-  const onUp = () => { setDrag(false); if (coarse) setP((v) => (v < 0.5 ? 0 : 1)); };
-  const onKey = (e) => {
-    let np = null;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') np = c01(p + 0.1);
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') np = c01(p - 0.1);
-    else if (e.key === 'Home') np = 0; else if (e.key === 'End') np = 1;
-    if (np != null) { e.preventDefault(); setP(np); }
-  };
-  const lerp = (a, b, t) => a + (b - a) * t;
-  const topOp = lerp(1, 0.45, p), botOp = lerp(0.55, 1, p), pTrans = drag ? 'none' : 'opacity 220ms ease';
+/* ── BeforeAfterRevealSvg — true before/after clipped reveal (one canvas) ─────
+ * Two full chart STATES share ONE SVG coordinate space and ONE debt backdrop.
+ * BASE = surface view (debt backdrop prominent, the interest cost still faint).
+ * OVERLAY = hidden-cost view (the SAME backdrop + the rising interest line, its
+ * burden inflection, an interest-burden threshold and a pressure zone), clipped
+ * to the RIGHT of a vertical divider. Dragging the divider spatially WIPES the
+ * calm surface away to expose the cost beneath — a real reveal, never an opacity
+ * toggle. Surface (left) ↔ Hidden cost (right). Drag / keyboard / touch;
+ * reduced-motion + print safe. The backdrop is identical in both layers so it
+ * reads continuous across the wipe; the difference is the cost it was hiding. */
+function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin, showValues, valueNote }) {
+  const svgRef = useRef(null);
+  const clipId = `acf-reveal-${useId().replace(/:/g, '')}`;
+  const debtP = spec.panels[0], intP = spec.panels[1];
+  const debtPts = debtP.series[0].pts, intPts = intP.series[0].pts;
+  const dDom = debtP.domain, iDom = intP.domain, xDom = spec.xDomain;
+  const labels = spec.beforeAfterLabels || { before: 'Surface', after: 'Hidden cost' };
   const copy = spec.perspectiveCopy || {};
-  const surfaceText = copy.surface || spec.connective || 'surface';
-  const hiddenText = copy.hidden || 'the cost returns';
-  const sOp = c01((0.6 - p) / 0.4), hOp = c01((p - 0.4) / 0.4);
+  const surfaceText = copy.surface || 'rates fell for decades and hid the cost';
+  const hiddenText = copy.hidden || 'the cost returns as rates normalize';
+  const thr = (intP.guides && intP.guides[0] && intP.guides[0].y) || 3;
+  const band = (intP.bands && intP.bands[0]) || { x0: 32, x1: 40 };
+  const mark = (intP.markers && intP.markers[0]) || { x: 25, r: 11 };
+
+  const pad = { l: 18, r: 92, t: 26, b: 30 };
+  const X = (v) => pad.l + ((v - xDom.xMin) / (xDom.xMax - xDom.xMin)) * (width - pad.l - pad.r);
+  const top0 = pad.t, top1 = pad.t + 168;
+  const bot0 = top1 + 42, bot1 = height - pad.b - 14;
+  const Yd = (v) => top1 - ((v - dDom.yMin) / (dDom.yMax - dDom.yMin)) * (top1 - top0);
+  const Yi = (v) => bot1 - ((v - iDom.yMin) / (iDom.yMax - iDom.yMin)) * (bot1 - bot0);
+  const midY = (top1 + bot0) / 2;
+  const HIT = { line: coarse ? 22 : 14, marker: coarse ? 30 : 22, level: coarse ? 18 : 11 };
+
+  const geom = useMemo(() => {
+    const dpx = debtPts.map((p) => ({ x: X(p.x), y: Yd(p.y) }));
+    const ipx = intPts.map((p) => ({ x: X(p.x), y: Yi(p.y) }));
+    const xc = (X(band.x0) + X(band.x1)) / 2, half = (X(band.x1) - X(band.x0)) / 2;
+    return {
+      dpx, ipx,
+      debtArea: areaPath(dpx, debtPts.map((p) => ({ x: X(p.x), y: Yd(dDom.yMin) }))),
+      debtLine: Brush.brushLine(dpx, { seed: 31, weight: 1.0, intensity: 0.6 }),
+      intFull: Brush.brushLine(ipx, { seed: 67, weight: 1.25, intensity: 0.85 }),
+      intFaint: Brush.smoothOpen(ipx),
+      field: Brush.pressureField(xc, bot0, bot1, half, { seed: band.seed || 53, intensity: band.intensity ?? 0.55, asymmetric: band.asymmetric ?? 0.12 }),
+      enso: Brush.enso(X(mark.x), Yi(valueAt(intPts, mark.x)), mark.r || 11, { seed: 97, weight: 0.85, intensity: 0.85, gapAngle: -Math.PI / 3 }),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  const def = typeof spec.revealDefault === 'number' ? spec.revealDefault : (typeof spec.perspectiveDefault === 'number' ? spec.perspectiveDefault : 0.5);
+  const [reveal, setReveal] = useState(def);
+  const [drag, setDrag] = useState(false);
+  const c01 = (v) => Math.max(0, Math.min(1, v));
+  const dividerX = (1 - reveal) * width;                       // Layout: hidden cost is revealed on the RIGHT of the divider
+  const setFromClientX = (cx) => { const el = svgRef.current; if (!el) return; const r = el.getBoundingClientRect(); setReveal(c01(1 - (cx - r.left) / (r.width || 1))); };
+  const onDown = (e) => { setDrag(true); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) { /* noop */ } setFromClientX(e.clientX); };
+  const onHandleMove = (e) => { if (drag) setFromClientX(e.clientX); };
+  const onUp = () => { setDrag(false); if (coarse) setReveal((v) => (v < 0.25 ? 0 : v > 0.75 ? 1 : 0.5)); };  // mobile snaps to surface / midpoint / hidden
+  const onKey = (e) => {
+    let nv = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') nv = c01(reveal + 0.1);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') nv = c01(reveal - 0.1);
+    else if (e.key === 'Home') nv = 0; else if (e.key === 'End') nv = 1;
+    if (nv != null) { e.preventDefault(); setReveal(nv); }
+  };
+
+  const revealedAt = (vbx) => vbx >= dividerX;                 // hidden-cost marks are only live where they are shown
+  const anchorOf = (t) => {
+    if (!t) return null;
+    if (t.id === 'debt') return { x: X(34), y: Yd(valueAt(debtPts, 34)) };
+    if (t.id === 'int') return { x: X(37), y: Yi(valueAt(intPts, 37)) };
+    if (t.id === 'threshold') return { x: width - pad.r - 28, y: Yi(thr) };
+    if (t.id === 'burden') return { x: X(mark.x), y: Yi(valueAt(intPts, mark.x)) };
+    if (t.id === 'pressure') return { x: geom.field.peakX, y: bot0 + 18 };
+    return null;
+  };
+  const resolve = (mx, my) => {
+    if (my <= midY) return targets.find((t) => t.id === 'debt');
+    if (revealedAt(mx)) {
+      if (Math.abs(my - Yi(thr)) < HIT.level && mx > pad.l && mx < width - pad.r) return targets.find((t) => t.id === 'threshold');
+      if (Math.hypot(mx - X(mark.x), my - Yi(valueAt(intPts, mark.x))) < HIT.marker) return targets.find((t) => t.id === 'burden');
+      if (mx >= X(band.x0) && mx <= X(band.x1)) return targets.find((t) => t.id === 'pressure');
+    }
+    return targets.find((t) => t.id === 'int');
+  };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned || drag) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { if (drag) return; const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+  const EZ = 'cubic-bezier(0.22,0.61,0.36,1)';
+  const fadeIn = (delay) => ({ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 620ms ${EZ} ${delay}ms` });
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) {
+      let valueText = null;
+      if (showValues && (active.id === 'debt' || active.id === 'int' || active.id === 'threshold')) {
+        const v = active.id === 'debt' ? valueAt(debtPts, 34) : active.id === 'int' ? valueAt(intPts, 37) : thr;
+        valueText = `${v.toFixed(active.id === 'debt' ? 0 : 1)} % of GDP · ${valueNote}`;
+      }
+      const kl = { debt: 'BACKDROP', int: 'COST', threshold: 'THRESHOLD', burden: 'TRIPWIRE', pressure: 'PRESSURE' }[active.id] || 'ELEMENT';
+      tooltip = <TargetTooltip meta={meta} kindLabel={kl} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={valueText} />;
+    }
+  }
+
   const lbl = { fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em' };
-  const cpDown = { pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext };
 
   return (
-    <div>
-      <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', color: pal.text4, padding: '4px 0 2px 10px' }}>{top.label.toUpperCase()}</div>
-      <div style={{ opacity: topOp, transition: pTrans }}>
-        <PlotSvg panel={top} xDomain={spec.xDomain} xTicks={spec.xTicks} hideX width={width} height={188} targets={spec.hoverTargets.filter((t) => t.panel === top.id)} showValues={showValues} {...cpDown} />
-      </div>
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary}
+        style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }}
+        onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        <defs>
+          <clipPath id={clipId}><rect x={dividerX} y={0} width={Math.max(0, width - dividerX)} height={height} /></clipPath>
+        </defs>
 
-      {/* perspective slider — the interactive spacer */}
-      <div style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 500ms ease 700ms', padding: '2px 14px 4px' }}>
-        <div style={{ position: 'relative', height: 16, marginBottom: 5 }}>
-          <span style={{ position: 'absolute', inset: 0, textAlign: 'center', fontFamily: pal.sans, fontSize: 10.5, fontStyle: 'italic', color: pal.text3, opacity: sOp, transition: 'opacity 160ms ease' }}>{surfaceText}</span>
-          <span style={{ position: 'absolute', inset: 0, textAlign: 'center', fontFamily: pal.sans, fontSize: 10.5, fontStyle: 'italic', color: accent, opacity: hOp, transition: 'opacity 160ms ease' }}>{hiddenText}</span>
-        </div>
-        <div role="slider" aria-label="Reveal hidden debt cost" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(p * 100)} aria-valuetext={p < 0.5 ? 'surface' : 'hidden cost'}
-          tabIndex={0} className="acf-fx-focusable" title="Slide to shift perspective from surface calm to hidden cost"
-          onKeyDown={onKey} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
-          style={{ position: 'relative', padding: '9px 0', cursor: 'pointer', touchAction: 'none', outlineOffset: 3 }}>
-          <div ref={trackRef} style={{ position: 'relative', height: 2, background: pal.cardBorder, borderRadius: 2 }}>
-            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${p * 100}%`, background: accent, opacity: 0.5, transition: drag ? 'none' : 'width 200ms ease' }} />
-            <div aria-hidden style={{ position: 'absolute', left: `${p * 100}%`, top: '50%', width: 10, height: 16, transform: 'translate(-50%,-50%)', borderRadius: 3, background: pal.cardSolid, border: `1.5px solid ${accent}`, transition: drag ? 'none' : 'left 200ms ease' }} />
-          </div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 6 }}>
-          <span style={{ ...lbl, color: p < 0.5 ? pal.text2 : pal.text4 }}>SURFACE</span>
-          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>slide to reveal the hidden cost</span>
-          <span style={{ ...lbl, color: p >= 0.5 ? pal.text2 : pal.text4 }}>HIDDEN COST</span>
-        </div>
-      </div>
+        {/* BASE — surface view: debt backdrop prominent, the cost still faint */}
+        <g style={fadeIn(120)}>
+          <path d={geom.debtArea} fill={pal.tierSecondary} opacity={pal.name === 'light' ? 0.12 : 0.1} />
+          <path d={geom.debtLine} fill={pal.tierReference} opacity="0.92" />
+          <path d={geom.intFaint} fill="none" stroke={pal.tierSecondary} strokeWidth="1.1" opacity="0.32" />
+          {!coarse && <text x={X(5)} y={bot0 + 16} style={{ ...haloSans(pal, 10.5, pal.text3, 500), fontStyle: 'italic' }}>{surfaceText}</text>}
+        </g>
 
-      <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', color: pal.text4, padding: '4px 0 2px 10px' }}>{bot.label.toUpperCase()}</div>
-      <div style={{ opacity: botOp, transition: pTrans }}>
-        <PlotSvg panel={bot} xDomain={spec.xDomain} xTicks={spec.xTicks} width={width} height={212} targets={spec.hoverTargets.filter((t) => t.panel === bot.id)} showValues={showValues} bandReveal={p} {...cpDown} />
+        {/* OVERLAY — hidden-cost view, clipped to the RIGHT of the divider */}
+        <g clipPath={`url(#${clipId})`}>
+          <rect x={0} y={0} width={width} height={height} fill={pal.card} />
+          <g style={fadeIn(520)}>
+            <path d={geom.debtArea} fill={pal.tierSecondary} opacity={pal.name === 'light' ? 0.12 : 0.1} />
+            <path d={geom.debtLine} fill={pal.tierReference} opacity="0.92" />
+            {/* pressure zone — where the burden compounds */}
+            <g style={{ opacity: focusId === 'pressure' ? 1 : 0.9 }}>
+              <path d={geom.field.plume} fill={pal.bandStress} fillOpacity={focusId === 'pressure' ? (pal.name === 'light' ? 0.2 : 0.18) : (pal.name === 'light' ? 0.13 : 0.12)} style={{ transition: trans('fill-opacity') }} />
+              {geom.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={pal.bandStress} opacity={gr.op} />)}
+            </g>
+            {/* interest-burden threshold */}
+            <line x1={pad.l} x2={width - pad.r} y1={Yi(thr)} y2={Yi(thr)} stroke={pal.invalidCharcoal} strokeWidth="0.9" strokeDasharray="5 5" opacity={focusId === 'threshold' ? 0.95 : 0.6} style={{ transition: trans('opacity') }} />
+            <text x={width - pad.r} y={Yi(thr) - 5} textAnchor="end" style={halo(pal, 8.5, pal.invalidCharcoal)}>interest-burden pressure</text>
+            {/* the cost line */}
+            <path d={geom.intFull} fill={accent} opacity={focusId && focusId !== 'int' ? 0.5 : 1} style={{ transition: trans('opacity') }} />
+            {/* burden inflection */}
+            <path d={geom.enso} fill={pal.markInk} />
+            {focusId === 'burden' && <circle cx={X(mark.x)} cy={Yi(valueAt(intPts, mark.x))} r={(mark.r || 11) + 2} fill="none" stroke={accent} strokeWidth="1.1" />}
+            {!coarse && <text x={X(mark.x) + (mark.r || 11) + 6} y={Yi(valueAt(intPts, mark.x)) - 8} style={halo(pal, 9, pal.text2)}>burden inflects</text>}
+            {!coarse && <text x={X(31)} y={bot0 + 16} textAnchor="middle" style={{ ...haloSans(pal, 10.5, pal.bandStressText, 500), fontStyle: 'italic' }}>{hiddenText}</text>}
+          </g>
+        </g>
+
+        {/* shared axes + register labels — drawn on top, continuous across the wipe */}
+        <text x={pad.l} y={pad.t - 12} style={halo(pal, 9, pal.text4)}>{(debtP.label || 'Federal debt / GDP').toUpperCase()}</text>
+        <text x={pad.l} y={bot0 - 12} style={halo(pal, 9, pal.text4)}>{(intP.label || 'Net interest / GDP').toUpperCase()}</text>
+        {(debtP.yTicks || []).map((t, i) => <text key={`dy${i}`} x={width - pad.r + 8} y={Yd(t.v) + 3} style={halo(pal, 9, pal.axis, 500)}>{t.label != null ? t.label : t.v}</text>)}
+        {(intP.yTicks || []).map((t, i) => <text key={`iy${i}`} x={width - pad.r + 8} y={Yi(t.v) + 3} style={halo(pal, 9, pal.axis, 500)}>{t.label != null ? t.label : t.v}</text>)}
+        {(spec.xTicks || []).map((t, i) => { const anc = t.v === xDom.xMin ? 'start' : t.v === xDom.xMax ? 'end' : 'middle'; return <text key={`xt${i}`} x={X(t.v)} y={height - 8} textAnchor={anc} style={halo(pal, 9, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
+
+        {/* divider + handle (the reveal control) */}
+        <g style={fadeIn(360)}>
+          <line x1={dividerX} x2={dividerX} y1={pad.t - 4} y2={height - pad.b} stroke={accent} strokeWidth="1.1" opacity="0.75" />
+          <g role="slider" tabIndex={0} className="acf-fx-focusable"
+            aria-label="Reveal hidden debt cost" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(reveal * 100)} aria-valuetext={reveal < 0.5 ? 'mostly surface' : 'mostly hidden cost'}
+            onKeyDown={onKey} onPointerDown={onDown} onPointerMove={onHandleMove} onPointerUp={onUp} onPointerCancel={onUp} onClick={(e) => e.stopPropagation()}
+            style={{ cursor: 'ew-resize', touchAction: 'none', outlineOffset: 3 }}>
+            <circle cx={dividerX} cy={midY} r={coarse ? 17 : 13} fill={pal.cardSolid} stroke={accent} strokeWidth="1.5" />
+            <path d={`M${dividerX - 3} ${midY - 4.5} L${dividerX - 6.5} ${midY} L${dividerX - 3} ${midY + 4.5}`} fill="none" stroke={accent} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={`M${dividerX + 3} ${midY - 4.5} L${dividerX + 6.5} ${midY} L${dividerX + 3} ${midY + 4.5}`} fill="none" stroke={accent} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        </g>
+
+        {/* hover dot on the backdrop / cost lines */}
+        {anchor && isActiveHere && (active.id === 'debt' || active.id === 'int') && (
+          <circle cx={anchor.x} cy={anchor.y} r="4" fill={accent} stroke={pal.scrim} strokeWidth="1.5" style={{ pointerEvents: 'none' }} />
+        )}
+
+        {/* keyboard focus chips — hidden-only marks become reachable once revealed */}
+        {targets.filter((t) => t.id === 'debt' || t.id === 'int' || (anchorOf(t) && revealedAt(anchorOf(t).x))).map((t) => (
+          <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />
+        ))}
+      </svg>
+
+      {/* endpoint labels + microcopy */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '6px 14px 2px' }}>
+        <span style={{ ...lbl, color: reveal < 0.5 ? pal.text2 : pal.text4 }}>{(labels.before || 'Surface').toUpperCase()}</span>
+        <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>drag to reveal the hidden cost</span>
+        <span style={{ ...lbl, color: reveal >= 0.5 ? accent : pal.text4 }}>{(labels.after || 'Hidden cost').toUpperCase()}</span>
       </div>
+      {tooltip}
     </div>
   );
 }
@@ -1790,7 +1917,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}
-        {spec.layout === 'dual' && spec.perspectiveSlider && <DualPerspectiveSvg spec={spec} showValues={showValues} {...cp} />}
+        {spec.layout === 'dual' && spec.perspectiveSlider && <BeforeAfterRevealSvg spec={spec} height={460} targets={spec.hoverTargets} showValues={showValues} {...cp} />}
         {spec.layout === 'dual' && !spec.perspectiveSlider && spec.panels.map((p, i) => (
           <React.Fragment key={p.id}>
             <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', color: pal.text4, padding: '4px 0 2px 10px' }}>{p.label.toUpperCase()}</div>
