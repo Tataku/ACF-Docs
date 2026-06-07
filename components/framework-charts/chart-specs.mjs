@@ -261,6 +261,7 @@ const p3Reserve = (() => {
 const p3Scenario = (() => {
   const n = 96;
   const T = (i) => i / n;
+  // one shared market path: a long bull, a deep cycle drawdown, then recovery.
   const market = [];
   for (let i = 0; i <= n; i++) {
     const t = T(i);
@@ -271,11 +272,13 @@ const p3Scenario = (() => {
     market.push(Math.max(45, up + taper + crash + rec));
   }
   let troughI = 0; for (let i = 1; i <= n; i++) if (market[i] < market[troughI]) troughI = i;
-  const stable = (t) => 100 + 30 * t;
+  const stable = (t) => 100 + 30 * t;                       // diversified, income-backed sleeve
+  // w = share that tracks Bitcoin; dp = dry powder (capacity to act); income = wage buffer.
+  // More control trades clean-path upside for a smaller drawdown and more capacity.
   const presets = {
-    max: { w: 1.0, dp: 0.0, income: false },
-    reserve: { w: 0.18, dp: 0.22, income: true },
-    stress: { w: 0.18, dp: 0.45, income: true },
+    max: { w: 1.0, dp: 0.0, income: false },                // 100% BTC
+    reserve: { w: 0.20, dp: 0.25, income: true },           // framework reserve
+    stress: { w: 0.13, dp: 0.50, income: true },            // reserve + deliberate dry powder
   };
   const build = (pk, shock) => {
     const p = presets[pk];
@@ -284,24 +287,32 @@ const p3Scenario = (() => {
       const t = T(i);
       let v = p.w * market[i] + (1 - p.w) * stable(t);
       if (i >= troughI) {
+        // job loss: no wage buffer + no dry powder forces a sale into the bottom.
         if (shock === 'jobloss') v -= (!p.income && p.dp < 0.2) ? 0.30 * market[i] : 2;
+        // deploy: dry powder buys the trough and rides the recovery.
         else if (shock === 'deploy') v += p.dp * 0.95 * Math.max(0, market[i] - market[troughI]);
       }
       value.push({ x: R(t * 100), y: R(Math.max(20, v)) });
     }
     let peak = -9, maxDD = 0; value.forEach((q) => { peak = Math.max(peak, q.y); maxDD = Math.max(maxDD, (peak - q.y) / peak); });
     const forced = shock === 'jobloss' && !p.income && p.dp < 0.2;
+    const deployed = shock === 'deploy' && p.dp > 0;
     const dryPowder = Math.round(p.dp * 100);
     const integrity = forced ? 62 : 100;
     const control = Math.max(6, Math.min(100, Math.round(100 - maxDD * 72 + dryPowder * 0.32 - (forced ? 34 : 0) - (p.income ? 0 : 8))));
-    return { value, stats: { terminal: Math.round(value[value.length - 1].y), maxDD: Math.round(maxDD * 100), dryPowder, forced, integrity, control } };
+    return { value, stats: { terminal: Math.round(value[value.length - 1].y), maxDD: Math.round(maxDD * 100), dryPowder, forced, deployed, integrity, control } };
   };
   const variants = {};
-  let yMax = 0;
+  let yMax = 0, yMin = 1e9;
   ['max', 'reserve', 'stress'].forEach((pk) => ['none', 'jobloss', 'deploy'].forEach((sh) => {
-    const r = build(pk, sh); variants[`${pk}|${sh}`] = r; r.value.forEach((q) => { yMax = Math.max(yMax, q.y); });
+    const r = build(pk, sh); variants[`${pk}|${sh}`] = r; r.value.forEach((q) => { yMax = Math.max(yMax, q.y); yMin = Math.min(yMin, q.y); });
   }));
-  return { variants, troughX: R(T(troughI) * 100), yMax: Math.ceil((yMax + 10) / 10) * 10 };
+  return {
+    variants, troughX: R(T(troughI) * 100),
+    peakX: R(T(market.indexOf(Math.max(...market.slice(0, troughI)))) * 100),
+    yMax: Math.ceil((yMax + 12) / 10) * 10,
+    yMin: Math.max(0, Math.floor((yMin - 14) / 10) * 10),
+  };
 })();
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1264,40 +1275,49 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p3-exposure-not-control', idx: 'P3-04', group: 'part-3', intendedPlacement: 'part-3',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Exposure Is Not Control', setupLine: 'Choose the path. Watch what survives the drawdown.',
+    title: 'Exposure Is Not Control', setupLine: 'Choose the path. Then change the shock.',
     claimLabel: 'CONTROL · INTERACTIVE',
     frameworkClaim: '100% Bitcoin can win one favorable cycle; the framework optimizes for control across many.',
-    readerTakeaway: 'The ability to act beats the size of a single bet.',
-    chartType: 'Interactive path-aware scenario: compare strategies through a drawdown and an optional shock.',
+    readerTakeaway: 'Max exposure wins the clean bull case; control wins the messy path.',
+    chartType: 'Interactive path-aware comparison: all three strategies through a drawdown, with an optional shock.',
     visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
     sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative paths; no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
     explainerHeadline: 'Winning a cycle is not the same as staying in control.',
-    explainerBody: 'Maximum exposure can win the clean bull case. The framework exists for the messy path: drawdowns, income shocks, and the need to act when opportunity appears. Choose a strategy and a shock, and watch terminal value, drawdown, capacity to act, forced-sale risk, and reserve integrity move together.',
+    explainerBody: 'Maximum exposure can win the clean bull case. The framework exists for the path where drawdowns, income shocks, and deployment opportunities arrive at the same time. All three strategies are drawn together: the selected one is emphasised, the others stay as context. Change the shock and watch which path keeps its capacity to act.',
     explainerConcept: 'Operational control',
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'scenario',
-    ariaSummary: 'An interactive exhibit comparing three strategies — maximum exposure, framework reserve, and stress-tested reserve — through a market drawdown, with an optional job-loss or deploy-at-trough shock. For the selected path it reports terminal value, maximum drawdown, dry powder, forced-sale risk, reserve integrity, and a control score.',
+    ariaSummary: 'An interactive exhibit. Three strategy paths — maximum exposure, framework reserve, and stress-tested reserve — are drawn together through a market drawdown, with an optional job-loss or deploy-at-trough shock. Maximum exposure peaks highest on a clean path; under a job-loss shock it is forced to sell at the bottom while the reserves absorb it; with dry powder the stress-tested reserve buys the trough. Outcome read-outs cover upside (terminal value) and control (drawdown, dry powder, forced-sale risk, reserve integrity, control score).',
     scenario: {
       defaultPreset: 'reserve', defaultShock: 'none',
-      domain: { yMin: 0, yMax: p3Scenario.yMax }, troughX: p3Scenario.troughX,
+      domain: { yMin: p3Scenario.yMin, yMax: p3Scenario.yMax }, troughX: p3Scenario.troughX, peakX: p3Scenario.peakX,
+      tradeoff: 'Maximum exposure maximises upside · the framework maximises control',
       presets: [
-        { id: 'max', label: 'Maximum exposure', sub: '100% BTC' },
-        { id: 'reserve', label: 'Framework reserve', sub: '~15% BTC + income' },
-        { id: 'stress', label: 'Stress-tested reserve', sub: 'reserve + dry powder' },
+        { id: 'max', label: 'Maximum exposure', short: 'Max exposure', sub: '100% BTC', axis: 'upside' },
+        { id: 'reserve', label: 'Framework reserve', short: 'Framework', sub: '~15% BTC + income', axis: 'control' },
+        { id: 'stress', label: 'Stress-tested reserve', short: 'Stress-tested', sub: 'reserve + dry powder', axis: 'control' },
       ],
       shocks: [
         { id: 'none', label: 'Clean path' },
         { id: 'jobloss', label: 'Job loss in the drawdown' },
         { id: 'deploy', label: 'Deploy at the trough' },
       ],
+      // annotation shown under the chart; keyed by shock, with a per-strategy nuance.
+      notes: {
+        none: { lead: 'Clean bull case rewards exposure.', max: 'Maximum exposure wins the upside — and only this path.', reserve: 'The reserve gives up some clean-path upside to stay in control.', stress: 'The most control, the least clean-path upside — by design.' },
+        jobloss: { lead: 'Messy path rewards control.', max: 'No wage buffer, no dry powder: maximum exposure is forced to sell at the bottom.', reserve: 'Income covers the gap — the reserve is never a forced seller.', stress: 'Income plus dry powder: the shock is absorbed and the reserve stays intact.' },
+        deploy: { lead: 'Opportunity rewards capacity.', max: 'Already all-in: no dry powder to buy the trough.', reserve: 'Dry powder buys the trough others can only watch.', stress: 'The most dry powder turns the drawdown into the best entry.' },
+      },
       variants: p3Scenario.variants,
     },
     primaryKey: 'reserve',
     hoverTargets: [
-      { id: 'path', kind: 'series', label: 'Portfolio path', name: 'Portfolio value path', why: 'The selected strategy through the cycle. Maximum exposure peaks highest and falls hardest; the reserves draw down less and keep the capacity to act.', claim: 'Terminal value is only one of the outputs.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'max', kind: 'strategy', label: 'Maximum exposure', name: 'Maximum exposure', why: 'Wins the clean bull case and nothing else. No wage buffer and no dry powder, so a drawdown plus an income shock forces a sale at the worst possible price.', claim: 'Highest upside, zero capacity to act.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'reserve', kind: 'strategy', label: 'Framework reserve', name: 'Framework reserve', why: 'A managed Bitcoin position alongside income. It gives up some clean-path upside to keep drawdowns survivable and to never become a forced seller.', claim: 'Trades some upside to stay in control.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'stress', kind: 'strategy', label: 'Stress-tested reserve', name: 'Stress-tested reserve', why: 'The framework reserve plus deliberate dry powder. The least clean-path upside, but the most capacity to act — it can buy the trough that maximum exposure is forced to sell into.', claim: 'Most control; turns a drawdown into an entry.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
     ],
-    mobileTapTargets: ['path'],
-    implementationNotes: 'INTERACTIVE SIMULATION — the headline Part 3 exhibit. Three preset strategies × an optional shock select precomputed, deterministic representative paths (no live calc). Reports terminal value, max drawdown, dry powder, forced-sale risk, reserve integrity, and a control score — not just terminal value.',
+    mobileTapTargets: ['max', 'reserve', 'stress'],
+    implementationNotes: 'INTERACTIVE SIMULATION — the headline Part 3 exhibit. All three strategy paths are drawn together under the selected shock; the chosen strategy is emphasised and the others stay as muted context. Click a path to select it. A capacity-to-act gauge, a trough/intervention zone, a forced-sale mark, and an annotation that updates with the shock carry the story; the stat strip (split into UPSIDE and CONTROL) is subordinate. Precomputed, deterministic representative paths — no live calc.',
   },
 
   {
@@ -1361,14 +1381,15 @@ export const FRAMEWORK_CHART_SPECS = [
       { key: 'baseline', tier: 'reference', label: 'Baseline DCA', pts: p3Accum.baseline },
       { key: 'guided', tier: 'primary', label: 'Framework DCA', pts: p3Accum.guided },
     ],
-    areas: [{ id: 'held', topKey: 'guided', kind: 'under', label: 'reserve held · only grows' }],
+    // the wedge between the two curves IS the extra sats the framework collects while cheap.
+    areas: [{ id: 'extra', topKey: 'guided', botKey: 'baseline', kind: 'edge', tone: 'accent', opacity: 0.16, labelX: 38, label: 'extra sats captured while cheap' }],
     bands: [
       { id: 'window', kind: 'regime', render: 'wash', x0: 0, x1: 33, label: 'accumulation window', labelAnchor: 'start' },
       { id: 'slow', kind: 'regime', render: 'wash', x0: 66, x1: 100, label: 'slow new buying', labelAnchor: 'end' },
     ],
     markers: [
-      { id: 'morecheap', type: 'dot', x: 24, y: R(valueAt(p3Accum.guided, 24)), r: 3.2, label: 'more sats when cheap', labelAnchor: 'start', labelDy: -12 },
-      { id: 'slows', type: 'dot', x: 84, y: R(valueAt(p3Accum.guided, 84)), r: 3.2, label: 'slows, never sells', labelAnchor: 'end', labelDy: -12 },
+      { id: 'morecheap', type: 'dot', x: 24, y: R(valueAt(p3Accum.guided, 24)), r: 3.2, label: '', labelAnchor: 'start', labelDy: -12 },
+      { id: 'slows', type: 'dot', x: 84, y: R(valueAt(p3Accum.guided, 84)), r: 3.2, label: 'slows buying, never sells', labelAnchor: 'end', labelDy: -12 },
     ],
     primaryKey: 'guided',
     hoverTargets: [
