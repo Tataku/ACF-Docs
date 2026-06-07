@@ -96,7 +96,7 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 | `p3-volatility-is-the-toll` | Volatility Is the Toll | single | representative |
 | `p3-exposure-not-control` | Exposure Is Not Control | **scenario (interactive)** | simulation |
 | `p3-models-must-converge` | Models Must Converge | single | representative |
-| `p3-accumulate-dont-trade` | Accumulate, Don’t Trade | single (cumulative units) | conceptual |
+| `p3-accumulate-dont-trade` | Accumulate, Don’t Trade | heartbeat (price + DCA pulses) | conceptual |
 | `p3-cold-storage-to-borrow` | Cold Storage to Borrow | flow | conceptual · **deferred** |
 | `p3-reserve-share-evolves` | Reserve Share Evolves | single | simulation · **deferred** |
 
@@ -133,6 +133,7 @@ Two families, one engine:
   - `gate` — a sober validation gauntlet; a survivor band thins through four gates into a thesis (e.g. *Narrative Is Not Thesis*).
   - `scorecard` — a requirement × asset matrix with bespoke brush meet/partial/fail glyphs and an emphasised focus column (e.g. *One Asset, Ten Tests*).
   - `scenario` — an interactive, path-aware comparison: all preset strategies are drawn together under the selected shock (the chosen one emphasised, the others muted context), with a capacity-to-act gauge, a trough/intervention zone, a forced-sale mark, and an annotation that updates with the shock. Stat read-outs are split into UPSIDE vs CONTROL and kept subordinate to the visual (e.g. *Exposure Is Not Control*). Click or focus a path to select it.
+  - `heartbeat` — a two-register accumulation exhibit: a representative volatile valuation *heartbeat* above a row of DCA *unit pulses* whose height = representative units per dollar, so a price dip buys taller pulses. The accent (framework) pulse stacks above the muted baseline while undervalued (leans in) and falls below it when extended (slows, never sells); the undervalued window reuses the organic `dcaWindow` field (e.g. *Accumulate, Don't Trade*). Representative/conceptual — no historical price, no exact sats.
 
 Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclosure behaviour as the data charts. Default visible text is minimal; detail reveals on hover/tap.
 
