@@ -191,7 +191,7 @@ function PlotSvg({
       else if (a.botKey && seriesByKey[a.botKey]) { topPx = top.pts.map((p) => ({ x: x(p.x), y: y(p.y) })); botPx = seriesByKey[a.botKey].pts.map((p) => ({ x: x(p.x), y: y(p.y) })); }
       else return;
       if (a.xFrom != null) { topPx = topPx.filter((_, i) => top.pts[i].x >= a.xFrom); botPx = botPx.filter((_, i) => top.pts[i].x >= a.xFrom); }
-      out.areas.push({ a, d: areaPath(topPx, botPx), labelX: a.xFrom != null ? x((a.xFrom + dom.xMax) / 2) : x((dom.xMin + dom.xMax) * 0.6) });
+      out.areas.push({ a, d: areaPath(topPx, botPx), labelX: a.labelX != null ? x(a.labelX) : a.xFrom != null ? x((a.xFrom + dom.xMax) / 2) : x((dom.xMin + dom.xMax) * 0.6) });
     });
     (panel.bands || []).forEach((b) => {
       const xc = (x(b.x0) + x(b.x1)) / 2;
@@ -292,10 +292,11 @@ function PlotSvg({
           </g>
         ))}
 
-        {/* areas (gap / drawdown / under / edge) */}
+        {/* areas (gap / drawdown / under / edge) — tone/opacity overridable per spec */}
         {geom.areas.map((ar, i) => {
-          const c = ar.a.kind === 'peak' ? pal.bandStress : ar.a.kind === 'under' || ar.a.kind === 'edge' ? accent : pal.tierSecondary;
-          const op = ar.a.kind === 'under' ? 0.10 : ar.a.kind === 'peak' ? 0.10 : ar.a.kind === 'edge' ? 0.13 : 0.09;
+          const toneC = ar.a.tone === 'muted' ? pal.tierSecondary : ar.a.tone === 'accent' ? accent : null;
+          const c = toneC || (ar.a.kind === 'peak' ? pal.bandStress : ar.a.kind === 'under' || ar.a.kind === 'edge' ? accent : pal.tierSecondary);
+          const op = ar.a.opacity != null ? ar.a.opacity : ar.a.kind === 'under' ? 0.10 : ar.a.kind === 'peak' ? 0.10 : ar.a.kind === 'edge' ? 0.13 : 0.09;
           return (
             <g key={`ar${i}`} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 360ms' }}>
               <path d={ar.d} fill={c} opacity={op} />
@@ -916,7 +917,7 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
   const svgRef = useRef(null);
   const sc = spec.scorecard;
   const reqs = sc.requirements, assets = sc.assets;
-  const pad = { l: 18, r: 18, t: 56, b: 42 };
+  const pad = { l: 18, r: 18, t: 56, b: 76 };
   const labelW = Math.min(248, width * 0.30);
   const colW = (width - pad.l - labelW - pad.r) / assets.length;
   const colX = (j) => pad.l + labelW + colW * (j + 0.5);
@@ -985,6 +986,23 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {assets.map((a, j) => (
           <text key={`a${a.id}`} x={colX(j)} y={height - pad.b + 24} textAnchor="middle" style={haloSans(pal, a.focus ? 12 : 10.5, a.focus ? accent : pal.text3, a.focus ? 700 : 600)}>{sc.aggregates[a.id]}</text>
         ))}
+        {/* "clears all ten" seal under the focus column — the asset that runs the gauntlet */}
+        {focusJ >= 0 && (
+          <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 320) }}>
+            <path d={scoreCheckPath(colX(focusJ) - 41, height - pad.b + 45, 4, 71)} fill={accent} />
+            <text x={colX(focusJ) - 33} y={height - pad.b + 48} style={halo(pal, 8.5, accent, 600)}>CLEARS ALL TEN</text>
+          </g>
+        )}
+        {/* glyph legend — shape-coded, not colour-only */}
+        <g transform={`translate(${pad.l + 2} ${height - pad.b + 45})`} style={{ opacity: entered ? 0.92 : 0, transition: trans('opacity', 320) }}>
+          {[
+            { g: <path d={scoreCheckPath(0, 0, 4, 11)} fill={pal.text2} />, t: 'satisfies' },
+            { g: <g><circle cx={0} cy={0} r={3.6} fill="none" stroke={pal.text4} strokeWidth="1" /><path d={`M0 ${-3.6} A 3.6 3.6 0 0 1 0 ${3.6} Z`} fill={pal.text4} opacity="0.7" /></g>, t: 'partial' },
+            { g: <path d={scoreFailPath(0, 0, 4, 23)} fill={pal.text4} opacity="0.7" />, t: 'does not satisfy' },
+          ].map((item, i) => (
+            <g key={i} transform={`translate(${i * 96} 0)`}>{item.g}<text x={11} y={3.5} style={halo(pal, 9, pal.text3, 500)}>{item.t}</text></g>
+          ))}
+        </g>
         {/* keyboard focus chips (per requirement row) */}
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
       </svg>
@@ -993,35 +1011,67 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
   );
 }
 
-/* ── ScenarioSvg — interactive path-aware strategy comparison ────────────────*
- * The Part 3 headline. Three preset strategies × an optional shock select
- * precomputed, deterministic representative paths; the chart + stat read-outs
- * (terminal, max drawdown, dry powder, forced-sale risk, reserve integrity,
- * control score) update together. Educational, not a calculator. */
-function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+/* ── ScenarioSvg — interactive, path-aware strategy comparison ───────────────*
+ * The Part 3 headline. All three strategies are drawn together under the
+ * selected shock: the chosen one is emphasised, the others stay as muted
+ * context. A capacity-to-act gauge, a trough/intervention zone, a forced-sale
+ * mark, and an annotation that updates with the shock carry the story; the stat
+ * strip (split into UPSIDE vs CONTROL) is subordinate. Click or focus a path to
+ * select it. Precomputed deterministic paths — educational, not a calculator. */
+function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets }) {
   const sc = spec.scenario;
   const svgRef = useRef(null);
   const [presetId, setPresetId] = useState(sc.defaultPreset);
   const [shockId, setShockId] = useState(sc.defaultShock);
-  const variant = sc.variants[`${presetId}|${shockId}`] || Object.values(sc.variants)[0];
-  const st = variant.stats;
+  const [hovered, setHovered] = useState(null);                 // { pk, x, y }
   const dom = { yMin: 0, yMax: 100, ...sc.domain };
-  const pad = { l: 16, r: 16, t: 22, b: 26 };
+  const pad = { l: 20, r: 20, t: 22, b: 28 };
   const X = (v) => pad.l + (v / 100) * (width - pad.l - pad.r);
   const Y = (v) => pad.t + (1 - (v - dom.yMin) / (dom.yMax - dom.yMin)) * (height - pad.t - pad.b);
   const vAt = (arr, xv) => { for (let i = 1; i < arr.length; i++) if (arr[i].x >= xv) { const a = arr[i - 1], b = arr[i], t = (xv - a.x) / ((b.x - a.x) || 1); return a.y + (b.y - a.y) * t; } return arr[arr.length - 1].y; };
 
-  const geom = useMemo(() => {
-    const px = variant.value.map((p) => ({ x: X(p.x), y: Y(p.y) }));
-    let mx = -9; const top = variant.value.map((p, i) => { mx = Math.max(mx, p.y); return { x: X(p.x), y: Y(mx) }; });
-    return { px, line: Brush.brushLine(px, { seed: 31, weight: 1.25, intensity: 0.85 }), dd: areaPath(top, px), end: px[px.length - 1] };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [presetId, shockId, width, height]);
+  const PKS = sc.presets.map((p) => p.id);
+  const byId = (id) => sc.presets.find((p) => p.id === id) || {};
+  const targetById = (id) => targets.find((t) => t.id === id);
 
-  const trough = { x: X(sc.troughX), y: Y(vAt(variant.value, sc.troughX)) };
-  const shockLabel = shockId === 'jobloss' ? (st.forced ? 'forced sale' : 'shock absorbed') : shockId === 'deploy' ? 'deploy at trough' : 'trough';
-  const shockColor = shockId === 'jobloss' && st.forced ? pal.bandStress : accent;
-  const presetLabel = (sc.presets.find((p) => p.id === presetId) || {}).label || '';
+  const paths = useMemo(() => PKS.map((pk) => {
+    const v = sc.variants[`${pk}|${shockId}`];
+    const px = v.value.map((p) => ({ x: X(p.x), y: Y(p.y) }));
+    return { pk, v, px, end: px[px.length - 1], stroke: Brush.smoothOpen(px), brush: Brush.brushLine(px, { seed: 31 + pk.length * 7, weight: 1.2, intensity: 0.85 }) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [shockId, width, height, dom.yMin, dom.yMax]);
+
+  const sel = paths.find((p) => p.pk === presetId) || paths[0];
+  const st = sel.v.stats;
+  const ddPath = useMemo(() => { let mxv = -9; const top = sel.v.value.map((p) => { mxv = Math.max(mxv, p.y); return { x: X(p.x), y: Y(mxv) }; }); return areaPath(top, sel.px); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [presetId, shockId, width, height]);
+
+  // trough / intervention zone + shock mark on the selected path
+  const zone = { x0: X(sc.peakX != null ? sc.peakX : 50), x1: X(Math.min(100, sc.troughX + 12)) };
+  const trough = { x: X(sc.troughX), y: Y(vAt(sel.v.value, sc.troughX)) };
+  let shockColor = accent, shockText = null;
+  if (shockId === 'jobloss') { shockColor = st.forced ? pal.bandStress : accent; shockText = st.forced ? 'forced to sell' : 'shock absorbed'; }
+  else if (shockId === 'deploy') { shockColor = st.deployed ? accent : pal.text3; shockText = st.deployed ? 'buys the trough' : 'no dry powder'; }
+
+  // capacity-to-act gauge (top-left, clear of the paths which start low)
+  const gx = pad.l + 8, g0 = pad.t + 16, g1 = pad.t + 92, gH = g1 - g0;
+  const cap = Math.min(1, st.dryPowder / 50);
+
+  // de-collided end labels
+  const endLabels = (() => {
+    const lab = paths.map((p) => ({ pk: p.pk, y: p.end.y, short: byId(p.pk).short, on: p.pk === presetId })).sort((a, b) => a.y - b.y);
+    for (let i = 1; i < lab.length; i++) if (lab[i].y < lab[i - 1].y + 13) lab[i].y = lab[i - 1].y + 13;
+    const over = lab[lab.length - 1].y - (height - pad.b - 4); if (over > 0) lab.forEach((l) => { l.y -= over; });
+    return lab;
+  })();
+
+  const note = sc.notes[shockId] || {};
+
+  // interaction (desktop hover/click; click selects the path)
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const nearest = (mx, my) => { let best = null, bd = coarse ? 22 : 16; paths.forEach((p) => { const dp = nearPoly(mx, my, p.px); if (dp.d < bd) { bd = dp.d; best = { pk: p.pk, x: p.px[dp.i].x, y: p.px[dp.i].y }; } }); return best; };
+  const onMove = (e) => { if (coarse) return; setHovered(nearest(...toVB(e))); };
+  const onLeave = () => { if (!coarse) setHovered(null); };
+  const onClick = (e) => { const n = nearest(...toVB(e)); if (n) setPresetId(n.pk); };
 
   const seg = (val, label, on, set) => (
     <button key={val} onClick={() => set(val)} aria-pressed={on}
@@ -1030,50 +1080,110 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const dot = (i) => (i > 0 ? <span key={`d${i}`} aria-hidden style={{ color: pal.text4, opacity: 0.4 }}>·</span> : null);
   const ctrlRow = (lbl, items) => (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-      <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.18em', color: pal.text4, width: 66, flexShrink: 0 }}>{lbl}</span>
+      <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.18em', color: pal.text4, width: 56, flexShrink: 0 }}>{lbl}</span>
       <div style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', alignItems: 'baseline' }}>{items}</div>
     </div>
   );
   const stat = (label, value, tone) => (
-    <div key={label} style={{ minWidth: 78 }}>
-      <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.13em', color: pal.text4, marginBottom: 3 }}>{label}</div>
-      <div style={{ fontFamily: pal.mono, fontSize: 15, fontWeight: 600, color: tone || pal.text1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+    <div key={label} style={{ minWidth: 72 }}>
+      <div style={{ fontFamily: pal.mono, fontSize: 7.5, letterSpacing: '0.12em', color: pal.text4, marginBottom: 3 }}>{label}</div>
+      <div style={{ fontFamily: pal.mono, fontSize: 13, fontWeight: 600, color: tone || pal.text1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
     </div>
   );
 
+  let tooltip = null;
+  if (!coarse && hovered) {
+    const meta = targetById(hovered.pk);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered.pk === spec.primaryKey} xPct={(hovered.x / width) * 100} yPct={(hovered.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => {}} valueText={null} />;
+  }
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
   return (
     <div style={{ position: 'relative' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
         {ctrlRow('STRATEGY', sc.presets.flatMap((p, i) => [dot(i), seg(p.id, p.label, presetId === p.id, setPresetId)]))}
         {ctrlRow('SHOCK', sc.shocks.flatMap((s, i) => [dot(i), seg(s.id, s.label, shockId === s.id, setShockId)]))}
       </div>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', touchAction: 'manipulation' }}>
+      <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.04em', color: pal.text4, margin: '7px 0 9px' }}>{sc.tradeoff} · <span style={{ color: pal.text3 }}>selected in colour, alternatives faint</span></div>
+
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary}
+        style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}>
+        {/* trough / intervention zone */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease' }}>
+          <path d={Brush.washRect(zone.x0, pad.t, zone.x1, height - pad.b, { seed: 33, intensity: 0.5, soft: 'both' })} fill={pal.bandRegime} fillOpacity={pal.name === 'light' ? 0.12 : 0.10} />
+          {!coarse && <text x={(zone.x0 + zone.x1) / 2} y={pad.t + 12} textAnchor="middle" style={halo(pal, 9, pal.bandRegimeText)}>the drawdown</text>}
+        </g>
+        {/* start reference */}
         <line x1={pad.l} x2={width - pad.r} y1={Y(100)} y2={Y(100)} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
-        <text x={width - pad.r} y={Y(100) - 5} textAnchor="end" style={halo(pal, 8.5, pal.text4)}>start = 100</text>
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 700ms ease' }}>
-          <path d={geom.dd} fill={pal.bandStress} opacity={pal.name === 'light' ? 0.10 : 0.09} />
+        <text x={pad.l} y={Y(100) - 5} style={halo(pal, 8.5, pal.text4)}>start = 100</text>
+
+        {/* capacity-to-act gauge */}
+        <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 300) }}>
+          <rect x={gx - 3.5} y={g0} width={7} height={gH} rx={3.5} fill="none" stroke={pal.cardBorder} strokeWidth="1" />
+          {cap > 0 && <rect x={gx - 3.5} y={g1 - gH * cap} width={7} height={gH * cap} rx={3.5} fill={accent} opacity={st.deployed ? 0.92 : 0.5} style={{ transition: trans('all', 260) }} />}
+          <text x={gx + 9} y={g0 + 4} style={halo(pal, 8, pal.text4)}>CAPACITY</text>
+          <text x={gx + 9} y={g0 + 15} style={halo(pal, 8, pal.text4)}>TO ACT</text>
+          <text x={gx + 9} y={g1} style={halo(pal, 8.5, cap > 0 ? accent : pal.text4, 600)}>{cap > 0 ? (st.deployed ? 'deployed' : 'ready') : 'none'}</text>
         </g>
+
+        {/* unselected paths (context) */}
+        {paths.filter((p) => p.pk !== presetId).map((p) => (
+          <g key={p.pk} style={{ opacity: entered ? (hovered && hovered.pk === p.pk ? 0.82 : 0.4) : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 600ms ease, opacity 180ms ease' }}>
+            <path d={p.stroke} fill="none" stroke={pal.tierReference} strokeWidth="1.1" strokeLinecap="round" />
+            <path d={Brush.inkDot(p.end.x, p.end.y, 2.6, { seed: 7, intensity: 0.7 })} fill={pal.tierReference} />
+          </g>
+        ))}
+        {/* selected path + its drawdown */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 520ms ease' }}>
-          <path d={geom.line} fill={accent} />
-          <path d={Brush.inkDot(geom.end.x, geom.end.y, 3.4, { seed: 9, intensity: 0.8 })} fill={accent} />
-          <text x={geom.end.x - 6} y={geom.end.y - 6} textAnchor="end" style={haloSans(pal, 11, accent, 600)}>{presetLabel}</text>
+          <path d={ddPath} fill={pal.bandStress} opacity={pal.name === 'light' ? 0.11 : 0.10} />
+          <path d={sel.brush} fill={accent} />
+          <path d={Brush.inkDot(sel.end.x, sel.end.y, 3.4, { seed: 9, intensity: 0.8 })} fill={accent} />
         </g>
+        {/* end labels (de-collided) */}
+        {endLabels.map((l) => <text key={l.pk} x={width - pad.r - 4} y={l.y + 3} textAnchor="end" style={haloSans(pal, l.on ? 11 : 10, l.on ? accent : pal.text3, l.on ? 700 : 500)}>{l.short}</text>)}
+        {/* shock mark on the selected path */}
         {shockId !== 'none' && (
-          <g>
+          <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 300) }}>
             <path d={Brush.enso(trough.x, trough.y, 11, { seed: 51, weight: 0.85, intensity: 0.8, gapAngle: -Math.PI / 3 })} fill={shockColor} />
-            <text x={trough.x} y={trough.y + 26} textAnchor="middle" style={halo(pal, 9, shockColor)}>{shockLabel}</text>
+            {shockText && <text x={trough.x} y={trough.y + 26} textAnchor="middle" style={halo(pal, 9, shockColor)}>{shockText}</text>}
           </g>
         )}
-        {targets[0] && <FocusChip t={targets[0]} anchor={{ x: geom.end.x, y: geom.end.y }} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />}
+        {/* focusable strategy ends (keyboard parity: focus previews, Enter selects) */}
+        {paths.map((p) => (
+          <circle key={`fx${p.pk}`} className="acf-fx-focusable" cx={p.end.x} cy={p.end.y} r={coarse ? 12 : 9} fill="transparent" tabIndex={0} role="button"
+            aria-label={`${byId(p.pk).label}. ${(targetById(p.pk) || {}).why || ''} Select to emphasise.`}
+            onFocus={() => setHovered({ pk: p.pk, x: p.end.x, y: p.end.y })} onBlur={() => setHovered(null)}
+            onClick={() => setPresetId(p.pk)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPresetId(p.pk); } }} style={{ cursor: 'pointer' }} />
+        ))}
       </svg>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 20px', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}` }}>
-        {stat('TERMINAL', st.terminal, pal.text1)}
-        {stat('MAX DRAWDOWN', `${st.maxDD}%`, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
-        {stat('DRY POWDER', `${st.dryPowder}%`, pal.text1)}
-        {stat('FORCED SALE', st.forced ? 'High' : 'None', st.forced ? pal.bandStressText : accent)}
-        {stat('RESERVE INTEGRITY', `${st.integrity}%`, st.integrity < 100 ? pal.bandStressText : accent)}
-        {stat('CONTROL SCORE', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
+
+      {/* annotation — the story; updates with shock + strategy */}
+      <div style={{ display: 'flex', gap: 12, marginTop: 11 }}>
+        <div style={{ width: 2, flexShrink: 0, borderRadius: 2, background: accent, opacity: 0.55 }} />
+        <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 13, lineHeight: 1.55, color: pal.text2, maxWidth: 700 }}>
+          <span style={{ color: pal.text1, fontWeight: 600 }}>{note.lead}</span> {note[presetId]}
+        </p>
       </div>
+
+      {/* outcome strip — UPSIDE vs CONTROL (subordinate to the visual) */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 24px', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}`, alignItems: 'flex-start' }}>
+        <div>
+          <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: accent, marginBottom: 8 }}>UPSIDE</div>
+          <div style={{ display: 'flex', gap: 20 }}>{stat('TERMINAL', st.terminal, pal.text1)}</div>
+        </div>
+        <div aria-hidden style={{ width: 1, alignSelf: 'stretch', background: pal.cardBorder }} />
+        <div>
+          <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: pal.text3, marginBottom: 8 }}>CONTROL</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 20px' }}>
+            {stat('MAX DRAWDOWN', `${st.maxDD}%`, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
+            {stat('DRY POWDER', `${st.dryPowder}%`, pal.text1)}
+            {stat('FORCED SALE', st.forced ? 'High' : 'None', st.forced ? pal.bandStressText : accent)}
+            {stat('RESERVE INTEGRITY', `${st.integrity}%`, st.integrity < 100 ? pal.bandStressText : accent)}
+            {stat('CONTROL SCORE', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
+          </div>
+        </div>
+      </div>
+      {tooltip}
     </div>
   );
 }
@@ -1258,7 +1368,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={420} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={380} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={120 + (spec.scorecard?.requirements.length || 8) * 32} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={150 + (spec.scorecard?.requirements.length || 8) * 32} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={300} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />

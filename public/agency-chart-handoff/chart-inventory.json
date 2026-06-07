@@ -797,9 +797,9 @@
       "visualDataMode": "simulation",
       "claimLabel": "CONTROL · INTERACTIVE",
       "frameworkClaim": "100% Bitcoin can win one favorable cycle; the framework optimizes for control across many.",
-      "readerTakeaway": "The ability to act beats the size of a single bet.",
-      "chartType": "Interactive path-aware scenario: compare strategies through a drawdown and an optional shock.",
-      "setupLine": "Choose the path. Watch what survives the drawdown.",
+      "readerTakeaway": "Max exposure wins the clean bull case; control wins the messy path.",
+      "chartType": "Interactive path-aware comparison: all three strategies through a drawdown, with an optional shock.",
+      "setupLine": "Choose the path. Then change the shock.",
       "explainerHeadline": "Winning a cycle is not the same as staying in control.",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
       "sources": [
