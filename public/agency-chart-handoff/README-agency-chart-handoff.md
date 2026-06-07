@@ -152,6 +152,11 @@ Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclo
 4. Text must never collide; a legend is placed *before* the marks it explains (top of the scorecard, not crammed into the footer) and never competes with the chart.
 5. Background regions explain a regime or mechanism — never decoration, and never a generic rectangular block where an organic field reads better (the accumulation window uses an ink-wash `dcaWindow` field with sat stipples, not a rectangle).
 
+**Motion rule** — *"Build the chart in the order the idea should be understood."* Charts reveal once they scroll into view (an `IntersectionObserver`, once — `useInViewOnce`); reduced-motion and print reveal immediately and never hide content behind animation. The layered order is:
+1. container settles → 2. frame / axis / structural guide → 3. regime or pressure fields breathe in → 4. context series → 5. primary thesis path draws (clip-path, left→right) → 6. markers and annotations resolve → 7. hover/tap affordances activate → 8. explainer / footer stay readable and stable.
+
+Interaction comes after comprehension; animation creates comprehension. It is native (CSS transitions + clip-path draw, no animation library), never loops, and never shifts layout. On the `scenario` chart a strategy/shock change updates the paths and stats quickly **without replaying the build**. The figure exposes `data-build="idle|in"`, `data-reduced-motion`, the `acf-chart-build` class, and `--build-duration` / `--build-stagger` CSS variables as hook points.
+
 ## 5. How to render one chart
 
 ```jsx

@@ -76,14 +76,25 @@ function useMqFlag(query) {
   }, [query]);
   return on;
 }
-function useEntered(reduce) {
-  const [entered, setEntered] = useState(false);
+/* Scroll-build trigger: reveal the chart once it scrolls into view, then never
+ * retrigger. Drives the engine's existing layered entrance transitions (frame →
+ * fields → context → primary → markers). SSR-safe; fires immediately under
+ * reduced-motion or where IntersectionObserver is unavailable, so content is
+ * never hidden behind animation. */
+function useInViewOnce(ref, reduce) {
+  const [seen, setSeen] = useState(false);
   useEffect(() => {
-    if (reduce) { setEntered(true); return undefined; }
-    const a = requestAnimationFrame(() => requestAnimationFrame(() => setEntered(true)));
-    return () => cancelAnimationFrame(a);
-  }, [reduce]);
-  return entered;
+    if (seen) return undefined;
+    if (reduce || typeof IntersectionObserver === 'undefined') { setSeen(true); return undefined; }
+    const el = ref.current;
+    if (!el) { setSeen(true); return undefined; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { setSeen(true); io.disconnect(); }
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.16 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref, reduce, seen]);
+  return seen;
 }
 
 const halo = (pal, size, color, w = 500) => ({
@@ -1312,7 +1323,8 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const accent = getAccent(pal, accentName);
   const reduce = useMqFlag('(prefers-reduced-motion: reduce)');
   const coarse = useMqFlag('(max-width: 700px), (hover: none) and (pointer: coarse)');
-  const entered = useEntered(reduce);
+  const figRef = useRef(null);
+  const entered = useInViewOnce(figRef, reduce);
   const reactId = useId();
 
   const [hover, setHover] = useState(null);
@@ -1355,8 +1367,8 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote };
 
   return (
-    <figure className={className} aria-label={`${spec.title}. ${spec.frameworkClaim}`} aria-describedby={`${reactId}-summary`}
-      style={{ margin: '34px 0', background: pal.card, border: `1px solid ${pal.cardBorder}`, borderRadius: 7, overflow: 'visible', colorScheme: pal.name, fontFamily: pal.sans, color: pal.text1 }}>
+    <figure ref={figRef} className={`acf-chart-build${className ? ` ${className}` : ''}`} data-build={entered ? 'in' : 'idle'} data-reduced-motion={reduce ? 'true' : 'false'} aria-label={`${spec.title}. ${spec.frameworkClaim}`} aria-describedby={`${reactId}-summary`}
+      style={{ margin: '34px 0', background: pal.card, border: `1px solid ${pal.cardBorder}`, borderRadius: 7, overflow: 'visible', colorScheme: pal.name, fontFamily: pal.sans, color: pal.text1, '--build-duration': '900ms', '--build-stagger': '110ms' }}>
       <span id={`${reactId}-summary`} style={SR_ONLY}>{spec.ariaSummary}</span>
 
       {/* topline */}
