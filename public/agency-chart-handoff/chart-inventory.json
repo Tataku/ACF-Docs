@@ -1,6 +1,36 @@
 {
   "name": "ACF Framework Charts — handoff inventory",
-  "note": "Representative/illustrative exhibits. visualDataMode + disclosure define how each chart is presented. See README-agency-chart-handoff.md.",
+  "note": "Representative/illustrative exhibits. dataMode + disclosure define how each chart is presented. claimStack, interaction, motionProfile, and backgroundRoles are resolved engine doctrine — explicit per-spec overrides win. See README-agency-chart-handoff.md.",
+  "doctrine": {
+    "interactionTypes": [
+      "none",
+      "hover",
+      "scenario",
+      "beforeAfterReveal",
+      "readerContext",
+      "returnOrder",
+      "slider"
+    ],
+    "motionTypes": [
+      "timeSweep",
+      "reveal",
+      "rowSweep",
+      "scenarioUpdate",
+      "diagramBuild"
+    ],
+    "backgroundRoles": [
+      "regime",
+      "pressure",
+      "relational",
+      "revealLayer"
+    ],
+    "dataModes": [
+      "representative",
+      "historical",
+      "simulation",
+      "conceptual"
+    ]
+  },
   "count": 28,
   "charts": [
     {
@@ -8,17 +38,28 @@
       "idx": "S1",
       "title": "Shape the Payoff",
       "group": "signature",
-      "intendedPlacement": "both",
+      "part": "both",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "PAYOFF SHAPE · SIGNATURE",
-      "frameworkClaim": "ACF shapes exposure: the left side is capped, the right side is left free to run.",
+      "primaryClaim": "ACF shapes exposure: the left side is capped, the right side is left free to run.",
+      "visualProof": "Conceptual payoff curve vs a symmetric reference line.",
+      "readerAction": null,
       "readerTakeaway": "Survive the left tail; stay convex on the right tail.",
-      "chartType": "Conceptual payoff curve vs a symmetric reference line.",
-      "setupLine": "The payoff shape the whole framework is built to produce",
-      "explainerHeadline": "The framework is a payoff shape, not a prediction.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -35,24 +76,38 @@
           "role": "verifies-concept",
           "url": "/part-6-convexity-framework-integrity-scoring"
         }
-      ]
+      ],
+      "agencyNotes": "This replaces the existing \"Defined downside. Asymmetric upside.\" web chart. Belongs on the landing hero AND as the Part 1 opener. Marketing should refine curve character and labels."
     },
     {
       "chartId": "sig-shape",
       "idx": "S2",
       "title": "Bend the Tail",
       "group": "signature",
-      "intendedPlacement": "docs-landing",
+      "part": "docs-landing",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "EXPOSURE SHAPING · SIGNATURE",
-      "frameworkClaim": "ACF truncates the left tail and extends the right tail of the outcome distribution.",
+      "primaryClaim": "ACF truncates the left tail and extends the right tail of the outcome distribution.",
+      "visualProof": "Conceptual outcome-distribution reshape vs a symmetric reference.",
+      "readerAction": null,
       "readerTakeaway": "Same center of gravity, deliberately reshaped tails.",
-      "chartType": "Conceptual outcome-distribution reshape vs a symmetric reference.",
-      "setupLine": "ACF reshapes the distribution of outcomes, it does not just chase higher returns",
-      "explainerHeadline": "We reshape the outcomes, not the average.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -69,24 +124,38 @@
           "role": "verifies-concept",
           "url": "/part-5-portfolio-construction-position-management"
         }
-      ]
+      ],
+      "agencyNotes": "Companion to sig-payoff. Distribution framing gives the landing page visual variety. Marketing should decide whether to ship payoff-curve, distribution, or both."
     },
     {
       "chartId": "dl-convexity-window",
       "idx": "L1",
       "title": "The Window Opens",
       "group": "docs-landing",
-      "intendedPlacement": "docs-landing",
+      "part": "docs-landing",
       "status": "implemented",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "CONVEXITY · WINDOW",
-      "frameworkClaim": "ACF waits for setups where downside is defined and upside can accelerate.",
+      "primaryClaim": "ACF waits for setups where downside is defined and upside can accelerate.",
+      "visualProof": "Representative regime/path chart with a compression field and release marker.",
+      "readerAction": null,
       "readerTakeaway": "Patience through compression; size into confirmation; let the release run.",
-      "chartType": "Representative regime/path chart with a compression field and release marker.",
-      "setupLine": "Compression, then confirmation, then asymmetric release",
-      "explainerHeadline": "Convexity is a window, not a constant.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -103,24 +172,36 @@
           "role": "verifies-concept",
           "url": "/part-6-convexity-framework-integrity-scoring"
         }
-      ]
+      ],
+      "agencyNotes": "Compression uses a feathered ink-wash band (washRect), NOT a pressure field (that treatment is reserved for the inflation shock)."
     },
     {
       "chartId": "dl-regime-map",
       "idx": "L2",
       "title": "Capital Has Weather",
       "group": "docs-landing",
-      "intendedPlacement": "docs-landing",
+      "part": "docs-landing",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "quadrant",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "REGIME MAP · CAPITAL WEATHER",
-      "frameworkClaim": "Portfolio construction changes with the macro regime.",
+      "primaryClaim": "Portfolio construction changes with the macro regime.",
+      "visualProof": "Growth × inflation quadrant with a representative regime path.",
+      "readerAction": null,
       "readerTakeaway": "You are not allocating in a vacuum; you are allocating into weather.",
-      "chartType": "Growth × inflation quadrant with a representative regime path.",
-      "setupLine": "Same assets, different regime, different behaviour",
-      "explainerHeadline": "The same portfolio behaves differently in different weather.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -137,24 +218,36 @@
           "role": "verifies-concept",
           "url": "/part-1-foundation"
         }
-      ]
+      ],
+      "agencyNotes": "Bespoke quadrant layout. Waypoint positions and regime copy are representative; marketing should validate the path narrative."
     },
     {
       "chartId": "dl-tripwire-loop",
       "idx": "L3",
       "title": "Govern the Thesis",
       "group": "docs-landing",
-      "intendedPlacement": "docs-landing",
+      "part": "docs-landing",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "systemLoop",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "SYSTEM · GOVERNED LOOP",
-      "frameworkClaim": "ACF is a closed-loop operating system, not a fixed set of weights.",
+      "primaryClaim": "ACF is a closed-loop operating system, not a fixed set of weights.",
+      "visualProof": "Minimal flow/loop diagram of the framework control system.",
+      "readerAction": null,
       "readerTakeaway": "Every position is traceable to a thesis and governed by a tripwire.",
-      "chartType": "Minimal flow/loop diagram of the framework control system.",
-      "setupLine": "Thesis creates exposure · exposure creates risk · tripwires govern behaviour",
-      "explainerHeadline": "Structure flows from a thesis and is governed by tripwires.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -171,24 +264,38 @@
           "role": "verifies-concept",
           "url": "/part-6-convexity-framework-integrity-scoring"
         }
-      ]
+      ],
+      "agencyNotes": "Bespoke loop layout with brush-arrow connectors. Conceptual diagram; copy is final-ish, geometry open to design review."
     },
     {
       "chartId": "p1-hedge-broke",
       "idx": "01",
       "title": "The Hedge Broke",
       "group": "part-1",
-      "intendedPlacement": "part-1",
+      "part": "part-1",
       "status": "implemented",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "DIVERSIFICATION · FRAGILITY",
-      "frameworkClaim": "Stocks and bonds are not always true diversifiers.",
+      "primaryClaim": "Stocks and bonds are not always true diversifiers.",
+      "visualProof": "Indexed-return stress chart, 3 series (stocks, bonds, 60/40).",
+      "readerAction": null,
       "readerTakeaway": "When inflation drives the regime, the hedge can fall with the risk.",
-      "chartType": "Indexed-return stress chart, 3 series (stocks, bonds, 60/40).",
-      "setupLine": "Indexed total return through an inflation shock: stocks, bonds, and the 60/40 blend",
-      "explainerHeadline": "The hedge can fail with the risk.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "pressure"
+      ],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -212,24 +319,38 @@
           "role": "methodology",
           "url": null
         }
-      ]
+      ],
+      "agencyNotes": "Canonical Part 1 hero. Handoff-only for now; unwired from the public page pending explicit placement. Production swaps primary index series behind this spec without touching the engine."
     },
     {
       "chartId": "p1-correlation",
       "idx": "02",
       "title": "Correlation Turns",
       "group": "part-1",
-      "intendedPlacement": "part-1",
+      "part": "part-1",
       "status": "implemented",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "CORRELATION · REGIME",
-      "frameworkClaim": "Stock–bond correlation changes when inflation becomes the dominant stress.",
+      "primaryClaim": "Stock–bond correlation changes when inflation becomes the dominant stress.",
+      "visualProof": "Rolling 24-month stock–bond correlation with a non-rectangular inflation-shock background.",
+      "readerAction": null,
       "readerTakeaway": "The diversifier did not disappear. The regime that produced it did.",
-      "chartType": "Rolling 24-month stock–bond correlation with a non-rectangular inflation-shock background.",
-      "setupLine": "Rolling 24-month stock–bond correlation across an inflation-shock window",
-      "explainerHeadline": "When inflation runs the regime, correlations flip.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "pressure"
+      ],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -253,24 +374,38 @@
           "role": "methodology",
           "url": null
         }
-      ]
+      ],
+      "agencyNotes": "Handoff-only for now; unwired from the public page pending explicit placement. Pressure field is bespoke geometry (brush.pressureField) — never a rectangle, never alters the true stress window."
     },
     {
       "chartId": "p1-cpi-assets",
       "idx": "03",
       "title": "Inflation Was Bigger",
       "group": "part-1",
-      "intendedPlacement": "part-1",
+      "part": "part-1",
       "status": "implemented",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "INFLATION · MEASUREMENT",
-      "frameworkClaim": "CPI alone does not capture the full inflation story.",
+      "primaryClaim": "CPI alone does not capture the full inflation story.",
+      "visualProof": "Three normalized index lines with a gap area between assets and CPI.",
+      "readerAction": null,
       "readerTakeaway": "Consumer prices roughly doubled. The assets that store capital did far more.",
-      "chartType": "Three normalized index lines with a gap area between assets and CPI.",
-      "setupLine": "CPI, housing, and a broad-asset proxy, each indexed to 100",
-      "explainerHeadline": "The CPI tells one story; capital saw another.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -294,24 +429,40 @@
           "role": "methodology",
           "url": null
         }
-      ]
+      ],
+      "agencyNotes": "Three-line composition; direct end-labels, no inline legend. The gap area between assets and CPI is the visual claim. Broad-asset blend is author calculation, disclosed."
     },
     {
       "chartId": "p1-policy-constraint",
       "idx": "04",
       "title": "The Bill Came Due",
       "group": "part-1",
-      "intendedPlacement": "part-1",
+      "part": "part-1",
       "status": "implemented",
       "wiredPublic": false,
       "layout": "dual",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "POLICY · CONSTRAINT",
-      "frameworkClaim": "Debt and interest burden reduce policy freedom.",
+      "primaryClaim": "Debt rose for decades while falling rates hid the cost",
+      "visualProof": "The same debt/GDP backdrop in both states; the interest-burden cost is revealed beneath it",
+      "readerAction": "Reveal what the surface was hiding",
       "readerTakeaway": "For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.",
-      "chartType": "Stacked dual-panel chart, shared timeline. Top: debt/GDP. Bottom: net interest/GDP.",
-      "setupLine": "Debt rose for decades. The cost returned when rates normalized.",
-      "explainerHeadline": "The cost of debt stopped being free.",
+      "interaction": {
+        "type": "beforeAfterReveal",
+        "gesture": "drag",
+        "conceptMatch": "Dragging spatially pulls back the surface to reveal the hidden interest cost beneath the same debt backdrop"
+      },
+      "motionProfile": {
+        "type": "reveal",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime",
+        "pressure",
+        "revealLayer"
+      ],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -335,24 +486,41 @@
           "role": "target-source",
           "url": "https://fred.stlouisfed.org/series/GDP"
         }
-      ]
+      ],
+      "agencyNotes": "Handoff-only for now; unwired from the public page pending explicit placement. Dual-panel = two plots sharing the x-domain, one explainer, one footer. Connective caption composed between panels."
     },
     {
       "chartId": "p1-sequence-risk",
       "idx": "05",
       "title": "Path Changes Everything",
       "group": "part-1",
-      "intendedPlacement": "part-1",
+      "part": "part-1",
       "status": "implemented",
       "wiredPublic": false,
       "layout": "sequenceRisk",
-      "visualDataMode": "simulation",
+      "dataMode": "simulation",
       "claimLabel": "PATH DEPENDENCY · WITHDRAWALS",
-      "frameworkClaim": "Same average return, opposite sequence, opposite survival outcome.",
+      "primaryClaim": "Same returns, same withdrawals — different order, opposite survival",
+      "visualProof": "A shared return deck (same blocks, two orders) drives both portfolio paths",
+      "readerAction": "Compare the two orders of the same deck",
       "readerTakeaway": "Withdrawal-phase capital does not care about the average. It cares about the order.",
-      "chartType": "Shared return-set proof: one set of returns in two orders, with the portfolio paths generated from them.",
-      "setupLine": "Same returns, same withdrawals — different order",
-      "explainerHeadline": "Same returns. Same withdrawals. Different order.",
+      "interaction": {
+        "type": "returnOrder",
+        "gesture": "hover",
+        "conceptMatch": "The same return deck is shown in two orders; the paths are generated from those exact returns"
+      },
+      "motionProfile": {
+        "type": "rowSweep",
+        "duration": "slow"
+      },
+      "backgroundRoles": [],
+      "readerContext": {
+        "kind": "sequence-scale",
+        "uses": [
+          "portfolioValue"
+        ]
+      },
+      "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
       "sources": [
         {
@@ -362,24 +530,38 @@
           "role": "methodology",
           "url": null
         }
-      ]
+      ],
+      "agencyNotes": "SIMULATION — the honesty footer is non-negotiable; most likely to be misread as a backtest. New sequenceRisk layout: a shared return DECK (same blocks, two orders, shape- and tone-coded) above two portfolio paths GENERATED from those returns, with level-withdrawal ticks on both. Bad path uses the stress tier (muted clay). Scales to reader-context portfolio value."
     },
     {
       "chartId": "p1-convexity-survival",
       "idx": "06",
       "title": "Survive the Path",
       "group": "part-1",
-      "intendedPlacement": "part-1",
+      "part": "part-1",
       "status": "implemented",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "CONVEXITY · ENDURANCE",
-      "frameworkClaim": "Upside only matters if sizing lets you survive the path.",
+      "primaryClaim": "Upside only matters if sizing lets you survive the path.",
+      "visualProof": "Invested-vs-value representative path with drawdown shading.",
+      "readerAction": null,
       "readerTakeaway": "Volatile assets can still compound — through, not around, the drawdown.",
-      "chartType": "Invested-vs-value representative path with drawdown shading.",
-      "setupLine": "Cumulative invested versus portfolio value, with drawdown-from-peak shaded",
-      "explainerHeadline": "Compounding happens through the drawdown.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -396,24 +578,36 @@
           "role": "methodology",
           "url": null
         }
-      ]
+      ],
+      "agencyNotes": "Completes the Part 1 arc. Drawdown-from-peak shaded behind the value line. Representative path; production would wire a provider price series."
     },
     {
       "chartId": "p2-method-before-macro",
       "idx": "P2-01",
       "title": "Method Before Macro",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "dual",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "LINEAGE · METHOD",
-      "frameworkClaim": "The framework’s method persists across regimes; the macro thesis changes with the environment.",
+      "primaryClaim": "The framework’s method persists across regimes; the macro thesis changes with the environment.",
+      "visualProof": "Two stacked panels: a rotating macro-thesis line over a stable method baseline.",
+      "readerAction": null,
       "readerTakeaway": "Keep the method fixed; let the thesis move.",
-      "chartType": "Two stacked panels: a rotating macro-thesis line over a stable method baseline.",
-      "setupLine": "The lineage holds steady while the macro thesis rotates with the regime",
-      "explainerHeadline": "The method is constant; the thesis rotates.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -430,24 +624,36 @@
           "role": "verifies-concept",
           "url": "/part-1-foundation"
         }
-      ]
+      ],
+      "agencyNotes": "Conceptual dual: top rotates, bottom holds. No numeric axes by design. Marketing may prefer a literal two-layer block diagram — flagged for design review."
     },
     {
       "chartId": "p2-ruin-comes-first",
       "idx": "P2-02",
       "title": "Ruin Comes First",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "FRAGILITY · SURVIVAL",
-      "frameworkClaim": "Fragility is nonlinear and ruin is irreversible; survival must precede optimization.",
+      "primaryClaim": "Fragility is nonlinear and ruin is irreversible; survival must precede optimization.",
+      "visualProof": "Two outcome paths with similar volatility but different left-tail ruin.",
+      "readerAction": null,
       "readerTakeaway": "You cannot compound from zero.",
-      "chartType": "Two outcome paths with similar volatility but different left-tail ruin.",
-      "setupLine": "Two portfolios, similar volatility, very different left tails",
-      "explainerHeadline": "Survival is not one goal among many.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -464,24 +670,36 @@
           "role": "verifies-concept",
           "url": "/part-2-lineage-macro-thesis"
         }
-      ]
+      ],
+      "agencyNotes": "Conceptual; no numeric axes. The two paths share early volatility on purpose — the difference is only the left tail."
     },
     {
       "chartId": "p2-conviction-needs-exit",
       "idx": "P2-03",
       "title": "Conviction Needs an Exit",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "CONCENTRATION · DISCIPLINE",
-      "frameworkClaim": "Concentration only works when paired with monitoring and disciplined exits.",
+      "primaryClaim": "Concentration only works when paired with monitoring and disciplined exits.",
+      "visualProof": "Position size versus conviction, with and without an enforced exit cap.",
+      "readerAction": null,
       "readerTakeaway": "Size up on conviction, but keep the exit.",
-      "chartType": "Position size versus conviction, with and without an enforced exit cap.",
-      "setupLine": "Position size can scale with conviction only because an exit caps the downside",
-      "explainerHeadline": "Concentration is earned by the exit.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -498,24 +716,36 @@
           "role": "verifies-concept",
           "url": "/part-5-portfolio-construction-position-management"
         }
-      ]
+      ],
+      "agencyNotes": "Conceptual; x is conviction, y is position size. The cap (level) is the point — concentration is licensed by the exit."
     },
     {
       "chartId": "p2-markets-feed-back",
       "idx": "P2-04",
       "title": "Markets Feed Back",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "systemLoop",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "REFLEXIVITY · FEEDBACK",
-      "frameworkClaim": "Prices do not only reflect fundamentals; they can change fundamentals.",
+      "primaryClaim": "Prices do not only reflect fundamentals; they can change fundamentals.",
+      "visualProof": "Reflexive loop of price, capital, fundamentals, and validation.",
+      "readerAction": null,
       "readerTakeaway": "Price is an input, not just an output.",
-      "chartType": "Reflexive loop of price, capital, fundamentals, and validation.",
-      "setupLine": "Price → capital → fundamentals → validation, and back to price",
-      "explainerHeadline": "Price can write the fundamentals it claims to read.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -525,24 +755,36 @@
           "role": "verifies-concept",
           "url": "/part-2-lineage-macro-thesis"
         }
-      ]
+      ],
+      "agencyNotes": "Loop layout, 4 nodes. Reversal path is conceptual (explainer) rather than a second drawn ring, to keep it quiet."
     },
     {
       "chartId": "p2-time-changes-prudence",
       "idx": "P2-05",
       "title": "Time Changes Prudence",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "simulation",
+      "dataMode": "simulation",
       "claimLabel": "HORIZON · PRUDENCE",
-      "frameworkClaim": "Longer horizons change what counts as prudent; tax-free compounding and convex exposure become more important.",
+      "primaryClaim": "Longer horizons change what counts as prudent; tax-free compounding and convex exposure become more important.",
+      "visualProof": "Two compounding paths diverging at long horizon (simulation).",
+      "readerAction": null,
       "readerTakeaway": "A long horizon rewrites the prudent choice.",
-      "chartType": "Two compounding paths diverging at long horizon (simulation).",
-      "setupLine": "Conventional versus convex, tax-free compounding over a 70-year horizon",
-      "explainerHeadline": "Prudence is a function of horizon.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
       "sources": [
         {
@@ -559,24 +801,36 @@
           "role": "verifies-concept",
           "url": "/part-2-lineage-macro-thesis"
         }
-      ]
+      ],
+      "agencyNotes": "SIMULATION — illustrative compounding, footer-disclosed. Linear y is bottom-heavy by nature; the late divergence is the message."
     },
     {
       "chartId": "p2-capital-finds-bottleneck",
       "idx": "P2-06",
       "title": "Capital Finds the Bottleneck",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "bridge",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "THESIS · CAPITAL FLOW",
-      "frameworkClaim": "A valid thesis must map structural force into capital-flow pathways.",
+      "primaryClaim": "A valid thesis must map structural force into capital-flow pathways.",
+      "visualProof": "Flow map: structural force → bottlenecks → where capital lands.",
+      "readerAction": null,
       "readerTakeaway": "Trace the force to its bottleneck to its instruments.",
-      "chartType": "Flow map: structural force → bottlenecks → where capital lands.",
-      "setupLine": "A structural force only matters where it is constrained — that is where capital lands",
-      "explainerHeadline": "Force is not a trade; the bottleneck is.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -586,24 +840,36 @@
           "role": "verifies-concept",
           "url": "/part-2-lineage-macro-thesis"
         }
-      ]
+      ],
+      "agencyNotes": "Uses the bridge layout: a descending five-stage cascade where each stage transforms the prior and capital concentrates into the emphasised final investable node."
     },
     {
       "chartId": "p2-narrative-not-thesis",
       "idx": "P2-07",
       "title": "Narrative Is Not Thesis",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "gate",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "THESIS · VALIDATION",
-      "frameworkClaim": "A valid macro thesis needs persistence, capital-flow implications, falsifiability, and multi-year runway.",
+      "primaryClaim": "A valid macro thesis needs persistence, capital-flow implications, falsifiability, and multi-year runway.",
+      "visualProof": "Validation gauntlet: narrative through four gates to a thesis.",
+      "readerAction": null,
       "readerTakeaway": "Most narratives never make it through the gates.",
-      "chartType": "Validation gauntlet: narrative through four gates to a thesis.",
-      "setupLine": "A story becomes a thesis only after it survives four gates",
-      "explainerHeadline": "A narrative is a candidate, not a conclusion.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -613,24 +879,36 @@
           "role": "verifies-concept",
           "url": "/part-2-lineage-macro-thesis"
         }
-      ]
+      ],
+      "agencyNotes": "Uses the gate layout: a survivor band that thins through four vertical gates into the thesis node. Sober gauntlet, not a marketing funnel."
     },
     {
       "chartId": "p2-phase-changes-sizing",
       "idx": "P2-08",
       "title": "Phase Changes Sizing",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "PHASE · SIZING",
-      "frameworkClaim": "A thesis can remain structurally valid while its deployment phase changes sizing and risk posture.",
+      "primaryClaim": "A thesis can remain structurally valid while its deployment phase changes sizing and risk posture.",
+      "visualProof": "Thesis validity held constant while sizing rises then trims across phases.",
+      "readerAction": null,
       "readerTakeaway": "Right thesis, wrong size, still a loss.",
-      "chartType": "Thesis validity held constant while sizing rises then trims across phases.",
-      "setupLine": "The same valid thesis carries different sizing early, mid, and late",
-      "explainerHeadline": "Validity is not a sizing instruction.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -647,24 +925,36 @@
           "role": "verifies-concept",
           "url": "/part-5-portfolio-construction-position-management"
         }
-      ]
+      ],
+      "agencyNotes": "Conceptual; phases live on the x-axis. Validity is a flat reference; sizing is the moving primary."
     },
     {
       "chartId": "p2-liquidity-sets-tide",
       "idx": "P2-09",
       "title": "Liquidity Sets the Tide",
       "group": "part-2",
-      "intendedPlacement": "part-2",
+      "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "LIQUIDITY · SENSITIVITY",
-      "frameworkClaim": "In the current thesis, liquidity cycles shape Bitcoin and long-duration asset sensitivity.",
+      "primaryClaim": "In the current thesis, liquidity cycles shape Bitcoin and long-duration asset sensitivity.",
+      "visualProof": "Representative liquidity impulse versus convex-asset sensitivity.",
+      "readerAction": null,
       "readerTakeaway": "Convex assets ride the liquidity tide, magnified.",
-      "chartType": "Representative liquidity impulse versus convex-asset sensitivity.",
-      "setupLine": "A representative liquidity impulse and the convex asset that amplifies it",
-      "explainerHeadline": "Convex assets trade the tide, not the weather.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -688,24 +978,38 @@
           "role": "methodology",
           "url": null
         }
-      ]
+      ],
+      "agencyNotes": "Representative shapes (not historical series). Production could wire a real global-liquidity proxy vs BTC behind the same spec."
     },
     {
       "chartId": "p3-power-law-holds",
       "idx": "P3-01",
       "title": "Power Law Holds",
       "group": "part-3",
-      "intendedPlacement": "part-3",
+      "part": "part-3",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "VALUATION · POWER LAW",
-      "frameworkClaim": "Bitcoin’s long-term path can be contextualized by power-law behavior — a regime heuristic, not a prediction.",
+      "primaryClaim": "Bitcoin’s long-term path can be contextualized by power-law behavior — a regime heuristic, not a prediction.",
+      "visualProof": "Log power-law corridor with price oscillating between euphoria and capitulation bands.",
+      "readerAction": null,
       "readerTakeaway": "A map of where Bitcoin sits on its adoption curve, not a forecast.",
-      "chartType": "Log power-law corridor with price oscillating between euphoria and capitulation bands.",
-      "setupLine": "Price against a log power-law corridor — central tendency, with euphoria and capitulation bands",
-      "explainerHeadline": "Power-law bands map the regime; they do not predict it.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -722,24 +1026,36 @@
           "role": "verifies-concept",
           "url": "/part-3-bitcoin-convexity-backbone"
         }
-      ]
+      ],
+      "agencyNotes": "Signature Part 3 visual. Baked in log space (y = log10 price; ticks are decades) so the corridor reads straight and calm. Representative shape — production can wire a real log-log fit behind the same spec. Restrained green thesis line, no orange/neon."
     },
     {
       "chartId": "p3-ten-tests",
       "idx": "P3-02",
       "title": "One Asset, Ten Tests",
       "group": "part-3",
-      "intendedPlacement": "part-3",
+      "part": "part-3",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "scorecard",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "BACKBONE · REQUIREMENTS",
-      "frameworkClaim": "Bitcoin uniquely satisfies the framework’s requirements for a convexity backbone asset.",
+      "primaryClaim": "Only Bitcoin clears all ten backbone requirements at once",
+      "visualProof": "A requirement × asset matrix with shape-coded meet/partial/fail glyphs and a 10/10 column",
+      "readerAction": "Scan the column that clears every row",
       "readerTakeaway": "No alternative clears all ten at once.",
-      "chartType": "Requirement × asset scorecard (meets / partial / fails).",
-      "setupLine": "The ten backbone requirements, scored across candidate reserve assets",
-      "explainerHeadline": "Ten requirements, derived from the objective — not reverse-engineered.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": "Hovering a requirement row reveals the rationale behind each asset score"
+      },
+      "motionProfile": {
+        "type": "rowSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -749,24 +1065,43 @@
           "role": "verifies-concept",
           "url": "/part-3-bitcoin-convexity-backbone"
         }
-      ]
+      ],
+      "agencyNotes": "New scorecard primitive: requirement rows × asset columns, quiet meet/partial/fail glyphs (shape-coded, not colour-only), Bitcoin column emphasised. Scores and aggregates taken from the Part 3 comparison table."
     },
     {
       "chartId": "p3-volatility-is-the-toll",
       "idx": "P3-03",
       "title": "Volatility Is the Toll",
       "group": "part-3",
-      "intendedPlacement": "part-3",
+      "part": "part-3",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "VOLATILITY · SIZING",
-      "frameworkClaim": "Bitcoin volatility is the cost of convexity; sizing decides whether it is survivable.",
+      "primaryClaim": "Big Bitcoin drawdowns are small portfolio hits at a managed size",
+      "visualProof": "A volatile Bitcoin line beside a calm total-portfolio line at a managed reserve",
+      "readerAction": "See the drawdown sized to your portfolio",
       "readerTakeaway": "The drawdown is the price of admission, not a reason to avoid it.",
-      "chartType": "Representative Bitcoin path with deep drawdowns vs the calmer total-portfolio line at managed size.",
-      "setupLine": "Large Bitcoin drawdowns, small total-portfolio impact at a managed allocation",
-      "explainerHeadline": "The volatility is the toll, not the risk.",
+      "interaction": {
+        "type": "readerContext",
+        "gesture": "type",
+        "conceptMatch": "Entering a starting value scales the representative drawdown into a portfolio-impact figure"
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "readerContext": {
+        "kind": "vol-impact",
+        "uses": [
+          "portfolioValue"
+        ]
+      },
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -783,24 +1118,43 @@
           "role": "verifies-concept",
           "url": "/part-1-foundation"
         }
-      ]
+      ],
+      "agencyNotes": "Representative paths, not historical BTC. Drawdown-from-peak shaded behind the Bitcoin line; the portfolio line stays calm at managed size."
     },
     {
       "chartId": "p3-exposure-not-control",
       "idx": "P3-04",
       "title": "Exposure Is Not Control",
       "group": "part-3",
-      "intendedPlacement": "part-3",
+      "part": "part-3",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "scenario",
-      "visualDataMode": "simulation",
+      "dataMode": "simulation",
       "claimLabel": "CONTROL · INTERACTIVE",
-      "frameworkClaim": "100% Bitcoin can win one favorable cycle; the framework optimizes for control across many.",
+      "primaryClaim": "Exposure can win one cycle; control is what survives many",
+      "visualProof": "All three strategy paths drawn together, plus an across-all-paths robustness strip",
+      "readerAction": "Pick a path, then stress it",
       "readerTakeaway": "Max exposure wins the clean bull case; the framework wins the messy path — balancing upside, capacity, and emotional control.",
-      "chartType": "Interactive path-aware comparison of representative portfolio paths through a drawdown, with an optional shock.",
-      "setupLine": "Choose the path. Then change the shock.",
-      "explainerHeadline": "Winning a cycle is not the same as staying in control.",
+      "interaction": {
+        "type": "scenario",
+        "gesture": "choose",
+        "conceptMatch": "Selecting a strategy and a shock redraws the emphasised path and its control read-outs"
+      },
+      "motionProfile": {
+        "type": "scenarioUpdate",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "readerContext": {
+        "kind": "scenario-scale",
+        "uses": [
+          "portfolioValue"
+        ]
+      },
+      "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
       "sources": [
         {
@@ -817,24 +1171,38 @@
           "role": "verifies-concept",
           "url": "/part-3-bitcoin-convexity-backbone"
         }
-      ]
+      ],
+      "agencyNotes": "INTERACTIVE SIMULATION — the headline Part 3 exhibit. All three strategy paths are drawn together under the selected shock; the chosen strategy is emphasised and the others stay as muted context. Click a path to select it. A capacity-to-act gauge, a trough/intervention zone, a forced-sale mark, and an annotation that updates with the shock carry the story; the stat strip (split into UPSIDE and CONTROL) is subordinate. Precomputed, deterministic representative paths — no live calc."
     },
     {
       "chartId": "p3-models-must-converge",
       "idx": "P3-05",
       "title": "Models Must Converge",
       "group": "part-3",
-      "intendedPlacement": "part-3",
+      "part": "part-3",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "representative",
+      "dataMode": "representative",
       "claimLabel": "VALUATION · CONVERGENCE",
-      "frameworkClaim": "Power-law, realized price, production cost, and liquidity models are most useful when they converge.",
+      "primaryClaim": "Power-law, realized price, production cost, and liquidity models are most useful when they converge.",
+      "visualProof": "Valuation envelope — the spread between models narrows on convergence, widens on divergence.",
+      "readerAction": null,
       "readerTakeaway": "Agreement strengthens conviction; disagreement is the signal.",
-      "chartType": "Valuation envelope — the spread between models narrows on convergence, widens on divergence.",
-      "setupLine": "The valuation models are most useful where they agree; divergence signals caution",
-      "explainerHeadline": "Conviction lives where the models agree.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "readerContext": null,
+      "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
       "sources": [
         {
@@ -844,24 +1212,38 @@
           "role": "verifies-concept",
           "url": "/part-3-bitcoin-convexity-backbone"
         }
-      ]
+      ],
+      "agencyNotes": "Representative envelope (min–max of four models), not historical. The band width is the message; avoid drawing four spaghetti lines."
     },
     {
       "chartId": "p3-accumulate-dont-trade",
       "idx": "P3-06",
       "title": "Accumulate, Don’t Trade",
       "group": "part-3",
-      "intendedPlacement": "part-3",
+      "part": "part-3",
       "status": "needs-design-review",
       "wiredPublic": false,
       "layout": "heartbeat",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "DISCIPLINE · ACCUMULATION",
-      "frameworkClaim": "Valuation models guide accumulation pacing and conviction, not selling the reserve.",
+      "primaryClaim": "Fixed-dollar DCA buys more units when price is lower",
+      "visualProof": "Unit bars whose height = dollars ÷ price; the framework boost stacks only in the undervalued window",
+      "readerAction": "Watch units rise as price falls",
       "readerTakeaway": "For an accumulator, drawdowns become unit-capture windows — if the plan survives them.",
-      "chartType": "Representative BTC price index with DCA unit bars: units = dollars ÷ price; the framework leans in only when undervalued and never sells.",
-      "setupLine": "Fixed-dollar DCA buys more units when Bitcoin is lower",
-      "explainerHeadline": "Same dollars, more units — when price is lower.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": "The price index drives the DCA unit bars by default: units = dollars ÷ price; hover adds the lean-in / slow detail"
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [
+        "relational"
+      ],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -871,24 +1253,36 @@
           "role": "verifies-concept",
           "url": "/part-3-bitcoin-convexity-backbone"
         }
-      ]
+      ],
+      "agencyNotes": "Math-grounded accumulation layout (HeartbeatSvg, internal name): a representative BTC price index above DCA unit bars where bar height = fixed dollars ÷ price, so lower price = taller bars. The accent (framework) bar stacks above the muted baseline bar only in the undervalued window and falls below it when extended (slows, never sells). A small \"DCA $ ÷ price = units\" formula anchors the conversion; the relational unit-capture field is kept faint/secondary. Representative/conceptual — no historical price, no exact sats; \"heartbeat\" is not used as visible copy."
     },
     {
       "chartId": "p3-cold-storage-to-borrow",
       "idx": "P3-07",
       "title": "Cold Storage to Borrow",
       "group": "part-3",
-      "intendedPlacement": "part-3",
+      "part": "part-3",
       "status": "deferred",
       "wiredPublic": false,
       "layout": "flow",
-      "visualDataMode": "conceptual",
+      "dataMode": "conceptual",
       "claimLabel": "LIFECYCLE · RESERVE",
-      "frameworkClaim": "The Bitcoin reserve moves from accumulation to collateralized borrowing without forced sale.",
+      "primaryClaim": "The Bitcoin reserve moves from accumulation to collateralized borrowing without forced sale.",
+      "visualProof": "Reserve lifecycle flow: accumulate → self-custody → mature → collateralized loan → liquidity.",
+      "readerAction": null,
       "readerTakeaway": "Liquidity comes from borrowing against the reserve, not selling it.",
-      "chartType": "Reserve lifecycle flow: accumulate → self-custody → mature → collateralized loan → liquidity.",
-      "setupLine": "The reserve lifecycle: accumulate, self-custody, mature, borrow — without a forced sale",
-      "explainerHeadline": "Liquidity without selling the reserve.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [
         {
@@ -905,24 +1299,36 @@
           "role": "verifies-concept",
           "url": "/part-4-tax-architecture-roc-strategy"
         }
-      ]
+      ],
+      "agencyNotes": "Lifecycle flow (linear stages). Conceptual diagram; the final liquidity node is the emphasised output."
     },
     {
       "chartId": "p3-reserve-share-evolves",
       "idx": "P3-08",
       "title": "Reserve Share Evolves",
       "group": "part-3",
-      "intendedPlacement": "part-3",
+      "part": "part-3",
       "status": "deferred",
       "wiredPublic": false,
       "layout": "single",
-      "visualDataMode": "simulation",
+      "dataMode": "simulation",
       "claimLabel": "ALLOCATION · PHASE",
-      "frameworkClaim": "A 10–15% reserve can evolve into a 30–50% mature share, at which point borrow-phase governance matters.",
+      "primaryClaim": "A 10–15% reserve can evolve into a 30–50% mature share, at which point borrow-phase governance matters.",
+      "visualProof": "Reserve share as a percent of net worth, rising through target, elevated, and mature phases.",
+      "readerAction": null,
       "readerTakeaway": "Success changes the job: from accumulating to governing the reserve.",
-      "chartType": "Reserve share as a percent of net worth, rising through target, elevated, and mature phases.",
-      "setupLine": "A 10–15% reserve can mature into a 30–50% share, where borrow-phase governance begins",
-      "explainerHeadline": "The reserve outgrows its target — on purpose.",
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "backgroundRoles": [],
+      "readerContext": null,
+      "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
       "sources": [
         {
@@ -939,7 +1345,8 @@
           "role": "verifies-concept",
           "url": "/part-3-bitcoin-convexity-backbone"
         }
-      ]
+      ],
+      "agencyNotes": "SIMULATION — illustrative trajectory; ranges (10–15% / 30–50%) from Part 3 allocation guidance. Phase thresholds shown as guides."
     }
   ]
 }

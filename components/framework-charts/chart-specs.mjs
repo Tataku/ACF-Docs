@@ -69,6 +69,154 @@ export const DISCLOSURE = {
 };
 
 // ════════════════════════════════════════════════════════════════════════════
+// ENGINE DOCTRINE (vNext) — canonical enums + derive-with-override resolvers
+//
+// The chart engine is a guided-learning instrument, not a chart builder. These
+// enums are the single source of truth (the Node validator imports them), and
+// the resolvers let every chart carry consistent doctrine metadata WITHOUT
+// hand-editing each spec: a chart may declare `claimStack` / `interaction` /
+// `motionProfile` explicitly, otherwise a sane value is derived from its layout.
+// Pure ESM (no React) — safe to import from components and from scripts.
+// ════════════════════════════════════════════════════════════════════════════
+
+export const DATA_MODES = ['representative', 'historical', 'simulation', 'conceptual'];
+export const SOURCE_ROLES = ['verifies-concept', 'backs-series', 'methodology', 'target-source'];
+export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat'];
+
+// Interaction must MATCH the concept (a reveal reveals; a selector changes the path).
+export const INTERACTION_TYPES = ['none', 'hover', 'scenario', 'beforeAfterReveal', 'readerContext', 'returnOrder', 'slider'];
+export const GESTURES = ['none', 'hover', 'tap', 'drag', 'choose', 'type'];
+
+// Motion follows comprehension — it draws in the order the idea is understood.
+export const MOTION_TYPES = ['timeSweep', 'reveal', 'rowSweep', 'scenarioUpdate', 'diagramBuild'];
+export const MOTION_DURATIONS = ['calm', 'slow', 'transformational'];
+
+// A background is allowed ONLY if it explains a relationship — never decorative.
+export const BACKGROUND_ROLES = ['regime', 'pressure', 'relational', 'revealLayer'];
+
+// Reader simulation-context keys. `startingValue` is canonical; `portfolioValue`
+// is the legacy alias kept working until the reader-context migration lands.
+export const CONTEXT_KEYS = ['startingValue', 'horizon', 'withdrawalRate', 'btcReserveAllocation', 'monthlyDca'];
+export const LEGACY_CONTEXT_KEYS = ['portfolioValue'];
+export const PERSONAL_KINDS = ['scenario-scale', 'vol-impact', 'sequence-scale'];
+
+// Promissory / forecast language that must never appear in a chart's VISIBLE
+// claim copy (disclosure/caution/note legitimately say "not a forecast", so they
+// are excluded from the scan). Representative exhibits scale, they do not predict.
+export const BANNED_PROMISE_WORDS = ['forecast', 'guaranteed', 'guarantee', 'expected return', 'will outperform', 'risk-free', 'optimized'];
+
+export const HORIZON_BANDS = [
+  { id: '10y', label: '10 years', short: '10y' },
+  { id: '20y', label: '20 years', short: '20y' },
+  { id: '30y', label: '30+ years', short: '30+ yr' },
+  { id: 'legacy', label: 'Legacy', short: 'Legacy' },
+];
+
+// ── standardized formatting (no cents, no false precision) ────────────────────
+export function formatStartingValue(n) {
+  if (!isFinite(n) || n <= 0) return '$0';
+  const r = n >= 100000 ? Math.round(n / 1000) * 1000 : Math.round(n / 100) * 100;
+  return '$' + r.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+export function formatCompactMoney(n) {
+  if (!isFinite(n) || n <= 0) return '$0';
+  const abs = Math.abs(n);
+  if (abs >= 1e6) return '$' + (Math.round(n / 1e5) / 10).toLocaleString('en-US') + 'M';
+  if (abs >= 1e4) return '$' + Math.round(n / 1e3) + 'k';
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+export function formatPercent(x, digits = 0) {
+  if (!isFinite(x)) return '0%';
+  return `${(x * 100).toFixed(digits).replace(/\.0+$/, '')}%`;
+}
+export function formatHorizon(id) {
+  const b = HORIZON_BANDS.find((h) => h.id === id);
+  return b ? b.label : '30+ years';
+}
+// Read the reader's starting value from either canonical or legacy key.
+export function readStartingValue(ctx) {
+  if (!ctx) return null;
+  const v = isFinite(ctx.startingValue) ? ctx.startingValue : ctx.portfolioValue;
+  return isFinite(v) && v > 0 ? v : null;
+}
+
+// ── derive-with-override doctrine resolvers ──────────────────────────────────
+// Every chart resolves a primaryClaim; explicit spec.claimStack wins.
+export function resolveClaimStack(spec) {
+  const cs = spec.claimStack || {};
+  return {
+    primaryClaim: cs.primaryClaim || spec.frameworkClaim || spec.title,
+    visualProof: cs.visualProof || spec.chartType || null,
+    interactionRole: cs.interactionRole || null,
+    readerAction: cs.readerAction || null,
+    caution: cs.caution || spec.disclosure || null,
+  };
+}
+// The PRIMARY interaction; explicit spec.interaction wins, else derived.
+export function resolveInteraction(spec) {
+  if (spec.interaction && spec.interaction.type) return spec.interaction;
+  let type = 'hover', gesture = 'hover';
+  if (spec.layout === 'scenario') { type = 'scenario'; gesture = 'choose'; }
+  else if (spec.layout === 'sequenceRisk') { type = 'returnOrder'; gesture = 'hover'; }
+  else if (spec.layout === 'dual' && spec.perspectiveSlider) { type = 'beforeAfterReveal'; gesture = 'drag'; }
+  else if (spec.personalization) { type = 'readerContext'; gesture = 'type'; }
+  return { type, gesture, conceptMatch: null };
+}
+export function resolveMotionProfile(spec) {
+  if (spec.motionProfile && spec.motionProfile.type) return spec.motionProfile;
+  const diagrams = ['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'quadrant'];
+  let type = 'timeSweep';
+  if (diagrams.includes(spec.layout)) type = 'diagramBuild';
+  else if (spec.layout === 'scenario') type = 'scenarioUpdate';
+  else if (spec.layout === 'sequenceRisk' || spec.layout === 'scorecard') type = 'rowSweep';
+  else if (spec.layout === 'dual' && spec.perspectiveSlider) type = 'reveal';
+  return { type, duration: 'calm', relatedElements: null };
+}
+// Background roles in use; explicit band/area.backgroundRole passes through so a
+// stray 'decorative' surfaces to the validator (BACKGROUND_ROLES excludes it).
+export function resolveBackgroundRoles(spec) {
+  const roles = new Set();
+  const scan = (p) => {
+    (p.bands || []).forEach((b) => roles.add(b.backgroundRole || (b.render === 'pressureField' ? 'pressure' : 'regime')));
+    (p.areas || []).forEach((a) => roles.add(a.backgroundRole || 'regime'));
+  };
+  if (spec.layout === 'dual') (spec.panels || []).forEach(scan); else scan(spec);
+  if (spec.layout === 'heartbeat') roles.add('relational');           // unitCaptureField
+  if (spec.layout === 'scenario') roles.add('regime');                // trough/intervention zone
+  if (spec.layout === 'dual' && spec.perspectiveSlider) roles.add('revealLayer');
+  return [...roles];
+}
+
+// ── simulation-context intro (chart-level data introduction) ─────────────────
+// Builds the quiet "scaled example" line for a personalized chart. Returns null
+// when the chart does not opt in, or when there is no usable starting value.
+export function getSimulationIntro(spec, ctx) {
+  const p = spec.personalization;
+  if (!p) return null;
+  const sv = readStartingValue(ctx);
+  if (sv == null) return null;
+  const start = formatStartingValue(sv);
+  const hz = ctx && ctx.horizon ? ` · ${formatHorizon(ctx.horizon)} horizon` : '';
+  if (p.kind === 'sequence-scale') {
+    const wr = p.withdrawalRate || 0.04;
+    return `Representative withdrawal simulation · ${start} start · ${formatStartingValue(sv * wr)}/yr withdrawals${hz}`;
+  }
+  if (p.kind === 'scenario-scale') {
+    return `Representative total-portfolio paths · ${start} start${hz} · not Bitcoin price`;
+  }
+  if (p.kind === 'vol-impact') {
+    const a = p.assume || { alloc: 0.15 };
+    return `Portfolio impact example · ${start} start · ${Math.round(a.alloc * 100)}% Bitcoin reserve assumption`;
+  }
+  return `Scaled example · ${start} starting value${hz}`;
+}
+export function buildPersonalizedDisclosure(spec) {
+  const p = spec.personalization;
+  if (!p) return null;
+  return p.disclosure || p.note || 'Scaled representative example · not a forecast or recommendation.';
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // DATA SHAPES (representative / conceptual — deterministic so SSR == CSR)
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -712,6 +860,16 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-policy-constraint', idx: '04', group: 'part-1', intendedPlacement: 'part-1',
+    claimStack: {
+      primaryClaim: 'Debt rose for decades while falling rates hid the cost',
+      visualProof: 'The same debt/GDP backdrop in both states; the interest-burden cost is revealed beneath it',
+      interactionRole: 'Drag the divider to pull back the calm surface and expose the hidden cost',
+      readerAction: 'Reveal what the surface was hiding',
+      caution: 'Representative exhibit (FRED target series), not exact historical data',
+    },
+    interaction: { type: 'beforeAfterReveal', gesture: 'drag', conceptMatch: 'Dragging spatially pulls back the surface to reveal the hidden interest cost beneath the same debt backdrop' },
+    beforeAfterLabels: { before: 'Surface', after: 'Hidden cost' }, revealDefault: 0.5,
+    motionProfile: { type: 'reveal', duration: 'calm', relatedElements: [['debt', 'int']] },
     status: 'implemented', wiredPublic: false,
     title: 'The Bill Came Due', setupLine:'Debt rose for decades. The cost returned when rates normalized.',
     claimLabel: 'POLICY · CONSTRAINT',
@@ -754,6 +912,15 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-sequence-risk', idx: '05', group: 'part-1', intendedPlacement: 'part-1',
+    claimStack: {
+      primaryClaim: 'Same returns, same withdrawals — different order, opposite survival',
+      visualProof: 'A shared return deck (same blocks, two orders) drives both portfolio paths',
+      interactionRole: 'Hover the deck and paths to tie the identical returns to opposite outcomes',
+      readerAction: 'Compare the two orders of the same deck',
+      caution: 'Representative simulation, not a forecast or backtest',
+    },
+    interaction: { type: 'returnOrder', gesture: 'hover', conceptMatch: 'The same return deck is shown in two orders; the paths are generated from those exact returns' },
+    motionProfile: { type: 'rowSweep', duration: 'slow', relatedElements: [['good', 'bad']] },
     status: 'implemented', wiredPublic: false,
     title: 'Path Changes Everything', setupLine:'Same returns, same withdrawals — different order',
     claimLabel: 'PATH DEPENDENCY · WITHDRAWALS',
@@ -765,7 +932,7 @@ export const FRAMEWORK_CHART_SPECS = [
     sources: [
       { provider: 'Author simulation', label: 'One return set, opposite order; paths generated from the returns', role: 'methodology', transform: 'v(i+1) = v(i)·(1+r) − withdrawal · $1.0M start · 4% level withdrawal', notes: 'No real-data transform. Pure deterministic simulation; the deck and the paths use the same returns.' },
     ],
-    personalization: { uses: ['portfolioValue'], kind: 'sequence-scale', note: 'Scales the start, withdrawal, and ending values to the reader-context portfolio. Representative simulation, not a forecast.' },
+    personalization: { uses: ['portfolioValue'], kind: 'sequence-scale', withdrawalRate: 0.04, note: 'Scales the start, withdrawal, and ending values to the reader-context portfolio. Representative simulation, not a forecast.' },
     explainerHeadline: 'Same returns. Same withdrawals. Different order.',
     explainerBody: 'Both paths use the same annual returns and the same withdrawals — the deck above proves it, the same blocks in opposite order. The only difference is sequence. Early losses force withdrawals from a smaller capital base, so later gains compound on less money. Average return did not change; surviving capital did.',
     explainerConcept: 'Sequence risk',
@@ -1216,6 +1383,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-ten-tests', idx: 'P3-02', group: 'part-3', intendedPlacement: 'part-3',
+    claimStack: {
+      primaryClaim: 'Only Bitcoin clears all ten backbone requirements at once',
+      visualProof: 'A requirement × asset matrix with shape-coded meet/partial/fail glyphs and a 10/10 column',
+      interactionRole: 'Hover a requirement row to see why it matters and how each asset scores',
+      readerAction: 'Scan the column that clears every row',
+      caution: 'Conceptual scoring from the Part 3 comparison; illustrative, not measured',
+    },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a requirement row reveals the rationale behind each asset score' },
     status: 'needs-design-review', wiredPublic: false,
     title: 'One Asset, Ten Tests', setupLine: 'The ten backbone requirements, scored across candidate reserve assets',
     claimLabel: 'BACKBONE · REQUIREMENTS',
@@ -1267,6 +1442,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-volatility-is-the-toll', idx: 'P3-03', group: 'part-3', intendedPlacement: 'part-3',
+    claimStack: {
+      primaryClaim: 'Big Bitcoin drawdowns are small portfolio hits at a managed size',
+      visualProof: 'A volatile Bitcoin line beside a calm total-portfolio line at a managed reserve',
+      interactionRole: 'Hover the toll / calm marks; the intro scales the hit to your starting value',
+      readerAction: 'See the drawdown sized to your portfolio',
+      caution: 'Representative paths, not historical Bitcoin; illustrative, not a forecast',
+    },
+    interaction: { type: 'readerContext', gesture: 'type', conceptMatch: 'Entering a starting value scales the representative drawdown into a portfolio-impact figure' },
     status: 'needs-design-review', wiredPublic: false,
     title: 'Volatility Is the Toll', setupLine: 'Large Bitcoin drawdowns, small total-portfolio impact at a managed allocation',
     claimLabel: 'VOLATILITY · SIZING',
@@ -1310,6 +1493,15 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-exposure-not-control', idx: 'P3-04', group: 'part-3', intendedPlacement: 'part-3',
+    claimStack: {
+      primaryClaim: 'Exposure can win one cycle; control is what survives many',
+      visualProof: 'All three strategy paths drawn together, plus an across-all-paths robustness strip',
+      interactionRole: 'Choose a strategy, then change the shock and watch outcome and decision strain move',
+      readerAction: 'Pick a path, then stress it',
+      caution: 'Representative simulation of total-portfolio paths (not Bitcoin price); not a forecast',
+    },
+    interaction: { type: 'scenario', gesture: 'choose', conceptMatch: 'Selecting a strategy and a shock redraws the emphasised path and its control read-outs' },
+    motionProfile: { type: 'scenarioUpdate', duration: 'calm' },
     status: 'needs-design-review', wiredPublic: false,
     title: 'Exposure Is Not Control', setupLine: 'Choose the path. Then change the shock.',
     claimLabel: 'CONTROL · INTERACTIVE',
@@ -1397,6 +1589,16 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-accumulate-dont-trade', idx: 'P3-06', group: 'part-3', intendedPlacement: 'part-3',
+    claimStack: {
+      primaryClaim: 'Fixed-dollar DCA buys more units when price is lower',
+      visualProof: 'Unit bars whose height = dollars ÷ price; the framework boost stacks only in the undervalued window',
+      interactionRole: 'Hover the price index and bars to see the conversion and the lean-in window',
+      readerAction: 'Watch units rise as price falls',
+      caution: 'Representative/conceptual — no historical price, no exact units; never sells the reserve',
+    },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'The price index drives the DCA unit bars by default: units = dollars ÷ price; hover adds the lean-in / slow detail' },
+    motionProfile: { type: 'timeSweep', duration: 'calm', relatedElements: [['priceIndex', 'unitBars']] },
+    formula: 'DCA $ ÷ price = units',
     status: 'needs-design-review', wiredPublic: false,
     title: 'Accumulate, Don’t Trade', setupLine: 'Fixed-dollar DCA buys more units when Bitcoin is lower',
     claimLabel: 'DISCIPLINE · ACCUMULATION',
