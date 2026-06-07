@@ -23,6 +23,8 @@ const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2', 'part-3
 const STATUSES = new Set(['implemented', 'needs-design-review', 'spec-only', 'deferred']);
 const MODES = new Set(['representative', 'historical', 'simulation', 'conceptual']);
 const ROLES = new Set(['verifies-concept', 'backs-series', 'methodology', 'target-source']);
+const PERSONAL_KEYS = new Set(['portfolioValue', 'horizon']);
+const PERSONAL_KINDS = new Set(['scenario-scale', 'vol-impact']);
 
 let checks = 0;
 const ok = (cond, msg) => { assert.ok(cond, msg); checks++; };
@@ -69,6 +71,15 @@ for (const s of FRAMEWORK_CHART_SPECS) {
   }
   if (s.visualDataMode === 'simulation') {
     ok(sources.some((src) => src.role === 'methodology'), `${w} simulation needs a methodology source`);
+  }
+
+  // optional reader-context personalization
+  if (s.personalization) {
+    const pz = s.personalization;
+    ok(Array.isArray(pz.uses) && pz.uses.length >= 1, `${w} personalization.uses must be a non-empty array`);
+    (pz.uses || []).forEach((u) => ok(PERSONAL_KEYS.has(u), `${w} personalization uses unknown key: ${u}`));
+    ok(PERSONAL_KINDS.has(pz.kind), `${w} personalization has bad kind: ${pz.kind}`);
+    ok(typeof pz.note === 'string' && pz.note.trim(), `${w} personalization needs a note string`);
   }
 
   // hover targets

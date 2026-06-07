@@ -152,6 +152,11 @@ Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclo
 4. Text must never collide; a legend is placed *before* the marks it explains (top of the scorecard, not crammed into the footer) and never competes with the chart.
 5. Background regions explain a regime or mechanism — never decoration, and never a generic rectangular block where an organic field reads better (the accumulation window uses an ink-wash `dcaWindow` field with sat stipples, not a rectangle).
 
+**Motion rule** — *"Build the chart in the order the idea should be understood."* Charts reveal once they scroll into view (an `IntersectionObserver`, once — `useInViewOnce`); reduced-motion and print reveal immediately and never hide content behind animation. The layered order is:
+1. container settles → 2. frame / axis / structural guide → 3. regime or pressure fields breathe in → 4. context series → 5. primary thesis path draws (clip-path, left→right) → 6. markers and annotations resolve → 7. hover/tap affordances activate → 8. explainer / footer stay readable and stable.
+
+Interaction comes after comprehension; animation creates comprehension. It is native (CSS transitions + clip-path draw, no animation library), never loops, and never shifts layout. On the `scenario` chart a strategy/shock change updates the paths and stats quickly **without replaying the build**. The figure exposes `data-build="idle|in"`, `data-reduced-motion`, the `acf-chart-build` class, and `--build-duration` / `--build-stagger` CSS variables as hook points.
+
 ## 5. How to render one chart
 
 ```jsx
@@ -223,6 +228,47 @@ To make a representative chart use exact data later:
 2. Set `visualDataMode: "historical"` and `wiredPublic` as appropriate.
 3. The footer automatically switches from the representative disclosure to a
    verifiable `Source: …` citation. No engine change required.
+
+## 11. Reader context (page-level personalization)
+
+The handoff/export pages carry **one optional input near the top** — a *reader
+context* — so a reader can feel the framework in their own numbers without the
+charts becoming a calculator:
+
+- **Portfolio value** (default `$100,000`) — accepts `250000`, `250,000`, or
+  `$250,000`; formats on blur; clamped `$1,000`–`$100,000,000`; empty/invalid
+  never crashes or shows `NaN`.
+- **Horizon** — `10 years · 20 years · 30+ years · Legacy` (default `30+ years`).
+  Renders for multi-cycle / lifetime / legacy framing; only affects a chart if
+  that chart explicitly consumes it (none do yet — reserved for later).
+
+State is **local only**: no persistence, no cookies/localStorage, no backend; it
+resets on refresh. The context is passed to every `FrameworkChart` as
+`readerContext={{ portfolioValue, horizon }}`.
+
+A chart opts in with a spec field:
+
+```js
+personalization: { uses: ['portfolioValue'], kind: 'scenario-scale', note: '…' }
+```
+
+Charts consuming context in v1 (Part 3 only):
+
+| chartId | kind | what it scales |
+|---|---|---|
+| `p3-exposure-not-control` | `scenario-scale` | terminal, max drawdown, and dry powder read-outs shown in **dollars** (· %); a caption notes the starting portfolio |
+| `p3-volatility-is-the-toll` | `vol-impact` | a caption: *"At a 15% Bitcoin reserve, a 70% Bitcoin drawdown is roughly a $X hit on a $Y portfolio"* |
+
+**Honesty rule:** personalized values **scale representative exhibits; they do not
+make them predictive.** Never say *expected / forecast / recommendation / should /
+optimized*. Prefer *illustrative / representative / scaled example / starting
+portfolio / portfolio impact*. Captions always carry "illustrative, not a
+forecast." The validator enforces that any `personalization` block has allowed
+`uses` keys, a known `kind`, and a `note`.
+
+Future expansion: wire `horizon` into horizon-sensitive exhibits (e.g.
+*Time Changes Prudence*), and optionally persist reader context across the public
+Part pages once the charts are placed there.
 
 ---
 
