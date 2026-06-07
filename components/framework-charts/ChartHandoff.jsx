@@ -11,7 +11,7 @@
  * ─────────────────────────────────────────────────────────────────────────── */
 import React, { useState } from 'react';
 import FrameworkChart from './FrameworkChart';
-import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel } from './chart-specs.mjs';
+import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel, HORIZON_BANDS } from './chart-specs.mjs';
 import { getPalette, getAccent } from './palette';
 
 const PLACEMENT = { both: 'Docs + Part 1', 'docs-landing': 'Docs landing', 'part-1': 'Part 1', 'part-2': 'Part 2', 'part-3': 'Part 3' };
@@ -222,41 +222,36 @@ const PRESETS = {
   },
 };
 
-// ── page-level reader context ────────────────────────────────────────────────
+// ── page-level simulation context ────────────────────────────────────────────
 // One optional input near the top scales representative exhibits to the reader's
-// own numbers. Local state only — no persistence, no cookies, no forecast.
-const DEFAULT_READER_CONTEXT = { portfolioValue: 100000, horizon: '30y' };
-const HORIZON_BANDS = [
-  { id: '10y', label: '10 years' },
-  { id: '20y', label: '20 years' },
-  { id: '30y', label: '30+ years' },
-  { id: 'legacy', label: 'Legacy' },
-];
+// own numbers (startingValue + horizon). Local state only — no persistence, no
+// cookies, no forecast. HORIZON_BANDS is shared from chart-specs (single source).
+const DEFAULT_SIMULATION_CONTEXT = { startingValue: 100000, horizon: '30y' };
 const parseMoney = (s) => { const n = Number(String(s).replace(/[^0-9.]/g, '')); return isFinite(n) ? n : NaN; };
 const clampMoney = (n) => Math.min(100000000, Math.max(1000, Math.round(n)));
 const groupMoney = (n) => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '');
 
-function ReaderContextBar({ pal, accent, ctx, setCtx }) {
-  const [raw, setRaw] = useState(groupMoney(ctx.portfolioValue));
+function SimulationContextBar({ pal, accent, ctx, setCtx }) {
+  const [raw, setRaw] = useState(groupMoney(ctx.startingValue));
   const lbl = { fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.18em', color: pal.text4 };
   const base = { fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.04em', cursor: 'pointer', background: 'transparent', border: 'none', padding: '3px 2px 1px', lineHeight: 1.4 };
   const sty = (active) => ({ ...base, color: active ? pal.text1 : pal.text3, fontWeight: active ? 600 : 400, borderBottom: `1.5px solid ${active ? accent : 'transparent'}` });
-  const commit = () => { const n = parseMoney(raw); const v = isFinite(n) ? clampMoney(n) : DEFAULT_READER_CONTEXT.portfolioValue; setCtx((c) => ({ ...c, portfolioValue: v })); setRaw(groupMoney(v)); };
+  const commit = () => { const n = parseMoney(raw); const v = isFinite(n) ? clampMoney(n) : DEFAULT_SIMULATION_CONTEXT.startingValue; setCtx((c) => ({ ...c, startingValue: v })); setRaw(groupMoney(v)); };
   return (
-    <section aria-label="Reader context" style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 28px' }}>
-      <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>SIMULATE WITH YOUR NUMBERS</span>
+    <section aria-label="Simulation context" style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 28px' }}>
+      <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>SIMULATION CONTEXT</span>
       <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9 }}>
-        <span style={lbl}>PORTFOLIO VALUE</span>
+        <span style={lbl}>STARTING VALUE</span>
         <span style={{ display: 'inline-flex', alignItems: 'baseline' }}>
           <span aria-hidden style={{ color: pal.text3, fontFamily: pal.mono, fontSize: 13 }}>$</span>
-          <input inputMode="numeric" aria-label="Illustrative portfolio value in dollars" value={raw}
+          <input inputMode="numeric" aria-label="Illustrative starting portfolio value in dollars" value={raw}
             onChange={(e) => setRaw(e.target.value)} onBlur={commit}
             onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
             style={{ width: 96, background: 'transparent', border: 'none', borderBottom: `1.5px solid ${pal.borderHi}`, color: pal.text1, fontFamily: pal.mono, fontSize: 13, padding: '2px 0 2px 2px', outline: 'none' }} />
         </span>
       </span>
       <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap' }}>
-        <span style={lbl}>HORIZON</span>
+        <span style={lbl}>TIME HORIZON</span>
         <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
           {HORIZON_BANDS.flatMap((h, i) => {
             const btn = <button key={h.id} onClick={() => setCtx((c) => ({ ...c, horizon: h.id }))} aria-pressed={ctx.horizon === h.id} style={sty(ctx.horizon === h.id)}>{h.label}</button>;
@@ -264,7 +259,7 @@ function ReaderContextBar({ pal, accent, ctx, setCtx }) {
           })}
         </span>
       </span>
-      <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>Used only to scale representative exhibits on this page. Not a forecast.</span>
+      <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>Used only to scale representative exhibits on this page. Not a forecast or recommendation.</span>
     </section>
   );
 }
@@ -272,7 +267,7 @@ function ReaderContextBar({ pal, accent, ctx, setCtx }) {
 export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', accent: accentName = 'green', variant = 'embedded' }) {
   const preset = PRESETS[part] || PRESETS['part-1'];
   const [theme, setTheme] = useState(initialTheme);
-  const [readerCtx, setReaderCtx] = useState(DEFAULT_READER_CONTEXT);
+  const [readerCtx, setReaderCtx] = useState(DEFAULT_SIMULATION_CONTEXT);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
   const isExport = variant === 'export';
@@ -309,7 +304,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 6, height: 6, background: pal.text3 }} /> HISTORICAL (WHEN WIRED)</span>
       </div>
 
-      <ReaderContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} />
+      <SimulationContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} />
 
       <InventoryTable pal={pal} accent={accent} specs={specs} />
 

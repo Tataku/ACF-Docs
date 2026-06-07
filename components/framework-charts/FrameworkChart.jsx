@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, valueAt } from './chart-specs.mjs';
+import { getChartSpec, footerModel, valueAt, getSimulationIntro, readStartingValue } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -113,18 +113,17 @@ function fmtMoney(n) {
   const r = n >= 100000 ? Math.round(n / 1000) * 1000 : Math.round(n / 100) * 100;
   return '$' + r.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
-// A quiet personalized caption for charts that opt in via spec.personalization.
-// Scales representative exhibits to the reader's portfolio value — never a forecast.
+// A quiet personalized CALLOUT below the plot — for the specific computed figure a
+// chart-level intro can't carry (e.g. the dollar size of a drawdown). The generic
+// "scaled example" framing is handled by getSimulationIntro ABOVE the visual, so
+// scenario/sequence scaling shows there + in-chart, not as a duplicate caption.
 function personalNote(spec, rc) {
   const p = spec.personalization;
-  if (!p || !rc || !isFinite(rc.portfolioValue) || rc.portfolioValue <= 0) return null;
-  const P = rc.portfolioValue;
+  const P = readStartingValue(rc);
+  if (!p || P == null) return null;
   if (p.kind === 'vol-impact') {
     const a = p.assume || { alloc: 0.15, drawdown: 0.70 };
     return `At a ${Math.round(a.alloc * 100)}% Bitcoin reserve, a ${Math.round(a.drawdown * 100)}% Bitcoin drawdown is roughly a ${fmtMoney(P * a.alloc * a.drawdown)} hit (~${Math.round(a.alloc * a.drawdown * 100)}%) on a ${fmtMoney(P)} portfolio — representative, not a forecast.`;
-  }
-  if (p.kind === 'scenario-scale') {
-    return `Outcomes are scaled to a ${fmtMoney(P)} starting portfolio — illustrative, not a forecast.`;
   }
   return null;
 }
@@ -1086,7 +1085,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const sel = paths.find((p) => p.pk === presetId) || paths[0];
   const st = sel.v.stats;
   // reader-context scaling (optional): index → dollars, illustrative only
-  const scaleP = spec.personalization && spec.personalization.kind === 'scenario-scale' && readerContext && isFinite(readerContext.portfolioValue) && readerContext.portfolioValue > 0 ? readerContext.portfolioValue : null;
+  const scaleP = spec.personalization && spec.personalization.kind === 'scenario-scale' ? readStartingValue(readerContext) : null;
   const maxDrop = (() => { let pk = -9, d = 0; sel.v.value.forEach((q) => { pk = Math.max(pk, q.y); d = Math.max(d, pk - q.y); }); return d; })();
   const termText = scaleP ? fmtMoney(scaleP * st.terminal / 100) : `${st.terminal}`;
   const ddText = scaleP ? `${fmtMoney(scaleP * maxDrop / 100)} · ${st.maxDD}%` : `${st.maxDD}%`;
@@ -1535,7 +1534,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   const svgRef = useRef(null);
   const seq = spec.sequence;
   const N = seq.N;
-  const P = readerContext && isFinite(readerContext.portfolioValue) && readerContext.portfolioValue > 0 ? readerContext.portfolioValue : 1e6;
+  const P = readStartingValue(readerContext) || 1e6;
   const pad = { l: 18, r: 96, t: 18, b: 36 };
   const X = (p) => pad.l + (p / N) * (width - pad.l - pad.r);
   const dom = spec.domain;
@@ -1885,6 +1884,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   // Representative/simulation values are art-directed: never label them "TRUE VALUE".
   const valueNote = spec.visualDataMode === 'historical' ? 'TRUE VALUE' : 'REPRESENTATIVE';
   const pNote = personalNote(spec, readerContext);
+  const simIntro = getSimulationIntro(spec, readerContext);   // chart-level "scaled example · …" line, above the visual
   const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext };
 
   return (
@@ -1901,6 +1901,16 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         </div>
         <span style={{ flexShrink: 0, fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em', color: pal.text3, border: `1px solid ${pal.borderHi}`, borderRadius: 3, padding: '3px 7px', whiteSpace: 'nowrap' }}>{badge}</span>
       </div>
+
+      {/* chart-level simulation intro — context visible where it changes interpretation */}
+      {simIntro && (
+        <div style={{ padding: `0 ${padX} 2px` }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, display: 'inline-flex', alignItems: 'center', gap: 8, lineHeight: 1.5 }}>
+            <span aria-hidden style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 }} />
+            {simIntro}
+          </span>
+        </div>
+      )}
 
       {/* plot region */}
       <div style={{ padding: `2px clamp(8px, 2vw, 14px) 8px` }}>

@@ -932,7 +932,7 @@ export const FRAMEWORK_CHART_SPECS = [
     sources: [
       { provider: 'Author simulation', label: 'One return set, opposite order; paths generated from the returns', role: 'methodology', transform: 'v(i+1) = v(i)·(1+r) − withdrawal · $1.0M start · 4% level withdrawal', notes: 'No real-data transform. Pure deterministic simulation; the deck and the paths use the same returns.' },
     ],
-    personalization: { uses: ['portfolioValue'], kind: 'sequence-scale', withdrawalRate: 0.04, note: 'Scales the start, withdrawal, and ending values to the reader-context portfolio. Representative simulation, not a forecast.' },
+    personalization: { uses: ['startingValue'], kind: 'sequence-scale', withdrawalRate: 0.04, note: 'Scales the start, withdrawal, and ending values to the reader simulation context. Representative simulation, not a forecast.' },
     explainerHeadline: 'Same returns. Same withdrawals. Different order.',
     explainerBody: 'Both paths use the same annual returns and the same withdrawals — the deck above proves it, the same blocks in opposite order. The only difference is sequence. Early losses force withdrawals from a smaller capital base, so later gains compound on less money. Average return did not change; surviving capital did.',
     explainerConcept: 'Sequence risk',
@@ -1465,7 +1465,7 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'Bitcoin pays in volatility for its convexity, with repeated drawdowns over fifty percent. Held at a managed reserve size, those drawdowns barely move the total portfolio. Sizing — not avoidance — is what makes the volatility survivable.',
     explainerConcept: 'Position sizing',
     concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }],
-    personalization: { uses: ['portfolioValue'], kind: 'vol-impact', assume: { alloc: 0.15, drawdown: 0.70 }, note: 'Translates the representative drawdown into a portfolio-impact figure at a 15% Bitcoin reserve. Illustrative, not a forecast.' },
+    personalization: { uses: ['startingValue'], kind: 'vol-impact', assume: { alloc: 0.15, drawdown: 0.70 }, note: 'Translates the representative drawdown into a portfolio-impact figure at a 15% Bitcoin reserve. Illustrative, not a forecast.' },
     layout: 'single',
     ariaSummary: 'Two lines indexed to 100. A volatile Bitcoin line rises overall but suffers two deep drawdowns; the total-portfolio line, holding Bitcoin at a managed size, rises gently and stays calm through both.',
     domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 230 }, yUnit: 'idx',
@@ -1514,7 +1514,7 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'Maximum exposure can win the clean bull case. The framework exists for the path where drawdowns, income shocks, and opportunity arrive together — and for the hidden variable underneath them: decision strain. A portfolio only works if its owner can keep thinking clearly while it is down, hold the thesis, and still act. Framework reserve is the balanced posture; stress-tested reserve is the more defensive one. A strategy that cannot be lived through is not robust.',
     explainerConcept: 'Operational control',
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
-    personalization: { uses: ['portfolioValue'], kind: 'scenario-scale', note: 'Scales the simulation read-outs (terminal, drawdown, dry powder) to the reader-context portfolio value. Illustrative, not a forecast.' },
+    personalization: { uses: ['startingValue'], kind: 'scenario-scale', note: 'Scales the simulation read-outs (terminal, drawdown, dry powder) to the reader simulation context. Illustrative, not a forecast.' },
     layout: 'scenario',
     ariaSummary: 'An interactive exhibit. Three representative total-portfolio paths, indexed to 100 — maximum exposure, framework reserve, and stress-tested reserve — are drawn together through a market drawdown, with an optional job-loss or deploy-at-trough shock. Maximum exposure peaks highest on a clean path; under a job-loss shock it is forced to sell at the bottom while the reserves absorb it; with dry powder the stress-tested reserve buys the trough, but that deployment spends its capacity, which then has to be rebuilt. Outcome read-outs cover upside (terminal value) and control (drawdown, remaining capacity, forced-sale risk, reserve integrity, control score).',
     scenario: {

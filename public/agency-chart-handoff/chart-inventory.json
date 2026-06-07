@@ -517,7 +517,7 @@
       "readerContext": {
         "kind": "sequence-scale",
         "uses": [
-          "portfolioValue"
+          "startingValue"
         ]
       },
       "disclosureMode": "simulation",
@@ -1098,7 +1098,7 @@
       "readerContext": {
         "kind": "vol-impact",
         "uses": [
-          "portfolioValue"
+          "startingValue"
         ]
       },
       "disclosureMode": "representative",
@@ -1151,7 +1151,7 @@
       "readerContext": {
         "kind": "scenario-scale",
         "uses": [
-          "portfolioValue"
+          "startingValue"
         ]
       },
       "disclosureMode": "simulation",
