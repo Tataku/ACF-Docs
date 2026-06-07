@@ -222,9 +222,57 @@ const PRESETS = {
   },
 };
 
+// ── page-level reader context ────────────────────────────────────────────────
+// One optional input near the top scales representative exhibits to the reader's
+// own numbers. Local state only — no persistence, no cookies, no forecast.
+const DEFAULT_READER_CONTEXT = { portfolioValue: 100000, horizon: '30y' };
+const HORIZON_BANDS = [
+  { id: '10y', label: '10 years' },
+  { id: '20y', label: '20 years' },
+  { id: '30y', label: '30+ years' },
+  { id: 'legacy', label: 'Legacy' },
+];
+const parseMoney = (s) => { const n = Number(String(s).replace(/[^0-9.]/g, '')); return isFinite(n) ? n : NaN; };
+const clampMoney = (n) => Math.min(100000000, Math.max(1000, Math.round(n)));
+const groupMoney = (n) => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '');
+
+function ReaderContextBar({ pal, accent, ctx, setCtx }) {
+  const [raw, setRaw] = useState(groupMoney(ctx.portfolioValue));
+  const lbl = { fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.18em', color: pal.text4 };
+  const base = { fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.04em', cursor: 'pointer', background: 'transparent', border: 'none', padding: '3px 2px 1px', lineHeight: 1.4 };
+  const sty = (active) => ({ ...base, color: active ? pal.text1 : pal.text3, fontWeight: active ? 600 : 400, borderBottom: `1.5px solid ${active ? accent : 'transparent'}` });
+  const commit = () => { const n = parseMoney(raw); const v = isFinite(n) ? clampMoney(n) : DEFAULT_READER_CONTEXT.portfolioValue; setCtx((c) => ({ ...c, portfolioValue: v })); setRaw(groupMoney(v)); };
+  return (
+    <section aria-label="Reader context" style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 28px' }}>
+      <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>SIMULATE WITH YOUR NUMBERS</span>
+      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9 }}>
+        <span style={lbl}>PORTFOLIO VALUE</span>
+        <span style={{ display: 'inline-flex', alignItems: 'baseline' }}>
+          <span aria-hidden style={{ color: pal.text3, fontFamily: pal.mono, fontSize: 13 }}>$</span>
+          <input inputMode="numeric" aria-label="Illustrative portfolio value in dollars" value={raw}
+            onChange={(e) => setRaw(e.target.value)} onBlur={commit}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+            style={{ width: 96, background: 'transparent', border: 'none', borderBottom: `1.5px solid ${pal.borderHi}`, color: pal.text1, fontFamily: pal.mono, fontSize: 13, padding: '2px 0 2px 2px', outline: 'none' }} />
+        </span>
+      </span>
+      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap' }}>
+        <span style={lbl}>HORIZON</span>
+        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
+          {HORIZON_BANDS.flatMap((h, i) => {
+            const btn = <button key={h.id} onClick={() => setCtx((c) => ({ ...c, horizon: h.id }))} aria-pressed={ctx.horizon === h.id} style={sty(ctx.horizon === h.id)}>{h.label}</button>;
+            return i === 0 ? [btn] : [<span key={`s${i}`} aria-hidden style={{ color: pal.text4, opacity: 0.4 }}>·</span>, btn];
+          })}
+        </span>
+      </span>
+      <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>Used only to scale representative exhibits on this page. Not a forecast.</span>
+    </section>
+  );
+}
+
 export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', accent: accentName = 'green', variant = 'embedded' }) {
   const preset = PRESETS[part] || PRESETS['part-1'];
   const [theme, setTheme] = useState(initialTheme);
+  const [readerCtx, setReaderCtx] = useState(DEFAULT_READER_CONTEXT);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
   const isExport = variant === 'export';
@@ -261,6 +309,8 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 6, height: 6, background: pal.text3 }} /> HISTORICAL (WHEN WIRED)</span>
       </div>
 
+      <ReaderContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} />
+
       <InventoryTable pal={pal} accent={accent} specs={specs} />
 
       {/* grouped gallery */}
@@ -276,7 +326,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
             {specs.map((spec) => (
               <div key={spec.chartId} id={spec.chartId} style={{ scrollMarginTop: 80, marginTop: 24 }}>
                 <MetaStrip pal={pal} accent={accent} spec={spec} />
-                <FrameworkChart spec={spec} theme={theme} accent={accentName} />
+                <FrameworkChart spec={spec} theme={theme} accent={accentName} readerContext={readerCtx} />
               </div>
             ))}
           </section>

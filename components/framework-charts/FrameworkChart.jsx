@@ -106,6 +106,29 @@ const haloSans = (pal, size, color, w = 600) => ({
   paintOrder: 'stroke', stroke: pal.scrim, strokeWidth: 3.4, strokeLinejoin: 'round', fill: color,
 });
 
+// ── reader context (optional, page-level) ───────────────────────────────────
+// Coarse money formatting — no cents; illustrative scaling, never precise.
+function fmtMoney(n) {
+  if (!isFinite(n) || n <= 0) return '$0';
+  const r = n >= 100000 ? Math.round(n / 1000) * 1000 : Math.round(n / 100) * 100;
+  return '$' + r.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+// A quiet personalized caption for charts that opt in via spec.personalization.
+// Scales representative exhibits to the reader's portfolio value — never a forecast.
+function personalNote(spec, rc) {
+  const p = spec.personalization;
+  if (!p || !rc || !isFinite(rc.portfolioValue) || rc.portfolioValue <= 0) return null;
+  const P = rc.portfolioValue;
+  if (p.kind === 'vol-impact') {
+    const a = p.assume || { alloc: 0.15, drawdown: 0.70 };
+    return `At a ${Math.round(a.alloc * 100)}% Bitcoin reserve, a ${Math.round(a.drawdown * 100)}% Bitcoin drawdown is roughly a ${fmtMoney(P * a.alloc * a.drawdown)} hit (~${Math.round(a.alloc * a.drawdown * 100)}%) on a ${fmtMoney(P)} portfolio — representative, not a forecast.`;
+  }
+  if (p.kind === 'scenario-scale') {
+    return `Outcomes are scaled to a ${fmtMoney(P)} starting portfolio — illustrative, not a forecast.`;
+  }
+  return null;
+}
+
 /* ── Shared tooltip ──────────────────────────────────────────────────────────
  * Hover preview is ephemeral; click pins it (links become clickable). Placement
  * is viewport-aware: flips across the anchor and never sits on top of the point. */
@@ -1038,7 +1061,7 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
  * mark, and an annotation that updates with the shock carry the story; the stat
  * strip (split into UPSIDE vs CONTROL) is subordinate. Click or focus a path to
  * select it. Precomputed deterministic paths — educational, not a calculator. */
-function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets }) {
+function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, readerContext }) {
   const sc = spec.scenario;
   const svgRef = useRef(null);
   const [presetId, setPresetId] = useState(sc.defaultPreset);
@@ -1063,6 +1086,12 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 
   const sel = paths.find((p) => p.pk === presetId) || paths[0];
   const st = sel.v.stats;
+  // reader-context scaling (optional): index → dollars, illustrative only
+  const scaleP = spec.personalization && spec.personalization.kind === 'scenario-scale' && readerContext && isFinite(readerContext.portfolioValue) && readerContext.portfolioValue > 0 ? readerContext.portfolioValue : null;
+  const maxDrop = (() => { let pk = -9, d = 0; sel.v.value.forEach((q) => { pk = Math.max(pk, q.y); d = Math.max(d, pk - q.y); }); return d; })();
+  const termText = scaleP ? fmtMoney(scaleP * st.terminal / 100) : `${st.terminal}`;
+  const ddText = scaleP ? `${fmtMoney(scaleP * maxDrop / 100)} · ${st.maxDD}%` : `${st.maxDD}%`;
+  const dpText = scaleP ? `${fmtMoney(scaleP * st.dryPowder / 100)} · ${st.dryPowder}%` : `${st.dryPowder}%`;
   const ddPath = useMemo(() => { let mxv = -9; const top = sel.v.value.map((p) => { mxv = Math.max(mxv, p.y); return { x: X(p.x), y: Y(mxv) }; }); return areaPath(top, sel.px); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [presetId, shockId, width, height]);
 
   // trough / intervention zone + shock mark on the selected path
@@ -1189,14 +1218,14 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 24px', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}`, alignItems: 'flex-start' }}>
         <div>
           <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: accent, marginBottom: 8 }}>UPSIDE</div>
-          <div style={{ display: 'flex', gap: 20 }}>{stat('TERMINAL', st.terminal, pal.text1)}</div>
+          <div style={{ display: 'flex', gap: 20 }}>{stat('TERMINAL', termText, pal.text1)}</div>
         </div>
         <div aria-hidden style={{ width: 1, alignSelf: 'stretch', background: pal.cardBorder }} />
         <div>
           <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: pal.text3, marginBottom: 8 }}>CONTROL</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 20px' }}>
-            {stat('MAX DRAWDOWN', `${st.maxDD}%`, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
-            {stat('DRY POWDER', `${st.dryPowder}%`, pal.text1)}
+            {stat('MAX DRAWDOWN', ddText, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
+            {stat('DRY POWDER', dpText, pal.text1)}
             {stat('FORCED SALE', st.forced ? 'High' : 'None', st.forced ? pal.bandStressText : accent)}
             {stat('RESERVE INTEGRITY', `${st.integrity}%`, st.integrity < 100 ? pal.bandStressText : accent)}
             {stat('CONTROL SCORE', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
@@ -1317,7 +1346,7 @@ function MobileInsight({ spec, pal, accent, active, onStep, onPick }) {
 }
 
 /* ── FrameworkChart (orchestrator) ──────────────────────────────────────────*/
-export default function FrameworkChart({ id, spec: specProp, theme = 'dark', accent: accentName = 'green', className }) {
+export default function FrameworkChart({ id, spec: specProp, theme = 'dark', accent: accentName = 'green', className, readerContext }) {
   const spec = specProp || getChartSpec(id);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
@@ -1364,7 +1393,8 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const W = 1000;
   // Representative/simulation values are art-directed: never label them "TRUE VALUE".
   const valueNote = spec.visualDataMode === 'historical' ? 'TRUE VALUE' : 'REPRESENTATIVE';
-  const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote };
+  const pNote = personalNote(spec, readerContext);
+  const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext };
 
   return (
     <figure ref={figRef} className={`acf-chart-build${className ? ` ${className}` : ''}`} data-build={entered ? 'in' : 'idle'} data-reduced-motion={reduce ? 'true' : 'false'} aria-label={`${spec.title}. ${spec.frameworkClaim}`} aria-describedby={`${reactId}-summary`}
@@ -1411,6 +1441,15 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
           <div style={{ textAlign: 'center', fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: pal.text4, marginTop: 2 }}>HOVER OR TAB AN ELEMENT · CLICK TO PIN</div>
         )}
       </div>
+
+      {pNote && (
+        <div style={{ padding: `0 ${padX} 2px` }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, display: 'inline-flex', alignItems: 'center', gap: 8, lineHeight: 1.5 }}>
+            <span aria-hidden style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 }} />
+            {pNote}
+          </span>
+        </div>
+      )}
 
       {coarse && spec.layout !== 'scenario' && <MobileInsight spec={spec} pal={pal} accent={accent} active={mobileTarget} onStep={stepMobile} onPick={pickMobile} />}
 

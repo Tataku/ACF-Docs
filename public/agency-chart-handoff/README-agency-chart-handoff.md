@@ -229,6 +229,47 @@ To make a representative chart use exact data later:
 3. The footer automatically switches from the representative disclosure to a
    verifiable `Source: …` citation. No engine change required.
 
+## 11. Reader context (page-level personalization)
+
+The handoff/export pages carry **one optional input near the top** — a *reader
+context* — so a reader can feel the framework in their own numbers without the
+charts becoming a calculator:
+
+- **Portfolio value** (default `$100,000`) — accepts `250000`, `250,000`, or
+  `$250,000`; formats on blur; clamped `$1,000`–`$100,000,000`; empty/invalid
+  never crashes or shows `NaN`.
+- **Horizon** — `10 years · 20 years · 30+ years · Legacy` (default `30+ years`).
+  Renders for multi-cycle / lifetime / legacy framing; only affects a chart if
+  that chart explicitly consumes it (none do yet — reserved for later).
+
+State is **local only**: no persistence, no cookies/localStorage, no backend; it
+resets on refresh. The context is passed to every `FrameworkChart` as
+`readerContext={{ portfolioValue, horizon }}`.
+
+A chart opts in with a spec field:
+
+```js
+personalization: { uses: ['portfolioValue'], kind: 'scenario-scale', note: '…' }
+```
+
+Charts consuming context in v1 (Part 3 only):
+
+| chartId | kind | what it scales |
+|---|---|---|
+| `p3-exposure-not-control` | `scenario-scale` | terminal, max drawdown, and dry powder read-outs shown in **dollars** (· %); a caption notes the starting portfolio |
+| `p3-volatility-is-the-toll` | `vol-impact` | a caption: *"At a 15% Bitcoin reserve, a 70% Bitcoin drawdown is roughly a $X hit on a $Y portfolio"* |
+
+**Honesty rule:** personalized values **scale representative exhibits; they do not
+make them predictive.** Never say *expected / forecast / recommendation / should /
+optimized*. Prefer *illustrative / representative / scaled example / starting
+portfolio / portfolio impact*. Captions always carry "illustrative, not a
+forecast." The validator enforces that any `personalization` block has allowed
+`uses` keys, a known `kind`, and a `note`.
+
+Future expansion: wire `horizon` into horizon-sensitive exhibits (e.g.
+*Time Changes Prudence*), and optionally persist reader context across the public
+Part pages once the charts are placed there.
+
 ---
 
 *Generated for marketing/design handoff. Charts are representative exhibits with
