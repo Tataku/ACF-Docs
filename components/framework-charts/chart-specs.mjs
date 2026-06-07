@@ -245,26 +245,28 @@ const p3Models = (() => {
   return { modelMax, modelMin, price };
 })();
 const p3Heartbeat = (() => {
-  // Representative Bitcoin "heartbeat": a volatile valuation path over a cycle —
-  // starts mid, falls into a deep undervalued trough, recovers, and runs into an
-  // extended/euphoric high. NOT historical price, NOT a forecast.
+  // Representative BTC PRICE / VALUATION INDEX over one cycle — starts mid, dips
+  // into an undervalued trough, recovers toward fair value, runs extended. Sober
+  // (gentle chop): a price index, not a frantic line. NOT historical, NOT a forecast.
   const n = 132;
   const trend = (t) => 0.5 - 0.34 * Math.exp(-Math.pow((t - 0.17) / 0.12, 2)) + 1.18 * ss(clamp((t - 0.3) / 0.7, 0, 1));
-  const chop = (t) => 0.11 * Math.sin(t * Math.PI * 7) + 0.06 * Math.sin(t * Math.PI * 15 + 1) + 0.045 * Math.sin(t * Math.PI * 23);
-  const priceFn = (t) => clamp(trend(t) + chop(t), 0.1, 1.95);
-  const price = curve(0, 100, n, (t) => priceFn(t), 371, 0.012);
-  // DCA unit pulses: same dollars buy MORE representative units when price is low.
-  // Framework leans in (×1.7) while undervalued, slows new buying (×0.55) when
-  // extended — it never sells. Units are a representative index (1 / price).
+  const chop = (t) => 0.05 * Math.sin(t * Math.PI * 6) + 0.03 * Math.sin(t * Math.PI * 13 + 1);
+  const priceFn = (t) => clamp(trend(t) + chop(t), 0.12, 1.95);
+  const price = curve(0, 100, n, (t) => priceFn(t), 371, 0.008);
+  // The mechanism, made explicit: units received = fixed DCA dollars / price.
+  // A constant dollar amount buys MORE units when price is lower. The framework
+  // leans in (×1.7) only in the confirmed undervalued window, returns to baseline
+  // at fair value, and slows new buying (×0.5) when extended — it never sells.
+  const DCA = 1;                                          // representative fixed dollar amount / interval
   const bars = 26;
   const pulses = [];
   let baseCum = 0, fwCum = 0;
   for (let i = 0; i < bars; i++) {
     const t = (i + 0.5) / bars;
     const p = priceFn(t);
-    const baseUnits = 1 / p;
-    const m = t < 0.36 ? 1.7 : t > 0.7 ? 0.55 : 1.0;     // lean in cheap, slow when extended
-    const fwUnits = baseUnits * m;
+    const baseUnits = DCA / p;                            // units = dollars / price
+    const m = t < 0.34 ? 1.7 : t > 0.7 ? 0.5 : 1.0;       // framework accumulation-pacing multiplier
+    const fwUnits = (DCA * m) / p;
     baseCum += baseUnits; fwCum += fwUnits;
     pulses.push({ x: R(t * 100), base: R(baseUnits), fw: R(fwUnits), boost: m > 1, slow: m < 1 });
   }
@@ -1389,30 +1391,30 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p3-accumulate-dont-trade', idx: 'P3-06', group: 'part-3', intendedPlacement: 'part-3',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Accumulate, Don’t Trade', setupLine: 'Bitcoin’s volatility is a heartbeat — the same dollars buy more units when it dips',
+    title: 'Accumulate, Don’t Trade', setupLine: 'Fixed-dollar DCA buys more units when Bitcoin is lower',
     claimLabel: 'DISCIPLINE · ACCUMULATION',
     frameworkClaim: 'Valuation models guide accumulation pacing and conviction, not selling the reserve.',
-    readerTakeaway: 'For an accumulator, a drawdown is a unit-accumulation window.',
-    chartType: 'Representative valuation heartbeat with DCA unit pulses: more units when cheap, framework leans in, never sells.',
+    readerTakeaway: 'For an accumulator, drawdowns become unit-capture windows — if the plan survives them.',
+    chartType: 'Representative BTC price index with DCA unit bars: units = dollars ÷ price; the framework leans in only when undervalued and never sells.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 3', label: 'Accumulation pacing and the never-sell reserve', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
-    explainerHeadline: 'Volatility is not only pain — it buys units.',
-    explainerBody: 'Bitcoin moves violently. Each time the heartbeat dips, price is low, so the same dollar of DCA collects more units — the pulses grow taller. The framework leans in further while undervalued, tracks the baseline at fair value, and slows new buying when extended. It never sells; the reserve only ever grows.',
+    explainerHeadline: 'Same dollars, more units — when price is lower.',
+    explainerBody: 'A fixed DCA amount already buys more units when Bitcoin falls — units received = dollars ÷ price. The framework adds discipline: increase accumulation only when valuation confirms an undervalued window, return to baseline at fair value, and slow new buying when extended. The reserve itself is not traded.',
     explainerConcept: 'Valuation discipline',
     concepts: [{ label: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'heartbeat',
-    ariaSummary: 'A representative Bitcoin valuation heartbeat over a cycle — starting mid, falling into a deep undervalued trough, recovering, and running into an extended high — drawn above a row of dollar-cost-averaging unit pulses. When the heartbeat is low the same dollars buy taller unit pulses; the framework leans in further during the undervalued window (accent pulses above baseline) and slows new buying when extended (accent below baseline). It never sells; the reserve only grows.',
+    ariaSummary: 'A representative Bitcoin price/valuation index over a cycle — starting mid, dipping into an undervalued trough, recovering toward fair value, then running extended — drawn above a row of dollar-cost-averaging unit bars. Because units received equal fixed dollars divided by price, the bars grow taller when price is lower and shorter when it is higher. During the undervalued window the framework adds an accent boost above the baseline bars; at fair value it returns to baseline; when extended it slows new buying. The reserve is never sold.',
     domain: { xMin: 0, xMax: 100 },
     xTicks: [{ v: 0, label: 'cycle start' }, { v: 17, label: 'undervalued' }, { v: 100, label: 'extended' }],
     heartbeat: p3Heartbeat,
     primaryKey: 'cheap',
     hoverTargets: [
-      { id: 'heartbeat', kind: 'series', label: 'BTC heartbeat', name: 'Bitcoin heartbeat', why: 'A representative valuation path — violent, not smooth. Its swings are exactly what change how many units each DCA dollar buys. Not historical price, not a forecast.', claim: 'Volatility is the input, not the enemy.', concept: 'Volatility', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'cheap', kind: 'marker', label: 'More units when cheap', name: 'More units when cheap', why: 'When the heartbeat dips, price is low, so the same dollar DCA collects taller unit pulses. The framework leans in further here — the accent pulses rise above the baseline.', claim: 'A drawdown is a unit-accumulation window.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'slows', kind: 'marker', label: 'Slows when extended', name: 'Slows new buying', why: 'When the heartbeat runs high, price is extended and each dollar buys few units, so the framework slows discretionary new buying — the accent pulses fall below baseline. It never sells.', claim: 'Ease off buying when dear; never sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'heartbeat', kind: 'series', label: 'BTC price index', name: 'BTC price index', why: 'A representative Bitcoin valuation path. A lower price increases the units a fixed-dollar DCA receives — units = dollars ÷ price. Representative, not historical price, not a forecast.', claim: 'Price is the input; units are the output.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'cheap', kind: 'marker', label: 'Same dollars, more units', name: 'Same dollars, more units', why: 'The same DCA dollars buy more representative units here because price is lower; in a confirmed undervalued window the framework leans in further, so the accent bars rise above the baseline bars.', claim: 'Lower price → more units captured.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'slows', kind: 'marker', label: 'Slows when extended', name: 'Slows new buying', why: 'When price is extended each dollar buys few units, so the framework slows discretionary new buying — the accent bars fall below baseline. Existing reserve is held, never sold.', claim: 'Slow new buying when dear; never sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
     ],
     mobileTapTargets: ['cheap', 'heartbeat', 'slows'],
-    implementationNotes: 'New heartbeat layout (HeartbeatSvg): a representative volatile valuation path above a row of DCA unit pulses. Pulse height = representative units per dollar (1/price), so cheap = taller; the accent (framework) pulse stacks above the muted baseline pulse while undervalued (boost) and falls below it when extended (slows, never sells). The undervalued window reuses the organic dcaWindow field. Representative/conceptual — no historical price, no exact sats.',
+    implementationNotes: 'Math-grounded accumulation layout (HeartbeatSvg, internal name): a representative BTC price index above DCA unit bars where bar height = fixed dollars ÷ price, so lower price = taller bars. The accent (framework) bar stacks above the muted baseline bar only in the undervalued window and falls below it when extended (slows, never sells). A small "DCA $ ÷ price = units" formula anchors the conversion; the relational unit-capture field is kept faint/secondary. Representative/conceptual — no historical price, no exact sats; "heartbeat" is not used as visible copy.',
   },
 
   {

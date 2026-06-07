@@ -1358,11 +1358,15 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {/* relational unit-capture field — opens where BTC is cheap and pulses are
             tall, pinches shut as the advantage fades; reveals with the time sweep */}
         <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'clip-path 1500ms cubic-bezier(0.22,0.61,0.36,1) 120ms, -webkit-clip-path 1500ms cubic-bezier(0.22,0.61,0.36,1) 120ms, opacity 700ms ease 120ms' }}>
-          <path d={geom.field.wash} fill={accent} fillOpacity={pal.name === 'light' ? 0.10 : 0.09} />
-          {geom.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.8} />)}
+          <path d={geom.field.wash} fill={accent} fillOpacity={pal.name === 'light' ? 0.06 : 0.05} />
+          {geom.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.5} />)}
         </g>
-        <line x1={pad.l} x2={width - pad.r} y1={(priceBot + pulseTop) / 2} y2={(priceBot + pulseTop) / 2} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
-        <text x={pad.l} y={pad.t - 2} style={halo(pal, 8.5, pal.text4)}>BTC HEARTBEAT · REPRESENTATIVE</text>
+        <text x={pad.l} y={pad.t - 2} style={halo(pal, 8.5, pal.text4)}>BTC PRICE INDEX · REPRESENTATIVE</text>
+        {/* math anchor in the transition zone — the conversion that drives bar height */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 600ms ease 1000ms' }}>
+          <text x={(pad.l + width - pad.r) / 2} y={(priceBot + pulseTop) / 2 - 3} textAnchor="middle" style={halo(pal, 10, pal.text2, 600)}>DCA $ ÷ BTC price = units received</text>
+          <text x={(pad.l + width - pad.r) / 2} y={(priceBot + pulseTop) / 2 + 10} textAnchor="middle" style={halo(pal, 8, pal.text4)}>lower price → more units</text>
+        </g>
 
         {/* tie line: price trough → tallest pulses */}
         <line x1={x(hb.troughX)} x2={x(hb.troughX)} y1={priceY(valueAt(hb.price, hb.troughX))} y2={pulseBase - barH(troughPulse.fw)} stroke={accent} strokeWidth="0.7" strokeDasharray="2 4" opacity={entered ? 0.4 : 0} style={{ transition: trans('opacity', 600) }} />
@@ -1372,7 +1376,7 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
           <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1100ms cubic-bezier(0.7,0,0.2,1) 120ms, -webkit-clip-path 1100ms cubic-bezier(0.7,0,0.2,1) 120ms' }}>
             <path d={geom.line} fill="none" stroke={pal.tierSecondary} strokeWidth="1.2" strokeLinecap="round" opacity="0.85" />
           </g>
-          <text x={x(58)} y={priceY(valueAt(hb.price, 58)) - 10} textAnchor="middle" style={haloSans(pal, 10.5, pal.tierSecondary, 600)}>BTC heartbeat</text>
+          <text x={x(58)} y={priceY(valueAt(hb.price, 58)) - 10} textAnchor="middle" style={haloSans(pal, 10.5, pal.tierSecondary, 600)}>BTC price index</text>
         </g>
 
         {/* DCA unit pulses: muted baseline behind, accent framework in front */}
@@ -1390,7 +1394,7 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {/* annotations (appear after the geometry) */}
         {!coarse && (
           <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 500ms ease 980ms' }}>
-            <text x={x(troughPulse.x)} y={pulseBase - barH(troughPulse.fw) - 12} textAnchor="middle" style={haloSans(pal, 10.5, accent, 600)}>same dollars buy more units when cheap</text>
+            <text x={x(troughPulse.x)} y={pulseBase - barH(troughPulse.fw) - 12} textAnchor="middle" style={haloSans(pal, 10.5, accent, 600)}>same dollars buy more units</text>
             <text x={x(rightPulse.x)} y={pulseBase - barH(rightPulse.base) - 12} textAnchor="end" style={{ ...haloSans(pal, 10, pal.text3, 500), fontStyle: 'italic' }}>slows new buying · never sells</text>
           </g>
         )}
