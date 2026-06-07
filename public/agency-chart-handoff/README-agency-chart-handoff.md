@@ -12,6 +12,82 @@ the charts.
 
 ---
 
+## 0. Engine doctrine — ACF charts are guided learning instruments
+
+The engine produces **guided learning instruments**, not decorations, generic
+visualizations, calculators, or marketing animations. It is built for a visual +
+kinesthetic learner: *see the idea, touch the idea.* Every chart must answer, in
+order — **What am I looking at? What changes? Why? What can I touch? What does my
+input affect? What is the one idea to remember?** If it can't, it isn't finished.
+
+- **Visual + kinesthetic rule.** The visible default teaches the core idea *before*
+  hover. Interaction deepens it; it never unlocks the whole meaning. The physical
+  gesture must match the concept — a reveal reveals, a scenario selector changes
+  the path, a return-order control reorders the deck, a DCA chart shows price→units.
+  No decorative or arbitrary interaction.
+- **One chart = one claim.** A single primary claim; everything else supports it
+  (`claimStack.primaryClaim`, resolved from `frameworkClaim` when not explicit).
+- **Show the mechanism, not just the result.** If the claim is "same return set",
+  "DCA buys more units", "the debt cost was hidden", or "capacity changes the
+  outcome", the visual shows the *mechanism* (the shared deck, the units = $÷price
+  bars, the spatial reveal, the all-paths spread) — never an unshown "identical" input.
+- **Math-backed where math is claimed.** If a chart uses a formula, the formula or
+  its visual equivalent is visible — e.g. `DCA $ ÷ price = units`. A poetic field
+  that only *implies* math does not count.
+- **Interaction must match concept.** before/after = clipped spatial reveal (not an
+  opacity toggle); scenario = alternate path with clear state changes; return order
+  = same deck rearranged; reader context = a consistent scale intro.
+- **Motion follows comprehension.** It draws in the order the idea is understood
+  (see *Motion follows comprehension* below). Reduced motion reveals immediately.
+- **Context visible where it changes interpretation.** If reader simulation context
+  changes a chart, the chart says so *near the visual* (`Scaled example · $250,000
+  starting value · 30+ years`), not only in the footer.
+- **Data honesty.** Every chart declares its `visualDataMode`; representative
+  geometry is never labelled exact data, simulations say simulation, and no visible
+  claim copy uses promissory/forecast language. `validate:charts` enforces this.
+
+### Taste guardrails
+- **No:** top-edge card highlights, glows, neon, SaaS pills, chart-library defaults,
+  random blobs, text collisions, decoration without an explanatory role, oversized
+  UI controls inside the plot, ornamental "AI-slop" flourishes.
+- **Yes:** quiet editorial type, generous spacing, clear hierarchy, low-contrast
+  structural context, accent reserved for the thesis line / selected path, organic
+  brush imperfection only where it supports the concept. Human but precise.
+
+### Chart doctrine metadata (resolved, with explicit override)
+Carried per spec; **derived from layout when not declared**, so the doctrine holds
+across all charts without hand-editing each. Surfaced in `chart-inventory.json`,
+enforced by `validate:charts`.
+
+| Field | Purpose | Allowed values |
+|---|---|---|
+| `claimStack` | one claim + its proof + the reader's role | `{primaryClaim, visualProof, interactionRole, readerAction, caution}` (strings) |
+| `interaction` | gesture ↔ concept | type `none·hover·scenario·beforeAfterReveal·readerContext·returnOrder·slider`; gesture `hover·tap·drag·choose·type`; `conceptMatch` |
+| `motionProfile` | how it builds | type `timeSweep·reveal·rowSweep·scenarioUpdate·diagramBuild`; duration `calm·slow·transformational` |
+| `backgroundRole` | why a field exists | `regime·pressure·relational·revealLayer` — never `decorative` |
+| `personalization` | reader-context scaling | `uses[]` ⊂ `startingValue·horizon·withdrawalRate·btcReserveAllocation·monthlyDca`; `kind` ∈ `scenario-scale·vol-impact·sequence-scale` |
+
+Concept-critical layouts (`scenario`, `dual + perspectiveSlider`) **must** declare
+`interaction` with a `conceptMatch`; `beforeAfterReveal` must declare
+`beforeAfterLabels {before, after}`; a DCA / `heartbeat` chart must declare a
+`formula`. Resolvers + enums live in `chart-specs.mjs` (single source of truth):
+`resolveClaimStack`, `resolveInteraction`, `resolveMotionProfile`,
+`resolveBackgroundRoles`, and the simulation-intro helpers `formatStartingValue`,
+`formatHorizon`, `getSimulationIntro`, `buildPersonalizedDisclosure`.
+
+### How to add a new chart safely
+1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
+   `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +
+   `readerTakeaway`, `explainer*`, and `hoverTargets`.
+2. Pick the closest existing `layout`; reuse a primitive before inventing one.
+3. Make the **default state teach the claim**; add hover/tap detail second.
+4. Override `claimStack` / `interaction` / `motionProfile` only if the derived
+   defaults don't fit; add `personalization` only when scaling has honest meaning.
+5. `npm run validate:charts` → `npm run build:inventory` → `next build`.
+6. Charts stay handoff-only; placement into public pages is a separate decision.
+
+---
+
 ## 1. Purpose
 
 A small, reusable React chart system for the ACF docs landing page and Part 1 of
@@ -63,7 +139,7 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 |---|---|---|---|
 | `dl-convexity-window` | The Window Opens | single | representative |
 | `dl-regime-map` | Capital Has Weather | quadrant | representative |
-| `dl-tripwire-loop` | Govern the Thesis | loop | conceptual |
+| `dl-tripwire-loop` | Govern the Thesis | systemLoop | conceptual |
 
 ### Part 1 framework
 | chartId | Title | Layout | Mode |
@@ -81,10 +157,10 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 | `p2-method-before-macro` | Method Before Macro | dual | conceptual |
 | `p2-ruin-comes-first` | Ruin Comes First | single | conceptual |
 | `p2-conviction-needs-exit` | Conviction Needs an Exit | single | conceptual |
-| `p2-markets-feed-back` | Markets Feed Back | loop | conceptual |
+| `p2-markets-feed-back` | Markets Feed Back | systemLoop | conceptual |
 | `p2-time-changes-prudence` | Time Changes Prudence | single | simulation |
-| `p2-capital-finds-bottleneck` | Capital Finds the Bottleneck | flow | conceptual |
-| `p2-narrative-not-thesis` | Narrative Is Not Thesis | flow | conceptual |
+| `p2-capital-finds-bottleneck` | Capital Finds the Bottleneck | bridge | conceptual |
+| `p2-narrative-not-thesis` | Narrative Is Not Thesis | gate | conceptual |
 | `p2-phase-changes-sizing` | Phase Changes Sizing | single | conceptual |
 | `p2-liquidity-sets-tide` | Liquidity Sets the Tide | single | representative |
 
@@ -113,7 +189,7 @@ Base (browse): `https://github.com/Tataku/ACF-Docs/blob/main/`
 | File | Role |
 |---|---|
 | `components/framework-charts/FrameworkChart.jsx` | The chart engine. Data charts (`single`, `dual`, `quadrant`) and bespoke framework diagrams (`systemLoop`, `bridge`, `gate`); hover/tap/keyboard, tooltips, source footer. |
-| `components/framework-charts/chart-specs.mjs` | The spec registry — all 11 charts + data generators + disclosure model. Source of truth. |
+| `components/framework-charts/chart-specs.mjs` | The spec registry — all 28 charts + data generators + disclosure model + engine-doctrine enums/resolvers. Source of truth. |
 | `components/framework-charts/brush.js` | Deterministic SVG brush primitives + the bespoke `pressureField` shock background. |
 | `components/framework-charts/palette.js` | Locked dark/light palette + accents + fonts. |
 | `components/framework-charts/ChartHandoff.jsx` | The review gallery (this preview page). |
@@ -244,18 +320,19 @@ To make a representative chart use exact data later:
 3. The footer automatically switches from the representative disclosure to a
    verifiable `Source: …` citation. No engine change required.
 
-## 11. Reader context (page-level personalization)
+## 11. Simulation context (page-level personalization)
 
-The handoff/export pages carry **one optional input near the top** — a *reader
+The handoff/export pages carry **one optional input near the top** — a *simulation
 context* — so a reader can feel the framework in their own numbers without the
 charts becoming a calculator:
 
-- **Portfolio value** (default `$100,000`) — accepts `250000`, `250,000`, or
+- **Starting value** (default `$100,000`) — accepts `250000`, `250,000`, or
   `$250,000`; formats on blur; clamped `$1,000`–`$100,000,000`; empty/invalid
-  never crashes or shows `NaN`.
+  never crashes or shows `NaN`. Canonical context key `startingValue`
+  (`portfolioValue` is the current alias, normalized by `readStartingValue`).
 - **Horizon** — `10 years · 20 years · 30+ years · Legacy` (default `30+ years`).
-  Renders for multi-cycle / lifetime / legacy framing; only affects a chart if
-  that chart explicitly consumes it (none do yet — reserved for later).
+  Surfaced in the chart-level intro for opted-in charts; only changes a chart's
+  *math* if that chart explicitly consumes it.
 
 State is **local only**: no persistence, no cookies/localStorage, no backend; it
 resets on refresh. The context is passed to every `FrameworkChart` as
@@ -267,12 +344,18 @@ A chart opts in with a spec field:
 personalization: { uses: ['portfolioValue'], kind: 'scenario-scale', note: '…' }
 ```
 
-Charts consuming context in v1 (Part 3 only):
+Charts consuming context (Part 1 + Part 3):
 
 | chartId | kind | what it scales |
 |---|---|---|
+| `p1-sequence-risk` | `sequence-scale` | start, level withdrawal (`withdrawalRate` 4%/yr), and good/bad ending values scaled to the starting value |
 | `p3-exposure-not-control` | `scenario-scale` | terminal, max drawdown, and dry powder read-outs shown in **dollars** (· %); a caption notes the starting portfolio |
 | `p3-volatility-is-the-toll` | `vol-impact` | a caption: *"At a 15% Bitcoin reserve, a 70% Bitcoin drawdown is roughly a $X hit on a $Y portfolio"* |
+
+**Context visible where it changes interpretation:** an opted-in chart shows a
+quiet scale intro *near the visual* via `getSimulationIntro(spec, ctx)` — not only
+in the footer. Standardized helpers (`chart-specs.mjs`): `formatStartingValue`,
+`formatHorizon`, `getSimulationIntro`, `buildPersonalizedDisclosure`.
 
 **Honesty rule:** personalized values **scale representative exhibits; they do not
 make them predictive.** Never say *expected / forecast / recommendation / should /
