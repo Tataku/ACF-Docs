@@ -72,7 +72,7 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 | `p1-correlation` | Correlation Turns | single | representative |
 | `p1-cpi-assets` | Inflation Was Bigger | single | representative |
 | `p1-policy-constraint` | The Bill Came Due | dual | representative |
-| `p1-sequence-risk` | Path Changes Everything | single | simulation |
+| `p1-sequence-risk` | Path Changes Everything | sequenceRisk (shared return deck) | simulation |
 | `p1-convexity-survival` | Survive the Path | single | representative |
 
 ### Part 2 · lineage & macro thesis
@@ -133,6 +133,7 @@ Two families, one engine:
   - `gate` — a sober validation gauntlet; a survivor band thins through four gates into a thesis (e.g. *Narrative Is Not Thesis*).
   - `scorecard` — a requirement × asset matrix with bespoke brush meet/partial/fail glyphs and an emphasised focus column (e.g. *One Asset, Ten Tests*).
   - `scenario` — an interactive, path-aware comparison: all preset strategies are drawn together under the selected shock (the chosen one emphasised, the others muted context), with a capacity-to-act gauge, a trough/intervention zone, a forced-sale mark, and an annotation that updates with the shock. Stat read-outs are split into UPSIDE vs CONTROL and kept subordinate to the visual (e.g. *Exposure Is Not Control*). Click or focus a path to select it.
+  - `sequenceRisk` — a *proof* layout for path dependency: a shared **return deck** (the same representative returns shown in two orders, shape- and tone-coded so the reversal is visible) above two portfolio paths **generated from those exact returns**, with level-withdrawal ticks on both and a depletion line (e.g. *Path Changes Everything*). The deck and the paths are the same math — the chart proves "same returns, same withdrawals, different order" rather than asserting it. **Design rule — prove, don't assert:** when a chart's claim is "identical inputs, different outcome," show the shared inputs as a visible factor tied to the output math; never ask the reader to trust an unshown "identical" set.
   - `heartbeat` — a two-register accumulation exhibit: a representative volatile valuation *heartbeat* above a row of DCA *unit pulses* whose height = representative units per dollar, so a price dip buys taller pulses. The accent (framework) pulse stacks above the muted baseline while undervalued (leans in) and falls below it when extended (slows, never sells); the undervalued window is a relational `unitCaptureField` — a lens shaped by price weakness and pulse height that bulges where BTC is cheapest and pinches shut as the advantage fades (e.g. *Accumulate, Don't Trade*). Representative/conceptual — no historical price, no exact sats.
 
 Each diagram node is hover/tap/keyboard reachable with the same tooltip + disclosure behaviour as the data charts. Default visible text is minimal; detail reveals on hover/tap.

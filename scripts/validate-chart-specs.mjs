@@ -24,7 +24,7 @@ const STATUSES = new Set(['implemented', 'needs-design-review', 'spec-only', 'de
 const MODES = new Set(['representative', 'historical', 'simulation', 'conceptual']);
 const ROLES = new Set(['verifies-concept', 'backs-series', 'methodology', 'target-source']);
 const PERSONAL_KEYS = new Set(['portfolioValue', 'horizon']);
-const PERSONAL_KINDS = new Set(['scenario-scale', 'vol-impact']);
+const PERSONAL_KINDS = new Set(['scenario-scale', 'vol-impact', 'sequence-scale']);
 
 let checks = 0;
 const ok = (cond, msg) => { assert.ok(cond, msg); checks++; };
@@ -123,6 +123,12 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     // representative valuation heartbeat + DCA unit pulses
     ok(s.heartbeat && Array.isArray(s.heartbeat.price) && s.heartbeat.price.length > 2, `${w} heartbeat needs a price path`);
     ok(Array.isArray(s.heartbeat.pulses) && s.heartbeat.pulses.length >= 4, `${w} heartbeat needs pulses`);
+    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
+  } else if (s.layout === 'sequenceRisk') {
+    // one shared return set, two orders, paths generated from it
+    const sq = s.sequence;
+    ok(sq && Array.isArray(sq.good) && Array.isArray(sq.bad) && sq.good.length === sq.bad.length && sq.good.length >= 4, `${w} sequenceRisk needs equal-length good/bad return sets`);
+    ok(Array.isArray(sq.goodPath) && Array.isArray(sq.badPath) && sq.goodPath.length === sq.good.length + 1, `${w} sequenceRisk needs generated paths`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;

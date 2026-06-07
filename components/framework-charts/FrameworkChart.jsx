@@ -1478,6 +1478,121 @@ function MobileInsight({ spec, pal, accent, active, onStep, onPick }) {
   );
 }
 
+/* ── SequenceRiskSvg — shared return-set proof for path dependency ───────────*
+ * A return DECK (the same representative returns in two orders, shape/tone-coded)
+ * sits above two portfolio paths GENERATED from those exact returns, with level-
+ * withdrawal ticks on both. Proves "same returns, same withdrawals, different
+ * order" instead of asking the reader to trust it. Scales to reader context. */
+function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin, readerContext }) {
+  const svgRef = useRef(null);
+  const seq = spec.sequence;
+  const N = seq.N;
+  const P = readerContext && isFinite(readerContext.portfolioValue) && readerContext.portfolioValue > 0 ? readerContext.portfolioValue : 1e6;
+  const pad = { l: 18, r: 96, t: 18, b: 36 };
+  const X = (p) => pad.l + (p / N) * (width - pad.l - pad.r);
+  const dom = spec.domain;
+  const deckTop = pad.t + 14, yG = deckTop + 22, yB = deckTop + 66, rowHalf = 15;
+  const pathTop = deckTop + 96, pathBot = height - pad.b;
+  const Y = (v) => pathBot - ((v - dom.yMin) / (dom.yMax - dom.yMin)) * (pathBot - pathTop);
+  const maxAbs = Math.max(...seq.good.map((v) => Math.abs(v)));
+  const blockW = (width - pad.l - pad.r) / N;
+  const bc = (i) => pad.l + (i + 0.5) * blockW;
+  const EZ = 'cubic-bezier(0.22,0.61,0.36,1)';
+
+  const geom = useMemo(() => {
+    const gpx = seq.goodPath.map((p) => ({ x: X(p.x), y: Y(p.y) }));
+    const bpx = seq.badPath.map((p) => ({ x: X(p.x), y: Y(p.y) }));
+    return { gpx, bpx, good: Brush.brushLine(gpx, { seed: 23, weight: 1.2, intensity: 0.85 }), bad: Brush.brushLine(bpx, { seed: 41, weight: 1.05, intensity: 0.8 }) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  const troughPx = { x: X(seq.trough.x), y: Y(seq.trough.y) };
+  const anchorOf = (t) => {
+    if (!t) return null;
+    if (t.id === 'deck') return { x: bc(Math.floor(N / 2)), y: yG };
+    if (t.id === 'good') return geom.gpx[geom.gpx.length - 1];
+    if (t.id === 'bad') return troughPx;
+    if (t.id === 'depletion') return { x: width - pad.r - 26, y: Y(seq.depletion) };
+    return null;
+  };
+  const resolve = (mx, my) => {
+    if (my <= pathTop - 6) return targets.find((t) => t.id === 'deck');
+    if (Math.abs(my - Y(seq.depletion)) < 10 && mx > pad.l && mx < width - pad.r) return targets.find((t) => t.id === 'depletion');
+    const dg = nearPoly(mx, my, geom.gpx), db = nearPoly(mx, my, geom.bpx);
+    return targets.find((t) => t.id === (dg.d <= db.d ? 'good' : 'bad'));
+  };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  const block = (val, cx, mid, key, delay) => {
+    const h = Math.max(2, (Math.abs(val) / maxAbs) * rowHalf), pos = val >= 0;
+    return <rect key={key} x={cx - (blockW - 4) / 2} y={pos ? mid - h : mid} width={blockW - 4} height={h} rx={1.5} fill={pos ? accent : pal.bandStress} opacity={(0.28 + 0.5 * (Math.abs(val) / maxAbs)) * (entered ? 1 : 0)} style={{ transition: reduce ? 'opacity 280ms ease' : `opacity 360ms ${EZ} ${delay}ms` }} />;
+  };
+  const wTick = (px, i, isBad) => <line key={`w${isBad ? 'b' : 'g'}${i}`} x1={px.x} x2={px.x} y1={px.y + 1.5} y2={px.y + 6} stroke={isBad ? pal.bandStress : accent} strokeWidth="0.9" opacity={entered ? 0.45 : 0} style={{ transition: trans('opacity', 400) }} />;
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* return deck — same set, opposite order */}
+        <text x={pad.l} y={pad.t + 2} style={halo(pal, 8.5, focusId === 'deck' ? accent : pal.text3)}>SAME RETURN SET · OPPOSITE ORDER</text>
+        <line x1={pad.l} x2={width - pad.r} y1={yG} y2={yG} stroke={pal.grid} strokeWidth="1" />
+        <line x1={pad.l} x2={width - pad.r} y1={yB} y2={yB} stroke={pal.grid} strokeWidth="1" />
+        <text x={pad.l} y={yG - rowHalf - 4} style={halo(pal, 8, pal.text4)}>GAINS FIRST →</text>
+        <text x={pad.l} y={yB + rowHalf + 10} style={halo(pal, 8, pal.text4)}>LOSSES FIRST →</text>
+        <g style={{ opacity: focusId && focusId !== 'deck' ? 0.5 : 1, transition: trans('opacity') }}>
+          {seq.good.map((v, i) => block(v, bc(i), yG, `g${i}`, 200 + i * 28))}
+          {seq.bad.map((v, i) => block(v, bc(i), yB, `b${i}`, 200 + i * 28))}
+        </g>
+
+        {/* depletion threshold */}
+        <line x1={pad.l} x2={width - pad.r} y1={Y(seq.depletion)} y2={Y(seq.depletion)} stroke={pal.invalidCharcoal} strokeWidth="0.9" strokeDasharray="5 5" opacity={focusId === 'depletion' ? 0.95 : 0.55} style={{ transition: trans('opacity') }} />
+        <text x={width - pad.r} y={Y(seq.depletion) - 5} textAnchor="end" style={halo(pal, 8.5, pal.invalidCharcoal)}>depletion risk</text>
+
+        {/* y ticks */}
+        {(spec.yTicks || []).map((t, i) => <text key={`yt${i}`} x={width - pad.r + 8} y={Y(t.v) + 3} style={halo(pal, 9, pal.axis, 500)}>{t.label}</text>)}
+
+        {/* portfolio paths — generated from the deck returns */}
+        <g style={{ opacity: focusId === 'bad' ? 0.4 : 1, transition: trans('opacity') }}>
+          <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : `clip-path 1500ms ${EZ} 360ms, -webkit-clip-path 1500ms ${EZ} 360ms` }}>
+            <path d={geom.good} fill={accent} />
+          </g>
+          {geom.gpx.slice(1).map((px, i) => wTick(px, i, false))}
+          <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, accent, 600)}>Good sequence</text>
+          <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(seq.goodEnd * P)}</text>
+        </g>
+        <g style={{ opacity: focusId === 'good' ? 0.4 : 1, transition: trans('opacity') }}>
+          <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : `clip-path 1500ms ${EZ} 360ms, -webkit-clip-path 1500ms ${EZ} 360ms` }}>
+            <path d={geom.bad} fill={pal.bandStress} opacity="0.9" />
+          </g>
+          {geom.bpx.slice(1).map((px, i) => wTick(px, i, true))}
+          <path d={Brush.enso(troughPx.x, troughPx.y, 10, { seed: 51, weight: 0.85, intensity: 0.8, gapAngle: -Math.PI / 3 })} fill={pal.bandStress} opacity={entered ? 1 : 0} style={{ transition: trans('opacity', 400) }} />
+          <text x={geom.bpx[geom.bpx.length - 1].x - 6} y={geom.bpx[geom.bpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, pal.bandStressText, 600)}>Bad sequence</text>
+          <text x={geom.bpx[geom.bpx.length - 1].x - 6} y={geom.bpx[geom.bpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(seq.badEnd * P)}</text>
+        </g>
+
+        {/* annotation + start / withdrawal context */}
+        {!coarse && <text x={troughPx.x} y={troughPx.y + 24} textAnchor="middle" style={{ ...haloSans(pal, 9.5, pal.bandStressText, 500), fontStyle: 'italic', opacity: entered ? 1 : 0, transition: trans('opacity', 400) }}>early losses shrink the base</text>}
+        <text x={pad.l} y={pathBot + 22} style={halo(pal, 8.5, pal.text4)}>{fmtMoney(P)} start · {fmtMoney(seq.withdraw * P)}/yr · same withdrawals both paths</text>
+        {(spec.xTicks || []).map((t, i) => { const anc = t.v === 0 ? 'start' : t.v >= N ? 'end' : 'middle'; return <text key={`xt${i}`} x={X(t.v)} y={pathBot + 22} textAnchor={anc} style={halo(pal, 9, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
+
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
 /* ── FrameworkChart (orchestrator) ──────────────────────────────────────────*/
 export default function FrameworkChart({ id, spec: specProp, theme = 'dark', accent: accentName = 'green', className, readerContext }) {
   const spec = specProp || getChartSpec(id);
@@ -1555,6 +1670,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={150 + (spec.scorecard?.requirements.length || 8) * 32} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={300} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'heartbeat' && <HeartbeatSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'sequenceRisk' && <SequenceRiskSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}
