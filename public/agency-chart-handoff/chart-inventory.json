@@ -487,7 +487,7 @@
           "url": "https://fred.stlouisfed.org/series/GDP"
         }
       ],
-      "agencyNotes": "Handoff-only for now; unwired from the public page pending explicit placement. Dual-panel = two plots sharing the x-domain, one explainer, one footer. Connective caption composed between panels."
+      "agencyNotes": "Handoff-only for now; unwired from the public page pending explicit placement. BeforeAfterRevealSvg: ONE canvas, two registers (debt backdrop over net-interest cost), with two full chart STATES layered in the same SVG coordinate space. The surface state (debt prominent, cost faint) is the base; the hidden-cost state (same backdrop + rising interest line, burden inflection, interest-burden threshold, pressure zone) is drawn inside an SVG clipPath revealed to the RIGHT of a draggable vertical divider — a true spatial reveal, never an opacity toggle. Backdrop identical in both layers for continuity. revealDefault 0.5; drag / arrows / Home-End / touch-snap; reduced-motion + print safe."
     },
     {
       "chartId": "p1-sequence-risk",

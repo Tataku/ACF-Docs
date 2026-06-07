@@ -875,7 +875,7 @@ export const FRAMEWORK_CHART_SPECS = [
     claimLabel: 'POLICY · CONSTRAINT',
     frameworkClaim: 'Debt and interest burden reduce policy freedom.',
     readerTakeaway: 'For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.',
-    chartType: 'Stacked dual-panel chart, shared timeline. Top: debt/GDP. Bottom: net interest/GDP.',
+    chartType: 'Before/after clipped reveal on one canvas: a shared debt/GDP backdrop; dragging a divider wipes the calm surface to expose the net-interest cost beneath.',
     visualDataMode: 'representative',
     disclosure: DISCLOSURE.representative, footerCta: 'View sources',
     historicalFooter: 'Source · FRED · GFDEGDQ188S + BEA net interest / GDP · annual · 1980 to 2024 · share of GDP',
@@ -890,7 +890,7 @@ export const FRAMEWORK_CHART_SPECS = [
     concepts: [{ label: 'Policy constraint', link: '#manifesto' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Fragility', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'dual', perspectiveSlider: true, perspectiveDefault: 0.25,
     perspectiveCopy: { surface: 'rates fell for decades and hid the cost', hidden: 'the cost returns as rates normalize' },
-    ariaSummary: 'Two stacked line charts on a shared 1980-to-2024 timeline, linked by a before/after perspective slider. The top panel is the backdrop: federal debt as a share of GDP rising steeply past 100 percent, with the area beneath it shaded as an accumulating liability. The bottom panel is the cost: net interest as a share of GDP eases as rates fall, troughs, then inflects upward through an interest-burden threshold into a pressure zone as rates normalize. Sliding from Surface to Hidden cost emphasises the debt backdrop, then reveals the interest burden and its pressure zone.',
+    ariaSummary: 'A single before/after reveal on a shared 1980-to-2024 timeline. One backdrop — federal debt as a share of GDP, rising steeply past 100 percent with the area beneath it shaded as an accumulating liability — is present in both states. Dragging a vertical divider wipes away the calm surface view, where falling rates kept the interest cost faint, to expose on the same backdrop beneath it the hidden-cost view: net interest as a share of GDP easing as rates fall, troughing at the rate trough, then inflecting upward through an interest-burden threshold into a pressure zone as rates normalize. Surface is on the left, hidden cost on the right; drag the divider, use the arrow keys, or tap to move it.',
     xDomain: { xMin: 0, xMax: 40 },
     xTicks: [{ v: 0, label: '1980' }, { v: 25, label: 'rate trough' }, { v: 40, label: '2024' }],
     connective: 'rates fell for decades and hid the cost',
@@ -907,7 +907,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'pressure', kind: 'band', panel: 'intPanel', label: 'Interest-burden pressure', name: 'Pressure zone', why: 'As rates normalize the interest bill rises into this zone, where debt service competes directly with the room for fiscal support.', claim: 'Policy constraint tightens here.', concept: 'Policy constraint', link: '#manifesto' },
     ],
     mobileTapTargets: ['debt', 'int', 'threshold', 'burden', 'pressure'],
-    implementationNotes: 'Handoff-only for now; unwired from the public page pending explicit placement. Dual-panel = two plots sharing the x-domain, one explainer, one footer. Connective caption composed between panels.',
+    implementationNotes: 'Handoff-only for now; unwired from the public page pending explicit placement. BeforeAfterRevealSvg: ONE canvas, two registers (debt backdrop over net-interest cost), with two full chart STATES layered in the same SVG coordinate space. The surface state (debt prominent, cost faint) is the base; the hidden-cost state (same backdrop + rising interest line, burden inflection, interest-burden threshold, pressure zone) is drawn inside an SVG clipPath revealed to the RIGHT of a draggable vertical divider — a true spatial reveal, never an opacity toggle. Backdrop identical in both layers for continuity. revealDefault 0.5; drag / arrows / Home-End / touch-snap; reduced-motion + print safe.',
   },
 
   {
