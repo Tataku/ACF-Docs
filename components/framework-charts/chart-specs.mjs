@@ -249,7 +249,10 @@ const p3Accum = (() => {
   // cumulative BTC units (sats) accumulated. Concave: the same dollar buys more
   // units when price is low (undervalued, early) than when extended (late).
   const baseline = curve(0, 100, n, (t) => 84 * Math.pow(t, 0.72), 341, 0.5);
-  const lead = (t) => 26 * ss(clamp(t / 0.42, 0, 1)) - 9 * ss(clamp((t - 0.7) / 0.3, 0, 1)); // guided gains a lead when cheap, then slows new buying when extended (never gives it back)
+  // guided opens its lead fast while cheap (steeper), tracks baseline at fair
+  // value, then slows new buying when extended (flatter) — but never gives the
+  // lead back: the reserve only ever grows.
+  const lead = (t) => 30 * ss(clamp(t / 0.42, 0, 1)) - 16 * ss(clamp((t - 0.62) / 0.38, 0, 1));
   const guided = baseline.map((p, i) => ({ x: p.x, y: R(p.y + lead(i / n)) }));
   return { baseline, guided };
 })();
@@ -1374,7 +1377,7 @@ export const FRAMEWORK_CHART_SPECS = [
     concepts: [{ label: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'single',
     ariaSummary: 'Two rising curves of cumulative Bitcoin units accumulated, against valuation from undervalued to extended. Both only ever rise; the framework-guided curve opens a lead in the undervalued window, tracks the baseline at fair value, and flattens — slowing new buying — when extended, never declining.',
-    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 130 }, yUnit: '',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 110 }, yUnit: '',
     xTicks: [{ v: 0, label: 'undervalued' }, { v: 50, label: 'fair value' }, { v: 100, label: 'extended' }],
     yTicks: [],
     series: [
@@ -1382,25 +1385,21 @@ export const FRAMEWORK_CHART_SPECS = [
       { key: 'guided', tier: 'primary', label: 'Framework DCA', pts: p3Accum.guided },
     ],
     // the wedge between the two curves IS the extra sats the framework collects while cheap.
-    areas: [{ id: 'extra', topKey: 'guided', botKey: 'baseline', kind: 'edge', tone: 'accent', opacity: 0.16, labelX: 38, label: 'extra sats captured while cheap' }],
-    bands: [
-      { id: 'window', kind: 'regime', render: 'wash', x0: 0, x1: 33, label: 'accumulation window', labelAnchor: 'start' },
-      { id: 'slow', kind: 'regime', render: 'wash', x0: 66, x1: 100, label: 'slow new buying', labelAnchor: 'end' },
-    ],
+    areas: [{ id: 'extra', topKey: 'guided', botKey: 'baseline', kind: 'edge', tone: 'accent', opacity: 0.18, labelX: 40, label: 'extra sats captured while cheap' }],
+    // organic accumulation field (dcaWindow), not a rectangular block; sat stipples bias toward cheap.
+    bands: [{ id: 'window', kind: 'regime', render: 'field', x0: 0, x1: 40, label: '' }],
     markers: [
-      { id: 'morecheap', type: 'dot', x: 24, y: R(valueAt(p3Accum.guided, 24)), r: 3.2, label: '', labelAnchor: 'start', labelDy: -12 },
-      { id: 'slows', type: 'dot', x: 84, y: R(valueAt(p3Accum.guided, 84)), r: 3.2, label: 'slows buying, never sells', labelAnchor: 'end', labelDy: -12 },
+      { id: 'slows', type: 'dot', x: 86, y: R(valueAt(p3Accum.guided, 86)), r: 3.2, label: 'slows buying, never sells', labelAnchor: 'end', labelDy: -12 },
     ],
     primaryKey: 'guided',
     hoverTargets: [
       { id: 'guided', kind: 'series', seriesKey: 'guided', label: 'Framework DCA', name: 'Framework-guided DCA', why: 'Leans in when models converge on undervaluation, tracks baseline at fair value, slows new buying when extended. It only ever adds units.', claim: 'Pace changes; the reserve only grows.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
       { id: 'baseline', kind: 'series', seriesKey: 'baseline', label: 'Baseline DCA', name: 'Baseline DCA', why: 'A constant dollar DCA already collects more units when price is low — the curve is steepest in the undervalued window.', claim: 'Even flat DCA stacks faster when cheap.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'window', kind: 'band', label: 'Accumulation window', name: 'Accumulation window', why: 'Undervalued: the same dollars buy the most units, and the framework adds to the pace.', claim: 'Cheap is when units are won.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'slow', kind: 'band', label: 'Slow new buying', name: 'Slow new buying', why: 'Extended: discretionary buying slows or pauses. The curve flattens — but never turns down.', claim: 'Ease off buying; do not sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'morecheap', kind: 'marker', label: 'More sats when cheap', name: 'More sats when cheap', why: 'The guided curve opens its lead here — extra units bought while Bitcoin is undervalued.', claim: 'The lead is built when cheap.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'window', kind: 'band', label: 'Accumulation window', name: 'Accumulation window', why: 'Undervalued: the same dollars buy the most units, and the framework adds to the pace. The stipples are the extra sats captured here.', claim: 'Cheap is when units are won.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'slows', kind: 'marker', label: 'Slow new buying', name: 'Slow new buying', why: 'When Bitcoin is extended, discretionary buying slows or pauses and the curve flattens. The reserve is never sold; holdings only ever grow.', claim: 'Ease off buying; never sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
     ],
-    mobileTapTargets: ['window', 'morecheap', 'guided', 'baseline', 'slow'],
-    implementationNotes: 'Cumulative BTC units (not pace): both curves are monotonic — they only ever rise. The shaded area under the guided curve is the never-sell reserve; valuation changes the slope of buying, never the direction of holdings.',
+    mobileTapTargets: ['window', 'guided', 'baseline', 'slows'],
+    implementationNotes: 'Cumulative BTC units (not pace): both curves are monotonic — they only ever rise. The undervalued window is an organic dcaWindow field (ink-wash + sat stipples), NOT a rectangular block; the accent wedge between the curves is the extra sats captured while cheap. Valuation changes the slope of buying, never the direction of holdings.',
   },
 
   {

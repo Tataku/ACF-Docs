@@ -262,7 +262,39 @@ export function brushArrow(tx, ty, len, dir, opts = {}) {
   return stem + footL + footR;
 }
 
+/* ── dcaWindow — organic "accumulation window" field (NOT a rectangle) ───────
+ * A soft vertical field that is full-height at x0 and pinches/dissolves toward
+ * x1, with ink stipples ("sats") biased toward x0. Marks a valuation window
+ * where accumulation is richest, fading as price rises to fair value. Distinct
+ * from pressureField (which is reserved, stress-coloured, for the shock). */
+export function dcaWindow(x0, x1, yTop, yBot, opts = {}) {
+  const { seed = 1, intensity = 0.7, grainCount = 24 } = opts;
+  const rng = mulberry32(seed + 17);
+  const H = yBot - yTop, N = 20;
+  const top = [], bot = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, x = lerp(x0, x1, t);
+    const fade = t < 0.5 ? 0 : (t - 0.5) / 0.5;          // right half pinches closed
+    const inset = fade * fade * H * 0.5;
+    top.push({ x, y: yTop + inset + (rng() - 0.5) * 3.4 * intensity });
+    bot.push({ x, y: yBot - inset + (rng() - 0.5) * 3.4 * intensity });
+  }
+  const wash = closedBezier([...top, ...bot.reverse()]);
+  const grains = [];
+  let placed = 0, safety = 0;
+  while (placed < grainCount && safety++ < grainCount * 8) {
+    const t = Math.pow(rng(), 1.7);                       // bias toward x0 (cheapest)
+    const fade = t < 0.5 ? 0 : (t - 0.5) / 0.5;
+    const inset = fade * fade * H * 0.5;
+    const x = lerp(x0, x1, t);
+    const y = yTop + inset + rng() * Math.max(2, H - 2 * inset);
+    grains.push({ x, y, r: 0.55 + rng() * 0.95, op: (0.12 + 0.30 * (1 - t)) * intensity });
+    placed++;
+  }
+  return { wash, grains };
+}
+
 export default {
   mulberry32, closedBezier, smoothOpen, strokeToPath, resamplePolyline,
-  brushLine, enso, inkDot, brushSegment, pressureField, washRect, brushArrow,
+  brushLine, enso, inkDot, brushSegment, pressureField, washRect, brushArrow, dcaWindow,
 };

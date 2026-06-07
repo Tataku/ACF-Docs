@@ -198,6 +198,8 @@ function PlotSvg({
       const halfSpan = ((x(b.x1) - x(b.x0)) / 2) * (b.spanScale || 1);
       if (b.render === 'wash') {
         out.bands.push({ b, xc, wash: Brush.washRect(x(b.x0), pad.t, x(b.x1), height - pad.b, { seed: b.seed || 33, intensity: 0.7, soft: 'both' }), x0: x(b.x0), x1: x(b.x1), yTop: pad.t, yBot: height - pad.b });
+      } else if (b.render === 'field') {
+        out.bands.push({ b, xc, dca: Brush.dcaWindow(x(b.x0), x(b.x1), pad.t, height - pad.b, { seed: b.seed || 29, intensity: 0.7 }), x0: x(b.x0), x1: x(b.x1), yTop: pad.t, yBot: height - pad.b });
       } else {
         const field = Brush.pressureField(xc, pad.t, height - pad.b, halfSpan, { seed: b.seed || 41, intensity: b.intensity ?? 0.78, asymmetric: b.asymmetric ?? 0.16 });
         out.bands.push({ b, xc, field, x0: x(b.x0), x1: x(b.x1), yTop: pad.t, yBot: height - pad.b });
@@ -285,6 +287,11 @@ function PlotSvg({
               <>
                 <path d={bg.field.plume} fill={pal.bandStress} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.20 : 0.18) : (pal.name === 'light' ? 0.13 : 0.12)} style={{ transition: trans('fill-opacity') }} />
                 {bg.field.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={pal.bandStress} opacity={gr.op} />)}
+              </>
+            ) : bg.dca ? (
+              <>
+                <path d={bg.dca.wash} fill={pal.bandRegime} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.16 : 0.15) : (pal.name === 'light' ? 0.12 : 0.10)} style={{ transition: trans('fill-opacity') }} />
+                {bg.dca.grains.map((gr, gi) => <circle key={gi} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op * 0.7} />)}
               </>
             ) : (
               <path d={bg.wash} fill={pal.bandRegime} fillOpacity={focusId === bg.b.id ? (pal.name === 'light' ? 0.16 : 0.16) : (pal.name === 'light' ? 0.10 : 0.09)} style={{ transition: trans('fill-opacity') }} />
@@ -612,6 +619,13 @@ function scoreFailPath(cx, cy, r, seed) {
   return Brush.brushSegment(cx - k, cy - k, cx + k, cy + k, { seed, weight: 0.7, intensity: 0.45, taperEnds: true, waver: 0.06 })
     + Brush.brushSegment(cx - k, cy + k, cx + k, cy - k, { seed: seed + 4, weight: 0.7, intensity: 0.45, taperEnds: true, waver: 0.06 });
 }
+// ScoreHalf — bespoke organic ring with a brush-filled left half (partial credit).
+function scoreHalfPaths(cx, cy, r, seed) {
+  const ring = Brush.enso(cx, cy, r, { seed, weight: 0.6, intensity: 0.5, gap: 0.04, gapAngle: -Math.PI / 2 });
+  const pts = [];
+  for (let k = 0; k <= 9; k++) { const a = Math.PI / 2 + Math.PI * (k / 9); pts.push({ x: cx + Math.cos(a) * (r - 0.8), y: cy + Math.sin(a) * (r - 0.8) }); }
+  return { ring, fill: Brush.closedBezier(pts) };
+}
 
 /* ── ribbonRing — closed ink ribbon of varying thickness (for systemLoop) ────*/
 function ribbonRing(pts) {
@@ -917,7 +931,7 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
   const svgRef = useRef(null);
   const sc = spec.scorecard;
   const reqs = sc.requirements, assets = sc.assets;
-  const pad = { l: 18, r: 18, t: 56, b: 76 };
+  const pad = { l: 18, r: 18, t: 64, b: 58 };
   const labelW = Math.min(248, width * 0.30);
   const colW = (width - pad.l - labelW - pad.r) / assets.length;
   const colX = (j) => pad.l + labelW + colW * (j + 0.5);
@@ -940,13 +954,8 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
     const cx = colX(j), gy = 0, r = 5;
     // ScoreCheck — bespoke brush check
     if (score === 2) return <path key={key} d={scoreCheckPath(cx, gy, r, 12 + j * 6)} fill={j === focusJ ? accent : pal.text2} />;
-    // ScoreHalf — half-filled disc
-    if (score === 1) return (
-      <g key={key}>
-        <circle cx={cx} cy={gy} r={r - 0.6} fill="none" stroke={pal.text4} strokeWidth="1" />
-        <path d={`M${cx} ${gy - (r - 0.6)} A ${r - 0.6} ${r - 0.6} 0 0 1 ${cx} ${gy + (r - 0.6)} Z`} fill={pal.text4} opacity="0.7" />
-      </g>
-    );
+    // ScoreHalf — bespoke organic ring + brush-filled half
+    if (score === 1) { const h = scoreHalfPaths(cx, gy, r, 40 + j * 7); return (<g key={key}><path d={h.fill} fill={pal.text4} opacity="0.6" /><path d={h.ring} fill={pal.text3} opacity="0.9" /></g>); }
     // ScoreFail — bespoke brush X
     return <path key={key} d={scoreFailPath(cx, gy, r, 23 + j * 6)} fill={pal.text4} opacity="0.6" />;
   };
@@ -960,8 +969,18 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
   return (
     <div style={{ position: 'relative' }}>
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Backbone requirement scorecard across candidate assets" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {/* focus column wash */}
-        {focusJ >= 0 && <rect x={colX(focusJ) - colW * 0.46} y={pad.t - 30} width={colW * 0.92} height={height - pad.t - pad.b + 36} rx={6} fill={accent} opacity={pal.name === 'light' ? 0.07 : 0.06} />}
+        {/* focus column — soft ink-wash, not a spreadsheet cell */}
+        {focusJ >= 0 && <path d={Brush.washRect(colX(focusJ) - colW * 0.44, pad.t - 26, colX(focusJ) + colW * 0.44, height - pad.b + 6, { seed: 53, intensity: 0.6, soft: 'both' })} fill={accent} fillOpacity={pal.name === 'light' ? 0.08 : 0.07} />}
+        {/* score legend — at the top, before the glyphs it explains */}
+        <g transform={`translate(${pad.l + 2} ${pad.t - 44})`} style={{ opacity: entered ? 0.95 : 0, transition: trans('opacity', 260) }}>
+          {[
+            { g: <path d={scoreCheckPath(0, 0, 4, 11)} fill={pal.text2} />, t: 'satisfies' },
+            { g: (() => { const h = scoreHalfPaths(0, 0, 4, 40); return <g><path d={h.fill} fill={pal.text4} opacity="0.6" /><path d={h.ring} fill={pal.text3} opacity="0.9" /></g>; })(), t: 'partial' },
+            { g: <path d={scoreFailPath(0, 0, 4, 23)} fill={pal.text4} opacity="0.7" />, t: 'does not satisfy' },
+          ].map((item, i) => (
+            <g key={i} transform={`translate(${i * 96} 0)`}>{item.g}<text x={11} y={3.5} style={halo(pal, 9, pal.text3, 500)}>{item.t}</text></g>
+          ))}
+        </g>
         {/* asset headers */}
         {assets.map((a, j) => (
           <text key={`h${a.id}`} x={colX(j)} y={pad.t - 32} textAnchor="middle" style={haloSans(pal, a.focus ? 12 : 11, a.focus ? accent : pal.text2, a.focus ? 700 : 600)}>{a.label}</text>
@@ -986,23 +1005,13 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {assets.map((a, j) => (
           <text key={`a${a.id}`} x={colX(j)} y={height - pad.b + 24} textAnchor="middle" style={haloSans(pal, a.focus ? 12 : 10.5, a.focus ? accent : pal.text3, a.focus ? 700 : 600)}>{sc.aggregates[a.id]}</text>
         ))}
-        {/* "clears all ten" seal under the focus column — the asset that runs the gauntlet */}
+        {/* "clears all ten" — integrated column footer under the focus aggregate */}
         {focusJ >= 0 && (
-          <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 320) }}>
-            <path d={scoreCheckPath(colX(focusJ) - 41, height - pad.b + 45, 4, 71)} fill={accent} />
-            <text x={colX(focusJ) - 33} y={height - pad.b + 48} style={halo(pal, 8.5, accent, 600)}>CLEARS ALL TEN</text>
+          <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 340) }}>
+            <path d={Brush.brushSegment(colX(focusJ) - colW * 0.3, height - pad.b + 32, colX(focusJ) + colW * 0.3, height - pad.b + 32, { seed: 71, weight: 0.7, intensity: 0.5, waver: 0.1 })} fill={accent} opacity="0.7" />
+            <text x={colX(focusJ)} y={height - pad.b + 46} textAnchor="middle" style={halo(pal, 8.5, accent, 600)}>clears all ten</text>
           </g>
         )}
-        {/* glyph legend — shape-coded, not colour-only */}
-        <g transform={`translate(${pad.l + 2} ${height - pad.b + 45})`} style={{ opacity: entered ? 0.92 : 0, transition: trans('opacity', 320) }}>
-          {[
-            { g: <path d={scoreCheckPath(0, 0, 4, 11)} fill={pal.text2} />, t: 'satisfies' },
-            { g: <g><circle cx={0} cy={0} r={3.6} fill="none" stroke={pal.text4} strokeWidth="1" /><path d={`M0 ${-3.6} A 3.6 3.6 0 0 1 0 ${3.6} Z`} fill={pal.text4} opacity="0.7" /></g>, t: 'partial' },
-            { g: <path d={scoreFailPath(0, 0, 4, 23)} fill={pal.text4} opacity="0.7" />, t: 'does not satisfy' },
-          ].map((item, i) => (
-            <g key={i} transform={`translate(${i * 96} 0)`}>{item.g}<text x={11} y={3.5} style={halo(pal, 9, pal.text3, 500)}>{item.t}</text></g>
-          ))}
-        </g>
         {/* keyboard focus chips (per requirement row) */}
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
       </svg>
@@ -1115,7 +1124,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         </g>
         {/* start reference */}
         <line x1={pad.l} x2={width - pad.r} y1={Y(100)} y2={Y(100)} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
-        <text x={pad.l} y={Y(100) - 5} style={halo(pal, 8.5, pal.text4)}>start = 100</text>
+        <text x={width - pad.r} y={Y(100) - 5} textAnchor="end" style={halo(pal, 8.5, pal.text4)}>start = 100</text>
 
         {/* capacity-to-act gauge */}
         <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 300) }}>
