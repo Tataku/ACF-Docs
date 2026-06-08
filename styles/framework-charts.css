@@ -10,6 +10,24 @@
   outline-offset: 2px;
 }
 
+/* Touch: tapping a chart element must never paint a full-width OS highlight box
+ * or select text. The interaction model is bespoke (tap = inspect / emphasize /
+ * reveal), so the platform tap-highlight and text selection are pure noise on
+ * mobile and read as a "flash across the chart". This is the root-cause fix for
+ * the reported full-viewport flash on tap. */
+.acf-chart-build,
+.acf-chart-build svg,
+.acf-chart-build button,
+.acf-chart-build [role='slider'],
+.acf-chart-build [role='button'] {
+  -webkit-tap-highlight-color: transparent;
+}
+.acf-chart-build svg {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
 /* Safety net: even if a transition slips through component logic, honor the
  * user's motion preference. The component already gates animation in JS; this
  * guarantees it at the platform level. */

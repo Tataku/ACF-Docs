@@ -176,12 +176,14 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
   return (
     <circle
       className="acf-fx-focusable" cx={anchor.x} cy={anchor.y} r={coarse ? 12 : 9}
-      fill="transparent" tabIndex={0} role="button"
+      fill="transparent" tabIndex={coarse ? -1 : 0} role="button" aria-hidden={coarse ? 'true' : undefined}
       aria-label={`${t.name || t.label}. ${t.why} ${t.claim}`}
       onFocus={() => onActive(mkActive(t), 'focus')}
       onBlur={() => onActive(null, 'focus')}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPin(pinned && pinned.id === t.id ? null : mkActive(t)); } }}
-      style={{ cursor: 'pointer' }}
+      // coarse: non-interactive so taps fall through to the SVG (no focus-scroll
+      // jump, no double handling); the MobileInsight stepper carries a11y instead.
+      style={{ cursor: 'pointer', pointerEvents: coarse ? 'none' : undefined }}
     />
   );
 }
@@ -278,7 +280,7 @@ function PlotSvg({
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
-  const dimOf = (id) => (focusId && focusId !== id ? 0.34 : 1);
+  const dimOf = (id) => (focusId && focusId !== id ? (coarse ? 0.5 : 0.34) : 1);  // coarse: emphasis is hierarchy, context stays readable (never disappears)
   const trans = (p, ms = 180) => (reduce ? undefined : `${p} ${ms}ms ease`);
   const anchor = isActiveHere ? anchorOf(active) : null;
   // Motion doctrine: a single left→right time-sweep reveals bands, areas and all
@@ -1022,7 +1024,7 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
         {reqs.map((r, i) => {
           const on = focusId === r.id;
           return (
-            <g key={r.id} style={{ opacity: entered ? (focusId && !on ? 0.42 : 1) : 0, transform: entered ? 'none' : 'translateX(-6px)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms cubic-bezier(0.22,0.61,0.36,1) ${220 + i * 130}ms, transform 440ms cubic-bezier(0.22,0.61,0.36,1) ${220 + i * 130}ms` }}>
+            <g key={r.id} style={{ opacity: entered ? (focusId && !on ? (coarse ? 0.55 : 0.42) : 1) : 0, transform: entered ? 'none' : 'translateX(-6px)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms cubic-bezier(0.22,0.61,0.36,1) ${220 + i * 130}ms, transform 440ms cubic-bezier(0.22,0.61,0.36,1) ${220 + i * 130}ms` }}>
               {on && <rect x={pad.l - 4} y={rowY(i) - rowH / 2 + 2} width={width - pad.l - pad.r + 8} height={rowH - 4} rx={5} fill={pal.text1} opacity={pal.name === 'light' ? 0.04 : 0.05} />}
               <text x={pad.l + 2} y={rowY(i) + 3.5} style={haloSans(pal, 11, on ? pal.text1 : pal.text2, on ? 600 : 500)}>{r.label}</text>
               <g transform={`translate(0 ${rowY(i)})`}>
@@ -1138,7 +1140,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 
   const seg = (val, label, on, set) => (
     <button key={val} onClick={() => set(val)} aria-pressed={on}
-      style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.04em', cursor: 'pointer', background: 'transparent', border: 'none', padding: '3px 2px 1px', lineHeight: 1.4, color: on ? pal.text1 : pal.text3, fontWeight: on ? 600 : 400, borderBottom: `1.5px solid ${on ? accent : 'transparent'}` }}>{label}</button>
+      style={{ fontFamily: pal.mono, fontSize: coarse ? 12 : 9.5, letterSpacing: '0.04em', cursor: 'pointer', background: coarse && on ? pal.surface : 'transparent', border: 'none', borderRadius: coarse ? 6 : 0, padding: coarse ? '7px 10px 5px' : '3px 2px 1px', lineHeight: 1.4, color: on ? pal.text1 : pal.text3, fontWeight: on ? 600 : 400, borderBottom: `1.5px solid ${on ? accent : 'transparent'}` }}>{label}</button>
   );
   const dot = (i) => (i > 0 ? <span key={`d${i}`} aria-hidden style={{ color: pal.text4, opacity: 0.4 }}>·</span> : null);
   const ctrlRow = (lbl, items) => (
@@ -1196,7 +1198,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
             replaying the build. */}
         <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1700ms cubic-bezier(0.22,0.61,0.36,1) 140ms, -webkit-clip-path 1700ms cubic-bezier(0.22,0.61,0.36,1) 140ms' }}>
           {paths.filter((p) => p.pk !== presetId).map((p) => (
-            <g key={p.pk} style={{ opacity: hovered && hovered.pk === p.pk ? 0.82 : 0.4, transition: 'opacity 180ms ease' }}>
+            <g key={p.pk} style={{ opacity: hovered && hovered.pk === p.pk ? 0.82 : (coarse ? 0.6 : 0.4), transition: 'opacity 180ms ease' }}>
               <path d={p.stroke} fill="none" stroke={pal.tierReference} strokeWidth="1.1" strokeLinecap="round" />
               <path d={Brush.inkDot(p.end.x, p.end.y, 2.6, { seed: 7, intensity: 0.7 })} fill={pal.tierReference} />
             </g>
@@ -1498,28 +1500,41 @@ function ConceptLinks({ items, pal, accent }) {
   );
 }
 
-function MobileInsight({ spec, pal, accent, active, onStep, onPick }) {
-  const order = spec.mobileTapTargets || spec.hoverTargets.map((t) => t.id);
+// Mobile detail rail — contained inside the chart card, anchored below the plot
+// (never a viewport overlay). Two states: OVERVIEW (active == null) keeps the
+// whole chart visible and invites a tap/step; INSPECT shows the tapped element's
+// detail with a one-tap return to overview. Dots = the mobileTapTargets order.
+function MobileInsight({ spec, pal, accent, active, order, onStep, onPick, onClear }) {
   const targets = spec.hoverTargets;
-  const idx = Math.max(0, order.findIndex((id) => active && id === active.id));
-  const cur = targets.find((t) => t.id === order[idx]) || targets[0];
-  if (!cur) return null; // no targets → render nothing rather than crash
+  const ord = order || targets.map((t) => t.id);
+  if (!targets.length) return null; // no targets → render nothing rather than crash
+  const idx = active ? Math.max(0, ord.findIndex((id) => id === active.id)) : -1;
+  const cur = active ? (targets.find((t) => t.id === ord[idx]) || null) : null;
   const tapBtn = { width: 44, height: 44, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: pal.surface, border: `1px solid ${pal.cardBorder}`, borderRadius: 10, cursor: 'pointer', color: pal.text2, fontSize: 18 };
   return (
     <div style={{ background: pal.cardSolid, borderTop: `1px solid ${pal.borderHi}`, padding: '12px 16px 14px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-        <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.14em', color: cur.kind === 'series' && cur.seriesKey === spec.primaryKey ? accent : pal.text4 }}>{TIER_LABEL[cur.kind] || 'ELEMENT'}</span>
-        {cur.concept && <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.06em', color: pal.text4, border: `1px solid ${pal.cardBorder}`, borderRadius: 3, padding: '2px 6px' }}>↳ {cur.concept}</span>}
-      </div>
-      <div style={{ fontSize: 16, fontWeight: 600, color: pal.text1, letterSpacing: '-0.01em', marginBottom: 5 }}>{cur.name}</div>
-      <p style={{ margin: '0 0 6px', fontSize: 13, lineHeight: 1.55, color: pal.text2 }}>{cur.why}</p>
-      <div style={{ fontSize: 12, color: pal.text3, fontStyle: 'italic', marginBottom: 12 }}>{cur.claim}</div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <button onClick={() => onStep(-1)} style={tapBtn} aria-label="Previous insight">‹</button>
-        <div style={{ display: 'flex', gap: 7 }}>
-          {order.map((id, i) => <button key={id} onClick={() => onPick(id)} aria-label={`Insight ${i + 1}`} style={{ width: i === idx ? 18 : 7, height: 7, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', background: i === idx ? accent : pal.cardBorder, transition: 'all .2s ease' }} />)}
+      {cur ? (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6, gap: 10 }}>
+            <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.14em', color: cur.kind === 'series' && cur.seriesKey === spec.primaryKey ? accent : pal.text4 }}>{TIER_LABEL[cur.kind] || 'ELEMENT'}{cur.concept ? ` · ↳ ${cur.concept}` : ''}</span>
+            <button onClick={onClear} aria-label="Back to full view" style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: pal.text3, background: 'transparent', border: `1px solid ${pal.cardBorder}`, borderRadius: 4, padding: '3px 8px', cursor: 'pointer', flexShrink: 0 }}>✕ FULL VIEW</button>
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: pal.text1, letterSpacing: '-0.01em', marginBottom: 5 }}>{cur.name}</div>
+          <p style={{ margin: '0 0 6px', fontSize: 13, lineHeight: 1.55, color: pal.text2 }}>{cur.why}</p>
+          <div style={{ fontSize: 12, color: pal.text3, fontStyle: 'italic', marginBottom: 12 }}>{cur.claim}</div>
+        </>
+      ) : (
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.14em', color: accent, marginBottom: 3 }}>FULL VIEW · NOTHING HIDDEN</div>
+          <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.45, color: pal.text2 }}>Tap a point on the chart — or step through below — to inspect each element. The whole chart stays visible.</p>
         </div>
-        <button onClick={() => onStep(1)} style={tapBtn} aria-label="Next insight">›</button>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <button onClick={() => onStep(-1)} style={tapBtn} aria-label="Previous element">‹</button>
+        <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+          {ord.map((id, i) => <button key={id} onClick={() => onPick(id)} aria-label={`Element ${i + 1}`} style={{ width: i === idx ? 18 : 7, height: 7, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', background: i === idx ? accent : pal.cardBorder, transition: 'all .2s ease' }} />)}
+        </div>
+        <button onClick={() => onStep(1)} style={tapBtn} aria-label="Next element">›</button>
       </div>
     </div>
   );
@@ -1610,7 +1625,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
         {(spec.yTicks || []).map((t, i) => <text key={`yt${i}`} x={width - pad.r + 8} y={Y(t.v) + 3} style={halo(pal, 9, pal.axis, 500)}>{t.label}</text>)}
 
         {/* portfolio paths — generated from the deck returns */}
-        <g style={{ opacity: focusId === 'bad' ? 0.4 : 1, transition: trans('opacity') }}>
+        <g style={{ opacity: focusId === 'bad' ? (coarse ? 0.55 : 0.4) : 1, transition: trans('opacity') }}>
           <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : `clip-path 1500ms ${EZ} 360ms, -webkit-clip-path 1500ms ${EZ} 360ms` }}>
             <path d={geom.good} fill={accent} />
           </g>
@@ -1618,7 +1633,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
           <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, accent, 600)}>Good sequence</text>
           <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(seq.goodEnd * P)}</text>
         </g>
-        <g style={{ opacity: focusId === 'good' ? 0.4 : 1, transition: trans('opacity') }}>
+        <g style={{ opacity: focusId === 'good' ? (coarse ? 0.55 : 0.4) : 1, transition: trans('opacity') }}>
           <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : `clip-path 1500ms ${EZ} 360ms, -webkit-clip-path 1500ms ${EZ} 360ms` }}>
             <path d={geom.bad} fill={pal.bandStress} opacity="0.9" />
           </g>
@@ -1695,9 +1710,10 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   const c01 = (v) => Math.max(0, Math.min(1, v));
   const dividerX = (1 - reveal) * width;                       // Layout: hidden cost is revealed on the RIGHT of the divider
   const setFromClientX = (cx) => { const el = svgRef.current; if (!el) return; const r = el.getBoundingClientRect(); setReveal(c01(1 - (cx - r.left) / (r.width || 1))); };
+  const snap = () => { if (coarse) setReveal((v) => (v < 0.25 ? 0 : v > 0.75 ? 1 : 0.5)); };  // mobile snaps to surface / split / hidden cost
   const onDown = (e) => { setDrag(true); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) { /* noop */ } setFromClientX(e.clientX); };
   const onHandleMove = (e) => { if (drag) setFromClientX(e.clientX); };
-  const onUp = () => { setDrag(false); if (coarse) setReveal((v) => (v < 0.25 ? 0 : v > 0.75 ? 1 : 0.5)); };  // mobile snaps to surface / midpoint / hidden
+  const onUp = () => { setDrag(false); snap(); };
   const onKey = (e) => {
     let nv = null;
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp') nv = c01(reveal + 0.1);
@@ -1705,6 +1721,28 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
     else if (e.key === 'Home') nv = 0; else if (e.key === 'End') nv = 1;
     if (nv != null) { e.preventDefault(); setReveal(nv); }
   };
+
+  // Coarse: the WHOLE chart is the reveal control — tap to jump the divider, drag
+  // to scrub. touch-action:pan-y lets vertical page-scroll through; a horizontal-
+  // intent drag captures the pointer so the page never hijacks the gesture. Element
+  // inspection on mobile is the stepper below, so the chart area is solely the slider.
+  const gest = useRef(null);
+  const trackDown = (e) => { gest.current = { x: e.clientX, y: e.clientY, dragging: false }; };
+  const trackMove = (e) => {
+    const g = gest.current; if (!g) return;
+    const dx = e.clientX - g.x, dy = e.clientY - g.y;
+    if (!g.dragging) {
+      if (Math.abs(dx) > 6 && Math.abs(dx) >= Math.abs(dy)) { g.dragging = true; setDrag(true); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) { /* noop */ } setFromClientX(e.clientX); }
+      else if (Math.abs(dy) > 10) gest.current = null;          // vertical intent → release to page scroll
+    } else setFromClientX(e.clientX);
+  };
+  const trackUp = (e) => {
+    const g = gest.current; gest.current = null;
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) { /* noop */ }
+    if (g && g.dragging) { setDrag(false); snap(); }
+    else if (g) { setFromClientX(e.clientX); snap(); }          // tap-to-jump → snap
+  };
+  const trackCancel = (e) => { gest.current = null; setDrag(false); try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) { /* noop */ } };
 
   const revealedAt = (vbx) => vbx >= dividerX;                 // hidden-cost marks are only live where they are shown
   const anchorOf = (t) => {
@@ -1727,7 +1765,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned || drag) return; onActive(resolve(...toVB(e)), 'hover'); };
-  const onClick = (e) => { if (drag) return; const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+  const onClick = (e) => { if (coarse || drag) return; const res = resolve(...toVB(e)); if (!res) { onPin(null); return; } onPin(res); };  // coarse: the track owns taps (inspect via stepper)
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
@@ -1822,12 +1860,18 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
         {targets.filter((t) => t.id === 'debt' || t.id === 'int' || (anchorOf(t) && revealedAt(anchorOf(t).x))).map((t) => (
           <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />
         ))}
+        {/* coarse reveal track — full-area drag + tap-to-jump; pan-y keeps page scroll */}
+        {coarse && (
+          <rect x={0} y={0} width={width} height={height} fill="transparent" aria-hidden="true"
+            onPointerDown={trackDown} onPointerMove={trackMove} onPointerUp={trackUp} onPointerCancel={trackCancel}
+            style={{ touchAction: 'pan-y', cursor: 'ew-resize' }} />
+        )}
       </svg>
 
       {/* endpoint labels + microcopy */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '6px 14px 2px' }}>
         <span style={{ ...lbl, color: reveal < 0.5 ? pal.text2 : pal.text4 }}>{(labels.before || 'Surface').toUpperCase()}</span>
-        <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>drag to reveal the hidden cost</span>
+        <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>{coarse ? 'drag or tap to reveal the hidden cost' : 'drag to reveal the hidden cost'}</span>
         <span style={{ ...lbl, color: reveal >= 0.5 ? accent : pal.text4 }}>{(labels.after || 'Hidden cost').toUpperCase()}</span>
       </div>
       {tooltip}
@@ -1858,24 +1902,29 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   }, [coarse]);
 
   const onActive = useCallback((res, src) => {
-    if (src === 'tap') { if (res && !res.fallback) setMobileActive(res); return; }
+    // tap an element ⇒ inspect it; tap the background (no/Fallback target) ⇒ back
+    // to overview (full visibility). Never leaves the chart in a dimmed default.
+    if (src === 'tap') { setMobileActive(res && !res.fallback ? res : null); return; }
     setHover(res);
   }, []);
   const onPin = useCallback((res) => { setPin(res); if (res) setHover(res); }, []);
 
   if (!spec) return <div role="alert" style={{ fontFamily: 'monospace', color: '#C0837A', padding: 12 }}>FrameworkChart: unknown chart id “{id}”.</div>;
 
-  const firstMobile = (spec.mobileTapTargets || spec.hoverTargets.map((t) => t.id))[0];
-  const mobileTarget = spec.hoverTargets.find((t) => t.id === (mobileActive ? mobileActive.id : firstMobile)) || spec.hoverTargets[0];
+  // Mobile DEFAULT is full visibility: nothing is emphasized until the reader taps
+  // or steps. mobileActive === null ⇒ "overview" (no focusId ⇒ nothing dimmed),
+  // matching desktop's null-by-default. Tapping/stepping enters "inspect".
+  const mobileTarget = mobileActive ? (spec.hoverTargets.find((t) => t.id === mobileActive.id) || null) : null;
   const active = coarse ? mobileTarget : (pin || hover);
   const pinned = coarse ? null : pin;
+  const mobileOrder = spec.mobileTapTargets || spec.hoverTargets.map((t) => t.id);
 
   const stepMobile = (d) => {
-    const order = spec.mobileTapTargets || spec.hoverTargets.map((t) => t.id);
-    const i = Math.max(0, order.findIndex((idv) => idv === (mobileTarget && mobileTarget.id)));
-    setMobileActive(spec.hoverTargets.find((t) => t.id === order[(i + d + order.length) % order.length]));
+    const cur = mobileTarget ? mobileOrder.findIndex((idv) => idv === mobileTarget.id) : -1;
+    const next = cur < 0 ? (d > 0 ? 0 : mobileOrder.length - 1) : (cur + d + mobileOrder.length) % mobileOrder.length;
+    setMobileActive(spec.hoverTargets.find((t) => t.id === mobileOrder[next]) || null);
   };
-  const pickMobile = (idv) => setMobileActive(spec.hoverTargets.find((t) => t.id === idv));
+  const pickMobile = (idv) => setMobileActive(idv == null ? null : (spec.hoverTargets.find((t) => t.id === idv) || null));
 
   const padX = 'clamp(14px, 3vw, 22px)';
   const badge = coarse ? 'TAP TO EXPLORE' : 'LIVE · HOVER';
@@ -1885,7 +1934,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const valueNote = spec.visualDataMode === 'historical' ? 'TRUE VALUE' : 'REPRESENTATIVE';
   const pNote = personalNote(spec, readerContext);
   const simIntro = getSimulationIntro(spec, readerContext);   // chart-level "scaled example · …" line, above the visual
-  const tryThis = resolveTryThis(spec);                       // quiet interaction cue, only where interaction is central
+  const tryThis = resolveTryThis(spec, coarse);               // quiet interaction cue (touch-direct copy on coarse)
   const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext, motion: resolveMotionTiming(spec) };
   const mob = resolveMobileBehavior(spec);                    // mobile is not "just shrink": tall layouts get vertical room on touch
   const hh = (base) => (coarse && mob.chartHeight === 'tall' ? Math.round(base * 1.2) : base);
@@ -1967,7 +2016,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         </div>
       )}
 
-      {coarse && spec.layout !== 'scenario' && <MobileInsight spec={spec} pal={pal} accent={accent} active={mobileTarget} onStep={stepMobile} onPick={pickMobile} />}
+      {coarse && spec.layout !== 'scenario' && <MobileInsight spec={spec} pal={pal} accent={accent} active={mobileTarget} order={mobileOrder} onStep={stepMobile} onPick={pickMobile} onClear={() => setMobileActive(null)} />}
 
       {/* explainer */}
       <div style={{ height: 1, background: pal.cardBorder }} />
