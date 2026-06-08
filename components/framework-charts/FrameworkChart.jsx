@@ -179,7 +179,7 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
 
 /* ── PlotSvg — single chart or one dual panel (time-series family) ───────────*/
 function PlotSvg({
-  panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse,
+  panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse, touch,
   targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion,
 }) {
   const svgRef = useRef(null);
@@ -189,7 +189,7 @@ function PlotSvg({
   const pad = { l: 18, r: Math.max(74, longest * 7 + 26), t: 30, b: hideX ? 14 : 40 };
   const x = (v) => pad.l + ((v - dom.xMin) / (dom.xMax - dom.xMin)) * (width - pad.l - pad.r);
   const y = (v) => pad.t + (1 - (v - dom.yMin) / (dom.yMax - dom.yMin)) * (height - pad.t - pad.b);
-  const HIT = { line: coarse ? 20 : 12, marker: coarse ? 32 : 24, level: coarse ? 20 : 12 };
+  const HIT = { line: touch ? 20 : 12, marker: touch ? 32 : 24, level: touch ? 20 : 12 };
 
   const seriesByKey = {};
   (panel.series || []).forEach((s) => { seriesByKey[s.key] = s; });
@@ -417,7 +417,7 @@ function PlotSvg({
 }
 
 /* ── QuadrantSvg — growth × inflation regime map ─────────────────────────────*/
-function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const q = spec.quadrant;
   const pad = { l: 80, r: 80, t: 34, b: 40 };
@@ -430,7 +430,7 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
     return { px, line: Brush.brushLine(px, { seed: 19, weight: 0.8, intensity: 0.7 }) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
-  const HITR = coarse ? 34 : 26;
+  const HITR = touch ? 34 : 26;
 
   const anchorOf = (a) => { const p = geom.px.find((pp) => pp.id === a.id); return p ? { x: p.x, y: p.y } : null; };
   const resolve = (mx, my) => { let best = null, bd = HITR; geom.px.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
@@ -493,7 +493,7 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 }
 
 /* ── LoopSvg — governed flow diagram ─────────────────────────────────────────*/
-function LoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+function LoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const nodes = spec.loop.nodes;
   const cx = width / 2, cy = height / 2;
@@ -513,7 +513,7 @@ function LoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
     return { arrows };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
-  const HITR = coarse ? 60 : 70;
+  const HITR = touch ? 60 : 70;
 
   const anchorOf = (a) => { const p = pos.find((pp) => pp.id === a.id); return p ? { x: p.x, y: p.y } : null; };
   const resolve = (mx, my) => { let best = null, bd = HITR; pos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
@@ -562,7 +562,7 @@ function LoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
 }
 
 /* ── FlowSvg — staged directed flow (bottleneck maps, validation gauntlets) ──*/
-function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const stages = spec.flow.stages;
   const N = stages.length;
@@ -591,7 +591,7 @@ function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
   }, [width, height]);
 
   const anchorOf = (a) => { const p = byId(a.id); return p ? { x: p.x, y: p.y } : null; };
-  const resolve = (mx, my) => { let best = null, bd = Math.max(coarse ? 40 : 30, NW / 2); pos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 40 : 30, NW / 2); pos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
   const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -668,7 +668,7 @@ function ribbonRing(pts) {
  * ramp clockwise (self-reinforcement building), with a muted counter-arc and a
  * break cue showing the loop can run in reverse. Optional governorId marks the
  * node that forces the reversal (e.g. tripwires). Nodes are stations on the rim. */
-function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const sl = spec.systemLoop;
   const nodes = sl.nodes;
@@ -705,7 +705,7 @@ function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coar
 
   const npos = nodeAng.map((a, i) => ({ ...nodes[i], a, ...at(a) }));
   const anchorOf = (act) => { const p = npos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: p.y } : null; };
-  const resolve = (mx, my) => { let best = null, bd = coarse ? 40 : 32; npos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const resolve = (mx, my) => { let best = null, bd = touch ? 40 : 32; npos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
   const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -767,7 +767,7 @@ function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coar
  * and re-concentrates into the investable exposure. The constraint is the star:
  * pressure grain builds before it, choke walls pinch at it, flow re-emerges
  * focused after it. Equal-weight process steps are deliberately avoided. */
-function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const stages = spec.bridge.stages;
   const K = stages.length;
@@ -799,7 +799,7 @@ function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
   }, [width, height]);
 
   const anchorOf = (act) => { const p = pos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: cy } : null; };
-  const resolve = (mx) => { let best = null, bd = coarse ? 60 : 46; pos.forEach((p) => { const d = Math.abs(mx - p.x); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const resolve = (mx) => { let best = null, bd = touch ? 60 : 46; pos.forEach((p) => { const d = Math.abs(mx - p.x); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
   const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -854,7 +854,7 @@ function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
  * A broad scatter of narrative fragments enters from the left; weak fragments
  * fall away at each of four gates while survivors drift toward the centreline,
  * concentrating into a single validated thesis. Transformation, not a funnel. */
-function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const nodes = spec.gate.nodes; // [entry, gate, gate, gate, gate, exit]
   const K = nodes.length;
@@ -889,7 +889,7 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, ta
   }, [width, height]);
 
   const anchorOf = (act) => { const p = pos.find((pp) => pp.id === act.id); return p ? { x: p.x, y: p.gate ? cy - SPREAD - 8 : cy } : null; };
-  const resolve = (mx) => { let best = null, bd = coarse ? 60 : 46; pos.forEach((p) => { const d = Math.abs(mx - p.x); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const resolve = (mx) => { let best = null, bd = touch ? 60 : 46; pos.forEach((p) => { const d = Math.abs(mx - p.x); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
   const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -1050,7 +1050,7 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
  * mark, and an annotation that updates with the shock carry the story; the stat
  * strip (split into UPSIDE vs CONTROL) is subordinate. Click or focus a path to
  * select it. Precomputed deterministic paths — educational, not a calculator. */
-function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, readerContext }) {
+function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, readerContext }) {
   const sc = spec.scenario;
   const svgRef = useRef(null);
   const [presetId, setPresetId] = useState(sc.defaultPreset);
@@ -1122,14 +1122,14 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 
   // interaction (desktop hover/click; click selects the path)
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
-  const nearest = (mx, my) => { let best = null, bd = coarse ? 22 : 16; paths.forEach((p) => { const dp = nearPoly(mx, my, p.px); if (dp.d < bd) { bd = dp.d; best = { pk: p.pk, x: p.px[dp.i].x, y: p.px[dp.i].y }; } }); return best; };
+  const nearest = (mx, my) => { let best = null, bd = touch ? 22 : 16; paths.forEach((p) => { const dp = nearPoly(mx, my, p.px); if (dp.d < bd) { bd = dp.d; best = { pk: p.pk, x: p.px[dp.i].x, y: p.px[dp.i].y }; } }); return best; };
   const onMove = (e) => { if (coarse) return; setHovered(nearest(...toVB(e))); };
   const onLeave = () => { if (!coarse) setHovered(null); };
   const onClick = (e) => { const n = nearest(...toVB(e)); if (n) setPresetId(n.pk); };
 
   const seg = (val, label, on, set) => (
     <button key={val} onClick={() => set(val)} aria-pressed={on}
-      style={{ fontFamily: pal.mono, fontSize: coarse ? 12 : 9.5, letterSpacing: '0.04em', cursor: 'pointer', background: coarse && on ? pal.surface : 'transparent', border: 'none', borderRadius: coarse ? 6 : 0, padding: coarse ? '7px 10px 5px' : '3px 2px 1px', lineHeight: 1.4, color: on ? pal.text1 : pal.text3, fontWeight: on ? 600 : 400, borderBottom: `1.5px solid ${on ? accent : 'transparent'}` }}>{label}</button>
+      style={{ fontFamily: pal.mono, fontSize: touch ? 12 : 9.5, letterSpacing: '0.04em', cursor: 'pointer', background: touch && on ? pal.surface : 'transparent', border: 'none', borderRadius: touch ? 6 : 0, padding: touch ? '7px 10px 5px' : '3px 2px 1px', lineHeight: 1.4, color: on ? pal.text1 : pal.text3, fontWeight: on ? 600 : 400, borderBottom: `1.5px solid ${on ? accent : 'transparent'}` }}>{label}</button>
   );
   const dot = (i) => (i > 0 ? <span key={`d${i}`} aria-hidden style={{ color: pal.text4, opacity: 0.4 }}>·</span> : null);
   const ctrlRow = (lbl, items) => (
@@ -1209,7 +1209,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         )}
         {/* focusable strategy ends (keyboard parity: focus previews, Enter selects) */}
         {paths.map((p) => (
-          <circle key={`fx${p.pk}`} className="acf-fx-focusable" cx={p.end.x} cy={p.end.y} r={coarse ? 12 : 9} fill="transparent" tabIndex={0} role="button"
+          <circle key={`fx${p.pk}`} className="acf-fx-focusable" cx={p.end.x} cy={p.end.y} r={touch ? 12 : 9} fill="transparent" tabIndex={0} role="button"
             aria-label={`${byId(p.pk).label}. ${(targetById(p.pk) || {}).why || ''} Select to emphasise.`}
             onFocus={() => setHovered({ pk: p.pk, x: p.end.x, y: p.end.y })} onBlur={() => setHovered(null)}
             onClick={() => setPresetId(p.pk)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPresetId(p.pk); } }} style={{ cursor: 'pointer' }} />
@@ -1664,7 +1664,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
  * toggle. Surface (left) ↔ Hidden cost (right). Drag / keyboard / touch;
  * reduced-motion + print safe. The backdrop is identical in both layers so it
  * reads continuous across the wipe; the difference is the cost it was hiding. */
-function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin, showValues, valueNote }) {
+function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin, showValues, valueNote }) {
   const svgRef = useRef(null);
   const clipId = `acf-reveal-${useId().replace(/:/g, '')}`;
   const debtP = spec.panels[0], intP = spec.panels[1];
@@ -1685,7 +1685,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   const Yd = (v) => top1 - ((v - dDom.yMin) / (dDom.yMax - dDom.yMin)) * (top1 - top0);
   const Yi = (v) => bot1 - ((v - iDom.yMin) / (iDom.yMax - iDom.yMin)) * (bot1 - bot0);
   const midY = (top1 + bot0) / 2;
-  const HIT = { line: coarse ? 22 : 14, marker: coarse ? 30 : 22, level: coarse ? 18 : 11 };
+  const HIT = { line: touch ? 22 : 14, marker: touch ? 30 : 22, level: touch ? 18 : 11 };
 
   const geom = useMemo(() => {
     const dpx = debtPts.map((p) => ({ x: X(p.x), y: Yd(p.y) }));
@@ -1844,7 +1844,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
             aria-label="Reveal hidden debt cost" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(reveal * 100)} aria-valuetext={reveal < 0.5 ? 'mostly surface' : 'mostly hidden cost'}
             onKeyDown={onKey} onPointerDown={onDown} onPointerMove={onHandleMove} onPointerUp={onUp} onPointerCancel={onUp} onClick={(e) => e.stopPropagation()}
             style={{ cursor: 'ew-resize', touchAction: 'none', outlineOffset: 3 }}>
-            <circle cx={dividerX} cy={midY} r={coarse ? 17 : 13} fill={pal.cardSolid} stroke={accent} strokeWidth="1.5" />
+            <circle cx={dividerX} cy={midY} r={touch ? 17 : 13} fill={pal.cardSolid} stroke={accent} strokeWidth="1.5" />
             <path d={`M${dividerX - 3} ${midY - 4.5} L${dividerX - 6.5} ${midY} L${dividerX - 3} ${midY + 4.5}`} fill="none" stroke={accent} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             <path d={`M${dividerX + 3} ${midY - 4.5} L${dividerX + 6.5} ${midY} L${dividerX + 3} ${midY + 4.5}`} fill="none" stroke={accent} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </g>
@@ -1884,7 +1884,15 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
   const reduce = useMqFlag('(prefers-reduced-motion: reduce)');
-  const coarse = useMqFlag('(max-width: 700px), (hover: none) and (pointer: coarse)');
+  // Interaction mode is VIEWPORT-scoped, not device-scoped. A desktop-width
+  // session keeps hover + click-to-pin even on touch / hybrid devices (touch
+  // laptops, tablets in landscape, responsive emulation, some preview envs) —
+  // touch CAPABILITY alone must never downgrade a wide desktop view. Only a
+  // narrow viewport switches to the mobile tap-to-inspect model.
+  const isNarrowViewport = useMqFlag('(max-width: 700px)');
+  const isTouchPrimary = useMqFlag('(hover: none) and (pointer: coarse)');
+  const coarse = isNarrowViewport;                            // mobile INTERACTION + layout mode (hover/pin → tap-inspect, badge, MobileInsight, declutter)
+  const touch = isNarrowViewport || isTouchPrimary;          // touch AFFORDANCES only (larger hit / grab targets) — never gates interaction
   const figRef = useRef(null);
   const entered = useInViewOnce(figRef, reduce);
   const reactId = useId();
@@ -1934,7 +1942,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const pNote = getSimulationNote(spec, readerContext);
   const simIntro = getSimulationIntro(spec, readerContext);   // chart-level "scaled example · …" line, above the visual
   const tryThis = resolveTryThis(spec, coarse);               // quiet interaction cue (touch-direct copy on coarse)
-  const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext, motion: resolveMotionTiming(spec) };
+  const cp = { width: W, pal, accent, reduce, entered, coarse, touch, active, pinned, onActive, onPin, valueNote, readerContext, motion: resolveMotionTiming(spec) };
   const mob = resolveMobileBehavior(spec);                    // mobile is not "just shrink": tall layouts get vertical room on touch
   const hh = (base) => (coarse && mob.chartHeight === 'tall' ? Math.round(base * 1.2) : base);
   const motionType = resolveMotionProfile(spec).type;        // motion-family hook (data-motion) for the governed tempo

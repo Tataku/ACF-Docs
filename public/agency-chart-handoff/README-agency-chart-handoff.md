@@ -101,6 +101,8 @@ Already native on touch: the before/after reveal **snaps** to Surface / Split / 
 
 #### Mobile charts are touch-guided exhibits
 
+**Mobile touch behavior is viewport-scoped, not device-scoped.** Interaction mode keys off `isNarrowViewport` (`max-width: 700px`) alone — a desktop-width view preserves hover + click-to-pin even on touch / hybrid devices (touch laptops, tablets in landscape, responsive emulation). Touch *capability* (`isTouchPrimary` = `hover: none and pointer: coarse`) only widens hit/grab targets (`touch = narrow || touchPrimary`); it never downgrades a wide desktop view into the mobile model.
+
 A mobile chart is **not** a hover chart squeezed onto a phone. The reader sees the whole idea first, then taps or drags to focus the lesson:
 
 - **Default is full visibility.** On a coarse pointer no element is emphasized until the reader acts (`active` is `null` by default, exactly like desktop) — nothing loads dimmed or "under-hydrated".
