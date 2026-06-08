@@ -228,6 +228,7 @@ for (const s of FRAMEWORK_CHART_SPECS) {
 
   // "Try this" cue — shown only where interaction is central; explicit must be a string.
   if (s.tryThis != null) ok(typeof s.tryThis === 'string', `${w} tryThis must be a string`);
+  if (s.tryThisMobile != null) ok(typeof s.tryThisMobile === 'string', `${w} tryThisMobile must be a string`);
   const interactionCentral = ['scenario', 'beforeAfterReveal', 'returnOrder', 'readerContext'].includes(resolveInteraction(s).type);
   ok(!interactionCentral || (resolveTryThis(s) && resolveTryThis(s).trim()), `${w} interaction-central chart should resolve a 'Try this' cue`);
 

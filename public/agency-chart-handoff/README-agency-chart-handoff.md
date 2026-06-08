@@ -99,6 +99,17 @@ Each layout declares how it adapts on touch and how much vertical room it needs,
 
 Already native on touch: the before/after reveal **snaps** to Surface / Split / Hidden cost on release; every chart is tap-to-explore (`MobileInsight`) with enlarged hit targets. The `note` records the per-layout target (e.g. *stack scenario controls; deck above paths*) as the QA signal for deeper per-layout reflow. Resolver: `resolveMobileBehavior` (`chart-specs.mjs`).
 
+#### Mobile charts are touch-guided exhibits
+
+A mobile chart is **not** a hover chart squeezed onto a phone. The reader sees the whole idea first, then taps or drags to focus the lesson:
+
+- **Default is full visibility.** On a coarse pointer no element is emphasized until the reader acts (`active` is `null` by default, exactly like desktop) — nothing loads dimmed or "under-hydrated".
+- **Interaction emphasizes; it never replaces.** A tapped element brightens; the rest stays readable as context (dim floor ~0.5 on coarse — hierarchy, never disappearance). Tapping the background returns to full view.
+- **No accidental flashes.** `-webkit-tap-highlight-color` is cleared on every chart surface and the in-chart focus chips are inert on touch (no focus-scroll), so a tap never flashes or jumps the viewport.
+- **Detail is contained.** The `MobileInsight` rail lives inside the card below the plot (overview ↔ inspect, 44px controls) — never a viewport overlay.
+- **Sliders are touch-first.** The before/after reveal makes the whole chart the control: tap to jump the divider, drag to scrub (pointer-captured; `touch-action: pan-y` so vertical page-scroll still works), snapping to Surface / Split / Hidden cost on release.
+- **Copy is touch-direct.** `resolveTryThis(spec, coarse)` swaps in tap/drag language on mobile (override with `tryThisMobile`).
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +

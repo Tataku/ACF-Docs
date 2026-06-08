@@ -255,11 +255,19 @@ export function resolveMobileBehavior(spec) {
 }
 
 // "Try this" cue: a quiet imperative shown ONLY where interaction is central
-// (reveal / scenario / return-order / reader-context). Explicit spec.tryThis
-// wins ('' opts out); hover-only charts get no cue (the default already teaches).
-export function resolveTryThis(spec) {
-  if (typeof spec.tryThis === 'string') return spec.tryThis || null;
+// (reveal / scenario / return-order / reader-context). On a coarse pointer the
+// copy becomes touch-direct ("tap"/"drag") — explicit spec.tryThisMobile wins on
+// coarse, spec.tryThis wins on desktop ('' opts out); hover-only charts get none.
+export function resolveTryThis(spec, coarse = false) {
+  if (coarse && typeof spec.tryThisMobile === 'string') return spec.tryThisMobile || null;
   const it = resolveInteraction(spec);
+  if (coarse) {
+    if (it.type === 'beforeAfterReveal') return 'Drag the divider — or tap the chart — to reveal the hidden cost';
+    if (it.type === 'scenario') return 'Tap a strategy or shock, then compare the paths';
+    if (it.type === 'returnOrder') return 'Tap a path or the return deck to compare the order';
+    if (it.type === 'readerContext') return 'Enter your starting value above';
+  }
+  if (typeof spec.tryThis === 'string') return spec.tryThis || null;
   if (it.type === 'beforeAfterReveal') return 'Drag the divider to reveal the hidden cost';
   if (it.type === 'scenario') return 'Switch the shock and watch the control score';
   if (it.type === 'returnOrder') return 'Compare the same return deck in reverse';

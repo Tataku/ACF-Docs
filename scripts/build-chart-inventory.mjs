@@ -47,6 +47,7 @@ const charts = FRAMEWORK_CHART_SPECS.map((s) => {
     // mobile is not "just shrink": how the layout adapts on touch + vertical room
     mobileBehavior: resolveMobileBehavior(s),
     tryThis: resolveTryThis(s),
+    tryThisMobile: resolveTryThis(s, true),
     // reader simulation context (null = not personalized)
     readerContext: s.personalization ? { kind: s.personalization.kind, uses: s.personalization.uses } : null,
     // data honesty
