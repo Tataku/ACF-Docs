@@ -1991,6 +1991,14 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
     setMobileActive(spec.hoverTargets.find((t) => t.id === mobileOrder[next]) || null);
   };
   const pickMobile = (idv) => setMobileActive(idv == null ? null : (spec.hoverTargets.find((t) => t.id === idv) || null));
+  // Desktop/web ALSO surfaces the explainer rail (the same MobileInsight window) when
+  // an element is PINNED — driven by `pin`, shown alongside the floating pinned tooltip.
+  const pinById = (idv) => { const t = idv == null ? null : spec.hoverTargets.find((x) => x.id === idv); onPin(t ? { ...t } : null); };
+  const stepPin = (d) => {
+    const cur = pin ? mobileOrder.findIndex((idv) => idv === pin.id) : -1;
+    const next = cur < 0 ? (d > 0 ? 0 : mobileOrder.length - 1) : (cur + d + mobileOrder.length) % mobileOrder.length;
+    pinById(mobileOrder[next]);
+  };
 
   const padX = 'clamp(14px, 3vw, 22px)';
   const badge = coarse ? 'TAP TO EXPLORE' : 'LIVE · HOVER';
@@ -2096,7 +2104,15 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         </div>
       )}
 
-      {coarse && spec.layout !== 'scenario' && <MobileInsight spec={spec} pal={pal} accent={accent} active={mobileTarget} order={mobileOrder} onStep={stepMobile} onPick={pickMobile} onClear={() => setMobileActive(null)} />}
+      {/* explainer rail (same window mobile uses): always on coarse; on desktop when an element is pinned (alongside the tooltip) */}
+      {spec.layout !== 'scenario' && (coarse || pin) && (
+        <MobileInsight spec={spec} pal={pal} accent={accent}
+          active={coarse ? mobileTarget : pin}
+          order={mobileOrder}
+          onStep={coarse ? stepMobile : stepPin}
+          onPick={coarse ? pickMobile : pinById}
+          onClear={coarse ? () => setMobileActive(null) : () => onPin(null)} />
+      )}
 
       {/* explainer */}
       <div style={{ height: 1, background: pal.cardBorder }} />
