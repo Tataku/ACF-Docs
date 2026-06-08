@@ -271,6 +271,7 @@ Interaction comes after comprehension; animation creates comprehension. It is na
 - **Markers appear when the sweep reaches them**; **labels appear after the object they describe exists** (opacity + tiny translate only — never at the cost of readability).
 - **Interaction is a quick update, not a replay** — a `scenario` strategy/shock change re-draws paths/stats in place (~250–500ms) and never re-runs the scroll-build.
 - **Reduced motion reveals immediately** — no path drawing, no staged transforms, no blank below-fold charts in print/export.
+- **Motion is split into families** — `timeSweep` (the shared sweep, default), `reveal` (layer wipe), `rowSweep` (deck / scorecard rows), `scenarioUpdate` (quick in-place), `diagramBuild` (staged nodes). Each family's tempo is **governed** by `MOTION_TIMING` / `resolveMotionTiming` (`chart-specs.mjs`) and exposed on the figure as `data-motion`. The shared `PlotSvg` sweep consumes it; bespoke renderers carry matching choreography. `timeSweep` preserves the prior values exactly, so this standardizes the tempo without changing what ships today.
 
 ## 5. How to render one chart
 

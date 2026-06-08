@@ -9,7 +9,7 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import {
   FRAMEWORK_CHART_SPECS, footerModel,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles,
-  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis,
+  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming,
   INTERACTION_TYPES, MOTION_TYPES, BACKGROUND_ROLES, DATA_MODES, EXPERIENCE_ROLES,
 } from '../components/framework-charts/chart-specs.mjs';
 
@@ -41,6 +41,7 @@ const charts = FRAMEWORK_CHART_SPECS.map((s) => {
     interaction: { type: interaction.type, gesture: interaction.gesture, conceptMatch: interaction.conceptMatch || null },
     // motion follows comprehension
     motionProfile: { type: motion.type, duration: motion.duration || null },
+    motionTiming: resolveMotionTiming(s),
     // a background is allowed only if it explains a relationship (never decorative)
     backgroundRoles: resolveBackgroundRoles(s),
     // mobile is not "just shrink": how the layout adapts on touch + vertical room

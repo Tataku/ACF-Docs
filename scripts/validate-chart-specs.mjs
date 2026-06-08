@@ -19,10 +19,10 @@ import assert from 'node:assert/strict';
 import {
   FRAMEWORK_CHART_SPECS, footerModel,
   DATA_MODES, SOURCE_ROLES, CONTEXT_KEYS, LEGACY_CONTEXT_KEYS, PERSONAL_KINDS,
-  INTERACTION_TYPES, GESTURES, MOTION_TYPES, MOTION_DURATIONS, BACKGROUND_ROLES, BANNED_PROMISE_WORDS,
+  INTERACTION_TYPES, GESTURES, MOTION_TYPES, MOTION_DURATIONS, MOTION_TIMING, BACKGROUND_ROLES, BANNED_PROMISE_WORDS,
   EXPERIENCE_ROLES, BEAT_KINDS, BEAT_TIMINGS, MOBILE_INTERACTIONS, CHART_HEIGHTS,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles, getSimulationIntro,
-  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis,
+  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming,
 } from '../components/framework-charts/chart-specs.mjs';
 
 const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'both']);
@@ -196,6 +196,8 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     if (s.motionProfile.duration != null) ok(MOTION_DURATIONS.includes(s.motionProfile.duration), `${w} motionProfile.duration invalid: ${s.motionProfile.duration}`);
     if (s.motionProfile.relatedElements != null) ok(Array.isArray(s.motionProfile.relatedElements), `${w} motionProfile.relatedElements must be an array`);
   }
+  const mt = resolveMotionTiming(s);
+  ok(mt && mt.sweepMs >= 0 && mt.fastMs > 0 && mt.mediumMs > 0, `${w} motion timing must resolve to positive durations`);
 
   // A background is allowed only if it explains a relationship — never decorative.
   resolveBackgroundRoles(s).forEach((r) => ok(BACKGROUND_ROLES.includes(r), `${w} background role '${r}' not allowed (decorative backgrounds are forbidden)`));

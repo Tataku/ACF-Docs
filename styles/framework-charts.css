@@ -44,6 +44,15 @@
   --build-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
+/* Motion families — governed tempo, exposed at the platform level via the figure's
+   data-motion. The JS time-sweep reads MOTION_TIMING (chart-specs); these keep the
+   --build-* tokens family-accurate for any CSS that consumes them. timeSweep uses
+   the defaults above; reduced-motion / print still neutralize every family. */
+.acf-chart-build[data-motion='scenarioUpdate'] { --build-fast: 300ms; --build-medium: 460ms; --build-path: 460ms; }
+.acf-chart-build[data-motion='reveal'] { --build-fast: 620ms; --build-medium: 900ms; --build-path: 1100ms; }
+.acf-chart-build[data-motion='rowSweep'] { --build-fast: 480ms; --build-medium: 900ms; --build-path: 1500ms; }
+.acf-chart-build[data-motion='diagramBuild'] { --build-fast: 520ms; --build-medium: 1000ms; --build-path: 1400ms; }
+
 /* If a chart is still in the pre-build (idle) state — reduced motion before the
  * effect runs, or below-fold during a print/PDF capture that never scrolled —
  * reveal it fully so nothing renders blank. Built charts keep their fidelity. */
