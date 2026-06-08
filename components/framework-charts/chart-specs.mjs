@@ -340,6 +340,31 @@ export function getSimulationNote(spec, ctx) {
   }
   return null;
 }
+// Tooltip value text: express the selected point THROUGH Simulation Context where
+// it is mathematically honest, with the raw plotted value kept as secondary detail.
+// Returns { primary, secondary } | null. Renderers pass either a raw plotted value
+// (raw/unit/dec/valueNote) or a precomputed `dollars` + `rawLabel` (sequence /
+// scenario, whose values are re-simulated at runtime). Non-personalized charts get
+// the raw value unchanged.
+export function getTooltipValueText(spec, ctx, opts = {}) {
+  const P = readStartingValue(ctx);
+  // explicit runtime dollars (sequence path end, scenario terminal): $ primary + raw secondary
+  if (opts.dollars != null && isFinite(opts.dollars)) return { primary: formatCompactMoney(opts.dollars), secondary: opts.rawLabel || null };
+  const p = spec && spec.personalization;
+  // multiples (× start) → dollars, e.g. Time Changes Prudence
+  if (p && p.kind === 'horizon-scale' && P != null && opts.raw != null && isFinite(opts.raw)) {
+    return { primary: formatCompactMoney(P * opts.raw), secondary: `${opts.raw.toFixed(1)}× start · representative` };
+  }
+  // DCA: name the dollar amount; never fake exact units / sats
+  if (p && p.kind === 'dca-note' && ctx && isFinite(ctx.monthlyDca) && ctx.monthlyDca > 0) {
+    return { primary: `${formatStartingValue(ctx.monthlyDca)}/mo DCA`, secondary: 'representative units, not exact sats' };
+  }
+  // default: the raw representative value (unchanged for non-personalized charts)
+  if (opts.raw != null && isFinite(opts.raw)) {
+    return { primary: `${opts.raw.toFixed(opts.dec != null ? opts.dec : 1)} ${opts.unit || ''} · ${opts.valueNote || 'REPRESENTATIVE'}`.replace(/ {2,}/g, ' ').trim(), secondary: null };
+  }
+  return null;
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 // DATA SHAPES (representative / conceptual — deterministic so SSR == CSR)
@@ -1919,6 +1944,21 @@ export function footerModel(spec) {
   const hasSources = Array.isArray(spec.sources) && spec.sources.length > 0;
   const cta = spec.footerCta || (hasSources ? (mode === 'simulation' ? 'View methodology' : 'View sources') : null);
   return { mode, marker, statement, cta, hasSources };
+}
+// Compact data-mode marker for the chart HEADER — first-principles honesty up top
+// (the full disclosure sentence + sources live behind progressive disclosure).
+export function getDataModeMarker(spec) {
+  const mode = spec.visualDataMode || 'representative';
+  const glyph = mode === 'historical' ? 'square' : mode === 'conceptual' ? 'circle' : 'diamond';
+  const label = { conceptual: 'Conceptual', representative: 'Representative', simulation: 'Simulation', historical: 'Historical', mixed: 'Mixed' }[mode] || 'Representative';
+  const explain = {
+    conceptual: 'Conceptual exhibit — illustrates framework logic, not historical data.',
+    representative: 'Representative exhibit — sources support the concept; the shape is illustrative.',
+    simulation: 'Representative simulation — built to show path dependency, not a forecast.',
+    historical: 'Historical data — a sourced record.',
+    mixed: 'Mixed exhibit — combines sourced data with representative framework elements.',
+  }[mode] || 'Representative exhibit — sources support the concept; the shape is illustrative.';
+  return { mode, glyph, label, explain };
 }
 
 export default FRAMEWORK_CHART_SPECS;

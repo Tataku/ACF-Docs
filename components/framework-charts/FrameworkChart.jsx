@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, valueAt, getSimulationIntro, getSimulationNote, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
+import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -120,17 +120,63 @@ function fmtMoney(n) {
 /* ── Shared tooltip ──────────────────────────────────────────────────────────
  * Hover preview is ephemeral; click pins it (links become clickable). Placement
  * is viewport-aware: flips across the anchor and never sits on top of the point. */
-function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, accent, reduce, entered, onUnpin, valueText }) {
-  const flipX = xPct > 58, flipY = yPct > 64;
-  const tx = `${flipX ? 'translateX(calc(-100% - 16px))' : 'translateX(16px)'} ${flipY ? 'translateY(calc(-100% - 12px))' : 'translateY(-12px)'}`;
+// Cursor-follow placement: offset from the point, flip sides near edges with
+// hysteresis (so it never oscillates), clamped inside the chart container.
+const TIP_OFF_X = 18, TIP_OFF_Y = 14, TIP_FLIP_MARGIN = 28;
+function placeTip(px, py, tw, th, cw, ch, st) {
+  if (st.right) { if (px + TIP_OFF_X + tw > cw - 2) st.right = false; } else if (px + TIP_OFF_X + tw <= cw - TIP_FLIP_MARGIN) st.right = true;
+  if (st.below) { if (py + TIP_OFF_Y + th > ch - 2) st.below = false; } else if (py + TIP_OFF_Y + th <= ch - TIP_FLIP_MARGIN) st.below = true;
+  const x = st.right ? px + TIP_OFF_X : px - TIP_OFF_X - tw;
+  const y = st.below ? py + TIP_OFF_Y : py - TIP_OFF_Y - th;
+  return { x: Math.max(4, Math.min(Math.max(4, cw - tw - 4), x)), y: Math.max(4, Math.min(Math.max(4, ch - th - 4), y)) };
+}
+
+// Shared hover/pin tooltip. On desktop HOVER the position is velocity-aware
+// cursor-follow (rAF lerp toward cursor + offset, edge-aware); PINNED and
+// REDUCED-MOTION anchor to the data point (stable, calm). It self-positions via
+// its offsetParent (the chart's relative wrapper) — no per-chart wiring. Mobile
+// never renders this (MobileInsight handles touch).
+function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, accent, reduce, onUnpin, valueText, valueSub }) {
+  const tipRef = useRef(null);
+  const st = useRef({ cur: null, cursor: null, right: true, below: true, raf: 0, xPct, yPct, isPin });
+  const [shown, setShown] = useState(false);
+  st.current.xPct = xPct; st.current.yPct = yPct; st.current.isPin = isPin;   // live values for the rAF loop
+  useEffect(() => setShown(true), []);
+  useEffect(() => {                                                            // desktop hover: velocity-aware cursor-follow; settles to the anchor when pinned
+    if (reduce) return undefined;
+    const tip = tipRef.current; const cont = tip && tip.offsetParent; if (!tip || !cont) return undefined;
+    const anchorPx = () => ({ x: (st.current.xPct / 100) * cont.clientWidth, y: (st.current.yPct / 100) * cont.clientHeight });
+    const desired = () => { const p = (!st.current.isPin && st.current.cursor) ? st.current.cursor : anchorPx(); return placeTip(p.x, p.y, tip.offsetWidth, tip.offsetHeight, cont.clientWidth, cont.clientHeight, st.current); };
+    const i = desired(); st.current.cur = { x: i.x, y: i.y }; tip.style.transform = `translate3d(${i.x}px, ${i.y}px, 0)`;
+    const onPM = (e) => { const r = cont.getBoundingClientRect(); st.current.cursor = { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    cont.addEventListener('pointermove', onPM);
+    const loop = () => {
+      const d = desired(); const c = st.current.cur;
+      const dx = d.x - c.x, dy = d.y - c.y, dist = Math.hypot(dx, dy);
+      const k = dist > 160 ? 0.28 : dist > 60 ? 0.20 : 0.14;                   // accelerate when far, decelerate when close; dead-zone kills jitter
+      if (dist < 0.5) { c.x = d.x; c.y = d.y; } else { c.x += dx * k; c.y += dy * k; }
+      tip.style.transform = `translate3d(${c.x}px, ${c.y}px, 0)`;
+      st.current.raf = requestAnimationFrame(loop);
+    };
+    st.current.raf = requestAnimationFrame(loop);
+    return () => { cont.removeEventListener('pointermove', onPM); cancelAnimationFrame(st.current.raf); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduce]);
+  useEffect(() => {                                                            // reduced motion: snap to the anchor (calm, no rAF), but track content changes
+    if (!reduce) return;
+    const tip = tipRef.current; const cont = tip && tip.offsetParent; if (!tip || !cont) return;
+    const a = { x: (xPct / 100) * cont.clientWidth, y: (yPct / 100) * cont.clientHeight };
+    const d = placeTip(a.x, a.y, tip.offsetWidth, tip.offsetHeight, cont.clientWidth, cont.clientHeight, st.current);
+    tip.style.transform = `translate3d(${d.x}px, ${d.y}px, 0)`;
+  }, [reduce, xPct, yPct, isPin]);
   return (
-    <div role={isPin ? 'dialog' : undefined} aria-label={isPin ? meta.name : undefined} style={{
-      position: 'absolute', left: `${xPct}%`, top: `${yPct}%`, zIndex: 8,
-      transform: tx, width: 244, pointerEvents: isPin ? 'auto' : 'none',
+    <div ref={tipRef} role={isPin ? 'dialog' : undefined} aria-label={isPin ? meta.name : undefined} style={{
+      position: 'absolute', left: 0, top: 0, zIndex: 8, width: 244,
+      pointerEvents: isPin ? 'auto' : 'none', willChange: 'transform',
       background: pal.cardSolid, border: `1px solid ${isPin ? accent : pal.borderHi}`, borderRadius: 6,
       boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)',
-      padding: '11px 13px 12px', opacity: entered ? 1 : 0,
-      transition: reduce ? 'opacity 160ms ease' : 'opacity 200ms cubic-bezier(0.2,0.7,0.2,1), border-color 220ms ease',
+      padding: '11px 13px 12px', opacity: shown ? 1 : 0,
+      transition: reduce ? 'opacity 120ms ease' : 'opacity 120ms cubic-bezier(0.2,0.7,0.2,1), border-color 200ms ease',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
         <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: accentTitle ? accent : pal.text4 }}>
@@ -144,17 +190,21 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
       </div>
       <div style={{ fontFamily: pal.sans, fontSize: 13.5, fontWeight: 600, color: pal.text1, marginBottom: valueText ? 2 : 6, letterSpacing: '-0.01em' }}>{meta.name}</div>
       {valueText && (
-        <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, marginBottom: 7, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
+        <div style={{ marginBottom: 7 }}>
+          <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
+          {isPin && valueSub && <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4, marginTop: 3 }}>{valueSub}</div>}
+        </div>
       )}
       <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2 }}>{meta.why}</p>
-      <div style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${pal.cardBorder}`, display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-        <span style={{ fontFamily: pal.sans, fontSize: 10, color: pal.text4, fontStyle: 'italic' }}>{meta.claim}</span>
-        {meta.link ? (
-          isPin
-            ? <a href={meta.link} style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: accent, textDecoration: 'none', borderBottom: `1px solid ${accent}77`, paddingBottom: 1, whiteSpace: 'nowrap' }}>READ →</a>
-            : <span style={{ fontFamily: pal.mono, fontSize: 8, color: pal.text4, letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>CLICK TO PIN</span>
-        ) : null}
-      </div>
+      {/* hover = quick read (a pin hint); pin = deeper read (the principle + raw context + link) */}
+      {isPin ? (
+        <div style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${pal.cardBorder}`, display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontFamily: pal.sans, fontSize: 10.5, color: pal.text3, fontStyle: 'italic' }}>{meta.claim}</span>
+          {meta.link && <a href={meta.link} style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: accent, textDecoration: 'none', borderBottom: `1px solid ${accent}77`, paddingBottom: 1, whiteSpace: 'nowrap' }}>READ →</a>}
+        </div>
+      ) : (
+        <div style={{ marginTop: 8, fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>{meta.link ? 'CLICK TO PIN FOR MORE →' : 'CLICK TO PIN →'}</div>
+      )}
     </div>
   );
 }
@@ -180,7 +230,7 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
 /* ── PlotSvg — single chart or one dual panel (time-series family) ───────────*/
 function PlotSvg({
   panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse, touch,
-  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion,
+  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion, readerContext,
 }) {
   const svgRef = useRef(null);
   const dom = { ...xDomain, ...panel.domain };
@@ -298,8 +348,8 @@ function PlotSvg({
         : null;
       const dec = panel.yUnit === '%' || (panel.domain && panel.domain.yMax <= 5) ? 2 : 1;
       const unit = (panel.valueUnit || panel.yUnit || 'val').toUpperCase();
-      const valueText = showValues && raw != null ? `${raw.toFixed(dec)} ${unit} · ${valueNote}` : null;
-      tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={valueText} />;
+      const vt = showValues && raw != null ? getTooltipValueText(panel, readerContext, { raw, unit, dec, valueNote }) : null;
+      tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
     }
   }
 
@@ -1148,7 +1198,11 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   let tooltip = null;
   if (!coarse && hovered) {
     const meta = targetById(hovered.pk);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered.pk === spec.primaryKey} xPct={(hovered.x / width) * 100} yPct={(hovered.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => {}} valueText={null} />;
+    if (meta) {
+      const stt = (sc.variants[`${hovered.pk}|${shockId}`] || {}).stats || {};
+      const vt = scaleP && isFinite(stt.terminal) ? getTooltipValueText(spec, readerContext, { dollars: scaleP * stt.terminal / 100, rawLabel: `${stt.terminal} terminal · representative` }) : null;
+      tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered.pk === spec.primaryKey} xPct={(hovered.x / width) * 100} yPct={(hovered.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} onUnpin={() => {}} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
+    }
   }
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
@@ -1342,7 +1396,7 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) { const vt = getTooltipValueText(spec, readerContext, {}); tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
   }
 
   return (
@@ -1593,7 +1647,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) { const sd = active.id === 'good' ? goodEnd * P : active.id === 'bad' ? badEnd * P : null; const vt = sd != null ? getTooltipValueText(spec, readerContext, { dollars: sd, rawLabel: `${active.id === 'good' ? 'Good' : 'Bad'} sequence · representative simulation` }) : null; tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
   }
 
   const block = (val, cx, mid, key, delay) => {
@@ -1707,8 +1761,8 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   const [reveal, setReveal] = useState(def);
   const [drag, setDrag] = useState(false);
   const c01 = (v) => Math.max(0, Math.min(1, v));
-  const dividerX = (1 - reveal) * width;                       // Layout: hidden cost is revealed on the RIGHT of the divider
-  const setFromClientX = (cx) => { const el = svgRef.current; if (!el) return; const r = el.getBoundingClientRect(); setReveal(c01(1 - (cx - r.left) / (r.width || 1))); };
+  const dividerX = reveal * width;                             // reveal grows L→R: drag RIGHT sweeps the curtain right, revealing hidden cost behind it (on the left)
+  const setFromClientX = (cx) => { const el = svgRef.current; if (!el) return; const r = el.getBoundingClientRect(); setReveal(c01((cx - r.left) / (r.width || 1))); };
   const snap = () => { if (coarse) setReveal((v) => (v < 0.25 ? 0 : v > 0.75 ? 1 : 0.5)); };  // mobile snaps to surface / split / hidden cost
   const onDown = (e) => { setDrag(true); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) { /* noop */ } setFromClientX(e.clientX); };
   const onHandleMove = (e) => { if (drag) setFromClientX(e.clientX); };
@@ -1743,7 +1797,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   };
   const trackCancel = (e) => { gest.current = null; setDrag(false); try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) { /* noop */ } };
 
-  const revealedAt = (vbx) => vbx >= dividerX;                 // hidden-cost marks are only live where they are shown
+  const revealedAt = (vbx) => vbx <= dividerX;                 // hidden cost is shown LEFT of the divider (the swept region); marks live there
   const anchorOf = (t) => {
     if (!t) return null;
     if (t.id === 'debt') return { x: X(34), y: Yd(valueAt(debtPts, 34)) };
@@ -1795,7 +1849,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
         style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }}
         onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         <defs>
-          <clipPath id={clipId}><rect x={dividerX} y={0} width={Math.max(0, width - dividerX)} height={height} /></clipPath>
+          <clipPath id={clipId}><rect x={0} y={0} width={Math.max(0, dividerX)} height={height} /></clipPath>
         </defs>
 
         {/* BASE — surface view: debt backdrop prominent, the cost still faint */}
@@ -1803,10 +1857,10 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
           <path d={geom.debtArea} fill={pal.tierSecondary} opacity={pal.name === 'light' ? 0.12 : 0.1} />
           <path d={geom.debtLine} fill={pal.tierReference} opacity="0.92" />
           <path d={geom.intFaint} fill="none" stroke={pal.tierSecondary} strokeWidth="1.1" opacity="0.32" />
-          {!coarse && <text x={X(5)} y={bot0 + 16} style={{ ...haloSans(pal, 10.5, pal.text3, 500), fontStyle: 'italic' }}>{surfaceText}</text>}
+          {!coarse && <text x={width - pad.r - 6} y={bot0 + 16} textAnchor="end" style={{ ...haloSans(pal, 10.5, pal.text3, 500), fontStyle: 'italic' }}>{surfaceText}</text>}
         </g>
 
-        {/* OVERLAY — hidden-cost view, clipped to the RIGHT of the divider */}
+        {/* OVERLAY — hidden-cost view, clipped to the LEFT of the divider (the swept region) */}
         <g clipPath={`url(#${clipId})`}>
           <rect x={0} y={0} width={width} height={height} fill={pal.card} />
           <g style={fadeIn(520)}>
@@ -1822,6 +1876,8 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
             <text x={width - pad.r} y={Yi(thr) - 5} textAnchor="end" style={halo(pal, 8.5, pal.invalidCharcoal)}>interest-burden pressure</text>
             {/* the cost line */}
             <path d={geom.intFull} fill={accent} opacity={focusId && focusId !== 'int' ? 0.5 : 1} style={{ transition: trans('opacity') }} />
+            {/* link the panels: the upper debt backdrop drives the lower carrying cost at the inflection (revealed together) */}
+            <line x1={X(mark.x)} x2={X(mark.x)} y1={Yd(valueAt(debtPts, mark.x))} y2={Yi(valueAt(intPts, mark.x))} stroke={accent} strokeWidth="0.8" strokeDasharray="2 5" opacity="0.4" />
             {/* burden inflection */}
             <path d={geom.enso} fill={pal.markInk} />
             {focusId === 'burden' && <circle cx={X(mark.x)} cy={Yi(valueAt(intPts, mark.x))} r={(mark.r || 11) + 2} fill="none" stroke={accent} strokeWidth="1.1" />}
@@ -1885,13 +1941,15 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const accent = getAccent(pal, accentName);
   const reduce = useMqFlag('(prefers-reduced-motion: reduce)');
   // Interaction mode is VIEWPORT-scoped, not device-scoped. A desktop-width
-  // session keeps hover + click-to-pin even on touch / hybrid devices (touch
-  // laptops, tablets in landscape, responsive emulation, some preview envs) —
-  // touch CAPABILITY alone must never downgrade a wide desktop view. Only a
-  // narrow viewport switches to the mobile tap-to-inspect model.
+  // session keeps hover + click-to-pin (the tooltip) even on touch / hybrid
+  // devices (touch laptops, tablets in landscape, responsive emulation, preview
+  // envs); only a narrow viewport switches to the mobile tap-to-inspect model
+  // (the MobileInsight explainer rail below the chart). Touch CAPABILITY alone
+  // must never downgrade a wide desktop view. Both models are kept — routed by
+  // viewport, not by whether the device can be touched.
   const isNarrowViewport = useMqFlag('(max-width: 700px)');
   const isTouchPrimary = useMqFlag('(hover: none) and (pointer: coarse)');
-  const coarse = isNarrowViewport;                            // mobile INTERACTION + layout mode (hover/pin → tap-inspect, badge, MobileInsight, declutter)
+  const coarse = isNarrowViewport;                            // mobile INTERACTION + layout mode (tooltip → MobileInsight rail, badge, declutter)
   const touch = isNarrowViewport || isTouchPrimary;          // touch AFFORDANCES only (larger hit / grab targets) — never gates interaction
   const figRef = useRef(null);
   const entered = useInViewOnce(figRef, reduce);
@@ -1900,6 +1958,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const [hover, setHover] = useState(null);
   const [pin, setPin] = useState(null);
   const [mobileActive, setMobileActive] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);     // progressive disclosure: sources / methodology / connects-to collapsed by default
 
   useEffect(() => {
     if (coarse) return undefined;
@@ -1935,6 +1994,18 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
 
   const padX = 'clamp(14px, 3vw, 22px)';
   const badge = coarse ? 'TAP TO EXPLORE' : 'LIVE · HOVER';
+  const dm = getDataModeMarker(spec);                         // ONE primary data-mode marker, in the title row (not repeated down the chart)
+  // distinct, quiet tone per mode (dark/light); meaning is carried by label + aria, never colour alone
+  const dmColor = ({
+    conceptual: { dark: '#7fb0c8', light: '#3f7a93' },        // cool blue / cyan-gray
+    representative: { dark: '#c8a36a', light: '#8f6c32' },    // muted amber / bronze
+    simulation: { dark: '#b79ad6', light: '#7a5ca6' },        // soft violet
+    historical: { dark: '#9aa6b2', light: '#566676' },        // slate / steel
+    mixed: { dark: '#9bb89a', light: '#5c7d5b' },             // blend
+  }[dm.mode] || { dark: '#c8a36a', light: '#8f6c32' })[pal.name === 'light' ? 'light' : 'dark'];
+  const dmGlyph = dm.glyph === 'circle' ? { width: 13, height: 13, borderRadius: '50%', border: `1.6px solid ${dmColor}`, flexShrink: 0 }
+    : dm.glyph === 'square' ? { width: 11, height: 11, border: `1.6px solid ${dmColor}`, flexShrink: 0 }
+    : { width: 12, height: 12, transform: 'rotate(45deg)', border: `1.6px solid ${dmColor}`, flexShrink: 0 };
   const showValues = spec.visualDataMode !== 'conceptual' && !spec.suppressValues;
   const W = 1000;
   // Representative/simulation values are art-directed: never label them "TRUE VALUE".
@@ -1955,9 +2026,20 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
       {/* topline */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: `16px ${padX} 8px`, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.18em', color: pal.text3, marginBottom: 6 }}>{spec.idx} · {spec.claimLabel}</div>
-          <h3 style={{ margin: 0, fontSize: 'clamp(16px, 2.6vw, 20px)', fontWeight: 600, color: pal.text1, letterSpacing: '-0.015em', lineHeight: 1.2 }}>{spec.title}</h3>
-          {spec.setupLine && <p style={{ margin: '6px 0 0', fontSize: 12.5, color: pal.text3, lineHeight: 1.45 }}>{spec.setupLine}</p>}
+          <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.18em', color: pal.text3, marginBottom: 8 }}>{spec.idx} · {spec.claimLabel}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+            {/* data-mode honesty marker — at-a-glance, with hover/focus explanation (durable copy also in Details) */}
+            <span className={`acf-dm acf-data-mode--${dm.mode} acf-fx-focusable`} tabIndex={0} role="img" aria-label={`${dm.label} exhibit. ${dm.explain}`} title={dm.explain}
+              style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, cursor: 'help', borderRadius: 4, padding: '3px 2px' }}>
+              <span aria-hidden style={dmGlyph} />
+              <span className="acf-dm-pop" role="tooltip" style={{ background: pal.cardSolid, border: `1px solid ${pal.borderHi}`, borderRadius: 6, padding: '9px 12px', width: 'max-content', maxWidth: 264, boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)' }}>
+                <span style={{ display: 'block', fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em', color: pal.text4, marginBottom: 4 }}>{dm.label.toUpperCase()}</span>
+                <span style={{ fontFamily: pal.sans, fontSize: 12, lineHeight: 1.5, color: pal.text2 }}>{dm.explain}</span>
+              </span>
+            </span>
+            <h3 style={{ margin: 0, minWidth: 0, fontSize: 'clamp(17px, 2.8vw, 22px)', fontWeight: 600, color: pal.text1, letterSpacing: '-0.015em', lineHeight: 1.22 }}>{spec.title}</h3>
+          </div>
+          {spec.setupLine && <p style={{ margin: '7px 0 0', fontSize: 13.5, color: pal.text2, lineHeight: 1.5 }}>{spec.setupLine}</p>}
         </div>
         <span style={{ flexShrink: 0, fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em', color: pal.text3, border: `1px solid ${pal.borderHi}`, borderRadius: 3, padding: '3px 7px', whiteSpace: 'nowrap' }}>{badge}</span>
       </div>
@@ -1965,10 +2047,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
       {/* chart-level simulation intro — context visible where it changes interpretation */}
       {simIntro && (
         <div style={{ padding: `0 ${padX} 2px` }}>
-          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, display: 'inline-flex', alignItems: 'center', gap: 8, lineHeight: 1.5 }}>
-            <span aria-hidden style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 }} />
-            {simIntro}
-          </span>
+          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, lineHeight: 1.5 }}>{simIntro}</span>
         </div>
       )}
 
@@ -2009,17 +2088,11 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
             )}
           </React.Fragment>
         ))}
-        {!coarse && (
-          <div style={{ textAlign: 'center', fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: pal.text4, marginTop: 2 }}>HOVER OR TAB AN ELEMENT · CLICK TO PIN</div>
-        )}
       </div>
 
       {pNote && (
         <div style={{ padding: `0 ${padX} 2px` }}>
-          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, display: 'inline-flex', alignItems: 'center', gap: 8, lineHeight: 1.5 }}>
-            <span aria-hidden style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 }} />
-            {pNote}
-          </span>
+          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, lineHeight: 1.5 }}>{pNote}</span>
         </div>
       )}
 
@@ -2029,9 +2102,17 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
       <div style={{ height: 1, background: pal.cardBorder }} />
       <div style={{ padding: `16px ${padX}` }}><ExplainerBlock spec={spec} pal={pal} accent={accent} /></div>
 
-      {/* source footer + concepts */}
+      {/* progressive disclosure — the citation machinery is one intentional click away */}
       <div style={{ height: 1, background: pal.cardBorder }} />
-      <figcaption style={{ padding: `12px ${padX} 14px`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ padding: `8px ${padX}` }}>
+        <button onClick={() => setShowDetails((v) => !v)} aria-expanded={showDetails} aria-controls={`${reactId}-details`}
+          aria-label={`${showDetails ? 'Hide' : 'Show'} details, sources, and methodology for ${spec.title}`}
+          className="acf-fx-focusable" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 32, background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 0', fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.1em', color: pal.text3 }}>
+          <span aria-hidden style={{ display: 'inline-block', transform: showDetails ? 'rotate(90deg)' : 'none', transition: reduce ? 'none' : 'transform 160ms ease', color: pal.text4 }}>›</span>
+          DETAILS, SOURCES &amp; METHODOLOGY
+        </button>
+      </div>
+      <figcaption id={`${reactId}-details`} style={{ display: showDetails ? 'flex' : 'none', padding: `0 ${padX} 14px`, justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <SourceFooter spec={spec} pal={pal} accent={accent} />
         <ConceptLinks items={spec.concepts} pal={pal} accent={accent} />
       </figcaption>

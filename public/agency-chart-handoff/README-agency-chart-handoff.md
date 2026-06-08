@@ -112,6 +112,44 @@ A mobile chart is **not** a hover chart squeezed onto a phone. The reader sees t
 - **Sliders are touch-first.** The before/after reveal makes the whole chart the control: tap to jump the divider, drag to scrub (pointer-captured; `touch-action: pan-y` so vertical page-scroll still works), snapping to Surface / Split / Hidden cost on release.
 - **Copy is touch-direct.** `resolveTryThis(spec, coarse)` swaps in tap/drag language on mobile (override with `tryThisMobile`).
 
+### Progressive disclosure
+
+The reader should see the chart **story** first; the citation/methodology machinery is one intentional click away.
+
+- **The chart story comes first** — header → simulation intro (if any) → visual → explainer / takeaway. The explainer stays visible; it is the guided story, not detail.
+- **Data-mode honesty is visible in the header** — a compact first-principles marker (`getDataModeMarker`: ◌ Conceptual · ◇ Representative / Simulation · ▪ Historical) sits in the title meta row, so the reader sees *what kind of exhibit this is* immediately.
+- **Source / methodology detail is preserved behind disclosure** — the full disclosure sentence, `View sources / methodology` (+ source popover), source roles, and *connects-to* tags collapse into a quiet `Details, sources & methodology` toggle (a real `<button>` with `aria-expanded` / `aria-controls`), collapsed by default in Reader **and** Agency (local per-card state; the agency inventory remains available separately). Nothing is removed — `chart-inventory.json` and the specs keep every source.
+- **Expandable detail is for verification, not first-pass comprehension.** **Do not make citation mechanics compete with the visual claim.**
+
+### Tooltip motion
+
+The tooltip should feel like it understands the reader's attention — follow the cursor with grace, not jitter with every pixel.
+
+- **Tooltips follow attention, not raw pointer noise.** Desktop **hover** uses velocity-aware smoothing: pointer events update a target only; a `requestAnimationFrame` loop eases the tooltip toward `cursor + offset` (accelerate when far, decelerate when near, a dead-zone that ignores sub-pixel tremor). No layout thrash — position is a `translate3d` transform.
+- **Pinned tooltips are stable anchors, not cursor followers.** Click pins to the element's anchor; pointer movement no longer moves it; Escape unpins; clicking another target re-pins. Links inside a pinned tooltip stay clickable (`pointer-events: auto`; hover tooltip is `pointer-events: none`).
+- **Edge-aware placement.** Offset from the point, flip sides near edges with hysteresis (no oscillation), clamped inside the chart container (`placeTip`). The tooltip self-positions via its `offsetParent` — no per-chart wiring.
+- **Motion improves legibility** — calm and precise, never bouncy/overshoot. **Reduced motion** removes the follow animation: the tooltip anchors to the data point (the prior calm behavior). **Mobile** uses tap-to-inspect (`MobileInsight`), never hover emulation.
+
+### Tooltip simulation context
+
+If Simulation Context changes a chart, the **tooltip must express the selected point through that context** where mathematically honest — it must not contradict an intro that says `$100,000 start · 30+ years horizon` by reporting only `180.3 × START`. One resolver, `getTooltipValueText(spec, ctx, …)`, returns a two-line `{ primary, secondary }`:
+
+- **Primary = the contextual value:** multiples → dollars (*Time Changes Prudence* `$18M`), re-simulated path / terminal → dollars (*Path Changes Everything* `$116k`, *Exposure* terminal), DCA → the entered amount (*Accumulate* `$500/mo DCA`).
+- **Secondary = the raw plotted meaning** (`180.3× start · representative`, `Good sequence · representative simulation`) — kept, never the only value.
+- **Honesty:** never fake exact units/sats; charts whose index→$ isn't honest per point (e.g. *Volatility Is the Toll*) keep the raw value and carry the dollar impact in their callout. **Non-personalized / conceptual charts keep raw values** — no forced dollars. Pinned tooltips use the same resolver, so they update live when the reader changes context; no `NaN`/`Infinity`.
+
+### Reader comfort (the charts must be easy to read)
+
+These charts are read by non-experts, including older readers. Legibility and calm beat density.
+
+- **Persistent reader preferences.** Reader/Agency and Dark/Light are *preferences* (not simulation data) and persist in `localStorage` (`acf-chart-handoff:viewMode` / `:theme`) across all handoff/export routes **and refresh**. Simulation Context stays in `sessionStorage`. Hydrate after mount (SSR-safe); defaults apply when nothing is saved.
+- **Header-first honesty — one marker, mode-coloured.** Exactly **one** data-mode marker per chart: a first-principles icon to the **left of the title** (`getDataModeMarker` → `glyph · label · explain`), tinted by mode (conceptual cyan-gray · representative bronze · simulation violet · historical steel · mixed blend — quiet, dark/light-aware; meaning is still carried by label + aria, never colour alone). Its explanation shows on **hover and keyboard focus** (`.acf-dm` popover) and durably in collapsed Details. **Supporting lines use words, not repeated icons** — the simulation/representative intro and the personalized note are text-only, so honesty is visible once, not as clutter.
+- **Progressive learning layers.** First view teaches the **visual story** (plus the always-visible main explainer). **Hover** = a quick, concise interpretation (name · value · why). **Click / pin** = a richer read (the raw context + the principle + a READ link). **Details** = durable sources / methodology. Each layer adds something; the pin must not merely duplicate Details, and the main explainer is never collapsed into them.
+- **One-time interaction education.** Do **not** repeat "hover / tab / click" inside every chart. The repeated in-body hint is removed; interaction is taught once by the page-level "How to read these charts" orientation and by the affordances themselves.
+- **Older-reader legibility.** Avoid tiny repeated helper text. Title dominates (`clamp(17–22px)`), subtitle is readable (`13.5px`, `text2`), metadata is calm, spacing does the work — no boxes, no louder UI.
+- **Reveal direction follows intuition.** For before/after reveal charts, **dragging right reveals the "after" / hidden layer** (the curtain sweeps right; hidden cost fills in behind it; mobile snaps left→Surface, center→Split, right→Hidden cost). Spatial wipe, never an opacity toggle.
+- **Relational backgrounds, linked panels.** A background/secondary layer must be visibly *related* to the foreground, never decorative. In the dual-panel reveal the top liability and bottom carrying-cost share one curtain + a connector, so they read as one before/after exhibit.
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +
