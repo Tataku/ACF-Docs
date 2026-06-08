@@ -6,7 +6,8 @@
     "build": "next build",
     "start": "next start",
     "validate:charts": "node scripts/validate-chart-specs.mjs",
-    "build:inventory": "node scripts/build-chart-inventory.mjs"
+    "build:inventory": "node scripts/build-chart-inventory.mjs",
+    "audit:chart-experience": "node scripts/audit-chart-experience.mjs"
   },
   "dependencies": {
     "next": "14.2.25",
