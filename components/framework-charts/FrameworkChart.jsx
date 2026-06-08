@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, valueAt, getSimulationIntro, readStartingValue } from './chart-specs.mjs';
+import { getChartSpec, footerModel, valueAt, getSimulationIntro, readStartingValue, resolveMobileBehavior } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -1886,6 +1886,8 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const pNote = personalNote(spec, readerContext);
   const simIntro = getSimulationIntro(spec, readerContext);   // chart-level "scaled example · …" line, above the visual
   const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext };
+  const mob = resolveMobileBehavior(spec);                    // mobile is not "just shrink": tall layouts get vertical room on touch
+  const hh = (base) => (coarse && mob.chartHeight === 'tall' ? Math.round(base * 1.2) : base);
 
   return (
     <figure ref={figRef} className={`acf-chart-build${className ? ` ${className}` : ''}`} data-build={entered ? 'in' : 'idle'} data-reduced-motion={reduce ? 'true' : 'false'} aria-label={`${spec.title}. ${spec.frameworkClaim}`} aria-describedby={`${reactId}-summary`}
@@ -1914,24 +1916,24 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
 
       {/* plot region */}
       <div style={{ padding: `2px clamp(8px, 2vw, 14px) 8px` }}>
-        {spec.layout === 'quadrant' && <QuadrantSvg spec={spec} height={560} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'loop' && <LoopSvg spec={spec} height={420} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'flow' && <FlowSvg spec={spec} height={400} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={420} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'gate' && <GateSvg spec={spec} height={380} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={150 + (spec.scorecard?.requirements.length || 8) * 32} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={300} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'heartbeat' && <HeartbeatSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'sequenceRisk' && <SequenceRiskSvg spec={spec} height={440} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'quadrant' && <QuadrantSvg spec={spec} height={hh(560)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'loop' && <LoopSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'flow' && <FlowSvg spec={spec} height={hh(400)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'gate' && <GateSvg spec={spec} height={hh(380)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={hh(150 + (spec.scorecard?.requirements.length || 8) * 32)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={hh(300)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'heartbeat' && <HeartbeatSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'sequenceRisk' && <SequenceRiskSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
-          <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={426} targets={spec.hoverTargets} showValues={showValues} {...cp} />
+          <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={hh(426)} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}
-        {spec.layout === 'dual' && spec.perspectiveSlider && <BeforeAfterRevealSvg spec={spec} height={460} targets={spec.hoverTargets} showValues={showValues} {...cp} />}
+        {spec.layout === 'dual' && spec.perspectiveSlider && <BeforeAfterRevealSvg spec={spec} height={hh(460)} targets={spec.hoverTargets} showValues={showValues} {...cp} />}
         {spec.layout === 'dual' && !spec.perspectiveSlider && spec.panels.map((p, i) => (
           <React.Fragment key={p.id}>
             <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.12em', color: pal.text4, padding: '4px 0 2px 10px' }}>{p.label.toUpperCase()}</div>
-            <PlotSvg panel={p} xDomain={spec.xDomain} xTicks={spec.xTicks} hideX={i === 0} width={W} height={i === 0 ? 188 : 212} targets={spec.hoverTargets.filter((t) => t.panel === p.id)} showValues={showValues} {...cp} />
+            <PlotSvg panel={p} xDomain={spec.xDomain} xTicks={spec.xTicks} hideX={i === 0} width={W} height={hh(i === 0 ? 188 : 212)} targets={spec.hoverTargets.filter((t) => t.panel === p.id)} showValues={showValues} {...cp} />
             {i === 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 14px' }}>
                 <span aria-hidden style={{ flex: 1, height: 1, background: pal.cardBorder }} />

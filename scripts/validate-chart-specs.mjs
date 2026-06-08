@@ -20,9 +20,9 @@ import {
   FRAMEWORK_CHART_SPECS, footerModel,
   DATA_MODES, SOURCE_ROLES, CONTEXT_KEYS, LEGACY_CONTEXT_KEYS, PERSONAL_KINDS,
   INTERACTION_TYPES, GESTURES, MOTION_TYPES, MOTION_DURATIONS, BACKGROUND_ROLES, BANNED_PROMISE_WORDS,
-  EXPERIENCE_ROLES, BEAT_KINDS, BEAT_TIMINGS,
+  EXPERIENCE_ROLES, BEAT_KINDS, BEAT_TIMINGS, MOBILE_INTERACTIONS, CHART_HEIGHTS,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles, getSimulationIntro,
-  resolveExperienceRole, resolveStoryBeats,
+  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior,
 } from '../components/framework-charts/chart-specs.mjs';
 
 const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'both']);
@@ -214,6 +214,15 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(ti >= lastT, `${w} storyBeats out of order at [${i}] — timing must not go backwards`);
     lastT = ti;
   });
+
+  // Mobile behavior — every layout declares how it adapts on touch (resolved).
+  const mb = resolveMobileBehavior(s);
+  ok(mb && MOBILE_INTERACTIONS.includes(mb.interaction), `${w} bad mobileBehavior.interaction: ${mb && mb.interaction}`);
+  ok(mb && CHART_HEIGHTS.includes(mb.chartHeight), `${w} bad mobileBehavior.chartHeight: ${mb && mb.chartHeight}`);
+  if (s.mobileBehavior) {
+    ok(MOBILE_INTERACTIONS.includes(s.mobileBehavior.interaction), `${w} explicit mobileBehavior.interaction invalid: ${s.mobileBehavior.interaction}`);
+    ok(CHART_HEIGHTS.includes(s.mobileBehavior.chartHeight), `${w} explicit mobileBehavior.chartHeight invalid: ${s.mobileBehavior.chartHeight}`);
+  }
 
   // Math-backed where math is claimed: a DCA chart must expose the conversion.
   if (s.layout === 'heartbeat') ok((s.formula && /[÷/=]/.test(s.formula)) || /÷|= units/i.test(cs.visualProof || ''), `${w} DCA chart must declare a visible conversion formula`);
