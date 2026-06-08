@@ -110,6 +110,15 @@ A mobile chart is **not** a hover chart squeezed onto a phone. The reader sees t
 - **Sliders are touch-first.** The before/after reveal makes the whole chart the control: tap to jump the divider, drag to scrub (pointer-captured; `touch-action: pan-y` so vertical page-scroll still works), snapping to Surface / Split / Hidden cost on release.
 - **Copy is touch-direct.** `resolveTryThis(spec, coarse)` swaps in tap/drag language on mobile (override with `tryThisMobile`).
 
+### Progressive disclosure
+
+The reader should see the chart **story** first; the citation/methodology machinery is one intentional click away.
+
+- **The chart story comes first** — header → simulation intro (if any) → visual → explainer / takeaway. The explainer stays visible; it is the guided story, not detail.
+- **Data-mode honesty is visible in the header** — a compact first-principles marker (`getDataModeMarker`: ◌ Conceptual · ◇ Representative / Simulation · ▪ Historical) sits in the title meta row, so the reader sees *what kind of exhibit this is* immediately.
+- **Source / methodology detail is preserved behind disclosure** — the full disclosure sentence, `View sources / methodology` (+ source popover), source roles, and *connects-to* tags collapse into a quiet `Details, sources & methodology` toggle (a real `<button>` with `aria-expanded` / `aria-controls`), collapsed by default in Reader **and** Agency (local per-card state; the agency inventory remains available separately). Nothing is removed — `chart-inventory.json` and the specs keep every source.
+- **Expandable detail is for verification, not first-pass comprehension.** **Do not make citation mechanics compete with the visual claim.**
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +

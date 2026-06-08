@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, valueAt, getSimulationIntro, getSimulationNote, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
+import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -1892,6 +1892,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const [hover, setHover] = useState(null);
   const [pin, setPin] = useState(null);
   const [mobileActive, setMobileActive] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);     // progressive disclosure: sources / methodology / connects-to collapsed by default
 
   useEffect(() => {
     if (coarse) return undefined;
@@ -1927,6 +1928,10 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
 
   const padX = 'clamp(14px, 3vw, 22px)';
   const badge = coarse ? 'TAP TO EXPLORE' : 'LIVE · HOVER';
+  const dm = getDataModeMarker(spec);                         // data-mode honesty marker, shown in the header (not buried in the footer)
+  const dmGlyph = dm.glyph === 'circle' ? { width: 7, height: 7, borderRadius: '50%', border: `1px solid ${pal.text4}`, flexShrink: 0 }
+    : dm.glyph === 'square' ? { width: 6, height: 6, border: `1px solid ${pal.text3}`, flexShrink: 0 }
+    : { width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 };
   const showValues = spec.visualDataMode !== 'conceptual' && !spec.suppressValues;
   const W = 1000;
   // Representative/simulation values are art-directed: never label them "TRUE VALUE".
@@ -1947,7 +1952,11 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
       {/* topline */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: `16px ${padX} 8px`, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.18em', color: pal.text3, marginBottom: 6 }}>{spec.idx} · {spec.claimLabel}</div>
+          <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.18em', color: pal.text3, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+            <span>{spec.idx} · {spec.claimLabel}</span>
+            <span aria-hidden style={{ color: pal.text4, opacity: 0.5 }}>·</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: pal.text4 }}><span aria-hidden style={dmGlyph} />{dm.label.toUpperCase()}</span>
+          </div>
           <h3 style={{ margin: 0, fontSize: 'clamp(16px, 2.6vw, 20px)', fontWeight: 600, color: pal.text1, letterSpacing: '-0.015em', lineHeight: 1.2 }}>{spec.title}</h3>
           {spec.setupLine && <p style={{ margin: '6px 0 0', fontSize: 12.5, color: pal.text3, lineHeight: 1.45 }}>{spec.setupLine}</p>}
         </div>
@@ -2021,9 +2030,17 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
       <div style={{ height: 1, background: pal.cardBorder }} />
       <div style={{ padding: `16px ${padX}` }}><ExplainerBlock spec={spec} pal={pal} accent={accent} /></div>
 
-      {/* source footer + concepts */}
+      {/* progressive disclosure — the citation machinery is one intentional click away */}
       <div style={{ height: 1, background: pal.cardBorder }} />
-      <figcaption style={{ padding: `12px ${padX} 14px`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ padding: `8px ${padX}` }}>
+        <button onClick={() => setShowDetails((v) => !v)} aria-expanded={showDetails} aria-controls={`${reactId}-details`}
+          aria-label={`${showDetails ? 'Hide' : 'Show'} details, sources, and methodology for ${spec.title}`}
+          className="acf-fx-focusable" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 32, background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 0', fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.1em', color: pal.text3 }}>
+          <span aria-hidden style={{ display: 'inline-block', transform: showDetails ? 'rotate(90deg)' : 'none', transition: reduce ? 'none' : 'transform 160ms ease', color: pal.text4 }}>›</span>
+          DETAILS, SOURCES &amp; METHODOLOGY
+        </button>
+      </div>
+      <figcaption id={`${reactId}-details`} style={{ display: showDetails ? 'flex' : 'none', padding: `0 ${padX} 14px`, justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <SourceFooter spec={spec} pal={pal} accent={accent} />
         <ConceptLinks items={spec.concepts} pal={pal} accent={accent} />
       </figcaption>

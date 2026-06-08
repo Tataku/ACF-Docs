@@ -1920,5 +1920,13 @@ export function footerModel(spec) {
   const cta = spec.footerCta || (hasSources ? (mode === 'simulation' ? 'View methodology' : 'View sources') : null);
   return { mode, marker, statement, cta, hasSources };
 }
+// Compact data-mode marker for the chart HEADER — first-principles honesty up top
+// (the full disclosure sentence + sources live behind progressive disclosure).
+export function getDataModeMarker(spec) {
+  const mode = spec.visualDataMode || 'representative';
+  const glyph = mode === 'historical' ? 'square' : mode === 'conceptual' ? 'circle' : 'diamond';
+  const label = { conceptual: 'Conceptual', representative: 'Representative', simulation: 'Simulation', historical: 'Historical', mixed: 'Mixed' }[mode] || 'Representative';
+  return { mode, glyph, label };
+}
 
 export default FRAMEWORK_CHART_SPECS;
