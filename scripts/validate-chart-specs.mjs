@@ -107,11 +107,12 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(s.quadrant && s.quadrant.path && s.quadrant.path.length >= 2, `${w} quadrant needs a path`);
     s.quadrant.path.forEach((id) => ok(wps.includes(id), `${w} quadrant path references missing waypoint ${id}`));
     ok(wps.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a waypoint`);
-  } else if (['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'scorecard', 'scenario'].includes(s.layout)) {
+  } else if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'bridge', 'gate', 'scorecard', 'scenario'].includes(s.layout)) {
     // node-based framework diagrams + scorecard matrix + interactive scenario
     const nodeIds = s.layout === 'flow' ? (s.flow.stages || []).flatMap((st) => st.nodes.map((nd) => nd.id))
       : s.layout === 'loop' ? (s.loop.nodes || []).map((n) => n.id)
         : s.layout === 'systemLoop' ? (s.systemLoop.nodes || []).map((n) => n.id)
+          : s.layout === 'governanceLoop' ? (s.governanceLoop.nodes || []).map((n) => n.id)
           : s.layout === 'bridge' ? (s.bridge.stages || []).map((n) => n.id)
             : s.layout === 'gate' ? (s.gate.nodes || []).map((n) => n.id)
               : s.layout === 'scorecard' ? (s.scorecard.requirements || []).map((r) => r.id)

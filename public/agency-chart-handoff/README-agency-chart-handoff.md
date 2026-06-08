@@ -160,6 +160,13 @@ The handoff pages are now a **shareable guided visual essay**, not an internal c
 - **Simulation Context is optional.** Reader shows it as **"Personalize examples · optional"** with **Starting value + Horizon** primary; **Withdrawal rate, Bitcoin reserve, monthly DCA** collapse behind **Advanced assumptions ▾** (all still wired + persisted). The hero caveat is short (*"these values only scale illustrative examples — not forecasts"*); the full disclosure stays in each chart's Details.
 - **Mobile.** Title → one-line orientation → compact Starting value + Horizon (advanced collapsed) → charts. No wide control rows, no four-column grid, no horizontal overflow.
 
+### Beginner governance diagrams
+
+For an **introductory** chart, do not show the entire control system. Show the **smallest loop that teaches the mental model**: `thesis → exposure → risk → tripwire → adjustment → updated thesis`. Advanced mechanics (the full watch / hedge / trim / redeploy menu, the tripwire taxonomy, multi-branch decision trees) belong in **details** or later product docs, not in the entry exhibit.
+
+- The `governanceLoop` primitive is the calm, beginner form of this: a left-to-right guarded path with **one governing checkpoint** (the tripwire — a quiet gate, never a red alarm) and a **subtle return arc** carrying evidence back to the thesis. It must read at a glance **without interaction**; hover / pin / tap only add the "why."
+- Reserve the `systemLoop` ring for charts whose concept genuinely *is* a reflexive feedback orbit (e.g. *Markets Feed Back*). An entry document teaches purpose before machinery — teach the smallest useful loop first.
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +
@@ -225,7 +232,7 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 |---|---|---|---|
 | `dl-convexity-window` | The Window Opens | single | representative |
 | `dl-regime-map` | Capital Has Weather | quadrant | representative |
-| `dl-tripwire-loop` | Govern the Thesis | systemLoop | conceptual |
+| `dl-tripwire-loop` | Govern the Thesis | governanceLoop | conceptual |
 
 ### Part 1 framework
 | chartId | Title | Layout | Mode |
@@ -290,7 +297,8 @@ Two families, one engine:
 
 - **Data charts** — `single` (time series, payoff, distribution), `dual` (stacked panels), `quadrant` (growth × inflation regime map).
 - **Framework diagrams** (bespoke, brush-influenced, not flowcharts):
-  - `systemLoop` — reflexive / self-reinforcing feedback ring with a reversal cue (e.g. *Markets Feed Back*, *Govern the Thesis*).
+  - `systemLoop` — reflexive / self-reinforcing feedback ring with a reversal cue (e.g. *Markets Feed Back*).
+  - `governanceLoop` — beginner governed path: a calm left-to-right `thesis → exposure → risk → tripwire → adjust` with one quiet checkpoint (the tripwire gate) and a subtle return arc (*evidence updates the thesis*). Reads at a glance without interaction (e.g. *Govern the Thesis*). Deliberately **not** an orbit.
   - `bridge` — descending cascade where each stage transforms the prior until the thesis becomes investable (e.g. *Capital Finds the Bottleneck*).
   - `gate` — a sober validation gauntlet; a survivor band thins through four gates into a thesis (e.g. *Narrative Is Not Thesis*).
   - `scorecard` — a requirement × asset matrix with bespoke brush meet/partial/fail glyphs and an emphasised focus column (e.g. *One Asset, Ten Tests*).

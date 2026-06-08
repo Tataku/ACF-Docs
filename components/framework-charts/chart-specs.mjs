@@ -81,7 +81,7 @@ export const DISCLOSURE = {
 
 export const DATA_MODES = ['representative', 'historical', 'simulation', 'conceptual'];
 export const SOURCE_ROLES = ['verifies-concept', 'backs-series', 'methodology', 'target-source'];
-export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat'];
+export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat'];
 
 // Interaction must MATCH the concept (a reveal reveals; a selector changes the path).
 export const INTERACTION_TYPES = ['none', 'hover', 'scenario', 'beforeAfterReveal', 'readerContext', 'returnOrder', 'slider'];
@@ -189,7 +189,7 @@ export function resolveInteraction(spec) {
 }
 export function resolveMotionProfile(spec) {
   if (spec.motionProfile && spec.motionProfile.type) return spec.motionProfile;
-  const diagrams = ['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'quadrant'];
+  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'bridge', 'gate', 'quadrant'];
   let type = 'timeSweep';
   if (diagrams.includes(spec.layout)) type = 'diagramBuild';
   else if (spec.layout === 'scenario') type = 'scenarioUpdate';
@@ -222,7 +222,7 @@ export function resolveExperienceRole(spec) {
   if (L === 'heartbeat') return 'conversion';
   if (L === 'dual' && spec.perspectiveSlider) return 'reveal';
   if (L === 'scorecard') return 'matrix';
-  if (['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
   return 'evidence';
 }
 // story beats: the comprehension arc the chart should build in. Explicit wins;
@@ -250,7 +250,7 @@ export function resolveMobileBehavior(spec) {
   if (L === 'sequenceRisk') return { interaction: 'stacked', chartHeight: 'tall', note: 'Return deck stacks above the paths; keep withdrawal ticks legible.' };
   if (L === 'heartbeat') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Unit bars need vertical room — do not shrink too far.' };
   if (L === 'scorecard') return { interaction: 'scroll-x', chartHeight: 'auto', note: 'Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable.' };
-  if (['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
   return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Tap to cycle elements; keep the thesis line and labels legible.' };
 }
 
@@ -847,43 +847,44 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'dl-tripwire-loop', idx: 'L3', group: 'docs-landing', intendedPlacement: 'docs-landing',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Govern the Thesis', setupLine:'Thesis creates exposure · exposure creates risk · tripwires govern behaviour',
+    title: 'Govern the Thesis', setupLine:'A thesis creates exposure; tripwires keep the response disciplined.',
     claimLabel: 'SYSTEM · GOVERNED LOOP',
     frameworkClaim: 'ACF is a closed-loop operating system, not a fixed set of weights.',
-    readerTakeaway: 'Every position is traceable to a thesis and governed by a tripwire.',
-    chartType: 'Minimal flow/loop diagram of the framework control system.',
+    readerTakeaway: 'The goal is not to avoid risk — it is to govern it.',
+    chartType: 'Beginner governance loop: thesis → exposure → risk → tripwire → adjust, returning to the thesis.',
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 1', label: 'Order of operations · the closed loop', role: 'verifies-concept', url: '/part-1-foundation' },
       { provider: 'ACF · Part 6', label: 'CIS governance and tripwires', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
     ],
-    explainerHeadline: 'Structure flows from a thesis and is governed by tripwires.',
-    explainerBody: 'A macro thesis defines exposure. Exposure creates fragility. Tripwires monitor that fragility and gate the response: watch, hedge, trim, or redeploy. The output feeds back into the thesis, so the portfolio adapts instead of drifting.',
-    explainerConcept: 'Closed-loop system',
+    explainerHeadline: 'Tripwires keep conviction from drifting.',
+    explainerBody: 'A thesis is allowed to create exposure, but exposure creates risk. Tripwires mark when the framework should watch, adjust, or revisit the thesis — before emotion takes over.',
+    explainerConcept: 'Governed loop',
     concepts: [{ label: 'Tripwires', link: '/part-5-portfolio-construction-position-management' }, { label: 'CIS governance', link: '/part-6-convexity-framework-integrity-scoring' }],
-    layout: 'systemLoop',
-    ariaSummary: 'A self-reinforcing governed ring — macro thesis, portfolio exposure, fragility, tripwires — with clockwise flow and a quiet cue that tripwires can force a reversal back into the thesis.',
-    systemLoop: {
-      centerLabel: 'governed loop',
-      reversalLabel: 'tripwires can reverse it',
+    layout: 'governanceLoop',
+    ariaSummary: 'A simple left-to-right governed path — thesis, exposure, risk, a tripwire checkpoint, and adjustment — with a return arc showing that evidence updates the thesis. The tripwire is the quiet checkpoint that governs the response.',
+    governanceLoop: {
       governorId: 'tripwire',
+      returnLabel: 'evidence updates the thesis',
       nodes: [
-        { id: 'thesis', label: 'Macro thesis', sub: 'defines exposure' },
-        { id: 'portfolio', label: 'Portfolio', sub: 'expresses the thesis' },
-        { id: 'risk', label: 'Fragility', sub: 'exposure creates risk' },
-        { id: 'tripwire', label: 'Tripwires', sub: 'govern the response' },
+        { id: 'thesis', label: 'Thesis', sub: 'the view' },
+        { id: 'exposure', label: 'Exposure', sub: 'capital placed' },
+        { id: 'risk', label: 'Risk', sub: 'fragility created' },
+        { id: 'tripwire', label: 'Tripwire', sub: 'the guardrail' },
+        { id: 'adjust', label: 'Adjust', sub: 'governed response' },
       ],
     },
     primaryKey: 'thesis',
     hoverTargets: [
-      { id: 'thesis', kind: 'node', label: 'Macro thesis', name: 'Macro thesis', why: 'The regime read that determines what to own. Everything downstream inherits its conviction.', claim: 'Structure starts with a thesis.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
-      { id: 'portfolio', kind: 'node', label: 'Portfolio', name: 'Portfolio exposure', why: 'The thesis expressed as carry posture and position sizing across wrappers.', claim: 'Exposure is the thesis made real.', concept: 'Carry posture', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'risk', kind: 'node', label: 'Fragility', name: 'Fragility', why: 'Every exposure carries failure modes. Naming them is what makes them monitorable.', claim: 'Risk is structural, so make it visible.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'tripwire', kind: 'node', label: 'Tripwires', name: 'Tripwires', why: 'Automated triggers that gate the response — watch, hedge, trim, redeploy — and feed back into the thesis.', claim: 'Behaviour is governed, not improvised.', concept: 'Tripwires', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'thesis', kind: 'node', label: 'Thesis', name: 'Thesis', why: 'The starting belief or framework view.', claim: 'Structure starts with a thesis.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'exposure', kind: 'node', label: 'Exposure', name: 'Exposure', why: 'Capital placed because the thesis has consequences.', claim: 'Exposure is the thesis made real.', concept: 'Exposure', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'risk', kind: 'node', label: 'Risk', name: 'Risk', why: 'Every exposure creates fragility that must be watched.', claim: 'Risk is the price of exposure.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'tripwire', kind: 'node', label: 'Tripwire', name: 'Tripwire', why: 'A pre-defined signal that forces discipline before emotion.', claim: 'Behaviour is governed, not improvised.', concept: 'Tripwires', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'adjust', kind: 'node', label: 'Adjust', name: 'Adjust', why: 'The response: watch, resize, hedge, or revisit the thesis.', claim: 'The response is disciplined, then feeds back.', concept: 'Governed response', link: '/part-5-portfolio-construction-position-management' },
     ],
-    mobileTapTargets: ['thesis', 'portfolio', 'risk', 'tripwire'],
-    implementationNotes: 'Bespoke loop layout with brush-arrow connectors. Conceptual diagram; copy is final-ish, geometry open to design review.',
+    mobileTapTargets: ['thesis', 'exposure', 'risk', 'tripwire', 'adjust'],
+    implementationNotes: 'Beginner governanceLoop layout — an additive primitive, NOT the systemLoop ring. A calm left-to-right path with one governing checkpoint (the tripwire gate) and a subtle return arc. Teaches the smallest useful loop: thesis → exposure → risk → tripwire → adjust → updated thesis. Advanced tripwire mechanics belong in details / later docs.',
   },
 
   /* ── PART 1 FRAMEWORK ──────────────────────────────────────────────────── */
