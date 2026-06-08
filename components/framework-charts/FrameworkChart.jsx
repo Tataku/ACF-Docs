@@ -812,6 +812,95 @@ function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coar
   );
 }
 
+/* ── GovernanceLoopSvg — beginner governed path (thesis → … → adjust ↩) ───────*
+ * The SMALLEST loop that teaches the mental model: a calm left-to-right path of
+ * 4–5 steps with a governing CHECKPOINT (the tripwire — a quiet gate, never an
+ * alarm) and a subtle return arc carrying evidence back to the thesis. It reads
+ * at a glance WITHOUT interaction; hover / pin / tap only add the "why".
+ * Deliberately NOT an orbit — distinct from systemLoop (a reflexive ring). */
+function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const gl = spec.governanceLoop;
+  const nodes = gl.nodes;
+  const N = nodes.length;
+  const govIdx = gl.governorId ? nodes.findIndex((n) => n.id === gl.governorId) : -1;
+  const pad = { l: 24, r: 24, t: 26, b: 24 };
+  const innerW = width - pad.l - pad.r;
+  const colW = innerW / N;
+  const rowY = pad.t + 52;
+  const NH = 44, NHg = 54;                       // the checkpoint sits a touch taller
+  const NW = Math.min(colW - 16, 128);
+  const pos = nodes.map((nd, i) => ({ ...nd, i, x: pad.l + colW * (i + 0.5), y: rowY, gov: i === govIdx, h: i === govIdx ? NHg : NH }));
+  const byId = (id) => pos.find((p) => p.id === id);
+  const sBottom = rowY + NH / 2 + 3;
+
+  const geom = useMemo(() => {
+    const arrows = [];                           // rightward brush arrows in the gaps
+    for (let i = 0; i < N - 1; i++) {
+      const a = pos[i], b = pos[i + 1];
+      const x0 = a.x + NW / 2, tip = b.x - NW / 2 - 4, len = Math.max(10, tip - x0);
+      arrows.push(Brush.brushArrow(tip, rowY, len, 0, { seed: 50 + i * 13, weight: 0.66, intensity: 0.5 }));
+    }
+    // subtle return arc underneath: from the last node back to the first; control
+    // points are pushed below the viewBox so the belly is low and round, framing
+    // the "evidence updates the thesis" caption inside the loop.
+    const sx = pos[N - 1].x, ex = pos[0].x, arcY = height + 36;
+    const arc = `M${sx} ${sBottom} C${sx} ${arcY} ${ex} ${arcY} ${ex} ${sBottom}`;
+    const ret = Brush.brushArrow(ex, sBottom + 1, 11, -Math.PI / 2, { seed: 131, weight: 0.6, intensity: 0.5 }); // ↑ into thesis
+    const bellyY = 0.25 * sBottom + 0.75 * arcY; // cubic midpoint y (lowest visible point)
+    return { arrows, arc, ret, labX: (sx + ex) / 2, labY: Math.min(rowY + NH / 2 + 36, (sBottom + bellyY) / 2) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  const anchorOf = (a) => { const p = byId(a.id); return p ? { x: p.x, y: p.y } : null; };
+  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 40 : 30, NW / 2); pos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === gl.governorId ? 'CHECKPOINT' : 'STEP'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Governed path: a thesis creates exposure and risk; a tripwire checkpoint governs the response, which updates the thesis." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* connectors + return arc (quiet; the nodes carry the meaning) */}
+        <g style={{ opacity: entered ? 0.7 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 220ms' }}>
+          {geom.arrows.map((d, i) => <path key={`ar${i}`} d={d} fill={accent} opacity="0.7" />)}
+          <path d={geom.arc} fill="none" stroke={pal.tierReference} strokeWidth="1" strokeDasharray="3 5" opacity="0.7" />
+          <path d={geom.ret} fill={pal.tierReference} opacity="0.85" />
+          <text x={geom.labX} y={geom.labY} textAnchor="middle" style={{ ...halo(pal, 8.5, pal.text4), fontStyle: 'italic' }}>{(gl.returnLabel || 'evidence updates the thesis').toUpperCase()}</text>
+        </g>
+        {pos.map((n) => {
+          const on = focusId === n.id;
+          const isP = n.id === spec.primaryKey;
+          const stroke = on || isP ? accent : n.gov ? pal.bandRegime : pal.borderHi;
+          const top = n.y - n.h / 2, bot = n.y + n.h / 2;
+          return (
+            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${110 + n.i * 90}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${110 + n.i * 90}ms` }}>
+              {/* checkpoint gate posts — a quiet guardrail, not an alarm */}
+              {n.gov && [-1, 1].map((s) => <line key={s} x1={n.x + s * (NW / 2)} y1={top - 7} x2={n.x + s * (NW / 2)} y2={bot + 7} stroke={pal.bandRegime} strokeWidth="2" strokeLinecap="round" opacity={on ? 0.9 : 0.7} />)}
+              <rect x={n.x - NW / 2} y={top} width={NW} height={n.h} rx={8} fill={pal.surface} stroke={stroke} strokeWidth={on ? 1.7 : n.gov ? 1.4 : 1} style={{ transition: trans('stroke') }} />
+              <text x={n.x} y={n.y - (n.sub ? 4 : -4)} textAnchor="middle" style={haloSans(pal, 12.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
+              {n.sub && <text x={n.x} y={n.y + 13} textAnchor="middle" style={halo(pal, 7.5, n.gov ? pal.bandRegimeText : pal.text4)}>{n.sub}</text>}
+            </g>
+          );
+        })}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
 /* ── BridgeSvg — capital compressed through a constraint (venturi / choke) ────*
  * A flow field of capital streamlines compresses through a dominant bottleneck
  * and re-concentrates into the investable exposure. The constraint is the star:
@@ -2073,6 +2162,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'loop' && <LoopSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'flow' && <FlowSvg spec={spec} height={hh(400)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'governanceLoop' && <GovernanceLoopSvg spec={spec} height={hh(300)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={hh(380)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={hh(150 + (spec.scorecard?.requirements.length || 8) * 32)} targets={spec.hoverTargets} {...cp} />}

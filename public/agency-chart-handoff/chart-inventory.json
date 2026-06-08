@@ -362,13 +362,13 @@
       "part": "docs-landing",
       "status": "needs-design-review",
       "wiredPublic": false,
-      "layout": "systemLoop",
+      "layout": "governanceLoop",
       "dataMode": "conceptual",
       "claimLabel": "SYSTEM · GOVERNED LOOP",
       "primaryClaim": "ACF is a closed-loop operating system, not a fixed set of weights.",
-      "visualProof": "Minimal flow/loop diagram of the framework control system.",
+      "visualProof": "Beginner governance loop: thesis → exposure → risk → tripwire → adjust, returning to the thesis.",
       "readerAction": null,
-      "readerTakeaway": "Every position is traceable to a thesis and governed by a tripwire.",
+      "readerTakeaway": "The goal is not to avoid risk — it is to govern it.",
       "experienceRole": "diagram",
       "storyBeats": [
         {
@@ -429,7 +429,7 @@
           "url": "/part-6-convexity-framework-integrity-scoring"
         }
       ],
-      "agencyNotes": "Bespoke loop layout with brush-arrow connectors. Conceptual diagram; copy is final-ish, geometry open to design review."
+      "agencyNotes": "Beginner governanceLoop layout — an additive primitive, NOT the systemLoop ring. A calm left-to-right path with one governing checkpoint (the tripwire gate) and a subtle return arc. Teaches the smallest useful loop: thesis → exposure → risk → tripwire → adjust → updated thesis. Advanced tripwire mechanics belong in details / later docs."
     },
     {
       "chartId": "p1-hedge-broke",
