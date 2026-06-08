@@ -1760,8 +1760,8 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   const [reveal, setReveal] = useState(def);
   const [drag, setDrag] = useState(false);
   const c01 = (v) => Math.max(0, Math.min(1, v));
-  const dividerX = (1 - reveal) * width;                       // Layout: hidden cost is revealed on the RIGHT of the divider
-  const setFromClientX = (cx) => { const el = svgRef.current; if (!el) return; const r = el.getBoundingClientRect(); setReveal(c01(1 - (cx - r.left) / (r.width || 1))); };
+  const dividerX = reveal * width;                             // reveal grows L→R: drag RIGHT sweeps the curtain right, revealing hidden cost behind it (on the left)
+  const setFromClientX = (cx) => { const el = svgRef.current; if (!el) return; const r = el.getBoundingClientRect(); setReveal(c01((cx - r.left) / (r.width || 1))); };
   const snap = () => { if (coarse) setReveal((v) => (v < 0.25 ? 0 : v > 0.75 ? 1 : 0.5)); };  // mobile snaps to surface / split / hidden cost
   const onDown = (e) => { setDrag(true); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) { /* noop */ } setFromClientX(e.clientX); };
   const onHandleMove = (e) => { if (drag) setFromClientX(e.clientX); };
@@ -1796,7 +1796,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   };
   const trackCancel = (e) => { gest.current = null; setDrag(false); try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) { /* noop */ } };
 
-  const revealedAt = (vbx) => vbx >= dividerX;                 // hidden-cost marks are only live where they are shown
+  const revealedAt = (vbx) => vbx <= dividerX;                 // hidden cost is shown LEFT of the divider (the swept region); marks live there
   const anchorOf = (t) => {
     if (!t) return null;
     if (t.id === 'debt') return { x: X(34), y: Yd(valueAt(debtPts, 34)) };
@@ -1848,7 +1848,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
         style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }}
         onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         <defs>
-          <clipPath id={clipId}><rect x={dividerX} y={0} width={Math.max(0, width - dividerX)} height={height} /></clipPath>
+          <clipPath id={clipId}><rect x={0} y={0} width={Math.max(0, dividerX)} height={height} /></clipPath>
         </defs>
 
         {/* BASE — surface view: debt backdrop prominent, the cost still faint */}
@@ -1856,10 +1856,10 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
           <path d={geom.debtArea} fill={pal.tierSecondary} opacity={pal.name === 'light' ? 0.12 : 0.1} />
           <path d={geom.debtLine} fill={pal.tierReference} opacity="0.92" />
           <path d={geom.intFaint} fill="none" stroke={pal.tierSecondary} strokeWidth="1.1" opacity="0.32" />
-          {!coarse && <text x={X(5)} y={bot0 + 16} style={{ ...haloSans(pal, 10.5, pal.text3, 500), fontStyle: 'italic' }}>{surfaceText}</text>}
+          {!coarse && <text x={width - pad.r - 6} y={bot0 + 16} textAnchor="end" style={{ ...haloSans(pal, 10.5, pal.text3, 500), fontStyle: 'italic' }}>{surfaceText}</text>}
         </g>
 
-        {/* OVERLAY — hidden-cost view, clipped to the RIGHT of the divider */}
+        {/* OVERLAY — hidden-cost view, clipped to the LEFT of the divider (the swept region) */}
         <g clipPath={`url(#${clipId})`}>
           <rect x={0} y={0} width={width} height={height} fill={pal.card} />
           <g style={fadeIn(520)}>
@@ -1875,6 +1875,8 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
             <text x={width - pad.r} y={Yi(thr) - 5} textAnchor="end" style={halo(pal, 8.5, pal.invalidCharcoal)}>interest-burden pressure</text>
             {/* the cost line */}
             <path d={geom.intFull} fill={accent} opacity={focusId && focusId !== 'int' ? 0.5 : 1} style={{ transition: trans('opacity') }} />
+            {/* link the panels: the upper debt backdrop drives the lower carrying cost at the inflection (revealed together) */}
+            <line x1={X(mark.x)} x2={X(mark.x)} y1={Yd(valueAt(debtPts, mark.x))} y2={Yi(valueAt(intPts, mark.x))} stroke={accent} strokeWidth="0.8" strokeDasharray="2 5" opacity="0.4" />
             {/* burden inflection */}
             <path d={geom.enso} fill={pal.markInk} />
             {focusId === 'burden' && <circle cx={X(mark.x)} cy={Yi(valueAt(intPts, mark.x))} r={(mark.r || 11) + 2} fill="none" stroke={accent} strokeWidth="1.1" />}
@@ -1982,9 +1984,9 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const padX = 'clamp(14px, 3vw, 22px)';
   const badge = coarse ? 'TAP TO EXPLORE' : 'LIVE · HOVER';
   const dm = getDataModeMarker(spec);                         // data-mode honesty marker, shown in the header (not buried in the footer)
-  const dmGlyph = dm.glyph === 'circle' ? { width: 7, height: 7, borderRadius: '50%', border: `1px solid ${pal.text4}`, flexShrink: 0 }
-    : dm.glyph === 'square' ? { width: 6, height: 6, border: `1px solid ${pal.text3}`, flexShrink: 0 }
-    : { width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 };
+  const dmGlyph = dm.glyph === 'circle' ? { width: 13, height: 13, borderRadius: '50%', border: `1.5px solid ${pal.text3}`, flexShrink: 0 }
+    : dm.glyph === 'square' ? { width: 11, height: 11, border: `1.5px solid ${pal.text3}`, flexShrink: 0 }
+    : { width: 12, height: 12, transform: 'rotate(45deg)', border: `1.5px solid ${pal.bandStressText}`, flexShrink: 0 };
   const showValues = spec.visualDataMode !== 'conceptual' && !spec.suppressValues;
   const W = 1000;
   // Representative/simulation values are art-directed: never label them "TRUE VALUE".
@@ -2005,13 +2007,20 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
       {/* topline */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: `16px ${padX} 8px`, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.18em', color: pal.text3, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-            <span>{spec.idx} · {spec.claimLabel}</span>
-            <span aria-hidden style={{ color: pal.text4, opacity: 0.5 }}>·</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: pal.text4 }}><span aria-hidden style={dmGlyph} />{dm.label.toUpperCase()}</span>
+          <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.18em', color: pal.text3, marginBottom: 8 }}>{spec.idx} · {spec.claimLabel}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+            {/* data-mode honesty marker — at-a-glance, with hover/focus explanation (durable copy also in Details) */}
+            <span className="acf-dm acf-fx-focusable" tabIndex={0} role="img" aria-label={`${dm.label} exhibit. ${dm.explain}`} title={dm.explain}
+              style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, cursor: 'help', borderRadius: 4, padding: '3px 2px' }}>
+              <span aria-hidden style={dmGlyph} />
+              <span className="acf-dm-pop" role="tooltip" style={{ background: pal.cardSolid, border: `1px solid ${pal.borderHi}`, borderRadius: 6, padding: '9px 12px', width: 'max-content', maxWidth: 264, boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)' }}>
+                <span style={{ display: 'block', fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em', color: pal.text4, marginBottom: 4 }}>{dm.label.toUpperCase()}</span>
+                <span style={{ fontFamily: pal.sans, fontSize: 12, lineHeight: 1.5, color: pal.text2 }}>{dm.explain}</span>
+              </span>
+            </span>
+            <h3 style={{ margin: 0, minWidth: 0, fontSize: 'clamp(17px, 2.8vw, 22px)', fontWeight: 600, color: pal.text1, letterSpacing: '-0.015em', lineHeight: 1.22 }}>{spec.title}</h3>
           </div>
-          <h3 style={{ margin: 0, fontSize: 'clamp(16px, 2.6vw, 20px)', fontWeight: 600, color: pal.text1, letterSpacing: '-0.015em', lineHeight: 1.2 }}>{spec.title}</h3>
-          {spec.setupLine && <p style={{ margin: '6px 0 0', fontSize: 12.5, color: pal.text3, lineHeight: 1.45 }}>{spec.setupLine}</p>}
+          {spec.setupLine && <p style={{ margin: '7px 0 0', fontSize: 13.5, color: pal.text2, lineHeight: 1.5 }}>{spec.setupLine}</p>}
         </div>
         <span style={{ flexShrink: 0, fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em', color: pal.text3, border: `1px solid ${pal.borderHi}`, borderRadius: 3, padding: '3px 7px', whiteSpace: 'nowrap' }}>{badge}</span>
       </div>
@@ -2063,9 +2072,6 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
             )}
           </React.Fragment>
         ))}
-        {!coarse && (
-          <div style={{ textAlign: 'center', fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: pal.text4, marginTop: 2 }}>HOVER OR TAB AN ELEMENT · CLICK TO PIN</div>
-        )}
       </div>
 
       {pNote && (

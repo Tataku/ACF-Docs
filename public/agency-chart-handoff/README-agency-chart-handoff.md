@@ -136,6 +136,17 @@ If Simulation Context changes a chart, the **tooltip must express the selected p
 - **Secondary = the raw plotted meaning** (`180.3× start · representative`, `Good sequence · representative simulation`) — kept, never the only value.
 - **Honesty:** never fake exact units/sats; charts whose index→$ isn't honest per point (e.g. *Volatility Is the Toll*) keep the raw value and carry the dollar impact in their callout. **Non-personalized / conceptual charts keep raw values** — no forced dollars. Pinned tooltips use the same resolver, so they update live when the reader changes context; no `NaN`/`Infinity`.
 
+### Reader comfort (the charts must be easy to read)
+
+These charts are read by non-experts, including older readers. Legibility and calm beat density.
+
+- **Persistent reader preferences.** Reader/Agency and Dark/Light are *preferences* (not simulation data) and persist in `localStorage` (`acf-chart-handoff:viewMode` / `:theme`) across all handoff/export routes **and refresh**. Simulation Context stays in `sessionStorage`. Hydrate after mount (SSR-safe); defaults apply when nothing is saved.
+- **Header-first honesty.** The data-mode marker is a larger first-principles icon to the **left of the title** (`getDataModeMarker` → glyph + label + `explain`), with the explanation on **hover and keyboard focus** (`.acf-dm` popover) and durably in the collapsed Details. Honesty is visible at a glance; it is never hover-only.
+- **One-time interaction education.** Do **not** repeat "hover / tab / click" inside every chart. The repeated in-body hint is removed; interaction is taught once by the page-level "How to read these charts" orientation and by the affordances themselves.
+- **Older-reader legibility.** Avoid tiny repeated helper text. Title dominates (`clamp(17–22px)`), subtitle is readable (`13.5px`, `text2`), metadata is calm, spacing does the work — no boxes, no louder UI.
+- **Reveal direction follows intuition.** For before/after reveal charts, **dragging right reveals the "after" / hidden layer** (the curtain sweeps right; hidden cost fills in behind it; mobile snaps left→Surface, center→Split, right→Hidden cost). Spatial wipe, never an opacity toggle.
+- **Relational backgrounds, linked panels.** A background/secondary layer must be visibly *related* to the foreground, never decorative. In the dual-panel reveal the top liability and bottom carrying-cost share one curtain + a connector, so they read as one before/after exhibit.
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +

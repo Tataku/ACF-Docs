@@ -10,6 +10,26 @@
   outline-offset: 2px;
 }
 
+/* Data-mode marker (chart header): quiet hover/focus explanation popover. The
+ * durable explanation also lives in the collapsed Details — this is the at-a-glance
+ * affordance, keyboard-reachable (focus), not hover-only. Theme colors are inline;
+ * placement + show/hide live here. */
+.acf-dm { position: relative; outline: none; }
+.acf-dm-pop {
+  position: absolute; left: 0; top: calc(100% + 8px); z-index: 20;
+  opacity: 0; visibility: hidden; transform: translateY(-3px);
+  transition: opacity 130ms ease, transform 130ms ease, visibility 130ms;
+  pointer-events: none;
+}
+.acf-dm:hover .acf-dm-pop,
+.acf-dm:focus .acf-dm-pop,
+.acf-dm:focus-visible .acf-dm-pop {
+  opacity: 1; visibility: visible; transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .acf-dm-pop { transition: opacity 0.01ms, visibility 0.01ms; }
+}
+
 /* Touch: tapping a chart element must never paint a full-width OS highlight box
  * or select text. The interaction model is bespoke (tap = inspect / emphasize /
  * reveal), so the platform tap-highlight and text selection are pure noise on
