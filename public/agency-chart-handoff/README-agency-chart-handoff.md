@@ -119,6 +119,15 @@ The reader should see the chart **story** first; the citation/methodology machin
 - **Source / methodology detail is preserved behind disclosure** — the full disclosure sentence, `View sources / methodology` (+ source popover), source roles, and *connects-to* tags collapse into a quiet `Details, sources & methodology` toggle (a real `<button>` with `aria-expanded` / `aria-controls`), collapsed by default in Reader **and** Agency (local per-card state; the agency inventory remains available separately). Nothing is removed — `chart-inventory.json` and the specs keep every source.
 - **Expandable detail is for verification, not first-pass comprehension.** **Do not make citation mechanics compete with the visual claim.**
 
+### Tooltip motion
+
+The tooltip should feel like it understands the reader's attention — follow the cursor with grace, not jitter with every pixel.
+
+- **Tooltips follow attention, not raw pointer noise.** Desktop **hover** uses velocity-aware smoothing: pointer events update a target only; a `requestAnimationFrame` loop eases the tooltip toward `cursor + offset` (accelerate when far, decelerate when near, a dead-zone that ignores sub-pixel tremor). No layout thrash — position is a `translate3d` transform.
+- **Pinned tooltips are stable anchors, not cursor followers.** Click pins to the element's anchor; pointer movement no longer moves it; Escape unpins; clicking another target re-pins. Links inside a pinned tooltip stay clickable (`pointer-events: auto`; hover tooltip is `pointer-events: none`).
+- **Edge-aware placement.** Offset from the point, flip sides near edges with hysteresis (no oscillation), clamped inside the chart container (`placeTip`). The tooltip self-positions via its `offsetParent` — no per-chart wiring.
+- **Motion improves legibility** — calm and precise, never bouncy/overshoot. **Reduced motion** removes the follow animation: the tooltip anchors to the data point (the prior calm behavior). **Mobile** uses tap-to-inspect (`MobileInsight`), never hover emulation.
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +
