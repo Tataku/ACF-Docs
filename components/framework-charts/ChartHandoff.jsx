@@ -106,6 +106,7 @@ function ControlBar({ pal, accent, theme, setTheme, view, setView, variant, part
   const navItem = (key, label, active, href) => (active
     ? <span key={key} aria-current="page" style={sty(true)}>{label}</span>
     : <a key={key} href={href} style={sty(false)}>{label}</a>);
+  const readerView = view === 'reader';                       // reader demotes Docs-shell/Export + Copy link behind Options
 
   return (
     <nav aria-label="Chart handoff controls" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '10px 22px', marginBottom: 24 }}>
@@ -123,11 +124,26 @@ function ControlBar({ pal, accent, theme, setTheme, view, setView, variant, part
         const label = <>{p.label} <span style={{ color: active ? pal.text2 : pal.text4, fontWeight: 400 }}>{p.shortTitle}</span></>;
         return navItem(p.key, label, active, href);
       }))}
-      {group('MODE', [
-        navItem('shell', 'Docs shell', variant === 'embedded', shellRoute),
-        navItem('export', 'Export', variant === 'export', exportRoute),
-      ])}
-      {variant === 'export' && <button onClick={copy} style={{ ...base, color: copied ? accent : pal.text4 }}>{copied ? 'Link copied' : 'Copy link ⧉'}</button>}
+      {readerView ? (
+        <details style={{ position: 'relative' }}>
+          <summary style={{ ...base, color: pal.text3, listStyle: 'none' }}>Options ▾</summary>
+          <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 30, background: pal.cardSolid, border: `1px solid ${pal.borderHi}`, borderRadius: 7, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12, whiteSpace: 'nowrap', boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)' }}>
+            {group('MODE', [
+              navItem('shell', 'Docs shell', variant === 'embedded', shellRoute),
+              navItem('export', 'Export', variant === 'export', exportRoute),
+            ])}
+            <button onClick={copy} style={{ ...base, color: copied ? accent : pal.text3, textAlign: 'left' }}>{copied ? 'Link copied' : 'Copy link ⧉'}</button>
+          </div>
+        </details>
+      ) : (
+        <>
+          {group('MODE', [
+            navItem('shell', 'Docs shell', variant === 'embedded', shellRoute),
+            navItem('export', 'Export', variant === 'export', exportRoute),
+          ])}
+          {variant === 'export' && <button onClick={copy} style={{ ...base, color: copied ? accent : pal.text4 }}>{copied ? 'Link copied' : 'Copy link ⧉'}</button>}
+        </>
+      )}
     </nav>
   );
 }
@@ -208,6 +224,8 @@ const PRESETS = {
     shellRoute: '/chart-handoff', exportRoute: '/chart-handoff-export',
     eyebrow: 'ACF · FRAMEWORK CHART HANDOFF · INTERNAL REVIEW',
     title: 'Every chart for the docs landing page and Part 1',
+    readerTitle: 'Part 1 · Foundation in Pictures',
+    readerSubtitle: 'A guided visual pass through the core ideas behind the Adaptive Convexity Framework. Each chart makes one claim — read top to bottom, and explore where a chart invites you.',
     intro: 'The full exhibit set in one place, for the marketing agency to review before production. Charts use art-directed, representative data shapes where exact historical series are not yet wired — every footer discloses that plainly, and the source links verify the underlying concept and data backdrop.',
   },
   'part-2': {
@@ -215,6 +233,8 @@ const PRESETS = {
     shellRoute: '/chart-handoff-part-2', exportRoute: '/chart-handoff-part-2-export',
     eyebrow: 'ACF · PART 2 CHART HANDOFF · INTERNAL REVIEW',
     title: 'Every chart for Part 2',
+    readerTitle: 'Part 2 · Lineage in Pictures',
+    readerSubtitle: 'A guided visual pass through the framework’s intellectual lineage and macro-thesis logic. Each chart makes one claim — read top to bottom, and explore where a chart invites you.',
     intro: 'The Part 2 exhibit set: intellectual lineage, what makes a macro thesis valid, how a structural force becomes capital flow, and how phase separates thesis validity from deployment timing. Representative and conceptual exhibits with honest disclosure — not historical backtests.',
   },
   'part-3': {
@@ -222,6 +242,8 @@ const PRESETS = {
     shellRoute: '/chart-handoff-part-3', exportRoute: '/chart-handoff-part-3-export',
     eyebrow: 'ACF · PART 3 CHART HANDOFF · INTERNAL REVIEW',
     title: 'Every chart for Part 3',
+    readerTitle: 'Part 3 · Bitcoin Backbone in Pictures',
+    readerSubtitle: 'A guided visual pass through Bitcoin as the convexity backbone. Each chart makes one claim — read top to bottom, and explore where a chart invites you.',
     intro: 'The Part 3 exhibit set: Bitcoin as the convexity backbone — power-law valuation discipline, the ten backbone requirements, volatility as the toll for convexity, and the accumulate-to-borrow reserve lifecycle. Representative and conceptual exhibits with honest disclosure, never exact historical Bitcoin data.',
   },
 };
@@ -238,9 +260,10 @@ const parseMoney = (s) => { const n = Number(String(s).replace(/[^0-9.]/g, ''));
 const clampMoney = (n) => Math.min(100000000, Math.max(1000, Math.round(n)));
 const groupMoney = (n) => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '');
 
-function SimulationContextBar({ pal, accent, ctx, setCtx }) {
+function SimulationContextBar({ pal, accent, ctx, setCtx, compact }) {
   const [raw, setRaw] = useState(groupMoney(ctx.startingValue));
   const [dcaRaw, setDcaRaw] = useState(groupMoney(ctx.monthlyDca));
+  const [advOpen, setAdvOpen] = useState(false);
   // keep inputs in sync when the context hydrates from sessionStorage / another page
   useEffect(() => { setRaw(groupMoney(ctx.startingValue)); }, [ctx.startingValue]);
   useEffect(() => { setDcaRaw(groupMoney(ctx.monthlyDca)); }, [ctx.monthlyDca]);
@@ -265,39 +288,42 @@ function SimulationContextBar({ pal, accent, ctx, setCtx }) {
       <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>{child}</span>
     </span>
   );
+  const advWithdrawal = group('WITHDRAWAL / YR', choice('withdrawalRate', [{ v: 0.03, label: '3%' }, { v: 0.04, label: '4%' }, { v: 0.05, label: '5%' }, { v: 0.06, label: '6%' }]));
+  const advReserve = group('BITCOIN RESERVE', choice('btcReserveAllocation', [{ v: 0.05, label: '5%' }, { v: 0.10, label: '10%' }, { v: 0.15, label: '15%' }, { v: 0.25, label: '25%' }]));
+  const advDca = group('MONTHLY DCA', money(dcaRaw, setDcaRaw, commitDca, 'Illustrative monthly DCA amount in dollars', 64));
+  const shortCaveat = 'These values only scale illustrative examples — not forecasts.';
+  const fullCaveat = 'Used only to scale representative exhibits on this page. Each chart discloses the inputs it uses. Not a forecast or recommendation.';
   return (
-    <section aria-label="Simulation context" style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 26px' }}>
-      <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>SIMULATION CONTEXT</span>
+    <section aria-label={compact ? 'Personalize examples' : 'Simulation context'} style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 26px' }}>
+      <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>{compact ? 'PERSONALIZE EXAMPLES' : 'SIMULATION CONTEXT'}{compact && <span style={{ marginLeft: 8, fontWeight: 400, letterSpacing: '0.08em', color: pal.text4 }}>optional</span>}</span>
       {group('STARTING VALUE', money(raw, setRaw, commit, 'Illustrative starting portfolio value in dollars', 96))}
       {group('TIME HORIZON', choice('horizon', HORIZON_BANDS.map((h) => ({ v: h.id, label: h.label }))))}
-      {group('WITHDRAWAL / YR', choice('withdrawalRate', [{ v: 0.03, label: '3%' }, { v: 0.04, label: '4%' }, { v: 0.05, label: '5%' }, { v: 0.06, label: '6%' }]))}
-      {group('BITCOIN RESERVE', choice('btcReserveAllocation', [{ v: 0.05, label: '5%' }, { v: 0.10, label: '10%' }, { v: 0.15, label: '15%' }, { v: 0.25, label: '25%' }]))}
-      {group('MONTHLY DCA', money(dcaRaw, setDcaRaw, commitDca, 'Illustrative monthly DCA amount in dollars', 64))}
-      <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>Used only to scale representative exhibits on this page. Each chart discloses the inputs it uses. Not a forecast or recommendation.</span>
+      {compact ? (
+        <>
+          <button onClick={() => setAdvOpen((o) => !o)} aria-expanded={advOpen} style={{ ...base, color: pal.text3 }}>Advanced assumptions {advOpen ? '▴' : '▾'}</button>
+          {advOpen && <>{advWithdrawal}{advReserve}{advDca}</>}
+          <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>{advOpen ? `Withdrawal rate, Bitcoin reserve and monthly DCA scale only the few charts that use them. ${shortCaveat}` : shortCaveat}</span>
+        </>
+      ) : (
+        <>
+          {advWithdrawal}{advReserve}{advDca}
+          <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>{fullCaveat}</span>
+        </>
+      )}
     </section>
   );
 }
 
-// Reader view: a short "how to read these charts" orientation — the kinesthetic
-// contract (one claim · see-then-touch · representative · your numbers once).
-const READ_GUIDE = [
-  { k: 'ONE CLAIM EACH', t: 'Every chart makes a single point — the title states it, the picture proves it.' },
-  { k: 'SEE, THEN TOUCH', t: 'The default view teaches the idea. Hover, tap, or focus an element for the why — some charts invite you to drag or choose.' },
-  { k: 'REPRESENTATIVE, NOT PREDICTIVE', t: 'These are shapes that teach the framework — not exact historical data or forecasts. Each footer says which.' },
-  { k: 'YOUR NUMBERS, ONCE', t: 'Set a starting value above; charts that use it introduce themselves as scaled examples.' },
-];
+// Reader view: ONE compact orientation cue (Claim → Picture → Explore) — not a
+// four-column training block. Interaction is taught once, then the charts begin.
 function ReaderOrientation({ pal, accent }) {
   return (
-    <section aria-label="How to read these charts" style={{ margin: '0 0 30px' }}>
-      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.2em', color: accent, marginBottom: 12 }}>HOW TO READ THESE CHARTS</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px 22px' }}>
-        {READ_GUIDE.map((g) => (
-          <div key={g.k}>
-            <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em', color: pal.text3, marginBottom: 5 }}>{g.k}</div>
-            <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 12.5, lineHeight: 1.5, color: pal.text2 }}>{g.t}</p>
-          </div>
-        ))}
-      </div>
+    <section aria-label="How to read this" style={{ margin: '2px 0 16px', display: 'flex', alignItems: 'baseline', gap: '8px 16px', flexWrap: 'wrap' }}>
+      <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.18em', color: accent, flexShrink: 0 }}>HOW TO READ THIS</span>
+      <span style={{ fontFamily: pal.sans, fontSize: 13, lineHeight: 1.55, color: pal.text2, maxWidth: 760 }}>
+        Each chart makes one claim and shows the mechanism. Hover, tap, or pin when you want the deeper explanation.
+        <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.12em', color: pal.text4, marginLeft: 10, whiteSpace: 'nowrap' }}>CLAIM → PICTURE → EXPLORE</span>
+      </span>
     </section>
   );
 }
@@ -345,12 +371,10 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
       <div style={{ maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 }}>
       <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} view={view} setView={setView} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
       {/* header */}
-      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{readerView ? 'ACF · FRAMEWORK CHARTS · GUIDED READING' : preset.eyebrow}</div>
-      <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{preset.title}</h1>
+      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{readerView ? 'ADAPTIVE CONVEXITY FRAMEWORK · A VISUAL ESSAY' : preset.eyebrow}</div>
+      <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{readerView ? (preset.readerTitle || preset.title) : preset.title}</h1>
       <p style={{ margin: '14px 0 18px', fontSize: 14, lineHeight: 1.62, color: pal.text3, maxWidth: 720 }}>
-        {readerView
-          ? 'A guided pass through the representative exhibits. Set a starting value once, then read top to bottom — each chart states a claim, shows it, and invites you to explore where it helps.'
-          : preset.intro}
+        {readerView ? (preset.readerSubtitle || preset.intro) : preset.intro}
       </p>
 
       {!readerView && (
@@ -373,7 +397,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
         </>
       )}
 
-      <SimulationContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} />
+      <SimulationContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} compact={readerView} />
 
       {readerView && <ReaderOrientation pal={pal} accent={accent} />}
 

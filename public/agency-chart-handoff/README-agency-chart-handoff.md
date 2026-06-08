@@ -150,6 +150,16 @@ These charts are read by non-experts, including older readers. Legibility and ca
 - **Reveal direction follows intuition.** For before/after reveal charts, **dragging right reveals the "after" / hidden layer** (the curtain sweeps right; hidden cost fills in behind it; mobile snaps left→Surface, center→Split, right→Hidden cost). Spatial wipe, never an opacity toggle.
 - **Relational backgrounds, linked panels.** A background/secondary layer must be visibly *related* to the foreground, never decorative. In the dual-panel reveal the top liability and bottom carrying-cost share one curtain + a connector, so they read as one before/after exhibit.
 
+### Reader hero — welcome, orient, get out of the way
+
+The handoff pages are now a **shareable guided visual essay**, not an internal control panel. The hero should invite the reader into the first chart, not teach the whole system.
+
+- **Audience split.** *Reader* mode optimizes for guided comprehension; *Agency* mode for implementation handoff. The internal framing (inventory link, implementation-package link, glyph legend, "internal review surface" note) is **Agency-only**; Reader gets a public title (`preset.readerTitle` — e.g. *Part 1 · Foundation in Pictures*) and a calm subtitle.
+- **First-chart priority.** Only essential controls appear before the first chart. The four-column "how to read" block is replaced by **one** orientation line (*claim → picture → explore*); the charts begin sooner.
+- **Progressive controls.** The control bar keeps VIEW / PART / THEME visible; **Docs-shell / Export + Copy link move behind `Options`** in Reader mode (inline in Agency). Persistence (Reader/Agency, Dark/Light, Simulation Context) is unchanged.
+- **Simulation Context is optional.** Reader shows it as **"Personalize examples · optional"** with **Starting value + Horizon** primary; **Withdrawal rate, Bitcoin reserve, monthly DCA** collapse behind **Advanced assumptions ▾** (all still wired + persisted). The hero caveat is short (*"these values only scale illustrative examples — not forecasts"*); the full disclosure stays in each chart's Details.
+- **Mobile.** Title → one-line orientation → compact Starting value + Horizon (advanced collapsed) → charts. No wide control rows, no four-column grid, no horizontal overflow.
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +
