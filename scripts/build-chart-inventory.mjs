@@ -9,7 +9,8 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import {
   FRAMEWORK_CHART_SPECS, footerModel,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles,
-  INTERACTION_TYPES, MOTION_TYPES, BACKGROUND_ROLES, DATA_MODES,
+  resolveExperienceRole, resolveStoryBeats,
+  INTERACTION_TYPES, MOTION_TYPES, BACKGROUND_ROLES, DATA_MODES, EXPERIENCE_ROLES,
 } from '../components/framework-charts/chart-specs.mjs';
 
 const charts = FRAMEWORK_CHART_SPECS.map((s) => {
@@ -33,6 +34,9 @@ const charts = FRAMEWORK_CHART_SPECS.map((s) => {
     visualProof: claim.visualProof,
     readerAction: claim.readerAction,
     readerTakeaway: s.readerTakeaway,
+    // teaching arc + experience role (resolved contract; takeaway = readerTakeaway)
+    experienceRole: resolveExperienceRole(s),
+    storyBeats: resolveStoryBeats(s),
     // interaction must match concept
     interaction: { type: interaction.type, gesture: interaction.gesture, conceptMatch: interaction.conceptMatch || null },
     // motion follows comprehension
@@ -60,6 +64,7 @@ const out = {
     motionTypes: MOTION_TYPES,
     backgroundRoles: BACKGROUND_ROLES,
     dataModes: DATA_MODES,
+    experienceRoles: EXPERIENCE_ROLES,
   },
   count: charts.length,
   charts,

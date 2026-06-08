@@ -75,6 +75,18 @@ Concept-critical layouts (`scenario`, `dual + perspectiveSlider`) **must** decla
 `resolveBackgroundRoles`, and the simulation-intro helpers `formatStartingValue`,
 `formatHorizon`, `getSimulationIntro`, `buildPersonalizedDisclosure`.
 
+### Story beats & experience role (the teaching contract)
+
+Each chart resolves a **comprehension arc** — the order the idea should build in —
+and an **experience role** — what kind of learning experience it is. Both are
+*non-visible contracts* for the inventory, this README, and (next) per-family
+motion choreography; explicit per-spec values win, otherwise they're derived.
+
+- `experienceRole` ∈ `evidence · comparison · mechanism · conversion · reveal · matrix · diagram`.
+- `storyBeats[]` — ordered `{ kind, label, timing }`; `kind` ∈ `context · mechanism · action · consequence · takeaway`, `timing` ∈ `early · middle · late` (never goes backwards). The default arc is *context → mechanism → (action, if interactive) → consequence*. The **`takeaway`** (the remembered idea) is the existing `readerTakeaway`, so default beats stop at `consequence` and never duplicate it.
+
+Resolvers: `resolveExperienceRole`, `resolveStoryBeats` (`chart-specs.mjs`). *Example:* `The Bill Came Due` declares `reveal` + `context → mechanism → action → consequence` so the build and the divider gesture follow the same order the reader understands it.
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +
