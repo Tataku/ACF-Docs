@@ -22,7 +22,7 @@ import {
   INTERACTION_TYPES, GESTURES, MOTION_TYPES, MOTION_DURATIONS, BACKGROUND_ROLES, BANNED_PROMISE_WORDS,
   EXPERIENCE_ROLES, BEAT_KINDS, BEAT_TIMINGS, MOBILE_INTERACTIONS, CHART_HEIGHTS,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles, getSimulationIntro,
-  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior,
+  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis,
 } from '../components/framework-charts/chart-specs.mjs';
 
 const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'both']);
@@ -223,6 +223,11 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(MOBILE_INTERACTIONS.includes(s.mobileBehavior.interaction), `${w} explicit mobileBehavior.interaction invalid: ${s.mobileBehavior.interaction}`);
     ok(CHART_HEIGHTS.includes(s.mobileBehavior.chartHeight), `${w} explicit mobileBehavior.chartHeight invalid: ${s.mobileBehavior.chartHeight}`);
   }
+
+  // "Try this" cue — shown only where interaction is central; explicit must be a string.
+  if (s.tryThis != null) ok(typeof s.tryThis === 'string', `${w} tryThis must be a string`);
+  const interactionCentral = ['scenario', 'beforeAfterReveal', 'returnOrder', 'readerContext'].includes(resolveInteraction(s).type);
+  ok(!interactionCentral || (resolveTryThis(s) && resolveTryThis(s).trim()), `${w} interaction-central chart should resolve a 'Try this' cue`);
 
   // Math-backed where math is claimed: a DCA chart must expose the conversion.
   if (s.layout === 'heartbeat') ok((s.formula && /[÷/=]/.test(s.formula)) || /÷|= units/i.test(cs.visualProof || ''), `${w} DCA chart must declare a visible conversion formula`);

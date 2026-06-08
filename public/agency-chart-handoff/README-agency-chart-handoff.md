@@ -36,7 +36,10 @@ input affect? What is the one idea to remember?** If it can't, it isn't finished
   that only *implies* math does not count.
 - **Interaction must match concept.** before/after = clipped spatial reveal (not an
   opacity toggle); scenario = alternate path with clear state changes; return order
-  = same deck rearranged; reader context = a consistent scale intro.
+  = same deck rearranged; reader context = a consistent scale intro. Charts whose
+  interaction is *central* carry a quiet **"Try this"** cue above the visual
+  (`resolveTryThis`) — reveal/scenario/return-order/reader-context only; hover-only
+  charts get none (the default already teaches).
 - **Motion follows comprehension.** It draws in the order the idea is understood
   (see *Motion follows comprehension* below). Reduced motion reveals immediately.
 - **Context visible where it changes interpretation.** If reader simulation context

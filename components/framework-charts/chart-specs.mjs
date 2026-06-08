@@ -243,6 +243,19 @@ export function resolveMobileBehavior(spec) {
   return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Tap to cycle elements; keep the thesis line and labels legible.' };
 }
 
+// "Try this" cue: a quiet imperative shown ONLY where interaction is central
+// (reveal / scenario / return-order / reader-context). Explicit spec.tryThis
+// wins ('' opts out); hover-only charts get no cue (the default already teaches).
+export function resolveTryThis(spec) {
+  if (typeof spec.tryThis === 'string') return spec.tryThis || null;
+  const it = resolveInteraction(spec);
+  if (it.type === 'beforeAfterReveal') return 'Drag the divider to reveal the hidden cost';
+  if (it.type === 'scenario') return 'Switch the shock and watch the control score';
+  if (it.type === 'returnOrder') return 'Compare the same return deck in reverse';
+  if (it.type === 'readerContext') return 'Enter your starting value above';
+  return null;
+}
+
 // ── simulation-context intro (chart-level data introduction) ─────────────────
 // Builds the quiet "scaled example" line for a personalized chart. Returns null
 // when the chart does not opt in, or when there is no usable starting value.

@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, valueAt, getSimulationIntro, readStartingValue, resolveMobileBehavior } from './chart-specs.mjs';
+import { getChartSpec, footerModel, valueAt, getSimulationIntro, readStartingValue, resolveMobileBehavior, resolveTryThis } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -1885,6 +1885,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const valueNote = spec.visualDataMode === 'historical' ? 'TRUE VALUE' : 'REPRESENTATIVE';
   const pNote = personalNote(spec, readerContext);
   const simIntro = getSimulationIntro(spec, readerContext);   // chart-level "scaled example · …" line, above the visual
+  const tryThis = resolveTryThis(spec);                       // quiet interaction cue, only where interaction is central
   const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext };
   const mob = resolveMobileBehavior(spec);                    // mobile is not "just shrink": tall layouts get vertical room on touch
   const hh = (base) => (coarse && mob.chartHeight === 'tall' ? Math.round(base * 1.2) : base);
@@ -1911,6 +1912,14 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
             <span aria-hidden style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 }} />
             {simIntro}
           </span>
+        </div>
+      )}
+
+      {/* try-this cue — invites the central interaction (kinesthetic affordance) */}
+      {tryThis && (
+        <div style={{ padding: `2px ${padX} 4px` }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.14em', color: accent }}>TRY THIS</span>
+          <span style={{ fontFamily: pal.sans, fontSize: 12, fontStyle: 'italic', color: pal.text3, marginLeft: 9 }}>{tryThis}</span>
         </div>
       )}
 

@@ -90,6 +90,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -161,6 +162,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -232,6 +234,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -301,6 +304,7 @@
         "chartHeight": "standard",
         "note": "Diagram scales; tap nodes to cycle detail."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -370,6 +374,7 @@
         "chartHeight": "standard",
         "note": "Diagram scales; tap nodes to cycle detail."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -441,6 +446,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -519,6 +525,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -597,6 +604,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -682,6 +690,7 @@
         "chartHeight": "tall",
         "note": "Snap the reveal to Surface / Split / Hidden cost on release."
       },
+      "tryThis": "Drag the divider to reveal the hidden cost",
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -763,6 +772,7 @@
         "chartHeight": "tall",
         "note": "Return deck stacks above the paths; keep withdrawal ticks legible."
       },
+      "tryThis": "Compare the same return deck in reverse",
       "readerContext": {
         "kind": "sequence-scale",
         "uses": [
@@ -832,6 +842,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -901,6 +912,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -970,6 +982,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1039,6 +1052,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1108,6 +1122,7 @@
         "chartHeight": "standard",
         "note": "Diagram scales; tap nodes to cycle detail."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1170,6 +1185,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
@@ -1239,6 +1255,7 @@
         "chartHeight": "standard",
         "note": "Diagram scales; tap nodes to cycle detail."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1301,6 +1318,7 @@
         "chartHeight": "standard",
         "note": "Diagram scales; tap nodes to cycle detail."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1363,6 +1381,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1432,6 +1451,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -1510,6 +1530,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -1579,6 +1600,7 @@
         "chartHeight": "auto",
         "note": "Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1648,6 +1670,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": "Enter your starting value above",
       "readerContext": {
         "kind": "vol-impact",
         "uses": [
@@ -1729,6 +1752,7 @@
         "chartHeight": "tall",
         "note": "Stack the strategy + shock controls; keep stat read-outs below the chart."
       },
+      "tryThis": "Switch the shock and watch the control score",
       "readerContext": {
         "kind": "scenario-scale",
         "uses": [
@@ -1805,6 +1829,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -1869,6 +1894,7 @@
         "chartHeight": "tall",
         "note": "Unit bars need vertical room — do not shrink too far."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1931,6 +1957,7 @@
         "chartHeight": "standard",
         "note": "Diagram scales; tap nodes to cycle detail."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -2000,6 +2027,7 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
+      "tryThis": null,
       "readerContext": null,
       "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
