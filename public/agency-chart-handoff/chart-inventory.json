@@ -950,11 +950,11 @@
       "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
-      "layout": "dual",
+      "layout": "single",
       "dataMode": "conceptual",
       "claimLabel": "LINEAGE · METHOD",
       "primaryClaim": "The framework’s method persists across regimes; the macro thesis changes with the environment.",
-      "visualProof": "Two stacked panels: a rotating macro-thesis line over a stable method baseline.",
+      "visualProof": "One field: a fixed central method/lineage axis with the macro-thesis line orbiting above, through, and below it across three regimes.",
       "readerAction": null,
       "readerTakeaway": "Keep the method fixed; let the thesis move.",
       "experienceRole": "evidence",
@@ -1017,7 +1017,7 @@
           "url": "/part-1-foundation"
         }
       ],
-      "agencyNotes": "Conceptual dual: top rotates, bottom holds. No numeric axes by design. Marketing may prefer a literal two-layer block diagram — flagged for design review."
+      "agencyNotes": "Conceptual single field (was a stacked dual): the method is a fixed central axis (guide) and the macro thesis orbits it — above in A, crossing at transitions, below in B, above in C. No numeric axes by design."
     },
     {
       "chartId": "p2-ruin-comes-first",

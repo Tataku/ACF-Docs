@@ -476,10 +476,14 @@ const window_ = (() => {
 
 // ── Part 2 — lineage & macro thesis (representative / conceptual) ────────────
 const p2Method = (() => {
-  const n = 100;
-  const thesis = curve(0, 100, n, (t) => 50 + 26 * Math.sin(t * Math.PI * 2.2) + 8 * Math.sin(t * Math.PI * 5), 211, 1.2);
-  const method = curve(0, 100, n, () => 55, 213, 1.0);
-  return { thesis, method };
+  const n = 130;
+  const spine = 50;                                            // the method is a fixed central axis
+  // The macro thesis ORBITS the method spine: expressed above it in regime A,
+  // crossing through it at the transition, below it in regime B, crossing again,
+  // and back above it in regime C (and staying above to the end). Two clean
+  // crossings near the regime boundaries; small organic waver, never noisy.
+  const thesis = curve(0, 100, n, (t) => spine + 27 * Math.cos(t * 2.7 * Math.PI - 1.272) + 3.5 * Math.sin(t * Math.PI * 6), 211, 1.0);
+  return { thesis, spine, cross1: 33.5, cross2: 70.5 };
 })();
 const p2Ruin = (() => {
   const n = 110;
@@ -1203,36 +1207,39 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p2-method-before-macro', idx: 'P2-01', group: 'part-2', intendedPlacement: 'part-2',
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Method Before Macro', setupLine: 'The lineage holds steady while the macro thesis rotates with the regime',
+    title: 'Method Before Macro', setupLine: 'The method is the axis; the macro thesis rotates around it as the regime changes',
     claimLabel: 'LINEAGE · METHOD',
     frameworkClaim: 'The framework’s method persists across regimes; the macro thesis changes with the environment.',
     readerTakeaway: 'Keep the method fixed; let the thesis move.',
-    chartType: 'Two stacked panels: a rotating macro-thesis line over a stable method baseline.',
+    chartType: 'One field: a fixed central method/lineage axis with the macro-thesis line orbiting above, through, and below it across three regimes.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 2', label: 'Lineage and macro thesis identification', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
       { provider: 'ACF · Part 1', label: 'Survivable compounding doctrine', role: 'verifies-concept', url: '/part-1-foundation' },
     ],
-    explainerHeadline: 'The method is constant; the thesis rotates.',
-    explainerBody: 'The lineage — survival first, convexity, regime awareness — does not change with the cycle. What changes is the macro thesis it gets pointed at. Confusing the two is how investors abandon a sound method the moment the regime turns.',
+    explainerHeadline: 'The method is the axis; the thesis rotates around it.',
+    explainerBody: 'The lineage — survival first, convexity, regime awareness, governance — is the fixed spine. The macro thesis is the expression that rotates around it: above the axis in one regime, reassessed as it crosses at each transition, below it in the next. Confusing the two is how investors abandon a sound method the moment the regime turns.',
     explainerConcept: 'Method vs application',
     concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
-    layout: 'dual',
-    ariaSummary: 'Two stacked conceptual panels sharing a regime timeline. The top panel shows the macro thesis swinging from regime to regime; the bottom panel shows the method as a near-flat, persistent baseline.',
-    xDomain: { xMin: 0, xMax: 100 },
-    xTicks: [{ v: 0, label: 'regime A' }, { v: 50, label: 'regime B' }, { v: 100, label: 'regime C' }],
-    connective: 'the thesis above rotates; the method below does not',
-    panels: [
-      { id: 'thesisPanel', label: 'Macro thesis · rotates with the regime', yUnit: '', domain: { yMin: 0, yMax: 100 }, yTicks: [], series: [{ key: 'thesis', tier: 'primary', pts: p2Method.thesis }] },
-      { id: 'methodPanel', label: 'Method · the lineage that persists', yUnit: '', domain: { yMin: 0, yMax: 100 }, yTicks: [], series: [{ key: 'method', tier: 'reference', pts: p2Method.method }] },
+    layout: 'single',
+    ariaSummary: 'A single conceptual field. A calm horizontal method / lineage axis runs through the centre; the macro-thesis line orbits it — expressed above the axis in regime A, crossing through the axis at each regime transition, below it in regime B, and back above it in regime C. The axis never moves; only the thesis rotates around it.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 100 }, yUnit: '', yTicks: [],
+    xTicks: [{ v: 15, label: 'regime A' }, { v: 50, label: 'regime B' }, { v: 85, label: 'regime C' }],
+    series: [{ key: 'thesis', tier: 'primary', label: 'Macro thesis', pts: p2Method.thesis }],
+    guides: [{ id: 'method', y: p2Method.spine, kind: 'reference', label: 'METHOD · LINEAGE' }],
+    markers: [
+      { id: 'transition', type: 'dot', x: p2Method.cross1, y: p2Method.spine, r: 3.2, label: 'regime transition', labelAnchor: 'middle', labelDy: 16 },
+      { id: 'transition2', type: 'dot', x: p2Method.cross2, y: p2Method.spine, r: 3.2 },
     ],
+    notes: [{ x: 15, y: 86, text: 'the thesis rotates around the method', anchor: 'middle' }],
     primaryKey: 'thesis',
     hoverTargets: [
-      { id: 'thesis', kind: 'series', panel: 'thesisPanel', seriesKey: 'thesis', label: 'Macro thesis', name: 'Macro thesis', why: 'The application layer. It swings with growth, inflation, and liquidity — it is supposed to.', claim: 'The thesis is meant to change.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
-      { id: 'method', kind: 'series', panel: 'methodPanel', seriesKey: 'method', label: 'Method', name: 'The method', why: 'Survival first, convexity, regime awareness, governance. It does not rotate when the regime does.', claim: 'The method is the constant.', concept: 'Method vs application', link: '/part-1-foundation' },
+      { id: 'thesis', kind: 'series', seriesKey: 'thesis', label: 'Macro thesis', name: 'Macro thesis', why: 'The application layer — it swings above and below the method as growth, inflation and liquidity rotate. It is supposed to move.', claim: 'The thesis rotates around the method.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'method', kind: 'level', label: 'Method · lineage', name: 'The method (the axis)', why: 'Survival first, convexity, regime awareness, governance — the fixed spine the thesis rotates around. It does not move when the regime does.', claim: 'The method is the constant axis.', concept: 'Method vs application', link: '/part-1-foundation' },
+      { id: 'transition', kind: 'marker', label: 'Regime transition', name: 'Regime transition', why: 'Where the thesis crosses the method and is reassessed for the new regime — the process that reassesses it does not change.', claim: 'Reassess the thesis, not the method.', concept: 'Method vs application', link: '/part-2-lineage-macro-thesis' },
     ],
-    mobileTapTargets: ['thesis', 'method'],
-    implementationNotes: 'Conceptual dual: top rotates, bottom holds. No numeric axes by design. Marketing may prefer a literal two-layer block diagram — flagged for design review.',
+    mobileTapTargets: ['thesis', 'method', 'transition'],
+    implementationNotes: 'Conceptual single field (was a stacked dual): the method is a fixed central axis (guide) and the macro thesis orbits it — above in A, crossing at transitions, below in B, above in C. No numeric axes by design.',
   },
 
   {
