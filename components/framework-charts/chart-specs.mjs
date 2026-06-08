@@ -94,6 +94,14 @@ export const MOTION_DURATIONS = ['calm', 'slow', 'transformational'];
 // A background is allowed ONLY if it explains a relationship — never decorative.
 export const BACKGROUND_ROLES = ['regime', 'pressure', 'relational', 'revealLayer'];
 
+// Teaching arc (story beats) + the chart's experience role. A non-visible
+// contract for inventory / README / future motion choreography. 'takeaway' (the
+// remembered idea) is carried by readerTakeaway, so default beats stop at
+// consequence and never duplicate it.
+export const EXPERIENCE_ROLES = ['evidence', 'comparison', 'mechanism', 'conversion', 'reveal', 'matrix', 'diagram'];
+export const BEAT_KINDS = ['context', 'mechanism', 'action', 'consequence', 'takeaway'];
+export const BEAT_TIMINGS = ['early', 'middle', 'late'];
+
 // Reader simulation-context keys. `startingValue` is canonical; `portfolioValue`
 // is the legacy alias kept working until the reader-context migration lands.
 export const CONTEXT_KEYS = ['startingValue', 'horizon', 'withdrawalRate', 'btcReserveAllocation', 'monthlyDca'];
@@ -185,6 +193,34 @@ export function resolveBackgroundRoles(spec) {
   if (spec.layout === 'scenario') roles.add('regime');                // trough/intervention zone
   if (spec.layout === 'dual' && spec.perspectiveSlider) roles.add('revealLayer');
   return [...roles];
+}
+
+// experience role: what KIND of learning experience the chart is (complements
+// claimStack = what it claims, interaction = how you touch it).
+export function resolveExperienceRole(spec) {
+  if (spec.experienceRole) return spec.experienceRole;
+  const L = spec.layout;
+  if (L === 'scenario') return 'comparison';
+  if (L === 'sequenceRisk') return 'mechanism';
+  if (L === 'heartbeat') return 'conversion';
+  if (L === 'dual' && spec.perspectiveSlider) return 'reveal';
+  if (L === 'scorecard') return 'matrix';
+  if (['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
+  return 'evidence';
+}
+// story beats: the comprehension arc the chart should build in. Explicit wins;
+// otherwise derived context → mechanism → (action, if interactive) → consequence.
+export function resolveStoryBeats(spec) {
+  if (Array.isArray(spec.storyBeats) && spec.storyBeats.length) return spec.storyBeats;
+  const it = resolveInteraction(spec);
+  const interactive = it.type !== 'hover' && it.type !== 'none';
+  const beats = [
+    { kind: 'context', label: 'Establish the backdrop', timing: 'early' },
+    { kind: 'mechanism', label: 'Reveal the mechanism', timing: 'middle' },
+  ];
+  if (interactive) beats.push({ kind: 'action', label: it.conceptMatch || 'Invite the reader to act', timing: 'middle' });
+  beats.push({ kind: 'consequence', label: 'Resolve the takeaway', timing: 'late' });
+  return beats;
 }
 
 // ── simulation-context intro (chart-level data introduction) ─────────────────
@@ -836,6 +872,7 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-cpi-assets', idx: '03', group: 'part-1', intendedPlacement: 'part-1',
+    experienceRole: 'comparison',
     claimStack: {
       primaryClaim: 'CPI alone does not capture the full inflation story',
       visualProof: 'Assets vs CPI as indexed lines; the widening gap between them is the claim',
@@ -888,6 +925,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-policy-constraint', idx: '04', group: 'part-1', intendedPlacement: 'part-1',
+    experienceRole: 'reveal',
+    storyBeats: [
+      { kind: 'context', label: 'The debt/GDP backdrop rises in both states', timing: 'early' },
+      { kind: 'mechanism', label: 'The interest cost sits hidden beneath the same backdrop', timing: 'middle' },
+      { kind: 'action', label: 'Drag the divider to wipe the surface and expose the cost', timing: 'middle' },
+      { kind: 'consequence', label: 'The bill surfaces; policy room narrows', timing: 'late' },
+    ],
     claimStack: {
       primaryClaim: 'Debt rose for decades while falling rates hid the cost',
       visualProof: 'The same debt/GDP backdrop in both states; the interest-burden cost is revealed beneath it',
@@ -940,6 +984,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p1-sequence-risk', idx: '05', group: 'part-1', intendedPlacement: 'part-1',
+    experienceRole: 'mechanism',
+    storyBeats: [
+      { kind: 'context', label: 'One shared return deck, shown in two orders', timing: 'early' },
+      { kind: 'mechanism', label: 'The same returns generate both portfolio paths', timing: 'middle' },
+      { kind: 'action', label: 'Compare the deck in reverse and watch the paths', timing: 'middle' },
+      { kind: 'consequence', label: 'Identical average, opposite surviving capital', timing: 'late' },
+    ],
     claimStack: {
       primaryClaim: 'Same returns, same withdrawals — different order, opposite survival',
       visualProof: 'A shared return deck (same blocks, two orders) drives both portfolio paths',
@@ -1528,6 +1579,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-exposure-not-control', idx: 'P3-04', group: 'part-3', intendedPlacement: 'part-3',
+    experienceRole: 'comparison',
+    storyBeats: [
+      { kind: 'context', label: 'Three strategy paths drawn together through a drawdown', timing: 'early' },
+      { kind: 'mechanism', label: 'Capacity and decision strain separate them', timing: 'middle' },
+      { kind: 'action', label: 'Choose a strategy, then change the shock', timing: 'middle' },
+      { kind: 'consequence', label: 'No line wins every path; the framework holds the tightest band', timing: 'late' },
+    ],
     claimStack: {
       primaryClaim: 'Exposure can win one cycle; control is what survives many',
       visualProof: 'All three strategy paths drawn together, plus an across-all-paths robustness strip',
@@ -1624,6 +1682,12 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-accumulate-dont-trade', idx: 'P3-06', group: 'part-3', intendedPlacement: 'part-3',
+    experienceRole: 'conversion',
+    storyBeats: [
+      { kind: 'context', label: 'A representative BTC price index over a cycle', timing: 'early' },
+      { kind: 'mechanism', label: 'Units = fixed dollars ÷ price, so a lower price buys more', timing: 'middle' },
+      { kind: 'consequence', label: 'The framework leans in only when undervalued; never sells', timing: 'late' },
+    ],
     claimStack: {
       primaryClaim: 'Fixed-dollar DCA buys more units when price is lower',
       visualProof: 'Unit bars whose height = dollars ÷ price; the framework boost stacks only in the undervalued window',

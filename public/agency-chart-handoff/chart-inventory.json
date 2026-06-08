@@ -29,6 +29,15 @@
       "historical",
       "simulation",
       "conceptual"
+    ],
+    "experienceRoles": [
+      "evidence",
+      "comparison",
+      "mechanism",
+      "conversion",
+      "reveal",
+      "matrix",
+      "diagram"
     ]
   },
   "count": 28,
@@ -48,6 +57,24 @@
       "visualProof": "Conceptual payoff curve vs a symmetric reference line.",
       "readerAction": null,
       "readerTakeaway": "Survive the left tail; stay convex on the right tail.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -94,6 +121,24 @@
       "visualProof": "Conceptual outcome-distribution reshape vs a symmetric reference.",
       "readerAction": null,
       "readerTakeaway": "Same center of gravity, deliberately reshaped tails.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -142,6 +187,24 @@
       "visualProof": "A representative path: patient compression, then an accelerating release past a defined-risk marker",
       "readerAction": "See where convexity actually pays",
       "readerTakeaway": "Patience through compression; size into confirmation; let the release run.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -190,6 +253,24 @@
       "visualProof": "Growth × inflation quadrant with a representative regime path.",
       "readerAction": null,
       "readerTakeaway": "You are not allocating in a vacuum; you are allocating into weather.",
+      "experienceRole": "diagram",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -236,6 +317,24 @@
       "visualProof": "Minimal flow/loop diagram of the framework control system.",
       "readerAction": null,
       "readerTakeaway": "Every position is traceable to a thesis and governed by a tripwire.",
+      "experienceRole": "diagram",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -282,6 +381,24 @@
       "visualProof": "Stocks, bonds, and the 60/40 blend indexed together through an inflation shock — bonds fall with stocks",
       "readerAction": "Watch the hedge fall with the risk",
       "readerTakeaway": "When inflation drives the regime, the hedge can fall with the risk.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -337,6 +454,24 @@
       "visualProof": "A rolling correlation line crossing from negative to positive through an inflation-shock field",
       "readerAction": "Watch the diversifier sign flip",
       "readerTakeaway": "The diversifier did not disappear. The regime that produced it did.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -392,6 +527,24 @@
       "visualProof": "Assets vs CPI as indexed lines; the widening gap between them is the claim",
       "readerAction": "See how far assets outran CPI",
       "readerTakeaway": "Consumer prices roughly doubled. The assets that store capital did far more.",
+      "experienceRole": "comparison",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -447,6 +600,29 @@
       "visualProof": "The same debt/GDP backdrop in both states; the interest-burden cost is revealed beneath it",
       "readerAction": "Reveal what the surface was hiding",
       "readerTakeaway": "For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.",
+      "experienceRole": "reveal",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "The debt/GDP backdrop rises in both states",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "The interest cost sits hidden beneath the same backdrop",
+          "timing": "middle"
+        },
+        {
+          "kind": "action",
+          "label": "Drag the divider to wipe the surface and expose the cost",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "The bill surfaces; policy room narrows",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "beforeAfterReveal",
         "gesture": "drag",
@@ -504,6 +680,29 @@
       "visualProof": "A shared return deck (same blocks, two orders) drives both portfolio paths",
       "readerAction": "Compare the two orders of the same deck",
       "readerTakeaway": "Withdrawal-phase capital does not care about the average. It cares about the order.",
+      "experienceRole": "mechanism",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "One shared return deck, shown in two orders",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "The same returns generate both portfolio paths",
+          "timing": "middle"
+        },
+        {
+          "kind": "action",
+          "label": "Compare the deck in reverse and watch the paths",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Identical average, opposite surviving capital",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "returnOrder",
         "gesture": "hover",
@@ -548,6 +747,24 @@
       "visualProof": "A representative portfolio path that compounds through a shaded drawdown rather than around it",
       "readerAction": "See compounding survive the drawdown",
       "readerTakeaway": "Volatile assets can still compound — through, not around, the drawdown.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -596,6 +813,24 @@
       "visualProof": "Two stacked panels: a rotating macro-thesis line over a stable method baseline.",
       "readerAction": null,
       "readerTakeaway": "Keep the method fixed; let the thesis move.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -642,6 +877,24 @@
       "visualProof": "Two outcome paths with similar volatility but different left-tail ruin.",
       "readerAction": null,
       "readerTakeaway": "You cannot compound from zero.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -688,6 +941,24 @@
       "visualProof": "Position size versus conviction, with and without an enforced exit cap.",
       "readerAction": null,
       "readerTakeaway": "Size up on conviction, but keep the exit.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -734,6 +1005,24 @@
       "visualProof": "Reflexive loop of price, capital, fundamentals, and validation.",
       "readerAction": null,
       "readerTakeaway": "Price is an input, not just an output.",
+      "experienceRole": "diagram",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -773,6 +1062,24 @@
       "visualProof": "Two compounding paths diverging at long horizon (simulation).",
       "readerAction": null,
       "readerTakeaway": "A long horizon rewrites the prudent choice.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -819,6 +1126,24 @@
       "visualProof": "Flow map: structural force → bottlenecks → where capital lands.",
       "readerAction": null,
       "readerTakeaway": "Trace the force to its bottleneck to its instruments.",
+      "experienceRole": "diagram",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -858,6 +1183,24 @@
       "visualProof": "Validation gauntlet: narrative through four gates to a thesis.",
       "readerAction": null,
       "readerTakeaway": "Most narratives never make it through the gates.",
+      "experienceRole": "diagram",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -897,6 +1240,24 @@
       "visualProof": "Thesis validity held constant while sizing rises then trims across phases.",
       "readerAction": null,
       "readerTakeaway": "Right thesis, wrong size, still a loss.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -943,6 +1304,24 @@
       "visualProof": "Representative liquidity impulse versus convex-asset sensitivity.",
       "readerAction": null,
       "readerTakeaway": "Convex assets ride the liquidity tide, magnified.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -996,6 +1375,24 @@
       "visualProof": "Log power-law corridor with price oscillating between euphoria and capitulation bands.",
       "readerAction": null,
       "readerTakeaway": "A map of where Bitcoin sits on its adoption curve, not a forecast.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -1044,6 +1441,24 @@
       "visualProof": "A requirement × asset matrix with shape-coded meet/partial/fail glyphs and a 10/10 column",
       "readerAction": "Scan the column that clears every row",
       "readerTakeaway": "No alternative clears all ten at once.",
+      "experienceRole": "matrix",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -1083,6 +1498,29 @@
       "visualProof": "A volatile Bitcoin line beside a calm total-portfolio line at a managed reserve",
       "readerAction": "See the drawdown sized to your portfolio",
       "readerTakeaway": "The drawdown is the price of admission, not a reason to avoid it.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "action",
+          "label": "Entering a starting value scales the representative drawdown into a portfolio-impact figure",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "readerContext",
         "gesture": "type",
@@ -1136,6 +1574,29 @@
       "visualProof": "All three strategy paths drawn together, plus an across-all-paths robustness strip",
       "readerAction": "Pick a path, then stress it",
       "readerTakeaway": "Max exposure wins the clean bull case; the framework wins the messy path — balancing upside, capacity, and emotional control.",
+      "experienceRole": "comparison",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Three strategy paths drawn together through a drawdown",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Capacity and decision strain separate them",
+          "timing": "middle"
+        },
+        {
+          "kind": "action",
+          "label": "Choose a strategy, then change the shock",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "No line wins every path; the framework holds the tightest band",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "scenario",
         "gesture": "choose",
@@ -1189,6 +1650,24 @@
       "visualProof": "Valuation envelope — the spread between models narrows on convergence, widens on divergence.",
       "readerAction": null,
       "readerTakeaway": "Agreement strengthens conviction; disagreement is the signal.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -1230,6 +1709,24 @@
       "visualProof": "Unit bars whose height = dollars ÷ price; the framework boost stacks only in the undervalued window",
       "readerAction": "Watch units rise as price falls",
       "readerTakeaway": "For an accumulator, drawdowns become unit-capture windows — if the plan survives them.",
+      "experienceRole": "conversion",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "A representative BTC price index over a cycle",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Units = fixed dollars ÷ price, so a lower price buys more",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "The framework leans in only when undervalued; never sells",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -1271,6 +1768,24 @@
       "visualProof": "Reserve lifecycle flow: accumulate → self-custody → mature → collateralized loan → liquidity.",
       "readerAction": null,
       "readerTakeaway": "Liquidity comes from borrowing against the reserve, not selling it.",
+      "experienceRole": "diagram",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",
@@ -1317,6 +1832,24 @@
       "visualProof": "Reserve share as a percent of net worth, rising through target, elevated, and mature phases.",
       "readerAction": null,
       "readerTakeaway": "Success changes the job: from accumulating to governing the reserve.",
+      "experienceRole": "evidence",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
       "interaction": {
         "type": "hover",
         "gesture": "hover",

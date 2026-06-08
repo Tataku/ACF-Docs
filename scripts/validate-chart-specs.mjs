@@ -20,7 +20,9 @@ import {
   FRAMEWORK_CHART_SPECS, footerModel,
   DATA_MODES, SOURCE_ROLES, CONTEXT_KEYS, LEGACY_CONTEXT_KEYS, PERSONAL_KINDS,
   INTERACTION_TYPES, GESTURES, MOTION_TYPES, MOTION_DURATIONS, BACKGROUND_ROLES, BANNED_PROMISE_WORDS,
+  EXPERIENCE_ROLES, BEAT_KINDS, BEAT_TIMINGS,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles, getSimulationIntro,
+  resolveExperienceRole, resolveStoryBeats,
 } from '../components/framework-charts/chart-specs.mjs';
 
 const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'both']);
@@ -198,6 +200,21 @@ for (const s of FRAMEWORK_CHART_SPECS) {
   // A background is allowed only if it explains a relationship — never decorative.
   resolveBackgroundRoles(s).forEach((r) => ok(BACKGROUND_ROLES.includes(r), `${w} background role '${r}' not allowed (decorative backgrounds are forbidden)`));
 
+  // Story beats + experience role — the comprehension-arc contract (resolved).
+  ok(EXPERIENCE_ROLES.includes(resolveExperienceRole(s)), `${w} bad experienceRole: ${resolveExperienceRole(s)}`);
+  if (s.experienceRole) ok(EXPERIENCE_ROLES.includes(s.experienceRole), `${w} explicit experienceRole invalid: ${s.experienceRole}`);
+  const beats = resolveStoryBeats(s);
+  ok(Array.isArray(beats) && beats.length >= 2, `${w} storyBeats must resolve to >= 2 beats`);
+  let lastT = -1;
+  beats.forEach((bt, i) => {
+    ok(bt && BEAT_KINDS.includes(bt.kind), `${w} storyBeats[${i}] bad kind: ${bt && bt.kind}`);
+    ok(bt && BEAT_TIMINGS.includes(bt.timing), `${w} storyBeats[${i}] bad timing: ${bt && bt.timing}`);
+    ok(bt && typeof bt.label === 'string' && bt.label.trim(), `${w} storyBeats[${i}] needs a label`);
+    const ti = bt ? BEAT_TIMINGS.indexOf(bt.timing) : -1;
+    ok(ti >= lastT, `${w} storyBeats out of order at [${i}] — timing must not go backwards`);
+    lastT = ti;
+  });
+
   // Math-backed where math is claimed: a DCA chart must expose the conversion.
   if (s.layout === 'heartbeat') ok((s.formula && /[÷/=]/.test(s.formula)) || /÷|= units/i.test(cs.visualProof || ''), `${w} DCA chart must declare a visible conversion formula`);
 
@@ -237,4 +254,5 @@ const tally = (fn) => { const m = {}; FRAMEWORK_CHART_SPECS.forEach((s) => { con
 console.log(`  data modes  : ${tally((s) => s.visualDataMode)}`);
 console.log(`  interaction : ${tally((s) => resolveInteraction(s).type)}`);
 console.log(`  motion      : ${tally((s) => resolveMotionProfile(s).type)}`);
+console.log(`  experience  : ${tally((s) => resolveExperienceRole(s))}`);
 console.log(`  personalized: ${FRAMEWORK_CHART_SPECS.filter((s) => s.personalization).map((s) => s.chartId).join(', ') || '(none)'}`);
