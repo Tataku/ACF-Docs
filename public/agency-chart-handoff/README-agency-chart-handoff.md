@@ -108,7 +108,8 @@ Already native on touch: the before/after reveal **snaps** to Surface / Split / 
 4. Override `claimStack` / `interaction` / `motionProfile` only if the derived
    defaults don't fit; add `personalization` only when scaling has honest meaning.
 5. `npm run validate:charts` → `npm run build:inventory` → `next build`.
-6. Charts stay handoff-only; placement into public pages is a separate decision.
+6. `npm run audit:chart-experience` — the **non-failing** coaching report (design QA, not a gate): actionable RISKS (hover-only density, unarticulated mechanism, label crowding, relational backgrounds to verify) + CONTEXT (status + which charts lean on derived doctrine). `validate:charts` is the gate; this keeps the validator from becoming a design prison.
+7. Charts stay handoff-only; placement into public pages is a separate decision.
 
 ---
 
