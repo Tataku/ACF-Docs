@@ -9,7 +9,7 @@
  *
  * Editorial single column, dark terminal foundation. Not public navigation.
  * ─────────────────────────────────────────────────────────────────────────── */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FrameworkChart from './FrameworkChart';
 import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel, HORIZON_BANDS } from './chart-specs.mjs';
 import { getPalette, getAccent } from './palette';
@@ -230,40 +230,48 @@ const PRESETS = {
 // One optional input near the top scales representative exhibits to the reader's
 // own numbers (startingValue + horizon). Local state only — no persistence, no
 // cookies, no forecast. HORIZON_BANDS is shared from chart-specs (single source).
-const DEFAULT_SIMULATION_CONTEXT = { startingValue: 100000, horizon: '30y' };
+const SIM_CTX_KEY = 'acf-sim-context';
+const DEFAULT_SIMULATION_CONTEXT = { startingValue: 100000, horizon: '30y', withdrawalRate: 0.04, btcReserveAllocation: 0.15, monthlyDca: 500 };
 const parseMoney = (s) => { const n = Number(String(s).replace(/[^0-9.]/g, '')); return isFinite(n) ? n : NaN; };
 const clampMoney = (n) => Math.min(100000000, Math.max(1000, Math.round(n)));
 const groupMoney = (n) => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '');
 
 function SimulationContextBar({ pal, accent, ctx, setCtx }) {
   const [raw, setRaw] = useState(groupMoney(ctx.startingValue));
+  const [dcaRaw, setDcaRaw] = useState(groupMoney(ctx.monthlyDca));
+  // keep inputs in sync when the context hydrates from sessionStorage / another page
+  useEffect(() => { setRaw(groupMoney(ctx.startingValue)); }, [ctx.startingValue]);
+  useEffect(() => { setDcaRaw(groupMoney(ctx.monthlyDca)); }, [ctx.monthlyDca]);
   const lbl = { fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.18em', color: pal.text4 };
   const base = { fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.04em', cursor: 'pointer', background: 'transparent', border: 'none', padding: '3px 2px 1px', lineHeight: 1.4 };
   const sty = (active) => ({ ...base, color: active ? pal.text1 : pal.text3, fontWeight: active ? 600 : 400, borderBottom: `1.5px solid ${active ? accent : 'transparent'}` });
   const commit = () => { const n = parseMoney(raw); const v = isFinite(n) ? clampMoney(n) : DEFAULT_SIMULATION_CONTEXT.startingValue; setCtx((c) => ({ ...c, startingValue: v })); setRaw(groupMoney(v)); };
+  const commitDca = () => { const n = parseMoney(dcaRaw); const v = isFinite(n) ? Math.min(100000, Math.max(0, Math.round(n))) : DEFAULT_SIMULATION_CONTEXT.monthlyDca; setCtx((c) => ({ ...c, monthlyDca: v })); setDcaRaw(groupMoney(v)); };
+  const dots = (nodes, key) => nodes.flatMap((n, i) => (i === 0 ? [n] : [<span key={`d${key}${i}`} aria-hidden style={{ color: pal.text4, opacity: 0.4 }}>·</span>, n]));
+  const choice = (key, opts) => dots(opts.map((o) => <button key={String(o.v)} onClick={() => setCtx((c) => ({ ...c, [key]: o.v }))} aria-pressed={ctx[key] === o.v} style={sty(ctx[key] === o.v)}>{o.label}</button>), key);
+  const money = (value, onChange, onCommit, aria, w) => (
+    <span style={{ display: 'inline-flex', alignItems: 'baseline' }}>
+      <span aria-hidden style={{ color: pal.text3, fontFamily: pal.mono, fontSize: 13 }}>$</span>
+      <input inputMode="numeric" aria-label={aria} value={value} onChange={(e) => onChange(e.target.value)} onBlur={onCommit}
+        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+        style={{ width: w, background: 'transparent', border: 'none', borderBottom: `1.5px solid ${pal.borderHi}`, color: pal.text1, fontFamily: pal.mono, fontSize: 13, padding: '2px 0 2px 2px', outline: 'none' }} />
+    </span>
+  );
+  const group = (label, child) => (
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap' }}>
+      <span style={lbl}>{label}</span>
+      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>{child}</span>
+    </span>
+  );
   return (
-    <section aria-label="Simulation context" style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 28px' }}>
+    <section aria-label="Simulation context" style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 26px' }}>
       <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>SIMULATION CONTEXT</span>
-      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9 }}>
-        <span style={lbl}>STARTING VALUE</span>
-        <span style={{ display: 'inline-flex', alignItems: 'baseline' }}>
-          <span aria-hidden style={{ color: pal.text3, fontFamily: pal.mono, fontSize: 13 }}>$</span>
-          <input inputMode="numeric" aria-label="Illustrative starting portfolio value in dollars" value={raw}
-            onChange={(e) => setRaw(e.target.value)} onBlur={commit}
-            onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-            style={{ width: 96, background: 'transparent', border: 'none', borderBottom: `1.5px solid ${pal.borderHi}`, color: pal.text1, fontFamily: pal.mono, fontSize: 13, padding: '2px 0 2px 2px', outline: 'none' }} />
-        </span>
-      </span>
-      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9, flexWrap: 'wrap' }}>
-        <span style={lbl}>TIME HORIZON</span>
-        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
-          {HORIZON_BANDS.flatMap((h, i) => {
-            const btn = <button key={h.id} onClick={() => setCtx((c) => ({ ...c, horizon: h.id }))} aria-pressed={ctx.horizon === h.id} style={sty(ctx.horizon === h.id)}>{h.label}</button>;
-            return i === 0 ? [btn] : [<span key={`s${i}`} aria-hidden style={{ color: pal.text4, opacity: 0.4 }}>·</span>, btn];
-          })}
-        </span>
-      </span>
-      <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>Used only to scale representative exhibits on this page. Not a forecast or recommendation.</span>
+      {group('STARTING VALUE', money(raw, setRaw, commit, 'Illustrative starting portfolio value in dollars', 96))}
+      {group('TIME HORIZON', choice('horizon', HORIZON_BANDS.map((h) => ({ v: h.id, label: h.label }))))}
+      {group('WITHDRAWAL / YR', choice('withdrawalRate', [{ v: 0.03, label: '3%' }, { v: 0.04, label: '4%' }, { v: 0.05, label: '5%' }, { v: 0.06, label: '6%' }]))}
+      {group('BITCOIN RESERVE', choice('btcReserveAllocation', [{ v: 0.05, label: '5%' }, { v: 0.10, label: '10%' }, { v: 0.15, label: '15%' }, { v: 0.25, label: '25%' }]))}
+      {group('MONTHLY DCA', money(dcaRaw, setDcaRaw, commitDca, 'Illustrative monthly DCA amount in dollars', 64))}
+      <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>Used only to scale representative exhibits on this page. Each chart discloses the inputs it uses. Not a forecast or recommendation.</span>
     </section>
   );
 }
@@ -297,6 +305,16 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   const [theme, setTheme] = useState(initialTheme);
   const [view, setView] = useState('reader');                 // 'reader' (guided learning) | 'agency' (inventory-first review)
   const [readerCtx, setReaderCtx] = useState(DEFAULT_SIMULATION_CONTEXT);
+  // Single local source of truth across the Part 1/2/3 handoff pages: hydrate from
+  // and persist to sessionStorage only — no cookies, no server, no account.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try { const s = window.sessionStorage.getItem(SIM_CTX_KEY); if (s) setReaderCtx((c) => ({ ...c, ...JSON.parse(s) })); } catch (_) { /* noop */ }
+  }, []);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try { window.sessionStorage.setItem(SIM_CTX_KEY, JSON.stringify(readerCtx)); } catch (_) { /* noop */ }
+  }, [readerCtx]);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
   const isExport = variant === 'export';

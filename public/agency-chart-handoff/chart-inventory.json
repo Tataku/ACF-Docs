@@ -846,7 +846,8 @@
       "readerContext": {
         "kind": "sequence-scale",
         "uses": [
-          "startingValue"
+          "startingValue",
+          "withdrawalRate"
         ]
       },
       "disclosureMode": "simulation",
@@ -1270,14 +1271,19 @@
           "timing": "middle"
         },
         {
+          "kind": "action",
+          "label": "Invite the reader to act",
+          "timing": "middle"
+        },
+        {
           "kind": "consequence",
           "label": "Resolve the takeaway",
           "timing": "late"
         }
       ],
       "interaction": {
-        "type": "hover",
-        "gesture": "hover",
+        "type": "readerContext",
+        "gesture": "type",
         "conceptMatch": null
       },
       "motionProfile": {
@@ -1296,9 +1302,15 @@
         "chartHeight": "tall",
         "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
-      "tryThis": null,
-      "tryThisMobile": null,
-      "readerContext": null,
+      "tryThis": "Enter your starting value above",
+      "tryThisMobile": "Enter your starting value above",
+      "readerContext": {
+        "kind": "horizon-scale",
+        "uses": [
+          "startingValue",
+          "horizon"
+        ]
+      },
       "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
       "sources": [
@@ -1835,7 +1847,8 @@
       "readerContext": {
         "kind": "vol-impact",
         "uses": [
-          "startingValue"
+          "startingValue",
+          "btcReserveAllocation"
         ]
       },
       "disclosureMode": "representative",
@@ -2077,7 +2090,12 @@
       },
       "tryThis": null,
       "tryThisMobile": null,
-      "readerContext": null,
+      "readerContext": {
+        "kind": "dca-note",
+        "uses": [
+          "monthlyDca"
+        ]
+      },
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
       "sources": [

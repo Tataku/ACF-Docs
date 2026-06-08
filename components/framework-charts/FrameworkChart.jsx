@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, valueAt, getSimulationIntro, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
+import { getChartSpec, footerModel, valueAt, getSimulationIntro, getSimulationNote, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -113,20 +113,9 @@ function fmtMoney(n) {
   const r = n >= 100000 ? Math.round(n / 1000) * 1000 : Math.round(n / 100) * 100;
   return '$' + r.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
-// A quiet personalized CALLOUT below the plot — for the specific computed figure a
-// chart-level intro can't carry (e.g. the dollar size of a drawdown). The generic
-// "scaled example" framing is handled by getSimulationIntro ABOVE the visual, so
-// scenario/sequence scaling shows there + in-chart, not as a duplicate caption.
-function personalNote(spec, rc) {
-  const p = spec.personalization;
-  const P = readStartingValue(rc);
-  if (!p || P == null) return null;
-  if (p.kind === 'vol-impact') {
-    const a = p.assume || { alloc: 0.15, drawdown: 0.70 };
-    return `At a ${Math.round(a.alloc * 100)}% Bitcoin reserve, a ${Math.round(a.drawdown * 100)}% Bitcoin drawdown is roughly a ${fmtMoney(P * a.alloc * a.drawdown)} hit (~${Math.round(a.alloc * a.drawdown * 100)}%) on a ${fmtMoney(P)} portfolio — representative, not a forecast.`;
-  }
-  return null;
-}
+// The personalized CALLOUT below the plot — the one computed figure the intro line
+// can't carry (e.g. the dollar size of a drawdown, or the multiples at a horizon)
+// — is resolved in chart-specs (getSimulationNote), beside the data it scales.
 
 /* ── Shared tooltip ──────────────────────────────────────────────────────────
  * Hover preview is ephemeral; click pins it (links become clickable). Placement
@@ -1299,7 +1288,8 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
  * muted baseline pulse while undervalued (boost) and falls below it when
  * extended (slows, never sells). Representative/conceptual — no historical
  * price, no exact sats. The undervalued window reuses the organic dcaWindow. */
-function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin }) {
+function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coarse, targets, active, pinned, onActive, onPin, readerContext }) {
+  const dcaLabel = isFinite(readerContext && readerContext.monthlyDca) && readerContext.monthlyDca > 0 ? fmtMoney(readerContext.monthlyDca) : 'DCA $';
   const svgRef = useRef(null);
   const hb = spec.heartbeat;
   const pad = { l: 18, r: 96, t: 32, b: 46 };
@@ -1367,7 +1357,7 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
         <text x={pad.l} y={pad.t - 2} style={halo(pal, 8.5, pal.text4)}>BTC PRICE INDEX · REPRESENTATIVE</text>
         {/* math anchor in the transition zone — the conversion that drives bar height */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 600ms ease 1000ms' }}>
-          <text x={(pad.l + width - pad.r) / 2} y={(priceBot + pulseTop) / 2 - 3} textAnchor="middle" style={halo(pal, 10, pal.text2, 600)}>DCA $ ÷ BTC price = units received</text>
+          <text x={(pad.l + width - pad.r) / 2} y={(priceBot + pulseTop) / 2 - 3} textAnchor="middle" style={halo(pal, 10, pal.text2, 600)}>{dcaLabel} ÷ BTC price = units received</text>
           <text x={(pad.l + width - pad.r) / 2} y={(priceBot + pulseTop) / 2 + 10} textAnchor="middle" style={halo(pal, 8, pal.text4)}>lower price → more units</text>
         </g>
 
@@ -1550,9 +1540,18 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   const seq = spec.sequence;
   const N = seq.N;
   const P = readStartingValue(readerContext) || 1e6;
+  // Re-simulate BOTH paths from the SAME deck at the reader's withdrawal rate,
+  // clamped to a representative band so the exhibit stays on-axis and never NaNs.
+  // Default 4% reproduces the spec paths exactly; the domain only expands below 4%.
+  const w = Math.max(0.02, Math.min(0.08, isFinite(readerContext && readerContext.withdrawalRate) ? readerContext.withdrawalRate : (seq.withdraw || 0.04)));
+  const simPath = (order) => { const out = [{ x: 0, y: seq.start }]; let v = seq.start; order.forEach((r, i) => { v = Math.max(0, v * (1 + r / 100) - w); out.push({ x: i + 1, y: v }); }); return out; };
+  const goodPath = simPath(seq.good), badPath = simPath(seq.bad);
+  const goodEnd = goodPath[N].y, badEnd = badPath[N].y;
+  let trough = { x: 0, y: Infinity }; badPath.forEach((p) => { if (p.y < trough.y) trough = p; });
+  const dataMax = Math.max(...goodPath.map((p) => p.y), ...badPath.map((p) => p.y));
   const pad = { l: 18, r: 96, t: 18, b: 36 };
   const X = (p) => pad.l + (p / N) * (width - pad.l - pad.r);
-  const dom = spec.domain;
+  const dom = { ...spec.domain, yMax: dataMax <= spec.domain.yMax ? spec.domain.yMax : dataMax + 0.15 };
   const deckTop = pad.t + 14, yG = deckTop + 22, yB = deckTop + 66, rowHalf = 15;
   const pathTop = deckTop + 96, pathBot = height - pad.b;
   const Y = (v) => pathBot - ((v - dom.yMin) / (dom.yMax - dom.yMin)) * (pathBot - pathTop);
@@ -1562,13 +1561,13 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   const EZ = 'cubic-bezier(0.22,0.61,0.36,1)';
 
   const geom = useMemo(() => {
-    const gpx = seq.goodPath.map((p) => ({ x: X(p.x), y: Y(p.y) }));
-    const bpx = seq.badPath.map((p) => ({ x: X(p.x), y: Y(p.y) }));
+    const gpx = goodPath.map((p) => ({ x: X(p.x), y: Y(p.y) }));
+    const bpx = badPath.map((p) => ({ x: X(p.x), y: Y(p.y) }));
     return { gpx, bpx, good: Brush.brushLine(gpx, { seed: 23, weight: 1.2, intensity: 0.85 }), bad: Brush.brushLine(bpx, { seed: 41, weight: 1.05, intensity: 0.8 }) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height]);
+  }, [width, height, w]);
 
-  const troughPx = { x: X(seq.trough.x), y: Y(seq.trough.y) };
+  const troughPx = { x: X(trough.x), y: Y(trough.y) };
   const anchorOf = (t) => {
     if (!t) return null;
     if (t.id === 'deck') return { x: bc(Math.floor(N / 2)), y: yG };
@@ -1631,7 +1630,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
           </g>
           {geom.gpx.slice(1).map((px, i) => wTick(px, i, false))}
           <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, accent, 600)}>Good sequence</text>
-          <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(seq.goodEnd * P)}</text>
+          <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(goodEnd * P)}</text>
         </g>
         <g style={{ opacity: focusId === 'good' ? (coarse ? 0.55 : 0.4) : 1, transition: trans('opacity') }}>
           <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : `clip-path 1500ms ${EZ} 360ms, -webkit-clip-path 1500ms ${EZ} 360ms` }}>
@@ -1640,12 +1639,12 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
           {geom.bpx.slice(1).map((px, i) => wTick(px, i, true))}
           <path d={Brush.enso(troughPx.x, troughPx.y, 10, { seed: 51, weight: 0.85, intensity: 0.8, gapAngle: -Math.PI / 3 })} fill={pal.bandStress} opacity={entered ? 1 : 0} style={{ transition: trans('opacity', 400) }} />
           <text x={geom.bpx[geom.bpx.length - 1].x - 6} y={geom.bpx[geom.bpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, pal.bandStressText, 600)}>Bad sequence</text>
-          <text x={geom.bpx[geom.bpx.length - 1].x - 6} y={geom.bpx[geom.bpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(seq.badEnd * P)}</text>
+          <text x={geom.bpx[geom.bpx.length - 1].x - 6} y={geom.bpx[geom.bpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(badEnd * P)}</text>
         </g>
 
         {/* annotation + start / withdrawal context */}
         {!coarse && <text x={troughPx.x} y={troughPx.y + 24} textAnchor="middle" style={{ ...haloSans(pal, 9.5, pal.bandStressText, 500), fontStyle: 'italic', opacity: entered ? 1 : 0, transition: trans('opacity', 400) }}>early losses shrink the base</text>}
-        <text x={pad.l} y={pathBot + 22} style={halo(pal, 8.5, pal.text4)}>{fmtMoney(P)} start · {fmtMoney(seq.withdraw * P)}/yr · same withdrawals both paths</text>
+        <text x={pad.l} y={pathBot + 22} style={halo(pal, 8.5, pal.text4)}>{fmtMoney(P)} start · {fmtMoney(w * P)}/yr · same withdrawals both paths</text>
         {(spec.xTicks || []).map((t, i) => { const anc = t.v === 0 ? 'start' : t.v >= N ? 'end' : 'middle'; return <text key={`xt${i}`} x={X(t.v)} y={pathBot + 22} textAnchor={anc} style={halo(pal, 9, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
 
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
@@ -1932,7 +1931,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const W = 1000;
   // Representative/simulation values are art-directed: never label them "TRUE VALUE".
   const valueNote = spec.visualDataMode === 'historical' ? 'TRUE VALUE' : 'REPRESENTATIVE';
-  const pNote = personalNote(spec, readerContext);
+  const pNote = getSimulationNote(spec, readerContext);
   const simIntro = getSimulationIntro(spec, readerContext);   // chart-level "scaled example · …" line, above the visual
   const tryThis = resolveTryThis(spec, coarse);               // quiet interaction cue (touch-direct copy on coarse)
   const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext, motion: resolveMotionTiming(spec) };
