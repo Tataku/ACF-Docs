@@ -340,6 +340,31 @@ export function getSimulationNote(spec, ctx) {
   }
   return null;
 }
+// Tooltip value text: express the selected point THROUGH Simulation Context where
+// it is mathematically honest, with the raw plotted value kept as secondary detail.
+// Returns { primary, secondary } | null. Renderers pass either a raw plotted value
+// (raw/unit/dec/valueNote) or a precomputed `dollars` + `rawLabel` (sequence /
+// scenario, whose values are re-simulated at runtime). Non-personalized charts get
+// the raw value unchanged.
+export function getTooltipValueText(spec, ctx, opts = {}) {
+  const P = readStartingValue(ctx);
+  // explicit runtime dollars (sequence path end, scenario terminal): $ primary + raw secondary
+  if (opts.dollars != null && isFinite(opts.dollars)) return { primary: formatCompactMoney(opts.dollars), secondary: opts.rawLabel || null };
+  const p = spec && spec.personalization;
+  // multiples (× start) → dollars, e.g. Time Changes Prudence
+  if (p && p.kind === 'horizon-scale' && P != null && opts.raw != null && isFinite(opts.raw)) {
+    return { primary: formatCompactMoney(P * opts.raw), secondary: `${opts.raw.toFixed(1)}× start · representative` };
+  }
+  // DCA: name the dollar amount; never fake exact units / sats
+  if (p && p.kind === 'dca-note' && ctx && isFinite(ctx.monthlyDca) && ctx.monthlyDca > 0) {
+    return { primary: `${formatStartingValue(ctx.monthlyDca)}/mo DCA`, secondary: 'representative units, not exact sats' };
+  }
+  // default: the raw representative value (unchanged for non-personalized charts)
+  if (opts.raw != null && isFinite(opts.raw)) {
+    return { primary: `${opts.raw.toFixed(opts.dec != null ? opts.dec : 1)} ${opts.unit || ''} · ${opts.valueNote || 'REPRESENTATIVE'}`.replace(/ {2,}/g, ' ').trim(), secondary: null };
+  }
+  return null;
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 // DATA SHAPES (representative / conceptual — deterministic so SSR == CSR)

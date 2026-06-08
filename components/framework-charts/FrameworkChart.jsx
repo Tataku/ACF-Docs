@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
+import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -120,17 +120,63 @@ function fmtMoney(n) {
 /* ── Shared tooltip ──────────────────────────────────────────────────────────
  * Hover preview is ephemeral; click pins it (links become clickable). Placement
  * is viewport-aware: flips across the anchor and never sits on top of the point. */
-function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, accent, reduce, entered, onUnpin, valueText }) {
-  const flipX = xPct > 58, flipY = yPct > 64;
-  const tx = `${flipX ? 'translateX(calc(-100% - 16px))' : 'translateX(16px)'} ${flipY ? 'translateY(calc(-100% - 12px))' : 'translateY(-12px)'}`;
+// Cursor-follow placement: offset from the point, flip sides near edges with
+// hysteresis (so it never oscillates), clamped inside the chart container.
+const TIP_OFF_X = 18, TIP_OFF_Y = 14, TIP_FLIP_MARGIN = 28;
+function placeTip(px, py, tw, th, cw, ch, st) {
+  if (st.right) { if (px + TIP_OFF_X + tw > cw - 2) st.right = false; } else if (px + TIP_OFF_X + tw <= cw - TIP_FLIP_MARGIN) st.right = true;
+  if (st.below) { if (py + TIP_OFF_Y + th > ch - 2) st.below = false; } else if (py + TIP_OFF_Y + th <= ch - TIP_FLIP_MARGIN) st.below = true;
+  const x = st.right ? px + TIP_OFF_X : px - TIP_OFF_X - tw;
+  const y = st.below ? py + TIP_OFF_Y : py - TIP_OFF_Y - th;
+  return { x: Math.max(4, Math.min(Math.max(4, cw - tw - 4), x)), y: Math.max(4, Math.min(Math.max(4, ch - th - 4), y)) };
+}
+
+// Shared hover/pin tooltip. On desktop HOVER the position is velocity-aware
+// cursor-follow (rAF lerp toward cursor + offset, edge-aware); PINNED and
+// REDUCED-MOTION anchor to the data point (stable, calm). It self-positions via
+// its offsetParent (the chart's relative wrapper) — no per-chart wiring. Mobile
+// never renders this (MobileInsight handles touch).
+function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, accent, reduce, onUnpin, valueText, valueSub }) {
+  const tipRef = useRef(null);
+  const st = useRef({ cur: null, cursor: null, right: true, below: true, raf: 0, xPct, yPct, isPin });
+  const [shown, setShown] = useState(false);
+  st.current.xPct = xPct; st.current.yPct = yPct; st.current.isPin = isPin;   // live values for the rAF loop
+  useEffect(() => setShown(true), []);
+  useEffect(() => {                                                            // desktop hover: velocity-aware cursor-follow; settles to the anchor when pinned
+    if (reduce) return undefined;
+    const tip = tipRef.current; const cont = tip && tip.offsetParent; if (!tip || !cont) return undefined;
+    const anchorPx = () => ({ x: (st.current.xPct / 100) * cont.clientWidth, y: (st.current.yPct / 100) * cont.clientHeight });
+    const desired = () => { const p = (!st.current.isPin && st.current.cursor) ? st.current.cursor : anchorPx(); return placeTip(p.x, p.y, tip.offsetWidth, tip.offsetHeight, cont.clientWidth, cont.clientHeight, st.current); };
+    const i = desired(); st.current.cur = { x: i.x, y: i.y }; tip.style.transform = `translate3d(${i.x}px, ${i.y}px, 0)`;
+    const onPM = (e) => { const r = cont.getBoundingClientRect(); st.current.cursor = { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    cont.addEventListener('pointermove', onPM);
+    const loop = () => {
+      const d = desired(); const c = st.current.cur;
+      const dx = d.x - c.x, dy = d.y - c.y, dist = Math.hypot(dx, dy);
+      const k = dist > 160 ? 0.28 : dist > 60 ? 0.20 : 0.14;                   // accelerate when far, decelerate when close; dead-zone kills jitter
+      if (dist < 0.5) { c.x = d.x; c.y = d.y; } else { c.x += dx * k; c.y += dy * k; }
+      tip.style.transform = `translate3d(${c.x}px, ${c.y}px, 0)`;
+      st.current.raf = requestAnimationFrame(loop);
+    };
+    st.current.raf = requestAnimationFrame(loop);
+    return () => { cont.removeEventListener('pointermove', onPM); cancelAnimationFrame(st.current.raf); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduce]);
+  useEffect(() => {                                                            // reduced motion: snap to the anchor (calm, no rAF), but track content changes
+    if (!reduce) return;
+    const tip = tipRef.current; const cont = tip && tip.offsetParent; if (!tip || !cont) return;
+    const a = { x: (xPct / 100) * cont.clientWidth, y: (yPct / 100) * cont.clientHeight };
+    const d = placeTip(a.x, a.y, tip.offsetWidth, tip.offsetHeight, cont.clientWidth, cont.clientHeight, st.current);
+    tip.style.transform = `translate3d(${d.x}px, ${d.y}px, 0)`;
+  }, [reduce, xPct, yPct, isPin]);
   return (
-    <div role={isPin ? 'dialog' : undefined} aria-label={isPin ? meta.name : undefined} style={{
-      position: 'absolute', left: `${xPct}%`, top: `${yPct}%`, zIndex: 8,
-      transform: tx, width: 244, pointerEvents: isPin ? 'auto' : 'none',
+    <div ref={tipRef} role={isPin ? 'dialog' : undefined} aria-label={isPin ? meta.name : undefined} style={{
+      position: 'absolute', left: 0, top: 0, zIndex: 8, width: 244,
+      pointerEvents: isPin ? 'auto' : 'none', willChange: 'transform',
       background: pal.cardSolid, border: `1px solid ${isPin ? accent : pal.borderHi}`, borderRadius: 6,
       boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)',
-      padding: '11px 13px 12px', opacity: entered ? 1 : 0,
-      transition: reduce ? 'opacity 160ms ease' : 'opacity 200ms cubic-bezier(0.2,0.7,0.2,1), border-color 220ms ease',
+      padding: '11px 13px 12px', opacity: shown ? 1 : 0,
+      transition: reduce ? 'opacity 120ms ease' : 'opacity 120ms cubic-bezier(0.2,0.7,0.2,1), border-color 200ms ease',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
         <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: accentTitle ? accent : pal.text4 }}>
@@ -144,7 +190,10 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
       </div>
       <div style={{ fontFamily: pal.sans, fontSize: 13.5, fontWeight: 600, color: pal.text1, marginBottom: valueText ? 2 : 6, letterSpacing: '-0.01em' }}>{meta.name}</div>
       {valueText && (
-        <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, marginBottom: 7, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
+        <div style={{ marginBottom: 7 }}>
+          <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
+          {valueSub && <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4, marginTop: 3 }}>{valueSub}</div>}
+        </div>
       )}
       <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2 }}>{meta.why}</p>
       <div style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${pal.cardBorder}`, display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
@@ -180,7 +229,7 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
 /* ── PlotSvg — single chart or one dual panel (time-series family) ───────────*/
 function PlotSvg({
   panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse,
-  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion,
+  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion, readerContext,
 }) {
   const svgRef = useRef(null);
   const dom = { ...xDomain, ...panel.domain };
@@ -298,8 +347,8 @@ function PlotSvg({
         : null;
       const dec = panel.yUnit === '%' || (panel.domain && panel.domain.yMax <= 5) ? 2 : 1;
       const unit = (panel.valueUnit || panel.yUnit || 'val').toUpperCase();
-      const valueText = showValues && raw != null ? `${raw.toFixed(dec)} ${unit} · ${valueNote}` : null;
-      tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={valueText} />;
+      const vt = showValues && raw != null ? getTooltipValueText(panel, readerContext, { raw, unit, dec, valueNote }) : null;
+      tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
     }
   }
 
@@ -1148,7 +1197,11 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   let tooltip = null;
   if (!coarse && hovered) {
     const meta = targetById(hovered.pk);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered.pk === spec.primaryKey} xPct={(hovered.x / width) * 100} yPct={(hovered.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => {}} valueText={null} />;
+    if (meta) {
+      const stt = (sc.variants[`${hovered.pk}|${shockId}`] || {}).stats || {};
+      const vt = scaleP && isFinite(stt.terminal) ? getTooltipValueText(spec, readerContext, { dollars: scaleP * stt.terminal / 100, rawLabel: `${stt.terminal} terminal · representative` }) : null;
+      tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered.pk === spec.primaryKey} xPct={(hovered.x / width) * 100} yPct={(hovered.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} onUnpin={() => {}} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
+    }
   }
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
@@ -1342,7 +1395,7 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) { const vt = getTooltipValueText(spec, readerContext, {}); tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
   }
 
   return (
@@ -1593,7 +1646,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) { const sd = active.id === 'good' ? goodEnd * P : active.id === 'bad' ? badEnd * P : null; const vt = sd != null ? getTooltipValueText(spec, readerContext, { dollars: sd, rawLabel: `${active.id === 'good' ? 'Good' : 'Bad'} sequence · representative simulation` }) : null; tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
   }
 
   const block = (val, cx, mid, key, delay) => {
