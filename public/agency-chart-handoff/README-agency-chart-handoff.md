@@ -128,6 +128,14 @@ The tooltip should feel like it understands the reader's attention — follow th
 - **Edge-aware placement.** Offset from the point, flip sides near edges with hysteresis (no oscillation), clamped inside the chart container (`placeTip`). The tooltip self-positions via its `offsetParent` — no per-chart wiring.
 - **Motion improves legibility** — calm and precise, never bouncy/overshoot. **Reduced motion** removes the follow animation: the tooltip anchors to the data point (the prior calm behavior). **Mobile** uses tap-to-inspect (`MobileInsight`), never hover emulation.
 
+### Tooltip simulation context
+
+If Simulation Context changes a chart, the **tooltip must express the selected point through that context** where mathematically honest — it must not contradict an intro that says `$100,000 start · 30+ years horizon` by reporting only `180.3 × START`. One resolver, `getTooltipValueText(spec, ctx, …)`, returns a two-line `{ primary, secondary }`:
+
+- **Primary = the contextual value:** multiples → dollars (*Time Changes Prudence* `$18M`), re-simulated path / terminal → dollars (*Path Changes Everything* `$116k`, *Exposure* terminal), DCA → the entered amount (*Accumulate* `$500/mo DCA`).
+- **Secondary = the raw plotted meaning** (`180.3× start · representative`, `Good sequence · representative simulation`) — kept, never the only value.
+- **Honesty:** never fake exact units/sats; charts whose index→$ isn't honest per point (e.g. *Volatility Is the Toll*) keep the raw value and carry the dollar impact in their callout. **Non-personalized / conceptual charts keep raw values** — no forced dollars. Pinned tooltips use the same resolver, so they update live when the reader changes context; no `NaN`/`Infinity`.
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +

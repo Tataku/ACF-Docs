@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
+import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -136,7 +136,7 @@ function placeTip(px, py, tw, th, cw, ch, st) {
 // REDUCED-MOTION anchor to the data point (stable, calm). It self-positions via
 // its offsetParent (the chart's relative wrapper) — no per-chart wiring. Mobile
 // never renders this (MobileInsight handles touch).
-function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, accent, reduce, onUnpin, valueText }) {
+function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, accent, reduce, onUnpin, valueText, valueSub }) {
   const tipRef = useRef(null);
   const st = useRef({ cur: null, cursor: null, right: true, below: true, raf: 0, xPct, yPct, isPin });
   const [shown, setShown] = useState(false);
@@ -190,7 +190,10 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
       </div>
       <div style={{ fontFamily: pal.sans, fontSize: 13.5, fontWeight: 600, color: pal.text1, marginBottom: valueText ? 2 : 6, letterSpacing: '-0.01em' }}>{meta.name}</div>
       {valueText && (
-        <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, marginBottom: 7, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
+        <div style={{ marginBottom: 7 }}>
+          <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
+          {valueSub && <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4, marginTop: 3 }}>{valueSub}</div>}
+        </div>
       )}
       <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2 }}>{meta.why}</p>
       <div style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${pal.cardBorder}`, display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
@@ -226,7 +229,7 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
 /* ── PlotSvg — single chart or one dual panel (time-series family) ───────────*/
 function PlotSvg({
   panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse,
-  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion,
+  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion, readerContext,
 }) {
   const svgRef = useRef(null);
   const dom = { ...xDomain, ...panel.domain };
@@ -344,8 +347,8 @@ function PlotSvg({
         : null;
       const dec = panel.yUnit === '%' || (panel.domain && panel.domain.yMax <= 5) ? 2 : 1;
       const unit = (panel.valueUnit || panel.yUnit || 'val').toUpperCase();
-      const valueText = showValues && raw != null ? `${raw.toFixed(dec)} ${unit} · ${valueNote}` : null;
-      tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={valueText} />;
+      const vt = showValues && raw != null ? getTooltipValueText(panel, readerContext, { raw, unit, dec, valueNote }) : null;
+      tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
     }
   }
 
@@ -1194,7 +1197,11 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   let tooltip = null;
   if (!coarse && hovered) {
     const meta = targetById(hovered.pk);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered.pk === spec.primaryKey} xPct={(hovered.x / width) * 100} yPct={(hovered.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => {}} valueText={null} />;
+    if (meta) {
+      const stt = (sc.variants[`${hovered.pk}|${shockId}`] || {}).stats || {};
+      const vt = scaleP && isFinite(stt.terminal) ? getTooltipValueText(spec, readerContext, { dollars: scaleP * stt.terminal / 100, rawLabel: `${stt.terminal} terminal · representative` }) : null;
+      tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered.pk === spec.primaryKey} xPct={(hovered.x / width) * 100} yPct={(hovered.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} onUnpin={() => {}} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
+    }
   }
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
@@ -1388,7 +1395,7 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) { const vt = getTooltipValueText(spec, readerContext, {}); tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
   }
 
   return (
@@ -1639,7 +1646,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) { const sd = active.id === 'good' ? goodEnd * P : active.id === 'bad' ? badEnd * P : null; const vt = sd != null ? getTooltipValueText(spec, readerContext, { dollars: sd, rawLabel: `${active.id === 'good' ? 'Good' : 'Bad'} sequence · representative simulation` }) : null; tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
   }
 
   const block = (val, cx, mid, key, delay) => {
