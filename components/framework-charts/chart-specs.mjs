@@ -1951,7 +1951,14 @@ export function getDataModeMarker(spec) {
   const mode = spec.visualDataMode || 'representative';
   const glyph = mode === 'historical' ? 'square' : mode === 'conceptual' ? 'circle' : 'diamond';
   const label = { conceptual: 'Conceptual', representative: 'Representative', simulation: 'Simulation', historical: 'Historical', mixed: 'Mixed' }[mode] || 'Representative';
-  return { mode, glyph, label };
+  const explain = {
+    conceptual: 'Conceptual exhibit — illustrates framework logic, not historical data.',
+    representative: 'Representative exhibit — sources support the concept; the shape is illustrative.',
+    simulation: 'Representative simulation — built to show path dependency, not a forecast.',
+    historical: 'Historical data — a sourced record.',
+    mixed: 'Mixed exhibit — combines sourced data with representative framework elements.',
+  }[mode] || 'Representative exhibit — sources support the concept; the shape is illustrative.';
+  return { mode, glyph, label, explain };
 }
 
 export default FRAMEWORK_CHART_SPECS;

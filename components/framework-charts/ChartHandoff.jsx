@@ -231,6 +231,8 @@ const PRESETS = {
 // own numbers (startingValue + horizon). Local state only — no persistence, no
 // cookies, no forecast. HORIZON_BANDS is shared from chart-specs (single source).
 const SIM_CTX_KEY = 'acf-sim-context';
+const THEME_KEY = 'acf-chart-handoff:theme';                 // user preference → localStorage
+const VIEW_KEY = 'acf-chart-handoff:viewMode';
 const DEFAULT_SIMULATION_CONTEXT = { startingValue: 100000, horizon: '30y', withdrawalRate: 0.04, btcReserveAllocation: 0.15, monthlyDca: 500 };
 const parseMoney = (s) => { const n = Number(String(s).replace(/[^0-9.]/g, '')); return isFinite(n) ? n : NaN; };
 const clampMoney = (n) => Math.min(100000000, Math.max(1000, Math.round(n)));
@@ -305,6 +307,18 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   const [theme, setTheme] = useState(initialTheme);
   const [view, setView] = useState('reader');                 // 'reader' (guided learning) | 'agency' (inventory-first review)
   const [readerCtx, setReaderCtx] = useState(DEFAULT_SIMULATION_CONTEXT);
+  // Reader/Agency + Dark/Light are user PREFERENCES (not simulation data), so they
+  // persist in localStorage across all handoff/export routes and refresh. Hydrate
+  // after mount (SSR-safe; brief one-frame default before the stored choice applies).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const t = window.localStorage.getItem(THEME_KEY); if (t === 'dark' || t === 'light') setTheme(t);
+      const v = window.localStorage.getItem(VIEW_KEY); if (v === 'reader' || v === 'agency') setView(v);
+    } catch (_) { /* noop */ }
+  }, []);
+  useEffect(() => { if (typeof window !== 'undefined') { try { window.localStorage.setItem(THEME_KEY, theme); } catch (_) { /* noop */ } } }, [theme]);
+  useEffect(() => { if (typeof window !== 'undefined') { try { window.localStorage.setItem(VIEW_KEY, view); } catch (_) { /* noop */ } } }, [view]);
   // Single local source of truth across the Part 1/2/3 handoff pages: hydrate from
   // and persist to sessionStorage only — no cookies, no server, no account.
   useEffect(() => {
