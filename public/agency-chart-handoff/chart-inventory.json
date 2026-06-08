@@ -84,6 +84,12 @@
         "type": "timeSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
@@ -153,6 +159,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [
         "regime"
@@ -226,6 +238,12 @@
         "type": "timeSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
       "backgroundRoles": [
         "regime"
       ],
@@ -298,6 +316,12 @@
         "type": "diagramBuild",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
@@ -368,6 +392,12 @@
         "type": "diagramBuild",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
@@ -437,6 +467,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [
         "pressure"
@@ -517,6 +553,12 @@
         "type": "timeSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
       "backgroundRoles": [
         "pressure"
       ],
@@ -595,6 +637,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [
         "regime"
@@ -679,6 +727,12 @@
       "motionProfile": {
         "type": "reveal",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1100,
+        "fastMs": 620,
+        "mediumMs": 900,
+        "staggerMs": 200
       },
       "backgroundRoles": [
         "regime",
@@ -766,6 +820,12 @@
         "type": "rowSweep",
         "duration": "slow"
       },
+      "motionTiming": {
+        "sweepMs": 1500,
+        "fastMs": 480,
+        "mediumMs": 900,
+        "staggerMs": 90
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "stacked",
@@ -833,6 +893,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [
         "regime"
@@ -906,6 +972,12 @@
         "type": "timeSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
@@ -975,6 +1047,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [],
       "mobileBehavior": {
@@ -1046,6 +1124,12 @@
         "type": "timeSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
@@ -1116,6 +1200,12 @@
         "type": "diagramBuild",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
@@ -1178,6 +1268,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [],
       "mobileBehavior": {
@@ -1249,6 +1345,12 @@
         "type": "diagramBuild",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
@@ -1312,6 +1414,12 @@
         "type": "diagramBuild",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
@@ -1374,6 +1482,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [],
       "mobileBehavior": {
@@ -1444,6 +1558,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [],
       "mobileBehavior": {
@@ -1522,6 +1642,12 @@
         "type": "timeSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
       "backgroundRoles": [
         "regime"
       ],
@@ -1594,6 +1720,12 @@
         "type": "rowSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1500,
+        "fastMs": 480,
+        "mediumMs": 900,
+        "staggerMs": 90
+      },
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "scroll-x",
@@ -1661,6 +1793,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [
         "regime"
@@ -1744,6 +1882,12 @@
         "type": "scenarioUpdate",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 460,
+        "fastMs": 300,
+        "mediumMs": 460,
+        "staggerMs": 0
+      },
       "backgroundRoles": [
         "regime"
       ],
@@ -1821,6 +1965,12 @@
         "type": "timeSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
       "backgroundRoles": [
         "regime"
       ],
@@ -1886,6 +2036,12 @@
         "type": "timeSweep",
         "duration": "calm"
       },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
       "backgroundRoles": [
         "relational"
       ],
@@ -1950,6 +2106,12 @@
       "motionProfile": {
         "type": "diagramBuild",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
       },
       "backgroundRoles": [],
       "mobileBehavior": {
@@ -2020,6 +2182,12 @@
       "motionProfile": {
         "type": "timeSweep",
         "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
       "backgroundRoles": [],
       "mobileBehavior": {

@@ -91,6 +91,17 @@ export const GESTURES = ['none', 'hover', 'tap', 'drag', 'choose', 'type'];
 export const MOTION_TYPES = ['timeSweep', 'reveal', 'rowSweep', 'scenarioUpdate', 'diagramBuild'];
 export const MOTION_DURATIONS = ['calm', 'slow', 'transformational'];
 
+// Per-family motion tempo (ms). The shared time-series sweep (PlotSvg) reads this;
+// bespoke renderers carry matching choreography. Governed, not random — but the
+// default family (timeSweep) preserves the current values exactly.
+export const MOTION_TIMING = {
+  timeSweep: { sweepMs: 1900, fastMs: 560, mediumMs: 1100, staggerMs: 140 },
+  reveal: { sweepMs: 1100, fastMs: 620, mediumMs: 900, staggerMs: 200 },
+  rowSweep: { sweepMs: 1500, fastMs: 480, mediumMs: 900, staggerMs: 90 },
+  scenarioUpdate: { sweepMs: 460, fastMs: 300, mediumMs: 460, staggerMs: 0 },
+  diagramBuild: { sweepMs: 1400, fastMs: 520, mediumMs: 1000, staggerMs: 160 },
+};
+
 // A background is allowed ONLY if it explains a relationship — never decorative.
 export const BACKGROUND_ROLES = ['regime', 'pressure', 'relational', 'revealLayer'];
 
@@ -254,6 +265,11 @@ export function resolveTryThis(spec) {
   if (it.type === 'returnOrder') return 'Compare the same return deck in reverse';
   if (it.type === 'readerContext') return 'Enter your starting value above';
   return null;
+}
+
+// motion timing for a chart's family (governed tempo; default = timeSweep).
+export function resolveMotionTiming(spec) {
+  return MOTION_TIMING[resolveMotionProfile(spec).type] || MOTION_TIMING.timeSweep;
 }
 
 // ── simulation-context intro (chart-level data introduction) ─────────────────

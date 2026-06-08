@@ -18,7 +18,7 @@
 import React from 'react';
 import * as Brush from './brush';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, valueAt, getSimulationIntro, readStartingValue, resolveMobileBehavior, resolveTryThis } from './chart-specs.mjs';
+import { getChartSpec, footerModel, valueAt, getSimulationIntro, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -189,7 +189,7 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
 /* ── PlotSvg — single chart or one dual panel (time-series family) ───────────*/
 function PlotSvg({
   panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse,
-  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1,
+  targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion,
 }) {
   const svgRef = useRef(null);
   const dom = { ...xDomain, ...panel.domain };
@@ -285,7 +285,7 @@ function PlotSvg({
   // related series together (data drawn through time); markers and labels resolve
   // after the sweep front reaches their x-position. Slower + calmer than a pop.
   const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
-  const TM = { fast: 560, medium: 1100, path: 1900 };
+  const TM = { fast: (motion && motion.fastMs) || 560, medium: (motion && motion.mediumMs) || 1100, path: (motion && motion.sweepMs) || 1900 };
   const plotW = width - pad.l - pad.r;
   const xFrac = (px) => Math.max(0, Math.min(1, (px - pad.l) / (plotW || 1)));
   const sweep = (dur = TM.path, delay = 0) => ({
@@ -1886,12 +1886,13 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
   const pNote = personalNote(spec, readerContext);
   const simIntro = getSimulationIntro(spec, readerContext);   // chart-level "scaled example · …" line, above the visual
   const tryThis = resolveTryThis(spec);                       // quiet interaction cue, only where interaction is central
-  const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext };
+  const cp = { width: W, pal, accent, reduce, entered, coarse, active, pinned, onActive, onPin, valueNote, readerContext, motion: resolveMotionTiming(spec) };
   const mob = resolveMobileBehavior(spec);                    // mobile is not "just shrink": tall layouts get vertical room on touch
   const hh = (base) => (coarse && mob.chartHeight === 'tall' ? Math.round(base * 1.2) : base);
+  const motionType = resolveMotionProfile(spec).type;        // motion-family hook (data-motion) for the governed tempo
 
   return (
-    <figure ref={figRef} className={`acf-chart-build${className ? ` ${className}` : ''}`} data-build={entered ? 'in' : 'idle'} data-reduced-motion={reduce ? 'true' : 'false'} aria-label={`${spec.title}. ${spec.frameworkClaim}`} aria-describedby={`${reactId}-summary`}
+    <figure ref={figRef} className={`acf-chart-build${className ? ` ${className}` : ''}`} data-build={entered ? 'in' : 'idle'} data-reduced-motion={reduce ? 'true' : 'false'} data-motion={motionType} aria-label={`${spec.title}. ${spec.frameworkClaim}`} aria-describedby={`${reactId}-summary`}
       style={{ margin: '34px 0', background: pal.card, border: `1px solid ${pal.cardBorder}`, borderRadius: 7, overflow: 'visible', colorScheme: pal.name, fontFamily: pal.sans, color: pal.text1, '--build-duration': '900ms', '--build-stagger': '110ms' }}>
       <span id={`${reactId}-summary`} style={SR_ONLY}>{spec.ariaSummary}</span>
 
