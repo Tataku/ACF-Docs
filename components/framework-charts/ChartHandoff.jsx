@@ -82,11 +82,11 @@ const HANDOFF_PART_NAV = [
   { key: 'part-3', label: 'Part 3', shortTitle: 'Bitcoin', embeddedHref: '/chart-handoff-part-3', exportHref: '/chart-handoff-part-3-export' },
 ];
 
-// Quiet ACF control bar — editorial, not pills. Groups: VIEW (dark/light),
-// PART (mode-preserving), MODE (export/docs-shell), plus a muted copy-link on
-// export. Active state = brighter text + a thin accent underline (never a filled
-// pill or box). Future-ready: PART scales from HANDOFF_PART_NAV.
-function ControlBar({ pal, accent, theme, setTheme, variant, part, shellRoute, exportRoute }) {
+// Quiet ACF control bar — editorial, not pills. Groups: VIEW (Reader/Agency),
+// THEME (dark/light), PART (mode-preserving), MODE (export/docs-shell), plus a
+// muted copy-link on export. Active state = brighter text + a thin accent
+// underline (never a filled pill or box). PART scales from HANDOFF_PART_NAV.
+function ControlBar({ pal, accent, theme, setTheme, view, setView, variant, part, shellRoute, exportRoute }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined') {
@@ -110,6 +110,10 @@ function ControlBar({ pal, accent, theme, setTheme, variant, part, shellRoute, e
   return (
     <nav aria-label="Chart handoff controls" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '10px 22px', marginBottom: 24 }}>
       {group('VIEW', [
+        <button key="reader" onClick={() => setView('reader')} aria-pressed={view === 'reader'} style={sty(view === 'reader')}>Reader</button>,
+        <button key="agency" onClick={() => setView('agency')} aria-pressed={view === 'agency'} style={sty(view === 'agency')}>Agency</button>,
+      ])}
+      {group('THEME', [
         <button key="dark" onClick={() => setTheme('dark')} aria-pressed={theme === 'dark'} style={sty(theme === 'dark')}>Dark</button>,
         <button key="light" onClick={() => setTheme('light')} aria-pressed={theme === 'light'} style={sty(theme === 'light')}>Light</button>,
       ])}
@@ -264,13 +268,39 @@ function SimulationContextBar({ pal, accent, ctx, setCtx }) {
   );
 }
 
+// Reader view: a short "how to read these charts" orientation — the kinesthetic
+// contract (one claim · see-then-touch · representative · your numbers once).
+const READ_GUIDE = [
+  { k: 'ONE CLAIM EACH', t: 'Every chart makes a single point — the title states it, the picture proves it.' },
+  { k: 'SEE, THEN TOUCH', t: 'The default view teaches the idea. Hover, tap, or focus an element for the why — some charts invite you to drag or choose.' },
+  { k: 'REPRESENTATIVE, NOT PREDICTIVE', t: 'These are shapes that teach the framework — not exact historical data or forecasts. Each footer says which.' },
+  { k: 'YOUR NUMBERS, ONCE', t: 'Set a starting value above; charts that use it introduce themselves as scaled examples.' },
+];
+function ReaderOrientation({ pal, accent }) {
+  return (
+    <section aria-label="How to read these charts" style={{ margin: '0 0 30px' }}>
+      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.2em', color: accent, marginBottom: 12 }}>HOW TO READ THESE CHARTS</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px 22px' }}>
+        {READ_GUIDE.map((g) => (
+          <div key={g.k}>
+            <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.14em', color: pal.text3, marginBottom: 5 }}>{g.k}</div>
+            <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 12.5, lineHeight: 1.5, color: pal.text2 }}>{g.t}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', accent: accentName = 'green', variant = 'embedded' }) {
   const preset = PRESETS[part] || PRESETS['part-1'];
   const [theme, setTheme] = useState(initialTheme);
+  const [view, setView] = useState('reader');                 // 'reader' (guided learning) | 'agency' (inventory-first review)
   const [readerCtx, setReaderCtx] = useState(DEFAULT_SIMULATION_CONTEXT);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
   const isExport = variant === 'export';
+  const readerView = view === 'reader';
   const galleryGroups = HANDOFF_GROUPS.filter((g) => preset.groups.includes(g.id));
   const specs = FRAMEWORK_CHART_SPECS.filter((s) => preset.groups.includes(s.group) && s.status !== 'deferred');
 
@@ -281,46 +311,55 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   return (
     <div style={outer}>
       <div style={{ maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 }}>
-      <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
+      <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} view={view} setView={setView} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
       {/* header */}
-      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{preset.eyebrow}</div>
+      <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{readerView ? 'ACF · FRAMEWORK CHARTS · GUIDED READING' : preset.eyebrow}</div>
       <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{preset.title}</h1>
       <p style={{ margin: '14px 0 18px', fontSize: 14, lineHeight: 1.62, color: pal.text3, maxWidth: 720 }}>
-        {preset.intro}
+        {readerView
+          ? 'A guided pass through the representative exhibits. Set a starting value once, then read top to bottom — each chart states a claim, shows it, and invites you to explore where it helps.'
+          : preset.intro}
       </p>
-      <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.06em', color: pal.text4, lineHeight: 1.6, marginBottom: 20, maxWidth: 720 }}>
-        Internal chart review surface for marketing / design handoff. Charts are not automatically placed in public framework pages; placement is chosen explicitly.
-      </div>
 
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 22, fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.08em' }}>
-        <a href="#implementation-package" style={{ color: accent, textDecoration: 'none', borderBottom: `1px dotted ${accent}`, paddingBottom: 1 }}>↓ Implementation package</a>
-        <a href="/agency-chart-handoff/README-agency-chart-handoff.md" download style={{ color: pal.text3, textDecoration: 'none', borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1 }}>Download handoff README ↗</a>
-      </div>
+      {!readerView && (
+        <>
+          <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.06em', color: pal.text4, lineHeight: 1.6, marginBottom: 20, maxWidth: 720 }}>
+            Internal chart review surface for marketing / design handoff. Charts are not automatically placed in public framework pages; placement is chosen explicitly.
+          </div>
 
-      {/* legend */}
-      <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'center', padding: '12px 16px', border: `1px solid ${pal.cardBorder}`, borderRadius: 7, marginBottom: 22, fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.08em', color: pal.text3 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}` }} /> REPRESENTATIVE / SIMULATION</span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 7, height: 7, borderRadius: '50%', border: `1px solid ${pal.text4}` }} /> CONCEPTUAL</span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 6, height: 6, background: pal.text3 }} /> HISTORICAL (WHEN WIRED)</span>
-      </div>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 22, fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.08em' }}>
+            <a href="#implementation-package" style={{ color: accent, textDecoration: 'none', borderBottom: `1px dotted ${accent}`, paddingBottom: 1 }}>↓ Implementation package</a>
+            <a href="/agency-chart-handoff/README-agency-chart-handoff.md" download style={{ color: pal.text3, textDecoration: 'none', borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1 }}>Download handoff README ↗</a>
+          </div>
+
+          {/* legend */}
+          <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'center', padding: '12px 16px', border: `1px solid ${pal.cardBorder}`, borderRadius: 7, marginBottom: 22, fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.08em', color: pal.text3 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}` }} /> REPRESENTATIVE / SIMULATION</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 7, height: 7, borderRadius: '50%', border: `1px solid ${pal.text4}` }} /> CONCEPTUAL</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 6, height: 6, background: pal.text3 }} /> HISTORICAL (WHEN WIRED)</span>
+          </div>
+        </>
+      )}
 
       <SimulationContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} />
 
-      <InventoryTable pal={pal} accent={accent} specs={specs} />
+      {readerView && <ReaderOrientation pal={pal} accent={accent} />}
 
-      {/* grouped gallery */}
+      {!readerView && <InventoryTable pal={pal} accent={accent} specs={specs} />}
+
+      {/* grouped gallery — guided sequence (reader) or full review set (agency) */}
       {galleryGroups.map((g) => {
-        const specs = specsByGroup(g.id).filter((s) => s.status !== 'deferred');
-        if (!specs.length) return null;
+        const gspecs = specsByGroup(g.id).filter((s) => s.status !== 'deferred');
+        if (!gspecs.length) return null;
         return (
-          <section key={g.id} style={{ marginTop: 40 }}>
+          <section key={g.id} style={{ marginTop: readerView ? 56 : 40 }}>
             <div style={{ borderTop: `1px solid ${pal.cardBorder}`, paddingTop: 22, marginBottom: 6 }}>
               <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.2em', color: accent, marginBottom: 8 }}>{g.label.toUpperCase()}</div>
               <p style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: pal.text3, maxWidth: 720 }}>{g.blurb}</p>
             </div>
-            {specs.map((spec) => (
-              <div key={spec.chartId} id={spec.chartId} style={{ scrollMarginTop: 80, marginTop: 24 }}>
-                <MetaStrip pal={pal} accent={accent} spec={spec} />
+            {gspecs.map((spec) => (
+              <div key={spec.chartId} id={spec.chartId} style={{ scrollMarginTop: 80, marginTop: readerView ? 30 : 24 }}>
+                {!readerView && <MetaStrip pal={pal} accent={accent} spec={spec} />}
                 <FrameworkChart spec={spec} theme={theme} accent={accentName} readerContext={readerCtx} />
               </div>
             ))}
@@ -328,7 +367,17 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
         );
       })}
 
-      <ImplementationPackage pal={pal} accent={accent} />
+      {readerView ? (
+        <details style={{ marginTop: 44, borderTop: `1px solid ${pal.cardBorder}`, paddingTop: 18 }}>
+          <summary style={{ cursor: 'pointer', fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.16em', color: pal.text3 }}>AGENCY REFERENCE · inventory &amp; implementation package</summary>
+          <div style={{ marginTop: 18 }}>
+            <InventoryTable pal={pal} accent={accent} specs={specs} />
+            <ImplementationPackage pal={pal} accent={accent} />
+          </div>
+        </details>
+      ) : (
+        <ImplementationPackage pal={pal} accent={accent} />
+      )}
 
       <div style={{ marginTop: 36, paddingTop: 16, borderTop: `1px solid ${pal.cardBorder}`, fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.1em', color: pal.text4, display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <span>ACF FRAMEWORK CHARTS · REPRESENTATIVE EXHIBIT SET · INTERNAL HANDOFF</span>
