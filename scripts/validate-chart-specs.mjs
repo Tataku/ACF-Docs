@@ -249,7 +249,7 @@ for (const s of FRAMEWORK_CHART_SPECS) {
   // Context visible where it changes interpretation: a personalized chart must be
   // able to produce a chart-level simulation intro from the reader's context.
   if (s.personalization) {
-    const intro = getSimulationIntro(s, { startingValue: 250000, horizon: '30y' });
+    const intro = getSimulationIntro(s, { startingValue: 250000, horizon: '30y', withdrawalRate: 0.04, btcReserveAllocation: 0.15, monthlyDca: 500 });
     ok(intro && intro.trim(), `${w} personalized chart must produce a simulation intro`);
   }
 }

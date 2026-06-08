@@ -123,7 +123,7 @@ export const CHART_HEIGHTS = ['standard', 'tall', 'auto'];
 // is the legacy alias kept working until the reader-context migration lands.
 export const CONTEXT_KEYS = ['startingValue', 'horizon', 'withdrawalRate', 'btcReserveAllocation', 'monthlyDca'];
 export const LEGACY_CONTEXT_KEYS = ['portfolioValue'];
-export const PERSONAL_KINDS = ['scenario-scale', 'vol-impact', 'sequence-scale'];
+export const PERSONAL_KINDS = ['scenario-scale', 'vol-impact', 'sequence-scale', 'horizon-scale', 'dca-note'];
 
 // Promissory / forecast language that must never appear in a chart's VISIBLE
 // claim copy (disclosure/caution/note legitimately say "not a forecast", so they
@@ -131,10 +131,10 @@ export const PERSONAL_KINDS = ['scenario-scale', 'vol-impact', 'sequence-scale']
 export const BANNED_PROMISE_WORDS = ['forecast', 'guaranteed', 'guarantee', 'expected return', 'will outperform', 'risk-free', 'optimized'];
 
 export const HORIZON_BANDS = [
-  { id: '10y', label: '10 years', short: '10y' },
-  { id: '20y', label: '20 years', short: '20y' },
-  { id: '30y', label: '30+ years', short: '30+ yr' },
-  { id: 'legacy', label: 'Legacy', short: 'Legacy' },
+  { id: '10y', label: '10 years', short: '10y', years: 10 },
+  { id: '20y', label: '20 years', short: '20y', years: 20 },
+  { id: '30y', label: '30+ years', short: '30+ yr', years: 30 },
+  { id: 'legacy', label: 'Legacy', short: 'Legacy', years: 55 },
 ];
 
 // ── standardized formatting (no cents, no false precision) ────────────────────
@@ -283,30 +283,62 @@ export function resolveMotionTiming(spec) {
 // ── simulation-context intro (chart-level data introduction) ─────────────────
 // Builds the quiet "scaled example" line for a personalized chart. Returns null
 // when the chart does not opt in, or when there is no usable starting value.
+// Chart-level intro line: discloses ONLY the inputs the chart honestly uses
+// (spec.personalization.uses), reading their current values from the reader
+// context. Updates live; never claims an input the chart does not consume.
 export function getSimulationIntro(spec, ctx) {
   const p = spec.personalization;
-  if (!p) return null;
+  if (!p || !ctx) return null;
+  const uses = p.uses || [];
   const sv = readStartingValue(ctx);
-  if (sv == null) return null;
-  const start = formatStartingValue(sv);
-  const hz = ctx && ctx.horizon ? ` · ${formatHorizon(ctx.horizon)} horizon` : '';
-  if (p.kind === 'sequence-scale') {
-    const wr = p.withdrawalRate || 0.04;
-    return `Representative withdrawal simulation · ${start} start · ${formatStartingValue(sv * wr)}/yr withdrawals${hz}`;
+  const parts = [];
+  if (uses.includes('startingValue')) {
+    if (sv == null) return null;
+    parts.push(`${formatStartingValue(sv)} start`);
   }
-  if (p.kind === 'scenario-scale') {
-    return `Representative total-portfolio paths · ${start} start${hz} · not Bitcoin price`;
-  }
-  if (p.kind === 'vol-impact') {
-    const a = p.assume || { alloc: 0.15 };
-    return `Portfolio impact example · ${start} start · ${Math.round(a.alloc * 100)}% Bitcoin reserve assumption`;
-  }
-  return `Scaled example · ${start} starting value${hz}`;
+  if (uses.includes('monthlyDca') && isFinite(ctx.monthlyDca) && ctx.monthlyDca > 0) parts.push(`${formatStartingValue(ctx.monthlyDca)}/mo DCA`);
+  if (uses.includes('withdrawalRate') && isFinite(ctx.withdrawalRate) && ctx.withdrawalRate > 0) parts.push(`${formatPercent(ctx.withdrawalRate)} withdrawals/yr`);
+  if (uses.includes('btcReserveAllocation') && isFinite(ctx.btcReserveAllocation) && ctx.btcReserveAllocation > 0) parts.push(`${formatPercent(ctx.btcReserveAllocation)} Bitcoin reserve`);
+  if (uses.includes('horizon') && ctx.horizon) parts.push(`${formatHorizon(ctx.horizon)} horizon`);
+  if (!parts.length) return null;
+  const tail = p.introTail ? ` · ${p.introTail}` : '';
+  return `${p.introLead || 'Scaled example'} · ${parts.join(' · ')}${tail}`;
 }
 export function buildPersonalizedDisclosure(spec) {
   const p = spec.personalization;
   if (!p) return null;
   return p.disclosure || p.note || 'Scaled representative example · not a forecast or recommendation.';
+}
+// Resolve a horizon band id to a representative number of years (for charts whose
+// outcome honestly depends on horizon).
+export function horizonYears(id) {
+  const b = HORIZON_BANDS.find((h) => h.id === id);
+  return b && isFinite(b.years) ? b.years : 30;
+}
+// Chart-level computed callout (below the plot) — the ONE figure a chart honestly
+// derives from the reader context that the intro line can't carry. Returns null
+// unless the personalization kind has an honest computation. Never a forecast.
+export function getSimulationNote(spec, ctx) {
+  const p = spec.personalization;
+  if (!p || !ctx) return null;
+  const P = readStartingValue(ctx);
+  if (p.kind === 'vol-impact') {
+    if (P == null) return null;
+    const alloc = isFinite(ctx.btcReserveAllocation) && ctx.btcReserveAllocation > 0 ? ctx.btcReserveAllocation : ((p.assume && p.assume.alloc) || 0.15);
+    const dd = (p.assume && p.assume.drawdown) || 0.70;
+    return `At a ${formatPercent(alloc)} Bitcoin reserve, a ${formatPercent(dd)} Bitcoin drawdown is roughly a ${formatStartingValue(P * alloc * dd)} hit (~${formatPercent(alloc * dd)}) on a ${formatStartingValue(P)} portfolio — representative, not a forecast.`;
+  }
+  if (p.kind === 'horizon-scale') {
+    if (P == null) return null;
+    const yrs = horizonYears(ctx.horizon);
+    const cx = (spec.series || []).find((s) => s.key === 'convex') || (spec.series || []).find((s) => s.tier === 'primary');
+    const pr = (spec.series || []).find((s) => s.key === 'prudent') || (spec.series || []).find((s) => s.tier === 'reference');
+    if (!cx || !pr) return null;
+    const cM = valueAt(cx.pts, yrs), pM = valueAt(pr.pts, yrs);
+    if (!isFinite(cM) || !isFinite(pM)) return null;
+    return `At a ${formatHorizon(ctx.horizon)} horizon on a ${formatStartingValue(P)} start, the convex path reaches ≈${formatStartingValue(P * cM)} versus ≈${formatStartingValue(P * pM)} conventional — illustrative compounding, not a forecast.`;
+  }
+  return null;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1068,7 +1100,7 @@ export const FRAMEWORK_CHART_SPECS = [
     sources: [
       { provider: 'Author simulation', label: 'One return set, opposite order; paths generated from the returns', role: 'methodology', transform: 'v(i+1) = v(i)·(1+r) − withdrawal · $1.0M start · 4% level withdrawal', notes: 'No real-data transform. Pure deterministic simulation; the deck and the paths use the same returns.' },
     ],
-    personalization: { uses: ['startingValue'], kind: 'sequence-scale', withdrawalRate: 0.04, note: 'Scales the start, withdrawal, and ending values to the reader simulation context. Representative simulation, not a forecast.' },
+    personalization: { uses: ['startingValue', 'withdrawalRate'], kind: 'sequence-scale', introLead: 'Representative withdrawal simulation', note: 'Scales start and ending values to the starting value, and re-simulates both paths at the chosen withdrawal rate (clamped to a representative band). Representative simulation, not a forecast.' },
     explainerHeadline: 'Same returns. Same withdrawals. Different order.',
     explainerBody: 'Both paths use the same annual returns and the same withdrawals — the deck above proves it, the same blocks in opposite order. The only difference is sequence. Early losses force withdrawals from a smaller capital base, so later gains compound on less money. Average return did not change; surviving capital did.',
     explainerConcept: 'Sequence risk',
@@ -1325,6 +1357,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'flip', kind: 'marker', label: 'Prudence reshaped', name: 'Where prudence flips', why: 'Past here the convex path is no longer the risky one — the horizon has made it the conservative choice.', claim: 'Time changes the definition.', concept: 'Survivable compounding', link: '/part-1-foundation' },
     ],
     mobileTapTargets: ['convex', 'prudent', 'flip'],
+    personalization: { uses: ['startingValue', 'horizon'], kind: 'horizon-scale', introLead: 'Illustrative compounding', note: 'Reads the two compounding multiples at the chosen horizon and scales them to the starting value. Illustrative compounding, not a forecast.' },
     implementationNotes: 'SIMULATION — illustrative compounding, footer-disclosed. Linear y is bottom-heavy by nature; the late divergence is the message.',
   },
 
@@ -1608,7 +1641,7 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'Bitcoin pays in volatility for its convexity, with repeated drawdowns over fifty percent. Held at a managed reserve size, those drawdowns barely move the total portfolio. Sizing — not avoidance — is what makes the volatility survivable.',
     explainerConcept: 'Position sizing',
     concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }],
-    personalization: { uses: ['startingValue'], kind: 'vol-impact', assume: { alloc: 0.15, drawdown: 0.70 }, note: 'Translates the representative drawdown into a portfolio-impact figure at a 15% Bitcoin reserve. Illustrative, not a forecast.' },
+    personalization: { uses: ['startingValue', 'btcReserveAllocation'], kind: 'vol-impact', assume: { alloc: 0.15, drawdown: 0.70 }, introLead: 'Portfolio impact example', note: 'Translates the representative drawdown into a portfolio-impact figure at the chosen Bitcoin reserve size. Illustrative, not a forecast.' },
     layout: 'single',
     ariaSummary: 'Two lines indexed to 100. A volatile Bitcoin line rises overall but suffers two deep drawdowns; the total-portfolio line, holding Bitcoin at a managed size, rises gently and stays calm through both.',
     domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 230 }, yUnit: 'idx',
@@ -1664,7 +1697,7 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'Maximum exposure can win the clean bull case. The framework exists for the path where drawdowns, income shocks, and opportunity arrive together — and for the hidden variable underneath them: decision strain. A portfolio only works if its owner can keep thinking clearly while it is down, hold the thesis, and still act. Framework reserve is the balanced posture; stress-tested reserve is the more defensive one. A strategy that cannot be lived through is not robust.',
     explainerConcept: 'Operational control',
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
-    personalization: { uses: ['startingValue'], kind: 'scenario-scale', note: 'Scales the simulation read-outs (terminal, drawdown, dry powder) to the reader simulation context. Illustrative, not a forecast.' },
+    personalization: { uses: ['startingValue'], kind: 'scenario-scale', introLead: 'Representative total-portfolio paths', introTail: 'not Bitcoin price', note: 'Scales the simulation read-outs (terminal, drawdown, dry powder) to the starting value. Illustrative, not a forecast.' },
     layout: 'scenario',
     ariaSummary: 'An interactive exhibit. Three representative total-portfolio paths, indexed to 100 — maximum exposure, framework reserve, and stress-tested reserve — are drawn together through a market drawdown, with an optional job-loss or deploy-at-trough shock. Maximum exposure peaks highest on a clean path; under a job-loss shock it is forced to sell at the bottom while the reserves absorb it; with dry powder the stress-tested reserve buys the trough, but that deployment spends its capacity, which then has to be rebuilt. Outcome read-outs cover upside (terminal value) and control (drawdown, remaining capacity, forced-sale risk, reserve integrity, control score).',
     scenario: {
@@ -1779,6 +1812,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'slows', kind: 'marker', label: 'Slows when extended', name: 'Slows new buying', why: 'When price is extended each dollar buys few units, so the framework slows discretionary new buying — the accent bars fall below baseline. Existing reserve is held, never sold.', claim: 'Slow new buying when dear; never sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
     ],
     mobileTapTargets: ['cheap', 'heartbeat', 'slows'],
+    personalization: { uses: ['monthlyDca'], kind: 'dca-note', introLead: 'Representative DCA example', note: 'Names the fixed DCA dollar amount in the units = dollars ÷ price relationship. Representative units on a representative price index, not historical price.' },
     implementationNotes: 'Math-grounded accumulation layout (HeartbeatSvg, internal name): a representative BTC price index above DCA unit bars where bar height = fixed dollars ÷ price, so lower price = taller bars. The accent (framework) bar stacks above the muted baseline bar only in the undervalued window and falls below it when extended (slows, never sells). A small "DCA $ ÷ price = units" formula anchors the conversion; the relational unit-capture field is kept faint/secondary. Representative/conceptual — no historical price, no exact sats; "heartbeat" is not used as visible copy.',
   },
 

@@ -68,7 +68,7 @@ enforced by `validate:charts`.
 | `interaction` | gesture ↔ concept | type `none·hover·scenario·beforeAfterReveal·readerContext·returnOrder·slider`; gesture `hover·tap·drag·choose·type`; `conceptMatch` |
 | `motionProfile` | how it builds | type `timeSweep·reveal·rowSweep·scenarioUpdate·diagramBuild`; duration `calm·slow·transformational` |
 | `backgroundRole` | why a field exists | `regime·pressure·relational·revealLayer` — never `decorative` |
-| `personalization` | reader-context scaling | `uses[]` ⊂ `startingValue·horizon·withdrawalRate·btcReserveAllocation·monthlyDca`; `kind` ∈ `scenario-scale·vol-impact·sequence-scale` |
+| `personalization` | reader-context scaling | `uses[]` ⊂ `startingValue·horizon·withdrawalRate·btcReserveAllocation·monthlyDca`; `kind` ∈ `scenario-scale·vol-impact·sequence-scale·horizon-scale·dca-note` |
 
 Concept-critical layouts (`scenario`, `dual + perspectiveSlider`) **must** declare
 `interaction` with a `conceptMatch`; `beforeAfterReveal` must declare
@@ -359,53 +359,58 @@ To make a representative chart use exact data later:
 
 ## 11. Simulation context (page-level personalization)
 
-The handoff/export pages carry **one optional input near the top** — a *simulation
-context* — so a reader can feel the framework in their own numbers without the
-charts becoming a calculator:
+The handoff/export pages carry **one optional input panel near the top** — the
+**SIMULATION CONTEXT** — so a reader can feel the framework in their own numbers
+without the charts becoming a calculator. The reader sets five assumptions:
 
-- **Starting value** (default `$100,000`) — the page panel is labelled **SIMULATION
-  CONTEXT** (*Starting value* · *Time horizon*). Accepts `250000`, `250,000`, or
-  `$250,000`; formats on blur; clamped `$1,000`–`$100,000,000`; empty/invalid
-  never crashes or shows `NaN`. Canonical context key `startingValue`
-  (`portfolioValue` is still accepted as a legacy alias, normalized by `readStartingValue`).
-- **Horizon** — `10 years · 20 years · 30+ years · Legacy` (default `30+ years`).
-  Surfaced in the chart-level intro for opted-in charts; only changes a chart's
-  *math* if that chart explicitly consumes it.
+- **Starting value** — default `$100,000`, clamped `$1,000`–`$100,000,000`.
+- **Time horizon** — `10 · 20 · 30+ · Legacy` (default `30+ years`).
+- **Withdrawal / yr** — `3 · 4 · 5 · 6%` (default `4%`).
+- **Bitcoin reserve** — `5 · 10 · 15 · 25%` (default `15%`).
+- **Monthly DCA** — dollar amount (default `$500`, clamped `$0`–`$100,000`).
 
-State is **local only**: no persistence, no cookies/localStorage, no backend; it
-resets on refresh. The context is passed to every `FrameworkChart` as
-`readerContext={{ startingValue, horizon }}`; each opted-in chart renders a quiet
-`getSimulationIntro(...)` line **above its visual**.
+Inputs accept `250000`, `250,000`, or `$250,000`; format on blur; empty/invalid
+never crashes or shows `NaN`. Canonical keys: `startingValue · horizon ·
+withdrawalRate · btcReserveAllocation · monthlyDca` (`portfolioValue` is a legacy
+alias normalized by `readStartingValue`).
 
-A chart opts in with a spec field:
+**Single local source of truth across pages.** The context is **persisted in
+`sessionStorage` only** (key `acf-sim-context`) — no cookies, no `localStorage`,
+no backend, no account. Changing a value on the Part 1 page carries it to Part 2
+and Part 3 for the session; it resets when the tab closes. It is passed to every
+`FrameworkChart` as `readerContext`, and charts update **immediately**.
 
-```js
-personalization: { uses: ['startingValue'], kind: 'scenario-scale', note: '…' }
-```
+**Doctrine — honest wiring only.** If a reader enters an input, every chart that
+*honestly* uses it discloses it and updates; every chart that cannot use it
+ignores it. A chart opts in with `personalization: { uses, kind, introLead, note }`
+and discloses **exactly** the inputs in `uses` via `getSimulationIntro(spec, ctx)`
+(a quiet line **above** the visual) — never an input it doesn't consume. The one
+computed figure the intro can't carry (a dollar drawdown, multiples at a horizon)
+is `getSimulationNote(spec, ctx)`, a quiet callout **below** the visual.
 
-Charts consuming context (Part 1 + Part 3):
+Charts consuming context (every other chart stays conceptual and ignores it, by design):
 
-| chartId | kind | what it scales |
+| chartId · part | uses | what it does |
 |---|---|---|
-| `p1-sequence-risk` | `sequence-scale` | start, level withdrawal (`withdrawalRate` 4%/yr), and good/bad ending values scaled to the starting value |
-| `p3-exposure-not-control` | `scenario-scale` | terminal, max drawdown, and dry powder read-outs shown in **dollars** (· %); a caption notes the starting portfolio |
-| `p3-volatility-is-the-toll` | `vol-impact` | a caption: *"At a 15% Bitcoin reserve, a 70% Bitcoin drawdown is roughly a $X hit on a $Y portfolio"* |
+| `p1-sequence-risk` · 1 | `startingValue`, `withdrawalRate` | **re-simulates both paths** from the shared deck at the chosen withdrawal rate (clamped to a 2–8% representative band, dynamic y-domain; default 4% = the current paths); start / withdrawal / ending values in dollars |
+| `p2-time-changes-prudence` · 2 | `startingValue`, `horizon` | reads the convex vs conventional multiples **at the chosen horizon** and scales them to dollars — the one Part 2 chart the horizon honestly drives |
+| `p3-exposure-not-control` · 3 | `startingValue` | terminal / max-drawdown / dry-powder read-outs in dollars |
+| `p3-volatility-is-the-toll` · 3 | `startingValue`, `btcReserveAllocation` | a callout: *"At a 15% Bitcoin reserve, a 70% drawdown is ≈ $X on a $Y portfolio"* — the reserve size is the reader's |
+| `p3-accumulate-dont-trade` · 3 | `monthlyDca` | makes the conversion concrete: *"$500 ÷ price = units received"* — representative units on a representative index, no fake totals |
 
-**Context visible where it changes interpretation:** an opted-in chart shows a
-quiet scale intro *near the visual* via `getSimulationIntro(spec, ctx)` — not only
-in the footer. Standardized helpers (`chart-specs.mjs`): `formatStartingValue`,
-`formatHorizon`, `getSimulationIntro`, `buildPersonalizedDisclosure`.
+`kind` ∈ `scenario-scale · vol-impact · sequence-scale · horizon-scale · dca-note`.
+Helpers (`chart-specs.mjs`): `formatStartingValue`, `formatPercent`,
+`formatHorizon`, `horizonYears`, `getSimulationIntro`, `getSimulationNote`,
+`buildPersonalizedDisclosure`.
 
 **Honesty rule:** personalized values **scale representative exhibits; they do not
 make them predictive.** Never say *expected / forecast / recommendation / should /
-optimized*. Prefer *illustrative / representative / scaled example / starting
-portfolio / portfolio impact*. Captions always carry "illustrative, not a
-forecast." The validator enforces that any `personalization` block has allowed
-`uses` keys, a known `kind`, and a `note`.
-
-Future expansion: wire `horizon` into horizon-sensitive exhibits (e.g.
-*Time Changes Prudence*), and optionally persist reader context across the public
-Part pages once the charts are placed there.
+optimized*. Prefer *illustrative / representative / scaled example / portfolio
+impact*. Every personalized chart carries "illustrative/representative, not a
+forecast." Conceptual / macro charts (regime maps, loops, scorecards, ruin, payoff
+shapes, correlation, CPI, power-law, liquidity) **do not** personalize — scaling
+them would be fake. The validator enforces allowed `uses`, a known `kind`, a
+`note`, and that every personalized chart produces an intro.
 
 ---
 
