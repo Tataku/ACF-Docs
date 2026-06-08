@@ -192,18 +192,19 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
       {valueText && (
         <div style={{ marginBottom: 7 }}>
           <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
-          {valueSub && <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4, marginTop: 3 }}>{valueSub}</div>}
+          {isPin && valueSub && <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4, marginTop: 3 }}>{valueSub}</div>}
         </div>
       )}
       <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2 }}>{meta.why}</p>
-      <div style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${pal.cardBorder}`, display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-        <span style={{ fontFamily: pal.sans, fontSize: 10, color: pal.text4, fontStyle: 'italic' }}>{meta.claim}</span>
-        {meta.link ? (
-          isPin
-            ? <a href={meta.link} style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: accent, textDecoration: 'none', borderBottom: `1px solid ${accent}77`, paddingBottom: 1, whiteSpace: 'nowrap' }}>READ →</a>
-            : <span style={{ fontFamily: pal.mono, fontSize: 8, color: pal.text4, letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>CLICK TO PIN</span>
-        ) : null}
-      </div>
+      {/* hover = quick read (a pin hint); pin = deeper read (the principle + raw context + link) */}
+      {isPin ? (
+        <div style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${pal.cardBorder}`, display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontFamily: pal.sans, fontSize: 10.5, color: pal.text3, fontStyle: 'italic' }}>{meta.claim}</span>
+          {meta.link && <a href={meta.link} style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: accent, textDecoration: 'none', borderBottom: `1px solid ${accent}77`, paddingBottom: 1, whiteSpace: 'nowrap' }}>READ →</a>}
+        </div>
+      ) : (
+        <div style={{ marginTop: 8, fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>{meta.link ? 'CLICK TO PIN FOR MORE →' : 'CLICK TO PIN →'}</div>
+      )}
     </div>
   );
 }
@@ -1983,10 +1984,18 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
 
   const padX = 'clamp(14px, 3vw, 22px)';
   const badge = coarse ? 'TAP TO EXPLORE' : 'LIVE · HOVER';
-  const dm = getDataModeMarker(spec);                         // data-mode honesty marker, shown in the header (not buried in the footer)
-  const dmGlyph = dm.glyph === 'circle' ? { width: 13, height: 13, borderRadius: '50%', border: `1.5px solid ${pal.text3}`, flexShrink: 0 }
-    : dm.glyph === 'square' ? { width: 11, height: 11, border: `1.5px solid ${pal.text3}`, flexShrink: 0 }
-    : { width: 12, height: 12, transform: 'rotate(45deg)', border: `1.5px solid ${pal.bandStressText}`, flexShrink: 0 };
+  const dm = getDataModeMarker(spec);                         // ONE primary data-mode marker, in the title row (not repeated down the chart)
+  // distinct, quiet tone per mode (dark/light); meaning is carried by label + aria, never colour alone
+  const dmColor = ({
+    conceptual: { dark: '#7fb0c8', light: '#3f7a93' },        // cool blue / cyan-gray
+    representative: { dark: '#c8a36a', light: '#8f6c32' },    // muted amber / bronze
+    simulation: { dark: '#b79ad6', light: '#7a5ca6' },        // soft violet
+    historical: { dark: '#9aa6b2', light: '#566676' },        // slate / steel
+    mixed: { dark: '#9bb89a', light: '#5c7d5b' },             // blend
+  }[dm.mode] || { dark: '#c8a36a', light: '#8f6c32' })[pal.name === 'light' ? 'light' : 'dark'];
+  const dmGlyph = dm.glyph === 'circle' ? { width: 13, height: 13, borderRadius: '50%', border: `1.6px solid ${dmColor}`, flexShrink: 0 }
+    : dm.glyph === 'square' ? { width: 11, height: 11, border: `1.6px solid ${dmColor}`, flexShrink: 0 }
+    : { width: 12, height: 12, transform: 'rotate(45deg)', border: `1.6px solid ${dmColor}`, flexShrink: 0 };
   const showValues = spec.visualDataMode !== 'conceptual' && !spec.suppressValues;
   const W = 1000;
   // Representative/simulation values are art-directed: never label them "TRUE VALUE".
@@ -2010,7 +2019,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
           <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.18em', color: pal.text3, marginBottom: 8 }}>{spec.idx} · {spec.claimLabel}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
             {/* data-mode honesty marker — at-a-glance, with hover/focus explanation (durable copy also in Details) */}
-            <span className="acf-dm acf-fx-focusable" tabIndex={0} role="img" aria-label={`${dm.label} exhibit. ${dm.explain}`} title={dm.explain}
+            <span className={`acf-dm acf-data-mode--${dm.mode} acf-fx-focusable`} tabIndex={0} role="img" aria-label={`${dm.label} exhibit. ${dm.explain}`} title={dm.explain}
               style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, cursor: 'help', borderRadius: 4, padding: '3px 2px' }}>
               <span aria-hidden style={dmGlyph} />
               <span className="acf-dm-pop" role="tooltip" style={{ background: pal.cardSolid, border: `1px solid ${pal.borderHi}`, borderRadius: 6, padding: '9px 12px', width: 'max-content', maxWidth: 264, boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)' }}>
@@ -2028,10 +2037,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
       {/* chart-level simulation intro — context visible where it changes interpretation */}
       {simIntro && (
         <div style={{ padding: `0 ${padX} 2px` }}>
-          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, display: 'inline-flex', alignItems: 'center', gap: 8, lineHeight: 1.5 }}>
-            <span aria-hidden style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 }} />
-            {simIntro}
-          </span>
+          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, lineHeight: 1.5 }}>{simIntro}</span>
         </div>
       )}
 
@@ -2076,10 +2082,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
 
       {pNote && (
         <div style={{ padding: `0 ${padX} 2px` }}>
-          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, display: 'inline-flex', alignItems: 'center', gap: 8, lineHeight: 1.5 }}>
-            <span aria-hidden style={{ width: 7, height: 7, transform: 'rotate(45deg)', border: `1px solid ${pal.bandStressText}`, flexShrink: 0 }} />
-            {pNote}
-          </span>
+          <span style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.03em', color: pal.text3, lineHeight: 1.5 }}>{pNote}</span>
         </div>
       )}
 
