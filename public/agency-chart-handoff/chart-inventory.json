@@ -85,6 +85,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -151,6 +156,11 @@
       "backgroundRoles": [
         "regime"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -217,6 +227,11 @@
       "backgroundRoles": [
         "regime"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -281,6 +296,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -345,6 +365,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -411,6 +436,11 @@
       "backgroundRoles": [
         "pressure"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -484,6 +514,11 @@
       "backgroundRoles": [
         "pressure"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -557,6 +592,11 @@
       "backgroundRoles": [
         "regime"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -637,6 +677,11 @@
         "pressure",
         "revealLayer"
       ],
+      "mobileBehavior": {
+        "interaction": "snap-slider",
+        "chartHeight": "tall",
+        "note": "Snap the reveal to Surface / Split / Hidden cost on release."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -713,6 +758,11 @@
         "duration": "slow"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "stacked",
+        "chartHeight": "tall",
+        "note": "Return deck stacks above the paths; keep withdrawal ticks legible."
+      },
       "readerContext": {
         "kind": "sequence-scale",
         "uses": [
@@ -777,6 +827,11 @@
       "backgroundRoles": [
         "regime"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -841,6 +896,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -905,6 +965,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -969,6 +1034,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1033,6 +1103,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1090,6 +1165,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",
@@ -1154,6 +1234,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1211,6 +1296,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1268,6 +1358,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1332,6 +1427,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -1405,6 +1505,11 @@
       "backgroundRoles": [
         "regime"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -1469,6 +1574,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "scroll-x",
+        "chartHeight": "auto",
+        "note": "Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1533,6 +1643,11 @@
       "backgroundRoles": [
         "regime"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": {
         "kind": "vol-impact",
         "uses": [
@@ -1609,6 +1724,11 @@
       "backgroundRoles": [
         "regime"
       ],
+      "mobileBehavior": {
+        "interaction": "stacked-controls",
+        "chartHeight": "tall",
+        "note": "Stack the strategy + shock controls; keep stat read-outs below the chart."
+      },
       "readerContext": {
         "kind": "scenario-scale",
         "uses": [
@@ -1680,6 +1800,11 @@
       "backgroundRoles": [
         "regime"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "representative",
       "disclosure": "Representative framework exhibit · Sources support the underlying concept",
@@ -1739,6 +1864,11 @@
       "backgroundRoles": [
         "relational"
       ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Unit bars need vertical room — do not shrink too far."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1796,6 +1926,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
       "readerContext": null,
       "disclosureMode": "conceptual",
       "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
@@ -1860,6 +1995,11 @@
         "duration": "calm"
       },
       "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
       "readerContext": null,
       "disclosureMode": "simulation",
       "disclosure": "Representative simulation · Built to show path dependency, not a historical backtest",

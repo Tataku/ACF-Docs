@@ -102,6 +102,12 @@ export const EXPERIENCE_ROLES = ['evidence', 'comparison', 'mechanism', 'convers
 export const BEAT_KINDS = ['context', 'mechanism', 'action', 'consequence', 'takeaway'];
 export const BEAT_TIMINGS = ['early', 'middle', 'late'];
 
+// Mobile is not "just shrink." Each layout declares how it adapts on touch and
+// how much vertical room it needs — a contract for the orchestrator and a mobile
+// QA signal in the inventory.
+export const MOBILE_INTERACTIONS = ['tap-cycle', 'snap-slider', 'stacked-controls', 'stacked', 'scroll-x', 'simplified'];
+export const CHART_HEIGHTS = ['standard', 'tall', 'auto'];
+
 // Reader simulation-context keys. `startingValue` is canonical; `portfolioValue`
 // is the legacy alias kept working until the reader-context migration lands.
 export const CONTEXT_KEYS = ['startingValue', 'horizon', 'withdrawalRate', 'btcReserveAllocation', 'monthlyDca'];
@@ -221,6 +227,20 @@ export function resolveStoryBeats(spec) {
   if (interactive) beats.push({ kind: 'action', label: it.conceptMatch || 'Invite the reader to act', timing: 'middle' });
   beats.push({ kind: 'consequence', label: 'Resolve the takeaway', timing: 'late' });
   return beats;
+}
+
+// mobile behavior: how a layout adapts on touch + the vertical room it needs.
+// Explicit spec.mobileBehavior wins; otherwise derived per layout.
+export function resolveMobileBehavior(spec) {
+  if (spec.mobileBehavior) return spec.mobileBehavior;
+  const L = spec.layout;
+  if (L === 'dual' && spec.perspectiveSlider) return { interaction: 'snap-slider', chartHeight: 'tall', note: 'Snap the reveal to Surface / Split / Hidden cost on release.' };
+  if (L === 'scenario') return { interaction: 'stacked-controls', chartHeight: 'tall', note: 'Stack the strategy + shock controls; keep stat read-outs below the chart.' };
+  if (L === 'sequenceRisk') return { interaction: 'stacked', chartHeight: 'tall', note: 'Return deck stacks above the paths; keep withdrawal ticks legible.' };
+  if (L === 'heartbeat') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Unit bars need vertical room — do not shrink too far.' };
+  if (L === 'scorecard') return { interaction: 'scroll-x', chartHeight: 'auto', note: 'Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable.' };
+  if (['loop', 'flow', 'systemLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
+  return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Tap to cycle elements; keep the thesis line and labels legible.' };
 }
 
 // ── simulation-context intro (chart-level data introduction) ─────────────────

@@ -87,6 +87,15 @@ motion choreography; explicit per-spec values win, otherwise they're derived.
 
 Resolvers: `resolveExperienceRole`, `resolveStoryBeats` (`chart-specs.mjs`). *Example:* `The Bill Came Due` declares `reveal` + `context → mechanism → action → consequence` so the build and the divider gesture follow the same order the reader understands it.
 
+### Mobile behavior (not "just shrink")
+
+Each layout declares how it adapts on touch and how much vertical room it needs, via `mobileBehavior { interaction, chartHeight, note }` (derived per layout; explicit wins):
+
+- `interaction` ∈ `tap-cycle · snap-slider · stacked-controls · stacked · scroll-x · simplified`.
+- `chartHeight` ∈ `standard · tall · auto`. On a coarse pointer the engine gives **`tall`** layouts ~20% more vertical room (so line charts, unit bars, reveal and paths don't render as a short strip); `auto` (scorecard) is content-sized; `standard` (diagrams) scales as-is.
+
+Already native on touch: the before/after reveal **snaps** to Surface / Split / Hidden cost on release; every chart is tap-to-explore (`MobileInsight`) with enlarged hit targets. The `note` records the per-layout target (e.g. *stack scenario controls; deck above paths*) as the QA signal for deeper per-layout reflow. Resolver: `resolveMobileBehavior` (`chart-specs.mjs`).
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +
