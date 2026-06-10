@@ -902,6 +902,107 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   );
 }
 
+/* ── FeedbackLoopSvg — reflexivity as two lanes (reinforce / reverse) ─────────*
+ * The concept is causal FEEDBACK, not a decorative orbit: the same mechanism
+ * (price → capital → fundamentals → validation → back to price) runs two ways.
+ * Top lane reinforces (accent, arrows thicken left→right, loops back stronger);
+ * bottom lane reverses (stress, arrows thin/break, loops back weaker). A quiet
+ * "REFLEXIVITY" sits between them. Reads at a glance; hover/pin adds the why.
+ * Distinct from systemLoop (a single ring) — circularity isn't the only story. */
+function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const fl = spec.feedbackLoop;
+  const lanes = fl.lanes;
+  const K = lanes[0].nodes.length;
+  const stages = lanes[0].nodes.map((n) => n.stage);
+  const pad = { l: 92, r: 24, t: 26, b: 30 };
+  const innerW = width - pad.l - pad.r;
+  const colW = innerW / K;
+  const colX = (i) => pad.l + colW * (i + 0.5);
+  const yTop = pad.t + 50, yBot = height - pad.b - 50, midY = (yTop + yBot) / 2;
+  const NW = Math.min(colW - 14, 118), NH = 34;
+  const laneY = (li) => (li === 0 ? yTop : yBot);
+  const toneCol = (tone) => (tone === 'stress' ? pal.bandStress : accent);
+  const toneTxt = (tone) => (tone === 'stress' ? pal.bandStressText : accent);
+  const nodes = [];
+  lanes.forEach((lane, li) => lane.nodes.forEach((nd, i) => nodes.push({ ...nd, li, i, x: colX(i), y: laneY(li), tone: lane.tone })));
+  const stageAnchor = (id) => { const i = stages.indexOf(id); return i < 0 ? null : { x: colX(i), y: midY }; };
+
+  const geom = useMemo(() => {
+    const arrows = [], rets = [];
+    lanes.forEach((lane, li) => {
+      const y = laneY(li);
+      for (let i = 0; i < K - 1; i++) {
+        const x0 = colX(i) + NW / 2, tip = colX(i + 1) - NW / 2 - 4, len = Math.max(10, tip - x0);
+        const w = lane.tone === 'stress' ? 0.92 - i * 0.17 : 0.5 + i * 0.17;   // reinforce thickens, reverse thins
+        arrows.push({ d: Brush.brushArrow(tip, y, len, 0, { seed: 60 + li * 23 + i * 7, weight: Math.max(0.34, w), intensity: 0.5 }), tone: lane.tone });
+      }
+      // return arc bows OUTWARD (above the top lane / below the bottom lane), arrowhead back into price
+      const sx = colX(K - 1), ex = colX(0);
+      const sy = li === 0 ? y - NH / 2 - 2 : y + NH / 2 + 2;
+      const bow = li === 0 ? pad.t + 4 : height - pad.b - 4;
+      rets.push({ arc: `M${sx} ${sy} C${sx} ${bow} ${ex} ${bow} ${ex} ${sy}`, head: Brush.brushArrow(ex, sy, 9, li === 0 ? Math.PI / 2 : -Math.PI / 2, { seed: 150 + li * 9, weight: 0.55, intensity: 0.45 }), tone: lane.tone });
+    });
+    return { arrows, rets };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  const anchorOf = (a) => stageAnchor(a.id);
+  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 40 : 30, NW / 2); nodes.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.stage) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Reflexivity as two lanes: a reinforcing loop (price rises, capital enters, buildout funds, validation confirms, price strengthens) and a reversing loop (price falls, capital leaves, buildout starves, validation disappoints, price breaks). Both feed back into price." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* return arcs (loop feeds back to price) — quiet, drawn behind the nodes */}
+        <g style={{ opacity: entered ? 0.6 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 240ms' }}>
+          {geom.rets.map((r, i) => <g key={`ret${i}`}><path d={r.arc} fill="none" stroke={toneCol(r.tone)} strokeWidth="1" strokeDasharray="3 5" opacity="0.5" /><path d={r.head} fill={toneCol(r.tone)} opacity="0.7" /></g>)}
+          <text x={(pad.l + width - pad.r) / 2} y={midY - 3} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{(fl.centerLabel || 'reflexivity').toUpperCase()}</text>
+          {fl.returnLabel && <text x={(pad.l + width - pad.r) / 2} y={midY + 12} textAnchor="middle" style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>{fl.returnLabel}</text>}
+        </g>
+        {/* lane connectors */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 700ms ease 180ms' }}>
+          {geom.arrows.map((a, i) => <path key={`ar${i}`} d={a.d} fill={toneCol(a.tone)} opacity={a.tone === 'stress' ? 0.7 : 0.85} />)}
+        </g>
+        {/* lane labels (left gutter) */}
+        {lanes.map((lane, li) => (
+          <g key={lane.id} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${120 + li * 80}ms` }}>
+            <text x={8} y={laneY(li) - 2} style={halo(pal, 9, toneTxt(lane.tone), 600)}>{lane.label}</text>
+            {lane.note && <text x={8} y={laneY(li) + 11} style={halo(pal, 7.5, pal.text4)}>{lane.note}</text>}
+          </g>
+        ))}
+        {/* nodes (both lanes; a focused stage emphasises its whole column) */}
+        {nodes.map((n) => {
+          const on = focusId === n.stage;
+          const isP = n.stage === spec.primaryKey;
+          const col = toneCol(n.tone);
+          return (
+            <g key={`${n.li}-${n.i}`} style={{ opacity: entered ? (focusId && !on ? 0.38 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms ease ${140 + n.i * 80 + n.li * 40}ms, transform 440ms cubic-bezier(0.2,0.7,0.2,1) ${140 + n.i * 80 + n.li * 40}ms` }}>
+              <rect x={n.x - NW / 2} y={n.y - NH / 2} width={NW} height={NH} rx={7} fill={pal.surface} stroke={on ? col : (isP ? col : pal.borderHi)} strokeWidth={on ? 1.7 : (isP ? 1.3 : 1)} style={{ transition: trans('stroke') }} />
+              <text x={n.x} y={n.y + 4} textAnchor="middle" style={haloSans(pal, 11, isP ? col : pal.text1, isP ? 600 : 500)}>{n.label}</text>
+            </g>
+          );
+        })}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+
 /* ── BridgeSvg — capital compressed through a constraint (venturi / choke) ────*
  * A flow field of capital streamlines compresses through a dominant bottleneck
  * and re-concentrates into the investable exposure. The constraint is the star:
@@ -2166,6 +2267,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'flow' && <FlowSvg spec={spec} height={hh(400)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'governanceLoop' && <GovernanceLoopSvg spec={spec} height={hh(300)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'feedbackLoop' && <FeedbackLoopSvg spec={spec} height={hh(330)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={hh(380)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={hh(150 + (spec.scorecard?.requirements.length || 8) * 32)} targets={spec.hoverTargets} {...cp} />}

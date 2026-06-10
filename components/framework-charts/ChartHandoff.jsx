@@ -9,7 +9,7 @@
  *
  * Editorial single column, dark terminal foundation. Not public navigation.
  * ─────────────────────────────────────────────────────────────────────────── */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import FrameworkChart from './FrameworkChart';
 import { BrushChevron } from './icons';
 import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel, HORIZON_BANDS } from './chart-specs.mjs';
@@ -87,7 +87,7 @@ const HANDOFF_PART_NAV = [
 // THEME (dark/light), PART (mode-preserving), MODE (export/docs-shell), plus a
 // muted copy-link on export. Active state = brighter text + a thin accent
 // underline (never a filled pill or box). PART scales from HANDOFF_PART_NAV.
-function ControlBar({ pal, accent, theme, setTheme, view, setView, variant, part, shellRoute, exportRoute }) {
+function ControlBar({ pal, accent, theme, setTheme, view, setView, variant, part, shellRoute, exportRoute, extra }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard && typeof window !== 'undefined') {
@@ -145,6 +145,7 @@ function ControlBar({ pal, accent, theme, setTheme, view, setView, variant, part
           {variant === 'export' && <button onClick={copy} style={{ ...base, color: copied ? accent : pal.text4 }}>{copied ? 'Link copied' : 'Copy link ⧉'}</button>}
         </>
       )}
+      {extra}
     </nav>
   );
 }
@@ -262,7 +263,7 @@ const parseMoney = (s) => { const n = Number(String(s).replace(/[^0-9.]/g, ''));
 const clampMoney = (n) => Math.min(100000000, Math.max(1000, Math.round(n)));
 const groupMoney = (n) => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '');
 
-function SimulationContextBar({ pal, accent, ctx, setCtx, compact }) {
+function SimulationContextBar({ pal, accent, ctx, setCtx, compact, layout = 'bar' }) {
   const [raw, setRaw] = useState(groupMoney(ctx.startingValue));
   const [dcaRaw, setDcaRaw] = useState(groupMoney(ctx.monthlyDca));
   const [advOpen, setAdvOpen] = useState(false);
@@ -295,9 +296,13 @@ function SimulationContextBar({ pal, accent, ctx, setCtx, compact }) {
   const advDca = group('MONTHLY DCA', money(dcaRaw, setDcaRaw, commitDca, 'Illustrative monthly DCA amount in dollars', 64));
   const shortCaveat = 'These values only scale illustrative examples — not forecasts.';
   const fullCaveat = 'Used only to scale representative exhibits on this page. Each chart discloses the inputs it uses. Not a forecast or recommendation.';
+  const isDrop = layout === 'dropdown';
+  const sectionStyle = isDrop
+    ? { display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 13, padding: 0, margin: 0, minWidth: 230 }
+    : { borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 26px' };
   return (
-    <section aria-label={compact ? 'Personalize examples' : 'Simulation context'} style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 26px' }}>
-      <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>{compact ? 'PERSONALIZE EXAMPLES' : 'SIMULATION CONTEXT'}{compact && <span style={{ marginLeft: 8, fontWeight: 400, letterSpacing: '0.08em', color: pal.text4 }}>optional</span>}</span>
+    <section aria-label={compact ? 'Personalize examples' : 'Simulation context'} style={sectionStyle}>
+      {!isDrop && <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>{compact ? 'PERSONALIZE EXAMPLES' : 'SIMULATION CONTEXT'}{compact && <span style={{ marginLeft: 8, fontWeight: 400, letterSpacing: '0.08em', color: pal.text4 }}>optional</span>}</span>}
       {group('STARTING VALUE', money(raw, setRaw, commit, 'Illustrative starting portfolio value in dollars', 96))}
       {group('TIME HORIZON', choice('horizon', HORIZON_BANDS.map((h) => ({ v: h.id, label: h.label }))))}
       {compact ? (
@@ -313,6 +318,55 @@ function SimulationContextBar({ pal, accent, ctx, setCtx, compact }) {
         </>
       )}
     </section>
+  );
+}
+
+// Quiet header dropdown — a brush-chevron trigger + popover that closes on
+// outside-click and Escape (the native <details> Options can't). Used for the
+// in-header Personalize control so assumptions are reachable while scrolling.
+function HeaderDropdown({ pal, label, ariaLabel, children, align = 'right', narrow = false }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey); };
+  }, [open]);
+  const trig = { fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.04em', cursor: 'pointer', background: 'transparent', border: 'none', padding: '3px 2px 1px', lineHeight: 1.4, color: open ? pal.text1 : pal.text3, fontWeight: open ? 600 : 400, display: 'inline-flex', alignItems: 'center', gap: 5 };
+  const surface = { background: pal.cardSolid, border: `1px solid ${pal.borderHi}`, borderRadius: 8, padding: '14px 16px', boxShadow: pal.name === 'light' ? '0 8px 26px rgba(40,36,28,0.18)' : '0 10px 30px rgba(0,0,0,0.55)' };
+  // Narrow: a fixed full-width sheet just below the sticky bar (can't overflow,
+  // never clipped by a wrapped trigger). Wide: a popover anchored to the trigger.
+  const popStyle = narrow
+    ? { ...surface, position: 'fixed', left: '4vw', right: '4vw', top: 62, zIndex: 50, maxWidth: 'none' }
+    : { ...surface, position: 'absolute', top: 'calc(100% + 9px)', [align]: 0, zIndex: 50, maxWidth: 'min(92vw, 320px)' };
+  return (
+    <span ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+      <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-haspopup="dialog" style={trig}>
+        {label} <span className="acf-cv" style={{ display: 'inline-flex', transform: open ? 'rotate(90deg)' : undefined }}><BrushChevron size={10} /></span>
+      </button>
+      {open && (
+        <div role="dialog" aria-label={ariaLabel || (typeof label === 'string' ? label : 'Options')} style={popStyle}>
+          {children}
+        </div>
+      )}
+    </span>
+  );
+}
+
+// Simulation assumptions, reachable from the frozen header. Same reader context
+// + persistence as the hero bar (one source of truth) — both update live.
+function HeaderPersonalize({ pal, accent, ctx, setCtx, narrow }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 9 }}>
+      <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.18em', color: pal.text4 }}>ASSUMPTIONS</span>
+      <HeaderDropdown pal={pal} label="Personalize" ariaLabel="Personalize examples" narrow={narrow}>
+        <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.2em', color: pal.text3, marginBottom: 12 }}>PERSONALIZE EXAMPLES <span style={{ color: pal.text4, fontWeight: 400, letterSpacing: '0.08em' }}>· optional</span></div>
+        <SimulationContextBar pal={pal} accent={accent} ctx={ctx} setCtx={setCtx} compact layout="dropdown" />
+      </HeaderDropdown>
+    </span>
   );
 }
 
@@ -337,6 +391,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   const [readerCtx, setReaderCtx] = useState(DEFAULT_SIMULATION_CONTEXT);
   const [scrolled, setScrolled] = useState(false);            // sticky control bar gains a quiet surface only after scroll
   const [reduce, setReduce] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(false);            // header Personalize → full-width sheet on mobile
   // Reader/Agency + Dark/Light are user PREFERENCES (not simulation data), so they
   // persist in localStorage across all handoff/export routes and refresh. Hydrate
   // after mount (SSR-safe; brief one-frame default before the stored choice applies).
@@ -376,6 +431,13 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
     m.addEventListener ? m.addEventListener('change', f) : m.addListener(f);
     return () => { m.removeEventListener ? m.removeEventListener('change', f) : m.removeListener(f); };
   }, []);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const m = window.matchMedia('(max-width: 700px)');
+    const f = () => setIsNarrow(m.matches); f();
+    m.addEventListener ? m.addEventListener('change', f) : m.addListener(f);
+    return () => { m.removeEventListener ? m.removeEventListener('change', f) : m.removeListener(f); };
+  }, []);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
   const selBg = pal.name === 'light' ? 'rgba(14,140,102,0.20)' : 'rgba(16,185,129,0.32)';
@@ -386,17 +448,24 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   const specs = FRAMEWORK_CHART_SPECS.filter((s) => preset.groups.includes(s.group) && s.status !== 'deferred');
 
   const selVars = { '--acf-sel-bg': selBg, '--acf-sel-fg': pal.text1 };
+  const padX = isExport ? 'clamp(16px, 4vw, 32px)' : 'clamp(16px, 3vw, 28px)';
+  const centered = { maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 };
   const outer = isExport
-    ? { ...selVars, background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', padding: 'clamp(20px, 4vw, 44px) clamp(16px, 4vw, 32px)', colorScheme: pal.name }
-    : { ...selVars, background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, padding: 'clamp(16px, 3vw, 28px)', margin: '8px 0 32px', colorScheme: pal.name };
+    ? { ...selVars, background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', colorScheme: pal.name }
+    : { ...selVars, background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, margin: '8px 0 32px', colorScheme: pal.name };
 
   return (
     <div className="acf-chart-handoff" style={outer}>
-      <div style={{ maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 }}>
-      {/* sticky reader controls — quiet, compact, non-obstructive; surface fades in on scroll */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 40, marginBottom: 24, padding: '10px 0', background: scrolled ? stickyBg : 'transparent', backdropFilter: scrolled ? 'saturate(140%) blur(10px)' : 'none', WebkitBackdropFilter: scrolled ? 'saturate(140%) blur(10px)' : 'none', borderBottom: `1px solid ${scrolled ? pal.cardBorder : 'transparent'}`, transition: reduce ? 'none' : 'background 220ms ease, border-color 220ms ease' }}>
-        <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} view={view} setView={setView} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
+      {/* full-bleed sticky reader chrome: the wrapper spans the viewport so the surface +
+          hairline reach the edges (no clipped floating strip); inner content stays page-aligned.
+          Quiet — transparent at rest; translucent surface + blur + hairline fade in on scroll. */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 40, background: scrolled ? stickyBg : 'transparent', backdropFilter: scrolled ? 'saturate(140%) blur(10px)' : 'none', WebkitBackdropFilter: scrolled ? 'saturate(140%) blur(10px)' : 'none', borderBottom: `1px solid ${scrolled ? pal.cardBorder : 'transparent'}`, transition: reduce ? 'none' : 'background 220ms ease, border-color 220ms ease' }}>
+        <div style={{ ...centered, padding: `10px ${padX}` }}>
+          <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} view={view} setView={setView} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} extra={readerView ? <HeaderPersonalize pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} narrow={isNarrow} /> : null} />
+        </div>
       </div>
+      {/* page content — same max-width, page padding */}
+      <div style={{ ...centered, padding: `clamp(10px, 2vw, 18px) ${padX} ${isExport ? 'clamp(20px, 4vw, 44px)' : 'clamp(16px, 3vw, 28px)'}` }}>
       {/* header */}
       <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{readerView ? 'ADAPTIVE CONVEXITY FRAMEWORK · A VISUAL ESSAY' : preset.eyebrow}</div>
       <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{readerView ? (preset.readerTitle || preset.title) : preset.title}</h1>
