@@ -262,7 +262,7 @@ const parseMoney = (s) => { const n = Number(String(s).replace(/[^0-9.]/g, ''));
 const clampMoney = (n) => Math.min(100000000, Math.max(1000, Math.round(n)));
 const groupMoney = (n) => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '');
 
-function SimulationContextBar({ pal, accent, ctx, setCtx, compact }) {
+function SimulationContextBar({ pal, accent, ctx, setCtx, compact, layout = 'bar' }) {
   const [raw, setRaw] = useState(groupMoney(ctx.startingValue));
   const [dcaRaw, setDcaRaw] = useState(groupMoney(ctx.monthlyDca));
   const [advOpen, setAdvOpen] = useState(false);
@@ -295,8 +295,12 @@ function SimulationContextBar({ pal, accent, ctx, setCtx, compact }) {
   const advDca = group('MONTHLY DCA', money(dcaRaw, setDcaRaw, commitDca, 'Illustrative monthly DCA amount in dollars', 64));
   const shortCaveat = 'These values only scale illustrative examples — not forecasts.';
   const fullCaveat = 'Used only to scale representative exhibits on this page. Each chart discloses the inputs it uses. Not a forecast or recommendation.';
+  const isPanel = layout === 'panel';
+  const sectionStyle = isPanel
+    ? { display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 13, padding: 0, margin: 0 }
+    : { borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 26px' };
   return (
-    <section aria-label={compact ? 'Personalize examples' : 'Simulation context'} style={{ borderTop: `1px solid ${pal.cardBorder}`, borderBottom: `1px solid ${pal.cardBorder}`, padding: '14px 2px', margin: '0 0 22px', display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '12px 26px' }}>
+    <section aria-label={compact ? 'Personalize examples' : 'Simulation context'} style={sectionStyle}>
       <span style={{ ...lbl, letterSpacing: '0.22em', color: pal.text3 }}>{compact ? 'PERSONALIZE EXAMPLES' : 'SIMULATION CONTEXT'}{compact && <span style={{ marginLeft: 8, fontWeight: 400, letterSpacing: '0.08em', color: pal.text4 }}>optional</span>}</span>
       {group('STARTING VALUE', money(raw, setRaw, commit, 'Illustrative starting portfolio value in dollars', 96))}
       {group('TIME HORIZON', choice('horizon', HORIZON_BANDS.map((h) => ({ v: h.id, label: h.label }))))}
@@ -320,12 +324,12 @@ function SimulationContextBar({ pal, accent, ctx, setCtx, compact }) {
 // four-column training block. Interaction is taught once, then the charts begin.
 function ReaderOrientation({ pal, accent }) {
   return (
-    <section aria-label="How to read this" style={{ margin: '2px 0 16px', display: 'flex', alignItems: 'baseline', gap: '8px 16px', flexWrap: 'wrap' }}>
-      <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.18em', color: accent, flexShrink: 0 }}>HOW TO READ THIS</span>
-      <span style={{ fontFamily: pal.sans, fontSize: 13, lineHeight: 1.55, color: pal.text2, maxWidth: 760 }}>
-        Each chart makes one claim and shows the mechanism. Hover, tap, or pin when you want the deeper explanation.
-        <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.12em', color: pal.text4, marginLeft: 10, whiteSpace: 'nowrap' }}>CLAIM → PICTURE → EXPLORE</span>
-      </span>
+    <section aria-label="How to read this" style={{ margin: '20px 0 2px', borderLeft: `2px solid ${accent}`, padding: '3px 0 4px 14px', maxWidth: 600 }}>
+      <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.2em', color: accent, marginBottom: 6 }}>HOW TO READ THIS</div>
+      <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 14, lineHeight: 1.55, color: pal.text1 }}>
+        Each chart makes <strong style={{ fontWeight: 600 }}>one claim</strong> and shows the mechanism. Hover, tap, or pin when you want the deeper explanation.
+      </p>
+      <div style={{ marginTop: 9, fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.16em', color: pal.text4 }}>CLAIM&nbsp;→&nbsp;PICTURE&nbsp;→&nbsp;EXPLORE</div>
     </section>
   );
 }
@@ -400,12 +404,22 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
       {/* header */}
       <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{readerView ? 'ADAPTIVE CONVEXITY FRAMEWORK · A VISUAL ESSAY' : preset.eyebrow}</div>
       <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{readerView ? (preset.readerTitle || preset.title) : preset.title}</h1>
-      <p style={{ margin: '14px 0 18px', fontSize: 14, lineHeight: 1.62, color: pal.text3, maxWidth: 720 }}>
-        {readerView ? (preset.readerSubtitle || preset.intro) : preset.intro}
-      </p>
-
-      {!readerView && (
+      {readerView ? (
+        /* reader hero: title block + "how to read" on the left; the optional
+           simulation controls live in their own subtle container on the right. */
+        <div className="acf-hero">
+          <div style={{ minWidth: 0 }}>
+            <p style={{ margin: '14px 0 0', fontSize: 14, lineHeight: 1.62, color: pal.text3, maxWidth: 600 }}>{preset.readerSubtitle || preset.intro}</p>
+            <ReaderOrientation pal={pal} accent={accent} />
+          </div>
+          <aside style={{ border: `1px solid ${pal.cardBorder}`, borderRadius: 9, padding: '14px 16px 15px', background: pal.name === 'light' ? 'rgba(20,16,8,0.02)' : 'rgba(255,255,255,0.022)' }}>
+            <SimulationContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} compact layout="panel" />
+          </aside>
+        </div>
+      ) : (
         <>
+          <p style={{ margin: '14px 0 18px', fontSize: 14, lineHeight: 1.62, color: pal.text3, maxWidth: 720 }}>{preset.intro}</p>
+
           <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.06em', color: pal.text4, lineHeight: 1.6, marginBottom: 20, maxWidth: 720 }}>
             Internal chart review surface for marketing / design handoff. Charts are not automatically placed in public framework pages; placement is chosen explicitly.
           </div>
@@ -421,14 +435,11 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 7, height: 7, borderRadius: '50%', border: `1px solid ${pal.text4}` }} /> CONCEPTUAL</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ width: 6, height: 6, background: pal.text3 }} /> HISTORICAL (WHEN WIRED)</span>
           </div>
+
+          <SimulationContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} compact={false} />
+          <InventoryTable pal={pal} accent={accent} specs={specs} />
         </>
       )}
-
-      <SimulationContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} compact={readerView} />
-
-      {readerView && <ReaderOrientation pal={pal} accent={accent} />}
-
-      {!readerView && <InventoryTable pal={pal} accent={accent} specs={specs} />}
 
       {/* grouped gallery — guided sequence (reader) or full review set (agency) */}
       {galleryGroups.map((g) => {
