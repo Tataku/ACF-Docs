@@ -138,6 +138,14 @@ If Simulation Context changes a chart, the **tooltip must express the selected p
 - **Secondary = the raw plotted meaning** (`180.3× start · representative`, `Good sequence · representative simulation`) — kept, never the only value.
 - **Honesty:** never fake exact units/sats; charts whose index→$ isn't honest per point (e.g. *Volatility Is the Toll*) keep the raw value and carry the dollar impact in their callout. **Non-personalized / conceptual charts keep raw values** — no forced dollars. Pinned tooltips use the same resolver, so they update live when the reader changes context; no `NaN`/`Infinity`.
 
+### No native browser tooltips — one tooltip system
+
+The chart system has its own layered explanation model: the custom **tooltip** (hover), the **pinned explainer** (click-to-pin), the **MobileInsight** rail (tap-to-inspect / desktop pin), the data-mode **popover** (`.acf-dm-pop`, hover + focus), and the collapsed **Details / sources & methodology**. Native browser `title` tooltips are **banned** inside the chart card: they duplicate that content, cannot be styled, sit in a second unstyled layer, and fire on a delay the reader can't control.
+
+- **Do not use** `title=` for any user-facing hover explanation — not on data-mode icons, chart nodes / marks / targets, SVG elements, disclosure triggers, or controls that already carry visible text or an `aria-label`. Likewise no SVG `<title>` children on interactive nodes (they render as native tooltips).
+- **Use instead:** `aria-label` for the accessible name (+ description, when the visible/custom layer already shows it), the custom tooltip/popover for the visual explanation, and Details for durable methodology. Don't pair `aria-label` *and* `aria-describedby` pointing at the same text — that double-announces.
+- The data-mode marker is the canonical example: `aria-label={\`${dm.label} exhibit. ${dm.explain}\`}` + the styled `.acf-dm-pop` (revealed on hover **and** keyboard focus). No `title`. Site chrome outside the chart card (e.g. the Nextra navbar's "Change theme" button) is out of this system's scope.
+
 ### Reader comfort (the charts must be easy to read)
 
 These charts are read by non-experts, including older readers. Legibility and calm beat density.
