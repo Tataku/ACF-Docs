@@ -171,10 +171,11 @@ These charts are read by non-experts, including older readers. Legibility and ca
 The handoff pages are now a **shareable guided visual essay**, not an internal control panel. The hero should invite the reader into the first chart, not teach the whole system.
 
 - **Audience split.** *Reader* mode optimizes for guided comprehension; *Agency* mode for implementation handoff. The internal framing (inventory link, implementation-package link, glyph legend, "internal review surface" note) is **Agency-only**; Reader gets a public title (`preset.readerTitle` — e.g. *Part 1 · Foundation in Pictures*) and a calm subtitle.
-- **First-chart priority.** Only essential controls appear before the first chart. The four-column "how to read" block is replaced by **one** orientation line (*claim → picture → explore*); the charts begin sooner.
+- **Two-column hero (`.acf-hero`).** The title block and the **"How to read this"** callout sit on the left; the optional simulation controls live in their **own subtle bordered container on the right** (faint tint + 1px border, `SimulationContextBar layout="panel"` stacked) — separated from the reading material instead of stretched across it. One column on narrow screens (the panel drops below the title). Agency keeps the full-width bar + inventory.
+- **"How to read this" gets quiet emphasis.** A left accent rule + accent label + one-line instruction (*one claim · hover/tap/pin*) and a `CLAIM → PICTURE → EXPLORE` footer — a calm callout, not a four-column training block.
 - **Progressive controls.** The control bar keeps VIEW / PART / THEME visible; **Docs-shell / Export + Copy link move behind `Options`** in Reader mode (inline in Agency). Persistence (Reader/Agency, Dark/Light, Simulation Context) is unchanged.
-- **Simulation Context is optional.** Reader shows it as **"Personalize examples · optional"** with **Starting value + Horizon** primary; **Withdrawal rate, Bitcoin reserve, monthly DCA** collapse behind **Advanced assumptions ▾** (all still wired + persisted). The hero caveat is short (*"these values only scale illustrative examples — not forecasts"*); the full disclosure stays in each chart's Details.
-- **Mobile.** Title → one-line orientation → compact Starting value + Horizon (advanced collapsed) → charts. No wide control rows, no four-column grid, no horizontal overflow.
+- **Simulation Context is optional + one source of truth.** Reader shows it as **"Personalize examples · optional"** with **Starting value + Horizon** primary; **Withdrawal rate, Bitcoin reserve, monthly DCA** collapse behind **Advanced assumptions ▾** (all still wired + persisted on the same `readerCtx`). The caveat is short; full disclosure stays in each chart's Details.
+- **Mobile.** Title → one-line orientation → the Personalize panel (compact Starting value + Horizon, advanced collapsed) → charts. No wide control rows, no horizontal overflow.
 
 ### Beginner governance diagrams
 
