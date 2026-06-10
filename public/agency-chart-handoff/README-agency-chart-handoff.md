@@ -146,6 +146,14 @@ The chart system has its own layered explanation model: the custom **tooltip** (
 - **Use instead:** `aria-label` for the accessible name (+ description, when the visible/custom layer already shows it), the custom tooltip/popover for the visual explanation, and Details for durable methodology. Don't pair `aria-label` *and* `aria-describedby` pointing at the same text — that double-announces.
 - The data-mode marker is the canonical example: `aria-label={\`${dm.label} exhibit. ${dm.explain}\`}` + the styled `.acf-dm-pop` (revealed on hover **and** keyboard focus). No `title`. Site chrome outside the chart card (e.g. the Nextra navbar's "Change theme" button) is out of this system's scope.
 
+### Reader chrome — selection, sticky controls, framework icons
+
+The reader should never feel the browser default. Selection, navigation, and small controls are all part of the same calm framework system.
+
+- **Theme-aware selection.** Selecting reader text uses the framework accent, not the browser gray/blue. Per-theme CSS vars (`--acf-sel-bg` / `--acf-sel-fg`) are set inline on the `.acf-chart-handoff` root from the palette; `::selection` + `::-moz-selection` consume them. Soft green wash, theme text colour, legibility preserved — visible, not neon.
+- **Sticky reader controls.** The `ControlBar` is `position: sticky; top: 0` so PART / VIEW / THEME / Options stay reachable while scrolling. The sticky layer is **quiet**: padding is constant (no layout shift, so it can't jitter); a translucent surface + `backdrop-filter` blur + a 1px hairline **fade in only after scroll** (rAF-throttled `scrolled` state, reduced-motion aware), and clear again at the top so the hero reads clean. No heavy shadow, no big background block. It sits above charts (`z-index` 40) without covering the below-chart explainer rail.
+- **Framework-native icons.** Small controls use the brush-stroke icon pack (`icons.jsx`: `BrushX`, `BrushChevron`, `BrushCheck`) — the same `Brush.brushSegment` ink as the in-chart `scoreCheck`/`scoreFail` glyphs, `currentColor`, no icon library or Unicode glyphs. The pinned-tooltip **close** is a **borderless** brush ✕ (`.acf-icon-btn`, quiet opacity hover, `.acf-fx-focusable` ring, `aria-label="Unpin"`, no `title`); disclosure carets (Details, Options, Advanced assumptions) and the mobile/desktop-rail steppers are brush chevrons. Editorial prose arrows (`READ →`, `CLAIM → PICTURE → EXPLORE`) stay as text — icons are for controls, not copy.
+
 ### Reader comfort (the charts must be easy to read)
 
 These charts are read by non-experts, including older readers. Legibility and calm beat density.

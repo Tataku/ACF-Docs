@@ -11,6 +11,7 @@
  * ─────────────────────────────────────────────────────────────────────────── */
 import React, { useState, useEffect } from 'react';
 import FrameworkChart from './FrameworkChart';
+import { BrushChevron } from './icons';
 import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel, HORIZON_BANDS } from './chart-specs.mjs';
 import { getPalette, getAccent } from './palette';
 
@@ -109,7 +110,7 @@ function ControlBar({ pal, accent, theme, setTheme, view, setView, variant, part
   const readerView = view === 'reader';                       // reader demotes Docs-shell/Export + Copy link behind Options
 
   return (
-    <nav aria-label="Chart handoff controls" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '10px 22px', marginBottom: 24 }}>
+    <nav aria-label="Chart handoff controls" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '10px 22px' }}>
       {group('VIEW', [
         <button key="reader" onClick={() => setView('reader')} aria-pressed={view === 'reader'} style={sty(view === 'reader')}>Reader</button>,
         <button key="agency" onClick={() => setView('agency')} aria-pressed={view === 'agency'} style={sty(view === 'agency')}>Agency</button>,
@@ -126,7 +127,7 @@ function ControlBar({ pal, accent, theme, setTheme, view, setView, variant, part
       }))}
       {readerView ? (
         <details style={{ position: 'relative' }}>
-          <summary style={{ ...base, color: pal.text3, listStyle: 'none' }}>Options ▾</summary>
+          <summary style={{ ...base, color: pal.text3, listStyle: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}>Options <span className="acf-cv" style={{ display: 'inline-flex' }}><BrushChevron size={10} /></span></summary>
           <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, zIndex: 30, background: pal.cardSolid, border: `1px solid ${pal.borderHi}`, borderRadius: 7, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12, whiteSpace: 'nowrap', boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)' }}>
             {group('MODE', [
               navItem('shell', 'Docs shell', variant === 'embedded', shellRoute),
@@ -157,6 +158,7 @@ const PKG_FILES = [
   'components/framework-charts/chart-specs.mjs',
   'components/framework-charts/brush.js',
   'components/framework-charts/palette.js',
+  'components/framework-charts/icons.jsx',
   'components/framework-charts/ChartHandoff.jsx',
   'components/framework-charts/index.js',
   'styles/framework-charts.css',
@@ -300,7 +302,7 @@ function SimulationContextBar({ pal, accent, ctx, setCtx, compact }) {
       {group('TIME HORIZON', choice('horizon', HORIZON_BANDS.map((h) => ({ v: h.id, label: h.label }))))}
       {compact ? (
         <>
-          <button onClick={() => setAdvOpen((o) => !o)} aria-expanded={advOpen} style={{ ...base, color: pal.text3 }}>Advanced assumptions {advOpen ? '▴' : '▾'}</button>
+          <button onClick={() => setAdvOpen((o) => !o)} aria-expanded={advOpen} style={{ ...base, color: pal.text3, display: 'inline-flex', alignItems: 'center', gap: 5 }}>Advanced assumptions <span className="acf-cv" style={{ display: 'inline-flex', transform: advOpen ? 'rotate(90deg)' : undefined }}><BrushChevron size={10} /></span></button>
           {advOpen && <>{advWithdrawal}{advReserve}{advDca}</>}
           <span style={{ flexBasis: '100%', fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4 }}>{advOpen ? `Withdrawal rate, Bitcoin reserve and monthly DCA scale only the few charts that use them. ${shortCaveat}` : shortCaveat}</span>
         </>
@@ -333,6 +335,8 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   const [theme, setTheme] = useState(initialTheme);
   const [view, setView] = useState('reader');                 // 'reader' (guided learning) | 'agency' (inventory-first review)
   const [readerCtx, setReaderCtx] = useState(DEFAULT_SIMULATION_CONTEXT);
+  const [scrolled, setScrolled] = useState(false);            // sticky control bar gains a quiet surface only after scroll
+  const [reduce, setReduce] = useState(false);
   // Reader/Agency + Dark/Light are user PREFERENCES (not simulation data), so they
   // persist in localStorage across all handoff/export routes and refresh. Hydrate
   // after mount (SSR-safe; brief one-frame default before the stored choice applies).
@@ -355,21 +359,44 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
     if (typeof window === 'undefined') return;
     try { window.sessionStorage.setItem(SIM_CTX_KEY, JSON.stringify(readerCtx)); } catch (_) { /* noop */ }
   }, [readerCtx]);
+  // Sticky control bar: a quiet translucent surface fades in only once the hero
+  // scrolls under it (rAF-throttled). Padding never changes, so it can't jitter.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let raf = 0;
+    const onScroll = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; setScrolled(window.scrollY > 8); }); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const m = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const f = () => setReduce(m.matches); f();
+    m.addEventListener ? m.addEventListener('change', f) : m.addListener(f);
+    return () => { m.removeEventListener ? m.removeEventListener('change', f) : m.removeListener(f); };
+  }, []);
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
+  const selBg = pal.name === 'light' ? 'rgba(14,140,102,0.20)' : 'rgba(16,185,129,0.32)';
+  const stickyBg = pal.name === 'light' ? 'rgba(243,239,230,0.82)' : 'rgba(8,9,11,0.78)';
   const isExport = variant === 'export';
   const readerView = view === 'reader';
   const galleryGroups = HANDOFF_GROUPS.filter((g) => preset.groups.includes(g.id));
   const specs = FRAMEWORK_CHART_SPECS.filter((s) => preset.groups.includes(s.group) && s.status !== 'deferred');
 
+  const selVars = { '--acf-sel-bg': selBg, '--acf-sel-fg': pal.text1 };
   const outer = isExport
-    ? { background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', padding: 'clamp(20px, 4vw, 44px) clamp(16px, 4vw, 32px)', colorScheme: pal.name }
-    : { background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, padding: 'clamp(16px, 3vw, 28px)', margin: '8px 0 32px', colorScheme: pal.name };
+    ? { ...selVars, background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', padding: 'clamp(20px, 4vw, 44px) clamp(16px, 4vw, 32px)', colorScheme: pal.name }
+    : { ...selVars, background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, padding: 'clamp(16px, 3vw, 28px)', margin: '8px 0 32px', colorScheme: pal.name };
 
   return (
-    <div style={outer}>
+    <div className="acf-chart-handoff" style={outer}>
       <div style={{ maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 }}>
-      <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} view={view} setView={setView} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
+      {/* sticky reader controls — quiet, compact, non-obstructive; surface fades in on scroll */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 40, marginBottom: 24, padding: '10px 0', background: scrolled ? stickyBg : 'transparent', backdropFilter: scrolled ? 'saturate(140%) blur(10px)' : 'none', WebkitBackdropFilter: scrolled ? 'saturate(140%) blur(10px)' : 'none', borderBottom: `1px solid ${scrolled ? pal.cardBorder : 'transparent'}`, transition: reduce ? 'none' : 'background 220ms ease, border-color 220ms ease' }}>
+        <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} view={view} setView={setView} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} />
+      </div>
       {/* header */}
       <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.22em', color: pal.text3, marginBottom: 10 }}>{readerView ? 'ADAPTIVE CONVEXITY FRAMEWORK · A VISUAL ESSAY' : preset.eyebrow}</div>
       <h1 style={{ margin: 0, fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, letterSpacing: '-0.025em', lineHeight: 1.1, color: pal.text1, maxWidth: 760 }}>{readerView ? (preset.readerTitle || preset.title) : preset.title}</h1>

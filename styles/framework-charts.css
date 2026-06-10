@@ -10,6 +10,28 @@
   outline-offset: 2px;
 }
 
+/* Theme-aware text selection — selecting reader text feels like the framework
+ * accent, not the browser default gray/blue. The colours are set per-theme as
+ * CSS vars on the chart-handoff root (inline, from the palette), so light and
+ * dark both stay on-brand; legibility is preserved (soft wash + theme text). */
+.acf-chart-handoff ::selection { background: var(--acf-sel-bg); color: var(--acf-sel-fg); }
+.acf-chart-handoff ::-moz-selection { background: var(--acf-sel-bg); color: var(--acf-sel-fg); }
+
+/* Borderless framework icon button — pinned-tooltip close (brush ✕) and other
+ * small brush-glyph controls. No SaaS box; quiet opacity hover; the focus ring
+ * comes from .acf-fx-focusable. The brush <path> uses currentColor. */
+.acf-icon-btn { opacity: 0.72; transition: opacity 140ms ease; }
+.acf-icon-btn:hover,
+.acf-icon-btn:focus-visible { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .acf-icon-btn { transition: none; } }
+
+/* Disclosure caret (brush chevron) — points right when closed, rotates to point
+ * down when open. Native <details> uses [open]; React toggles set the transform
+ * inline. Both share this transition and honor reduced motion. */
+.acf-chart-handoff .acf-cv { transition: transform 160ms ease; }
+.acf-chart-handoff details[open] > summary .acf-cv { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .acf-chart-handoff .acf-cv { transition: none; } }
+
 /* Data-mode marker (chart header): quiet hover/focus explanation popover. The
  * durable explanation also lives in the collapsed Details — this is the at-a-glance
  * affordance, keyboard-reachable (focus), not hover-only. Theme colors are inline;
