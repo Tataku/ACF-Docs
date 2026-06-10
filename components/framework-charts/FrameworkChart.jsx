@@ -2125,8 +2125,10 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         <div style={{ minWidth: 0 }}>
           <div style={{ fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.18em', color: pal.text3, marginBottom: 8 }}>{spec.idx} · {spec.claimLabel}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-            {/* data-mode honesty marker — at-a-glance, with hover/focus explanation (durable copy also in Details) */}
-            <span className={`acf-dm acf-data-mode--${dm.mode} acf-fx-focusable`} tabIndex={0} role="img" aria-label={`${dm.label} exhibit. ${dm.explain}`} title={dm.explain}
+            {/* data-mode honesty marker — at-a-glance, with hover/focus explanation (durable copy also in Details).
+                No native `title` — the styled .acf-dm-pop popover (hover + focus) is the only explanation layer;
+                aria-label carries the accessible name + description so screen readers need no duplicate. */}
+            <span className={`acf-dm acf-data-mode--${dm.mode} acf-fx-focusable`} tabIndex={0} role="img" aria-label={`${dm.label} exhibit. ${dm.explain}`}
               style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, cursor: 'help', borderRadius: 4, padding: '3px 2px' }}>
               <span aria-hidden style={dmGlyph} />
               <span className="acf-dm-pop" role="tooltip" style={{ background: pal.cardSolid, border: `1px solid ${pal.borderHi}`, borderRadius: 6, padding: '9px 12px', width: 'max-content', maxWidth: 264, boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)' }}>
