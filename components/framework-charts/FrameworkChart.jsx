@@ -17,6 +17,7 @@
  * ─────────────────────────────────────────────────────────────────────────── */
 import React from 'react';
 import * as Brush from './brush';
+import { BrushX, BrushChevron } from './icons';
 import { getPalette, getAccent } from './palette';
 import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 
@@ -183,7 +184,7 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
           {kindLabel}{isPin && <span style={{ color: accent, marginLeft: 6 }}>· PINNED</span>}
         </span>
         {isPin ? (
-          <button onClick={onUnpin} aria-label="Unpin" style={{ background: 'transparent', border: `1px solid ${pal.cardBorder}`, color: pal.text3, cursor: 'pointer', padding: '1px 5px 2px', fontFamily: pal.mono, fontSize: 11, lineHeight: 1, borderRadius: 3 }}>✕</button>
+          <button onClick={onUnpin} aria-label="Unpin" className="acf-fx-focusable acf-icon-btn" style={{ background: 'transparent', border: 'none', color: pal.text3, cursor: 'pointer', padding: 4, margin: -2, lineHeight: 0, borderRadius: 4, display: 'inline-flex' }}><BrushX size={12} /></button>
         ) : meta.concept ? (
           <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.08em', color: pal.text4, border: `1px solid ${pal.cardBorder}`, borderRadius: 3, padding: '2px 5px' }}>↳ {meta.concept}</span>
         ) : null}
@@ -1650,7 +1651,7 @@ function MobileInsight({ spec, pal, accent, active, order, onStep, onPick, onCle
         <>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6, gap: 10 }}>
             <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.14em', color: cur.kind === 'series' && cur.seriesKey === spec.primaryKey ? accent : pal.text4 }}>{TIER_LABEL[cur.kind] || 'ELEMENT'}{cur.concept ? ` · ↳ ${cur.concept}` : ''}</span>
-            <button onClick={onClear} aria-label="Back to full view" style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: pal.text3, background: 'transparent', border: `1px solid ${pal.cardBorder}`, borderRadius: 4, padding: '3px 8px', cursor: 'pointer', flexShrink: 0 }}>✕ FULL VIEW</button>
+            <button onClick={onClear} aria-label="Back to full view" className="acf-fx-focusable" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: pal.text3, background: 'transparent', border: 'none', padding: '3px 2px', cursor: 'pointer', flexShrink: 0 }}><BrushX size={10} /> FULL VIEW</button>
           </div>
           <div style={{ fontSize: 16, fontWeight: 600, color: pal.text1, letterSpacing: '-0.01em', marginBottom: 5 }}>{cur.name}</div>
           <p style={{ margin: '0 0 6px', fontSize: 13, lineHeight: 1.55, color: pal.text2 }}>{cur.why}</p>
@@ -1663,11 +1664,11 @@ function MobileInsight({ spec, pal, accent, active, order, onStep, onPick, onCle
         </div>
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <button onClick={() => onStep(-1)} style={tapBtn} aria-label="Previous element">‹</button>
+        <button onClick={() => onStep(-1)} style={tapBtn} aria-label="Previous element"><BrushChevron size={14} dir="left" /></button>
         <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
           {ord.map((id, i) => <button key={id} onClick={() => onPick(id)} aria-label={`Element ${i + 1}`} style={{ width: i === idx ? 18 : 7, height: 7, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', background: i === idx ? accent : pal.cardBorder, transition: 'all .2s ease' }} />)}
         </div>
-        <button onClick={() => onStep(1)} style={tapBtn} aria-label="Next element">›</button>
+        <button onClick={() => onStep(1)} style={tapBtn} aria-label="Next element"><BrushChevron size={14} dir="right" /></button>
       </div>
     </div>
   );
@@ -2216,7 +2217,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         <button onClick={() => setShowDetails((v) => !v)} aria-expanded={showDetails} aria-controls={`${reactId}-details`}
           aria-label={`${showDetails ? 'Hide' : 'Show'} details, sources, and methodology for ${spec.title}`}
           className="acf-fx-focusable" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 32, background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 0', fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.1em', color: pal.text3 }}>
-          <span aria-hidden style={{ display: 'inline-block', transform: showDetails ? 'rotate(90deg)' : 'none', transition: reduce ? 'none' : 'transform 160ms ease', color: pal.text4 }}>›</span>
+          <span aria-hidden style={{ display: 'inline-flex', transform: showDetails ? 'rotate(90deg)' : 'none', transition: reduce ? 'none' : 'transform 160ms ease', color: pal.text4 }}><BrushChevron size={11} /></span>
           DETAILS, SOURCES &amp; METHODOLOGY
         </button>
       </div>
