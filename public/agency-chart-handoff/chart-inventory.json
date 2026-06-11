@@ -1882,37 +1882,37 @@
       "layout": "scenario",
       "dataMode": "simulation",
       "claimLabel": "CONTROL · INTERACTIVE",
-      "primaryClaim": "Exposure can win one cycle; control is what survives many",
-      "visualProof": "All three strategy paths drawn together, plus an across-all-paths robustness strip",
-      "readerAction": "Pick a path, then stress it",
+      "primaryClaim": "Exposure and control are different dimensions; the framework optimizes governable participation",
+      "visualProof": "A control vs participation map — strategies positioned by control and participation, a governable zone, and per-shock spread",
+      "readerAction": "Pick a strategy, then stress it",
       "readerTakeaway": "The path you can follow beats the path that only works on paper.",
       "experienceRole": "comparison",
       "storyBeats": [
         {
           "kind": "context",
-          "label": "Three strategy paths drawn together through a drawdown",
+          "label": "Three strategies placed on a control vs participation map",
           "timing": "early"
         },
         {
           "kind": "mechanism",
-          "label": "Capacity and decision strain separate them",
+          "label": "Control and participation are different dimensions; a governable zone marks the balance",
           "timing": "middle"
         },
         {
           "kind": "action",
-          "label": "Choose a strategy, then change the shock",
+          "label": "Choose a strategy, then change the shock to move it on the map",
           "timing": "middle"
         },
         {
           "kind": "consequence",
-          "label": "No line wins every path; the framework holds the tightest band",
+          "label": "No strategy wins both axes; the framework holds the governable zone across shocks",
           "timing": "late"
         }
       ],
       "interaction": {
         "type": "scenario",
         "gesture": "choose",
-        "conceptMatch": "Selecting a strategy and a shock redraws the emphasised path and its control read-outs"
+        "conceptMatch": "Selecting a strategy and a shock moves the emphasised mark on the control/participation map and updates its control read-outs"
       },
       "motionProfile": {
         "type": "scenarioUpdate",
@@ -1932,7 +1932,7 @@
         "chartHeight": "tall",
         "note": "Stack the strategy + shock controls; keep stat read-outs below the chart."
       },
-      "tryThis": "Change the shock and watch which path stays governable.",
+      "tryThis": "Change the shock and watch which strategy stays in the governable zone.",
       "tryThisMobile": "Tap a strategy or shock, then compare the paths",
       "readerContext": {
         "kind": "scenario-scale",
