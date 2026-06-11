@@ -611,8 +611,8 @@ const p3Scenario = (() => {
   // More control trades clean-path upside for a smaller drawdown and more capacity.
   const presets = {
     max: { w: 1.0, dp: 0.0, income: false },                // 100% BTC
-    reserve: { w: 0.20, dp: 0.25, income: true },           // framework reserve
-    stress: { w: 0.12, dp: 0.50, income: true },            // reserve + deliberate dry powder
+    reserve: { w: 0.22, dp: 0.25, income: true },           // framework reserve
+    stress: { w: 0.10, dp: 0.50, income: true },            // reserve + deliberate dry powder
   };
   // participation = clean-path upside capture vs the all-in ceiling. Underparticipation
   // (cash drag) shows up as a low score; the framework's balance is the reference.
@@ -1727,37 +1727,38 @@ export const FRAMEWORK_CHART_SPECS = [
     chartId: 'p3-exposure-not-control', idx: 'P3-04', group: 'part-3', intendedPlacement: 'part-3',
     experienceRole: 'comparison',
     storyBeats: [
-      { kind: 'context', label: 'Three strategy paths drawn together through a drawdown', timing: 'early' },
-      { kind: 'mechanism', label: 'Capacity and decision strain separate them', timing: 'middle' },
-      { kind: 'action', label: 'Choose a strategy, then change the shock', timing: 'middle' },
-      { kind: 'consequence', label: 'No line wins every path; the framework holds the tightest band', timing: 'late' },
+      { kind: 'context', label: 'Three strategies placed on a control vs participation map', timing: 'early' },
+      { kind: 'mechanism', label: 'Control and participation are different dimensions; a governable zone marks the balance', timing: 'middle' },
+      { kind: 'action', label: 'Choose a strategy, then change the shock to move it on the map', timing: 'middle' },
+      { kind: 'consequence', label: 'No strategy wins both axes; the framework holds the governable zone across shocks', timing: 'late' },
     ],
     claimStack: {
-      primaryClaim: 'Exposure can win one cycle; control is what survives many',
-      visualProof: 'All three strategy paths drawn together, plus an across-all-paths robustness strip',
-      interactionRole: 'Choose a strategy, then change the shock and watch outcome and decision strain move',
-      readerAction: 'Pick a path, then stress it',
-      caution: 'Representative simulation of total-portfolio paths (not Bitcoin price); not a forecast',
+      primaryClaim: 'Exposure and control are different dimensions; the framework optimizes governable participation',
+      visualProof: 'A control vs participation map — strategies positioned by control and participation, a governable zone, and per-shock spread',
+      interactionRole: 'Choose a strategy, then change the shock and watch it move on the control/participation map',
+      readerAction: 'Pick a strategy, then stress it',
+      caution: 'Representative simulation of total-portfolio strategies (not Bitcoin price); not a forecast',
     },
-    interaction: { type: 'scenario', gesture: 'choose', conceptMatch: 'Selecting a strategy and a shock redraws the emphasised path and its control read-outs' },
+    interaction: { type: 'scenario', gesture: 'choose', conceptMatch: 'Selecting a strategy and a shock moves the emphasised mark on the control/participation map and updates its control read-outs' },
     motionProfile: { type: 'scenarioUpdate', duration: 'calm' },
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Exposure Is Not Control', setupLine: 'The best strategy is not the largest line — it is the path you can keep following.',
+    title: 'Exposure Is Not Control', setupLine: 'The best path is the one that stays followable when the future path is unknown.',
     claimLabel: 'CONTROL · INTERACTIVE',
-    tryThis: 'Change the shock and watch which path stays governable.',
+    tryThis: 'Change the shock and watch which strategy stays in the governable zone.',
     frameworkClaim: '100% Bitcoin can win one favorable cycle; the framework optimizes for control and repeatability across many.',
     readerTakeaway: 'The path you can follow beats the path that only works on paper.',
     chartType: 'Interactive path-aware comparison of representative portfolio paths through a drawdown, with an optional shock.',
     visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
     sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative representative portfolio paths; a deterministic livability/repeatability score, disclosed as illustrative — no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
-    explainerHeadline: 'Winning a clean path is not the same as surviving a messy one.',
-    explainerBody: 'Maximum exposure can post the highest terminal number when the path is clean — staying all-in even rides the recovery. Stress-tested reserve can defend hardest when the world breaks, but it underparticipates the rest of the time (cash drag). The framework is the middle discipline: enough exposure to participate, enough reserve to act, and low enough strain to keep following the plan when the path is unknown. A strategy that cannot be lived through is not robust.',
+    explainerHeadline: 'The highest line is not always the best plan.',
+    explainerBody: 'Max exposure can post the strongest clean-path outcome, but it has the least room for life shocks, drawdowns, or bad decisions — high participation, low control. Stress-tested reserve protects hardest but can underparticipate (cash drag) — high control, low participation. The framework is the middle discipline: enough exposure to matter, enough reserve to act, and low enough strain to keep following the plan when the path is unknown. The map reads control against participation, not value over time — because a strategy that cannot be lived through is not robust.',
     explainerConcept: 'Operational control',
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
-    personalization: { uses: ['startingValue'], kind: 'scenario-scale', introLead: 'Representative total-portfolio paths', introTail: 'not Bitcoin price', note: 'Scales the simulation read-outs (terminal, drawdown, dry powder) to the starting value. Illustrative, not a forecast.' },
+    personalization: { uses: ['startingValue'], kind: 'scenario-scale', introLead: 'Representative total-portfolio strategies', introTail: 'illustrative, not a forecast', note: 'Scales the subordinate outcome read-outs (terminal, drawdown) to the starting value. The control/participation axes are scores, not dollars. Illustrative, not a forecast.' },
     layout: 'scenario',
-    ariaSummary: 'An interactive exhibit. Three representative total-portfolio paths, indexed to 100 — maximum exposure, framework reserve, and stress-tested reserve — are drawn together through a market drawdown, with an optional job-loss or opportunity-window shock and a faint governable band behind them. The framework path stays inside the governable band; maximum exposure leaves it both ways — climbing above it in the bull, then falling below it in the crash — and under a job-loss shock is forced to sell at the bottom; the stress-tested reserve hugs the lower edge, defensive but underparticipating. The opportunity window deploys reserve during the drawdown, not at the exact bottom. Read-outs are grouped: outcome (terminal, participation), control (drawdown, decision strain, forced-sale risk), and repeatability (a livability score and a control score). An across-all-paths strip shows each strategy spread by livability under every shock — you commit before the shock is known.',
+    ariaSummary: 'An interactive map, not a time series. The horizontal axis is participation (exposure to upside); the vertical axis is control (followability — staying governable, low forced-error risk). A soft governable zone sits in the middle. Three representative strategies are plotted: maximum exposure sits far right (high participation) but low and spread vertically (low, variable control — fragile when messy); the framework reserve sits inside the governable zone (adequate participation, high control); the stress-tested reserve sits upper-left (very high control but low participation — cash drag). Changing the shock moves each strategy: a job loss drops maximum exposure into forced-error territory while the reserves stay governable. Each strategy also shows faint dots for the other shocks — the framework keeps the tightest cluster, maximum exposure the widest spread. Read-outs lead with control, participation, decision strain, forced-error risk and a livability score; terminal value and drawdown are shown as subordinate outcomes. The opportunity window deploys reserve during the drawdown, not at the exact bottom.',
     scenario: {
+      zone: { partLo: 27, partHi: 60, ctrlLo: 66, ctrlHi: 94 },
       defaultPreset: 'reserve', defaultShock: 'none',
       domain: { yMin: p3Scenario.yMin, yMax: p3Scenario.yMax }, troughX: p3Scenario.troughX, peakX: p3Scenario.peakX,
       band: p3Scenario.band,

@@ -1183,90 +1183,64 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
   );
 }
 
-/* ── ScenarioSvg — interactive, path-aware strategy comparison ───────────────*
- * The Part 3 headline. All three strategies are drawn together under the
- * selected shock: the chosen one is emphasised, the others stay as muted
- * context. A capacity-to-act gauge, a trough/intervention zone, a forced-sale
- * mark, and an annotation that updates with the shock carry the story; the stat
- * strip (split into UPSIDE vs CONTROL) is subordinate. Click or focus a path to
- * select it. Precomputed deterministic paths — educational, not a calculator. */
+/* ── ScenarioSvg — Control vs Participation map (NOT a return path) ──────────*
+ * The Part 3 headline. The picture IS the claim: exposure and control are
+ * different dimensions. x = participation (upside exposure), y = control
+ * (followability). A soft governable ZONE sits on the tradeoff frontier. Each
+ * strategy is a vertical cluster (participation is per-strategy; the shock sets
+ * control); the selected shock is solid, the other shocks are faint dots, so a
+ * short cluster = repeatable. The framework sits inside the zone; max exposure
+ * far right + low/spread (fragile); stress upper-left (defensive, cash drag).
+ * Read-outs lead with control; terminal is a subordinate outcome. Strategy/shock
+ * selectors drive it; hover/click a mark to inspect/select. Deterministic. */
 function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, readerContext }) {
   const sc = spec.scenario;
   const svgRef = useRef(null);
   const [presetId, setPresetId] = useState(sc.defaultPreset);
   const [shockId, setShockId] = useState(sc.defaultShock);
   const [hovered, setHovered] = useState(null);                 // { pk, x, y }
-  const dom = { yMin: 0, yMax: 100, ...sc.domain };
-  const pad = { l: 20, r: 20, t: 22, b: 28 };
-  const X = (v) => pad.l + (v / 100) * (width - pad.l - pad.r);
-  const Y = (v) => pad.t + (1 - (v - dom.yMin) / (dom.yMax - dom.yMin)) * (height - pad.t - pad.b);
-  const vAt = (arr, xv) => { for (let i = 1; i < arr.length; i++) if (arr[i].x >= xv) { const a = arr[i - 1], b = arr[i], t = (xv - a.x) / ((b.x - a.x) || 1); return a.y + (b.y - a.y) * t; } return arr[arr.length - 1].y; };
-
   const PKS = sc.presets.map((p) => p.id);
+  const SHK = sc.shocks.map((s) => s.id);
   const byId = (id) => sc.presets.find((p) => p.id === id) || {};
   const targetById = (id) => targets.find((t) => t.id === id);
+  const statOf = (pk, sh) => (sc.variants[`${pk}|${sh}`] || {}).stats || {};
 
-  const paths = useMemo(() => PKS.map((pk) => {
-    const v = sc.variants[`${pk}|${shockId}`];
-    const px = v.value.map((p) => ({ x: X(p.x), y: Y(p.y) }));
-    return { pk, v, px, end: px[px.length - 1], stroke: Brush.smoothOpen(px), brush: Brush.brushLine(px, { seed: 31 + pk.length * 7, weight: 1.2, intensity: 0.85 }) };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [shockId, width, height, dom.yMin, dom.yMax]);
+  // control / participation map — the axes ARE the claim (not value over time).
+  const pad = { l: 50, r: 16, t: 16, b: 38 };
+  const plotW = width - pad.l - pad.r, plotH = height - pad.t - pad.b;
+  const xOf = (part) => pad.l + (0.08 + 0.86 * Math.sqrt(Math.max(0, part) / 100)) * plotW;   // sqrt spreads the low end so the reserves separate
+  const yOf = (ctrl) => pad.t + (1 - (0.06 + 0.88 * Math.max(0, Math.min(100, ctrl)) / 100)) * plotH;
+  const zone = sc.zone || { partLo: 27, partHi: 60, ctrlLo: 66, ctrlHi: 94 };
 
-  const sel = paths.find((p) => p.pk === presetId) || paths[0];
-  const st = sel.v.stats;
-  // reader-context scaling (optional): index → dollars, illustrative only
+  // each strategy = a vertical cluster (participation is per-strategy; the shock
+  // sets control). selected shock is the solid mark, the others are faint dots.
+  const marks = PKS.map((pk) => {
+    const part = statOf(pk, sc.defaultShock).participation;
+    const pts = SHK.map((sh) => { const s = statOf(pk, sh); return { sh, x: xOf(s.participation), y: yOf(s.control), forced: !!s.forced, on: sh === shockId }; });
+    return { pk, part, x: xOf(part), pts, cur: pts.find((p) => p.on) || pts[0], sel: pk === presetId };
+  });
+  const st = statOf(presetId, shockId);
+  // reader-context scaling (optional): subordinate OUTCOME read-outs only (terminal);
+  // the control/participation axes are scores, never dollars.
   const scaleP = spec.personalization && spec.personalization.kind === 'scenario-scale' ? readStartingValue(readerContext) : null;
-  const maxDrop = (() => { let pk = -9, d = 0; sel.v.value.forEach((q) => { pk = Math.max(pk, q.y); d = Math.max(d, pk - q.y); }); return d; })();
   const termText = scaleP ? fmtMoney(scaleP * st.terminal / 100) : `${st.terminal}`;
-  const ddText = scaleP ? `${fmtMoney(scaleP * maxDrop / 100)} · ${st.maxDD}%` : `${st.maxDD}%`;
-  // participation tier (cash drag shows as Low) + livability tone — the framework's
-  // balance is the reference; the capacity gauge already carries dry powder visually.
-  const partRef = (sc.variants[`${sc.defaultPreset}|none`] || {}).stats ? sc.variants[`${sc.defaultPreset}|none`].stats.participation : 30;
+  const ddText = `${st.maxDD}%`;
+  const partRef = statOf(sc.defaultPreset, 'none').participation || 30;
   const partTier = st.participation >= 60 ? 'High' : st.participation >= partRef - 3 ? 'Adequate' : 'Low';
   const partTone = partTier === 'Adequate' ? accent : partTier === 'Low' ? pal.text3 : pal.text1;
   const livTone = st.livability >= 70 ? accent : st.livability >= 45 ? pal.text1 : pal.bandStressText;
-  // decision strain → stat tone + the rust intensity of the drawdown shading (mostly max)
   const strainTone = st.strain === 'Extreme' || st.strain === 'High' ? pal.bandStressText : st.strain === 'Moderate' ? pal.text1 : accent;
-  const strainOp = ({ Low: 0.06, Moderate: 0.11, High: 0.17, Extreme: 0.23 })[st.strain] || 0.10;
-  // across-all-paths robustness: every strategy's outcome under ALL shocks — you
-  // commit to a strategy BEFORE the shock is known. Built from existing variants
-  // (no new math): x = terminal, dot quality = whether you stay in control.
-  const SHK = sc.shocks.map((s) => s.id);
-  const allRows = PKS.map((pk) => ({
-    pk, short: byId(pk).short || pk, on: pk === presetId,
-    outs: SHK.map((sh) => { const s = sc.variants[`${pk}|${sh}`].stats; return { livability: s.livability, control: s.control, forced: s.forced }; }),
-  }));
-  let tMin = 1e9, tMax = -1e9; allRows.forEach((r) => r.outs.forEach((o) => { tMin = Math.min(tMin, o.livability); tMax = Math.max(tMax, o.livability); }));
-  const ddPath = useMemo(() => { let mxv = -9; const top = sel.v.value.map((p) => { mxv = Math.max(mxv, p.y); return { x: X(p.x), y: Y(mxv) }; }); return areaPath(top, sel.px); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [presetId, shockId, width, height]);
-
-  // trough / intervention zone + shock mark on the selected path
-  const zone = { x0: X(sc.peakX != null ? sc.peakX : 50), x1: X(Math.min(100, sc.troughX + 12)) };
-  const trough = { x: X(sc.troughX), y: Y(vAt(sel.v.value, sc.troughX)) };
-  let shockColor = accent, shockText = null;
-  if (shockId === 'jobloss') { shockColor = st.forced ? pal.bandStress : accent; shockText = st.forced ? 'forced to sell' : 'shock absorbed'; }
-  else if (shockId === 'deploy') { shockColor = st.deployed ? accent : pal.text3; shockText = st.deployed ? 'acts in the window' : 'no reserve to act'; }
-
-  // capacity-to-act gauge (top-left, clear of the paths which start low)
-  const gx = pad.l + 8, g0 = pad.t + 16, g1 = pad.t + 92, gH = g1 - g0;
-  const capFill = Math.min(1, st.dryPowder / 50);   // the strategy's capacity posture
-
-  // de-collided end labels
-  const endLabels = (() => {
-    const lab = paths.map((p) => ({ pk: p.pk, y: p.end.y, short: byId(p.pk).short, on: p.pk === presetId })).sort((a, b) => a.y - b.y);
-    for (let i = 1; i < lab.length; i++) if (lab[i].y < lab[i - 1].y + 13) lab[i].y = lab[i - 1].y + 13;
-    const over = lab[lab.length - 1].y - (height - pad.b - 4); if (over > 0) lab.forEach((l) => { l.y -= over; });
-    return lab;
-  })();
-
+  const feRisk = st.forced ? 'High' : (st.strain === 'High' || st.strain === 'Extreme') ? 'Elevated' : 'Low';
+  const feTone = st.forced ? pal.bandStressText : feRisk === 'Elevated' ? pal.text1 : accent;
   const note = sc.notes[shockId] || {};
 
-  // interaction (desktop hover/click; click selects the path)
+  // interaction: hover/click a strategy's current-shock mark (desktop). Mobile uses
+  // the strategy/shock buttons (this chart is excluded from the pin/rail system).
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
-  const nearest = (mx, my) => { let best = null, bd = touch ? 22 : 16; paths.forEach((p) => { const dp = nearPoly(mx, my, p.px); if (dp.d < bd) { bd = dp.d; best = { pk: p.pk, x: p.px[dp.i].x, y: p.px[dp.i].y }; } }); return best; };
+  const nearest = (mx, my) => { let best = null, bd = touch ? 30 : 22; marks.forEach((m) => { const d = Math.hypot(mx - m.cur.x, my - m.cur.y); if (d < bd) { bd = d; best = m.pk; } }); return best; };
   const onMove = (e) => { if (coarse) return; setHovered(nearest(...toVB(e))); };
   const onLeave = () => { if (!coarse) setHovered(null); };
-  const onClick = (e) => { const n = nearest(...toVB(e)); if (n) setPresetId(n.pk); };
+  const onClick = (e) => { const pk = nearest(...toVB(e)); if (pk) setPresetId(pk); };
 
   const seg = (val, label, on, set) => (
     <button key={val} onClick={() => set(val)} aria-pressed={on}
@@ -1288,11 +1262,11 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 
   let tooltip = null;
   if (!coarse && hovered) {
-    const meta = targetById(hovered.pk);
-    if (meta) {
-      const stt = (sc.variants[`${hovered.pk}|${shockId}`] || {}).stats || {};
+    const meta = targetById(hovered); const m = marks.find((mm) => mm.pk === hovered);
+    if (meta && m) {
+      const stt = statOf(hovered, shockId);
       const vt = scaleP && isFinite(stt.terminal) ? getTooltipValueText(spec, readerContext, { dollars: scaleP * stt.terminal / 100, rawLabel: `${stt.terminal} terminal · representative` }) : null;
-      tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered.pk === spec.primaryKey} xPct={(hovered.x / width) * 100} yPct={(hovered.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} onUnpin={() => {}} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
+      tooltip = <TargetTooltip meta={meta} kindLabel="STRATEGY" accentTitle={hovered === spec.primaryKey} xPct={(m.cur.x / width) * 100} yPct={(m.cur.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} onUnpin={() => {}} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
     }
   }
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
@@ -1304,70 +1278,46 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         {ctrlRow('SHOCK', sc.shocks.flatMap((s, i) => [dot(i), seg(s.id, s.label, shockId === s.id, setShockId)]))}
       </div>
       <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.04em', color: pal.text3, margin: '7px 0 3px' }}>{sc.tradeoff}</div>
-      <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.06em', color: pal.text4, margin: '0 0 9px' }}>Representative total-portfolio paths · indexed to 100 · not Bitcoin price · <span style={{ color: pal.text3 }}>selected in colour, alternatives faint</span></div>
+      <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.06em', color: pal.text4, margin: '0 0 9px' }}>Control vs participation · representative strategies · illustrative, not a forecast · <span style={{ color: pal.text3 }}>selected strategy in colour; faint dots = the other shocks</span></div>
 
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary}
-        style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}>
-        {/* trough / intervention zone */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease' }}>
-          <path d={Brush.washRect(zone.x0, pad.t, zone.x1, height - pad.b, { seed: 33, intensity: 0.5, soft: 'both' })} fill={pal.bandRegime} fillOpacity={pal.name === 'light' ? 0.12 : 0.10} />
-          {!coarse && <text x={(zone.x0 + zone.x1) / 2} y={pad.t + 12} textAnchor="middle" style={halo(pal, 9, pal.bandRegimeText)}>the drawdown</text>}
-          {!coarse && (st.strain === 'High' || st.strain === 'Extreme') && <text x={(zone.x0 + zone.x1) / 2} y={pad.t + 24} textAnchor="middle" style={halo(pal, 8, pal.bandStressText)}>decision strain rises</text>}
+        style={{ display: 'block', cursor: coarse ? 'default' : 'pointer', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}>
+        {/* axes */}
+        <line x1={pad.l} y1={pad.t} x2={pad.l} y2={height - pad.b} stroke={pal.cardBorder} strokeWidth="1" />
+        <line x1={pad.l} y1={height - pad.b} x2={width - pad.r} y2={height - pad.b} stroke={pal.cardBorder} strokeWidth="1" />
+        <text transform={`rotate(-90 16 ${pad.t + plotH / 2})`} x={16} y={pad.t + plotH / 2} textAnchor="middle" style={halo(pal, 8, pal.text3)}>CONTROL · FOLLOWABILITY →</text>
+        <text x={pad.l + plotW / 2} y={height - 5} textAnchor="middle" style={halo(pal, 8, pal.text3)}>PARTICIPATION · EXPOSURE →</text>
+        {/* region hints (corners of the tradeoff) */}
+        <text x={pad.l + 5} y={pad.t + 11} style={halo(pal, 7.5, pal.text4)}>defensive · cash drag</text>
+        <text x={width - pad.r - 3} y={height - pad.b - 7} textAnchor="end" style={halo(pal, 7.5, pal.bandStressText)}>fragile · forced-error</text>
+        {/* governable zone — the hero region on the tradeoff frontier */}
+        <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 320) }}>
+          <rect x={xOf(zone.partLo)} y={yOf(zone.ctrlHi)} width={Math.max(0, xOf(zone.partHi) - xOf(zone.partLo))} height={Math.max(0, yOf(zone.ctrlLo) - yOf(zone.ctrlHi))} rx={10} fill={accent} opacity={pal.name === 'light' ? 0.07 : 0.08} stroke={accent} strokeOpacity="0.34" strokeDasharray="3 5" />
+          <text x={(xOf(zone.partLo) + xOf(zone.partHi)) / 2} y={yOf(zone.ctrlHi) - 5} textAnchor="middle" style={halo(pal, 8, accent)}>GOVERNABLE ZONE</text>
         </g>
-        {/* governable corridor — the index range the framework lives in; max leaves it
-            both ways (euphoria then crash), the defensive reserve hugs the lower edge */}
-        {sc.band && (
-          <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 320) }}>
-            <rect x={pad.l} y={Y(sc.band.hi)} width={width - pad.l - pad.r} height={Math.max(0, Y(sc.band.lo) - Y(sc.band.hi))} fill={accent} opacity={pal.name === 'light' ? 0.05 : 0.06} />
-            <line x1={pad.l} x2={width - pad.r} y1={Y(sc.band.hi)} y2={Y(sc.band.hi)} stroke={accent} strokeWidth="1" strokeDasharray="2 7" opacity="0.38" />
-            <line x1={pad.l} x2={width - pad.r} y1={Y(sc.band.lo)} y2={Y(sc.band.lo)} stroke={accent} strokeWidth="1" strokeDasharray="2 7" opacity="0.38" />
-            {!coarse && <text x={pad.l + 3} y={(Y(sc.band.hi) + Y(sc.band.lo)) / 2 + 3} style={halo(pal, 7.5, pal.text4)}>governable band</text>}
-          </g>
-        )}
-        {/* start reference */}
-        <line x1={pad.l} x2={width - pad.r} y1={Y(100)} y2={Y(100)} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
-        <text x={width - pad.r} y={Y(100) - 5} textAnchor="end" style={halo(pal, 8.5, pal.text4)}>start = 100</text>
-
-        {/* capacity-to-act gauge — a state, not a penalty: preserved / deployed / none */}
-        <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 300) }}>
-          <rect x={gx - 3.5} y={g0} width={7} height={gH} rx={3.5} fill="none" stroke={pal.cardBorder} strokeWidth="1" />
-          {capFill > 0 && <rect x={gx - 3.5} y={g1 - gH * capFill} width={7} height={gH * capFill} rx={3.5} fill={accent} opacity={st.deployed ? 0.85 : 0.55} style={{ transition: trans('all', 260) }} />}
-          <text x={gx + 9} y={g0 + 4} style={halo(pal, 8, pal.text4)}>CAPACITY</text>
-          <text x={gx + 9} y={g0 + 15} style={halo(pal, 8, pal.text4)}>TO ACT</text>
-          <text x={gx + 9} y={g1} style={halo(pal, 8.5, capFill > 0 ? accent : pal.text4, 600)}>{capFill > 0 ? (st.deployed ? 'deployed' : 'preserved') : 'none'}</text>
-        </g>
-
-        {/* comparison paths draw through time together (left→right). The clip is
-            tied to entered, so a strategy/shock change updates instantly without
-            replaying the build. */}
-        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1700ms cubic-bezier(0.22,0.61,0.36,1) 140ms, -webkit-clip-path 1700ms cubic-bezier(0.22,0.61,0.36,1) 140ms' }}>
-          {paths.filter((p) => p.pk !== presetId).map((p) => (
-            <g key={p.pk} style={{ opacity: hovered && hovered.pk === p.pk ? 0.82 : (coarse ? 0.6 : 0.4), transition: 'opacity 180ms ease' }}>
-              <path d={p.stroke} fill="none" stroke={pal.tierReference} strokeWidth="1.1" strokeLinecap="round" />
-              <path d={Brush.inkDot(p.end.x, p.end.y, 2.6, { seed: 7, intensity: 0.7 })} fill={pal.tierReference} />
+        {/* strategy clusters: vertical spread across shocks + dots (selected shock solid) */}
+        {marks.map((m) => {
+          const ys = m.pts.map((p) => p.y), yTop = Math.min(...ys), yBot = Math.max(...ys);
+          const isHov = hovered === m.pk, col = m.sel ? accent : pal.markInk;
+          return (
+            <g key={m.pk} style={{ opacity: entered ? (presetId && !m.sel && !isHov ? 0.55 : 1) : 0, transition: trans('opacity', 300) }}>
+              <line x1={m.x} x2={m.x} y1={yTop} y2={yBot} stroke={col} strokeWidth={m.sel ? 1.5 : 1} opacity="0.3" strokeLinecap="round" style={{ transition: trans('all', 300) }} />
+              {m.pts.filter((p) => !p.on).map((p, j) => (p.forced
+                ? <circle key={j} cx={p.x} cy={p.y} r={3} fill="none" stroke={pal.bandStress} strokeWidth="1" opacity="0.5" />
+                : <circle key={j} cx={p.x} cy={p.y} r={2.6} fill={col} opacity="0.28" />))}
+              {m.cur.forced
+                ? <path d={Brush.enso(m.cur.x, m.cur.y, m.sel ? 8 : 6, { seed: 51, weight: 0.85, intensity: 0.8, gapAngle: -Math.PI / 3 })} fill={pal.bandStress} style={{ transition: trans('all', 300) }} />
+                : <path d={Brush.inkDot(m.cur.x, m.cur.y, m.sel ? 6 : 4.4, { seed: 9 + m.pk.length, intensity: 0.85 })} fill={col} style={{ transition: trans('all', 300) }} />}
+              {(m.sel || isHov) && <text x={m.cur.x} y={m.cur.y - (m.sel ? 13 : 11)} textAnchor="middle" style={haloSans(pal, m.sel ? 11 : 10, m.sel ? accent : pal.text2, m.sel ? 700 : 600)}>{byId(m.pk).short}</text>}
             </g>
-          ))}
-          <g>
-            <path d={ddPath} fill={pal.bandStress} opacity={strainOp} />
-            <path d={sel.brush} fill={accent} />
-            <path d={Brush.inkDot(sel.end.x, sel.end.y, 3.4, { seed: 9, intensity: 0.8 })} fill={accent} />
-          </g>
-        </g>
-        {/* end labels (de-collided) — resolve after the paths have drawn */}
-        {endLabels.map((l) => <text key={l.pk} x={width - pad.r - 4} y={l.y + 3} textAnchor="end" style={{ ...haloSans(pal, l.on ? 11 : 10, l.on ? accent : pal.text3, l.on ? 700 : 500), opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 460ms ease 1720ms' }}>{l.short}</text>)}
-        {/* shock mark — appears as the sweep reaches the trough */}
-        {shockId !== 'none' && (
-          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : `opacity 480ms ease ${Math.round(140 + 1700 * Math.max(0, Math.min(1, (trough.x - pad.l) / (width - pad.l - pad.r))))}ms` }}>
-            <path d={Brush.enso(trough.x, trough.y, 11, { seed: 51, weight: 0.85, intensity: 0.8, gapAngle: -Math.PI / 3 })} fill={shockColor} />
-            {shockText && <text x={trough.x} y={trough.y + 26} textAnchor="middle" style={halo(pal, 9, shockColor)}>{shockText}</text>}
-          </g>
-        )}
-        {/* focusable strategy ends (keyboard parity: focus previews, Enter selects) */}
-        {paths.map((p) => (
-          <circle key={`fx${p.pk}`} className="acf-fx-focusable" cx={p.end.x} cy={p.end.y} r={touch ? 12 : 9} fill="transparent" tabIndex={0} role="button"
-            aria-label={`${byId(p.pk).label}. ${(targetById(p.pk) || {}).why || ''} Select to emphasise.`}
-            onFocus={() => setHovered({ pk: p.pk, x: p.end.x, y: p.end.y })} onBlur={() => setHovered(null)}
-            onClick={() => setPresetId(p.pk)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPresetId(p.pk); } }} style={{ cursor: 'pointer' }} />
+          );
+        })}
+        {/* focusable strategy marks (keyboard parity: focus previews, Enter selects) */}
+        {marks.map((m) => (
+          <circle key={`fx${m.pk}`} className="acf-fx-focusable" cx={m.cur.x} cy={m.cur.y} r={touch ? 14 : 11} fill="transparent" tabIndex={0} role="button"
+            aria-label={`${byId(m.pk).label}. ${(targetById(m.pk) || {}).why || ''} Select to emphasise.`}
+            onFocus={() => setHovered(m.pk)} onBlur={() => setHovered(null)}
+            onClick={() => setPresetId(m.pk)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPresetId(m.pk); } }} style={{ cursor: 'pointer' }} />
         ))}
       </svg>
 
@@ -1379,72 +1329,26 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         </p>
       </div>
 
-      {/* outcome strip — OUTCOME · CONTROL · REPEATABILITY (subordinate to the visual).
-          Terminal is one metric among several; livability is the framework's headline. */}
-      {(() => {
-        const grpLbl = (c) => ({ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: c, marginBottom: 8 });
-        const vdiv = <div aria-hidden style={{ width: 1, alignSelf: 'stretch', background: pal.cardBorder }} />;
-        return (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 20px', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}`, alignItems: 'flex-start' }}>
-            <div>
-              <div style={grpLbl(pal.text3)}>OUTCOME</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 18px' }}>
-                {stat('TERMINAL', termText, pal.text1)}
-                {stat('PARTICIPATION', partTier, partTone)}
-              </div>
-            </div>
-            {vdiv}
-            <div>
-              <div style={grpLbl(pal.text3)}>CONTROL</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 18px' }}>
-                {stat('MAX DRAWDOWN', ddText, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
-                {stat('DECISION STRAIN', st.strain, strainTone)}
-                {stat('FORCED SALE', st.forced ? 'High' : 'None', st.forced ? pal.bandStressText : accent)}
-              </div>
-            </div>
-            {vdiv}
-            <div>
-              <div style={grpLbl(accent)}>REPEATABILITY</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 18px' }}>
-                {stat('LIVABILITY', `${st.livability}`, livTone)}
-                {stat('CONTROL SCORE', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* across all paths — you don't get to pick the shock (built from all variants) */}
+      {/* read-outs — control-first. Terminal / drawdown are subordinate OUTCOMES. */}
       <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}` }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
-          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: pal.text3 }}>ACROSS ALL PATHS · YOU COMMIT BEFORE THE SHOCK IS KNOWN</span>
-          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.04em', color: pal.text4 }}><span style={{ color: accent }}>●</span> in control · <span style={{ color: pal.text3 }}>●</span> low control · <span style={{ color: pal.bandStressText }}>◌</span> forced sale</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 18px', alignItems: 'flex-start' }}>
+          {stat('CONTROL', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
+          {stat('PARTICIPATION', partTier, partTone)}
+          {stat('DECISION STRAIN', st.strain, strainTone)}
+          {stat('FORCED-ERROR RISK', feRisk, feTone)}
+          {stat('LIVABILITY', `${st.livability}`, livTone)}
         </div>
-        <svg viewBox={`0 0 ${width} 104`} width="100%" style={{ display: 'block' }} aria-hidden="true">
-          {(() => {
-            const PL = 150, PR = 24, xT = (t) => PL + ((t - tMin) / ((tMax - tMin) || 1)) * (width - PL - PR);
-            const EZ = 'cubic-bezier(0.22,0.61,0.36,1)';
-            return allRows.map((r, i) => {
-              const ry = 22 + i * 28;
-              const xs = r.outs.map((o) => xT(o.livability));
-              return (
-                <g key={r.pk} style={{ opacity: entered ? (r.on ? 1 : 0.5) : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 520ms ${EZ} ${Math.round(700 + i * 90)}ms` }}>
-                  <text x={8} y={ry + 3.5} style={haloSans(pal, 10.5, r.on ? accent : pal.text3, r.on ? 700 : 500)}>{r.short}</text>
-                  <line x1={Math.min(...xs)} x2={Math.max(...xs)} y1={ry} y2={ry} stroke={r.on ? accent : pal.tierReference} strokeWidth={r.on ? 1.4 : 1} opacity={r.on ? 0.5 : 0.32} strokeLinecap="round" />
-                  {r.outs.map((o, j) => (o.forced
-                    ? <circle key={j} cx={xs[j]} cy={ry} r={4.4} fill="none" stroke={pal.bandStress} strokeWidth="1.4" />
-                    : <circle key={j} cx={xs[j]} cy={ry} r={r.on ? 4.4 : 3.6} fill={o.control >= 80 ? accent : pal.text3} opacity={o.control >= 80 ? 0.95 : 0.8} />))}
-                </g>
-              );
-            });
-          })()}
-          <text x={150} y={99} style={halo(pal, 7.5, pal.text4)}>← less livable</text>
-          <text x={width - 24} y={99} textAnchor="end" style={halo(pal, 7.5, pal.text4)}>more livable →</text>
-        </svg>
-        <p style={{ margin: '4px 0 0', fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2, maxWidth: 760 }}>
-          <span style={{ color: pal.text1, fontWeight: 600 }}>The framework wins by staying followable.</span> Maximum exposure can post the highest terminal — but only on a clean path, and it leaves the governable band both ways; stress-tested is safe yet underparticipates (cash drag); the framework holds the most livable band across every shock. The path you can follow beats the path that only works on paper.
-        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 16px', marginTop: 10, alignItems: 'baseline', opacity: 0.7 }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 7.5, letterSpacing: '0.16em', color: pal.text4 }}>OUTCOME</span>
+          {stat('TERMINAL', termText, pal.text2)}
+          {stat('MAX DRAWDOWN', ddText, st.maxDD >= 50 ? pal.bandStressText : pal.text2)}
+        </div>
       </div>
+
+      {/* repeatability caption — the map's faint dots ARE the across-shock spread */}
+      <p style={{ margin: '12px 0 0', fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2, maxWidth: 760 }}>
+        <span style={{ color: pal.text1, fontWeight: 600 }}>Same strategy, different shocks.</span> Each strategy&rsquo;s faint dots are its other two shocks — a short cluster is repeatable. Max exposure swings far down into forced-error territory; stress-tested stays high-control but underparticipates (left of the zone); the framework holds the tightest cluster inside the governable zone. The path you can follow beats the path that only works on paper.
+      </p>
 
       {tooltip}
     </div>
