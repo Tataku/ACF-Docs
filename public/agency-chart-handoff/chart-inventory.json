@@ -1885,7 +1885,7 @@
       "primaryClaim": "Exposure can win one cycle; control is what survives many",
       "visualProof": "All three strategy paths drawn together, plus an across-all-paths robustness strip",
       "readerAction": "Pick a path, then stress it",
-      "readerTakeaway": "Max exposure wins the clean bull case; the framework wins the messy path — balancing upside, capacity, and emotional control.",
+      "readerTakeaway": "The path you can follow beats the path that only works on paper.",
       "experienceRole": "comparison",
       "storyBeats": [
         {
@@ -1932,7 +1932,7 @@
         "chartHeight": "tall",
         "note": "Stack the strategy + shock controls; keep stat read-outs below the chart."
       },
-      "tryThis": "Switch the shock and watch the control score",
+      "tryThis": "Change the shock and watch which path stays governable.",
       "tryThisMobile": "Tap a strategy or shock, then compare the paths",
       "readerContext": {
         "kind": "scenario-scale",

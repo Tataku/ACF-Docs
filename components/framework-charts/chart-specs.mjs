@@ -612,8 +612,15 @@ const p3Scenario = (() => {
   const presets = {
     max: { w: 1.0, dp: 0.0, income: false },                // 100% BTC
     reserve: { w: 0.20, dp: 0.25, income: true },           // framework reserve
-    stress: { w: 0.13, dp: 0.50, income: true },            // reserve + deliberate dry powder
+    stress: { w: 0.12, dp: 0.50, income: true },            // reserve + deliberate dry powder
   };
+  // participation = clean-path upside capture vs the all-in ceiling. Underparticipation
+  // (cash drag) shows up as a low score; the framework's balance is the reference.
+  const cleanTerm = {};
+  ['max', 'reserve', 'stress'].forEach((pk) => { const p = presets[pk]; cleanTerm[pk] = p.w * market[n] + (1 - p.w) * stable(1); });
+  const partOf = (pk) => clamp(Math.round(100 * (cleanTerm[pk] - 100) / ((cleanTerm.max - 100) || 1)), 6, 100);
+  const participation = { max: partOf('max'), reserve: partOf('reserve'), stress: partOf('stress') };
+  const partRef = participation.reserve;                    // the balanced posture is the reference
   const build = (pk, shock) => {
     const p = presets[pk];
     const value = [];
@@ -623,8 +630,10 @@ const p3Scenario = (() => {
       if (i >= troughI) {
         // job loss: no wage buffer + no dry powder forces a sale into the bottom.
         if (shock === 'jobloss') v -= (!p.income && p.dp < 0.2) ? 0.30 * market[i] : 2;
-        // deploy: dry powder buys the trough and rides the recovery.
-        else if (shock === 'deploy') v += p.dp * 0.95 * Math.max(0, market[i] - market[troughI]);
+        // OPPORTUNITY WINDOW (not perfect bottom-timing): deploy PART of the reserve
+        // during the drawdown, entering ABOVE the low; capture a modest, realistic
+        // share of the rebound. The value is "had capacity to act," not "timed it".
+        else if (shock === 'deploy') v += p.dp * 0.40 * Math.max(0, market[i] - (market[troughI] + 20));
       }
       value.push({ x: R(t * 100), y: R(Math.max(20, v)) });
     }
@@ -638,21 +647,35 @@ const p3Scenario = (() => {
     const control = Math.max(6, Math.min(100, Math.round(100 - maxDD * 72 + dryPowder * 0.32 - (forced ? 34 : 0) - (p.income ? 0 : 8))));
     // decision strain: deep drawdowns, forced sales, and no income buffer raise the
     // behavioural load where panic-selling happens; capacity and income lower it.
-    // Acting at the trough takes some nerve — a modest, non-punishing bump.
-    const strainN = maxDD * 100 * 0.85 + (forced ? 40 : 0) + (p.income ? 0 : 16) + (shock === 'jobloss' ? 18 : 0) + (deployed ? 20 : 0) - dryPowder * 0.45;
+    // Acting in the window takes some nerve — a modest, non-punishing bump.
+    const strainN = maxDD * 100 * 0.85 + (forced ? 40 : 0) + (p.income ? 0 : 16) + (shock === 'jobloss' ? 18 : 0) + (deployed ? 14 : 0) - dryPowder * 0.45;
     const strain = strainN >= 95 ? 'Extreme' : strainN >= 55 ? 'High' : strainN >= 26 ? 'Moderate' : 'Low';
-    return { value, stats: { terminal: Math.round(value[value.length - 1].y), maxDD: Math.round(maxDD * 100), dryPowder, forced, deployed, integrity, control, strain } };
+    const strainPen = strain === 'Extreme' ? 32 : strain === 'High' ? 16 : strain === 'Moderate' ? 6 : 0;
+    const part = participation[pk];
+    // LIVABILITY (repeatability): the balanced posture is the reference. Drawdown,
+    // forced sale, strain, AND deviation from balanced participation all cost — under
+    // = cash drag (defensive), over = fragility (all-in). Deterministic + illustrative.
+    const partPen = part < partRef ? (partRef - part) * 1.25 : (part - partRef) * 0.30;
+    const livability = Math.max(6, Math.min(100, Math.round(100 - maxDD * 100 * 0.30 - (forced ? 30 : 0) - strainPen - partPen)));
+    return { value, stats: { terminal: Math.round(value[value.length - 1].y), maxDD: Math.round(maxDD * 100), dryPowder, forced, deployed, integrity, control, strain, participation: part, livability } };
   };
   const variants = {};
   let yMax = 0, yMin = 1e9;
   ['max', 'reserve', 'stress'].forEach((pk) => ['none', 'jobloss', 'deploy'].forEach((sh) => {
     const r = build(pk, sh); variants[`${pk}|${sh}`] = r; r.value.forEach((q) => { yMax = Math.max(yMax, q.y); yMin = Math.min(yMin, q.y); });
   }));
+  // governable corridor: the index range the framework lives in across the cycle.
+  // The framework stays inside; max exits both ways (euphoria, then crash); the
+  // defensive reserve hugs the lower edge (underparticipation).
+  const rc = variants['reserve|none'];
+  let rcLo = 1e9; rc.value.forEach((q) => { rcLo = Math.min(rcLo, q.y); });
+  const band = { lo: Math.round(rcLo - 8), hi: Math.round(rc.stats.terminal + 25) };
   return {
     variants, troughX: R(T(troughI) * 100),
     peakX: R(T(market.indexOf(Math.max(...market.slice(0, troughI)))) * 100),
     yMax: Math.ceil((yMax + 12) / 10) * 10,
     yMin: Math.max(0, Math.floor((yMin - 14) / 10) * 10),
+    band,
   };
 })();
 
@@ -1719,47 +1742,49 @@ export const FRAMEWORK_CHART_SPECS = [
     interaction: { type: 'scenario', gesture: 'choose', conceptMatch: 'Selecting a strategy and a shock redraws the emphasised path and its control read-outs' },
     motionProfile: { type: 'scenarioUpdate', duration: 'calm' },
     status: 'needs-design-review', wiredPublic: false,
-    title: 'Exposure Is Not Control', setupLine: 'Choose the path. Then change the shock.',
+    title: 'Exposure Is Not Control', setupLine: 'The best strategy is not the largest line — it is the path you can keep following.',
     claimLabel: 'CONTROL · INTERACTIVE',
-    frameworkClaim: '100% Bitcoin can win one favorable cycle; the framework optimizes for control across many.',
-    readerTakeaway: 'Max exposure wins the clean bull case; the framework wins the messy path — balancing upside, capacity, and emotional control.',
+    tryThis: 'Change the shock and watch which path stays governable.',
+    frameworkClaim: '100% Bitcoin can win one favorable cycle; the framework optimizes for control and repeatability across many.',
+    readerTakeaway: 'The path you can follow beats the path that only works on paper.',
     chartType: 'Interactive path-aware comparison of representative portfolio paths through a drawdown, with an optional shock.',
     visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
-    sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative representative portfolio paths; no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
-    explainerHeadline: 'Winning a cycle is not the same as staying in control.',
-    explainerBody: 'Maximum exposure can win the clean bull case. The framework exists for the path where drawdowns, income shocks, and opportunity arrive together — and for the hidden variable underneath them: decision strain. A portfolio only works if its owner can keep thinking clearly while it is down, hold the thesis, and still act. Framework reserve is the balanced posture; stress-tested reserve is the more defensive one. A strategy that cannot be lived through is not robust.',
+    sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative representative portfolio paths; a deterministic livability/repeatability score, disclosed as illustrative — no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    explainerHeadline: 'Winning a clean path is not the same as surviving a messy one.',
+    explainerBody: 'Maximum exposure can post the highest terminal number when the path is clean — staying all-in even rides the recovery. Stress-tested reserve can defend hardest when the world breaks, but it underparticipates the rest of the time (cash drag). The framework is the middle discipline: enough exposure to participate, enough reserve to act, and low enough strain to keep following the plan when the path is unknown. A strategy that cannot be lived through is not robust.',
     explainerConcept: 'Operational control',
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
     personalization: { uses: ['startingValue'], kind: 'scenario-scale', introLead: 'Representative total-portfolio paths', introTail: 'not Bitcoin price', note: 'Scales the simulation read-outs (terminal, drawdown, dry powder) to the starting value. Illustrative, not a forecast.' },
     layout: 'scenario',
-    ariaSummary: 'An interactive exhibit. Three representative total-portfolio paths, indexed to 100 — maximum exposure, framework reserve, and stress-tested reserve — are drawn together through a market drawdown, with an optional job-loss or deploy-at-trough shock. Maximum exposure peaks highest on a clean path; under a job-loss shock it is forced to sell at the bottom while the reserves absorb it; with dry powder the stress-tested reserve buys the trough, but that deployment spends its capacity, which then has to be rebuilt. Outcome read-outs cover upside (terminal value) and control (drawdown, remaining capacity, forced-sale risk, reserve integrity, control score).',
+    ariaSummary: 'An interactive exhibit. Three representative total-portfolio paths, indexed to 100 — maximum exposure, framework reserve, and stress-tested reserve — are drawn together through a market drawdown, with an optional job-loss or opportunity-window shock and a faint governable band behind them. The framework path stays inside the governable band; maximum exposure leaves it both ways — climbing above it in the bull, then falling below it in the crash — and under a job-loss shock is forced to sell at the bottom; the stress-tested reserve hugs the lower edge, defensive but underparticipating. The opportunity window deploys reserve during the drawdown, not at the exact bottom. Read-outs are grouped: outcome (terminal, participation), control (drawdown, decision strain, forced-sale risk), and repeatability (a livability score and a control score). An across-all-paths strip shows each strategy spread by livability under every shock — you commit before the shock is known.',
     scenario: {
       defaultPreset: 'reserve', defaultShock: 'none',
       domain: { yMin: p3Scenario.yMin, yMax: p3Scenario.yMax }, troughX: p3Scenario.troughX, peakX: p3Scenario.peakX,
-      tradeoff: 'Framework reserve = balanced base case · stress-tested = defensive · maximum exposure = fragile when messy',
+      band: p3Scenario.band,
+      tradeoff: 'Framework = balanced, repeatable · stress-tested = defensive, more cash drag · max exposure = high upside, fragile when messy',
       presets: [
         { id: 'max', label: 'Maximum exposure', short: 'Max exposure', sub: '100% BTC', axis: 'upside' },
-        { id: 'reserve', label: 'Framework reserve', short: 'Framework', sub: '~15% BTC + income', axis: 'control' },
+        { id: 'reserve', label: 'Framework reserve', short: 'Framework', sub: '~20% BTC + income', axis: 'control' },
         { id: 'stress', label: 'Stress-tested reserve', short: 'Stress-tested', sub: 'reserve + dry powder', axis: 'control' },
       ],
       shocks: [
         { id: 'none', label: 'Clean path' },
         { id: 'jobloss', label: 'Job loss in the drawdown' },
-        { id: 'deploy', label: 'Deploy at the trough' },
+        { id: 'deploy', label: 'Opportunity window' },
       ],
       // annotation shown under the chart; keyed by shock, with a per-strategy nuance.
       notes: {
-        none: { lead: 'Clean bull case rewards exposure.', max: 'Maximum exposure wins the upside — but it still rides the full cycle drawdown; the strain only shows once the path stops being clean.', reserve: 'The reserve gives up some clean-path upside to stay in control.', stress: 'The most control, the least clean-path upside — by design.' },
+        none: { lead: 'Clean bull case rewards exposure.', max: 'Maximum exposure wins the upside — but it still rides the full cycle drawdown; the strain only shows once the path stops being clean.', reserve: 'The reserve gives up some clean-path upside to stay governable — and keeps participating.', stress: 'The most defensive: high control, but it underparticipates in a clean market — cash drag.' },
         jobloss: { lead: 'Messy path rewards control.', max: 'No wage buffer, no dry powder: maximum exposure is forced to sell at the bottom — the deepest drawdown and the highest decision strain.', reserve: 'Income covers the gap — the reserve is never a forced seller, so the strain stays bearable.', stress: 'Income plus dry powder: the shock is absorbed, the reserve stays intact, and the strain stays low.' },
-        deploy: { lead: 'Opportunity rewards capacity.', max: 'Already all-in: no dry powder to buy the trough.', reserve: 'Framework keeps its balance — it deploys some capacity while staying diversified.', stress: 'Stress-tested deploys more because it began more defensive — the most dry powder makes the best entry.' },
+        deploy: { lead: 'Opportunity rewards the capacity to act.', max: 'All-in and never sold, so it rides the rebound — the highest terminal, at the deepest drawdown and the highest strain. It only works if no shock forces a sale.', reserve: 'Deploys some reserve in the window — not the exact bottom — and stays diversified. Enough capacity to act without betting the cycle on timing.', stress: 'Deploys the most because it began most defensive — but it gave up participation the rest of the cycle to hold that cash.' },
       },
       variants: p3Scenario.variants,
     },
     primaryKey: 'reserve',
     hoverTargets: [
-      { id: 'max', kind: 'strategy', label: 'Maximum exposure', name: 'Maximum exposure', why: 'Wins the clean bull case and nothing else. No wage buffer and no dry powder, so a drawdown plus an income shock forces a sale at the worst price — and the deepest drawdowns carry the highest decision strain, where panic-selling and abandoned theses happen.', claim: 'Highest upside, highest behaviour risk.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'reserve', kind: 'strategy', label: 'Framework reserve', name: 'Framework reserve', why: 'The balanced posture: it participates in upside while preserving enough capacity and emotional bandwidth to act through a drawdown — without ever becoming a forced seller. This is the framework’s normal target.', claim: 'The balanced base case.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'stress', kind: 'strategy', label: 'Stress-tested reserve', name: 'Stress-tested reserve', why: 'The defensive posture: the most capacity to deploy at a trough, at the cost of more cash drag in a clean bull market. Deployed capacity is governed and rebuilt over time — not a one-time timing bet.', claim: 'Defensive posture; most capacity to act.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'max', kind: 'strategy', label: 'Maximum exposure', name: 'Maximum exposure', why: 'Highest terminal when the path is clean — all-in even rides the rebound. But no wage buffer and no dry powder means a drawdown plus an income shock forces a sale at the worst price, and the deepest drawdowns carry the highest decision strain, where panic-selling and abandoned theses happen. High upside, low livability.', claim: 'Highest upside, highest behaviour risk.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'reserve', kind: 'strategy', label: 'Framework reserve', name: 'Framework reserve', why: 'The balanced posture: enough exposure to participate, enough reserve to act in a drawdown, and low enough strain to keep following the plan — without ever becoming a forced seller. It does not win every scenario; it stays inside the governable band across all of them. The framework’s normal target.', claim: 'Balanced, repeatable participation.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'stress', kind: 'strategy', label: 'Stress-tested reserve', name: 'Stress-tested reserve', why: 'The defensive posture: the most capacity to act in a drawdown, at the cost of cash drag — it underparticipates the rest of the cycle. Best for extreme defense, not the default. Deployed capacity is governed and rebuilt over time, not a one-time timing bet.', claim: 'Maximum defense; underparticipates otherwise.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['max', 'reserve', 'stress'],
     implementationNotes: 'INTERACTIVE SIMULATION — the headline Part 3 exhibit. All three strategy paths are drawn together under the selected shock; the chosen strategy is emphasised and the others stay as muted context. Click a path to select it. A capacity-to-act gauge, a trough/intervention zone, a forced-sale mark, and an annotation that updates with the shock carry the story; the stat strip (split into UPSIDE and CONTROL) is subordinate. Precomputed, deterministic representative paths — no live calc.',

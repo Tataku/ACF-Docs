@@ -184,6 +184,14 @@ For an **introductory** chart, do not show the entire control system. Show the *
 - The `governanceLoop` primitive is the calm, beginner form of this: a left-to-right guarded path with **one governing checkpoint** (the tripwire — a quiet gate, never a red alarm) and a **subtle return arc** carrying evidence back to the thesis. It must read at a glance **without interaction**; hover / pin / tap only add the "why."
 - Reserve the `systemLoop` ring for charts whose concept genuinely *is* a reflexive feedback orbit (e.g. *Markets Feed Back*). An entry document teaches purpose before machinery — teach the smallest useful loop first.
 
+### Scenario charts — don't reward perfect hindsight
+
+A scenario chart must not collapse into *"which line ends highest?"* It has to distinguish **terminal value** from **control, livability, and repeatability across unknown paths** — because you commit to a strategy *before* the path is known.
+
+- **No perfect bottom-timing.** An "opportunity" shock must not assume the investor deploys all cash at the exact low. *Exposure Is Not Control* renames it **Opportunity window** and deploys only **part** of the reserve, **above** the bottom — the value modelled is *"had capacity to act,"* not *"timed it."* (The old `deploy-at-trough` math rewarded the most-defensive path for hindsight and made the framework look pointless.)
+- **A framework path needn't win every metric — it must clearly show the metric it optimizes.** Here the framework does **not** post the highest terminal (max exposure does, on a clean path). It wins on a **livability / repeatability** score (penalizes drawdown, forced-sale, decision strain, *and* under-participation / cash drag) and on a **governable band** it stays inside while max exits both ways and the defensive reserve hugs the lower edge. The deterministic livability score is **disclosed as illustrative**.
+- **Stat hierarchy carries the lesson.** Group read-outs **Outcome** (terminal, participation) · **Control** (drawdown, strain, forced-sale) · **Repeatability** (livability, control score); don't let terminal value or dry-powder dominate. The across-all-paths strip plots **livability under every shock**, so the tightest, highest band is the visible winner — not the single highest dot.
+
 ### How to add a new chart safely
 1. Add a spec with a stable kebab `chartId`, `group`, `intendedPlacement`,
    `status`, `visualDataMode` + `disclosure`, `sources[]`, `frameworkClaim` +

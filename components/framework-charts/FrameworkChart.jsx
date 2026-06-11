@@ -1220,11 +1220,12 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const maxDrop = (() => { let pk = -9, d = 0; sel.v.value.forEach((q) => { pk = Math.max(pk, q.y); d = Math.max(d, pk - q.y); }); return d; })();
   const termText = scaleP ? fmtMoney(scaleP * st.terminal / 100) : `${st.terminal}`;
   const ddText = scaleP ? `${fmtMoney(scaleP * maxDrop / 100)} · ${st.maxDD}%` : `${st.maxDD}%`;
-  // dry powder is the strategy's capacity posture (a strength); a deploy USES it
-  // deliberately — shown as a positive state, never a caution/penalty.
-  const capLabel = 'DRY POWDER';
-  const capText = `${scaleP ? `${fmtMoney(scaleP * st.dryPowder / 100)} · ` : ''}${st.dryPowder}%${st.deployed ? ' deployed' : ''}`;
-  const capTone = st.dryPowder > 0 ? accent : pal.text3;
+  // participation tier (cash drag shows as Low) + livability tone — the framework's
+  // balance is the reference; the capacity gauge already carries dry powder visually.
+  const partRef = (sc.variants[`${sc.defaultPreset}|none`] || {}).stats ? sc.variants[`${sc.defaultPreset}|none`].stats.participation : 30;
+  const partTier = st.participation >= 60 ? 'High' : st.participation >= partRef - 3 ? 'Adequate' : 'Low';
+  const partTone = partTier === 'Adequate' ? accent : partTier === 'Low' ? pal.text3 : pal.text1;
+  const livTone = st.livability >= 70 ? accent : st.livability >= 45 ? pal.text1 : pal.bandStressText;
   // decision strain → stat tone + the rust intensity of the drawdown shading (mostly max)
   const strainTone = st.strain === 'Extreme' || st.strain === 'High' ? pal.bandStressText : st.strain === 'Moderate' ? pal.text1 : accent;
   const strainOp = ({ Low: 0.06, Moderate: 0.11, High: 0.17, Extreme: 0.23 })[st.strain] || 0.10;
@@ -1234,9 +1235,9 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const SHK = sc.shocks.map((s) => s.id);
   const allRows = PKS.map((pk) => ({
     pk, short: byId(pk).short || pk, on: pk === presetId,
-    outs: SHK.map((sh) => { const s = sc.variants[`${pk}|${sh}`].stats; return { terminal: s.terminal, control: s.control, forced: s.forced }; }),
+    outs: SHK.map((sh) => { const s = sc.variants[`${pk}|${sh}`].stats; return { livability: s.livability, control: s.control, forced: s.forced }; }),
   }));
-  let tMin = 1e9, tMax = -1e9; allRows.forEach((r) => r.outs.forEach((o) => { tMin = Math.min(tMin, o.terminal); tMax = Math.max(tMax, o.terminal); }));
+  let tMin = 1e9, tMax = -1e9; allRows.forEach((r) => r.outs.forEach((o) => { tMin = Math.min(tMin, o.livability); tMax = Math.max(tMax, o.livability); }));
   const ddPath = useMemo(() => { let mxv = -9; const top = sel.v.value.map((p) => { mxv = Math.max(mxv, p.y); return { x: X(p.x), y: Y(mxv) }; }); return areaPath(top, sel.px); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [presetId, shockId, width, height]);
 
   // trough / intervention zone + shock mark on the selected path
@@ -1244,7 +1245,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const trough = { x: X(sc.troughX), y: Y(vAt(sel.v.value, sc.troughX)) };
   let shockColor = accent, shockText = null;
   if (shockId === 'jobloss') { shockColor = st.forced ? pal.bandStress : accent; shockText = st.forced ? 'forced to sell' : 'shock absorbed'; }
-  else if (shockId === 'deploy') { shockColor = st.deployed ? accent : pal.text3; shockText = st.deployed ? 'buys the trough' : 'no dry powder'; }
+  else if (shockId === 'deploy') { shockColor = st.deployed ? accent : pal.text3; shockText = st.deployed ? 'acts in the window' : 'no reserve to act'; }
 
   // capacity-to-act gauge (top-left, clear of the paths which start low)
   const gx = pad.l + 8, g0 = pad.t + 16, g1 = pad.t + 92, gH = g1 - g0;
@@ -1313,6 +1314,16 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
           {!coarse && <text x={(zone.x0 + zone.x1) / 2} y={pad.t + 12} textAnchor="middle" style={halo(pal, 9, pal.bandRegimeText)}>the drawdown</text>}
           {!coarse && (st.strain === 'High' || st.strain === 'Extreme') && <text x={(zone.x0 + zone.x1) / 2} y={pad.t + 24} textAnchor="middle" style={halo(pal, 8, pal.bandStressText)}>decision strain rises</text>}
         </g>
+        {/* governable corridor — the index range the framework lives in; max leaves it
+            both ways (euphoria then crash), the defensive reserve hugs the lower edge */}
+        {sc.band && (
+          <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 320) }}>
+            <rect x={pad.l} y={Y(sc.band.hi)} width={width - pad.l - pad.r} height={Math.max(0, Y(sc.band.lo) - Y(sc.band.hi))} fill={accent} opacity={pal.name === 'light' ? 0.05 : 0.06} />
+            <line x1={pad.l} x2={width - pad.r} y1={Y(sc.band.hi)} y2={Y(sc.band.hi)} stroke={accent} strokeWidth="1" strokeDasharray="2 7" opacity="0.38" />
+            <line x1={pad.l} x2={width - pad.r} y1={Y(sc.band.lo)} y2={Y(sc.band.lo)} stroke={accent} strokeWidth="1" strokeDasharray="2 7" opacity="0.38" />
+            {!coarse && <text x={pad.l + 3} y={(Y(sc.band.hi) + Y(sc.band.lo)) / 2 + 3} style={halo(pal, 7.5, pal.text4)}>governable band</text>}
+          </g>
+        )}
         {/* start reference */}
         <line x1={pad.l} x2={width - pad.r} y1={Y(100)} y2={Y(100)} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />
         <text x={width - pad.r} y={Y(100) - 5} textAnchor="end" style={halo(pal, 8.5, pal.text4)}>start = 100</text>
@@ -1368,25 +1379,40 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         </p>
       </div>
 
-      {/* outcome strip — UPSIDE vs CONTROL (subordinate to the visual) */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 24px', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}`, alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: accent, marginBottom: 8 }}>UPSIDE</div>
-          <div style={{ display: 'flex', gap: 20 }}>{stat('TERMINAL', termText, pal.text1)}</div>
-        </div>
-        <div aria-hidden style={{ width: 1, alignSelf: 'stretch', background: pal.cardBorder }} />
-        <div>
-          <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: pal.text3, marginBottom: 8 }}>CONTROL</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 20px' }}>
-            {stat('MAX DRAWDOWN', ddText, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
-            {stat(capLabel, capText, capTone)}
-            {stat('FORCED SALE', st.forced ? 'High' : 'None', st.forced ? pal.bandStressText : accent)}
-            {stat('DECISION STRAIN', st.strain, strainTone)}
-            {stat('RESERVE INTEGRITY', `${st.integrity}%`, st.integrity < 100 ? pal.bandStressText : accent)}
-            {stat('CONTROL SCORE', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
+      {/* outcome strip — OUTCOME · CONTROL · REPEATABILITY (subordinate to the visual).
+          Terminal is one metric among several; livability is the framework's headline. */}
+      {(() => {
+        const grpLbl = (c) => ({ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.16em', color: c, marginBottom: 8 });
+        const vdiv = <div aria-hidden style={{ width: 1, alignSelf: 'stretch', background: pal.cardBorder }} />;
+        return (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 20px', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}`, alignItems: 'flex-start' }}>
+            <div>
+              <div style={grpLbl(pal.text3)}>OUTCOME</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 18px' }}>
+                {stat('TERMINAL', termText, pal.text1)}
+                {stat('PARTICIPATION', partTier, partTone)}
+              </div>
+            </div>
+            {vdiv}
+            <div>
+              <div style={grpLbl(pal.text3)}>CONTROL</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 18px' }}>
+                {stat('MAX DRAWDOWN', ddText, st.maxDD >= 50 ? pal.bandStressText : pal.text1)}
+                {stat('DECISION STRAIN', st.strain, strainTone)}
+                {stat('FORCED SALE', st.forced ? 'High' : 'None', st.forced ? pal.bandStressText : accent)}
+              </div>
+            </div>
+            {vdiv}
+            <div>
+              <div style={grpLbl(accent)}>REPEATABILITY</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 18px' }}>
+                {stat('LIVABILITY', `${st.livability}`, livTone)}
+                {stat('CONTROL SCORE', `${st.control}`, st.control >= 60 ? accent : pal.text2)}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* across all paths — you don't get to pick the shock (built from all variants) */}
       <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}` }}>
@@ -1400,7 +1426,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
             const EZ = 'cubic-bezier(0.22,0.61,0.36,1)';
             return allRows.map((r, i) => {
               const ry = 22 + i * 28;
-              const xs = r.outs.map((o) => xT(o.terminal));
+              const xs = r.outs.map((o) => xT(o.livability));
               return (
                 <g key={r.pk} style={{ opacity: entered ? (r.on ? 1 : 0.5) : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 520ms ${EZ} ${Math.round(700 + i * 90)}ms` }}>
                   <text x={8} y={ry + 3.5} style={haloSans(pal, 10.5, r.on ? accent : pal.text3, r.on ? 700 : 500)}>{r.short}</text>
@@ -1412,11 +1438,11 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
               );
             });
           })()}
-          <text x={150} y={99} style={halo(pal, 7.5, pal.text4)}>← lower terminal</text>
-          <text x={width - 24} y={99} textAnchor="end" style={halo(pal, 7.5, pal.text4)}>higher terminal →</text>
+          <text x={150} y={99} style={halo(pal, 7.5, pal.text4)}>← less livable</text>
+          <text x={width - 24} y={99} textAnchor="end" style={halo(pal, 7.5, pal.text4)}>more livable →</text>
         </svg>
         <p style={{ margin: '4px 0 0', fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2, maxWidth: 760 }}>
-          <span style={{ color: pal.text1, fontWeight: 600 }}>No line is best on every path.</span> Maximum exposure posts the highest numbers, but on low-control dots with a forced-sale floor; stress-tested is feast-or-famine; the framework holds the tightest, in-control band — the outcome you can count on without predicting the path or timing the trough.
+          <span style={{ color: pal.text1, fontWeight: 600 }}>The framework wins by staying followable.</span> Maximum exposure can post the highest terminal — but only on a clean path, and it leaves the governable band both ways; stress-tested is safe yet underparticipates (cash drag); the framework holds the most livable band across every shock. The path you can follow beats the path that only works on paper.
         </p>
       </div>
 
