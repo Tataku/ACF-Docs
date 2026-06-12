@@ -1354,13 +1354,15 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const svgRef = useRef(null);
   const [presetId, setPresetId] = useState(sc.defaultPreset);
   const [shockId, setShockId] = useState(sc.defaultShock);
-  const [hovered, setHovered] = useState(null);                 // { pk, x, y }
+  const [hovered, setHovered] = useState(null);                 // strategy id under pointer/focus
+  const [pinned, setPinned] = useState(null);                   // strategy id pinned → premium tooltip (brush frame + connector)
   const PKS = sc.presets.map((p) => p.id);
   const SHK = sc.shocks.map((s) => s.id);
   const byId = (id) => sc.presets.find((p) => p.id === id) || {};
   const targetById = (id) => targets.find((t) => t.id === id);
   const statOf = (pk, sh) => (sc.variants[`${pk}|${sh}`] || {}).stats || {};
   const posture = { max: 'upside, fragile', reserve: 'usable middle', stress: 'defensive, drag' };
+  const SHOCK_TAG = { none: 'NO SHOCK', jobloss: 'JOB LOSS', deploy: 'OPPORTUNITY' };
 
   // ── three-lane stress tunnel ────────────────────────────────────────────────
   // Same shock, three postures enter, one stays usable. Each strategy is a lane;
@@ -1407,7 +1409,13 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const nearestLane = (my) => { let best = null, bd = laneH * 0.6; lanes.forEach((l) => { const d = Math.abs(my - l.yc); if (d < bd) { bd = d; best = l.pk; } }); return best; };
   const onMove = (e) => { if (coarse) return; setHovered(nearestLane(toVB(e)[1])); };
   const onLeave = () => { if (!coarse) setHovered(null); };
-  const onClick = (e) => { const pk = nearestLane(toVB(e)[1]); if (pk) setPresetId(pk); };
+  const onClick = (e) => { const pk = nearestLane(toVB(e)[1]); if (pk) { setPresetId(pk); setPinned(pk); } else { setPinned(null); } };
+  useEffect(() => {                                             // Escape unpins (parity with the rest of the pin system)
+    if (!pinned) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setPinned(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pinned]);
 
   const seg = (val, label, on, set) => (
     <button key={val} onClick={() => set(val)} aria-pressed={on}
@@ -1428,12 +1436,13 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   );
   const cell = (val, tone) => <td style={{ padding: '5px 8px', fontFamily: pal.mono, fontSize: 9.5, color: tone, fontWeight: 600, textAlign: 'center' }}>{val}</td>;
 
+  const activePk = pinned || hovered;                           // pin wins over hover
   let tooltip = null;
-  if (!coarse && hovered) {
-    const meta = targetById(hovered); const l = lanes.find((x) => x.pk === hovered);
+  if (!coarse && activePk) {
+    const meta = targetById(activePk); const l = lanes.find((x) => x.pk === activePk);
     if (meta && l) {
       const vt = scaleP && isFinite(l.s.terminal) ? getTooltipValueText(spec, readerContext, { dollars: scaleP * l.s.terminal / 100, rawLabel: `${l.s.terminal} terminal · representative` }) : null;
-      tooltip = <TargetTooltip meta={meta} kindLabel="POSTURE" accentTitle={hovered === spec.primaryKey} xPct={(l.endPt.x / width) * 100} yPct={(l.endPt.y / height) * 100} isPin={false} pal={pal} accent={accent} reduce={reduce} onUnpin={() => {}} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
+      tooltip = <TargetTooltip meta={meta} kindLabel="POSTURE" accentTitle={activePk === spec.primaryKey} xPct={(l.endPt.x / width) * 100} yPct={(l.endPt.y / height) * 100} isPin={!!pinned} pal={pal} accent={accent} reduce={reduce} onUnpin={() => setPinned(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
     }
   }
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
@@ -1449,50 +1458,55 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary}
         style={{ display: 'block', cursor: coarse ? 'default' : 'pointer', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}>
-        {/* the shock chamber + phase labels */}
+        {/* the shock chamber + phase dividers + labels */}
         <g style={{ opacity: entered ? 1 : 0, transition: trans('opacity', 320) }}>
           {shockId !== 'none'
             ? <path d={Brush.washRect(sX0, plotTop, sX1, plotBot, { seed: 33, intensity: 0.5, soft: 'both' })} fill={pal.bandStress} fillOpacity={pal.name === 'light' ? 0.11 : 0.09} />
             : <rect x={sX0} y={plotTop} width={sX1 - sX0} height={plotH} fill={pal.bandRegime} opacity="0.05" />}
-          <text x={sMid} y={plotTop - 13} textAnchor="middle" style={halo(pal, 8, shockId === 'none' ? pal.text4 : pal.bandStressText)}>{shockLabel}</text>
+          {[sX0, sX1].map((x) => <line key={x} x1={x} x2={x} y1={plotTop} y2={plotBot} stroke={pal.cardBorder} strokeWidth="1" strokeDasharray="2 5" opacity="0.6" />)}
+          <text x={sMid} y={plotTop - 13} textAnchor="middle" style={halo(pal, 8, shockId === 'none' ? pal.text4 : pal.bandStressText)}>{SHOCK_TAG[shockId] || shockLabel}</text>
           <text x={(x0 + sX0) / 2} y={plotTop - 13} textAnchor="middle" style={halo(pal, 7.5, pal.text4)}>BEFORE</text>
           <text x={(sX1 + x1) / 2} y={plotTop - 13} textAnchor="middle" style={halo(pal, 7.5, pal.text4)}>AFTER</text>
         </g>
-        {/* lanes — one posture each; the selected one in colour */}
-        {lanes.map((l) => {
-          const isHov = hovered === l.pk, col = l.sel ? accent : pal.tierReference;
-          const broken = l.forced;
-          const main = Brush.smoothOpen(broken ? l.P.slice(0, 3) : l.P);
-          const after = broken ? Brush.smoothOpen(l.P.slice(3)) : null;
-          return (
-            <g key={l.pk} style={{ opacity: entered ? (l.sel || isHov ? 1 : 0.5) : 0, transition: trans('opacity', 300) }}>
-              <line x1={x0} x2={x1} y1={l.yc} y2={l.yc} stroke={pal.cardBorder} strokeWidth="1" strokeDasharray="1 6" opacity="0.5" />
-              <text x={x0 - 8} y={l.yc - 2} textAnchor="end" style={haloSans(pal, l.sel ? 10.5 : 9.5, l.sel ? accent : pal.text2, l.sel ? 700 : 600)}>{byId(l.pk).short}</text>
-              <text x={x0 - 8} y={l.yc + 9} textAnchor="end" style={halo(pal, 7.5, pal.text4)}>{posture[l.pk]}</text>
-              <path d={main} fill="none" stroke={col} strokeWidth={l.sel ? 2 : 1.3} strokeLinecap="round" style={{ transition: trans('all', 300) }} />
-              {after && <path d={after} fill="none" stroke={col} strokeWidth={l.sel ? 2 : 1.3} strokeDasharray="4 4" strokeLinecap="round" opacity="0.7" />}
-              {l.forced && (
-                <g>
-                  <path d={Brush.enso(l.dipPt.x, l.dipPt.y, 8, { seed: 51, weight: 0.9, intensity: 0.85, gapAngle: -Math.PI / 3 })} fill={pal.bandStress} />
-                  {(l.sel || isHov) && <text x={l.dipPt.x} y={l.dipPt.y + 20} textAnchor="middle" style={halo(pal, 7.5, pal.bandStressText)}>forced — breaks</text>}
-                </g>
-              )}
-              {!l.forced && l.dryPowder > 0 && (
-                <g>
-                  <path d={Brush.inkDot(l.capPt.x, l.capPt.y, l.deployed ? 4 : 3, { seed: 17, intensity: 0.8 })} fill={l.sel ? accent : pal.markInk} opacity={l.deployed ? 0.95 : 0.6} />
-                  {(l.sel || isHov) && <text x={l.capPt.x} y={l.capPt.y - 7} textAnchor="middle" style={halo(pal, 7, l.sel ? accent : pal.text3)}>{l.deployed ? 'acts' : 'can act'}</text>}
-                </g>
-              )}
-              <path d={Brush.inkDot(l.endPt.x, l.endPt.y, l.sel ? 4 : 3, { seed: 9 + l.i, intensity: 0.85 })} fill={col} style={{ transition: trans('all', 300) }} />
-            </g>
-          );
-        })}
-        {/* focusable lanes (keyboard parity: focus previews, Enter selects) */}
+        {/* selected-lane emphasis band — links to the pinned card's accent */}
+        {(() => { const sl = lanes.find((l) => l.sel); return sl ? <rect x={x0 - 2} y={sl.yc - laneH * 0.46} width={innerW + 2} height={laneH * 0.92} rx={7} fill={accent} opacity={pal.name === 'light' ? 0.045 : 0.055} /> : null; })()}
+        {/* lanes — draw in left→right through the tunnel as the postures "enter" */}
+        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1400ms cubic-bezier(0.22,0.61,0.36,1) 160ms, -webkit-clip-path 1400ms cubic-bezier(0.22,0.61,0.36,1) 160ms' }}>
+          {lanes.map((l) => {
+            const isHov = hovered === l.pk, col = l.sel ? accent : pal.tierReference;
+            const broken = l.forced;
+            const main = Brush.smoothOpen(broken ? l.P.slice(0, 3) : l.P);
+            const after = broken ? Brush.smoothOpen(l.P.slice(3)) : null;
+            return (
+              <g key={l.pk} style={{ opacity: l.sel || isHov ? 1 : (pinned ? 0.4 : 0.5), transition: trans('opacity', 240) }}>
+                <line x1={x0} x2={x1} y1={l.yc} y2={l.yc} stroke={pal.cardBorder} strokeWidth="1" strokeDasharray="1 6" opacity="0.5" />
+                <text x={x0 - 8} y={l.yc - 2} textAnchor="end" style={haloSans(pal, l.sel ? 10.5 : 9.5, l.sel ? accent : pal.text2, l.sel ? 700 : 600)}>{byId(l.pk).short}</text>
+                <text x={x0 - 8} y={l.yc + 9} textAnchor="end" style={halo(pal, 7.5, pal.text4)}>{posture[l.pk]}</text>
+                <path d={main} fill="none" stroke={col} strokeWidth={l.sel ? 2.2 : 1.4} strokeLinecap="round" style={{ transition: trans('all', 300) }} />
+                {after && <path d={after} fill="none" stroke={col} strokeWidth={l.sel ? 2.2 : 1.4} strokeDasharray="4 4" strokeLinecap="round" opacity="0.7" />}
+                {l.forced && (
+                  <g>
+                    <path d={Brush.enso(l.dipPt.x, l.dipPt.y, 8, { seed: 51, weight: 0.9, intensity: 0.85, gapAngle: -Math.PI / 3 })} fill={pal.bandStress} />
+                    {(l.sel || isHov) && <text x={l.dipPt.x} y={l.dipPt.y + 20} textAnchor="middle" style={halo(pal, 7.5, pal.bandStressText)}>forced — breaks</text>}
+                  </g>
+                )}
+                {!l.forced && l.dryPowder > 0 && (
+                  <g>
+                    <path d={Brush.inkDot(l.capPt.x, l.capPt.y, l.deployed ? 4 : 3, { seed: 17, intensity: 0.8 })} fill={l.sel ? accent : pal.markInk} opacity={l.deployed ? 0.95 : 0.6} />
+                    {(l.sel || isHov) && <text x={l.capPt.x} y={l.capPt.y - 7} textAnchor="middle" style={halo(pal, 7, l.sel ? accent : pal.text3)}>{l.deployed ? 'acts' : 'can act'}</text>}
+                  </g>
+                )}
+                <path d={Brush.inkDot(l.endPt.x, l.endPt.y, l.sel ? 4.4 : 3, { seed: 9 + l.i, intensity: 0.85 })} fill={col} style={{ transition: trans('all', 300) }} />
+              </g>
+            );
+          })}
+        </g>
+        {/* focusable lanes (keyboard parity: focus previews, Enter selects + pins) */}
         {lanes.map((l) => (
           <rect key={`fx${l.pk}`} className="acf-fx-focusable" x={x0} y={l.yc - laneH * 0.4} width={innerW} height={laneH * 0.8} fill="transparent" tabIndex={0} role="button"
-            aria-label={`${byId(l.pk).label}. ${(targetById(l.pk) || {}).why || ''} Select to emphasise.`}
+            aria-label={`${byId(l.pk).label}. ${(targetById(l.pk) || {}).why || ''} Select and pin.`}
             onFocus={() => setHovered(l.pk)} onBlur={() => setHovered(null)}
-            onClick={() => setPresetId(l.pk)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPresetId(l.pk); } }} style={{ cursor: 'pointer' }} />
+            onClick={() => { setPresetId(l.pk); setPinned(l.pk); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPresetId(l.pk); setPinned(l.pk); } }} style={{ cursor: 'pointer' }} />
         ))}
       </svg>
 
@@ -2287,7 +2301,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={hh(380)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={hh(150 + (spec.scorecard?.requirements.length || 8) * 32)} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={hh(330)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={hh(360)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'heartbeat' && <HeartbeatSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'sequenceRisk' && <SequenceRiskSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
