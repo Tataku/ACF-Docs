@@ -154,6 +154,18 @@ The reader should never feel the browser default. Selection, navigation, and sma
 - **Sticky reader controls.** The `ControlBar` is `position: sticky; top: 0` so PART / VIEW / THEME / Options stay reachable while scrolling. The sticky layer is **quiet**: padding is constant (no layout shift, so it can't jitter); a translucent surface + `backdrop-filter` blur + a 1px hairline **fade in only after scroll** (rAF-throttled `scrolled` state, reduced-motion aware), and clear again at the top so the hero reads clean. No heavy shadow, no big background block. It sits above charts (`z-index` 40) without covering the below-chart explainer rail.
 - **Framework-native icons.** Small controls use the brush-stroke icon pack (`icons.jsx`: `BrushX`, `BrushChevron`, `BrushCheck`) — the same `Brush.brushSegment` ink as the in-chart `scoreCheck`/`scoreFail` glyphs, `currentColor`, no icon library or Unicode glyphs. The pinned-tooltip **close** is a **borderless** brush ✕ (`.acf-icon-btn`, quiet opacity hover, `.acf-fx-focusable` ring, `aria-label="Unpin"`, no `title`); disclosure carets (Details, Options, Advanced assumptions) and the mobile/desktop-rail steppers are brush chevrons. Editorial prose arrows (`READ →`, `CLAIM → PICTURE → EXPLORE`) stay as text — icons are for controls, not copy.
 
+### Bespoke interaction polish
+
+Interactive **focus** states may use subtle brushwork — variable-width borders, organic highlight strokes — but **only to clarify what is selected**. Brushwork is not background decoration; it marks focus, then gets out of the way.
+
+- **Pinned cards get the premium frame.** Pinning is a higher-commitment interaction than hover, so the pinned tooltip gets a subtle brush frame (`BrushFrame` in `icons.jsx`: four tapered `Brush.brushSegment` edges, theme accent, low opacity, measured to the card so there's no layout shift, `pointer-events:none`). The CSS border is softened to `accent` at low alpha so the inked edge carries the craft. **Hover stays clean** — the frame is reserved for the pinned state. Not applied to every card/explainer/Details block.
+- **Selected gate uses a brush line, not a uniform rule** — the active gate in *Narrative Is Not Thesis* is drawn with `brushSegment` (slight variable-width waver) instead of a perfect `<line>`, matching the static gate ink.
+- **Guardrails:** brush emphasis animates with CSS transitions only, respects `prefers-reduced-motion`, never loops, and never reintroduces a native `title`. Close ✕ stays the borderless brush glyph; READ link unchanged.
+
+### Narrative-thread diagrams (filtering / survival / validation)
+
+When a chart is about **filtering, survival, or validation**, interaction should reveal the *path of the selected thread*: where it survives, where it weakens, where it ends. In *Narrative Is Not Thesis* (`gate` layout) focusing a gate makes the narratives that **die at that gate jump out** (clay, thicker), survivors **recede but stay visible**, and the gate inks brighter; focusing the **thesis** lifts the **survivor** band. The thread→gate mapping is the `endCol` each thread already carries in `geom` — no new spec data, no per-hairline hit targets (gate focus drives it), works with hover / pin / mobile tap, reduced-motion safe.
+
 ### Reader comfort (the charts must be easy to read)
 
 These charts are read by non-experts, including older readers. Legibility and calm beat density.

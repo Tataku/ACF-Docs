@@ -17,7 +17,7 @@
  * ─────────────────────────────────────────────────────────────────────────── */
 import React from 'react';
 import * as Brush from './brush';
-import { BrushX, BrushChevron } from './icons';
+import { BrushX, BrushChevron, BrushFrame } from './icons';
 import { getPalette, getAccent } from './palette';
 import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 
@@ -141,6 +141,15 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
   const tipRef = useRef(null);
   const st = useRef({ cur: null, cursor: null, right: true, below: true, raf: 0, xPct, yPct, isPin });
   const [shown, setShown] = useState(false);
+  const [box, setBox] = useState({ w: 244, h: 0 });                            // measured for the pinned brush frame (no layout shift)
+  useEffect(() => {
+    const el = tipRef.current; if (!el || !isPin) return undefined;
+    const update = () => setBox({ w: el.offsetWidth, h: el.offsetHeight });
+    update();
+    const RO = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+    if (RO) RO.observe(el);
+    return () => { if (RO) RO.disconnect(); };
+  }, [isPin, meta, valueText]);
   st.current.xPct = xPct; st.current.yPct = yPct; st.current.isPin = isPin;   // live values for the rAF loop
   useEffect(() => setShown(true), []);
   useEffect(() => {                                                            // desktop hover: velocity-aware cursor-follow; settles to the anchor when pinned
@@ -174,11 +183,13 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
     <div ref={tipRef} role={isPin ? 'dialog' : undefined} aria-label={isPin ? meta.name : undefined} style={{
       position: 'absolute', left: 0, top: 0, zIndex: 8, width: 244,
       pointerEvents: isPin ? 'auto' : 'none', willChange: 'transform',
-      background: pal.cardSolid, border: `1px solid ${isPin ? accent : pal.borderHi}`, borderRadius: 6,
+      background: pal.cardSolid, border: `1px solid ${isPin ? `${accent}55` : pal.borderHi}`, borderRadius: 6,
       boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)',
       padding: '11px 13px 12px', opacity: shown ? 1 : 0,
       transition: reduce ? 'opacity 120ms ease' : 'opacity 120ms cubic-bezier(0.2,0.7,0.2,1), border-color 200ms ease',
     }}>
+      {/* pinned = higher-commitment focus → a subtle brush frame (hover stays clean) */}
+      {isPin && <BrushFrame w={box.w} h={box.h} color={accent} opacity={pal.name === 'light' ? 0.55 : 0.72} />}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
         <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: accentTitle ? accent : pal.text4 }}>
           {kindLabel}{isPin && <span style={{ color: accent, marginLeft: 6 }}>· PINNED</span>}
@@ -1020,7 +1031,7 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
         survivors.push(Brush.brushLine(sp, { seed: 200 + f * 7, weight: 0.5, intensity: 0.5 }));
       } else {
         const endX = X(endCol), endY = yAt(endCol);
-        frags.push({ d: `M${X(0)} ${startY} ${Brush.smoothOpen(pts).slice(1)}`, fall: `M${endX} ${endY} Q${endX + 8} ${endY + 16} ${endX + 14} ${endY + 30 + rng() * 14}` });
+        frags.push({ d: `M${X(0)} ${startY} ${Brush.smoothOpen(pts).slice(1)}`, fall: `M${endX} ${endY} Q${endX + 8} ${endY + 16} ${endX + 14} ${endY + 30 + rng() * 14}`, endCol });
       }
     }
     const gates = pos.filter((p) => p.gate).map((p) => ({ x: p.x, line: Brush.brushSegment(p.x, cy - SPREAD - 8, p.x, cy + SPREAD + 8, { seed: 60 + p.i * 8, weight: 0.7, intensity: 0.6, waver: 0.15 }) }));
@@ -1038,6 +1049,13 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
   const focusId = isActiveHere ? active.id : null;
   const anchor = isActiveHere ? anchorOf(active) : null;
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+  // selected-thread storytelling: focusing a gate makes the narratives that DIE
+  // there jump out (clay), survivors recede; focusing the thesis lifts survivors.
+  const focusNode = focusId ? pos.find((p) => p.id === focusId) : null;
+  const selGateCol = focusNode && focusNode.gate ? focusNode.i : null;
+  const exitSel = !!(focusNode && focusNode.exit);
+  const anySel = selGateCol != null || exitSel;
+  const emTrans = reduce ? undefined : 'opacity 240ms ease, stroke 240ms ease';
 
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
@@ -1050,16 +1068,20 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Thesis validation gauntlet filtering narratives" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* fragments: weak narratives that fall away at a gate */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 120ms' }}>
-          {geom.frags.map((fr, i) => (
-            <g key={`f${i}`}>
-              <path d={fr.d} fill="none" stroke={pal.text3} strokeWidth="1" opacity="0.34" strokeLinecap="round" />
-              <path d={fr.fall} fill="none" stroke={pal.text4} strokeWidth="0.9" opacity="0.2" strokeLinecap="round" />
-            </g>
-          ))}
+          {geom.frags.map((fr, i) => {
+            const dieHere = selGateCol != null && fr.endCol === selGateCol;   // this story ends at the selected gate
+            const recede = anySel && !dieHere;                                // others stay visible, just quieter
+            return (
+              <g key={`f${i}`}>
+                <path d={fr.d} fill="none" stroke={dieHere ? pal.bandStressText : pal.text3} strokeWidth={dieHere ? 1.5 : 1} opacity={dieHere ? 0.92 : recede ? 0.1 : 0.34} strokeLinecap="round" style={{ transition: emTrans }} />
+                <path d={fr.fall} fill="none" stroke={dieHere ? pal.bandStressText : pal.text4} strokeWidth={dieHere ? 1.2 : 0.9} opacity={dieHere ? 0.8 : recede ? 0.06 : 0.2} strokeLinecap="round" style={{ transition: emTrans }} />
+              </g>
+            );
+          })}
         </g>
-        {/* survivors: concentrate into the thesis */}
+        {/* survivors: concentrate into the thesis (lift when the thesis is selected) */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 1000ms ease 320ms' }}>
-          {geom.survivors.map((d, i) => <path key={`sv${i}`} d={d} fill={accent} opacity="0.9" />)}
+          {geom.survivors.map((d, i) => <path key={`sv${i}`} d={d} fill={accent} opacity={exitSel ? 1 : anySel ? 0.28 : 0.9} style={{ transition: reduce ? undefined : 'opacity 240ms ease' }} />)}
         </g>
         {/* gates */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 220ms' }}>
@@ -1073,7 +1095,7 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
             <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transition: trans('opacity') }}>
               {(n.entry || n.exit) && <path d={Brush.inkDot(n.x, cy, n.exit ? 5.5 : 4, { seed: 20 + n.i * 6, intensity: 0.8 })} fill={isP ? accent : pal.markInk} />}
               {n.exit && <circle cx={n.x} cy={cy} r="11" fill="none" stroke={accent} strokeWidth="1" opacity="0.55" />}
-              {on && (n.gate ? <line x1={n.x} x2={n.x} y1={cy - SPREAD - 8} y2={cy + SPREAD + 8} stroke={accent} strokeWidth="1.5" opacity="0.9" /> : <circle cx={n.x} cy={cy} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />)}
+              {on && (n.gate ? <path d={Brush.brushSegment(n.x, cy - SPREAD - 8, n.x, cy + SPREAD + 8, { seed: 60 + n.i * 8, weight: 1.15, intensity: 0.6, waver: 0.18 })} fill={accent} opacity="0.9" /> : <circle cx={n.x} cy={cy} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />)}
               <text x={n.x} y={labelY} textAnchor="middle" style={haloSans(pal, n.entry || n.exit ? 12.5 : 10.5, isP ? accent : pal.text1, isP ? 700 : 600)}>{n.label}</text>
               {n.sub && <text x={n.x} y={n.exit || n.entry ? cy + 20 : labelY + 13} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
             </g>
