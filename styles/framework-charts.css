@@ -25,6 +25,13 @@
 .acf-icon-btn:focus-visible { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .acf-icon-btn { transition: none; } }
 
+/* Pinned-tooltip brush frame "inks in" on pin — a quiet opacity reveal, never a
+ * bounce or glow. The card clips the frame to its rounded silhouette; this only
+ * fades it. Reduced motion = appears immediately. */
+.acf-brush-frame { animation: acf-ink-in 280ms ease both; }
+@keyframes acf-ink-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .acf-brush-frame { animation: none; } }
+
 /* Disclosure caret (brush chevron) — points right when closed, rotates to point
  * down when open. Native <details> uses [open]; React toggles set the transform
  * inline. Both share this transition and honor reduced motion. */

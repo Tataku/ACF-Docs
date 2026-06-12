@@ -46,20 +46,21 @@ export function BrushChevron({ size = 12, dir = 'right', seed = 7 }) {
   return <Glyph size={size} d={d} rotate={rotate} />;
 }
 
-// Brush frame — a subtle hand-inked rectangle for an INTERACTIVE FOCUS surface
-// (the pinned tooltip). Four tapered brush edges, slightly varied per side, drawn
-// just inside the card's rounded corners. Sized in px (the card measures itself),
-// pointer-events none, theme colour via `color`. Marks focus — not decoration.
+// Brush frame — an inked edge for a pinned tooltip. The OUTER silhouette stays
+// perfect: the parent card clips to its rounded rectangle (overflow:hidden +
+// border-radius), so the four strokes hug the card edge and any outward waver is
+// trimmed to the card shape — only the INNER edge stays organic. Same accent as
+// the chart's active line. `.acf-brush-frame` inks it in (reduced-motion safe).
 export function BrushFrame({ w, h, color, opacity = 0.7, seed = 17 }) {
   if (!w || !h) return null;
-  const m = 2.6, x0 = m, y0 = m, x1 = w - m, y1 = h - m;
-  const o = { weight: 0.7, intensity: 0.4, taperEnds: true, waver: 0.05 };
-  const d = Brush.brushSegment(x0, y0, x1, y0, { seed, ...o })
-    + Brush.brushSegment(x1, y0, x1, y1, { seed: seed + 5, ...o })
-    + Brush.brushSegment(x1, y1, x0, y1, { seed: seed + 10, ...o })
-    + Brush.brushSegment(x0, y1, x0, y0, { seed: seed + 15, ...o });
+  const i = 1.0;                                       // straddle the edge; the card's clip trims the outer half flush
+  const o = { weight: 1.7, intensity: 0.55, taperEnds: false, waver: 0.12 };
+  const d = Brush.brushSegment(0, i, w, i, { seed, ...o })                 // top
+    + Brush.brushSegment(w - i, 0, w - i, h, { seed: seed + 5, ...o })     // right
+    + Brush.brushSegment(w, h - i, 0, h - i, { seed: seed + 10, ...o })    // bottom
+    + Brush.brushSegment(i, h, i, 0, { seed: seed + 15, ...o });           // left
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true" focusable="false"
+    <svg className="acf-brush-frame" width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true" focusable="false"
       style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'visible' }}>
       <path d={d} fill={color} opacity={opacity} />
     </svg>
