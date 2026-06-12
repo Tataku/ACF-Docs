@@ -139,9 +139,24 @@ function placeTip(px, py, tw, th, cw, ch, st) {
 // never renders this (MobileInsight handles touch).
 function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, accent, reduce, onUnpin, valueText, valueSub }) {
   const tipRef = useRef(null);
+  const lineRef = useRef(null);
+  const dotRef = useRef(null);
   const st = useRef({ cur: null, cursor: null, right: true, below: true, raf: 0, xPct, yPct, isPin });
   const [shown, setShown] = useState(false);
   const [box, setBox] = useState({ w: 244, h: 0 });                            // measured for the pinned brush frame (no layout shift)
+  // connector: a quiet accent hairline from the selected element to the nearest
+  // edge of the PINNED card — so the card reads as anchored, not floating UI. Drawn
+  // imperatively beside the card transform (no per-frame React re-render); hidden
+  // when the card sits over / near the anchor so it never crosses content.
+  const drawConnector = (ax, ay, cx, cy, cw, ch) => {
+    const ln = lineRef.current, dt = dotRef.current; if (!ln || !dt) return;
+    if (!st.current.isPin) { ln.style.opacity = '0'; dt.style.opacity = '0'; return; }
+    const px = Math.max(cx, Math.min(ax, cx + cw)), py = Math.max(cy, Math.min(ay, cy + ch)); // closest point on the card
+    const show = Math.hypot(ax - px, ay - py) > 16 ? '1' : '0';
+    ln.setAttribute('x1', ax); ln.setAttribute('y1', ay); ln.setAttribute('x2', px); ln.setAttribute('y2', py);
+    dt.setAttribute('cx', ax); dt.setAttribute('cy', ay);
+    ln.style.opacity = show; dt.style.opacity = show;
+  };
   useEffect(() => {
     const el = tipRef.current; if (!el || !isPin) return undefined;
     const update = () => setBox({ w: el.clientWidth, h: el.clientHeight });   // padding box — matches the inset:0 overlay 1:1
@@ -166,6 +181,7 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
       const k = dist > 160 ? 0.28 : dist > 60 ? 0.20 : 0.14;                   // accelerate when far, decelerate when close; dead-zone kills jitter
       if (dist < 0.5) { c.x = d.x; c.y = d.y; } else { c.x += dx * k; c.y += dy * k; }
       tip.style.transform = `translate3d(${c.x}px, ${c.y}px, 0)`;
+      const a = anchorPx(); drawConnector(a.x, a.y, c.x, c.y, tip.offsetWidth, tip.offsetHeight);
       st.current.raf = requestAnimationFrame(loop);
     };
     st.current.raf = requestAnimationFrame(loop);
@@ -178,50 +194,63 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
     const a = { x: (xPct / 100) * cont.clientWidth, y: (yPct / 100) * cont.clientHeight };
     const d = placeTip(a.x, a.y, tip.offsetWidth, tip.offsetHeight, cont.clientWidth, cont.clientHeight, st.current);
     tip.style.transform = `translate3d(${d.x}px, ${d.y}px, 0)`;
+    drawConnector(a.x, a.y, d.x, d.y, tip.offsetWidth, tip.offsetHeight);
   }, [reduce, xPct, yPct, isPin]);
   return (
-    <div ref={tipRef} role={isPin ? 'dialog' : undefined} aria-label={isPin ? meta.name : undefined} style={{
-      position: 'absolute', left: 0, top: 0, zIndex: 8, width: 244,
-      pointerEvents: isPin ? 'auto' : 'none', willChange: 'transform',
-      background: pal.cardSolid, border: `1px solid ${isPin ? `${accent}66` : pal.borderHi}`, borderRadius: 6,
-      // pinned: clip to the rounded rect so the brush frame's outward waver is trimmed
-      // to a clean outer silhouette (architecture outside, brushwork inside). The
-      // box-shadow renders outside the box and is unaffected by overflow:hidden.
-      overflow: isPin ? 'hidden' : 'visible',
-      boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)',
-      padding: '11px 13px 12px', opacity: shown ? 1 : 0,
-      transition: reduce ? 'opacity 120ms ease' : 'opacity 120ms cubic-bezier(0.2,0.7,0.2,1), border-color 200ms ease',
-    }}>
-      {/* pinned = higher-commitment focus → brush frame, clipped to the card silhouette (hover stays clean) */}
-      {isPin && <BrushFrame w={box.w} h={box.h} color={accent} opacity={pal.name === 'light' ? 0.62 : 0.8} />}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
-        <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: accentTitle ? accent : pal.text4 }}>
-          {kindLabel}{isPin && <span style={{ color: accent, marginLeft: 6 }}>· PINNED</span>}
-        </span>
+    <>
+      {/* pinned connector — anchors the card to the selected element (same accent green) */}
+      {isPin && (
+        <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible', zIndex: 7 }}>
+          <line ref={lineRef} x1="0" y1="0" x2="0" y2="0" stroke={accent} strokeWidth="1" strokeLinecap="round" style={{ opacity: 0, transition: reduce ? 'none' : 'opacity 220ms ease' }} />
+          <circle ref={dotRef} cx="0" cy="0" r="2.4" fill={accent} style={{ opacity: 0, transition: reduce ? 'none' : 'opacity 220ms ease' }} />
+        </svg>
+      )}
+      <div ref={tipRef} role={isPin ? 'dialog' : undefined} aria-label={isPin ? meta.name : undefined} style={{
+        position: 'absolute', left: 0, top: 0, zIndex: 8, width: isPin ? 'min(320px, 84vw)' : 244,
+        pointerEvents: isPin ? 'auto' : 'none', willChange: 'transform',
+        background: pal.cardSolid, border: `1px solid ${isPin ? `${accent}99` : pal.borderHi}`, borderRadius: 6,
+        // pinned: clip to the rounded rect so the brush frame's outward waver is trimmed
+        // to a clean outer silhouette (architecture outside, brushwork inside). The
+        // box-shadow renders outside the box and is unaffected by overflow:hidden.
+        overflow: isPin ? 'hidden' : 'visible',
+        boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)',
+        padding: isPin ? '12px 15px 13px' : '11px 13px 12px', opacity: shown ? 1 : 0,
+        transition: reduce ? 'opacity 120ms ease' : 'opacity 120ms cubic-bezier(0.2,0.7,0.2,1), border-color 200ms ease',
+      }}>
+        {/* pinned = higher-commitment focus → confident brush frame, clipped to the card silhouette (hover stays clean) */}
+        {isPin && <BrushFrame w={box.w} h={box.h} color={accent} opacity={pal.name === 'light' ? 0.78 : 0.9} />}
+        {/* META · PINNED — quiet curated label */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isPin ? 8 : 7 }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: accentTitle || isPin ? accent : pal.text4 }}>
+            {kindLabel}{isPin && <span style={{ color: accent, marginLeft: 6 }}>· PINNED</span>}
+          </span>
+          {isPin ? (
+            <button onClick={onUnpin} aria-label="Unpin" className="acf-fx-focusable acf-icon-btn" style={{ background: 'transparent', border: 'none', color: pal.text3, cursor: 'pointer', padding: 4, margin: -2, lineHeight: 0, borderRadius: 4, display: 'inline-flex' }}><BrushX size={12} /></button>
+          ) : meta.concept ? (
+            <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.08em', color: pal.text4, border: `1px solid ${pal.cardBorder}`, borderRadius: 3, padding: '2px 5px' }}>↳ {meta.concept}</span>
+          ) : null}
+        </div>
+        {/* Title — the strongest element */}
+        <div style={{ fontFamily: pal.sans, fontSize: isPin ? 15 : 13.5, fontWeight: 600, color: pal.text1, marginBottom: valueText ? 3 : (isPin ? 7 : 6), letterSpacing: '-0.012em', lineHeight: 1.2 }}>{meta.name}</div>
+        {valueText && (
+          <div style={{ marginBottom: isPin ? 8 : 7 }}>
+            <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
+            {isPin && valueSub && <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4, marginTop: 3 }}>{valueSub}</div>}
+          </div>
+        )}
+        {/* Explanation — comfortable line-height; card width keeps the measure tight */}
+        <p style={{ margin: 0, fontFamily: pal.sans, fontSize: isPin ? 12 : 11.5, lineHeight: isPin ? 1.58 : 1.5, color: pal.text2 }}>{meta.why}</p>
+        {/* hover = quick read (a pin hint); pin = principle + raw context + READ action */}
         {isPin ? (
-          <button onClick={onUnpin} aria-label="Unpin" className="acf-fx-focusable acf-icon-btn" style={{ background: 'transparent', border: 'none', color: pal.text3, cursor: 'pointer', padding: 4, margin: -2, lineHeight: 0, borderRadius: 4, display: 'inline-flex' }}><BrushX size={12} /></button>
-        ) : meta.concept ? (
-          <span style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.08em', color: pal.text4, border: `1px solid ${pal.cardBorder}`, borderRadius: 3, padding: '2px 5px' }}>↳ {meta.concept}</span>
-        ) : null}
+          <div style={{ marginTop: 10, paddingTop: 9, borderTop: `1px solid ${pal.cardBorder}`, display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
+            <span style={{ fontFamily: pal.sans, fontSize: 11, color: pal.text3, fontStyle: 'italic', lineHeight: 1.45 }}>{meta.claim}</span>
+            {meta.link && <a href={meta.link} className="acf-read-link acf-fx-focusable" style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: accent, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>READ <BrushChevron dir="right" size={9} /></a>}
+          </div>
+        ) : (
+          <div style={{ marginTop: 8, fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>{meta.link ? 'CLICK TO PIN FOR MORE →' : 'CLICK TO PIN →'}</div>
+        )}
       </div>
-      <div style={{ fontFamily: pal.sans, fontSize: 13.5, fontWeight: 600, color: pal.text1, marginBottom: valueText ? 2 : 6, letterSpacing: '-0.01em' }}>{meta.name}</div>
-      {valueText && (
-        <div style={{ marginBottom: 7 }}>
-          <div style={{ fontFamily: pal.mono, fontSize: 17, fontWeight: 600, color: accent, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{valueText}</div>
-          {isPin && valueSub && <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.04em', color: pal.text4, marginTop: 3 }}>{valueSub}</div>}
-        </div>
-      )}
-      <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2 }}>{meta.why}</p>
-      {/* hover = quick read (a pin hint); pin = deeper read (the principle + raw context + link) */}
-      {isPin ? (
-        <div style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${pal.cardBorder}`, display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontFamily: pal.sans, fontSize: 10.5, color: pal.text3, fontStyle: 'italic' }}>{meta.claim}</span>
-          {meta.link && <a href={meta.link} style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.1em', color: accent, textDecoration: 'none', borderBottom: `1px solid ${accent}77`, paddingBottom: 1, whiteSpace: 'nowrap' }}>READ →</a>}
-        </div>
-      ) : (
-        <div style={{ marginTop: 8, fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.1em', color: pal.text4 }}>{meta.link ? 'CLICK TO PIN FOR MORE →' : 'CLICK TO PIN →'}</div>
-      )}
-    </div>
+    </>
   );
 }
 
