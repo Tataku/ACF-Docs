@@ -258,6 +258,21 @@ const PRESETS = {
 const SIM_CTX_KEY = 'acf-sim-context';
 const THEME_KEY = 'acf-chart-handoff:theme';                 // user preference → localStorage
 const VIEW_KEY = 'acf-chart-handoff:viewMode';
+const STAGE_BG = { dark: '#08090b', light: '#E6DFD2' };      // palette stage colours (mirror palette.js)
+// Keep the document in sync with the reader's Light/Dark choice — same key the
+// pre-paint bootstrap (_document.jsx) reads — so navigation/refresh never flashes
+// the default theme. Scoped to the full-bleed export pages (they own the page bg);
+// embedded handoff cards theme themselves and leave the Nextra document alone.
+function applyThemeRoot(t) {
+  if (typeof document === 'undefined' || typeof location === 'undefined') return;
+  if (location.pathname.indexOf('export') < 0) return;
+  try {
+    const d = document.documentElement;
+    d.setAttribute('data-acf-theme', t);
+    d.style.colorScheme = t === 'light' ? 'light' : 'dark';
+    d.style.backgroundColor = STAGE_BG[t] || STAGE_BG.dark;
+  } catch (_) { /* noop */ }
+}
 const DEFAULT_SIMULATION_CONTEXT = { startingValue: 100000, horizon: '30y', withdrawalRate: 0.04, btcReserveAllocation: 0.15, monthlyDca: 500 };
 const parseMoney = (s) => { const n = Number(String(s).replace(/[^0-9.]/g, '')); return isFinite(n) ? n : NaN; };
 const clampMoney = (n) => Math.min(100000000, Math.max(1000, Math.round(n)));
@@ -394,6 +409,8 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   const [scrolled, setScrolled] = useState(false);            // sticky control bar gains a quiet surface only after scroll
   const [reduce, setReduce] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);            // header Personalize → full-width sheet on mobile
+  const [ready, setReady] = useState(false);                  // reveal once the persisted theme is applied (no default-theme flash)
+  const themeTimer = useRef(0);
   // Reader/Agency + Dark/Light are user PREFERENCES (not simulation data), so they
   // persist in localStorage across all handoff/export routes and refresh. Hydrate
   // after mount (SSR-safe; brief one-frame default before the stored choice applies).
@@ -440,6 +457,26 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
     m.addEventListener ? m.addEventListener('change', f) : m.addListener(f);
     return () => { m.removeEventListener ? m.removeEventListener('change', f) : m.removeListener(f); };
   }, []);
+  // keep the document attribute / colour-scheme / export bg in sync with the theme
+  // (runs on the post-mount hydrate and on every toggle) — unified source of truth.
+  useEffect(() => { applyThemeRoot(theme); }, [theme]);
+  // reveal after first paint: the hydrate effects (theme/view) run on mount, so by
+  // the next frame the persisted theme is applied — the default-theme frame is never
+  // seen. Doubles as a calm page-enter. Reduced motion = no fade (still no flash).
+  useEffect(() => { const id = requestAnimationFrame(() => setReady(true)); return () => cancelAnimationFrame(id); }, []);
+  useEffect(() => () => { clearTimeout(themeTimer.current); }, []);
+  // user toggles Light/Dark → crossfade the colour variables for a beat (CSS class
+  // on <html>), then snap back to instant so charts/tooltips carry no permanent
+  // transition cost. Reduced motion skips the fade. localStorage persist is elsewhere.
+  const chooseTheme = (t) => {
+    if (typeof document !== 'undefined' && !reduce) {
+      const d = document.documentElement;
+      d.classList.add('acf-theme-transitioning');
+      clearTimeout(themeTimer.current);
+      themeTimer.current = setTimeout(() => d.classList.remove('acf-theme-transitioning'), 360);
+    }
+    setTheme(t);
+  };
   const pal = getPalette(theme);
   const accent = getAccent(pal, accentName);
   const selBg = pal.name === 'light' ? 'rgba(14,140,102,0.20)' : 'rgba(16,185,129,0.32)';
@@ -452,9 +489,10 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
   const selVars = { '--acf-sel-bg': selBg, '--acf-sel-fg': pal.text1 };
   const padX = isExport ? 'clamp(16px, 4vw, 32px)' : 'clamp(16px, 3vw, 28px)';
   const centered = { maxWidth: isExport ? 1120 : 'none', margin: isExport ? '0 auto' : 0 };
+  const reveal = { opacity: ready ? 1 : 0, transition: reduce ? undefined : 'opacity 260ms cubic-bezier(0.2, 0.8, 0.2, 1)' };
   const outer = isExport
-    ? { ...selVars, background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', colorScheme: pal.name }
-    : { ...selVars, background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, margin: '8px 0 32px', colorScheme: pal.name };
+    ? { ...selVars, ...reveal, background: pal.stage, color: pal.text1, fontFamily: pal.sans, minHeight: '100vh', colorScheme: pal.name }
+    : { ...selVars, ...reveal, background: pal.stage, color: pal.text1, fontFamily: pal.sans, borderRadius: 10, margin: '8px 0 32px', colorScheme: pal.name };
 
   return (
     <div className="acf-chart-handoff" style={outer}>
@@ -463,7 +501,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
           Quiet — transparent at rest; translucent surface + blur + hairline fade in on scroll. */}
       <div style={{ position: 'sticky', top: 0, zIndex: 40, background: scrolled ? stickyBg : 'transparent', backdropFilter: scrolled ? 'saturate(140%) blur(10px)' : 'none', WebkitBackdropFilter: scrolled ? 'saturate(140%) blur(10px)' : 'none', borderBottom: `1px solid ${scrolled ? pal.cardBorder : 'transparent'}`, transition: reduce ? 'none' : 'background 220ms ease, border-color 220ms ease' }}>
         <div style={{ ...centered, padding: `10px ${padX}` }}>
-          <ControlBar pal={pal} accent={accent} theme={theme} setTheme={setTheme} view={view} setView={setView} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} extra={readerView ? <HeaderPersonalize pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} narrow={isNarrow} /> : null} />
+          <ControlBar pal={pal} accent={accent} theme={theme} setTheme={chooseTheme} view={view} setView={setView} variant={variant} part={part} shellRoute={preset.shellRoute} exportRoute={preset.exportRoute} extra={readerView ? <HeaderPersonalize pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} narrow={isNarrow} /> : null} />
         </div>
       </div>
       {/* page content — same max-width, page padding */}

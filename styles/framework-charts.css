@@ -43,6 +43,25 @@
 .acf-read-link:focus-visible::after { opacity: 0.85; }
 @media (prefers-reduced-motion: reduce) { .acf-read-link::after { transition: none; } }
 
+/* Fluid Light/Dark toggle — a brief colour crossfade, NOT a layout animation.
+ * `<html>` gets `.acf-theme-transitioning` only while a USER toggles theme (a beat,
+ * then removed), scoped to the handoff subtree so the docs chrome is untouched. The
+ * no-op properties (fill/stroke on non-SVG, bg/border on SVG) cost nothing — only
+ * the values that actually change animate. Off on the initial paint and reduced
+ * motion. Transforms/dimensions are never transitioned. */
+@media (prefers-reduced-motion: no-preference) {
+  html.acf-theme-transitioning .acf-chart-handoff,
+  html.acf-theme-transitioning .acf-chart-handoff * {
+    transition:
+      background-color 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      color 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-color 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      fill 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      stroke 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 300ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  }
+}
+
 /* Disclosure caret (brush chevron) — points right when closed, rotates to point
  * down when open. Native <details> uses [open]; React toggles set the transform
  * inline. Both share this transition and honor reduced motion. */
