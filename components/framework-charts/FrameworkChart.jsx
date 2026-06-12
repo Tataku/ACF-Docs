@@ -144,7 +144,7 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
   const [box, setBox] = useState({ w: 244, h: 0 });                            // measured for the pinned brush frame (no layout shift)
   useEffect(() => {
     const el = tipRef.current; if (!el || !isPin) return undefined;
-    const update = () => setBox({ w: el.offsetWidth, h: el.offsetHeight });
+    const update = () => setBox({ w: el.clientWidth, h: el.clientHeight });   // padding box — matches the inset:0 overlay 1:1
     update();
     const RO = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
     if (RO) RO.observe(el);
@@ -183,13 +183,17 @@ function TargetTooltip({ meta, kindLabel, accentTitle, xPct, yPct, isPin, pal, a
     <div ref={tipRef} role={isPin ? 'dialog' : undefined} aria-label={isPin ? meta.name : undefined} style={{
       position: 'absolute', left: 0, top: 0, zIndex: 8, width: 244,
       pointerEvents: isPin ? 'auto' : 'none', willChange: 'transform',
-      background: pal.cardSolid, border: `1px solid ${isPin ? `${accent}55` : pal.borderHi}`, borderRadius: 6,
+      background: pal.cardSolid, border: `1px solid ${isPin ? `${accent}66` : pal.borderHi}`, borderRadius: 6,
+      // pinned: clip to the rounded rect so the brush frame's outward waver is trimmed
+      // to a clean outer silhouette (architecture outside, brushwork inside). The
+      // box-shadow renders outside the box and is unaffected by overflow:hidden.
+      overflow: isPin ? 'hidden' : 'visible',
       boxShadow: pal.name === 'light' ? '0 6px 22px rgba(40,36,28,0.16)' : '0 8px 28px rgba(0,0,0,0.5)',
       padding: '11px 13px 12px', opacity: shown ? 1 : 0,
       transition: reduce ? 'opacity 120ms ease' : 'opacity 120ms cubic-bezier(0.2,0.7,0.2,1), border-color 200ms ease',
     }}>
-      {/* pinned = higher-commitment focus → a subtle brush frame (hover stays clean) */}
-      {isPin && <BrushFrame w={box.w} h={box.h} color={accent} opacity={pal.name === 'light' ? 0.55 : 0.72} />}
+      {/* pinned = higher-commitment focus → brush frame, clipped to the card silhouette (hover stays clean) */}
+      {isPin && <BrushFrame w={box.w} h={box.h} color={accent} opacity={pal.name === 'light' ? 0.62 : 0.8} />}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
         <span style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: accentTitle ? accent : pal.text4 }}>
           {kindLabel}{isPin && <span style={{ color: accent, marginLeft: 6 }}>· PINNED</span>}
