@@ -54,7 +54,7 @@ export function BrushChevron({ size = 12, dir = 'right', seed = 7 }) {
 export function BrushFrame({ w, h, color, opacity = 0.7, seed = 17 }) {
   if (!w || !h) return null;
   const i = 1.0;                                       // straddle the edge; the card's clip trims the outer half flush
-  const o = { weight: 1.7, intensity: 0.55, taperEnds: false, waver: 0.12 };
+  const o = { weight: 1.5, intensity: 0.55, taperEnds: false, waver: 0.12 };
   const d = Brush.brushSegment(0, i, w, i, { seed, ...o })                 // top
     + Brush.brushSegment(w - i, 0, w - i, h, { seed: seed + 5, ...o })     // right
     + Brush.brushSegment(w, h - i, 0, h - i, { seed: seed + 10, ...o })    // bottom

@@ -32,6 +32,17 @@
 @keyframes acf-ink-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .acf-brush-frame { animation: none; } }
 
+/* Pinned-tooltip READ action — framework-native (label + brush chevron), no box.
+ * A faint accent underline at rest brightens on hover/focus; never a button. */
+.acf-read-link { position: relative; }
+.acf-read-link::after {
+  content: ''; position: absolute; left: 0; bottom: -1px; width: 100%; height: 1px;
+  background: currentColor; opacity: 0.35; transition: opacity 170ms ease;
+}
+.acf-read-link:hover::after,
+.acf-read-link:focus-visible::after { opacity: 0.85; }
+@media (prefers-reduced-motion: reduce) { .acf-read-link::after { transition: none; } }
+
 /* Disclosure caret (brush chevron) — points right when closed, rotates to point
  * down when open. Native <details> uses [open]; React toggles set the transform
  * inline. Both share this transition and honor reduced motion. */
