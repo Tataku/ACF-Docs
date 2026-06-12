@@ -32,6 +32,14 @@
 .acf-chart-handoff details[open] > summary .acf-cv { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .acf-chart-handoff .acf-cv { transition: none; } }
 
+/* Reader hero: title + "how to read" on the left, the optional simulation
+ * controls in a subtle container on the right. Single column on narrow screens
+ * (the panel drops below the title); two columns once there's room. */
+.acf-hero { display: grid; grid-template-columns: 1fr; gap: 20px 36px; align-items: start; margin-bottom: 6px; }
+@media (min-width: 880px) {
+  .acf-hero { grid-template-columns: minmax(0, 1fr) clamp(258px, 30%, 320px); }
+}
+
 /* Data-mode marker (chart header): quiet hover/focus explanation popover. The
  * durable explanation also lives in the collapsed Details — this is the at-a-glance
  * affordance, keyboard-reachable (focus), not hover-only. Theme colors are inline;

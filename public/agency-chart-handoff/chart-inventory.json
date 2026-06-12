@@ -1882,37 +1882,37 @@
       "layout": "scenario",
       "dataMode": "simulation",
       "claimLabel": "CONTROL · INTERACTIVE",
-      "primaryClaim": "Exposure can win one cycle; control is what survives many",
-      "visualProof": "All three strategy paths drawn together, plus an across-all-paths robustness strip",
-      "readerAction": "Pick a path, then stress it",
-      "readerTakeaway": "Max exposure wins the clean bull case; the framework wins the messy path — balancing upside, capacity, and emotional control.",
+      "primaryClaim": "Exposure is not control; the framework is the posture that stays usable when reality hits",
+      "visualProof": "Three posture lanes through a shock zone — break vs bend vs barely-flinch — plus a survival readout",
+      "readerAction": "Pick a posture, then stress it",
+      "readerTakeaway": "The strategy that survives behaviorally is the strategy that can compound.",
       "experienceRole": "comparison",
       "storyBeats": [
         {
           "kind": "context",
-          "label": "Three strategy paths drawn together through a drawdown",
+          "label": "Three postures enter a shock tunnel as three lanes",
           "timing": "early"
         },
         {
           "kind": "mechanism",
-          "label": "Capacity and decision strain separate them",
+          "label": "The same shock hits all three; each lane breaks, bends, or barely flinches",
           "timing": "middle"
         },
         {
           "kind": "action",
-          "label": "Choose a strategy, then change the shock",
+          "label": "Choose a posture, then change the shock and watch what happens to it",
           "timing": "middle"
         },
         {
           "kind": "consequence",
-          "label": "No line wins every path; the framework holds the tightest band",
+          "label": "Max breaks, stress drags, the framework stays usable — the survivable posture",
           "timing": "late"
         }
       ],
       "interaction": {
         "type": "scenario",
         "gesture": "choose",
-        "conceptMatch": "Selecting a strategy and a shock redraws the emphasised path and its control read-outs"
+        "conceptMatch": "Selecting a posture and a shock re-shapes the three lanes through the shock zone and updates the survival readout"
       },
       "motionProfile": {
         "type": "scenarioUpdate",
@@ -1932,7 +1932,7 @@
         "chartHeight": "tall",
         "note": "Stack the strategy + shock controls; keep stat read-outs below the chart."
       },
-      "tryThis": "Switch the shock and watch the control score",
+      "tryThis": "Change the shock and watch which posture stays usable.",
       "tryThisMobile": "Tap a strategy or shock, then compare the paths",
       "readerContext": {
         "kind": "scenario-scale",
