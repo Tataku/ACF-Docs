@@ -1181,11 +1181,11 @@
       "part": "part-2",
       "status": "needs-design-review",
       "wiredPublic": false,
-      "layout": "systemLoop",
+      "layout": "feedbackLoop",
       "dataMode": "conceptual",
       "claimLabel": "REFLEXIVITY · FEEDBACK",
       "primaryClaim": "Prices do not only reflect fundamentals; they can change fundamentals.",
-      "visualProof": "Reflexive loop of price, capital, fundamentals, and validation.",
+      "visualProof": "Two-lane reflexivity diagram: a reinforcing loop and its reversal across price, capital, fundamentals, validation.",
       "readerAction": null,
       "readerTakeaway": "Price is an input, not just an output.",
       "experienceRole": "diagram",
@@ -1241,7 +1241,7 @@
           "url": "/part-2-lineage-macro-thesis"
         }
       ],
-      "agencyNotes": "Loop layout, 4 nodes. Reversal path is conceptual (explainer) rather than a second drawn ring, to keep it quiet."
+      "agencyNotes": "feedbackLoop layout (additive primitive; NOT the systemLoop ring, which is reserved for true circular systems). Two lanes share one mechanism — reinforcing (accent, arrows thicken) and reversing (stress, arrows thin) — each looping back to price. Teaches reflexivity as causal feedback, two directions, at a glance."
     },
     {
       "chartId": "p2-time-changes-prudence",

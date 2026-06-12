@@ -151,7 +151,8 @@ The chart system has its own layered explanation model: the custom **tooltip** (
 The reader should never feel the browser default. Selection, navigation, and small controls are all part of the same calm framework system.
 
 - **Theme-aware selection.** Selecting reader text uses the framework accent, not the browser gray/blue. Per-theme CSS vars (`--acf-sel-bg` / `--acf-sel-fg`) are set inline on the `.acf-chart-handoff` root from the palette; `::selection` + `::-moz-selection` consume them. Soft green wash, theme text colour, legibility preserved — visible, not neon.
-- **Sticky reader controls.** The `ControlBar` is `position: sticky; top: 0` so PART / VIEW / THEME / Options stay reachable while scrolling. The sticky layer is **quiet**: padding is constant (no layout shift, so it can't jitter); a translucent surface + `backdrop-filter` blur + a 1px hairline **fade in only after scroll** (rAF-throttled `scrolled` state, reduced-motion aware), and clear again at the top so the hero reads clean. No heavy shadow, no big background block. It sits above charts (`z-index` 40) without covering the below-chart explainer rail.
+- **Sticky reader controls = document chrome, not a dashboard toolbar.** The `ControlBar` is `position: sticky; top: 0` so PART / VIEW / THEME / Options / Personalize stay reachable while scrolling. The sticky **wrapper spans the full viewport width** (the surface + hairline reach the edges — no clipped, floating content-width strip); the **inner content is page-aligned** to the same max-width + horizontal padding as the body. It's **quiet**: padding is constant (no layout shift → can't jitter); transparent at rest, with a translucent surface + `backdrop-filter` blur + a 1px hairline that **fade in only after scroll** (rAF-throttled `scrolled` state, reduced-motion aware) and clear again at the top so the hero reads clean. No heavy shadow, no big background block; `z-index` 40, above charts but never covering the below-chart explainer rail.
+- **Assumptions reachable while scrolling.** Reader simulation context lives in a **Personalize** dropdown *in* the sticky header (brush-chevron trigger; closes on outside-click + Escape — the affordance native `<details>` lacks; a full-width sheet on mobile so it can't overflow). It and the hero Simulation Context bar are **the same `readerCtx` (one source of truth, same sessionStorage)** — change one, both update live, every disclosing chart re-scales. The hero bar stays as the first-view intro. Caveat copy unchanged: *used only to scale illustrative examples — not forecasts*.
 - **Framework-native icons.** Small controls use the brush-stroke icon pack (`icons.jsx`: `BrushX`, `BrushChevron`, `BrushCheck`) — the same `Brush.brushSegment` ink as the in-chart `scoreCheck`/`scoreFail` glyphs, `currentColor`, no icon library or Unicode glyphs. The pinned-tooltip **close** is a **borderless** brush ✕ (`.acf-icon-btn`, quiet opacity hover, `.acf-fx-focusable` ring, `aria-label="Unpin"`, no `title`); disclosure carets (Details, Options, Advanced assumptions) and the mobile/desktop-rail steppers are brush chevrons. Editorial prose arrows (`READ →`, `CLAIM → PICTURE → EXPLORE`) stay as text — icons are for controls, not copy.
 
 ### Bespoke interaction polish
@@ -194,7 +195,14 @@ The handoff pages are now a **shareable guided visual essay**, not an internal c
 For an **introductory** chart, do not show the entire control system. Show the **smallest loop that teaches the mental model**: `thesis → exposure → risk → tripwire → adjustment → updated thesis`. Advanced mechanics (the full watch / hedge / trim / redeploy menu, the tripwire taxonomy, multi-branch decision trees) belong in **details** or later product docs, not in the entry exhibit.
 
 - The `governanceLoop` primitive is the calm, beginner form of this: a left-to-right guarded path with **one governing checkpoint** (the tripwire — a quiet gate, never a red alarm) and a **subtle return arc** carrying evidence back to the thesis. It must read at a glance **without interaction**; hover / pin / tap only add the "why."
-- Reserve the `systemLoop` ring for charts whose concept genuinely *is* a reflexive feedback orbit (e.g. *Markets Feed Back*). An entry document teaches purpose before machinery — teach the smallest useful loop first.
+- An entry document teaches purpose before machinery — teach the smallest useful loop first.
+
+### Feedback diagrams (don't decorate causal feedback)
+
+When the concept is **causal feedback** — an input changes behaviour, behaviour changes fundamentals, fundamentals validate or reverse the input — do **not** reach for a decorative orbit. Use the smallest structure that teaches `input → behaviour → fundamentals → validation/reversal → feedback`, and if the point is that the *same mechanism runs two ways*, show **two lanes**, not one spinning ring.
+
+- The `feedbackLoop` primitive does exactly this for **Markets Feed Back** (reflexivity): two left-to-right lanes — **reinforcing** (accent, arrows thicken, loops back stronger) and **reversing** (stress, arrows thin/break, loops back weaker) — sharing one labelled mechanism (price → capital → fundamentals → validation), each with a return arc and a quiet "REFLEXIVITY" between them. It reads in ~3s without interaction; hover/pin adds the why per stage.
+- **Orbital loops (`systemLoop`) are now reserved** for concepts where *circularity itself* is the whole story. `feedbackLoop` and `governanceLoop` are additive primitives — switching a chart to one **does not touch** `SystemLoopSvg`, so any future true-ring chart still has it.
 
 ### Scenario charts — don't reward perfect hindsight
 
@@ -287,7 +295,7 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 | `p2-method-before-macro` | Method Before Macro | dual | conceptual |
 | `p2-ruin-comes-first` | Ruin Comes First | single | conceptual |
 | `p2-conviction-needs-exit` | Conviction Needs an Exit | single | conceptual |
-| `p2-markets-feed-back` | Markets Feed Back | systemLoop | conceptual |
+| `p2-markets-feed-back` | Markets Feed Back | feedbackLoop | conceptual |
 | `p2-time-changes-prudence` | Time Changes Prudence | single | simulation |
 | `p2-capital-finds-bottleneck` | Capital Finds the Bottleneck | bridge | conceptual |
 | `p2-narrative-not-thesis` | Narrative Is Not Thesis | gate | conceptual |
@@ -334,7 +342,8 @@ Two families, one engine:
 
 - **Data charts** — `single` (time series, payoff, distribution), `dual` (stacked panels), `quadrant` (growth × inflation regime map).
 - **Framework diagrams** (bespoke, brush-influenced, not flowcharts):
-  - `systemLoop` — reflexive / self-reinforcing feedback ring with a reversal cue (e.g. *Markets Feed Back*).
+  - `systemLoop` — reflexive self-reinforcing **ring** with a reversal cue. **Reserved** for concepts where circularity itself is the story; no spec currently uses it (kept available for a future true-ring chart).
+  - `feedbackLoop` — causal feedback as **two lanes**: reinforcing (accent, arrows thicken) and reversing (stress, arrows thin), sharing one labelled mechanism (price → capital → fundamentals → validation), each looping back, with a quiet "REFLEXIVITY" between them (e.g. *Markets Feed Back*). Teaches "same mechanism, two directions" at a glance — not a decorative orbit.
   - `governanceLoop` — beginner governed path: a calm left-to-right `thesis → exposure → risk → tripwire → adjust` with one quiet checkpoint (the tripwire gate) and a subtle return arc (*evidence updates the thesis*). Reads at a glance without interaction (e.g. *Govern the Thesis*). Deliberately **not** an orbit.
   - `bridge` — descending cascade where each stage transforms the prior until the thesis becomes investable (e.g. *Capital Finds the Bottleneck*).
   - `gate` — a sober validation gauntlet; a survivor band thins through four gates into a thesis (e.g. *Narrative Is Not Thesis*).
