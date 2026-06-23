@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Part 1 in Pictures &middot; The Adaptive Convexity Framework</title>
+  <meta name="description" content="Foundation &amp; Philosophy as a visual essay: seven chart exhibits, each making one claim.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="reading-system.css">
+</head>
+<body>
+  <main>
+    <header class="pictures-head">
+      <div class="pictures-top">
+        <a class="doc-breadcrumb" href="part-1-foundation.html">Part 1 &middot; Foundation &amp; Philosophy</a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="doc-kicker">Part 1 &middot; A visual essay &middot; 7 exhibits</p>
+      <h1 class="doc-title">Foundation in Pictures</h1>
+      <p class="pictures-lede">Each chart makes one claim and shows the mechanism. Hover, tap, or pin for the deeper explanation; sources sit behind each Details toggle.</p>
+    </header>
+
+<figure class="exhibit" data-wide id="exhibit-s1" data-chart="S1" data-mode="conceptual">
+      <header class="ex-head">
+        <p class="ex-eyebrow"><span class="ex-idx">S1</span> &middot; Payoff shape &middot; Signature
+          <span class="ex-mode" aria-label="Conceptual exhibit. Illustrative framework diagram, not historical data.">&#9676;</span></p>
+        <h3 class="ex-title">Shape the Payoff</h3>
+        <p class="ex-sub">The payoff shape the whole framework is built to produce</p>
+      </header>
+      <div class="ex-plot">
+        <svg viewBox="0 0 760 420" role="img" aria-labelledby="exs1-t exs1-d">
+          <title id="exs1-t">Shape the Payoff</title>
+          <desc id="exs1-d">A conceptual payoff curve with a capped left side and a free right side, above a symmetric reference line.</desc>
+          <line class="cx-grid" x1="70" y1="370" x2="710" y2="370"/>
+          <line class="cx-grid" x1="380" y1="60" x2="380" y2="370"/>
+          <path class="cx-line2" d="M110 318 L660 96"/>
+          <path class="cx-areaq" d="M110 252 L380 244 L110 318 Z" opacity=".5"/>
+          <path class="cx-thesis" pathLength="1" d="M110 252 C 230 252, 320 248, 380 238 C 470 222, 570 158, 660 56"/>
+          <circle class="cx-dotq" cx="110" cy="252" r="3.5"/>
+          <circle class="cx-dot" cx="660" cy="56" r="4"/>
+          <text class="cx-lbl cx-build" x="118" y="234">downside capped</text>
+          <text class="cx-lbl cx-lbl--a cx-build" x="440" y="48">upside left free to run</text>
+          <text class="cx-lbl cx-build" x="510" y="140" text-anchor="end" opacity=".8">symmetric reference</text>
+          <text class="cx-lbl cx-lbl--up" x="110" y="398">Adverse outcome</text>
+          <text class="cx-lbl cx-lbl--up" x="362" y="398">Base</text>
+          <text class="cx-lbl cx-lbl--up" x="548" y="398">Favourable outcome</text>
+          <circle class="cx-hit" cx="110" cy="252" r="16" tabindex="0" data-tip-name="Left tail" data-tip="The adverse side is structurally capped. Losses are bounded by design, not by forecast accuracy."/>
+          <circle class="cx-hit" cx="380" cy="240" r="16" tabindex="0" data-tip-name="Base case" data-tip="Near the base case the framework gives up little against a symmetric position."/>
+          <circle class="cx-hit" cx="660" cy="56" r="16" tabindex="0" data-tip-name="Right tail" data-tip="The favourable side is left open. Occasional large outcomes do the compounding work."/>
+        </svg>
+      </div>
+      <div class="ex-explain">
+        <p class="ex-claim">ACF shapes exposure: the left side is capped, the right side is left free to run.</p>
+          <p class="ex-body">A symmetric position gives back on the left what it makes on the right. ACF caps the downside and keeps the upside open, so being roughly right occasionally still compounds. The whole system exists to defend that shape.</p>
+        <p class="ex-takeaway">Survive the left tail; stay convex on the right tail.</p>
+      </div>
+      <footer class="ex-foot">
+        <p class="ex-disclosure">Conceptual diagram &middot; Illustrative framework exhibit, not historical data</p>
+        <details class="ex-details">
+          <summary>Details, sources &amp; methodology</summary>
+          <ul class="ex-sources">
+            <li><span class="src-role">verifies-concept</span>ACF &middot; Part 1 &middot; Survivable compounding under uncertainty</li>
+            <li><span class="src-role">verifies-concept</span>ACF &middot; Part 6 &middot; Convexity Integrity Score</li>
+          </ul>
+        </details>
+      </footer>
+    </figure>
+
+<figure class="exhibit" data-wide id="exhibit-01" data-chart="01" data-mode="representative">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">01</span> &middot; Diversification &middot; Fragility
+            <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
+          <h3 class="ex-title">The Hedge Broke</h3>
+          <p class="ex-sub">Stocks, bonds, and the 60/40 blend indexed together through an inflation shock</p>
+        </header>
+        <div class="ex-plot">
+          <svg viewBox="0 0 760 420" role="img" aria-labelledby="ex01-t ex01-d">
+            <title id="ex01-t">The Hedge Broke</title>
+            <desc id="ex01-d">Indexed total return: stocks, bonds, and the 60/40 blend all decline together through the inflation shock; the bonds line falls with the stocks line.</desc>
+            <path class="cx-fieldw" d="M300 130 C 380 112, 470 116, 540 138 C 590 154, 606 212, 592 274 C 578 338, 520 380, 446 376 C 372 372, 312 324, 304 252 C 299 204, 292 158, 300 130 Z"/>
+            <line class="cx-base" x1="70" y1="120" x2="710" y2="120"/>
+            <text class="cx-lbl" x="74" y="110">base = 100</text>
+            <path class="cx-line" d="M90 122 L165 132 L240 152 L315 196 L390 252 L465 288 L540 270 L615 242 L690 218"/>
+            <path class="cx-line2" d="M90 121 L165 127 L240 140 L315 170 L390 205 L465 232 L540 244 L615 248 L690 252"/>
+            <path class="cx-thesis" pathLength="1" d="M90 121 L165 130 L240 147 L315 186 L390 233 L465 266 L540 260 L615 244 L690 232"/>
+            <text class="cx-lbl cx-build" x="300" y="92">inflation shock &middot; pressure enters the system</text>
+            <text class="cx-lbl cx-build" x="310" y="330" opacity=".85">hedge fails &middot; bonds fall with stocks</text>
+            <text class="cx-lbl cx-build" x="698" y="222" opacity=".8">stocks</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="698" y="237">60/40</text>
+            <text class="cx-lbl cx-build" x="698" y="257" opacity=".8">bonds</text>
+            <circle class="cx-hit" cx="390" cy="233" r="16" tabindex="0" data-tip-name="The shock" data-tip="Inflation repriced both assets at once. The blend had nowhere to hide. &middot; representative"/>
+            <circle class="cx-hit" cx="490" cy="237" r="14" tabindex="0" data-tip-name="Bonds" data-tip="The hedge fell with the risk: bonds drew down alongside equities instead of offsetting them. &middot; representative"/>
+            <circle class="cx-hit" cx="540" cy="260" r="14" tabindex="0" data-tip-name="60/40 blend" data-tip="The prudent blend declined more than 16 percent across the year. &middot; representative"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">Stocks and bonds are not always true diversifiers.</p>
+          <p class="ex-body">Indexed through the inflation shock, the bonds line falls with the stocks line, and the 60/40 blend falls with both. The diversification assumption failed exactly when it was needed.</p>
+          <p class="ex-takeaway">When inflation drives the regime, the hedge can fall with the risk.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative framework exhibit &middot; Sources support the underlying concept</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+            <ul class="ex-sources">
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/SP500" target="_blank" rel="noopener noreferrer">FRED &middot; S&amp;P 500 total return</a></li>
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/BAMLCC0A0CMTRIV" target="_blank" rel="noopener noreferrer">FRED &middot; Bloomberg US Aggregate total return (ICE proxy)</a></li>
+              <li><span class="src-role">methodology</span>Author calculation &middot; 60/40 blend, monthly rebalance</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+<!-- EXHIBIT 02 · the stock-bond diversifier is regime-dependent -->
+      <figure class="exhibit" data-wide id="exhibit-02" data-chart="02" data-mode="representative">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">02</span> &middot; Correlation &middot; Regime
+            <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
+          <h3 class="ex-title">Correlation Turns</h3>
+          <p class="ex-sub">A rolling stock&ndash;bond correlation crossing from negative to positive through an inflation shock</p>
+        </header>
+        <div class="ex-plot">
+          <svg viewBox="0 0 760 420" role="img" aria-labelledby="ex02-t ex02-d">
+            <title id="ex02-t">Correlation Turns</title>
+            <desc id="ex02-d">A rolling correlation line sits below zero for years, then crosses to positive as inflation becomes the dominant stress.</desc>
+            <path class="cx-fieldw" d="M340 70 C 420 56, 520 60, 600 84 C 650 102, 660 150, 640 210 C 620 280, 540 330, 460 322 C 380 314, 330 250, 332 180 C 333 130, 330 92, 340 70 Z"/>
+            <line class="cx-base" x1="70" y1="210" x2="710" y2="210"/>
+            <text class="cx-lbl" x="688" y="204">0</text>
+            <text class="cx-lbl" x="684" y="82">+1</text>
+            <text class="cx-lbl" x="682" y="364">&#8722;1</text>
+            <path class="cx-thesis" pathLength="1" d="M90 290 C 130 302, 170 304, 210 296 C 260 286, 300 272, 340 254 C 390 232, 420 214, 450 196 C 490 172, 540 140, 590 118 C 626 104, 648 98, 660 94"/>
+            <circle class="cx-dot" cx="433" cy="210" r="4"/>
+            <text class="cx-lbl cx-build" x="96" y="330">negative &middot; the hedge regime</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="450" y="70">positive &middot; bonds move with stocks</text>
+            <text class="cx-lbl cx-build" x="350" y="352" opacity=".8">inflation becomes the dominant stress</text>
+            <circle class="cx-hit" cx="180" cy="300" r="16" tabindex="0" data-tip-name="The hedge regime" data-tip="Decades of disinflation kept stock and bond returns negatively correlated: bonds cushioned equity drawdowns. &middot; representative"/>
+            <circle class="cx-hit" cx="433" cy="210" r="16" tabindex="0" data-tip-name="The crossing" data-tip="When inflation becomes the dominant stress, both assets reprice off the same discount rate. The correlation crosses zero. &middot; representative"/>
+            <circle class="cx-hit" cx="630" cy="102" r="16" tabindex="0" data-tip-name="Positive regime" data-tip="Sustained positive correlation: the diversifier now moves with the risk it was meant to offset. &middot; representative"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">Stock&ndash;bond correlation changes when inflation becomes the dominant stress.</p>
+          <p class="ex-body">The negative correlation that made 60/40 work was a property of the disinflationary regime, not a law of markets. Under inflation stress both assets fall together.</p>
+          <p class="ex-takeaway">The diversifier did not disappear. The regime that produced it did.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative framework exhibit &middot; Sources support the underlying concept</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+            <ul class="ex-sources">
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/SP500" target="_blank" rel="noopener noreferrer">FRED &middot; S&amp;P 500 total return</a></li>
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/BAMLCC0A0CMTRIV" target="_blank" rel="noopener noreferrer">FRED &middot; Bloomberg US Aggregate total return (ICE proxy)</a></li>
+              <li><span class="src-role">methodology</span>Author calculation &middot; Rolling 24-month Pearson correlation</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+<!-- EXHIBIT 03 · CPI vs the assets that store capital -->
+      <figure class="exhibit" data-wide id="exhibit-03" data-chart="03" data-mode="representative">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">03</span> &middot; Inflation &middot; Measurement
+            <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
+          <h3 class="ex-title">Inflation Was Bigger</h3>
+          <p class="ex-sub">Assets vs CPI as indexed lines; the widening gap between them is the claim</p>
+        </header>
+        <div class="ex-plot">
+          <svg viewBox="0 0 760 420" role="img" aria-labelledby="ex03-t ex03-d">
+            <title id="ex03-t">Inflation Was Bigger</title>
+            <desc id="ex03-d">CPI and a broad-asset blend indexed together; the asset line pulls far above CPI and the shaded gap between them widens.</desc>
+            <line class="cx-base" x1="70" y1="340" x2="710" y2="340"/>
+            <text class="cx-lbl" x="74" y="330">base = 100</text>
+            <path class="cx-field" d="M90 340 L190 322 L290 296 L390 258 L490 208 L590 148 L690 84 L690 262 L590 272 L490 284 L390 296 L290 312 L190 326 L90 340 Z"/>
+            <path class="cx-line" d="M90 340 L190 326 L290 312 L390 296 L490 284 L590 272 L690 262"/>
+            <path class="cx-thesis" pathLength="1" d="M90 340 L190 322 L290 296 L390 258 L490 208 L590 148 L690 84"/>
+            <text class="cx-lbl cx-lbl--a cx-build" x="700" y="64" text-anchor="end">assets that store capital</text>
+            <text class="cx-lbl cx-build" x="664" y="290" opacity=".85">CPI</text>
+            <text class="cx-lbl cx-build" x="450" y="258" opacity=".8">the gap is the claim</text>
+            <circle class="cx-hit" cx="390" cy="296" r="16" tabindex="0" data-tip-name="CPI" data-tip="Consumer prices roughly doubled over the period. Real, but only part of the story. &middot; representative"/>
+            <circle class="cx-hit" cx="490" cy="208" r="16" tabindex="0" data-tip-name="Broad assets" data-tip="Equity, housing, and gold blended: the assets that store capital repriced far beyond CPI. &middot; representative"/>
+            <circle class="cx-hit" cx="640" cy="180" r="16" tabindex="0" data-tip-name="The gap" data-tip="The distance between the lines is monetary inflation that CPI never measured. &middot; representative"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">CPI alone does not capture the full inflation story.</p>
+          <p class="ex-body">Indexed from the same base, consumer prices grind upward while the assets that store capital reprice several times over. The widening gap is the inflation that portfolios actually had to outrun.</p>
+          <p class="ex-takeaway">Consumer prices roughly doubled. The assets that store capital did far more.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative framework exhibit &middot; Sources support the underlying concept</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+            <ul class="ex-sources">
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/CPIAUCSL" target="_blank" rel="noopener noreferrer">FRED (BLS) &middot; CPI-U, all items</a></li>
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/CSUSHPINSA" target="_blank" rel="noopener noreferrer">FRED (S&amp;P) &middot; Case-Shiller US National Home Price Index</a></li>
+              <li><span class="src-role">methodology</span>Author calculation &middot; Broad-asset blend (equity + housing + gold)</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+<!-- EXHIBIT 04 · fiscal dominance: the hidden interest cost -->
+      <figure class="exhibit" data-wide id="exhibit-04" data-chart="04" data-mode="representative" data-wide>
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">04</span> &middot; Policy &middot; Constraint
+            <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
+          <h3 class="ex-title">The Bill Came Due</h3>
+          <p class="ex-sub">The same debt backdrop in both states; the interest cost is revealed beneath it</p>
+        </header>
+        <div class="ex-plot">
+          <svg class="cx-tall" viewBox="0 0 760 480" role="img" aria-labelledby="ex04-t ex04-d">
+            <title id="ex04-t">The Bill Came Due</title>
+            <desc id="ex04-d">Federal debt to GDP rises for decades while falling rates hide the interest cost; beneath the same backdrop, the interest burden inflects upward once rates normalize.</desc>
+            <text class="cx-lbl cx-lbl--up" x="90" y="52">Surface</text>
+            <text class="cx-lbl cx-lbl--up cx-lbl--a" x="560" y="52">Hidden cost</text>
+            <line class="cx-divider" x1="390" y1="40" x2="390" y2="446"/>
+            <line class="cx-grid" x1="70" y1="300" x2="710" y2="300"/>
+            <path class="cx-areaq" d="M90 262 L190 252 L290 232 L390 212 L490 178 L590 138 L690 96 L690 300 L90 300 Z"/>
+            <text class="cx-lbl cx-build" x="96" y="244">debt / GDP &middot; rising for decades</text>
+            <line class="cx-grid" x1="70" y1="446" x2="710" y2="446"/>
+            <path class="cx-warn" d="M90 428 L240 426 L390 422" opacity=".45"/>
+            <path class="cx-thesis" pathLength="1" d="M390 422 L470 416 C 530 410, 580 394, 630 370 L690 342"/>
+            <line class="cx-base" x1="390" y1="378" x2="710" y2="378"/>
+            <text class="cx-lbl cx-build" x="402" y="368">burden threshold</text>
+            <text class="cx-lbl cx-build" x="96" y="410">interest cost &middot; faint while rates fall</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="528" y="326">the cost is no longer hidden</text>
+            <circle class="cx-hit" cx="240" cy="426" r="16" tabindex="0" data-tip-name="Falling-rate decades" data-tip="Debt compounds, but each refinance is cheaper. The carrying cost stays flat and politically invisible. &middot; representative"/>
+            <circle class="cx-hit" cx="630" cy="370" r="16" tabindex="0" data-tip-name="Normalized rates" data-tip="The same debt stock at normal rates: the interest burden inflects and crosses the threshold where it competes with policy goals. &middot; representative"/>
+            <circle class="cx-hit" cx="590" cy="138" r="16" tabindex="0" data-tip-name="Debt / GDP" data-tip="The backdrop never changed across the divider. The cost was always beneath it. &middot; representative"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">Debt rose for decades while falling rates hid the cost.</p>
+          <p class="ex-body">One backdrop, two readings. On the surface, debt to GDP grinds upward while the carrying cost stays faint. Beneath the same backdrop, normalized rates reveal the interest burden inflecting toward a structural constraint on policy.</p>
+          <p class="ex-takeaway">For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative framework exhibit &middot; Sources support the underlying concept</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+            <ul class="ex-sources">
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/FYGFGDQ188S" target="_blank" rel="noopener noreferrer">FRED &middot; Federal debt held by the public / GDP</a></li>
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/A091RC1Q027SBEA" target="_blank" rel="noopener noreferrer">BEA (via FRED) &middot; Federal net interest outlays</a></li>
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/GDP" target="_blank" rel="noopener noreferrer">FRED &middot; Gross domestic product (denominator)</a></li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+<figure class="exhibit" data-wide id="exhibit-05" data-chart="05" data-mode="simulation">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">05</span> &middot; Path dependency &middot; Withdrawals
+            <span class="ex-mode" aria-label="Representative simulation. Built to show path dependency, not a historical backtest.">&#9671;</span></p>
+          <h3 class="ex-title">Path Changes Everything</h3>
+          <p class="ex-sub">One shared return deck, two orders; both portfolio paths are generated from those exact returns</p>
+        </header>
+        <div class="ex-plot">
+          <svg class="cx-tall" viewBox="0 0 760 540" role="img" aria-labelledby="ex05-t ex05-d">
+            <title id="ex05-t">Path Changes Everything</title>
+            <desc id="ex05-d">The same ten annual returns shown in two orders drive two withdrawal portfolios: the good-order path survives, the bad-order path slides to the depletion line.</desc>
+            <text class="cx-lbl cx-lbl--up" x="90" y="54">The return deck &middot; same ten returns</text>
+            <text class="cx-lbl" x="90" y="86">good order</text>
+            <g>
+              <rect class="cx-blockp" x="170" y="66" width="40" height="26" rx="2"/><rect class="cx-blockp" x="220" y="70" width="40" height="22" rx="2"/><rect class="cx-blockp" x="270" y="73" width="40" height="19" rx="2"/><rect class="cx-blockp" x="320" y="76" width="40" height="16" rx="2"/><rect class="cx-blockp" x="370" y="79" width="40" height="13" rx="2"/><rect class="cx-blockn" x="420" y="80" width="40" height="12" rx="2"/><rect class="cx-blockn" x="470" y="77" width="40" height="15" rx="2"/><rect class="cx-blockn" x="520" y="73" width="40" height="19" rx="2"/><rect class="cx-blockn" x="570" y="69" width="40" height="23" rx="2"/><rect class="cx-blockn" x="620" y="64" width="40" height="28" rx="2"/>
+            </g>
+            <text class="cx-lbl" x="90" y="128">bad order</text>
+            <g>
+              <rect class="cx-blockn" x="170" y="106" width="40" height="28" rx="2"/><rect class="cx-blockn" x="220" y="111" width="40" height="23" rx="2"/><rect class="cx-blockn" x="270" y="115" width="40" height="19" rx="2"/><rect class="cx-blockn" x="320" y="119" width="40" height="15" rx="2"/><rect class="cx-blockn" x="370" y="122" width="40" height="12" rx="2"/><rect class="cx-blockp" x="420" y="121" width="40" height="13" rx="2"/><rect class="cx-blockp" x="470" y="118" width="40" height="16" rx="2"/><rect class="cx-blockp" x="520" y="115" width="40" height="19" rx="2"/><rect class="cx-blockp" x="570" y="112" width="40" height="22" rx="2"/><rect class="cx-blockp" x="620" y="108" width="40" height="26" rx="2"/>
+            </g>
+            <text class="cx-lbl cx-build" x="170" y="156" opacity=".8">same blocks, reversed &middot; green = positive year, gray = negative year</text>
+            <line class="cx-grid" x1="70" y1="186" x2="710" y2="186" opacity=".5"/>
+            <text class="cx-lbl" x="74" y="208">start = 100 &middot; level withdrawals every year</text>
+            <path class="cx-thesis" pathLength="1" d="M90 286 L150 255 L210 236 L270 224 L330 220 L390 226 L450 248 L510 293 L570 338 L630 386 L690 396"/>
+            <path class="cx-warn" d="M90 286 L150 359 L210 403 L270 434 L330 456 L390 474 L450 487 L510 499 L570 510 L630 521 L690 526"/>
+            <g class="cx-tickw" opacity=".7">
+              <line x1="150" y1="359" x2="150" y2="368"/><line x1="270" y1="434" x2="270" y2="443"/><line x1="390" y1="474" x2="390" y2="483"/><line x1="510" y1="499" x2="510" y2="508"/>
+              <line x1="150" y1="255" x2="150" y2="264"/><line x1="270" y1="224" x2="270" y2="233"/><line x1="390" y1="226" x2="390" y2="235"/><line x1="510" y1="293" x2="510" y2="302"/>
+            </g>
+            <line class="cx-base" x1="70" y1="528" x2="710" y2="528"/>
+            <text class="cx-lbl" x="74" y="520" opacity=".85">depletion</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="692" y="424" text-anchor="end">good order &middot; survives</text>
+            <text class="cx-lbl cx-build" x="420" y="464" opacity=".9">bad order &middot; depleted</text>
+            <circle class="cx-dotq" cx="690" cy="526" r="4"/>
+            <circle class="cx-dot" cx="690" cy="396" r="4"/>
+            <circle class="cx-hit" cx="330" cy="220" r="16" tabindex="0" data-tip-name="Good order" data-tip="Strong years arrive before the withdrawals bite. The base compounds first, then funds the drawdowns. &middot; representative simulation"/>
+            <circle class="cx-hit" cx="330" cy="456" r="16" tabindex="0" data-tip-name="Bad order" data-tip="The same returns, reversed: early losses plus level withdrawals shrink the base before the good years arrive. &middot; representative simulation"/>
+            <circle class="cx-hit" cx="690" cy="526" r="16" tabindex="0" data-tip-name="Depletion" data-tip="Identical average return, opposite outcome. Order, not average, decided survival. &middot; representative simulation"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">Same returns, same withdrawals: different order, opposite survival.</p>
+          <p class="ex-body">The deck and the paths are the same math. Ten annual returns are shown in two orders, and each portfolio path below is generated from exactly those returns with identical level withdrawals.</p>
+          <p class="ex-takeaway">Withdrawal-phase capital does not care about the average. It cares about the order.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative simulation &middot; Built to show path dependency, not a historical backtest</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+            <ul class="ex-sources">
+              <li><span class="src-role">methodology</span>Author simulation &middot; One return set, opposite order; paths generated from the returns</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+<figure class="exhibit" data-wide id="exhibit-06" data-chart="06" data-mode="representative">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">06</span> &middot; Convexity &middot; Endurance
+            <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
+          <h3 class="ex-title">Survive the Path</h3>
+          <p class="ex-sub">A representative portfolio path that compounds through a drawdown rather than around it</p>
+        </header>
+        <div class="ex-plot">
+          <svg viewBox="0 0 760 420" role="img" aria-labelledby="ex06-t ex06-d">
+            <title id="ex06-t">Survive the Path</title>
+            <desc id="ex06-d">A portfolio path rises, passes through a deep shaded drawdown, and continues compounding to a far higher level.</desc>
+            <path class="cx-fieldw" d="M280 232 C 320 220, 370 224, 404 244 C 428 260, 434 290, 424 310 C 410 334, 366 344, 330 338 C 296 332, 272 310, 272 282 C 272 262, 272 244, 280 232 Z"/>
+            <line class="cx-grid" x1="70" y1="370" x2="710" y2="370"/>
+            <path class="cx-thesis" pathLength="1" d="M90 344 C 150 322, 210 280, 252 240 C 290 204, 318 232, 340 280 C 358 318, 386 314, 416 270 C 458 208, 530 150, 600 110 C 636 90, 666 76, 690 66"/>
+            <circle class="cx-dotq" cx="90" cy="344" r="3.5"/>
+            <circle class="cx-dot" cx="690" cy="66" r="4"/>
+            <text class="cx-lbl cx-build" x="300" y="360" opacity=".9">deep drawdown &middot; same asset</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="672" y="56" text-anchor="end">compounds through, not around</text>
+            <text class="cx-lbl cx-build" x="96" y="362" opacity=".8">sized to survive</text>
+            <circle class="cx-hit" cx="252" cy="240" r="16" tabindex="0" data-tip-name="Before" data-tip="Sizing assumes the drawdown will come. Survival is engineered before the volatility arrives. &middot; representative"/>
+            <circle class="cx-hit" cx="340" cy="280" r="16" tabindex="0" data-tip-name="The drawdown" data-tip="The path passes through the loss. Position sizing keeps it survivable, so no forced exit crystallizes it. &middot; representative"/>
+            <circle class="cx-hit" cx="600" cy="110" r="16" tabindex="0" data-tip-name="After" data-tip="The same volatile asset keeps compounding. Upside only mattered because sizing let the path be survived. &middot; representative"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">Upside only matters if sizing lets you survive the path.</p>
+          <p class="ex-body">The path does not route around the drawdown; it goes through it. Constant accumulation, no leverage, no forced exit: the volatility is endured, and the compounding continues on the other side.</p>
+          <p class="ex-takeaway">Volatile assets can still compound: through, not around, the drawdown.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative framework exhibit &middot; Sources support the underlying concept</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+            <ul class="ex-sources">
+              <li><span class="src-role">verifies-concept</span>ACF &middot; Part 3 &middot; Bitcoin convexity and multi-cycle drawdowns</li>
+              <li><span class="src-role">methodology</span>Author calculation &middot; Constant DCA, no rebalancing, no leverage</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+    <footer class="site-footer">
+      <div class="measure foot-base">
+        <span>&copy; 2026 Adaptive Convexity Framework</span>
+        <span>Part 1 &middot; Foundation in Pictures</span>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Progressive enhancement: theme + chart build-in + tooltips -->
+  <script src="reading.js" defer></script>
+</body>
+</html>

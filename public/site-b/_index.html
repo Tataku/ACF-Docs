@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>ACF Docs — framework-site-B staging preview (internal)</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      background: #08090b; color: #e8e4da;
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      display: flex; align-items: center; justify-content: center; padding: 40px 20px;
+    }
+    main { width: 100%; max-width: 720px; }
+    .eyebrow { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7f8a83; margin: 0 0 8px; }
+    h1 { font-size: clamp(22px, 4vw, 30px); font-weight: 600; margin: 0 0 6px; }
+    p.lede { color: #a9a497; margin: 0 0 28px; }
+    ul { list-style: none; padding: 0; margin: 0 0 28px; display: grid; gap: 10px; }
+    a.card {
+      display: block; text-decoration: none; color: inherit;
+      padding: 16px 18px; border: 1px solid #23262b; border-radius: 10px;
+      background: #0d0f12; transition: border-color 140ms ease, background 140ms ease;
+    }
+    a.card:hover, a.card:focus-visible { border-color: #2f6f57; background: #10141a; outline: none; }
+    a.card .t { font-weight: 600; }
+    a.card .s { display: block; font-size: 13px; color: #8b8c84; margin-top: 2px; }
+    .note { font-size: 12.5px; color: #6f7269; border-top: 1px solid #1c1f24; padding-top: 16px; }
+    code { background: #14171c; padding: 1px 6px; border-radius: 4px; font-size: 12.5px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Internal · Phase 1 staging · noindex</p>
+    <h1>framework-site-B — docs design preview</h1>
+    <p class="lede">Isolated static staging of the agency reading-system reference. Not wired into production docs routes. Served verbatim from <code>/site-b/</code>.</p>
+    <ul>
+      <li><a class="card" href="cover-docs.html"><span class="t">Cover — Docs</span><span class="s">cover-docs.html · hero-field + GSAP scroll</span></a></li>
+      <li><a class="card" href="part-1-foundation.html"><span class="t">Part 1 — Foundation &amp; Philosophy</span><span class="s">part-1-foundation.html</span></a></li>
+      <li><a class="card" href="part-2-lineage-macro.html"><span class="t">Part 2 — Lineage &amp; Macro Thesis</span><span class="s">part-2-lineage-macro.html</span></a></li>
+      <li><a class="card" href="part-3-bitcoin-convexity.html"><span class="t">Part 3 — Bitcoin: Convexity Backbone</span><span class="s">part-3-bitcoin-convexity.html</span></a></li>
+      <li><a class="card" href="part-1-pictures.html"><span class="t">Part 1 — In Pictures</span><span class="s">part-1-pictures.html · visual essay</span></a></li>
+    </ul>
+    <p class="note">Reversible by design: deleting <code>public/site-b/</code> removes this preview cleanly. Parts 4–6 are pending. External runtime deps: Google Fonts + GSAP (cdnjs).</p>
+  </main>
+</body>
+</html>

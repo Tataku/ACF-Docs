@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Part 2 — Lineage &amp; Macro Thesis · The Adaptive Convexity Framework</title>
+  <meta name="description" content="Lineage &amp; Macro Thesis: the enduring intellectual foundations of the framework and the method by which macro theses are constructed, evaluated, and governed.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="reading-system.css">
+</head>
+<body>
+  <a class="skip-link" href="#lineage">Skip to content</a>
+
+  <!-- Mobile: open the parts sidebar -->
+  <button type="button" class="drawer-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Open parts navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+  </button>
+  <div class="drawer-backdrop" hidden></div>
+
+  <div class="shell">
+    <!-- Sidebar: brand + theme + the six parts (this IS the Part-page nav) -->
+    <nav class="sidebar" id="sidebar" aria-label="Parts">
+      <div class="sidebar-bar">
+        <button type="button" class="sidebar-toggle" aria-pressed="false" aria-label="Collapse sidebar">
+          <svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M14 8l-4 4 4 4"></path>
+            <path d="M19 5v14"></path>
+          </svg>
+          <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M10 8l4 4-4 4"></path>
+            <path d="M5 5v14"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="sidebar-head">
+        <a class="brand" href="cover-docs.html" aria-label="Adaptive Convexity Framework — home">
+          <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+            <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+            <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+          </svg>
+          <span class="brand-word">ACF</span>
+        </a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <p class="side-movement">Philosophy</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="part-1-foundation.html"><span class="spnum">01</span><span>Foundation &amp; Philosophy</span></a></li>
+          <li>
+            <a class="side-part current" href="part-2-lineage-macro.html" aria-current="page">
+              <span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span>
+            </a>
+            <ol class="on-this-page" data-spy aria-label="On this page">
+              <li><a href="#lineage">Framework Lineage</a></li>
+              <li><a href="#excludes">What It Excludes</a></li>
+              <li><a href="#tax">Tax as Multiplier</a></li>
+              <li><a href="#thought-leaders">Thought Leaders</a></li>
+              <li><a href="#macro-thesis">Macro Thesis Process</a></li>
+            </ol>
+          </li>
+        </ul>
+
+        <p class="side-movement">Architecture</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="part-3-bitcoin-convexity.html"><span class="spnum">03</span><span>Bitcoin &mdash; Convexity Backbone</span></a></li>
+          <li><span class="side-part pending"><span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy <span class="soon">Soon</span></span></span></li>
+        </ul>
+
+        <p class="side-movement">Implementation</p>
+        <ul class="side-parts">
+          <li><span class="side-part pending"><span class="spnum">05</span><span>Portfolio Construction &amp; Position Management <span class="soon">Soon</span></span></span></li>
+        </ul>
+
+        <p class="side-movement">Governance</p>
+        <ul class="side-parts">
+          <li><span class="side-part pending"><span class="spnum">06</span><span>Convexity &amp; Framework Integrity Scoring <span class="soon">Soon</span></span></span></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="shell-main">
+      <header class="doc-header">
+        <div class="measure">
+          <a class="doc-breadcrumb" href="cover-docs.html">The Adaptive Convexity Framework</a>
+          <p class="doc-kicker">Part 2 of 6 &middot; &approx; 18 min read</p>
+          <h1 class="doc-title">Lineage &amp; Macro Thesis</h1>
+
+          <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
+          <div class="part-actions" role="group" aria-label="Part actions">
+            <button type="button" class="part-action part-listen" data-listen aria-pressed="false">
+              <svg class="pa-icon icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z"></path></svg>
+              <svg class="pa-icon icon-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7" y="7" width="10" height="10" rx="1.5"></rect></svg>
+              <span class="part-action-label" data-listen-label>Listen</span>
+            </button>
+
+            <div class="part-share">
+              <a class="part-action" data-share="x" href="https://x.com/intent/post" target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4l16 16M20 4L4 20"></path></svg>
+              </a>
+              <a class="part-action" data-share="email" href="mailto:" aria-label="Share by email">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M4 7l8 6 8-6"></path></svg>
+              </a>
+              <button type="button" class="part-action" data-copy-link aria-label="Copy link to this part">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 15l6-6"></path><path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"></path><path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"></path></svg>
+                <span class="part-action-label" data-copy-label>Copy link</span>
+              </button>
+              <button type="button" class="part-action part-share-native" data-share-native hidden aria-label="Share">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6"></path></svg>
+              </button>
+            </div>
+
+            <span class="part-actions-status visually-hidden" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </header>
+
+    <!-- ===== SECTION · FRAMEWORK LINEAGE ==================================== -->
+    <section class="section" id="lineage" aria-labelledby="lineage-title">
+      <div class="measure">
+        <p class="section-eyebrow">Framework Lineage</p>
+        <h2 class="section-title" id="lineage-title">The intellectual foundations, thesis-agnostic.</h2>
+      </div>
+
+      <div class="measure prose">
+        <p class="prose-lead">This section establishes the enduring intellectual foundations of the framework: the principles that remain valid regardless of which <button type="button" class="gloss" data-gloss="macro-thesis" aria-expanded="false">macro thesis</button> is currently operating. These thinkers shape the framework&rsquo;s methodology &mdash; how it defines risk, structures convexity, invalidates theses, interprets reflexive market dynamics, and accounts for long-horizon tax effects.</p>
+        <p>Framework lineage differs from macro thesis influences. Lineage provides the <span class="key-term">method</span>: how to think about risk, conviction, sizing, and survival. Macro thesis provides the <span class="key-term">application</span>: where structural forces currently direct capital. The method persists across regimes; the application changes with them. The lineage is presented from philosophical foundations to more tactical applications.</p>
+      </div>
+
+      <!-- Thinker · Taleb -->
+      <div class="measure">
+        <p class="sub-meta">Antifragile &middot; The Black Swan &middot; Fooled by Randomness</p>
+        <h3 class="sub-title">Nassim Nicholas Taleb &mdash; Antifragility &amp; ruin avoidance</h3>
+      </div>
+      <div class="measure prose">
+        <p>Taleb&rsquo;s core contribution is the observation that <button type="button" class="gloss" data-gloss="fragility" aria-expanded="false">fragility</button> is nonlinear, that ruin is irreversible, and that payoff structure matters more than forecasting accuracy. Traditional portfolio theory treats risk as symmetric standard deviation, which is mathematically convenient but incomplete as a description of survival risk. Two portfolios can share identical volatility while having materially different survival profiles.</p>
+        <p>The barbell strategy, which pairs extreme safety with extreme <button type="button" class="gloss" data-gloss="convexity" aria-expanded="false">convexity</button>, reframes risk management as a question of payoff asymmetry rather than volatility minimization. This framework operationalizes that insight: survival and optionality take priority over optimization. Rather than minimizing volatility, the framework uses it deliberately &mdash; tax-loss harvesting monetizes volatility, <button type="button" class="gloss" data-gloss="momentum-filter" aria-expanded="false">momentum filters</button> treat it as signal, and <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwires</button> convert it into attention. Taleb has criticized Bitcoin as unsuitable as money; the framework applies his methods (barbells, convex payoffs, ruin avoidance) to a governed Bitcoin allocation without adopting his specific conclusions about the asset.</p>
+      </div>
+      <aside class="callout callout-info" aria-label="Synthesis">
+        <p class="callout-label">Synthesis</p>
+        <ul>
+          <li><strong>Failure mode addressed.</strong> Mean-variance optimization creates fragility when correlations break and assets that appear balanced decline simultaneously.</li>
+          <li><strong>Principle extracted.</strong> Engineer portfolios for survival first and optionality second, with optimization a lower priority. Accept high volatility in the convex portions because the safe portions support survival.</li>
+          <li><strong>Framework implementation.</strong> Barbell architecture, <button type="button" class="gloss" data-gloss="cis" aria-expanded="false">CIS</button> Risk and Fragility scoring to quantify exposure to correlation shifts, and tripwires that convert volatility into actionable signals.</li>
+        </ul>
+      </aside>
+
+      <!-- Thinker · Druckenmiller -->
+      <div class="measure">
+        <p class="sub-meta">The New Market Wizards &middot; Various Interviews</p>
+        <h3 class="sub-title">Stanley Druckenmiller &mdash; Conviction &amp; asymmetric positioning</h3>
+      </div>
+      <div class="measure prose">
+        <p>Druckenmiller is associated with concentration paired with close monitoring and disciplined exits. His principle &mdash; &ldquo;put all your eggs in one basket and watch that basket very carefully&rdquo; &mdash; differs from diversification convention and produced strong long-term results. Diversification without conviction tends to produce average outcomes; concentrated conviction combined with exit discipline allows for asymmetry.</p>
+        <p>He also demonstrated a willingness to exit quickly when a thesis broke, even at substantial losses: &ldquo;The way to build superior long-term returns is through preservation of capital and home runs.&rdquo; This pattern &mdash; concentrate when conviction is high, de-risk promptly when conviction breaks &mdash; inverts the conventional instruction to remain diversified at all times.</p>
+      </div>
+      <aside class="callout callout-info" aria-label="Synthesis">
+        <p class="callout-label">Synthesis</p>
+        <ul>
+          <li><strong>Failure mode addressed.</strong> Equal-weight diversification across 50 or more positions dilutes conviction and reduces the likelihood of meaningful asymmetric outcomes.</li>
+          <li><strong>Principle extracted.</strong> Conviction depth should inform position sizing. High conviction supports concentration; broken conviction supports prompt exit.</li>
+          <li><strong>Framework implementation.</strong> CIS scoring determines conviction tier and sizing eligibility: high CIS supports concentration, mid CIS supports tactical exposure, low CIS triggers trim or exit. Portfolio-level caps and tripwires govern risk as conditions evolve.</li>
+        </ul>
+      </aside>
+
+      <!-- Thinker · Soros -->
+      <div class="measure">
+        <p class="sub-meta">The Alchemy of Finance</p>
+        <h3 class="sub-title">George Soros &mdash; Reflexivity &amp; regime feedback loops</h3>
+      </div>
+      <div class="measure prose">
+        <p>Soros&rsquo;s theory of <button type="button" class="gloss" data-gloss="policy-reflexivity" aria-expanded="false">reflexivity</button> challenges a central assumption of equilibrium economics. Markets do not merely reflect fundamentals; they also shape them. Participant perceptions influence prices, prices influence fundamentals, and fundamentals then validate or invalidate perceptions in self-reinforcing or self-defeating cycles. Markets can move away from equilibrium for extended periods.</p>
+        <p>Reflexive dynamics become more pronounced during regime transitions. Rising prices attract capital; capital can improve fundamentals through cheaper financing, talent, and validation; improved fundamentals appear to justify higher prices &mdash; until some constraint interrupts the cycle. This has direct relevance for the framework: <button type="button" class="gloss" data-gloss="fiscal-dominance" aria-expanded="false">fiscal dominance</button> can create reflexive loops in which debt issuance encourages accommodation, accommodation supports asset prices, and wealth effects sustain the political feasibility of continued spending. Bitcoin adoption can follow a similar pattern.</p>
+      </div>
+      <aside class="callout callout-info" aria-label="Synthesis">
+        <p class="callout-label">Synthesis</p>
+        <ul>
+          <li><strong>Failure mode addressed.</strong> Linear cause-and-effect models that assume price passively reflects value systematically misjudge the magnitude and duration of moves.</li>
+          <li><strong>Principle extracted.</strong> Feedback loops become more influential during transitions. Watch for reflexive reinforcement (extension) and reflexive reversal (exit). Price acts as a participant in the system, not only an observer.</li>
+          <li><strong>Framework implementation.</strong> Tripwires monitor for reflexive reversal signals. Sizing discipline acknowledges loops can extend beyond rational levels. Flow and liquidity awareness rank alongside fundamental analysis, with fast invalidation when feedback reverses.</li>
+        </ul>
+      </aside>
+
+      <!-- Thinker · Edelman -->
+      <div class="measure">
+        <p class="sub-meta">The Truth About Your Future</p>
+        <h3 class="sub-title">Ric Edelman &mdash; Longevity horizon &amp; tax architecture</h3>
+      </div>
+      <div class="measure prose">
+        <p>Edelman&rsquo;s contribution differs from the others. He does not identify which positions to take; he helps explain why the framework&rsquo;s core architecture &mdash; its convexity emphasis and its priority on tax optimization &mdash; is warranted regardless of macro thesis. Traditional portfolio assumptions were built for horizons of 30 to 40 years. As life expectancies extend into the 90s and 100s, portfolios may need to compound across horizons of 60 to 80 years, which alters what counts as prudent.</p>
+        <p>Over 60 years, the difference between taxable and tax-free growth can exceed the contribution of security selection. The historical success of the 60/40 portfolio depended on specific conditions that may not persist across regimes. And small allocations to high-convexity assets that appear risky over 10-year windows can become more important over 60-year windows, because the opportunity cost of missing asymmetric upside compounds significantly. Edelman&rsquo;s research indicates positions of 1 to 5 percent in high-convexity assets can meaningfully improve portfolio characteristics when properly governed.</p>
+      </div>
+      <aside class="callout callout-info" aria-label="Synthesis">
+        <p class="callout-label">Synthesis</p>
+        <ul>
+          <li><strong>Failure mode addressed.</strong> Traditional portfolios assume 30-to-40-year horizons, treat 60/40 as a default, and relegate tax optimization to a compliance afterthought.</li>
+          <li><strong>Principle extracted.</strong> Extended timeframes make tax-free compounding consequential rather than merely beneficial. Default assumptions warrant active validation. Small convex positions can disproportionately affect terminal wealth over long horizons.</li>
+          <li><strong>Framework implementation.</strong> A 60-to-80-year horizon supports Roth prioritization for convex assets. <span class="part-ref">Tax architecture is developed in Part 4</span>, and <span class="part-ref">CIS governance is developed in Part 6</span>, keeping convex exposure survival-compatible while capturing multi-decade upside.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · WHAT IT EXCLUDES ==================================== -->
+    <section class="section" id="excludes" aria-labelledby="excludes-title">
+      <div class="measure">
+        <p class="section-eyebrow">Boundaries</p>
+        <h2 class="section-title" id="excludes-title">What the framework intentionally excludes.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Intellectual honesty requires acknowledging the perspectives the framework excludes and the conditions under which they become less applicable. None of these approaches is wrong &mdash; each is conditionally valid.</p>
+      </div>
+
+      <div class="measure">
+        <h3 class="sub-title">Jack Bogle &mdash; Passive indexing</h3>
+      </div>
+      <div class="measure prose">
+        <p>Passive index methodology &mdash; buy the market portfolio, hold it indefinitely, minimize fees &mdash; produces strong results during secular bull markets and stable regimes. Between 1980 and 2020, U.S. equities compounded at roughly 10 percent annually, and indexing captured most of that at minimal cost. What it does not address is regime transitions. Between 1966 and 1982 the S&amp;P 500 was roughly flat in nominal terms, costly in real terms given inflation near 7 percent; between 2000 and 2013 it had two drawdowns exceeding 50 percent and took 13 years to recover. This framework accepts higher complexity to navigate transitions that passive strategies are not designed to address.</p>
+      </div>
+
+      <div class="measure">
+        <h3 class="sub-title">Eugene Fama &mdash; Efficient market hypothesis</h3>
+      </div>
+      <div class="measure prose">
+        <p>The efficient market hypothesis captures an important point: consistent alpha is rare, and most active managers underperform after fees. What it does not fully address is reflexivity, liquidity cycles, and regime transitions. Markets can be efficient at reflecting current information while still mispricing structural shifts that have not yet occurred. Druckenmiller and Soros generated decades of returns less by exploiting persistent mispricings than by positioning ahead of regime changes markets had not yet discounted. This framework respects market efficiency for known information while positioning around the slower incorporation of structural transitions.</p>
+      </div>
+
+      <div class="measure">
+        <h3 class="sub-title">Charlie Munger &mdash; Quality compounders</h3>
+      </div>
+      <div class="measure prose">
+        <p>Buying high-quality businesses at fair prices and holding indefinitely works well for durable competitive advantages in stable environments. What it does not fully address is opportunity cost and regime exposure. Holding compounders that appreciate at roughly 12 percent annually can be very effective; during specific regimes, assets such as Bitcoin or AI infrastructure may compound materially faster, raising the relative opportunity cost. This framework respects quality while prioritizing convexity and regime positioning over stable compounding.</p>
+      </div>
+
+      <aside class="callout callout-insight" aria-label="Key insight">
+        <div class="ci-head">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M9 18h6"></path>
+            <path d="M10 21h4"></path>
+            <path d="M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.2 1 2V16h6v-.5c0-.8.5-1.5 1-2A6 6 0 0 0 12 3z"></path>
+          </svg>
+          <p class="callout-label">Key Insight</p>
+        </div>
+        <p>These approaches are conditionally valid. Passive indexing performs strongly during secular bull markets, the efficient market hypothesis prevents many tactical mistakes, and quality compounders work across most regimes. This framework trades some of that reliability during normal conditions for adaptability during transitions &mdash; a different objective with different trade-offs.</p>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · TAX AS A STRUCTURAL MULTIPLIER ====================== -->
+    <section class="section" id="tax" aria-labelledby="tax-title">
+      <div class="measure">
+        <p class="section-eyebrow">Tax Architecture</p>
+        <h2 class="section-title" id="tax-title">A dominant structural return multiplier.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Tax optimization is not an implementation detail. It functions as a dominant structural return multiplier that compounds independently of asset-selection skill. None of the framework lineage thinkers treat tax architecture as a first-order design variable. This framework treats it as one.</p>
+        <p>Over horizons of 60 to 80 years, tax drag becomes one of the largest deterministic forces acting on terminal wealth. A $7,500 annual Roth contribution compounded tax-free for 30 years at high but plausible convex returns can exceed $750,000; the same return profile in a taxable wrapper &mdash; subject to capital-gains realization, rebalancing friction, and compounding leakage &mdash; produces materially less, despite identical gross performance. The difference arises not from better asset selection but from how returns are retained through wrapper selection.</p>
+      </div>
+
+      <blockquote class="pull-quote">
+        Asset selection determines what you own; tax architecture determines <span class="hl">how much of it you keep.</span>
+      </blockquote>
+
+      <div class="measure prose">
+        <p>The framework does not assume a single best wrapper for all assets. Assets intended for periodic realization, rotation, or volatility harvesting benefit most from tax-free compounding; assets intended for indefinite holding, collateralization, or intergenerational transfer may be better suited to taxable structures optimized for deferral, borrowing, and estate treatment. Wrapper choice is strategic rather than dogmatic, and the framework treats tax architecture at the same level as risk management and convexity engineering.</p>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · THOUGHT LEADERS ===================================== -->
+    <section class="section" id="thought-leaders" aria-labelledby="tl-title">
+      <div class="measure">
+        <p class="section-eyebrow">Interpretive Inputs</p>
+        <h2 class="section-title" id="tl-title">How the framework uses thought leaders.</h2>
+      </div>
+      <div class="measure prose">
+        <p>The lineage defines the structural method; macro thesis interpretation operates on a separate layer. The framework does not treat thought leaders as sources of authority or final truth. It treats them as interpretive inputs that help clarify the structural forces relevant to a given macro thesis. They inform the reading of the current environment but do not define portfolio construction rules, risk limits, position sizing, or tax architecture &mdash; those remain governed by the framework lineage. When the macro thesis changes, the relevant thought leaders may change with it.</p>
+        <p>Thought leaders are selected on three criteria:</p>
+      </div>
+
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li>
+            <p class="step-title">Domain specificity</p>
+            <p class="step-body">demonstrated insight into a particular structural dimension &mdash; regime transitions, liquidity dynamics, or technological buildouts.</p>
+          </li>
+          <li>
+            <p class="step-title">Model coherence</p>
+            <p class="step-body">internally consistent frameworks capable of producing falsifiable implications.</p>
+          </li>
+          <li>
+            <p class="step-title">Instrumental utility</p>
+            <p class="step-body">the ability to translate abstract forces into actionable signals, constraints, or capital-flow pathways.</p>
+          </li>
+        </ol>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Current thesis example &middot; illustrative, not foundational</p>
+        <h3 class="sub-title">Macro thesis thought leaders</h3>
+      </div>
+      <div class="measure prose">
+        <p>The thinkers below inform the current macro thesis only &mdash; Fourth Turning dynamics, AI infrastructure buildout, fiscal dominance, and liquidity-driven asset cycles over a 2024-to-2035 horizon. They are illustrative and may be replaced as conditions change. The framework itself remains anchored in the lineage defined above.</p>
+        <p><span class="key-term">Ray Dalio &mdash; Regime analysis.</span> Dalio&rsquo;s regime methodology, rather than his specific All-Weather allocation, informs how the framework identifies macro-thesis opportunities: economic environments are multidimensional, reflecting growth, inflation, and policy. His debt-cycle analysis (short cycles of 5 to 8 years, long cycles of 50 to 75 years) provides structural context for policy constraints and helps map the probable trajectory of fiscal dominance. The methodology is particularly relevant during high-debt regimes and less relevant during deleveraging or stable-debt periods.</p>
+        <p><span class="key-term">Lyn Alden &mdash; Liquidity cycles.</span> Alden&rsquo;s analysis of fiscal dominance and her liquidity-cycle work (M2 growth, central-bank balance sheets, real rates) provide an operational framework for understanding when the regime favors duration and speculation versus safety and liquidity. During M2 expansion, Bitcoin often appreciates at 3 to 5 times the magnitude of equity moves; during contraction it experiences amplified drawdowns. This relationship is highly relevant during fiscal-dominance regimes and may weaken as Bitcoin matures or monetary regimes shift.</p>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · MACRO THESIS PROCESS =============================== -->
+    <section class="section" id="macro-thesis" aria-labelledby="mt-title">
+      <div class="measure">
+        <p class="section-eyebrow">Macro Thesis</p>
+        <h2 class="section-title" id="mt-title">Identification, evaluation, and governance.</h2>
+      </div>
+      <div class="measure prose">
+        <p>The framework requires a macro thesis: a coherent worldview about the structural forces shaping trajectories over 5 to 20 years. This differs from market timing (next quarter&rsquo;s Fed decision) or sector rotation. Without a macro thesis, position selection lacks a unifying rationale. With a coherent thesis, each allocation expresses that worldview, sizing follows from conviction depth, and entry and exit decisions follow a defined process rather than discretionary impulse.</p>
+        <p>Valid theses share four characteristics that enable probability assessment and falsification:</p>
+      </div>
+
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li>
+            <p class="step-title">Structural persistence over cyclical timing</p>
+            <p class="step-body">identify forces that operate over multi-decade horizons regardless of precise timing. &ldquo;AI infrastructure will require massive power buildout&rdquo; is structural; &ldquo;NVDA will peak in Q3 2026&rdquo; is timing.</p>
+          </li>
+          <li>
+            <p class="step-title">Capital flow implications, not just narrative</p>
+            <p class="step-body">specify where capital is likely to flow. &ldquo;Deglobalization requires reshoring&rdquo; implies flows toward domestic industrial capacity; &ldquo;the world is changing&rdquo; specifies no destination.</p>
+          </li>
+          <li>
+            <p class="step-title">Falsifiable via observable indicators</p>
+            <p class="step-body">a valid thesis can be shown wrong through measurable structural events. Falsification applies to the thesis itself, not to valuation saturation or reflexive reversals &mdash; a drawdown during an intact thesis is volatility, not invalidation.</p>
+          </li>
+          <li>
+            <p class="step-title">Multi-year conviction runway</p>
+            <p class="step-body">durable enough to survive the volatility inherent in transitions. Conviction in the thesis does not imply static positioning: entry phase, sizing, and turnover are governed by CIS, posture classification, and tripwires.</p>
+          </li>
+        </ol>
+      </div>
+
+      <div class="measure prose">
+        <p>Thesis construction follows a defined sequence. Each step has distinct outputs that feed the next, separating what is structurally true from how it is interpreted, and both from how positions within it are governed.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="proc-steps" data-stepper>
+          <li><p><span class="lead">Structural force identification.</span> Identify forces with trajectories of a decade or more, backed by mathematical, physical, or political necessity rather than opinion. The output is a named structural thesis &mdash; a claim about what force exists and why it persists. Example: &ldquo;AI infrastructure buildout will require massive power generation expansion through 2035 and beyond.&rdquo; This does not change based on market conditions.</p></li>
+          <li><p><span class="lead">Capital flow pathway mapping.</span> Translate the structural force into capital-deployment requirements. If the thesis is AI-driven data-center buildout, capital flows to power generation, semiconductor production, networking infrastructure, and data-center real estate. The output is a map of sectors, asset classes, and instruments where capital concentration is structurally required.</p></li>
+          <li><p><span class="lead">Interpretive grounding.</span> Apply thought leaders and historical analogs to refine how the thesis is interpreted. Determine which investors navigated analogous transitions, extract their validation frameworks, and translate the principles into measurable characteristics. The output is a set of interpretive inputs that shape assertion logic without altering the thesis itself.</p></li>
+          <li><p><span class="lead">Governance context.</span> Establish the current phase of thesis expression &mdash; early structural, mid-cycle buildout, or late expression. Phase affects position sizing, entry posture, and risk controls rather than thesis validity. A thesis in late expression is not invalid; it requires different governance than the same thesis early on.</p></li>
+        </ol>
+      </div>
+
+      <div class="measure prose">
+        <p>Thesis development is iterative: refine as evidence accumulates, pivot when falsified, and hold conviction when noise creates opportunity. The framework provides a method rather than a fixed doctrine &mdash; structural forces may persist while governance context adapts to evolving conditions.</p>
+      </div>
+
+      <!-- Chapter-end transition -->
+      <aside class="callout callout-transition" aria-label="End of part">
+        <p class="callout-label">End of Part 2</p>
+        <p>Part 2 established the intellectual foundations: a thesis-agnostic lineage (Taleb, Druckenmiller, Soros, Edelman), tax-wrapper optimization as a structural edge, and a macro-thesis process that separates structural force from capital-flow mapping, interpretive grounding, and governance context.</p>
+      </aside>
+    </section>
+
+      <!-- Forward pointer: the spine's Next-up backbone (Part 3 not yet built) -->
+      <aside class="next-up" aria-label="Next in the series">
+        <div class="measure">
+          <p class="next-up-label">Next up</p>
+          <a class="next-up-card" href="part-3-bitcoin-convexity.html">
+            <span class="next-up-num">03</span>
+            <span class="next-up-body">
+              <span class="next-up-title">Bitcoin &mdash; Convexity Backbone</span>
+              <span class="next-up-teaser">Bitcoin as a non-negotiable allocation through TAM analysis, valuation models, and tax-optimized holding structure.</span>
+            </span>
+            <span class="next-up-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Marks Part 2 read once it scrolls into view (drives cover completion) -->
+      <div data-progress-sentinel data-part="2" aria-hidden="true"></div>
+
+      <footer class="site-footer">
+        <div class="measure foot-base">
+          <span>&copy; 2026 Adaptive Convexity Framework</span>
+          <span>Part 2 &middot; Lineage &amp; Macro Thesis</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Floating reading nav — home + prev/next part, surfaces while scrolling -->
+  <nav class="floatnav" aria-label="Reading navigation" hidden>
+    <div class="floatnav-inner">
+      <a class="floatnav-home" href="cover-docs.html">
+        <svg class="fn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M3 11l9-7 9 7"></path>
+          <path d="M5 10v9h14v-9"></path>
+        </svg>
+        <span class="fn-home-label">Framework</span>
+      </a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-prev" href="part-1-foundation.html">&larr; Part 1</a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-next" href="part-3-bitcoin-convexity.html">Next &middot; Part 3</a>
+    </div>
+  </nav>
+
+  <!-- Progressive enhancement: theme, scroll-spy, drawer, completion, floatnav -->
+  <script src="reading.js" defer></script>
+</body>
+</html>

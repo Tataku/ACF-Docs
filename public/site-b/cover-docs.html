@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The Adaptive Convexity Framework</title>
+  <meta name="description" content="The Adaptive Convexity Framework, end to end: six Parts across four movements. Start with the Foundation or jump to any Part.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('acf-home', 'cover-docs.html'); // reading pages route "home" back to this cover
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="reading-system.css">
+
+  <!-- GSAP (this page only) — motion start-states applied at runtime, so the
+       static page is always complete without it. -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+  <div class="cover">
+
+    <!-- Nav bar: same homepage chrome as Option A -->
+    <header class="nav">
+      <a class="brand" href="cover-docs.html" aria-label="Adaptive Convexity Framework — home">
+        <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+          <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+          <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+        </svg>
+        <span class="brand-word">ACF</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#parts">The Framework</a>
+        <a href="part-1-pictures.html">In Pictures</a>
+        <a href="#" data-placeholder>The Software</a>
+      </nav>
+      <div class="nav-right">
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+        <a class="nav-cta" href="part-1-foundation.html">Start reading</a>
+      </div>
+    </header>
+
+    <main class="dc-main">
+
+      <!-- Hero: the front door, in the documentation register -->
+      <section class="dc-hero" data-hero-field aria-labelledby="dc-title">
+        <!-- Atmospheric backdrop. The canvas particle field (JS) symbolizes the
+             thesis: turbulence on the left resolving into convex ascent. The SVG
+             sweep is the JS-off / reduced-motion fallback and stays in markup. -->
+        <canvas class="dc-hero-canvas" aria-hidden="true" hidden></canvas>
+        <div class="dc-hero-art" aria-hidden="true">
+          <svg viewBox="0 0 1200 460" preserveAspectRatio="xMidYMax slice" fill="none">
+            <path class="ha-wash" d="M-20 392 C 260 392, 470 382, 630 350 C 820 312, 1010 222, 1220 64 L 1220 460 L -20 460 Z"></path>
+            <path class="ha-curve" pathLength="1" d="M-20 392 C 260 392, 470 382, 630 350 C 820 312, 1010 222, 1220 64"></path>
+          </svg>
+        </div>
+        <p class="dc-kicker">An executable philosophy</p>
+        <h1 class="dc-title" id="dc-title">The Adaptive Convexity Framework</h1>
+        <p class="dc-lede">A holistic, tax-optimized portfolio operating system for asymmetric compounding across regime shifts.</p>
+
+        <div class="dc-hero-actions" data-hero-lede>
+          <a class="cover-cta" href="part-1-foundation.html">
+            <span class="cta-text">Start with Part 1</span>
+            <span class="cta-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                <path d="M5 12h13M13 6l6 6-6 6"></path>
+              </svg>
+            </span>
+          </a>
+          <a class="dc-resume" href="part-1-foundation.html">Resume reading <span class="dc-arr" aria-hidden="true">&rarr;</span></a>
+        </div>
+      </section>
+
+      <!-- The six Parts: the homepage's main act -->
+      <section class="dc-parts" id="parts" aria-labelledby="dc-parts-title">
+
+        <div class="dc-parts-head">
+          <p class="dc-parts-eyebrow">The framework</p>
+          <h2 class="dc-parts-title" id="dc-parts-title">From philosophy to governance</h2>
+          <p class="dc-parts-lede">A deep dive into four movements.</p>
+        </div>
+
+        <div class="dc-movement">
+          <p class="dc-movement-label">Philosophy</p>
+          <div class="dc-grid">
+            <a class="dc-card" href="part-1-foundation.html" data-part="1">
+              <span class="dc-glyph" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="40" x2="42" y2="40" opacity=".35"></line><path d="M8 33 C 16 33, 22 32, 26 29 C 32 25, 38 17, 42 9"></path><circle cx="42" cy="9" r="2.2" fill="currentColor" stroke="none"></circle></svg></span>
+              <span class="dc-num">01</span>
+              <p class="dc-card-title">Foundation &amp; Philosophy</p>
+              <p class="dc-card-desc">The premise, the operating posture, and the order of operations.</p>
+              <p class="dc-card-meta"><span>&approx; 12 min read</span><span class="read-badge">&check; Read</span></p>
+            </a>
+            <a class="dc-card" href="part-2-lineage-macro.html" data-part="2">
+              <span class="dc-glyph" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="11" r="3"></circle><circle cx="10" cy="24" r="3"></circle><circle cx="10" cy="37" r="3"></circle><path d="M13 11 C 24 11, 26 22, 34 23 M13 24 H34 M13 37 C 24 37, 26 26, 34 25" opacity=".7"></path><circle cx="38" cy="24" r="3.6"></circle></svg></span>
+              <span class="dc-num">02</span>
+              <p class="dc-card-title">Lineage &amp; Macro Thesis</p>
+              <p class="dc-card-desc">Intellectual lineage and the regime-shift macro thesis.</p>
+              <p class="dc-card-meta"><span>&approx; 18 min read</span><span class="read-badge">&check; Read</span></p>
+            </a>
+          </div>
+        </div>
+
+        <div class="dc-movement">
+          <p class="dc-movement-label">Architecture</p>
+          <div class="dc-grid">
+            <a class="dc-card" href="part-3-bitcoin-convexity.html" data-part="3">
+              <span class="dc-glyph" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="38" x2="42" y2="38" opacity=".35"></line><line x1="8" y1="25" x2="42" y2="25" opacity=".18"></line><line x1="8" y1="12" x2="42" y2="12" opacity=".18"></line><path d="M8 40 C 18 39, 26 35, 31 29 C 35 24, 38 16, 40 7"></path></svg></span>
+              <span class="dc-num">03</span>
+              <p class="dc-card-title">Bitcoin: Convexity Backbone</p>
+              <p class="dc-card-desc">Why Bitcoin anchors the portfolio&rsquo;s asymmetric upside.</p>
+              <p class="dc-card-meta"><span>&approx; 22 min read</span><span class="read-badge">&check; Read</span></p>
+            </a>
+            <div class="dc-card pending" aria-disabled="true">
+              <span class="dc-glyph" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5 V15 M20 11 L24 15 L28 11"></path><rect x="11" y="20" width="26" height="19" rx="2.5"></rect><path d="M11 29 H37" opacity=".45"></path></svg></span>
+              <span class="dc-num">04</span>
+              <p class="dc-card-title">Tax Architecture &amp; ROC Strategy</p>
+              <p class="dc-card-desc">Return-of-capital mechanics and the keep-more architecture.</p>
+              <p class="dc-card-meta"><span class="soon">Soon</span></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dc-movement-pair">
+          <div class="dc-movement">
+            <p class="dc-movement-label">Implementation</p>
+            <div class="dc-grid">
+              <div class="dc-card pending" aria-disabled="true">
+                <span class="dc-glyph" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><rect x="26" y="9" width="13" height="13" rx="2"></rect><rect x="9" y="26" width="13" height="13" rx="2"></rect><rect x="26" y="26" width="13" height="13" rx="2" fill="currentColor" fill-opacity=".22"></rect></svg></span>
+              <span class="dc-num">05</span>
+                <p class="dc-card-title">Portfolio Construction &amp; Position Management</p>
+                <p class="dc-card-desc">Building positions and managing them across Postures.</p>
+                <p class="dc-card-meta"><span class="soon">Soon</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="dc-movement">
+            <p class="dc-movement-label">Governance</p>
+            <div class="dc-grid">
+              <div class="dc-card pending" aria-disabled="true">
+                <span class="dc-glyph" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 37 A 17 17 0 0 1 39 37" opacity=".5"></path><path d="M11 30 L14 32 M37 30 L34 32 M24 19 V23" opacity=".5"></path><path d="M24 37 L33 24"></path><circle cx="24" cy="37" r="2.4" fill="currentColor" stroke="none"></circle></svg></span>
+              <span class="dc-num">06</span>
+                <p class="dc-card-title">Convexity &amp; Framework Integrity Scoring</p>
+                <p class="dc-card-desc">Scoring convexity and governing framework integrity (CIS).</p>
+                <p class="dc-card-meta"><span class="soon">Soon</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <section class="dc-resources" aria-label="Resources">
+        <p class="dc-res-head">Resources</p>
+        <div class="dc-res-grid">
+          <a class="dc-tile" href="part-1-pictures.html">
+            <p class="dc-tile-title">Part 1 in Pictures</p>
+            <p class="dc-tile-desc">The Foundation as a visual essay: seven exhibits, one claim each.</p>
+          </a>
+          <a class="dc-tile" href="part-1-foundation.html" data-glossary-tile>
+            <p class="dc-tile-title">Glossary &middot; 20 terms</p>
+            <p class="dc-tile-desc">The framework&rsquo;s vocabulary, defined where it is taught.</p>
+          </a>
+          <a class="dc-tile" href="#" data-placeholder>
+            <p class="dc-tile-title">The Software</p>
+            <p class="dc-tile-desc">The framework in motion. Coming with the product site.</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Closing CTA band -->
+      <section class="cta-band" aria-labelledby="cta-band-title" data-reveal>
+        <div class="measure-full">
+          <h2 class="cta-band-title" id="cta-band-title">Start where the framework begins.</h2>
+          <p class="cta-band-line">One read, cover to cover.</p>
+          <div class="cta-band-actions">
+            <a class="cover-cta" href="part-1-foundation.html">
+              <span class="cta-text">Start reading <span class="cta-part">&middot; Part 1</span></span>
+              <span class="cta-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M5 12h13M13 6l6 6-6 6"></path>
+                </svg>
+              </span>
+            </a>
+            <a class="cta-secondary" href="#" data-placeholder>
+              Test the Software <span aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="faq" id="faq" aria-labelledby="faq-title" data-reveal>
+        <div class="faq-inner">
+          <p class="faq-eyebrow">FAQ</p>
+          <h2 class="faq-title" id="faq-title">Convexity, clarified.</h2>
+
+          <div class="faq-list">
+            <details class="faq-item">
+              <summary class="faq-q">
+                <span>What is the Adaptive Convexity Framework?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M6 9l6 6 6-6"></path>
+                </svg>
+              </summary>
+              <div class="faq-a">
+                <p>A holistic, tax-optimized portfolio operating system for compounding through instability. Instead of forecasting markets, it engineers a portfolio that survives being wrong, while staying positioned for the outsized, asymmetric gains that regime shifts can deliver.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-q">
+                <span>Who is it for?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M6 9l6 6 6-6"></path>
+                </svg>
+              </summary>
+              <div class="faq-a">
+                <p>Serious, self-directed investors who want a deliberate, repeatable method over tips and predictions, and who want to understand the reasoning behind each decision, not just the conclusion.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-q">
+                <span>What will I achieve after reading it?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M6 9l6 6 6-6"></path>
+                </svg>
+              </summary>
+              <div class="faq-a">
+                <p>A clear operating model: how to define your downside, pursue upside without fragility, and meet every regime with a deliberate posture. You&rsquo;ll leave with the vocabulary and structure to put the framework to work.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-q">
+                <span>Is it free to read?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M6 9l6 6 6-6"></path>
+                </svg>
+              </summary>
+              <div class="faq-a">
+                <p>Yes. All six parts are free, start to finish, and you&rsquo;re free to share it.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-q">
+                <span>Is this investment advice?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M6 9l6 6 6-6"></path>
+                </svg>
+              </summary>
+              <div class="faq-a">
+                <p>No. The framework is educational and analytical. It explains a way of thinking about portfolios; it does not recommend specific securities, allocations, or actions for your situation. For decisions about your own money, talk to a licensed professional who knows your circumstances.</p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Two-tier editorial footer (Option A's simplified, nav-mirrored footer) -->
+    <footer class="site-footer">
+      <div class="measure-full foot-top">
+        <div class="foot-brand">
+          <a class="brand" href="cover-docs.html" aria-label="Adaptive Convexity Framework — home">
+            <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+              <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+              <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+            </svg>
+            <span class="brand-word">Adaptive Convexity Framework</span>
+          </a>
+          <p class="foot-descriptor">An executable philosophy for compounding through instability.</p>
+        </div>
+        <div class="foot-actions">
+          <nav class="nav-links" aria-label="Footer">
+            <a href="#parts">The Framework</a>
+            <a href="part-1-pictures.html">In Pictures</a>
+            <a href="#" data-placeholder>The Software</a>
+          </nav>
+          <a class="nav-cta" href="part-1-foundation.html">Start reading</a>
+        </div>
+      </div>
+      <div class="measure-full foot-base">
+        <span>&copy; 2026 Adaptive Convexity Framework</span>
+        <span>An executable philosophy.</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Shared progressive enhancement (theme, read badges, resume) -->
+  <script src="reading.js" defer></script>
+  <!-- Shared hero field (accumulation dot-matrix) -->
+  <script src="hero-field.js" defer></script>
+  <!-- Page-specific: search panel + GSAP choreography -->
+  <script src="cover-docs.js" defer></script>
+</body>
+</html>
