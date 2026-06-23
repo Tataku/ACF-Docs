@@ -562,12 +562,20 @@
 
     /* --- mini-player UI (injected above the nav pill) ------------------------- */
     var ui = null;
-    if (nav) {
-      var inner = nav.querySelector('.floatnav-inner');
+    var inner = nav && nav.querySelector('.floatnav-inner');
+    if (nav && inner) {
+      // Fold the existing quick-nav controls into a main row, then attach the
+      // narration rail beneath them INSIDE the same dock surface — one pill with
+      // two rows (not a separate floating pill stacked above).
+      var main = document.createElement('div');
+      main.className = 'floatnav-main';
+      while (inner.firstChild) main.appendChild(inner.firstChild);
+      inner.appendChild(main);
+      inner.classList.add('is-dock');
+
       var player = document.createElement('div');
       player.className = 'floatnav-player';
       player.setAttribute('data-state', 'idle');
-      player.hidden = true;
       player.innerHTML =
         '<button type="button" class="floatnav-play" aria-label="Play narration" aria-pressed="false">' +
           '<svg class="fn-icon fn-ico-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.2v13.6L19 12z"/></svg>' +
@@ -575,7 +583,7 @@
         '</button>' +
         '<input type="range" class="floatnav-progress-input" min="0" max="1000" value="0" step="1" aria-label="Narration position" disabled>' +
         '<span class="floatnav-time" aria-hidden="true">-0:00</span>';
-      nav.insertBefore(player, inner);
+      inner.appendChild(player);            // attached lower rail of the dock
       ui = {
         player: player,
         play:  player.querySelector('.floatnav-play'),
@@ -599,13 +607,11 @@
 
     function arm() {
       armed = true;
-      if (ui) ui.player.hidden = false;
-      if (nav) { nav.hidden = false; nav.setAttribute('data-visible', ''); nav.setAttribute('data-pinned', ''); }
+      if (nav) { nav.hidden = false; nav.setAttribute('data-armed', ''); nav.setAttribute('data-visible', ''); nav.setAttribute('data-pinned', ''); }
     }
     function disarm() {
       armed = false;
-      if (ui) ui.player.hidden = true;
-      if (nav) { nav.removeAttribute('data-pinned'); if (window.scrollY <= 600) nav.removeAttribute('data-visible'); }
+      if (nav) { nav.removeAttribute('data-armed'); nav.removeAttribute('data-pinned'); if (window.scrollY <= 600) nav.removeAttribute('data-visible'); }
     }
 
     function paint() {
