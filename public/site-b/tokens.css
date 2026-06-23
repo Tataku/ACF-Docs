@@ -25,9 +25,17 @@
   --paper:          #f7f4ec;   /* page background — warm paper, harmonized with the chart paper */
   --paper-warm:     #efe9dc;   /* warm tint band (CTA) */
   --surface-raised: #fbf8f1;   /* raised card fill — warm off-white (harmonizes with chart paper, not pure white) */
-  --ink:            #16130d;   /* primary reading ink — warm near-black */
-  --ink-quiet:      #514b40;   /* secondary / captions / labels — warm */
-  --ink-faint:      #6e695c;   /* tertiary / metadata — warm (matches chart muted text) */
+  /* Semantic ink hierarchy — warmth follows editorial importance, not font size.
+     Light keeps the current warm-paper inks; the legacy --ink/--ink-quiet/--ink-faint
+     alias the semantic tokens so existing rules map with no per-rule churn. */
+  --ink-display:    #16130d;   /* display / headings */
+  --ink-body:       #16130d;   /* main prose */
+  --ink-muted:      #514b40;   /* secondary / supporting */
+  --ink-micro:      #6e695c;   /* small metadata / labels / utility */
+  --ink-disabled:   #6e695c;   /* disabled / SOON */
+  --ink:            var(--ink-body);    /* legacy alias → body */
+  --ink-quiet:      var(--ink-muted);   /* legacy alias → muted */
+  --ink-faint:      var(--ink-micro);   /* legacy alias → micro (metadata/labels) */
   --rule:           #dcd6ca;   /* hairline rules — warm */
   --rule-faint:     #ece6da;   /* faintest dividers — warm */
 
@@ -213,9 +221,17 @@
   --paper:          #14171a;   /* page background */
   --paper-warm:     #191d21;   /* whisper-light tint — full measure only */
   --surface-raised: #1b2129;   /* raised card fill — a step up from --paper */
-  --ink:            #f1f4f7;   /* primary reading ink — brightened toward white */
-  --ink-quiet:      #c6cdd4;   /* secondary / captions / subheads — lighter, more legible */
-  --ink-faint:      #828b95;   /* tertiary / metadata */
+  /* Semantic ink hierarchy (dark) — editorial inks lean toward warm paper; small
+     utility/metadata text stays a crisp, cooler neutral for small-size legibility.
+     Warmth follows editorial importance, NOT raw font size. */
+  --ink-display:    #f4f0e8;   /* display / headings — warmest paper off-white */
+  --ink-body:       #e9e3d7;   /* main prose — warm readable off-white */
+  --ink-muted:      #c9c2b5;   /* secondary / supporting — warm muted gray */
+  --ink-micro:      #d8dce0;   /* small metadata / labels — crisp cooler neutral */
+  --ink-disabled:   #948c7d;   /* disabled / SOON — quiet warm gray (legible, low key) */
+  --ink:            var(--ink-body);    /* legacy alias → body */
+  --ink-quiet:      var(--ink-muted);   /* legacy alias → muted */
+  --ink-faint:      var(--ink-micro);   /* legacy alias → micro (metadata/labels) */
   --rule:           #2a3137;   /* hairline rules */
   --rule-faint:     #1f262c;   /* faintest dividers */
 

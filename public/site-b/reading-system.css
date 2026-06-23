@@ -2932,3 +2932,20 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 .faq-title {
   font-weight: var(--weight-semibold);
 }
+
+/* ── Semantic ink hierarchy split ──────────────────────────────────────────
+   Body, secondary and metadata already map via the --ink/--ink-quiet/--ink-faint
+   aliases. These two rules split out the ends of the scale: display headings lean
+   to the warmest paper ink, and SOON/disabled states go quiet. Grouped + late so
+   they win the cascade over each component's own --ink. Light is unchanged (its
+   --ink-display / --ink-disabled equal the prior heading / SOON values). */
+.section-title,
+.doc-title,
+.cover-title { color: var(--ink-display); }
+.soon,
+.fn-soon,
+.foot-soon,
+.side-part.pending,
+.side-part.pending .spnum,
+.part.pending .ptitle,
+.part.pending .pdesc { color: var(--ink-disabled); }
