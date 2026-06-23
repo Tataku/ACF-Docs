@@ -51,7 +51,7 @@
       <p class="pictures-lede">Each chart makes one claim and shows the mechanism. Hover, tap, or pin for the deeper explanation; sources sit behind each Details toggle.</p>
     </header>
 
-<figure class="exhibit" data-wide id="exhibit-s1" data-chart="S1" data-mode="conceptual">
+<figure class="exhibit" data-wide id="exhibit-s1" data-chart="S1" data-fc-chart="sig-payoff" data-mode="conceptual">
       <header class="ex-head">
         <p class="ex-eyebrow"><span class="ex-idx">S1</span> &middot; Payoff shape &middot; Signature
           <span class="ex-mode" aria-label="Conceptual exhibit. Illustrative framework diagram, not historical data.">&#9676;</span></p>
@@ -97,7 +97,7 @@
       </footer>
     </figure>
 
-<figure class="exhibit" data-wide id="exhibit-01" data-chart="01" data-mode="representative">
+<figure class="exhibit" data-wide id="exhibit-01" data-chart="01" data-fc-chart="p1-hedge-broke" data-mode="representative">
         <header class="ex-head">
           <p class="ex-eyebrow"><span class="ex-idx">01</span> &middot; Diversification &middot; Fragility
             <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
@@ -143,7 +143,7 @@
       </figure>
 
 <!-- EXHIBIT 02 · the stock-bond diversifier is regime-dependent -->
-      <figure class="exhibit" data-wide id="exhibit-02" data-chart="02" data-mode="representative">
+      <figure class="exhibit" data-wide id="exhibit-02" data-chart="02" data-fc-chart="p1-correlation" data-mode="representative">
         <header class="ex-head">
           <p class="ex-eyebrow"><span class="ex-idx">02</span> &middot; Correlation &middot; Regime
             <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
@@ -188,7 +188,7 @@
       </figure>
 
 <!-- EXHIBIT 03 · CPI vs the assets that store capital -->
-      <figure class="exhibit" data-wide id="exhibit-03" data-chart="03" data-mode="representative">
+      <figure class="exhibit" data-wide id="exhibit-03" data-chart="03" data-fc-chart="p1-cpi-assets" data-mode="representative">
         <header class="ex-head">
           <p class="ex-eyebrow"><span class="ex-idx">03</span> &middot; Inflation &middot; Measurement
             <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
@@ -231,7 +231,7 @@
       </figure>
 
 <!-- EXHIBIT 04 · fiscal dominance: the hidden interest cost -->
-      <figure class="exhibit" data-wide id="exhibit-04" data-chart="04" data-mode="representative" data-wide>
+      <figure class="exhibit" data-wide id="exhibit-04" data-chart="04" data-fc-chart="p1-policy-constraint" data-mode="representative" data-wide>
         <header class="ex-head">
           <p class="ex-eyebrow"><span class="ex-idx">04</span> &middot; Policy &middot; Constraint
             <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
@@ -278,7 +278,7 @@
         </footer>
       </figure>
 
-<figure class="exhibit" data-wide id="exhibit-05" data-chart="05" data-mode="simulation">
+<figure class="exhibit" data-wide id="exhibit-05" data-chart="05" data-fc-chart="p1-sequence-risk" data-mode="simulation">
         <header class="ex-head">
           <p class="ex-eyebrow"><span class="ex-idx">05</span> &middot; Path dependency &middot; Withdrawals
             <span class="ex-mode" aria-label="Representative simulation. Built to show path dependency, not a historical backtest.">&#9671;</span></p>
@@ -334,7 +334,7 @@
         </footer>
       </figure>
 
-<figure class="exhibit" data-wide id="exhibit-06" data-chart="06" data-mode="representative">
+<figure class="exhibit" data-wide id="exhibit-06" data-chart="06" data-fc-chart="p1-convexity-survival" data-mode="representative">
         <header class="ex-head">
           <p class="ex-eyebrow"><span class="ex-idx">06</span> &middot; Convexity &middot; Endurance
             <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
@@ -384,6 +384,7 @@
   </main>
 
   <!-- Progressive enhancement: theme + chart build-in + tooltips -->
+  <script src="/site-b/site-b-charts.js" defer></script>
   <script src="/site-b/reading.js" defer></script>
 </body>
 </html>

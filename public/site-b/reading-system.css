@@ -2312,6 +2312,13 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
 }
 /* Gallery pages (part-N-pictures) let exhibits breathe wider. */
 .exhibit[data-wide] { max-width: min(54rem, calc(100% - 2 * var(--page-gutter))); }
+/* Live React chart island (site-b-charts.js) renders its own card, so drop the
+   static .exhibit chrome when a chart mounts; the static SVG stays the no-JS
+   fallback. Width stays governed by .exhibit / .exhibit[data-wide]. */
+.exhibit.fc-live { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; overflow-x: clip; }
+/* New chart slots inserted into Part 2/3 (no static fallback): layout only, the
+   React engine renders its own card. Same width contract as .exhibit[data-wide]. */
+.fc-mount { max-width: min(54rem, calc(100% - 2 * var(--page-gutter))); margin: var(--space-8) auto; overflow-x: clip; }
 
 .ex-head { margin-bottom: var(--space-3); }
 .ex-eyebrow {

@@ -26,6 +26,7 @@ function mountAll() {
     if (!id) return;
     const accent = el.getAttribute('data-fc-accent') || 'green';
     el.textContent = ''; // clear any static fallback before mounting the live chart
+    el.classList.add('fc-live'); // lets the page CSS drop the static card chrome (the engine renders its own)
     const root = createRoot(el);
     const render = (theme) => root.render(React.createElement(FrameworkChart, { id, theme, accent }));
     render(currentTheme());
