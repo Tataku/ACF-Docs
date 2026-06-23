@@ -330,29 +330,35 @@
           .forEach(function (n) { var t = (n.textContent || '').trim(); if (t) blocks.push(t); });
         return blocks;
       }
-      // Group blocks into <=API_MAX-char segments (OpenAI TTS caps input at 4096).
+      // Segment the page for the API path. The first segments are deliberately
+      // SMALL and ramp up (SEG_CAPS) so the first audio arrives in ~1-2s instead
+      // of waiting on a full 3500-char generation; steady-state caps at API_MAX
+      // (OpenAI TTS limit is 4096). Look-ahead generation (playApi) keeps later
+      // segments warm, so the small head never creates a gap.
+      var SEG_CAPS = [700, 1500, 3000]; // ramp for fast time-to-first-audio
       var API_MAX = 3500;
       var segs = null;
       function buildSegments() {
         if (segs) return segs;
         segs = [];
         var cur = '';
+        function cap() { return segs.length < SEG_CAPS.length ? SEG_CAPS[segs.length] : API_MAX; }
+        function flush() { if (cur.trim()) segs.push(cur.trim()); cur = ''; }
         buildBlocks().forEach(function (b) {
-          if (b.length > API_MAX) {                       // a single long block: split by sentence
-            if (cur) { segs.push(cur); cur = ''; }
-            var sentences = b.match(/[^.!?]+[.!?]*\s*/g) || [b], piece = '';
-            sentences.forEach(function (s) {
-              if ((piece + s).length > API_MAX) { if (piece.trim()) segs.push(piece.trim()); piece = s; }
-              else piece += s;
+          if (b.length > cap()) {                         // oversized block: split by sentence
+            flush();
+            (b.match(/[^.!?]+[.!?]*\s*/g) || [b]).forEach(function (s) {
+              if (cur.length + s.length > cap()) flush();
+              cur += s;
             });
-            if (piece.trim()) segs.push(piece.trim());
-          } else if ((cur ? cur.length + 1 : 0) + b.length > API_MAX) {
-            segs.push(cur); cur = b;
+            flush();
+          } else if ((cur ? cur.length + 1 : 0) + b.length > cap()) {
+            flush(); cur = b;
           } else {
             cur = cur ? cur + ' ' + b : b;
           }
         });
-        if (cur) segs.push(cur);
+        flush();
         return segs;
       }
 
@@ -388,16 +394,23 @@
       }
 
       // --- API audio engine --------------------------------------------------
-      var audio = null, runId = 0, inflight = null;
-      var cache = new Map(); // transcript hash -> object URL (this page session)
+      // cache = finished object URLs (key -> url); pending = in-flight requests
+      // (key -> Promise) so prewarm + playback never double-generate the same
+      // segment; controllers = every live AbortController, so stop() cancels them.
+      var audio = null, runId = 0;
+      var cache = new Map();
+      var pending = new Map();
+      var controllers = new Set();
       function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; } return h.toString(36); }
 
-      function fetchSegment(text, myRun) {
+      function fetchSegment(text) {
         var key = hash(text);
         if (cache.has(key)) return Promise.resolve(cache.get(key));
+        if (pending.has(key)) return pending.get(key);   // dedup concurrent requests
         var ctrl = new AbortController();
-        if (myRun === runId) inflight = ctrl;
-        return fetch('/api/narration', {
+        controllers.add(ctrl);
+        function done() { controllers.delete(ctrl); pending.delete(key); }
+        var p = fetch('/api/narration', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: text }),
@@ -414,15 +427,19 @@
         }).then(function (blob) {
           var u = URL.createObjectURL(blob);
           cache.set(key, u);
+          done();
           return u;
-        });
+        }, function (err) { done(); throw err; });
+        pending.set(key, p);
+        return p;
       }
 
+      var LOOKAHEAD = 1; // warm this many upcoming segments while one plays
       function playApi(i, myRun) {
         if (myRun !== runId) return;
         var list = buildSegments();
         if (i >= list.length) { finish(myRun); return; }
-        fetchSegment(list[i], myRun).then(function (url) {
+        fetchSegment(list[i]).then(function (url) {
           if (myRun !== runId) return;
           audio = new Audio(url);
           audio.onended = function () { if (myRun === runId) playApi(i + 1, myRun); };
@@ -430,6 +447,8 @@
           var p = audio.play();
           if (p && p.catch) p.catch(function () { if (myRun === runId) setState('error'); });
           setState('playing');
+          // look-ahead: warm upcoming segments so playback stays gapless
+          for (var k = 1; k <= LOOKAHEAD; k++) { if (list[i + k]) fetchSegment(list[i + k]).catch(function () {}); }
         }).catch(function (err) {
           if (myRun !== runId || (err && err.name === 'AbortError')) return;
           // Provider failed: fall back to Web Speech from the top (once), else quiet error.
@@ -482,12 +501,29 @@
         runId++;                                  // invalidate async work + onended/onend
         if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
         if (synth) synth.cancel();
-        if (inflight) { try { inflight.abort(); } catch (e) {} inflight = null; }
+        controllers.forEach(function (c) { try { c.abort(); } catch (e) {} });
+        controllers.clear(); pending.clear();
         setState('idle'); announce('Audio stopped');
       }
       function finish(myRun) {
         if (myRun !== runId) return;
         audio = null; setState('idle'); announce('Audio finished');
+      }
+
+      // --- prewarm -----------------------------------------------------------
+      // On hover/focus (clear intent, before the click) resolve capability and
+      // warm just the small first segment, so the first click plays almost
+      // instantly. Fire-and-forget, runs once, bounded to one segment — no
+      // excessive pre-generation, and a no-op when narration uses Web Speech.
+      var prewarmed = false;
+      function prewarm() {
+        if (prewarmed) return;
+        prewarmed = true;
+        (method ? Promise.resolve(method) : resolveCapability()).then(function (m) {
+          if (m !== 'api') return;
+          var list = buildSegments();
+          if (list.length) fetchSegment(list[0]).catch(function () {});
+        });
       }
 
       // --- wire-up -----------------------------------------------------------
@@ -512,6 +548,9 @@
         else if (STATE === 'loading') stop();     // cancel a pending load
         else start();                             // idle / error
       });
+      // Warm the first segment ahead of the click on hover/focus intent.
+      listenBtn.addEventListener('mouseenter', prewarm);
+      listenBtn.addEventListener('focus', prewarm);
       stopBtn.addEventListener('click', stop);
       window.addEventListener('pagehide', function () {
         stop();
