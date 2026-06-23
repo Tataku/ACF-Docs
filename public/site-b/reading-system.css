@@ -1829,6 +1829,16 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
 .part-actions[data-narration-state="playing"] .part-listen-stop,
 .part-actions[data-narration-state="paused"]  .part-listen-stop { display: inline-flex; }
 
+/* Zen brush icons — the brush artwork sits inset in its 100×100 viewBox, so it
+   reads ~15% smaller than the retained geometric (24-viewBox) icons. A scoped
+   optical bump restores weight parity without resizing the layout box or
+   touching the geometric set. Targets only the brush icons (viewBox 0 0 100 100)
+   inside these three controls; the display-swap/sizing rules elsewhere are
+   unaffected. */
+.part-actions svg[viewBox="0 0 100 100"],
+.floatnav svg[viewBox="0 0 100 100"],
+.sidebar-toggle svg[viewBox="0 0 100 100"] { transform: scale(1.15); }
+
 /* ============================================================================
    PART READING SHELL  (part-1-foundation.html)
    Sidebar (parts nav + nested scroll-spy) | reading column. The cover owns the
