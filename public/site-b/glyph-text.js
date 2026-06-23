@@ -4,8 +4,8 @@
    Progressive enhancement for the framework Part documents. Dependency-free,
    no build step. A faithful static-site port of the SVRN "GlyphText" scramble-
    reveal: the single top-level document title resolves left -> right out of a
-   pool of block / hex glyphs over one requestAnimationFrame pass, then settles
-   to clean static serif text. Plays once. No Matrix rain, no looping.
+   pool of ASCII / hex glyphs over one requestAnimationFrame pass, then settles
+   into the page's own static title type. Plays once. No Matrix rain, no looping.
 
    Scope — the ONE top-level <h1 class="doc-title"> per page. Never body copy,
    section headings, the table of contents, nav, tables, or citations.
@@ -26,23 +26,26 @@
 (function () {
   'use strict';
 
-  // Block + box-drawing + structural + hex glyphs. Reads as "analytical
-  // terminal", not cyberpunk noise. Identical pool to the reference effect.
+  // Hex + operator + structural ASCII glyphs. Reads as an "analytical terminal"
+  // decode, not cyberpunk noise. Deliberately restricted to characters the live
+  // title font (Inter) is guaranteed to cover, so the scramble animates in the
+  // title's OWN type — no tofu, and no font swap to pop back from on settle.
   // (This file is UTF-8, like the rest of /site-b.)
-  var GLYPHS = '▚▞▙▟▘▝▖▗░▒▓█/\\<>=+:·0123456789ABCDEF'.split('');
+  var GLYPHS = '0123456789ABCDEF/\\<>=+:·#%&'.split('');
 
   function randGlyph() {
     return GLYPHS[(Math.random() * GLYPHS.length) | 0];
   }
 
-  // intensity -> total scramble duration (ms). Higher = longer, more "computed".
-  var INTENSITY_MS = { low: 420, medium: 620, high: 900 };
+  // One central reveal duration (ms), scaled per intensity. A slow, deliberate
+  // "ritual" decode — materially longer than a quick glitch. data-glyph-intensity
+  // picks a multiplier; the default is medium (1x).
+  var BASE_MS = 2000;
+  var INTENSITY = { low: 0.62, medium: 1, high: 1.5 };
 
-  // Monospace is applied ONLY during the scramble. It guarantees coverage of the
-  // block/hex glyphs and an equal advance per character, so the large serif
-  // display title neither renders tofu nor reflows its balanced line breaks
-  // mid-decode. The settled title restores the editorial serif (font cleared).
-  var MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
+  // Un-revealed glyphs re-randomize on this cadence (ms) rather than every frame,
+  // so the un-decoded tail mutates at a calm, intentional rate instead of strobing.
+  var CHURN_MS = 50;
 
   function reducedMotion() {
     return !!(window.matchMedia &&
@@ -59,25 +62,35 @@
     // Static path — honour reduced-motion and an explicit per-title opt-out.
     if (reducedMotion() || el.getAttribute('data-glyph') === 'off') return;
 
-    var duration = INTENSITY_MS[el.getAttribute('data-glyph-intensity')] || INTENSITY_MS.medium;
+    var duration = Math.round(BASE_MS * (INTENSITY[el.getAttribute('data-glyph-intensity')] || INTENSITY.medium));
     var delay = parseInt(el.getAttribute('data-glyph-delay'), 10);
     if (isNaN(delay)) delay = 0;
     var len = text.length;
 
-    // Reserve the natural (serif) height + switch to monospace for the pass, so
-    // the surrounding reading column never shifts. Both are cleared on settle.
-    var prevFont = el.style.fontFamily;
+    // Reserve the natural height so the reading column never shifts as the line
+    // count settles. The font is deliberately NOT changed — the scramble renders
+    // in the title's own type, so there is nothing to "pop" back from on settle.
+    // Tabular figures keep the hex digits on an even advance during the decode.
     var prevMinHeight = el.style.minHeight;
+    var prevNumeric = el.style.fontVariantNumeric;
     var naturalHeight = el.offsetHeight;
-    el.style.fontFamily = MONO;
     if (naturalHeight) el.style.minHeight = naturalHeight + 'px';
+    el.style.fontVariantNumeric = 'tabular-nums';
 
     var begin = null;
     var raf = null;
+    var lastChurn = -1;
+    var pool = new Array(len); // cached glyph per position, refreshed on churn
+
+    function refreshPool() {
+      for (var i = 0; i < len; i++) {
+        if (text.charAt(i) !== ' ') pool[i] = randGlyph();
+      }
+    }
 
     function settle() {
-      el.style.fontFamily = prevFont;
       el.style.minHeight = prevMinHeight;
+      el.style.fontVariantNumeric = prevNumeric;
       el.textContent = text; // exact original text is the final value
     }
 
@@ -85,10 +98,11 @@
       if (begin === null) begin = now + delay; // anchor to the rAF clock
       var p = now < begin ? 0 : Math.min(1, (now - begin) / duration);
       var locked = Math.floor(p * len); // chars resolved so far, left -> right
+      if (now - lastChurn >= CHURN_MS) { refreshPool(); lastChurn = now; } // calm cadence
       var s = '';
       for (var i = 0; i < len; i++) {
         if (text.charAt(i) === ' ') s += ' '; // spaces preserved (word shape)
-        else s += i < locked ? text.charAt(i) : randGlyph();
+        else s += i < locked ? text.charAt(i) : pool[i];
       }
       el.textContent = s;
       if (p < 1) raf = requestAnimationFrame(tick);
