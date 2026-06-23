@@ -2185,6 +2185,86 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
   transition: background var(--motion-base) var(--ease-standard);
 }
 .floatnav-prev:hover, .floatnav-prev:focus-visible { background: var(--floatnav-hover); }
+
+/* ---------------------------------------------------------------------------
+   NARRATION MINI-PLAYER — a slim transport (play/pause · scrub · time-left)
+   docked above the nav pill. reading.js injects it only once narration is
+   armed. It shares the inverted floatnav surface so it reads as one quiet
+   instrument with the quick-nav group; accent fill shows progress, the track
+   stays subtly visible, and the thumb is a refined dot. Theme-aware via the
+   same --floatnav-* tokens the pill uses.
+   --------------------------------------------------------------------------- */
+/* Stack the transport above the existing button pill (single child = unchanged). */
+.floatnav { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-2); }
+.floatnav-player {
+  --fnp-track: rgba(255, 255, 255, .24);
+  --fnp-fill: 0%;
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  background: var(--floatnav-bg);
+  color: var(--floatnav-fg);
+  box-shadow: 0 6px 18px -8px rgba(10, 14, 18, .45);
+}
+[data-theme="dark"] .floatnav-player { --fnp-track: rgba(0, 0, 0, .22); }
+.floatnav-player[hidden] { display: none; }
+
+.floatnav-play {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.9rem; height: 1.9rem; flex: 0 0 auto;
+  padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--floatnav-fg); cursor: pointer;
+  transition: background var(--motion-base) var(--ease-standard);
+}
+.floatnav-play:hover, .floatnav-play:focus-visible { background: var(--floatnav-hover); }
+.floatnav-play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.floatnav-play .fn-icon { width: .95rem; height: .95rem; }
+.floatnav-play .fn-ico-pause { display: none; }
+.floatnav-player[data-state="playing"] .fn-ico-play  { display: none; }
+.floatnav-player[data-state="playing"] .fn-ico-pause { display: inline; }
+
+/* Range input: transparent surround, accent fill to --fnp-fill, faint track after. */
+.floatnav-progress-input {
+  -webkit-appearance: none; appearance: none;
+  flex: 1 1 auto; min-width: 6.5rem; align-self: center;
+  height: 1.25rem; margin: 0; padding: 0;
+  background: transparent; cursor: pointer;
+}
+.floatnav-progress-input:disabled { cursor: default; opacity: .5; }
+.floatnav-progress-input::-webkit-slider-runnable-track {
+  height: 3px; border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) 0 var(--fnp-fill), var(--fnp-track) var(--fnp-fill) 100%);
+}
+.floatnav-progress-input::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 11px; height: 11px; margin-top: -4px; border-radius: 50%;
+  background: var(--floatnav-fg);
+  box-shadow: 0 0 0 2px var(--floatnav-bg), 0 1px 3px rgba(0, 0, 0, .45);
+  transition: transform var(--motion-base) var(--ease-standard);
+}
+.floatnav-progress-input::-moz-range-track    { height: 3px; border-radius: 999px; background: var(--fnp-track); }
+.floatnav-progress-input::-moz-range-progress { height: 3px; border-radius: 999px; background: var(--accent); }
+.floatnav-progress-input::-moz-range-thumb {
+  width: 11px; height: 11px; border: 0; border-radius: 50%;
+  background: var(--floatnav-fg); box-shadow: 0 0 0 2px var(--floatnav-bg);
+}
+.floatnav-progress-input:hover::-webkit-slider-thumb,
+.floatnav-progress-input:focus-visible::-webkit-slider-thumb { transform: scale(1.18); }
+.floatnav-progress-input:focus-visible { outline: none; }
+.floatnav-progress-input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--floatnav-bg), 0 0 0 4px var(--accent); }
+.floatnav-progress-input:focus-visible::-moz-range-thumb     { box-shadow: 0 0 0 2px var(--floatnav-bg), 0 0 0 4px var(--accent); }
+
+.floatnav-time {
+  flex: 0 0 auto; min-width: 3.1em; text-align: right;
+  font-family: var(--font-mono); font-size: .72rem; font-variant-numeric: tabular-nums;
+  color: var(--floatnav-fg); opacity: .68; white-space: nowrap;
+}
+.floatnav-player[data-state="error"] .floatnav-time { color: #e0623f; opacity: .9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .floatnav-progress-input::-webkit-slider-thumb { transition: none; }
+}
+
 .fn-soon {
   font-size: 0.6rem;
   text-transform: uppercase;

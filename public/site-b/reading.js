@@ -156,14 +156,16 @@
     function hideSoon() {
       clearTimeout(idle);
       idle = setTimeout(function () {
+        if (nav.hasAttribute('data-pinned')) return;            // narration playing: keep transport visible
         if (!nav.matches(':hover') && !nav.contains(document.activeElement)) {
           nav.removeAttribute('data-visible');
         }
       }, 3200);
     }
     function onScroll() {
-      if (window.scrollY > threshold) { nav.setAttribute('data-visible', ''); hideSoon(); }
-      else { nav.removeAttribute('data-visible'); clearTimeout(idle); }
+      if (nav.hasAttribute('data-pinned') || window.scrollY > threshold) {
+        nav.setAttribute('data-visible', ''); hideSoon();
+      } else { nav.removeAttribute('data-visible'); clearTimeout(idle); }
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
@@ -312,46 +314,8 @@
       });
     }
 
-    // Listen — Web Speech API PLACEHOLDER. Chunk by block so long parts don't cut off on iOS Safari.
-    var listenBtn = bar.querySelector('[data-listen]');
-    var listenLabel = bar.querySelector('[data-listen-label]');
-    var synth = window.speechSynthesis;
-    if (listenBtn && synth) {
-      var chunks = [], idx = 0, playing = false;
-      function build() {
-        var out = [];
-        document.querySelectorAll('.shell-main .section-title, .shell-main .prose-lead, .shell-main .prose p')
-          .forEach(function (n) { var t = (n.textContent || '').trim(); if (t) out.push(t); });
-        return out;
-      }
-      function next() {
-        if (!playing) return;
-        if (idx >= chunks.length) { stop(); return; }
-        var u = new SpeechSynthesisUtterance(chunks[idx]);
-        u.rate = 1;
-        u.onend = function () { idx++; next(); };
-        synth.speak(u);
-      }
-      function start() {
-        if (!chunks.length) chunks = build();
-        playing = true; idx = 0;
-        listenBtn.setAttribute('aria-pressed', 'true');
-        if (listenLabel) listenLabel.textContent = 'Stop';
-        synth.cancel(); next();
-        announce('Playing audio');
-      }
-      function stop() {
-        playing = false; idx = 0;
-        listenBtn.setAttribute('aria-pressed', 'false');
-        if (listenLabel) listenLabel.textContent = 'Listen';
-        synth.cancel();
-        announce('Audio stopped');
-      }
-      listenBtn.addEventListener('click', function () { playing ? stop() : start(); });
-      window.addEventListener('pagehide', stop);
-    } else if (listenBtn) {
-      listenBtn.hidden = true; // no speech support: hide the placeholder rather than show a dead button
-    }
+    // Listen / voice narration is owned by narration() below — a shared mini-player
+    // (transport + scrub slider + time-remaining) docked in the floating nav.
   }
 
   /* ---- Remembered home: route the Parts' "home" affordances to this site's cover *
@@ -430,6 +394,296 @@
     });
   }
 
+  /* ---- Voice narration mini-player ------------------------------------------ *
+   * One shared controller, one audio source, one piece of UI: a slim transport
+   * (play/pause · scrub slider · time-remaining) docked above the floating-nav
+   * pill. Engine-agnostic — it prefers a real <audio> narration source when one
+   * is wired (exact timeline + seeking), and otherwise drives the existing Web
+   * Speech narration with a derived timeline so the same scrubber still works.
+   * The UI appears only once narration is armed, is keyboard-operable, theme-aware,
+   * never autoplays, never spawns overlapping playback, and is torn down on unload. */
+  function narration() {
+    var listenBtn   = document.querySelector('[data-listen]');
+    var listenLabel = document.querySelector('[data-listen-label]');
+    var statusEl    = document.querySelector('.part-actions-status');
+    var nav         = document.querySelector('.floatnav');
+
+    function announce(m) { if (statusEl) statusEl.textContent = m; }
+
+    /* --- engine: real <audio> when available, else Web Speech ----------------- */
+    function pickSource() {
+      var el = document.querySelector('audio[data-narration]');
+      var src = (el && (el.currentSrc || el.src)) ||
+                (listenBtn && listenBtn.getAttribute('data-narration-src')) ||
+                (window.ACF_NARRATION_SRC || '');
+      return src || '';
+    }
+
+    function makeAudioEngine(emit, src) {
+      var a = new Audio();
+      a.preload = 'metadata';
+      a.src = src;
+      a.addEventListener('loadedmetadata', function () { emit('durationchange'); });
+      a.addEventListener('durationchange', function () { emit('durationchange'); });
+      a.addEventListener('timeupdate',     function () { emit('timeupdate'); });
+      a.addEventListener('play',           function () { emit('statechange'); });
+      a.addEventListener('pause',          function () { emit('statechange'); });
+      a.addEventListener('ended',          function () { emit('ended'); });
+      a.addEventListener('error',          function () { emit('error'); });
+      return {
+        duration:    function () { return isFinite(a.duration) ? a.duration : 0; },
+        currentTime: function () { return a.currentTime || 0; },
+        state:       function () { return a.ended ? 'ended' : (!a.paused ? 'playing' : (a.currentTime > 0 ? 'paused' : 'idle')); },
+        play:        function () { var p = a.play(); if (p && p.catch) p.catch(function () { emit('error'); }); },
+        pause:       function () { a.pause(); },
+        stop:        function () { a.pause(); try { a.currentTime = 0; } catch (e) {} emit('statechange'); emit('timeupdate'); },
+        seek:        function (t) { try { a.currentTime = Math.max(0, Math.min(t, a.duration || t)); } catch (e) {} emit('timeupdate'); },
+        destroy:     function () { try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) {} }
+      };
+    }
+
+    function makeSpeechEngine(emit) {
+      var synth = window.speechSynthesis;
+      if (!synth) return null;
+      var chunks = [], durs = [], starts = [], total = 0;
+      var idx = 0, playing = false, paused = false;
+      var clockBase = 0, chunkStart = 0, pausedAt = 0, raf = 0;
+
+      function nowSec() { return (window.performance ? performance.now() : Date.now()) / 1000; }
+      // Pack a block into <=~200-char utterances at word boundaries (avoids the
+      // Blink long-utterance cut-off), preferring to break after a sentence end.
+      function pack(s, out) {
+        s = (s || '').replace(/\s+/g, ' ').trim();
+        if (!s) return;
+        if (s.length <= 220) { out.push(s); return; }
+        var words = s.split(' '), line = '';
+        for (var i = 0; i < words.length; i++) {
+          var w = words[i], cand = line ? line + ' ' + w : w;
+          if (cand.length > 200 && line) { out.push(line); line = w; }
+          else { line = cand; }
+          if (line.length >= 120 && /[.!?]$/.test(w)) { out.push(line); line = ''; }
+        }
+        if (line) out.push(line);
+      }
+      function build() {
+        var out = [];
+        document.querySelectorAll('.shell-main .section-title, .shell-main .prose-lead, .shell-main .prose p')
+          .forEach(function (n) { pack(n.textContent, out); });
+        chunks = out;
+        durs = out.map(function (t) { return Math.max(1.4, t.length / 14.5); }); // ~14.5 chars/sec @ rate 1
+        starts = []; var acc = 0;
+        durs.forEach(function (d) { starts.push(acc); acc += d; });
+        total = acc;
+      }
+      function curTime() {
+        if (!chunks.length) return 0;
+        if (paused) return pausedAt;
+        if (!playing) return clockBase;
+        var cap = durs[idx] * 0.985;                  // hold just shy of the boundary until onend re-syncs
+        return starts[idx] + Math.min(nowSec() - chunkStart, cap);
+      }
+      function tick() {
+        if (!playing || paused) return;
+        emit('timeupdate');
+        raf = window.requestAnimationFrame(tick);
+      }
+      function speakFrom(i) {
+        try { synth.cancel(); } catch (e) {}
+        idx = i; clockBase = starts[i]; chunkStart = nowSec();
+        var u = new SpeechSynthesisUtterance(chunks[i]);
+        u.rate = 1;
+        u.onend = function () {
+          if (!playing || paused) return;             // superseded by pause / seek / stop
+          if (idx + 1 >= chunks.length) { finish(); return; }
+          speakFrom(idx + 1);
+        };
+        u.onerror = function () { emit('error'); };
+        synth.speak(u);
+      }
+      function finish() {
+        playing = false; paused = false; idx = 0; clockBase = 0; pausedAt = 0;
+        window.cancelAnimationFrame(raf);
+        emit('ended');
+      }
+      return {
+        duration:    function () { return total; },
+        currentTime: curTime,
+        state:       function () { return paused ? 'paused' : (playing ? 'playing' : 'idle'); },
+        play: function () {
+          if (playing && !paused) return;
+          if (!chunks.length) build();
+          if (paused) {                               // resume in place
+            paused = false;
+            chunkStart = nowSec() - (pausedAt - starts[idx]);
+            try { synth.resume(); } catch (e) {}
+            emit('statechange'); tick(); return;
+          }
+          playing = true; paused = false;
+          emit('statechange');
+          speakFrom(idx);                             // idx may be > 0 after a seek-while-idle
+          tick();
+        },
+        pause: function () {
+          if (!playing || paused) return;
+          pausedAt = curTime(); paused = true;
+          window.cancelAnimationFrame(raf);
+          try { synth.pause(); } catch (e) {}
+          emit('statechange'); emit('timeupdate');
+        },
+        stop: function () {
+          playing = false; paused = false; idx = 0; clockBase = 0; pausedAt = 0;
+          window.cancelAnimationFrame(raf);
+          try { synth.cancel(); } catch (e) {}
+          emit('statechange'); emit('timeupdate');
+        },
+        seek: function (t) {
+          if (!chunks.length) build();
+          t = Math.max(0, Math.min(t, Math.max(0, total - 0.05)));
+          var i = 0;
+          for (var k = 0; k < starts.length; k++) { if (starts[k] <= t) i = k; else break; }
+          idx = i; clockBase = starts[i];
+          if (paused) { pausedAt = starts[i]; emit('timeupdate'); return; }
+          if (playing) { speakFrom(i); emit('timeupdate'); return; }
+          emit('timeupdate');                         // idle: remember position; play() resumes from idx
+        },
+        destroy: function () { try { synth.cancel(); } catch (e) {} window.cancelAnimationFrame(raf); }
+      };
+    }
+
+    function onEvent(type) {
+      if (type === 'ended') { onEnded(); return; }
+      if (type === 'error') { onError(); return; }
+      paint();                                        // timeupdate | durationchange | statechange
+    }
+
+    var src = pickSource();
+    var engine = src ? makeAudioEngine(onEvent, src) : makeSpeechEngine(onEvent);
+    if (!engine) { if (listenBtn) listenBtn.hidden = true; return; }   // no narration capability at all
+
+    /* --- mini-player UI (injected above the nav pill) ------------------------- */
+    var ui = null;
+    if (nav) {
+      var inner = nav.querySelector('.floatnav-inner');
+      var player = document.createElement('div');
+      player.className = 'floatnav-player';
+      player.setAttribute('data-state', 'idle');
+      player.hidden = true;
+      player.innerHTML =
+        '<button type="button" class="floatnav-play" aria-label="Play narration" aria-pressed="false">' +
+          '<svg class="fn-icon fn-ico-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.2v13.6L19 12z"/></svg>' +
+          '<svg class="fn-icon fn-ico-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 5h3.1v14H7zM13.9 5H17v14h-3.1z"/></svg>' +
+        '</button>' +
+        '<input type="range" class="floatnav-progress-input" min="0" max="1000" value="0" step="1" aria-label="Narration position" disabled>' +
+        '<span class="floatnav-time" aria-hidden="true">-0:00</span>';
+      nav.insertBefore(player, inner);
+      ui = {
+        player: player,
+        play:  player.querySelector('.floatnav-play'),
+        input: player.querySelector('.floatnav-progress-input'),
+        time:  player.querySelector('.floatnav-time')
+      };
+    }
+
+    var scrubbing = false, armed = false;
+
+    function fmt(sec) {
+      sec = Math.max(0, Math.floor(sec));
+      var m = Math.floor(sec / 60), s = sec % 60;
+      return '-' + m + ':' + (s < 10 ? '0' : '') + s;
+    }
+    function spoken(sec) {
+      sec = Math.max(0, Math.round(sec));
+      var m = Math.floor(sec / 60), s = sec % 60;
+      return (m ? m + ' minute' + (m === 1 ? '' : 's') + ' ' : '') + s + ' second' + (s === 1 ? '' : 's') + ' remaining';
+    }
+
+    function arm() {
+      armed = true;
+      if (ui) ui.player.hidden = false;
+      if (nav) { nav.hidden = false; nav.setAttribute('data-visible', ''); nav.setAttribute('data-pinned', ''); }
+    }
+    function disarm() {
+      armed = false;
+      if (ui) ui.player.hidden = true;
+      if (nav) { nav.removeAttribute('data-pinned'); if (window.scrollY <= 600) nav.removeAttribute('data-visible'); }
+    }
+
+    function paint() {
+      var dur = engine.duration(), cur = engine.currentTime(), st = engine.state();
+      var active = (st === 'playing' || st === 'paused');
+      if (listenBtn) {
+        listenBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        if (listenLabel) listenLabel.textContent = active ? 'Stop' : 'Listen';
+      }
+      if (!ui) return;
+      var hasDur = isFinite(dur) && dur > 0.1;
+      ui.player.setAttribute('data-state', st);
+      ui.play.setAttribute('aria-label', st === 'playing' ? 'Pause narration' : 'Play narration');
+      ui.play.setAttribute('aria-pressed', st === 'playing' ? 'true' : 'false');
+      ui.input.disabled = !hasDur;
+      if (hasDur) {
+        var frac = Math.min(1, cur / dur);
+        if (!scrubbing) {
+          ui.input.value = String(Math.round(frac * 1000));
+          ui.input.style.setProperty('--fnp-fill', (frac * 100).toFixed(1) + '%');
+          ui.input.setAttribute('aria-valuetext', spoken(dur - cur));
+        }
+        ui.time.textContent = fmt(dur - cur);
+      } else {
+        ui.input.value = '0';
+        ui.input.style.setProperty('--fnp-fill', '0%');
+        ui.time.textContent = '-0:00';
+      }
+    }
+
+    function onEnded() {
+      engine.stop();                                  // reset to 0; keep the player armed for one-click replay
+      scrubbing = false;
+      paint();
+      announce('Narration finished');
+    }
+    function onError() {
+      scrubbing = false;
+      if (ui) { ui.player.setAttribute('data-state', 'error'); ui.input.disabled = true; ui.time.textContent = '—'; }
+      if (listenBtn) { listenBtn.setAttribute('aria-pressed', 'false'); if (listenLabel) listenLabel.textContent = 'Listen'; }
+      announce('Narration unavailable');
+    }
+
+    // Header Listen button = start / stop (and hide the transport on stop).
+    if (listenBtn) listenBtn.addEventListener('click', function () {
+      var st = engine.state();
+      if (st === 'playing' || st === 'paused') { engine.stop(); disarm(); announce('Narration stopped'); }
+      else { arm(); engine.play(); announce('Playing narration'); }
+    });
+
+    // Floating-nav transport = play / pause (never hides; mirrors the same state).
+    if (ui) {
+      ui.play.addEventListener('click', function () {
+        if (engine.state() === 'playing') { engine.pause(); announce('Narration paused'); }
+        else { arm(); engine.play(); announce('Playing narration'); }
+      });
+      ui.input.addEventListener('input', function () {
+        scrubbing = true;
+        var dur = engine.duration();
+        if (!(dur > 0)) return;
+        var frac = Number(ui.input.value) / 1000;
+        ui.input.style.setProperty('--fnp-fill', (frac * 100).toFixed(1) + '%');
+        ui.input.setAttribute('aria-valuetext', spoken(dur - frac * dur));
+        ui.time.textContent = fmt(dur - frac * dur);
+      });
+      ui.input.addEventListener('change', function () {
+        var dur = engine.duration();
+        scrubbing = false;
+        if (dur > 0) engine.seek((Number(ui.input.value) / 1000) * dur);
+      });
+      ui.input.addEventListener('pointerup', function () { scrubbing = false; });
+      ui.input.addEventListener('blur', function () { scrubbing = false; });
+    }
+
+    window.addEventListener('pagehide', function () { engine.stop(); engine.destroy(); });
+    paint();
+  }
+
   /* ---- init -------------------------------------------------------------- */
   theme();
   scrollSpy();
@@ -442,6 +696,7 @@
   highlights();
   stepperProgress();
   partActions();
+  narration();
   chartBuild();
   chartTips();
   homeLinks();
