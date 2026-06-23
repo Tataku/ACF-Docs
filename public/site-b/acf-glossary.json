@@ -17,11 +17,11 @@
     },
     "usage": "Tooltip layer one shows 'definition'. Layer two ('see where this appears later') is built from 'appearsLater' + 'related'. The 'related' and 'chart' ids share vocabulary with the chart-handoff CONNECTS-TO network so the glossary and the charts form one cross-reference graph. Internal sources cite the framework's own Parts; external sources cite primary/academic references.",
     "rollout": {
-      "wave1": ["cis", "convexity", "macro-thesis", "tripwire", "momentum-filter", "tax-wrapper", "torque", "ballast", "hype", "fiscal-dominance", "buy-borrow-die", "fragility", "posture"],
+      "wave1": ["cis", "convexity", "macro-thesis", "tripwire", "momentum-filter", "tax-wrapper", "torque", "ballast", "hype", "fiscal-dominance", "buy-borrow-die", "fragility", "posture", "tam", "power-law-corridor", "sequence-of-returns-risk"],
       "wave2": ["policy-reflexivity", "volatility-clustering", "correlation-instability", "survivable-compounding", "right-tail-outcomes", "agentic-verification"]
     },
-    "harmonizeBeforeLocking": ["power-law convergence / valuation corridor", "carry vectors"],
-    "harmonizeNote": "Two Part 1 terms are gestured at more than defined there. Reconcile against Parts 3-5 copy before writing their tooltip text, or they will read shallower than the later parts."
+    "harmonizeBeforeLocking": ["carry vectors"],
+    "harmonizeNote": "Carry vectors are still gestured at more than defined in Part 1. Reconcile against Part 5 copy before writing the tooltip text, or it will read shallower than the later parts. The power-law corridor was harmonized against Part 3 and added to the glossary."
   },
   "terms": [
     {
@@ -251,6 +251,42 @@
       "related": ["tripwire", "cis"],
       "appearsLater": { "part": 5, "topic": "Verification inside position management" },
       "chart": null
+    },
+    {
+      "id": "tam",
+      "term": "TAM",
+      "aliases": ["total addressable market", "addressable market"],
+      "wave": 1,
+      "definition": "Total Addressable Market: a deliberately conservative estimate of the capital a market could absorb over time, used to size an asset's potential rather than to forecast a price.",
+      "length": "medium",
+      "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone" },
+      "related": ["convexity", "cis", "macro-thesis"],
+      "appearsLater": { "part": 3, "topic": "The conservative addressable-market estimate for the Bitcoin reserve" },
+      "chart": null
+    },
+    {
+      "id": "power-law-corridor",
+      "term": "Power-law corridor",
+      "aliases": ["power law", "power-law", "power-law bands", "power-law trendline", "power-law convergence", "valuation corridor"],
+      "wave": 1,
+      "definition": "A long-run regression channel, on a log scale, that Bitcoin's price has historically tracked. The framework reads it as a context band for accumulation pace, not a deterministic price prediction.",
+      "length": "medium",
+      "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone; external power-law model (Santostasi)" },
+      "related": ["convexity", "cis", "macro-thesis"],
+      "appearsLater": { "part": 3, "topic": "Power-law bands and model convergence" },
+      "chart": null
+    },
+    {
+      "id": "sequence-of-returns-risk",
+      "term": "Sequence-of-returns risk",
+      "aliases": ["sequence of returns risk", "sequence risk", "sequencing risk"],
+      "wave": 1,
+      "definition": "The risk that the order of gains and losses, not just their average, determines whether a portfolio survives. A large drawdown at the wrong time can permanently impair compounding.",
+      "length": "medium",
+      "source": { "kind": "internal", "ref": "Part 1 manifesto; operational in Part 5" },
+      "related": ["survivable-compounding", "fragility", "posture"],
+      "appearsLater": { "part": 5, "topic": "Position sizing against sequence risk" },
+      "chart": "05"
     }
   ]
 }
