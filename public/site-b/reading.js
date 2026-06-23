@@ -264,8 +264,9 @@
   }
 
   /* ---- Part action bar: Share + Listen --------------------------------------- *
-   * Listen is a Web Speech (speechSynthesis) PLACEHOLDER — a reading convenience,
-   * NOT the accessibility story; swap for generated audio when the copy is final.
+   * Listen plays AI narration (OpenAI TTS via /api/narration) when a provider key
+   * is configured, and falls back to the browser's Web Speech voice otherwise.
+   * Audio is generated on click only (never on load), one stream at a time.
    * Feature-detected: a no-op when .part-actions is absent (cover + future pages). */
   function partActions() {
     var bar = document.querySelector('.part-actions');
@@ -305,45 +306,219 @@
       });
     }
 
-    // Listen — Web Speech API PLACEHOLDER. Chunk by block so long parts don't cut off on iOS Safari.
+    // Listen — AI narration (OpenAI TTS) with a Web Speech fallback. The whole
+    // upgrade lives here in JS + CSS, so the Part HTML files stay untouched and
+    // the change is fully reversible (delete /api/narration -> Web Speech only).
     var listenBtn = bar.querySelector('[data-listen]');
     var listenLabel = bar.querySelector('[data-listen-label]');
-    var synth = window.speechSynthesis;
-    if (listenBtn && synth) {
-      var chunks = [], idx = 0, playing = false;
-      function build() {
-        var out = [];
+    if (listenBtn) {
+      var synth = window.speechSynthesis || null;
+
+      // --- readable text -----------------------------------------------------
+      var blocks = null;
+      function buildBlocks() {
+        if (blocks) return blocks;
+        blocks = [];
         document.querySelectorAll('.shell-main .section-title, .shell-main .prose-lead, .shell-main .prose p')
-          .forEach(function (n) { var t = (n.textContent || '').trim(); if (t) out.push(t); });
-        return out;
+          .forEach(function (n) { var t = (n.textContent || '').trim(); if (t) blocks.push(t); });
+        return blocks;
       }
-      function next() {
-        if (!playing) return;
-        if (idx >= chunks.length) { stop(); return; }
-        var u = new SpeechSynthesisUtterance(chunks[idx]);
+      // Group blocks into <=API_MAX-char segments (OpenAI TTS caps input at 4096).
+      var API_MAX = 3500;
+      var segs = null;
+      function buildSegments() {
+        if (segs) return segs;
+        segs = [];
+        var cur = '';
+        buildBlocks().forEach(function (b) {
+          if (b.length > API_MAX) {                       // a single long block: split by sentence
+            if (cur) { segs.push(cur); cur = ''; }
+            var sentences = b.match(/[^.!?]+[.!?]*\s*/g) || [b], piece = '';
+            sentences.forEach(function (s) {
+              if ((piece + s).length > API_MAX) { if (piece.trim()) segs.push(piece.trim()); piece = s; }
+              else piece += s;
+            });
+            if (piece.trim()) segs.push(piece.trim());
+          } else if ((cur ? cur.length + 1 : 0) + b.length > API_MAX) {
+            segs.push(cur); cur = b;
+          } else {
+            cur = cur ? cur + ' ' + b : b;
+          }
+        });
+        if (cur) segs.push(cur);
+        return segs;
+      }
+
+      // --- capability (resolved lazily; no audio, and no load-time ping when
+      //     Web Speech already covers us) --------------------------------------
+      var method = null; // 'api' | 'browser' | 'unavailable'
+      var capabilityPromise = null;
+      function resolveCapability() {
+        if (capabilityPromise) return capabilityPromise;
+        var ctrl = new AbortController();
+        var to = setTimeout(function () { ctrl.abort(); }, 5000);
+        capabilityPromise = fetch('/api/narration', { method: 'GET', signal: ctrl.signal })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { method = (d && d.available) ? 'api' : (synth ? 'browser' : 'unavailable'); })
+          .catch(function () { method = synth ? 'browser' : 'unavailable'; })
+          .then(function () { clearTimeout(to); return method; });
+        return capabilityPromise;
+      }
+
+      // --- state -------------------------------------------------------------
+      var STATE = 'idle';
+      function setState(s) {
+        STATE = s;
+        bar.setAttribute('data-narration-state', s);
+        listenBtn.setAttribute('aria-busy', s === 'loading' ? 'true' : 'false');
+        listenBtn.setAttribute('aria-pressed', (s === 'playing' || s === 'paused') ? 'true' : 'false');
+        if (listenLabel) {
+          listenLabel.textContent =
+            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Loading' : 'Listen';
+        }
+        listenBtn.setAttribute('aria-label',
+          s === 'playing' ? 'Pause narration' : s === 'paused' ? 'Resume narration' : 'Listen to this part');
+      }
+
+      // --- API audio engine --------------------------------------------------
+      var audio = null, runId = 0, inflight = null;
+      var cache = new Map(); // transcript hash -> object URL (this page session)
+      function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; } return h.toString(36); }
+
+      function fetchSegment(text, myRun) {
+        var key = hash(text);
+        if (cache.has(key)) return Promise.resolve(cache.get(key));
+        var ctrl = new AbortController();
+        if (myRun === runId) inflight = ctrl;
+        return fetch('/api/narration', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text }),
+          signal: ctrl.signal
+        }).then(function (r) {
+          if (!r.ok) {
+            return r.json().catch(function () { return {}; }).then(function (e) {
+              var err = new Error((e && e.message) || ('HTTP ' + r.status));
+              err.fallback = e && e.fallback;
+              throw err;
+            });
+          }
+          return r.blob();
+        }).then(function (blob) {
+          var u = URL.createObjectURL(blob);
+          cache.set(key, u);
+          return u;
+        });
+      }
+
+      function playApi(i, myRun) {
+        if (myRun !== runId) return;
+        var list = buildSegments();
+        if (i >= list.length) { finish(myRun); return; }
+        fetchSegment(list[i], myRun).then(function (url) {
+          if (myRun !== runId) return;
+          audio = new Audio(url);
+          audio.onended = function () { if (myRun === runId) playApi(i + 1, myRun); };
+          audio.onerror = function () { if (myRun === runId) { setState('error'); announce('Narration error'); } };
+          var p = audio.play();
+          if (p && p.catch) p.catch(function () { if (myRun === runId) setState('error'); });
+          setState('playing');
+        }).catch(function (err) {
+          if (myRun !== runId || (err && err.name === 'AbortError')) return;
+          // Provider failed: fall back to Web Speech from the top (once), else quiet error.
+          if (synth && ((err && err.fallback === 'browser') || i === 0)) { method = 'browser'; startBrowser(myRun); return; }
+          setState('error'); announce('Narration unavailable');
+        });
+      }
+
+      // --- Web Speech engine (fallback) -------------------------------------
+      var bIdx = 0, bList = null;
+      function startBrowser(myRun) {
+        if (!synth) { setState('error'); return; }
+        bList = buildBlocks(); bIdx = 0;
+        synth.cancel(); setState('playing'); announce('Playing audio');
+        speakNext(myRun);
+      }
+      function speakNext(myRun) {
+        if (myRun !== runId) return;
+        if (bIdx >= bList.length) { finish(myRun); return; }
+        var u = new SpeechSynthesisUtterance(bList[bIdx]);
         u.rate = 1;
-        u.onend = function () { idx++; next(); };
+        u.onend = function () { if (myRun === runId) { bIdx++; speakNext(myRun); } };
         synth.speak(u);
       }
+
+      // --- transport ---------------------------------------------------------
       function start() {
-        if (!chunks.length) chunks = build();
-        playing = true; idx = 0;
-        listenBtn.setAttribute('aria-pressed', 'true');
-        if (listenLabel) listenLabel.textContent = 'Stop';
-        synth.cancel(); next();
-        announce('Playing audio');
+        runId++; var myRun = runId;
+        setState('loading'); announce('Loading audio');
+        (method ? Promise.resolve(method) : resolveCapability()).then(function (m) {
+          if (myRun !== runId) return;            // stopped while resolving
+          if (m === 'api') playApi(0, myRun);
+          else if (m === 'browser') startBrowser(myRun);
+          else { setState('idle'); announce('Narration unavailable'); }
+        });
+      }
+      function pause() {
+        if (STATE !== 'playing') return;
+        if (method === 'api' && audio) audio.pause();
+        else if (synth) synth.pause();
+        setState('paused'); announce('Audio paused');
+      }
+      function resume() {
+        if (STATE !== 'paused') return;
+        if (method === 'api' && audio) { var p = audio.play(); if (p && p.catch) p.catch(function () { setState('error'); }); }
+        else if (synth) synth.resume();
+        setState('playing'); announce('Audio resumed');
       }
       function stop() {
-        playing = false; idx = 0;
-        listenBtn.setAttribute('aria-pressed', 'false');
-        if (listenLabel) listenLabel.textContent = 'Listen';
-        synth.cancel();
-        announce('Audio stopped');
+        runId++;                                  // invalidate async work + onended/onend
+        if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
+        if (synth) synth.cancel();
+        if (inflight) { try { inflight.abort(); } catch (e) {} inflight = null; }
+        setState('idle'); announce('Audio stopped');
       }
-      listenBtn.addEventListener('click', function () { playing ? stop() : start(); });
-      window.addEventListener('pagehide', stop);
-    } else if (listenBtn) {
-      listenBtn.hidden = true; // no speech support: hide the placeholder rather than show a dead button
+      function finish(myRun) {
+        if (myRun !== runId) return;
+        audio = null; setState('idle'); announce('Audio finished');
+      }
+
+      // --- wire-up -----------------------------------------------------------
+      // Inject a pause glyph + a dedicated Stop control so the Part HTML stays
+      // untouched. Both inherit the existing .part-action styling.
+      var label = listenBtn.querySelector('.part-action-label');
+      var pauseSvg = '<svg class="pa-icon icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7.5" y="6" width="3.2" height="12" rx="1"></rect><rect x="13.3" y="6" width="3.2" height="12" rx="1"></rect></svg>';
+      if (label) label.insertAdjacentHTML('beforebegin', pauseSvg);
+      else listenBtn.insertAdjacentHTML('beforeend', pauseSvg);
+
+      var stopBtn = document.createElement('button');
+      stopBtn.type = 'button';
+      stopBtn.className = 'part-action part-listen-stop';
+      stopBtn.setAttribute('data-listen-stop', '');
+      stopBtn.setAttribute('aria-label', 'Stop narration');
+      stopBtn.innerHTML = '<svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7" y="7" width="10" height="10" rx="1.5"></rect></svg>';
+      listenBtn.insertAdjacentElement('afterend', stopBtn);
+
+      listenBtn.addEventListener('click', function () {
+        if (STATE === 'playing') pause();
+        else if (STATE === 'paused') resume();
+        else if (STATE === 'loading') stop();     // cancel a pending load
+        else start();                             // idle / error
+      });
+      stopBtn.addEventListener('click', stop);
+      window.addEventListener('pagehide', function () {
+        stop();
+        cache.forEach(function (u) { try { URL.revokeObjectURL(u); } catch (e) {} });
+        cache.clear();
+      });
+
+      // Visibility: Web Speech => usable immediately. Otherwise reveal only if
+      // the capability check confirms a provider (avoid a dead button).
+      setState('idle');
+      if (!synth) {
+        listenBtn.hidden = true;
+        resolveCapability().then(function (m) { if (m === 'api') listenBtn.hidden = false; });
+      }
     }
   }
 
