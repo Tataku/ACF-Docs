@@ -2314,11 +2314,14 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
 .exhibit[data-wide] { max-width: min(54rem, calc(100% - 2 * var(--page-gutter))); }
 /* Live React chart island (site-b-charts.js) renders its own card, so drop the
    static .exhibit chrome when a chart mounts; the static SVG stays the no-JS
-   fallback. Width stays governed by .exhibit / .exhibit[data-wide]. */
-.exhibit.fc-live { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; overflow-x: clip; }
+   fallback. The live card BREAKS OUT wider than body copy (66ch) up to the
+   export chart scale (--exhibit-max), centered — it must not be trapped in the
+   prose measure. The shell lane (--exhibit-col) gives it the room. */
+.exhibit.fc-live { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; overflow-x: clip;
+  max-width: min(var(--exhibit-max), calc(100% - 2 * var(--page-gutter))); margin-inline: auto; }
 /* New chart slots inserted into Part 2/3 (no static fallback): layout only, the
-   React engine renders its own card. Same width contract as .exhibit[data-wide]. */
-.fc-mount { max-width: min(54rem, calc(100% - 2 * var(--page-gutter))); margin: var(--space-8) auto; overflow-x: clip; }
+   React engine renders its own card. Same wide exhibit lane as live exhibits. */
+.fc-mount { max-width: min(var(--exhibit-max), calc(100% - 2 * var(--page-gutter))); margin: var(--space-8) auto; overflow-x: clip; }
 
 .ex-head { margin-bottom: var(--space-3); }
 .ex-eyebrow {
