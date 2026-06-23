@@ -17,7 +17,7 @@
     },
     "usage": "Tooltip layer one shows 'definition'. Layer two ('see where this appears later') is built from 'appearsLater' + 'related'. The 'related' and 'chart' ids share vocabulary with the chart-handoff CONNECTS-TO network so the glossary and the charts form one cross-reference graph. Internal sources cite the framework's own Parts; external sources cite primary/academic references.",
     "rollout": {
-      "wave1": ["cis", "convexity", "macro-thesis", "tripwire", "momentum-filter", "tax-wrapper", "torque", "ballast", "hype", "fiscal-dominance", "buy-borrow-die", "fragility", "posture", "tam", "power-law-corridor", "sequence-of-returns-risk"],
+      "wave1": ["cis", "convexity", "macro-thesis", "tripwire", "momentum-filter", "tax-wrapper", "torque", "ballast", "hype", "fiscal-dominance", "buy-borrow-die", "fragility", "posture", "tam", "power-law-corridor", "sequence-of-returns-risk", "barbell", "dca", "dry-powder"],
       "wave2": ["policy-reflexivity", "volatility-clustering", "correlation-instability", "survivable-compounding", "right-tail-outcomes", "agentic-verification"]
     },
     "harmonizeBeforeLocking": ["carry vectors"],
@@ -32,7 +32,7 @@
       "definition": "Exposure where the upside can compound far faster than the downside, so being right pays off disproportionately more than being wrong costs.",
       "length": "short",
       "source": { "kind": "internal", "ref": "Part 6 — Convexity & Framework Integrity Scoring" },
-      "related": ["cis", "posture", "torque", "fragility"],
+      "related": ["cis", "posture", "torque", "fragility", "power-law-corridor"],
       "appearsLater": { "part": 5, "topic": "How convexity is expressed through Posture" },
       "chart": "S1"
     },
@@ -56,7 +56,7 @@
       "definition": "A probabilistic read of the current regime that sets the portfolio's structure. It is a framing device, not a point forecast.",
       "length": "short",
       "source": { "kind": "internal", "ref": "Part 2 — Lineage & Macro Thesis" },
-      "related": ["fiscal-dominance", "policy-reflexivity", "posture", "tripwire"],
+      "related": ["fiscal-dominance", "policy-reflexivity", "posture", "tripwire", "tam"],
       "appearsLater": { "part": 2, "topic": "The lineage and the full regime thesis" },
       "chart": "L2"
     },
@@ -164,7 +164,7 @@
       "definition": "Vulnerability to disorder and nonlinear shocks, not just price movement. A fragile position breaks when stress rises.",
       "length": "medium",
       "source": { "kind": "external", "ref": "Taleb & Douady (2012), Mathematical Definition, Mapping, and Detection of (Anti)Fragility" },
-      "related": ["convexity", "tripwire", "cis"],
+      "related": ["convexity", "tripwire", "cis", "sequence-of-returns-risk"],
       "appearsLater": { "part": 6, "topic": "Fragility inside the CIS score" },
       "chart": "01"
     },
@@ -224,7 +224,7 @@
       "definition": "Building a portfolio that can stay alive through timing errors, volatility, and thesis delays while keeping exposure to large upside.",
       "length": "medium",
       "source": { "kind": "internal", "ref": "Part 1 manifesto" },
-      "related": ["convexity", "fragility", "posture"],
+      "related": ["convexity", "fragility", "posture", "sequence-of-returns-risk"],
       "appearsLater": null,
       "chart": "06"
     },
@@ -287,6 +287,42 @@
       "related": ["survivable-compounding", "fragility", "posture"],
       "appearsLater": { "part": 5, "topic": "Position sizing against sequence risk" },
       "chart": "05"
+    },
+    {
+      "id": "barbell",
+      "term": "Barbell",
+      "aliases": ["barbell strategy", "barbell structure"],
+      "wave": 1,
+      "definition": "A structure that pairs very safe holdings with a small, highly convex allocation and skips the fragile middle. It targets payoff asymmetry, not low volatility.",
+      "length": "medium",
+      "source": { "kind": "external", "ref": "Taleb, barbell strategy; internal Part 2 lineage" },
+      "related": ["convexity", "fragility", "ballast", "torque"],
+      "appearsLater": { "part": 5, "topic": "Portfolio construction and posture expression" },
+      "chart": null
+    },
+    {
+      "id": "dca",
+      "term": "Dollar-cost averaging",
+      "aliases": ["DCA", "dollar cost averaging"],
+      "wave": 1,
+      "definition": "Buying a fixed amount on a set schedule regardless of price, which spreads entry risk across time. The framework funds it from income and accelerates it into deep drawdowns.",
+      "length": "medium",
+      "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone" },
+      "related": ["survivable-compounding", "ballast", "sequence-of-returns-risk"],
+      "appearsLater": { "part": 5, "topic": "Accumulation discipline and position management" },
+      "chart": "06"
+    },
+    {
+      "id": "dry-powder",
+      "term": "Dry powder",
+      "aliases": [],
+      "wave": 1,
+      "definition": "Reserve cash kept ready to deploy into dislocations. The framework builds it during extensions and spends it when valuations converge on undervaluation.",
+      "length": "medium",
+      "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone" },
+      "related": ["ballast", "posture", "sequence-of-returns-risk"],
+      "appearsLater": { "part": 5, "topic": "Reserve capital and redeployment rules" },
+      "chart": null
     }
   ]
 }
