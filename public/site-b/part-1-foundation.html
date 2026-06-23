@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Part 1 — Foundation &amp; Philosophy · The Adaptive Convexity Framework</title>
+  <meta name="description" content="Foundation &amp; Philosophy: the objective of portfolio management is not prediction — it is survivable compounding under uncertainty.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/site-b/tokens.css">
+  <link rel="stylesheet" href="/site-b/reading-system.css">
+</head>
+<body>
+  <a class="skip-link" href="#manifesto">Skip to content</a>
+
+  <!-- Mobile: open the parts sidebar -->
+  <button type="button" class="drawer-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Open parts navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+  </button>
+  <div class="drawer-backdrop" hidden></div>
+
+  <div class="shell">
+    <!-- Sidebar: brand + theme + the six parts (this IS the Part-page nav) -->
+    <nav class="sidebar" id="sidebar" aria-label="Parts">
+      <div class="sidebar-bar">
+        <button type="button" class="sidebar-toggle" aria-pressed="false" aria-label="Collapse sidebar">
+          <svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M14 8l-4 4 4 4"></path>
+            <path d="M19 5v14"></path>
+          </svg>
+          <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M10 8l4 4-4 4"></path>
+            <path d="M5 5v14"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="sidebar-head">
+        <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
+          <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+            <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+            <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+          </svg>
+          <span class="brand-word">ACF</span>
+        </a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <p class="side-movement">Philosophy</p>
+        <ul class="side-parts">
+          <li>
+            <a class="side-part current" href="/part-1-foundation" aria-current="page">
+              <span class="spnum">01</span><span>Foundation &amp; Philosophy</span>
+            </a>
+            <ol class="on-this-page" data-spy aria-label="On this page">
+              <li><a href="#manifesto">Manifesto</a></li>
+              <li><a href="#abstract">Abstract</a></li>
+              <li><a href="#order-of-operations">Order of Operations</a></li>
+            </ol>
+          </li>
+          <li><a class="side-part" href="/part-2-lineage-macro-thesis"><span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span></a></li>
+        </ul>
+
+        <p class="side-movement">Architecture</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-3-bitcoin-convexity-backbone"><span class="spnum">03</span><span>Bitcoin &mdash; Convexity Backbone</span></a></li>
+          <li><span class="side-part pending"><span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy <span class="soon">Soon</span></span></span></li>
+        </ul>
+
+        <p class="side-movement">Implementation</p>
+        <ul class="side-parts">
+          <li><span class="side-part pending"><span class="spnum">05</span><span>Portfolio Construction &amp; Position Management <span class="soon">Soon</span></span></span></li>
+        </ul>
+
+        <p class="side-movement">Governance</p>
+        <ul class="side-parts">
+          <li><span class="side-part pending"><span class="spnum">06</span><span>Convexity &amp; Framework Integrity Scoring <span class="soon">Soon</span></span></span></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="shell-main">
+      <header class="doc-header">
+        <div class="measure">
+          <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
+          <p class="doc-kicker">Part 1 of 6 &middot; &approx; 12 min read &middot; <a class="kicker-link" href="/part-1-pictures">In pictures &rarr;</a></p>
+          <h1 class="doc-title">Foundation &amp; Philosophy</h1>
+
+          <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
+          <div class="part-actions" role="group" aria-label="Part actions">
+            <button type="button" class="part-action part-listen" data-listen aria-pressed="false">
+              <svg class="pa-icon icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z"></path></svg>
+              <svg class="pa-icon icon-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7" y="7" width="10" height="10" rx="1.5"></rect></svg>
+              <span class="part-action-label" data-listen-label>Listen</span>
+            </button>
+
+            <div class="part-share">
+              <a class="part-action" data-share="x" href="https://x.com/intent/post" target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4l16 16M20 4L4 20"></path></svg>
+              </a>
+              <a class="part-action" data-share="email" href="mailto:" aria-label="Share by email">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M4 7l8 6 8-6"></path></svg>
+              </a>
+              <button type="button" class="part-action" data-copy-link aria-label="Copy link to this part">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 15l6-6"></path><path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"></path><path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"></path></svg>
+                <span class="part-action-label" data-copy-label>Copy link</span>
+              </button>
+              <button type="button" class="part-action part-share-native" data-share-native hidden aria-label="Share">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6"></path></svg>
+              </button>
+            </div>
+
+            <span class="part-actions-status visually-hidden" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </header>
+
+
+    <!-- ===== SECTION · MANIFESTO =========================================== -->
+    <section class="section" id="manifesto" aria-labelledby="manifesto-title">
+      <div class="measure">
+        <p class="section-eyebrow">Manifesto</p>
+        <h2 class="section-title" id="manifesto-title">The traditional portfolio playbook is failing quietly.</h2>
+      </div>
+
+      <div class="measure prose">
+        <p class="prose-lead">It was designed for a world in which inflation was episodic, correlations were stable, bonds reliably hedged equities, and volatility was treated as an inconvenience rather than a structural feature. That world produced decades in which diversification alone was largely sufficient. Advisors collected fees, rebalanced mechanically, and the system functioned because the underlying regime was cooperative. Markets oscillated around predictable means. Risk was quantified by standard deviation. The 60/40 portfolio was widely regarded as prudent, simple, and effective.</p>
+
+        <p>The structural conditions of the 2020s differ meaningfully from that prior regime.</p>
+
+        <p>Modern markets are increasingly characterized by regime shifts, policy reflexivity, volatility clustering, and structural debt dynamics. Central banks oscillate between inflation control and financial stability, with limited capacity to satisfy both mandates simultaneously. Geopolitical fragmentation is accelerating as the post&ndash;Cold War unipolar order reorganizes into competing blocs. Technology is deflationary in goods but inflationary in assets, producing a divergence between CPI and asset prices that distorts traditional valuation frameworks. Fiscal dominance has moved from a theoretical concern to an operational constraint. At normalized rates, the interest burden on sovereign debt is increasingly difficult to service from revenue. This dynamic places central banks in a structural tradeoff between price stability and fiscal solvency.</p>
+
+        <p>In such environments, portfolios optimized for average conditions become structurally fragile. Fragility is distinct from volatility. A portfolio that declines 15 percent during a routine correction but recovers is volatile but robust. A portfolio that experiences catastrophic loss during a correlation breakdown, where diversification benefits evaporate simultaneously, is fragile. Fragility is structural, not statistical.</p>
+
+        <p>The consequences are measurable and recent. Traditional balanced portfolios experienced simultaneous equity and bond drawdowns in 2022. This correlation breakdown materially weakened core assumptions of diversification theory. The 60/40 portfolio, long regarded as the bedrock of prudent allocation, declined more than 16 percent over the year. For retirees drawing 4 percent annually, this was not mere volatility. It represented a structural threat to financial survival. Sequence-of-returns risk, long discussed in the academic literature, materialized in real portfolios. The problem was not bad luck. The problem was not &ldquo;this time was different.&rdquo; The problem was that the portfolio was not designed for the regime it inhabited.</p>
+      </div>
+
+      <!-- EXHIBIT 01 · 2022: stocks, bonds, and the blend fell together -->
+      <figure class="exhibit" id="exhibit-01" data-chart="01" data-mode="representative">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">01</span> &middot; Diversification &middot; Fragility
+            <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
+          <h3 class="ex-title">The Hedge Broke</h3>
+          <p class="ex-sub">Stocks, bonds, and the 60/40 blend indexed together through an inflation shock</p>
+        </header>
+        <div class="ex-plot">
+          <svg viewBox="0 0 760 420" role="img" aria-labelledby="ex01-t ex01-d">
+            <title id="ex01-t">The Hedge Broke</title>
+            <desc id="ex01-d">Indexed total return: stocks, bonds, and the 60/40 blend all decline together through the inflation shock; the bonds line falls with the stocks line.</desc>
+            <path class="cx-fieldw" d="M300 130 C 380 112, 470 116, 540 138 C 590 154, 606 212, 592 274 C 578 338, 520 380, 446 376 C 372 372, 312 324, 304 252 C 299 204, 292 158, 300 130 Z"/>
+            <line class="cx-base" x1="70" y1="120" x2="710" y2="120"/>
+            <text class="cx-lbl" x="74" y="110">base = 100</text>
+            <path class="cx-line" d="M90 122 L165 132 L240 152 L315 196 L390 252 L465 288 L540 270 L615 242 L690 218"/>
+            <path class="cx-line2" d="M90 121 L165 127 L240 140 L315 170 L390 205 L465 232 L540 244 L615 248 L690 252"/>
+            <path class="cx-thesis" pathLength="1" d="M90 121 L165 130 L240 147 L315 186 L390 233 L465 266 L540 260 L615 244 L690 232"/>
+            <text class="cx-lbl cx-build" x="300" y="92">inflation shock &middot; pressure enters the system</text>
+            <text class="cx-lbl cx-build" x="310" y="330" opacity=".85">hedge fails &middot; bonds fall with stocks</text>
+            <text class="cx-lbl cx-build" x="698" y="222" opacity=".8">stocks</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="698" y="237">60/40</text>
+            <text class="cx-lbl cx-build" x="698" y="257" opacity=".8">bonds</text>
+            <circle class="cx-hit" cx="390" cy="233" r="16" tabindex="0" data-tip-name="The shock" data-tip="Inflation repriced both assets at once. The blend had nowhere to hide. &middot; representative"/>
+            <circle class="cx-hit" cx="490" cy="237" r="14" tabindex="0" data-tip-name="Bonds" data-tip="The hedge fell with the risk: bonds drew down alongside equities instead of offsetting them. &middot; representative"/>
+            <circle class="cx-hit" cx="540" cy="260" r="14" tabindex="0" data-tip-name="60/40 blend" data-tip="The prudent blend declined more than 16 percent across the year. &middot; representative"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">Stocks and bonds are not always true diversifiers.</p>
+          <p class="ex-takeaway">When inflation drives the regime, the hedge can fall with the risk.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative framework exhibit &middot; Sources support the underlying concept</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+          <p class="ex-body">Indexed through the inflation shock, the bonds line falls with the stocks line, and the 60/40 blend falls with both. The diversification assumption failed exactly when it was needed.</p>
+            <ul class="ex-sources">
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/SP500" target="_blank" rel="noopener noreferrer">FRED &middot; S&amp;P 500 total return</a></li>
+              <li><span class="src-role">target-source</span><a href="https://fred.stlouisfed.org/series/BAMLCC0A0CMTRIV" target="_blank" rel="noopener noreferrer">FRED &middot; Bloomberg US Aggregate total return (ICE proxy)</a></li>
+              <li><span class="src-role">methodology</span>Author calculation &middot; 60/40 blend, monthly rebalance</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+      <div class="measure prose">
+        <p>In parallel, several approaches outside the traditional allocation spectrum, often categorized as speculative or unsuitable under conventional advisory frameworks, delivered asymmetric outcomes that preserved and grew wealth. Bitcoin experienced a 75 percent drawdown from its 2021 peak, yet still compounded at rates that exceeded most traditional assets over multi-year periods. An investor who began accumulating Bitcoin in 2018 through dollar-cost averaging remained substantially ahead by 2024 despite the 2022 bear market. Thematic equity exposures tied to structural trends such as AI infrastructure, defense modernization, and space commercialization generated significant wealth for those positioned accordingly. Defense equities advanced while the S&amp;P 500 declined. Energy producers generated substantial free cash flow during a period of bond market deterioration.</p>
+
+        <p>The investors who outperformed were not those with the broadest diversification, but those whose positioning reflected greater regime awareness and structural convexity. They recognized the regime shift, adapted their structure accordingly, and sized for survival while structuring for asymmetry.</p>
+
+        <p>The Adaptive Convexity Framework begins from a different premise:</p>
+      </div>
+
+      <!-- PULL-QUOTE / APHORISM -->
+      <blockquote class="pull-quote">
+        The objective of portfolio management is not prediction. It is <span class="hl">survivable compounding</span> under uncertainty.
+      </blockquote>
+
+      <div class="measure prose">
+        <p>The distinction is substantive. Prediction implies forecasting specific outcomes, such as Bitcoin reaching $150,000 by a defined date, or the Federal Reserve following a precise sequence of rate cuts. Such predictions are structurally brittle. They resolve binarily, and incorrect resolutions tend to be costly. Even directionally correct forecasts can fail on timing, and timing determines whether a position survives long enough to validate its thesis.</p>
+      </div>
+
+      <!-- EXHIBIT 05 · same returns, opposite order, opposite survival -->
+      <figure class="exhibit" id="exhibit-05" data-chart="05" data-mode="simulation">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">05</span> &middot; Path dependency &middot; Withdrawals
+            <span class="ex-mode" aria-label="Representative simulation. Built to show path dependency, not a historical backtest.">&#9671;</span></p>
+          <h3 class="ex-title">Path Changes Everything</h3>
+          <p class="ex-sub">One shared return deck, two orders; both portfolio paths are generated from those exact returns</p>
+        </header>
+        <div class="ex-plot">
+          <svg class="cx-tall" viewBox="0 0 760 540" role="img" aria-labelledby="ex05-t ex05-d">
+            <title id="ex05-t">Path Changes Everything</title>
+            <desc id="ex05-d">The same ten annual returns shown in two orders drive two withdrawal portfolios: the good-order path survives, the bad-order path slides to the depletion line.</desc>
+            <text class="cx-lbl cx-lbl--up" x="90" y="54">The return deck &middot; same ten returns</text>
+            <text class="cx-lbl" x="90" y="86">good order</text>
+            <g>
+              <rect class="cx-blockp" x="170" y="66" width="40" height="26" rx="2"/><rect class="cx-blockp" x="220" y="70" width="40" height="22" rx="2"/><rect class="cx-blockp" x="270" y="73" width="40" height="19" rx="2"/><rect class="cx-blockp" x="320" y="76" width="40" height="16" rx="2"/><rect class="cx-blockp" x="370" y="79" width="40" height="13" rx="2"/><rect class="cx-blockn" x="420" y="80" width="40" height="12" rx="2"/><rect class="cx-blockn" x="470" y="77" width="40" height="15" rx="2"/><rect class="cx-blockn" x="520" y="73" width="40" height="19" rx="2"/><rect class="cx-blockn" x="570" y="69" width="40" height="23" rx="2"/><rect class="cx-blockn" x="620" y="64" width="40" height="28" rx="2"/>
+            </g>
+            <text class="cx-lbl" x="90" y="128">bad order</text>
+            <g>
+              <rect class="cx-blockn" x="170" y="106" width="40" height="28" rx="2"/><rect class="cx-blockn" x="220" y="111" width="40" height="23" rx="2"/><rect class="cx-blockn" x="270" y="115" width="40" height="19" rx="2"/><rect class="cx-blockn" x="320" y="119" width="40" height="15" rx="2"/><rect class="cx-blockn" x="370" y="122" width="40" height="12" rx="2"/><rect class="cx-blockp" x="420" y="121" width="40" height="13" rx="2"/><rect class="cx-blockp" x="470" y="118" width="40" height="16" rx="2"/><rect class="cx-blockp" x="520" y="115" width="40" height="19" rx="2"/><rect class="cx-blockp" x="570" y="112" width="40" height="22" rx="2"/><rect class="cx-blockp" x="620" y="108" width="40" height="26" rx="2"/>
+            </g>
+            <text class="cx-lbl cx-build" x="170" y="156" opacity=".8">same blocks, reversed &middot; green = positive year, gray = negative year</text>
+            <line class="cx-grid" x1="70" y1="186" x2="710" y2="186" opacity=".5"/>
+            <text class="cx-lbl" x="74" y="208">start = 100 &middot; level withdrawals every year</text>
+            <path class="cx-thesis" pathLength="1" d="M90 286 L150 255 L210 236 L270 224 L330 220 L390 226 L450 248 L510 293 L570 338 L630 386 L690 396"/>
+            <path class="cx-warn" d="M90 286 L150 359 L210 403 L270 434 L330 456 L390 474 L450 487 L510 499 L570 510 L630 521 L690 526"/>
+            <g class="cx-tickw" opacity=".7">
+              <line x1="150" y1="359" x2="150" y2="368"/><line x1="270" y1="434" x2="270" y2="443"/><line x1="390" y1="474" x2="390" y2="483"/><line x1="510" y1="499" x2="510" y2="508"/>
+              <line x1="150" y1="255" x2="150" y2="264"/><line x1="270" y1="224" x2="270" y2="233"/><line x1="390" y1="226" x2="390" y2="235"/><line x1="510" y1="293" x2="510" y2="302"/>
+            </g>
+            <line class="cx-base" x1="70" y1="528" x2="710" y2="528"/>
+            <text class="cx-lbl" x="74" y="520" opacity=".85">depletion</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="692" y="424" text-anchor="end">good order &middot; survives</text>
+            <text class="cx-lbl cx-build" x="420" y="464" opacity=".9">bad order &middot; depleted</text>
+            <circle class="cx-dotq" cx="690" cy="526" r="4"/>
+            <circle class="cx-dot" cx="690" cy="396" r="4"/>
+            <circle class="cx-hit" cx="330" cy="220" r="16" tabindex="0" data-tip-name="Good order" data-tip="Strong years arrive before the withdrawals bite. The base compounds first, then funds the drawdowns. &middot; representative simulation"/>
+            <circle class="cx-hit" cx="330" cy="456" r="16" tabindex="0" data-tip-name="Bad order" data-tip="The same returns, reversed: early losses plus level withdrawals shrink the base before the good years arrive. &middot; representative simulation"/>
+            <circle class="cx-hit" cx="690" cy="526" r="16" tabindex="0" data-tip-name="Depletion" data-tip="Identical average return, opposite outcome. Order, not average, decided survival. &middot; representative simulation"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">Same returns, same withdrawals: different order, opposite survival.</p>
+          <p class="ex-takeaway">Withdrawal-phase capital does not care about the average. It cares about the order.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative simulation &middot; Built to show path dependency, not a historical backtest</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+          <p class="ex-body">The deck and the paths are the same math. Ten annual returns are shown in two orders, and each portfolio path below is generated from exactly those returns with identical level withdrawals.</p>
+            <ul class="ex-sources">
+              <li><span class="src-role">methodology</span>Author simulation &middot; One return set, opposite order; paths generated from the returns</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+      <div class="measure prose">
+        <p>Survivable compounding under uncertainty means engineering a portfolio that can withstand being wrong about timing, magnitude, or specific outcomes while maintaining sufficient exposure to <button type="button" class="gloss" data-gloss="convexity" aria-expanded="false">convex</button> payoffs. Occasional directional accuracy, when paired with convex exposure, can produce terminal wealth materially in excess of risk-free compounding.</p>
+      </div>
+
+      <!-- EXHIBIT S1 · Part opener: the payoff shape the whole framework defends -->
+      <figure class="exhibit" id="exhibit-s1" data-chart="S1" data-mode="conceptual">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">S1</span> &middot; Payoff shape &middot; Signature
+            <span class="ex-mode" aria-label="Conceptual exhibit. Illustrative framework diagram, not historical data.">&#9676;</span></p>
+          <h3 class="ex-title">Shape the Payoff</h3>
+          <p class="ex-sub">The payoff shape the whole framework is built to produce</p>
+        </header>
+        <div class="ex-plot">
+          <svg viewBox="0 0 760 420" role="img" aria-labelledby="exs1-t exs1-d">
+            <title id="exs1-t">Shape the Payoff</title>
+            <desc id="exs1-d">A conceptual payoff curve with a capped left side and a free right side, above a symmetric reference line.</desc>
+            <line class="cx-grid" x1="70" y1="370" x2="710" y2="370"/>
+            <line class="cx-grid" x1="380" y1="60" x2="380" y2="370"/>
+            <path class="cx-line2" d="M110 318 L660 96"/>
+            <path class="cx-areaq" d="M110 252 L380 244 L110 318 Z" opacity=".5"/>
+            <path class="cx-thesis" pathLength="1" d="M110 252 C 230 252, 320 248, 380 238 C 470 222, 570 158, 660 56"/>
+            <circle class="cx-dotq" cx="110" cy="252" r="3.5"/>
+            <circle class="cx-dot" cx="660" cy="56" r="4"/>
+            <text class="cx-lbl cx-build" x="118" y="234">downside capped</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="440" y="48">upside left free to run</text>
+            <text class="cx-lbl cx-build" x="510" y="140" text-anchor="end" opacity=".8">symmetric reference</text>
+            <text class="cx-lbl cx-lbl--up" x="110" y="398">Adverse outcome</text>
+            <text class="cx-lbl cx-lbl--up" x="362" y="398">Base</text>
+            <text class="cx-lbl cx-lbl--up" x="548" y="398">Favourable outcome</text>
+            <circle class="cx-hit" cx="110" cy="252" r="16" tabindex="0" data-tip-name="Left tail" data-tip="The adverse side is structurally capped. Losses are bounded by design, not by forecast accuracy."/>
+            <circle class="cx-hit" cx="380" cy="240" r="16" tabindex="0" data-tip-name="Base case" data-tip="Near the base case the framework gives up little against a symmetric position."/>
+            <circle class="cx-hit" cx="660" cy="56" r="16" tabindex="0" data-tip-name="Right tail" data-tip="The favourable side is left open. Occasional large outcomes do the compounding work."/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">ACF shapes exposure: the left side is capped, the right side is left free to run.</p>
+          <p class="ex-takeaway">Survive the left tail; stay convex on the right tail.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Conceptual diagram &middot; Illustrative framework exhibit, not historical data</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+            <p class="ex-body">A symmetric position gives back on the left what it makes on the right. ACF caps the downside and keeps the upside open, so being roughly right occasionally still compounds. The whole system exists to defend that shape.</p>
+            <ul class="ex-sources">
+              <li><span class="src-role">verifies-concept</span>ACF &middot; Part 1 &middot; Survivable compounding under uncertainty</li>
+              <li><span class="src-role">verifies-concept</span>ACF &middot; Part 6 &middot; Convexity Integrity Score</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+
+      <div class="measure prose">
+        <p>This framework treats investing as a system rather than a collection of static allocations. It is engineered from first principles and integrates insights from practical macro investing, convexity mathematics, and portfolio construction theory. It is designed to be portable across geographies, account types, and investor profiles. It is auditable, as every decision is traceable to a structured process. It is fiduciary-grade and defensible to regulators, clients, or future heirs.</p>
+
+        <p>The architecture consists of seven integrated components. Each addresses a recognized failure mode in traditional portfolio management:</p>
+      </div>
+
+      <!-- ARCHITECTURE LIST · seven components (number / title / body, on the progress rail) -->
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li>
+            <p class="step-title">A macro thesis engine</p>
+            <p class="step-body">that defines the regime and informs structure, addressing the failure mode of regime-agnostic allocation</p>
+          </li>
+          <li>
+            <p class="step-title">A Bitcoin backbone</p>
+            <p class="step-body">governed by valuation discipline and power-law convergence, addressing the failure modes of zero allocation, which forfeits convexity, and undisciplined overallocation, which introduces ruin risk</p>
+          </li>
+          <li>
+            <p class="step-title">Tax wrappers</p>
+            <p class="step-body">treated as compounding engines rather than administrative details, addressing the failure mode of suboptimal wrapper allocation that can materially reduce terminal wealth</p>
+          </li>
+          <li>
+            <p class="step-title">Portfolio construction</p>
+            <p class="step-body">expressed through carry behavior and <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button> language (<button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button>, <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">Ballast</button>, <button type="button" class="gloss" data-gloss="hype" aria-expanded="false">Hype</button>), addressing the failure mode of asset-class thinking divorced from regime behavior</p>
+          </li>
+          <li>
+            <p class="step-title">Convexity</p>
+            <p class="step-body">governed by scoring frameworks, addressing the failure mode of holding deteriorating positions due to emotional attachment or sunk-cost reasoning</p>
+          </li>
+          <li>
+            <p class="step-title">Momentum</p>
+            <p class="step-body">as a trend filter and drawdown governor, addressing the failure mode of resisting prevailing trends or holding through catastrophic drawdowns</p>
+          </li>
+          <li>
+            <p class="step-title">Automated tripwires and agentic research loops</p>
+            <p class="step-body">as the control system, addressing the failure modes of attention scarcity and information overload</p>
+          </li>
+        </ol>
+      </div>
+
+      <div class="measure prose">
+        <p>Bitcoin is included not as ideology but as structure. It is a long-duration, parallel monetary asset with measurable valuation lenses, expanding institutional rails, provable scarcity, and a multi-cycle record of asymmetric compounding despite severe volatility. <span class="part-ref">Detailed justification is provided in Part 3.</span> Its inclusion is governed by the same scoring discipline applied to every other holding. It is not faith. It is portfolio engineering informed by network growth theory, adoption economics, and liquidity sensitivity analysis.</p>
+
+        <p>Tax architecture is elevated from a compliance exercise to a dominant structural return multiplier, particularly over multi-decade horizons for right-tail-dominated strategies. Over a 40-year compounding period, the difference between holding convex assets in Roth versus taxable accounts can exceed 100 percent of terminal wealth. This is a function of compounding mathematics. Tax-free compounding on right-tail outcomes can dominate many other portfolio decisions. Conventional advice often prioritizes pre-tax contributions on the basis of immediate deduction value, while long-horizon mathematics frequently favors Roth allocation for convex, right-tail strategies.</p>
+
+        <p>Across the household portfolio, taxable accounts are engineered for liquidity, return-of-capital efficiency, and borrow-against optionality. This structure enables access to capital without triggering taxable events. Pre-tax contributions are deployed tactically when immediate deduction value is exceptionally high or when employer matching requires it.</p>
+
+        <p>This document presents a doctrine designed to replace static allocation with adaptive, auditable portfolio engineering. It does not forecast specific outcomes. It does not guarantee returns. It provides a framework for compounding through uncertainty, structured to survive regimes that cannot be reliably predicted while capturing available convexity. Some policy paths or regime evolutions may still invalidate portions of the framework&rsquo;s positioning. The framework is designed to detect and respond to such conditions rather than ignore them.</p>
+
+        <p>What follows is both theory and practice, philosophy and execution. It is designed to be studied, inhabited, and adapted. For individual investors building generational wealth, it provides a repeatable process. For fiduciaries managing capital for others, it offers a defensible alternative to fee-for-beta portfolio management. For institutions navigating regime uncertainty, it presents a framework engineered to adapt rather than break.</p>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · ABSTRACT (denser register) ========================== -->
+    <section class="section" id="abstract" aria-labelledby="abstract-title">
+      <div class="measure">
+        <p class="section-eyebrow">Abstract</p>
+        <h2 class="section-title" id="abstract-title">A portfolio operating system for unstable regimes.</h2>
+      </div>
+
+      <div class="measure prose-abstract">
+        <p>The Adaptive Convexity Framework is a portfolio operating system designed for unstable macro regimes characterized by policy reflexivity, volatility clustering, nonlinear outcomes, and correlation instability. It anchors long-horizon conviction in Bitcoin using power-law valuation corridors and multi-model confluence derived from network growth theory, adoption scaling curves, liquidity sensitivity analysis, and on-chain metrics. Portfolio construction is governed by the Convexity Integrity Score (<button type="button" class="gloss" data-gloss="cis" aria-expanded="false">CIS</button>), a weighted scoring heuristic that quantifies thesis alignment in real time across four dimensions: convexity potential, <button type="button" class="gloss" data-gloss="fragility" aria-expanded="false">fragility</button> exposure, macro alignment, and execution quality. The framework imposes discipline against narrative drift, sunk-cost bias, and position rationalization. <span class="part-ref">CIS methodology is detailed in Part 6.</span></p>
+
+        <p><button type="button" class="gloss" data-gloss="tax-wrapper" aria-expanded="false">Tax-wrapper</button> architecture is treated as a structural return multiplier rather than an administrative constraint. This effect is often dominant for right-tail-dominated strategies over multi-decade horizons. Roth accounts are prioritized for convexity exposure to capture tax-free compounding on right-tail outcomes that can dominate terminal wealth. Taxable accounts are engineered for liquidity provision, tax-loss harvesting, return-of-capital efficiency, and collateral for securities-backed borrowing. Pre-tax contributions are deployed tactically when bracket asymmetries or employer matching justify their use.</p>
+
+        <p>Risk is managed through automated <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwires</button> engineered during thesis optimization based on the regime&rsquo;s dominant fragilities. These tripwires monitor systemic stress indicators, including the MOVE index, liquidity conditions, breadth deterioration, and credit spreads under the current <button type="button" class="gloss" data-gloss="fiscal-dominance" aria-expanded="false">fiscal dominance</button> thesis. They also monitor position-specific deterioration signals such as CIS decay, <button type="button" class="gloss" data-gloss="momentum-filter" aria-expanded="false">momentum</button> breakdown, and valuation extension. Tripwires are paired with agentic verification workflows that accelerate research and adaptation without inducing overtrading.</p>
+
+        <p>Capital efficiency is enhanced through <button type="button" class="gloss" data-gloss="buy-borrow-die" aria-expanded="false">buy-borrow-die</button> mechanics, including securities-backed lines of credit, Bitcoin-backed loans, and strategic leverage against low-correlation collateral. These tools enable liquidity access without forced liquidations or taxable events. Portfolio structure is expressed through carry vectors (long carry, short carry, barbell) and posture language (Torque, Ballast, Hype). This structure supports rotation across thematic exposures such as AI infrastructure, defense modernization, space commercialization, critical systems, and biotechnology as the <button type="button" class="gloss" data-gloss="macro-thesis" aria-expanded="false">macro thesis</button> evolves. Structural discipline is maintained through scoring systems and tripwire protocols.</p>
+
+        <p>The result is a portable, fiduciary-grade doctrine designed to express a range of macro theses while preserving convexity, supporting survivability through drawdowns, and compounding tax-efficiently across multi-decade horizons. Where static allocation frameworks optimize for average conditions and degrade during regime transitions, this framework is structured around adaptation. It is designed to be wrong gracefully, to detect thesis breaks early, and to redeploy capital systematically rather than emotionally. <span class="lineage-ref">The framework draws on Taleb&rsquo;s fragility mathematics, Druckenmiller&rsquo;s concentration discipline paired with active monitoring, Soros&rsquo;s reflexivity dynamics, and Edelman&rsquo;s longevity horizon work.</span> These elements are integrated with modern portfolio construction theory into a coherent operating system for compounding under regime instability.</p>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · ORDER OF OPERATIONS ================================= -->
+    <section class="section" id="order-of-operations" aria-labelledby="ooo-title">
+      <div class="measure">
+        <p class="section-eyebrow">Order of Operations</p>
+        <h2 class="section-title" id="ooo-title">The system at a glance.</h2>
+      </div>
+
+      <!-- SEQUENCE / FLOW STRING — wraps gracefully at the reading measure -->
+      <ol class="flow-sequence" aria-label="Order of operations sequence">
+        <li>Macro thesis</li>
+        <li>Bitcoin backbone</li>
+        <li>Tax architecture</li>
+        <li>Portfolio construction</li>
+        <li>CIS governance</li>
+        <li>Momentum filter</li>
+        <li>Tripwires</li>
+        <li>Agentic verification</li>
+        <li>Adapt &amp; compound</li>
+      </ol>
+
+      <div class="measure prose">
+        <p>CIS governance and momentum operate as a coupled validation layer. Neither is subordinate to the other, and each depends on the other for execution integrity. CIS quantifies thesis alignment; momentum confirms market validation. Together they form the framework&rsquo;s primary execution gate.</p>
+
+        <p>The sequence is hierarchical. Each stage depends on the clarity and conviction of the prior stage. Constructing a portfolio without a macro thesis produces unstructured exposure. Sizing Bitcoin without valuation discipline produces either foregone opportunity or excess ruin risk, depending on the direction of the error. Allocating capital without a wrapper strategy can forfeit substantial terminal wealth. Building positions without CIS scoring increases susceptibility to narrative drift and fragility. Ignoring momentum tends to increase drawdown severity and recovery time. Operating without tripwires creates attention scarcity and delayed response to thesis breaks. Skipping verification workflows raises the probability of emotionally driven decisions during volatility.</p>
+
+        <p>The order of operations flows as follows:</p>
+      </div>
+
+      <!-- PROCEDURAL STEPS — bold lead-in + step, on the progress rail -->
+      <div class="measure">
+        <ol class="proc-steps" data-stepper>
+          <li><p><span class="lead">Macro thesis determines structure.</span> If the operative thesis is Fourth Turning (crisis, conflict, and transformation driven by debt dynamics and generational change), structure tilts toward defense, critical infrastructure, parallel systems, and hard assets. If the thesis is a disinflationary technology boom (AI driving productivity, deflationary goods prices, asset inflation), structure tilts toward AI infrastructure, semiconductors, cloud computing, and technology platforms. The thesis is not a prediction. It functions as a framework for interpreting signals and allocating probabilities across regime scenarios.</p></li>
+          <li><p><span class="lead">Structure determines wrapper allocation.</span> High-convexity positions aligned with the thesis are directed to Roth accounts, where right-tail outcomes (which can reach 10 to 100 times the initial position) compound tax-free. Moderate-growth positions generating return-of-capital or suitable for tax-loss harvesting are directed to taxable accounts. Employer-matched contributions and high-income-year contributions are directed to pre-tax accounts. Wrapper allocation is structured rather than discretionary, derived from the expected payoff distribution of each position.</p></li>
+          <li><p><span class="lead">Wrapper allocation informs position sizing.</span> A position with a high CIS score in a Roth account can be sized in the 15 to 20 percent range because survivability is supported by ballast in other accounts. The same position in a taxable account is typically sized in the 8 to 10 percent range due to tax drag and liquidity constraints. Position sizing is a function of conviction, wrapper efficiency, and portfolio-level risk capacity.</p></li>
+          <li><p><span class="lead">Position sizing is validated by CIS.</span> Every position receives a quantified score across convexity potential, fragility risk, macro alignment, and execution quality. Scores below 50 trigger trim protocols. Scores above 80 permit overweighting. <span class="part-ref">The full CIS scoring rubric and dimension weighting are developed in Part 6.</span> This addresses the failure mode of &ldquo;I like this stock&rdquo; portfolio construction divorced from systematic assessment.</p></li>
+          <li><p><span class="lead">CIS scores are confirmed by momentum.</span> A position with CIS 75 but broken momentum (price below the 200-day moving average, declining breadth, negative relative strength) is sized cautiously despite strong fundamental alignment. High CIS combined with strong momentum supports full weighting. High CIS with weak momentum supports reduced weight or a hold pending confirmation. Low CIS at any momentum reading triggers exit. Momentum is the market&rsquo;s vote on thesis validity.</p></li>
+          <li><p><span class="lead">Momentum is monitored by tripwires.</span> Tripwires are engineered during thesis optimization based on the regime&rsquo;s dominant fragilities and failure modes. For the current thesis (Fourth Turning liquidity supercycle, currently expressed through AI infrastructure), systematic tripwires include the MOVE index above 130, the VIX above 30, market breadth below 50 percent, and widening credit spreads. Position-specific tripwires include CIS decline, a 20 percent drawdown, and momentum breakdown. Different theses produce different tripwire sets. A deflationary thesis, for example, might monitor M2 contraction and yield curve dynamics instead. Tripwires convert passive monitoring into active governance.</p></li>
+          <li><p><span class="lead">Tripwires trigger verification.</span> When tripwires fire, agentic research workflows accelerate information gathering. AI agents scan news flow, positioning data, sentiment indicators, and historical analogs to assess whether the signal represents noise (temporary volatility) or information (thesis break). Human judgment remains in the loop but arrives at decisions with comprehensive synthesized data rather than fragmented headlines.</p></li>
+          <li><p><span class="lead">Verification informs adaptation.</span> Based on verification output, actions are gated into four categories: watch (thesis intact, volatility normal), hedge (thesis weakening, add short carry), trim (thesis breaking, reduce by 25 to 50 percent), or exit and redeploy (thesis broken, move capital to higher-CIS opportunities). Adaptation is systematic rather than emotional.</p></li>
+          <li><p><span class="lead">Adaptation feeds back into the macro thesis.</span> When multiple positions across a theme simultaneously breach CIS thresholds despite strong momentum, this indicates that the macro thesis itself may be shifting. The framework is designed to update its operating assumptions in response to accumulating evidence.</p></li>
+        </ol>
+      </div>
+
+      <!-- CALLOUT · KEY INSIGHT (emphatic card — accent icon + title + body) -->
+      <aside class="callout callout-insight" aria-label="Key insight">
+        <div class="ci-head">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M9 18h6"></path>
+            <path d="M10 21h4"></path>
+            <path d="M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.2 1 2V16h6v-.5c0-.8.5-1.5 1-2A6 6 0 0 0 12 3z"></path>
+          </svg>
+          <p class="callout-label">Key Insight</p>
+        </div>
+        <p>This is a closed-loop system. Decisions flow from structured processes. Every decision is auditable. Every action is traceable to a trigger. The framework governs behavior to reduce error and is designed to fail gracefully when regimes invalidate underlying assumptions.</p>
+      </aside>
+
+      <div class="measure prose">
+        <p>The framework is designed to address the most common failure modes in portfolio management:</p>
+      </div>
+
+      <!-- FAILURE-MODE LIST (named term + description) -->
+      <div class="measure">
+        <div class="failure-modes">
+          <div>
+            <span class="name">Narrative drift</span>
+            <p>Holding deteriorating positions because &ldquo;I still believe in the story.&rdquo; CIS scoring imposes quantified reassessment.</p>
+          </div>
+          <div>
+            <span class="name">Recency bias</span>
+            <p>Overweighting recent winners or panic-selling recent losers. Momentum filters and tripwires impose discipline.</p>
+          </div>
+          <div>
+            <span class="name">Fragility to correlation shifts</span>
+            <p>Assuming diversification holds during stress. Barbell structure and ROC ballast provide structural survival mechanisms.</p>
+          </div>
+          <div>
+            <span class="name">Tax inefficiency</span>
+            <p>Random wrapper allocation eroding terminal wealth. Tax architecture is treated as a first-order design variable.</p>
+          </div>
+          <div>
+            <span class="name">Attention scarcity</span>
+            <p>Missing thesis breaks under information overload. Tripwires automate attention to critical signals.</p>
+          </div>
+          <div>
+            <span class="name">Emotional decision-making</span>
+            <p>Buying tops, selling bottoms, chasing performance. Systematic processes substitute for discretionary impulses.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="measure prose">
+        <p>By treating each decision as a structured output of a governed process, the framework reduces discretion in areas where discretion creates risk, such as emotional position sizing, narrative-driven holding, and tax-ignorant allocation. It preserves optionality in areas where optionality creates value, such as thematic rotation, tactical positioning, and adaptive leverage.</p>
+
+        <p>The result is not a mechanical system devoid of judgment. It is a framework that elevates judgment by reducing noise, clarifying signal, and constraining avoidable error. The investor remains the decision-maker but operates within a structure designed to prevent catastrophic errors while preserving adaptive flexibility.</p>
+      </div>
+
+      <!-- EXHIBIT 06 · the closing image: compounding through the drawdown -->
+      <figure class="exhibit" id="exhibit-06" data-chart="06" data-mode="representative">
+        <header class="ex-head">
+          <p class="ex-eyebrow"><span class="ex-idx">06</span> &middot; Convexity &middot; Endurance
+            <span class="ex-mode" aria-label="Representative exhibit. Sources support the underlying concept.">&#9671;</span></p>
+          <h3 class="ex-title">Survive the Path</h3>
+          <p class="ex-sub">A representative portfolio path that compounds through a drawdown rather than around it</p>
+        </header>
+        <div class="ex-plot">
+          <svg viewBox="0 0 760 420" role="img" aria-labelledby="ex06-t ex06-d">
+            <title id="ex06-t">Survive the Path</title>
+            <desc id="ex06-d">A portfolio path rises, passes through a deep shaded drawdown, and continues compounding to a far higher level.</desc>
+            <path class="cx-fieldw" d="M280 232 C 320 220, 370 224, 404 244 C 428 260, 434 290, 424 310 C 410 334, 366 344, 330 338 C 296 332, 272 310, 272 282 C 272 262, 272 244, 280 232 Z"/>
+            <line class="cx-grid" x1="70" y1="370" x2="710" y2="370"/>
+            <path class="cx-thesis" pathLength="1" d="M90 344 C 150 322, 210 280, 252 240 C 290 204, 318 232, 340 280 C 358 318, 386 314, 416 270 C 458 208, 530 150, 600 110 C 636 90, 666 76, 690 66"/>
+            <circle class="cx-dotq" cx="90" cy="344" r="3.5"/>
+            <circle class="cx-dot" cx="690" cy="66" r="4"/>
+            <text class="cx-lbl cx-build" x="300" y="360" opacity=".9">deep drawdown &middot; same asset</text>
+            <text class="cx-lbl cx-lbl--a cx-build" x="672" y="56" text-anchor="end">compounds through, not around</text>
+            <text class="cx-lbl cx-build" x="96" y="362" opacity=".8">sized to survive</text>
+            <circle class="cx-hit" cx="252" cy="240" r="16" tabindex="0" data-tip-name="Before" data-tip="Sizing assumes the drawdown will come. Survival is engineered before the volatility arrives. &middot; representative"/>
+            <circle class="cx-hit" cx="340" cy="280" r="16" tabindex="0" data-tip-name="The drawdown" data-tip="The path passes through the loss. Position sizing keeps it survivable, so no forced exit crystallizes it. &middot; representative"/>
+            <circle class="cx-hit" cx="600" cy="110" r="16" tabindex="0" data-tip-name="After" data-tip="The same volatile asset keeps compounding. Upside only mattered because sizing let the path be survived. &middot; representative"/>
+          </svg>
+        </div>
+        <div class="ex-explain">
+          <p class="ex-claim">Upside only matters if sizing lets you survive the path.</p>
+          <p class="ex-takeaway">Volatile assets can still compound: through, not around, the drawdown.</p>
+        </div>
+        <footer class="ex-foot">
+          <p class="ex-disclosure">Representative framework exhibit &middot; Sources support the underlying concept</p>
+          <details class="ex-details">
+            <summary>Details, sources &amp; methodology</summary>
+          <p class="ex-body">The path does not route around the drawdown; it goes through it. Constant accumulation, no leverage, no forced exit: the volatility is endured, and the compounding continues on the other side.</p>
+            <ul class="ex-sources">
+              <li><span class="src-role">verifies-concept</span>ACF &middot; Part 3 &middot; Bitcoin convexity and multi-cycle drawdowns</li>
+              <li><span class="src-role">methodology</span>Author calculation &middot; Constant DCA, no rebalancing, no leverage</li>
+            </ul>
+          </details>
+        </footer>
+      </figure>
+    </section>
+
+      <!-- Forward pointer: the spine's Next-up backbone -->
+      <aside class="next-up" aria-label="Next in the series">
+        <div class="measure">
+          <p class="next-up-label">Next up</p>
+          <a class="next-up-card" href="/part-2-lineage-macro-thesis">
+            <span class="next-up-num">02</span>
+            <span class="next-up-body">
+              <span class="next-up-title">Lineage &amp; Macro Thesis</span>
+              <span class="next-up-teaser">The intellectual lineage and the regime-shift macro thesis the framework is built on.</span>
+            </span>
+            <span class="next-up-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Marks Part 1 read once it scrolls into view (drives cover completion) -->
+      <div data-progress-sentinel data-part="1" aria-hidden="true"></div>
+
+      <footer class="site-footer">
+        <div class="measure foot-base">
+          <span>&copy; 2026 Adaptive Convexity Framework</span>
+          <span>Part 1 &middot; Foundation &amp; Philosophy</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Floating reading nav — home + next part, surfaces while scrolling -->
+  <nav class="floatnav" aria-label="Reading navigation" hidden>
+    <div class="floatnav-inner">
+      <a class="floatnav-home" href="/">
+        <svg class="fn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M3 11l9-7 9 7"></path>
+          <path d="M5 10v9h14v-9"></path>
+        </svg>
+        <span class="fn-home-label">Framework</span>
+      </a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-next" href="/part-2-lineage-macro-thesis">Next &middot; Part 2</a>
+    </div>
+  </nav>
+
+  <!-- Progressive enhancement: theme, scroll-spy, drawer, completion, floatnav -->
+  <script src="/site-b/reading.js" defer></script>
+</body>
+</html>

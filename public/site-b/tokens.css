@@ -1,0 +1,237 @@
+/* ============================================================================
+   ACF FRAMEWORK — READING-SURFACE TOKEN LAYER
+   Single source of truth for the editorial reading surface.
+   Derived from the ACF dashboard design system, NOT copied from it.
+
+   SURFACE SPLIT (intentional — do not "fix" toward consistency):
+   ----------------------------------------------------------------------------
+   The dashboard surface uses  Inter (sans) on a dark app chrome (#08090b).
+   This editorial reading surface uses  Geist (sans) + Newsreader (serif)
+   on light paper. Two surfaces, two sans faces, on purpose:
+     • Inter   → dashboard / application chrome
+     • Geist   → editorial reading surface (matches the Phase 1 reports)
+   If you see Geist here and Inter in the dashboard, that is the designed
+   split, not drift.
+
+   ACCENT DERIVATION:
+   The dashboard brand accent is emerald #10b981 (kept below as the brand
+   reference). On light paper that emerald fails AA at body size, so the
+   reading surface uses a paper-tuned deep teal as --accent, with an even
+   darker teal reserved for inline links.
+   ============================================================================ */
+
+:root {
+  /* ---- Surface: paper & ink (light, editorial) ---------------------------- */
+  --paper:          #f5f7fa;   /* page background — cool platinum (was warm green-cream #fbfdfc) */
+  --paper-warm:     #ebeef3;   /* cool grey tint band (CTA) — was a warm green tint; name kept */
+  --surface-raised: #ffffff;   /* raised card fill (white) on the platinum page */
+  --ink:            #0a0e12;   /* primary reading ink */
+  --ink-quiet:      #4a5560;   /* secondary / captions / labels */
+  --ink-faint:      #69727d;   /* tertiary / metadata — darkened to clear AA (4.5:1) */
+  --rule:           #d5dae1;   /* hairline rules — cool grey */
+  --rule-faint:     #e7eaf0;   /* faintest dividers — cool grey */
+
+  /* ---- Accent: emerald foundation, recomputed for paper ------------------- */
+  --brand-emerald:  #10b981;   /* dashboard brand reference — NOT used as ink on paper */
+  --accent:         #0d7d6b;   /* deep teal — display / large accents (4.9:1 on paper) */
+  --accent-link:    #0a6557;   /* darker teal — inline links / small accents (~6.8:1) */
+  --accent-quiet:   #4a9a8b;   /* muted accent — decorative only */
+  --accent-faint:   #e0efea;   /* accent wash — callout-insight fill */
+  --on-accent:      #fbfdfc;   /* ink that sits ON the accent fill (CTA label) */
+
+  /* ---- Posture — LOCKED names & assignments ------------------------------- *
+   * Foregrounds below are LIGHT-RETUNED for paper (the dashboard values are
+   * tuned for dark fills and must not be used as ink on white). These are
+   * provided for surfaces that actually TEACH Postures — they are deliberately
+   * NOT applied to inline Posture terms in running prose.                      */
+  --posture-ballast-fg:   #4c5a6e;
+  --posture-cash-fg:      #566273;
+  --posture-torque-fg:    #2f5e96;
+  --posture-hype-fg:      #5b46b0;
+  --posture-bitcoin-fg:   #b56a09;
+  --posture-unclassified-fg: #5b6578;
+
+  /* ---- Confidence (research signal strength) ------------------------------ */
+  --confidence-high:  var(--accent);
+  --confidence-med:   #b07a0a;
+  --confidence-low:   #6b7280;
+
+  /* ---- Typography — ACF design-system §08 -------------------------------- *
+   * Inter for everything that reads as language; JetBrains Mono for tokens,
+   * labels, eyebrows, prices and tabular numerals. Weight ceiling 600.
+   * The editorial serif reading face (Newsreader) was RETIRED here in favour of
+   * design-system alignment — `--font-serif` now aliases Inter so the existing
+   * title/prose rules need no per-rule changes.                                */
+  --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-serif: var(--font-sans);   /* retired serif → Inter */
+  --font-mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale — major third (1.25), base 19px (set on html, see reading-system.css) */
+  --text-xs:   0.75rem;    /* ~14.25px */
+  --text-sm:   0.875rem;   /* ~16.6px  */
+  --text-base: 1rem;       /* 19px     */
+  --text-md:   1.1rem;     /* ~20.9px  */
+  --text-lg:   1.25rem;    /* ~23.75px */
+  --text-xl:   1.563rem;   /* ~29.7px  */
+  --text-2xl:  1.953rem;   /* ~37.1px  */
+  --text-3xl:  2.441rem;   /* ~46.4px  */
+  --text-4xl:  3.052rem;   /* ~58px    */
+  --text-5xl:  4rem;       /* 76px     */
+
+  --weight-light:    300;
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+
+  /* Rhythm */
+  --leading-tight:   1.18;
+  --leading-snug:    1.35;
+  --leading-normal:  1.55;
+  --leading-relaxed: 1.7;
+  --leading-loose:   1.85;
+
+  /* Tracking */
+  --track-tight:  -0.02em;
+  --track-normal: 0;
+  --track-wide:   0.04em;
+  --track-wider:  0.12em;
+  --track-widest: 0.2em;
+
+  /* ---- Spacing (8px base, rem) -------------------------------------------- */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  --space-40: 10rem;
+
+  /* ---- Measure & layout --------------------------------------------------- *
+   * Reading measure tied to the character box so it stays ~62–72ch. The prose
+   * column NEVER stretches — extra width becomes margin. The measure utilities
+   * size as calc(width + 2·gutter) so the CONTENT stays exactly these widths
+   * while the (fluid) gutter is additive.                                      */
+  --measure:        66ch;   /* primary reading column — content holds at 66ch */
+  --measure-tight:  58ch;   /* dense register (Abstract) */
+  --measure-wide:   46rem;  /* NARROW breakouts: pull-quote, flow sequence, dividers */
+  --measure-full:   62rem;  /* centered wide blocks: hero, premise/CTA */
+  --measure-figure: 1400px; /* WIDE figures, charts, tables — they breathe past prose */
+  --page-gutter:    clamp(1.25rem, 3vw, 2.25rem);  /* bounded fluid gutter (additive) */
+
+  /* ---- Shell layout: cover nav + Part-page sidebar & sidenote margin ------- *
+   * Consumed by the nav bar (cover) and the reading shell (Part pages).        */
+  --nav-height:     4rem;    /* cover nav bar height */
+  --sidebar-width:  17rem;   /* Part-page parts nav rail */
+  --sidenote-width: 13rem;   /* Part-page right margin for Tufte sidenotes */
+  --shell-gap:      var(--space-10);
+  --shell-max:      1760px;  /* whole shell cap so wide/ultrawide reads as one centered unit */
+
+  /* ---- Bounded fluid rhythm + display type (wide / ultrawide continuity) --- */
+  --section-rhythm:   clamp(4rem, 7vw, 7rem);     /* vertical space between sections */
+  --fs-doc-title:     clamp(2.4rem, 4.5vw, 3.7rem);   /* part title ~46 → ~70px (root is 19px) */
+  --fs-section-title: clamp(2.2rem, 3.2vw, 2.8rem);   /* section title ~42 → ~53px */
+
+  /* ---- Radii — sharp-corner stance (carried from foundation) -------------- */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius:    4px;
+  --radius-card: 8px;   /* card containers (disclaimer) — a restrained step above --radius */
+
+  /* ---- Motion (carried from foundation; reading surface is near-static) --- */
+  --motion-fast:   120ms;
+  --motion-base:   200ms;
+  --motion-slow:   320ms;
+  --ease-standard: cubic-bezier(.2, .0, .2, 1);
+  --ease-emphasis: cubic-bezier(.2, .0, .0, 1);
+
+  /* ---- Stepper: dim for steps ahead of the reading focus (JS-driven) ------- */
+  --step-dim: 0.4;
+
+  /* ---- Floating reading nav (Part pages) — inverted pill ------------------- *
+   * bg/fg ride --ink/--paper so they flip per theme for free; the translucent
+   * overlays (line/hover) are theme-specific (white over the dark light-theme
+   * pill, black over the near-white dark-theme pill — see [data-theme="dark"]). */
+  --floatnav-bg:    var(--ink);
+  --floatnav-fg:    var(--paper);
+  --floatnav-line:  rgba(255, 255, 255, .16);
+  --floatnav-hover: rgba(255, 255, 255, .10);
+
+  /* ---- Feature surface — dark emerald-accented panels for signature moments - *
+   * bg/ink/accent are fixed (the surface is always dark); only edge + shadow
+   * flip by theme so the panel still pops on the already-dark night surface.    */
+  --feature-bg:        #0f1318;
+  --feature-ink:       #eef2f6;
+  --feature-ink-quiet: rgba(238, 242, 246, .64);
+  --feature-accent:    #34d399;
+  --feature-edge:      transparent;
+  --feature-shadow:    0 14px 36px -14px rgba(10, 14, 18, .5);
+
+  /* ---- Chart exhibits — always-dark panels (consumed by .exhibit / .cx-*) -- *
+   * Fixed values: the exhibit panel rides the feature surface in BOTH themes,
+   * so none of these flip under [data-theme]. The thesis line is the single
+   * chromatic moment; the "warn" tone is a desaturated ink, never a 2nd accent. */
+  --chart-thesis:       var(--feature-accent);      /* the one chromatic line  */
+  --chart-context:      #8b97a3;                     /* muted context series    */
+  --chart-context-2:    #5d6873;                     /* secondary context       */
+  --chart-grid:         rgba(139, 151, 163, .16);    /* hairlines / axis        */
+  --chart-field:        rgba(52, 211, 153, .10);     /* regime / relational wash*/
+  --chart-field-warn:   rgba(139, 151, 163, .12);    /* pressure / burden wash  */
+  --chart-warn:         #aab4be;                     /* depletion / burden line */
+  --chart-lbl:          var(--feature-ink-quiet);    /* mono labels             */
+  --chart-lbl-strong:   var(--feature-ink);          /* emphasized labels       */
+}
+
+/* ============================================================================
+   DARK THEME  —  warm editorial night surface
+   Applied via [data-theme="dark"] on <html>. Only the surface, accent, posture
+   and confidence values flip; type scale, spacing, rhythm and motion are shared.
+   The accent brightens (emerald regains legibility on dark) and inline links go
+   LIGHTER than the accent (the inverse of the light surface). Posture/Confidence
+   foregrounds switch to the dashboard's dark-fill-tuned values.
+   ============================================================================ */
+[data-theme="dark"] {
+  /* ---- Surface: warm night paper & ink ---------------------------------- */
+  --paper:          #14171a;   /* page background */
+  --paper-warm:     #191d21;   /* whisper-light tint — full measure only */
+  --surface-raised: #1b2129;   /* raised card fill — a step up from --paper */
+  --ink:            #f1f4f7;   /* primary reading ink — brightened toward white */
+  --ink-quiet:      #c6cdd4;   /* secondary / captions / subheads — lighter, more legible */
+  --ink-faint:      #828b95;   /* tertiary / metadata */
+  --rule:           #2a3137;   /* hairline rules */
+  --rule-faint:     #1f262c;   /* faintest dividers */
+
+  /* ---- Accent: emerald regains legibility on dark ----------------------- */
+  --accent:         #34d399;   /* bright teal-emerald — display / large accents */
+  --accent-link:    #5ee3b5;   /* LIGHTER than accent — inline links / small accents */
+  --accent-quiet:   #2a9d85;   /* muted accent — decorative only */
+  --accent-faint:   rgba(16, 185, 129, .16);  /* accent wash — callout-insight fill */
+  --on-accent:      #08130f;   /* dark ink that sits ON the bright accent fill */
+
+  /* ---- Posture — dark-fill-tuned foregrounds (LOCKED names) ------------- */
+  --posture-ballast-fg:      #8D9BB0;
+  --posture-cash-fg:         #94A3B8;
+  --posture-torque-fg:       #6B9AD4;
+  --posture-hype-fg:         #9D8FE6;
+  --posture-bitcoin-fg:      #f7931a;
+  --posture-unclassified-fg: #6b7280;
+
+  /* ---- Confidence (research signal strength) ---------------------------- */
+  --confidence-high:  var(--accent);
+  --confidence-med:   #f59e0b;
+  --confidence-low:   #8a929c;
+
+  /* ---- Floating reading nav — pill is now near-white, so overlays go dark - */
+  --floatnav-line:  rgba(0, 0, 0, .14);
+  --floatnav-hover: rgba(0, 0, 0, .07);
+
+  /* ---- Feature surface — emerald edge + glow so the panel reads on dark ----- */
+  --feature-edge:   rgba(52, 211, 153, .30);
+  --feature-shadow: 0 0 0 1px rgba(52, 211, 153, .08), 0 14px 40px -14px rgba(0, 0, 0, .6);
+}

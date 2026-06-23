@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Part 3 — Bitcoin: Convexity Backbone · The Adaptive Convexity Framework</title>
+  <meta name="description" content="Bitcoin as the framework's reserve asset and principal source of convexity: structural requirements, valuation discipline, total addressable market, and a taxable cold-storage holding strategy.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/site-b/tokens.css">
+  <link rel="stylesheet" href="/site-b/reading-system.css">
+</head>
+<body>
+  <a class="skip-link" href="#backbone">Skip to content</a>
+
+  <!-- Mobile: open the parts sidebar -->
+  <button type="button" class="drawer-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Open parts navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+  </button>
+  <div class="drawer-backdrop" hidden></div>
+
+  <div class="shell">
+    <!-- Sidebar: brand + theme + the six parts (this IS the Part-page nav) -->
+    <nav class="sidebar" id="sidebar" aria-label="Parts">
+      <div class="sidebar-bar">
+        <button type="button" class="sidebar-toggle" aria-pressed="false" aria-label="Collapse sidebar">
+          <svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M14 8l-4 4 4 4"></path>
+            <path d="M19 5v14"></path>
+          </svg>
+          <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M10 8l4 4-4 4"></path>
+            <path d="M5 5v14"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="sidebar-head">
+        <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
+          <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+            <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+            <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+          </svg>
+          <span class="brand-word">ACF</span>
+        </a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <p class="side-movement">Philosophy</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-1-foundation"><span class="spnum">01</span><span>Foundation &amp; Philosophy</span></a></li>
+          <li><a class="side-part" href="/part-2-lineage-macro-thesis"><span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span></a></li>
+        </ul>
+
+        <p class="side-movement">Architecture</p>
+        <ul class="side-parts">
+          <li>
+            <a class="side-part current" href="/part-3-bitcoin-convexity-backbone" aria-current="page">
+              <span class="spnum">03</span><span>Bitcoin &mdash; Convexity Backbone</span>
+            </a>
+            <ol class="on-this-page" data-spy aria-label="On this page">
+              <li><a href="#backbone">The Backbone</a></li>
+              <li><a href="#irreplaceability">Structural Fit</a></li>
+              <li><a href="#survivability">Multi-Cycle Survivability</a></li>
+              <li><a href="#risks">Risk Register</a></li>
+              <li><a href="#valuation">Valuation Models</a></li>
+              <li><a href="#tam">TAM &amp; Implementation</a></li>
+            </ol>
+          </li>
+          <li><span class="side-part pending"><span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy <span class="soon">Soon</span></span></span></li>
+        </ul>
+
+        <p class="side-movement">Implementation</p>
+        <ul class="side-parts">
+          <li><span class="side-part pending"><span class="spnum">05</span><span>Portfolio Construction &amp; Position Management <span class="soon">Soon</span></span></span></li>
+        </ul>
+
+        <p class="side-movement">Governance</p>
+        <ul class="side-parts">
+          <li><span class="side-part pending"><span class="spnum">06</span><span>Convexity &amp; Framework Integrity Scoring <span class="soon">Soon</span></span></span></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="shell-main">
+      <header class="doc-header">
+        <div class="measure">
+          <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
+          <p class="doc-kicker">Part 3 of 6 &middot; &approx; 22 min read</p>
+          <h1 class="doc-title">Bitcoin: Convexity Backbone</h1>
+
+          <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
+          <div class="part-actions" role="group" aria-label="Part actions">
+            <button type="button" class="part-action part-listen" data-listen aria-pressed="false">
+              <svg class="pa-icon icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z"></path></svg>
+              <svg class="pa-icon icon-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7" y="7" width="10" height="10" rx="1.5"></rect></svg>
+              <span class="part-action-label" data-listen-label>Listen</span>
+            </button>
+
+            <div class="part-share">
+              <a class="part-action" data-share="x" href="https://x.com/intent/post" target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4l16 16M20 4L4 20"></path></svg>
+              </a>
+              <a class="part-action" data-share="email" href="mailto:" aria-label="Share by email">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M4 7l8 6 8-6"></path></svg>
+              </a>
+              <button type="button" class="part-action" data-copy-link aria-label="Copy link to this part">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 15l6-6"></path><path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"></path><path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"></path></svg>
+                <span class="part-action-label" data-copy-label>Copy link</span>
+              </button>
+              <button type="button" class="part-action part-share-native" data-share-native hidden aria-label="Share">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6"></path></svg>
+              </button>
+            </div>
+
+            <span class="part-actions-status visually-hidden" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </header>
+
+    <!-- ===== SECTION · THE BACKBONE ======================================= -->
+    <section class="section" id="backbone" aria-labelledby="backbone-title">
+      <div class="measure">
+        <p class="section-eyebrow">The Reserve Asset</p>
+        <h2 class="section-title" id="backbone-title">Bitcoin as the convexity backbone.</h2>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">Bitcoin occupies a central position in this framework. It functions as the reserve asset and principal source of <button type="button" class="gloss" data-gloss="convexity" aria-expanded="false">convexity</button>, with several other structural elements organized around it. Its inclusion rests on a combination of measurable properties: a fixed supply schedule, several independent valuation models, and an adoption curve that has historically produced asymmetric upside rather than the linear appreciation typical of mature assets.</p>
+        <p>Bitcoin can be held in both self-custody and regulated <button type="button" class="gloss" data-gloss="tax-wrapper" aria-expanded="false">wrappers</button>, which supports collateralized borrowing without sale. It has also exhibited high volatility, which the framework treats as a managed input rather than a disqualifying feature. Its inclusion and accumulation pace are governed rather than automatic: conviction and pacing are informed by <button type="button" class="gloss" data-gloss="cis" aria-expanded="false">CIS</button> scoring and valuation discipline, with <button type="button" class="gloss" data-gloss="momentum-filter" aria-expanded="false">momentum</button> signals shaping risk posture.</p>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Accumulate phase doctrine">
+        <p class="callout-label">Handling Doctrine &middot; Accumulate</p>
+        <ul>
+          <li><strong>Accumulate only.</strong> Bitcoin is never sold, traded, or rebalanced.</li>
+          <li><strong>Models inform pacing, not execution.</strong> Valuation frameworks shape conviction and accumulation rate, not entries and exits.</li>
+          <li><strong>Liquidity comes from elsewhere.</strong> Income and non-Bitcoin assets supply cash, leaving the reserve intact.</li>
+        </ul>
+      </aside>
+      <aside class="callout callout-info" aria-label="Borrow phase doctrine">
+        <p class="callout-label">Handling Doctrine &middot; Borrow</p>
+        <ul>
+          <li><strong>Collateral, not sale.</strong> Liquidity is accessed via Bitcoin-backed borrowing rather than liquidation.</li>
+          <li><strong>Borrowing replaces income</strong> once the reserve enters a drawdown-insensitive phase.</li>
+          <li><strong>Principal stays intact.</strong> The core holdings are never spent down.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · STRUCTURAL IRREPLACEABILITY ======================== -->
+    <section class="section" id="irreplaceability" aria-labelledby="irr-title">
+      <div class="measure">
+        <p class="section-eyebrow">Structural Fit</p>
+        <h2 class="section-title" id="irr-title">Why Bitcoin specifically.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Under the framework&rsquo;s objective &mdash; maximizing survivable multi-decade compounding during regime instability &mdash; the backbone asset is evaluated against a fixed set of requirements derived from that objective rather than reverse-engineered to justify Bitcoin. No alternative currently satisfies all ten conditions simultaneously at institutional scale. If another asset did, it would qualify equally. A suitable backbone asset satisfies ten conditions at once:</p>
+      </div>
+
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li><p class="step-title">Dual custody</p><p class="step-body">holdable in both sovereign self-custody and regulated institutional wrappers, with identical underlying exposure and minimal basis risk.</p></li>
+          <li><p class="step-title">Collateralization</p><p class="step-body">mature lending markets enabling borrowing without forced sales.</p></li>
+          <li><p class="step-title">Convexity (10&ndash;100x)</p><p class="step-body">a measurable TAM supporting multi-decade appreciation, not 2&ndash;3x mature-asset growth.</p></li>
+          <li><p class="step-title">Regime resilience</p><p class="step-body">appreciates during instability, not despite it.</p></li>
+          <li><p class="step-title">Quantifiable models</p><p class="step-body">multiple independent valuation frameworks, not subjective narratives.</p></li>
+          <li><p class="step-title">Single asset</p><p class="step-body">one unified thing globally, not location-specific instances.</p></li>
+          <li><p class="step-title">Tax optimization</p><p class="step-body">a functionally zero tax rate through buy-borrow-die, while preserving tax-advantaged wrapper space for high-turnover positions.</p></li>
+          <li><p class="step-title">Multi-decade survivability</p><p class="step-body">high probability of 30&ndash;60 year persistence.</p></li>
+          <li><p class="step-title">Passive hold-ability</p><p class="step-body">no active management, storage rotation, or operational attention.</p></li>
+          <li><p class="step-title">Instant liquidity</p><p class="step-body">add positions or access collateralized borrowing without multi-month timelines or friction.</p></li>
+        </ol>
+      </div>
+
+      <div class="compare">
+        <table>
+          <caption>How alternatives compare against the ten requirements</caption>
+          <thead>
+            <tr>
+              <th scope="col">Requirement</th>
+              <th scope="col" class="col-primary">Bitcoin</th>
+              <th scope="col">Gold</th>
+              <th scope="col">Real Estate</th>
+              <th scope="col">Commodities</th>
+              <th scope="col">S&amp;P 500</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Dual custody</th><td class="col-primary yes">&check;</td><td class="partial">&approx;</td><td class="no">&times;</td><td class="no">&times;</td><td class="no">&times;</td></tr>
+            <tr><th scope="row">Collateralization</th><td class="col-primary yes">&check;</td><td class="yes">&check;</td><td class="yes">&check;</td><td class="no">&times;</td><td class="yes">&check;</td></tr>
+            <tr><th scope="row">10&ndash;100x convexity</th><td class="col-primary yes">&check;</td><td class="no">&times;</td><td class="no">&times;</td><td class="no">&times;</td><td class="no">&times;</td></tr>
+            <tr><th scope="row">Quantifiable models</th><td class="col-primary yes">&check;</td><td class="partial">&approx;</td><td class="partial">&approx;</td><td class="partial">&approx;</td><td class="partial">&approx;</td></tr>
+            <tr><th scope="row">Single asset</th><td class="col-primary yes">&check;</td><td class="yes">&check;</td><td class="no">&times;</td><td class="partial">&approx;</td><td class="no">&times;</td></tr>
+            <tr><th scope="row">Roth viable</th><td class="col-primary yes">&check;</td><td class="yes">&check;</td><td class="no">&times;</td><td class="no">&times;</td><td class="yes">&check;</td></tr>
+            <tr><th scope="row">Passive hold</th><td class="col-primary yes">&check;</td><td class="yes">&check;</td><td class="no">&times;</td><td class="no">&times;</td><td class="yes">&check;</td></tr>
+            <tr><th scope="row">Regime resilience</th><td class="col-primary yes">&check;</td><td class="partial">&approx;</td><td class="partial">&approx;</td><td class="partial">&approx;</td><td class="partial">&approx;</td></tr>
+            <tr><th scope="row">Multi-decade survivability</th><td class="col-primary yes">&check;</td><td class="yes">&check;</td><td class="partial">&approx;</td><td class="partial">&approx;</td><td class="yes">&check;</td></tr>
+            <tr><th scope="row">Instant liquidity</th><td class="col-primary yes">&check;</td><td class="yes">&check;</td><td class="no">&times;</td><td class="yes">&check;</td><td class="yes">&check;</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><th scope="row">Aggregate alignment</th><td class="col-primary">10 / 10</td><td>8 / 10</td><td>4 / 10</td><td>3 / 10</td><td>5.5 / 10</td></tr>
+          </tfoot>
+        </table>
+      </div>
+      <p class="compare-key">&check; satisfies (1 pt) &nbsp;&middot;&nbsp; &approx; partial (0.5 pt) &nbsp;&middot;&nbsp; &times; does not satisfy (0 pt)</p>
+
+      <div class="measure prose">
+        <p>Gold is the closest alternative (8/10): it satisfies collateralization, single-asset focus, Roth viability, passive holding, multi-decade survivability, and liquidity, but offers purchasing-power preservation rather than 10-to-100x expansion. The others fall short on convexity, custody, or the buy-borrow-die tax treatment the framework depends on. This dependency arises from the framework&rsquo;s stated objectives &mdash; multi-cycle survivability, tax-efficient convexity capture, and agency preservation &mdash; not from a universal claim. A different objective could be served by a different asset.</p>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · MULTI-CYCLE SURVIVABILITY ========================== -->
+    <section class="section" id="survivability" aria-labelledby="surv-title">
+      <div class="measure">
+        <p class="section-eyebrow">Why Not 100% Bitcoin</p>
+        <h2 class="section-title" id="surv-title">Optimizing for multi-cycle survivability.</h2>
+      </div>
+      <div class="measure prose">
+        <p>A common counterargument holds that an investor who never sells should simply hold 100 percent Bitcoin. The framework does not claim to outperform that in raw dollar terms during an extended bull market &mdash; an investor holding 100 percent Bitcoin through a 10x appreciation will achieve higher absolute returns than one holding 15 percent. The framework accepts this trade-off explicitly. It optimizes for a different objective: probability-weighted outcomes across multiple cycles, subject to real-world lifecycle constraints &mdash; job loss, health events, family needs, and regime shifts over three to four Bitcoin cycles.</p>
+        <p>Sequence-of-returns risk, in which a large drawdown at an inopportune time permanently impairs compounding, becomes more significant when a single asset constitutes most of the portfolio. A concentrated holder has limited capacity to rebalance, to deploy into other assets at multi-year lows, or to convert volatility into advantage. Income-funded dollar-cost averaging is the usual answer &mdash; but external income tends to contract precisely when Bitcoin drawdowns occur, because job-loss risk is correlated with regime stress.</p>
+      </div>
+
+      <blockquote class="pull-quote">
+        Concentrated systems depend on favorable sequencing. <span class="hl">Structured systems are designed for adverse sequencing.</span>
+      </blockquote>
+
+      <div class="measure prose">
+        <p>An illustration, structural rather than historical: two investors begin with $100,000 in January 2021 and hold conviction through December 2025.</p>
+      </div>
+
+      <div class="measure">
+        <div class="failure-modes">
+          <div>
+            <span class="name">Investor A &middot; 100% Bitcoin</span>
+            <p>2.86 BTC at $35,000. Peak $197,000 (Nov 2021); trough $46,000 (Dec 2022), a 77% drawdown. With DCA, ends 2025 at ~3.26 BTC / $326,000. Maximum exposure captured the full upside; operational flexibility stayed at zero throughout.</p>
+          </div>
+          <div>
+            <span class="name">Investor B &middot; Framework</span>
+            <p>$15K Bitcoin, $40K regime equities, $30K income, $15K dry powder. The 77% BTC drawdown is only ~8&ndash;10% at the portfolio level; rules trigger trough accumulation and dry powder deploys into defense, energy, and AI dislocations. Ends 2025 at ~$190,000 with rebuilt dry powder and Bitcoin at 47% of net worth.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="measure prose">
+        <p>Investor A produced higher absolute returns this cycle &mdash; expected, since in a single strong cycle maximum exposure produces the highest raw return. The distinction is that A maximized <span class="key-term">exposure</span> while B maximized <span class="key-term">control</span>, and exposure is not the same as optimization. Over a single favorable cycle, concentration can win; across decades of volatility and disruption, sequencing risk becomes dominant and structural resilience is the more reliable basis for compounding. The framework&rsquo;s advantage is architectural rather than predictive: internal liquidity, diversified regime exposure, rule-based accumulation, and income independence.</p>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · RISK REGISTER ====================================== -->
+    <section class="section" id="risks" aria-labelledby="risk-title">
+      <div class="measure">
+        <p class="section-eyebrow">Risk Register</p>
+        <h2 class="section-title" id="risk-title">What can break.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Bitcoin&rsquo;s maturation reduces but does not eliminate the principal risks to a long-term holding. The 10-to-30 percent target reserve range reflects both its potential and the persistence of these failure modes.</p>
+      </div>
+
+      <div class="measure">
+        <div class="failure-modes">
+          <div><span class="name">Protocol &amp; technical</span><p>Undiscovered cryptographic vulnerabilities, consensus failures, or quantum advances breaking current encryption.</p></div>
+          <div><span class="name">Custody loss</span><p>Private-key loss, inheritance failures, hardware compromise, or multisig coordination breakdowns that eliminate access.</p></div>
+          <div><span class="name">Regulatory &amp; tax</span><p>Bans, confiscatory taxation, KYC undermining fungibility, or ETF de-listings forcing liquidation.</p></div>
+          <div><span class="name">ETF wrapper risk</span><p>Counterparty failures, fund closures, tracking errors, or changes to ETF tax treatment in qualified accounts.</p></div>
+          <div><span class="name">Market structure gaps</span><p>Liquidity evaporation during crises, exchange failures, or stablecoin collapses disrupting dollar on- and off-ramps.</p></div>
+          <div><span class="name">Leverage cascades</span><p>Systemic derivatives liquidations producing reflexive downward spirals beyond fundamental dislocation.</p></div>
+          <div><span class="name">Miner economics shocks</span><p>Hash-rate collapses, centralization, or energy-cost spikes that make mining unprofitable and weaken security.</p></div>
+          <div><span class="name">Geopolitical controls</span><p>Coordinated access restrictions, on-ramp closures, or internet-infrastructure disruption.</p></div>
+          <div><span class="name">Lender counterparty risk</span><p>Custodian insolvency, rehypothecation exposure, or force-majeure clauses permitting seizure of pledged collateral.</p></div>
+          <div><span class="name">Technology displacement</span><p>Emergence of superior monetary technology that renders Bitcoin obsolete despite network effects.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · VALUATION MODELS =================================== -->
+    <section class="section" id="valuation" aria-labelledby="val-title">
+      <div class="measure">
+        <p class="section-eyebrow">Valuation Discipline</p>
+        <h2 class="section-title" id="val-title">Why Bitcoin can be modeled.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Supply is algorithmically capped (21 million, with issuance declining through halvings roughly every four years) and value is determined by adoption, liquidity, and network effects, so Bitcoin&rsquo;s growth resembles technology platforms more than fiat currencies. On a logarithmic scale its price since 2010 has clustered around a power-law trendline of the form Price = A &times; (Days)<sup>B</sup>, where A and B are empirically stable constants. The framework treats this as a contextual heuristic for regime assessment, not a predictive model &mdash; the pattern could break if adoption dynamics shift.</p>
+        <p>Reliance on any single model creates brittleness, so the framework synthesizes several independent ones; their convergence is a confidence signal, their divergence a caution. <span class="part-ref">CIS scoring is developed in Part 6</span>.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li><p class="step-title">Power-law bands</p><p class="step-body">a log-log regression (Santostasi); Bitcoin has spent ~80% of its history in the central corridor, 15% in the upper band (euphoria), 5% below the lower band (capitulation). Early 2026 central tendency ~$80&ndash;100k.</p></li>
+          <li><p class="step-title">Realized price (on-chain cost basis)</p><p class="step-body">the average price at which all Bitcoin last moved on-chain (~$35&ndash;40k); acts as support in bear markets and rises over time as adoption increases.</p></li>
+          <li><p class="step-title">Adoption &amp; network models</p><p class="step-body">Metcalfe&rsquo;s Law and S-curve adoption; strong on multi-year trend, unsuited to tactical timing. Help identify the adoption phase.</p></li>
+          <li><p class="step-title">Production cost</p><p class="step-body">~$30&ndash;50k depending on ASIC efficiency and electricity; a soft floor, since sustained trading below cost drives miner capitulation and supply tightening.</p></li>
+          <li><p class="step-title">Liquidity-adjusted (Alden)</p><p class="step-body">adjusts fair value for M2 growth, central-bank balance sheets, and real rates; a 20&ndash;30% premium during M2 expansion, a comparable discount during contraction.</p></li>
+        </ol>
+      </div>
+
+      <div class="measure prose">
+        <p>Fair value is the moving central tendency where these models converge. The framework reads convergence as a posture signal &mdash; never an execution trigger. Bitcoin is not sold on model signals; the models reinforce conviction and guide accumulation discipline.</p>
+      </div>
+
+      <div class="measure">
+        <div class="failure-modes">
+          <div><span class="name">Models cluster near price</span><p>Confidence in the target reserve range increases. Maintain the 10&ndash;15% range, continue systematic DCA, avoid aggressive changes.</p></div>
+          <div><span class="name">Models converge on undervaluation</span><p>A &gt;30% discount to convergent estimates. Temporarily increase accumulation (raise DCA ~50% or deploy dry powder). Existing holdings untouched.</p></div>
+          <div><span class="name">Models diverge widely</span><p>Elevated uncertainty; the divergence itself is informative. Hold the range, avoid aggressive changes either way, wait for reconvergence.</p></div>
+        </div>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Historical illustrations">
+        <p class="callout-label">Through Two Cycles</p>
+        <ul>
+          <li><strong>Late 2021 &middot; extension.</strong> Bitcoin ~$69k against a power-law tendency ~$55k and realized price ~$24k &mdash; materially above fair value. Framework response: extension reduces discretionary accumulation; it never prompts sales. Build dry powder from income.</li>
+          <li><strong>Late 2022 &middot; convergence on undervaluation.</strong> Bitcoin ~$16&ndash;17k against a power-law tendency ~$35k. Models converged on material undervaluation. Framework response: accelerate DCA and deploy the dry powder built during the prior extension. Core holdings never sold.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · TAM & IMPLEMENTATION =============================== -->
+    <section class="section" id="tam" aria-labelledby="tam-title">
+      <div class="measure">
+        <p class="section-eyebrow">Addressable Market &amp; Implementation</p>
+        <h2 class="section-title" id="tam-title">TAM, custody, and the borrow phase.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Bitcoin&rsquo;s market capitalization in early 2026 is ~$2.0&ndash;2.1 trillion, roughly 6&ndash;7 percent of gold&rsquo;s $30 trillion. The framework&rsquo;s TAM estimate is intentionally conservative, counting only the share of existing monetary assets Bitcoin could plausibly absorb:</p>
+      </div>
+
+      <div class="measure">
+        <div class="failure-modes">
+          <div><span class="name">Gold coexistence &middot; ~$12T</span><p>Capturing 30&ndash;50% of gold&rsquo;s monetary premium over 20 years, with gold&rsquo;s market largely intact.</p></div>
+          <div><span class="name">Real-estate value storage &middot; ~$3T</span><p>A portion of property held primarily for preservation shifting to a more portable, divisible store of value.</p></div>
+          <div><span class="name">Offshore wealth &middot; ~$5T</span><p>Cross-jurisdictional holdings ($10T+) where self-custody offers a different intermediary and custody profile.</p></div>
+          <div><span class="name">EM currency substitution &middot; ~$3T</span><p>Holdings in 20%+ inflation economies as payment rails, custody, and regulatory clarity develop.</p></div>
+        </div>
+      </div>
+
+      <div class="measure prose">
+        <p>Summed conservatively, ~$23 trillion of addressable monetary premium &mdash; excluding new use cases such as settlement-layer or DeFi applications. As a single isolated scenario: capturing 40 percent of gold&rsquo;s premium over 15 years implies a $12 trillion market cap, ~$600,000 per coin against ~$100,000 today &mdash; roughly 6x. In a $100,000 portfolio a 15 percent allocation would grow from $15,000 to $90,000, lifting total value ~75 percent. This is conditional, not a forecast.</p>
+        <p><button type="button" class="gloss" data-gloss="buy-borrow-die" aria-expanded="false">Buy-borrow-die</button>. Bitcoin is held in taxable cold storage rather than a Roth. A long-held reserve can defer capital gains by being borrowed against rather than sold, and under current law heirs may receive a step-up in basis &mdash; treatment that depends on tax policy and is not guaranteed. Holding Bitcoin in taxable accounts keeps Roth capacity available for higher-turnover positions, where avoiding taxable rebalancing events can add roughly 5&ndash;8 percent in annual tax alpha. <span class="part-ref">Wrapper optimization is developed in Part 4</span>.</p>
+        <p><span class="key-term">Cold-storage architecture.</span> The full reserve is held in hardware wallets under the holder&rsquo;s own keys, accumulated through payroll DCA over 15&ndash;20 years and held rather than trimmed on valuation. A custodian is introduced only if and when collateralized borrowing begins. The Borrow phase is optional and scale-dependent: once the reserve becomes a large share of net worth, borrowing against it is one alternative to a taxable sale, conditional on scale and objectives. It introduces leverage, counterparty, and liquidation risk and is not mandatory.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="proc-steps" data-stepper>
+          <li><p><span class="lead">Conservative loan-to-value.</span> Target a 20&ndash;35% operating range (50% maximum) so the position can withstand the 70%+ drawdowns Bitcoin has historically experienced without a margin call.</p></li>
+          <li><p><span class="lead">Borrow only for cash-flowing assets.</span> Deploy borrowed capital into income-producing assets whose cash flow services the interest, not into consumption.</p></li>
+          <li><p><span class="lead">Emergency deleveraging plan.</span> Define tripwires that require paydown if LTV approaches 40&ndash;50%, and hold liquid reserves sufficient to cut principal 25&ndash;50% if needed.</p></li>
+          <li><p><span class="lead">Lender diversification &amp; custody verification.</span> Split borrowings across two or three custodians; verify segregation, bankruptcy-remoteness, and liquidation terms before pledging.</p></li>
+          <li><p><span class="lead">Know when not to borrow.</span> Avoid initiating loans during extreme volatility (VIX &gt; 30, Bitcoin 30%+ below fair value) or when the portfolio is already stressed.</p></li>
+          <li><p><span class="lead">Manage interest-rate risk.</span> Bitcoin-backed loan rates run ~8&ndash;12%. Fix the rate where possible; if variable, require deployed returns at least three points above the cost.</p></li>
+        </ol>
+      </div>
+
+      <div class="measure prose">
+        <p>Reserve sizing scales with horizon and risk capacity. A <span class="key-term">10&ndash;15% target</span> suits horizons of ten years or more and moderate risk capacity &mdash; a 50% Bitcoin drawdown is only ~7.5% of the portfolio. A <span class="key-term">20&ndash;30% elevated range</span> suits higher conviction and longer horizons, still requiring valuation discipline. A <span class="key-term">30&ndash;50% mature share</span> may emerge after 15&ndash;20 years through accumulation and appreciation rather than active rebalancing, at which point the framework can transition from Accumulate to Borrow. <span class="part-ref">Position management is developed in Part 5</span>.</p>
+      </div>
+
+      <aside class="callout callout-insight" aria-label="Key insight">
+        <div class="ci-head">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M9 18h6"></path>
+            <path d="M10 21h4"></path>
+            <path d="M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.2 1 2V16h6v-.5c0-.8.5-1.5 1-2A6 6 0 0 0 12 3z"></path>
+          </svg>
+          <p class="callout-label">Key Insight</p>
+        </div>
+        <p>The resulting profile is asymmetric: downside is bounded &mdash; the maximum loss is the reserve itself &mdash; while upside is open-ended but uncertain. The framework&rsquo;s contribution is the surrounding architecture: the structure that lets the holder retain the position through full cycles, accumulate during dislocations, and optionally borrow against it rather than sell.</p>
+      </aside>
+
+      <!-- Chapter-end transition -->
+      <aside class="callout callout-transition" aria-label="End of part">
+        <p class="callout-label">End of Part 3</p>
+        <p>Part 3 established Bitcoin as the framework&rsquo;s reserve asset: a conservative ~$23T TAM, regime-shift validation from the 2024&ndash;2025 cycle, valuation discipline through power-law mathematics and model convergence, and a long-horizon taxable cold-storage strategy with buy-borrow-die mechanics &mdash; introducing the evolution toward an Accumulate-to-Borrow phase.</p>
+      </aside>
+    </section>
+
+      <!-- Forward pointer: the spine's Next-up backbone (Part 4 not yet built) -->
+      <aside class="next-up" aria-label="Next in the series">
+        <div class="measure">
+          <p class="next-up-label">Next up</p>
+          <div class="next-up-card pending">
+            <span class="next-up-num">04</span>
+            <span class="next-up-body">
+              <span class="next-up-title">Tax Architecture &amp; ROC Strategy <span class="soon">Soon</span></span>
+              <span class="next-up-teaser">Wrapper optimization as the framework&rsquo;s primary structural edge, and Bitcoin-backed income generation.</span>
+            </span>
+            <span class="next-up-arrow" aria-hidden="true">&rarr;</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Marks Part 3 read once it scrolls into view (drives cover completion) -->
+      <div data-progress-sentinel data-part="3" aria-hidden="true"></div>
+
+      <footer class="site-footer">
+        <div class="measure foot-base">
+          <span>&copy; 2026 Adaptive Convexity Framework</span>
+          <span>Part 3 &middot; Bitcoin: Convexity Backbone</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Floating reading nav — home + prev/next part, surfaces while scrolling -->
+  <nav class="floatnav" aria-label="Reading navigation" hidden>
+    <div class="floatnav-inner">
+      <a class="floatnav-home" href="/">
+        <svg class="fn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M3 11l9-7 9 7"></path>
+          <path d="M5 10v9h14v-9"></path>
+        </svg>
+        <span class="fn-home-label">Framework</span>
+      </a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-prev" href="/part-2-lineage-macro-thesis">&larr; Part 2</a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <span class="floatnav-next" aria-disabled="true">Next &middot; Part 4</span>
+    </div>
+  </nav>
+
+  <!-- Progressive enhancement: theme, scroll-spy, drawer, completion, floatnav -->
+  <script src="/site-b/reading.js" defer></script>
+</body>
+</html>
