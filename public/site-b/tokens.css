@@ -131,13 +131,12 @@
   --sidebar-width:  17rem;   /* Part-page parts nav rail */
   --sidenote-width: 13rem;   /* Part-page right margin for Tufte sidenotes */
   --shell-gap:      var(--space-10);
-  --reading-col:    50rem;   /* capped reading column = prose measure + breathing. Large-monitor
-                                cap so prose isn't stranded/centered in a greedy 1fr cell on wide
-                                screens. Holds current in-flow figures (≤ ~46rem); bump if a wide
-                                chart exhibit ever needs more room. */
-  --shell-max:      calc(var(--sidebar-width) + var(--reading-col));  /* was 1760px. Shell = sidebar
-                                + reading column, centered, so wide/ultrawide reads as one
-                                institutional unit instead of a stretched page. */
+  --reading-col:    50rem;   /* prose-comfort reference (prose stays at --measure / 66ch) */
+  --exhibit-col:    64rem;   /* content lane: wide enough to host a full-scale chart exhibit */
+  --exhibit-max:    1120px;  /* chart-card width cap — matches the /chart-handoff-export scale */
+  --shell-max:      calc(var(--sidebar-width) + var(--exhibit-col));  /* sidebar + exhibit lane,
+                                centered. Prose holds at the 66ch measure; chart exhibits break out
+                                wider than body copy (up to --exhibit-max) via their host max-width. */
 
   /* ---- Bounded fluid rhythm + display type (wide / ultrawide continuity) --- */
   --section-rhythm:   clamp(4rem, 7vw, 7rem);     /* vertical space between sections */
