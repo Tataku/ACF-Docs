@@ -131,7 +131,13 @@
   --sidebar-width:  17rem;   /* Part-page parts nav rail */
   --sidenote-width: 13rem;   /* Part-page right margin for Tufte sidenotes */
   --shell-gap:      var(--space-10);
-  --shell-max:      1760px;  /* whole shell cap so wide/ultrawide reads as one centered unit */
+  --reading-col:    50rem;   /* capped reading column = prose measure + breathing. Large-monitor
+                                cap so prose isn't stranded/centered in a greedy 1fr cell on wide
+                                screens. Holds current in-flow figures (≤ ~46rem); bump if a wide
+                                chart exhibit ever needs more room. */
+  --shell-max:      calc(var(--sidebar-width) + var(--reading-col));  /* was 1760px. Shell = sidebar
+                                + reading column, centered, so wide/ultrawide reads as one
+                                institutional unit instead of a stretched page. */
 
   /* ---- Bounded fluid rhythm + display type (wide / ultrawide continuity) --- */
   --section-rhythm:   clamp(4rem, 7vw, 7rem);     /* vertical space between sections */
