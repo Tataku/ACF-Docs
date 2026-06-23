@@ -457,12 +457,12 @@
   // id -> part file (the ACTUAL built filenames). Unbuilt parts render layer-two
   // as muted plain text, never a dead link.
   var PART_FILES = {
-    1: 'part-1-foundation.html',
-    2: 'part-2-lineage-macro.html',
-    3: 'part-3-bitcoin-convexity.html',
-    4: 'part-4-tax-architecture-roc-strategy.html',
-    5: 'part-5-portfolio-construction-position-management.html',
-    6: 'part-6-convexity-framework-integrity-scoring.html'
+    1: '/part-1-foundation',
+    2: '/part-2-lineage-macro-thesis',
+    3: '/part-3-bitcoin-convexity-backbone',
+    4: '/part-4-tax-architecture-roc-strategy',
+    5: '/part-5-portfolio-construction-position-management',
+    6: '/part-6-convexity-framework-integrity-scoring'
   };
   var BUILT_PARTS = { 1: true, 2: true, 3: true }; // flip more true as parts ship
 
@@ -470,13 +470,13 @@
   // chart-handoff inventory's `idx`; glossary entries reference them via `chart`.
   // Unbuilt chart ids render nothing (current behavior, unchanged).
   var BUILT_CHARTS = {
-    'S1': { page: 'part-1-foundation.html', hash: '#exhibit-s1', label: 'S1 · Shape the Payoff' },
-    '01': { page: 'part-1-foundation.html', hash: '#exhibit-01', label: '01 · The Hedge Broke' },
-    '02': { page: 'part-1-pictures.html', hash: '#exhibit-02', label: '02 · Correlation Turns' },
-    '03': { page: 'part-1-pictures.html', hash: '#exhibit-03', label: '03 · Inflation Was Bigger' },
-    '04': { page: 'part-1-pictures.html', hash: '#exhibit-04', label: '04 · The Bill Came Due' },
-    '05': { page: 'part-1-foundation.html', hash: '#exhibit-05', label: '05 · Path Changes Everything' },
-    '06': { page: 'part-1-foundation.html', hash: '#exhibit-06', label: '06 · Survive the Path' }
+    'S1': { page: '/part-1-foundation', hash: '#exhibit-s1', label: 'S1 · Shape the Payoff' },
+    '01': { page: '/part-1-foundation', hash: '#exhibit-01', label: '01 · The Hedge Broke' },
+    '02': { page: '/part-1-pictures', hash: '#exhibit-02', label: '02 · Correlation Turns' },
+    '03': { page: '/part-1-pictures', hash: '#exhibit-03', label: '03 · Inflation Was Bigger' },
+    '04': { page: '/part-1-pictures', hash: '#exhibit-04', label: '04 · The Bill Came Due' },
+    '05': { page: '/part-1-foundation', hash: '#exhibit-05', label: '05 · Path Changes Everything' },
+    '06': { page: '/part-1-foundation', hash: '#exhibit-06', label: '06 · Survive the Path' }
   };
 
   function boot(data) {
@@ -489,7 +489,7 @@
   if (window.ACF_GLOSSARY && window.ACF_GLOSSARY.terms) {
     boot(window.ACF_GLOSSARY);
   } else {
-    fetch('acf-glossary.json').then(function (r) { return r.json(); }).then(boot).catch(function () {});
+    fetch('/site-b/acf-glossary.json').then(function (r) { return r.json(); }).then(boot).catch(function () {});
   }
 
   function ensureCard() {

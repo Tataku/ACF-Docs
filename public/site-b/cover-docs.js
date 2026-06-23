@@ -10,31 +10,31 @@
 
   /* ---- Search index ------------------------------------------------------- */
   var PARTS = [
-    { t: 'Part 1 · Foundation & Philosophy', s: 'The premise, the operating posture, and the order of operations.', h: 'part-1-foundation.html' },
-    { t: 'Part 2 · Lineage & Macro Thesis', s: 'Intellectual lineage and the regime-shift macro thesis.', h: 'part-2-lineage-macro.html' },
-    { t: 'Part 3 · Bitcoin: Convexity Backbone', s: 'Why Bitcoin anchors the portfolio’s asymmetric upside.', h: 'part-3-bitcoin-convexity.html' },
-    { t: 'Part 1 in Pictures', s: 'The Foundation as a visual essay: seven exhibits.', h: 'part-1-pictures.html' }
+    { t: 'Part 1 · Foundation & Philosophy', s: 'The premise, the operating posture, and the order of operations.', h: '/part-1-foundation' },
+    { t: 'Part 2 · Lineage & Macro Thesis', s: 'Intellectual lineage and the regime-shift macro thesis.', h: '/part-2-lineage-macro-thesis' },
+    { t: 'Part 3 · Bitcoin: Convexity Backbone', s: 'Why Bitcoin anchors the portfolio’s asymmetric upside.', h: '/part-3-bitcoin-convexity-backbone' },
+    { t: 'Part 1 in Pictures', s: 'The Foundation as a visual essay: seven exhibits.', h: '/part-1-pictures' }
   ];
   var SECTIONS = [
-    { t: 'Manifesto', s: 'Part 1 · The traditional portfolio playbook is failing quietly.', h: 'part-1-foundation.html#manifesto' },
-    { t: 'Abstract', s: 'Part 1 · A portfolio operating system for unstable regimes.', h: 'part-1-foundation.html#abstract' },
-    { t: 'Order of Operations', s: 'Part 1 · The system at a glance.', h: 'part-1-foundation.html#order-of-operations' },
-    { t: 'Framework Lineage', s: 'Part 2 · The intellectual foundations, thesis-agnostic.', h: 'part-2-lineage-macro.html#lineage' },
-    { t: 'What It Excludes', s: 'Part 2 · What the framework intentionally excludes.', h: 'part-2-lineage-macro.html#excludes' },
-    { t: 'Tax as Multiplier', s: 'Part 2 · A dominant structural return multiplier.', h: 'part-2-lineage-macro.html#tax' },
-    { t: 'Thought Leaders', s: 'Part 2 · How the framework uses thought leaders.', h: 'part-2-lineage-macro.html#thought-leaders' },
-    { t: 'Macro Thesis Process', s: 'Part 2 · Identification, evaluation, and governance.', h: 'part-2-lineage-macro.html#macro-thesis' },
-    { t: 'The Backbone', s: 'Part 3 · Bitcoin as the convexity backbone.', h: 'part-3-bitcoin-convexity.html#backbone' },
-    { t: 'Structural Fit', s: 'Part 3 · Why Bitcoin specifically.', h: 'part-3-bitcoin-convexity.html#irreplaceability' },
-    { t: 'Multi-Cycle Survivability', s: 'Part 3 · Optimizing for multi-cycle survivability.', h: 'part-3-bitcoin-convexity.html#survivability' },
-    { t: 'Risk Register', s: 'Part 3 · What can break.', h: 'part-3-bitcoin-convexity.html#risks' },
-    { t: 'Valuation Models', s: 'Part 3 · Why Bitcoin can be modeled.', h: 'part-3-bitcoin-convexity.html#valuation' },
-    { t: 'TAM & Implementation', s: 'Part 3 · TAM, custody, and the borrow phase.', h: 'part-3-bitcoin-convexity.html#tam' }
+    { t: 'Manifesto', s: 'Part 1 · The traditional portfolio playbook is failing quietly.', h: '/part-1-foundation#manifesto' },
+    { t: 'Abstract', s: 'Part 1 · A portfolio operating system for unstable regimes.', h: '/part-1-foundation#abstract' },
+    { t: 'Order of Operations', s: 'Part 1 · The system at a glance.', h: '/part-1-foundation#order-of-operations' },
+    { t: 'Framework Lineage', s: 'Part 2 · The intellectual foundations, thesis-agnostic.', h: '/part-2-lineage-macro-thesis#lineage' },
+    { t: 'What It Excludes', s: 'Part 2 · What the framework intentionally excludes.', h: '/part-2-lineage-macro-thesis#excludes' },
+    { t: 'Tax as Multiplier', s: 'Part 2 · A dominant structural return multiplier.', h: '/part-2-lineage-macro-thesis#tax' },
+    { t: 'Thought Leaders', s: 'Part 2 · How the framework uses thought leaders.', h: '/part-2-lineage-macro-thesis#thought-leaders' },
+    { t: 'Macro Thesis Process', s: 'Part 2 · Identification, evaluation, and governance.', h: '/part-2-lineage-macro-thesis#macro-thesis' },
+    { t: 'The Backbone', s: 'Part 3 · Bitcoin as the convexity backbone.', h: '/part-3-bitcoin-convexity-backbone#backbone' },
+    { t: 'Structural Fit', s: 'Part 3 · Why Bitcoin specifically.', h: '/part-3-bitcoin-convexity-backbone#irreplaceability' },
+    { t: 'Multi-Cycle Survivability', s: 'Part 3 · Optimizing for multi-cycle survivability.', h: '/part-3-bitcoin-convexity-backbone#survivability' },
+    { t: 'Risk Register', s: 'Part 3 · What can break.', h: '/part-3-bitcoin-convexity-backbone#risks' },
+    { t: 'Valuation Models', s: 'Part 3 · Why Bitcoin can be modeled.', h: '/part-3-bitcoin-convexity-backbone#valuation' },
+    { t: 'TAM & Implementation', s: 'Part 3 · TAM, custody, and the borrow phase.', h: '/part-3-bitcoin-convexity-backbone#tam' }
   ];
-  var WAVE_FILES = { 1: 'part-1-foundation.html', 2: 'part-2-lineage-macro.html', 3: 'part-3-bitcoin-convexity.html' };
+  var WAVE_FILES = { 1: '/part-1-foundation', 2: '/part-2-lineage-macro-thesis', 3: '/part-3-bitcoin-convexity-backbone' };
   var GLOSSARY = [];
 
-  fetch('acf-glossary.json')
+  fetch('/site-b/acf-glossary.json')
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (!d || !d.terms) return;
