@@ -2317,6 +2317,18 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
   .floatnav-inner { transition: box-shadow var(--motion-slow) var(--ease-standard); }   /* no radius morph */
 }
 
+/* Narration breathing room — while the dock is armed (reading.js mirrors the
+   active state to the root as [data-narrating]), give programmatic scrolls
+   (anchors / focus) and the end of the page enough room to clear the
+   bottom-fixed dock, so chart disclosures and source lines aren't left sitting
+   behind it. Both are removed when narration stops → no permanent layout shift,
+   no dock/engine/chart changes. */
+html[data-narrating] {
+  --dock-clear: 9.5rem;                                  /* ~2-row dock + its bottom offset + a small gap */
+  scroll-padding-bottom: var(--dock-clear);
+}
+html[data-narrating] .shell-main { padding-bottom: var(--dock-clear); }
+
 .fn-soon {
   font-size: 0.6rem;
   text-transform: uppercase;
