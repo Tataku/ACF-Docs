@@ -2311,10 +2311,24 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
 }
 .floatnav-player[data-state="error"] .floatnav-time { color: #e0623f; opacity: .9; }
 
+/* Preparing/loading — calm and premium (no spinner): the play glyph + time
+   marker gently breathe, and the control is non-interactive so spam-clicks land
+   nowhere (the dedicated Stop control still cancels). */
+.floatnav-player[data-state="loading"] .floatnav-play { cursor: progress; pointer-events: none; }
+.floatnav-player[data-state="loading"] .floatnav-play .fn-ico-play,
+.floatnav-player[data-state="loading"] .floatnav-time { animation: fnp-breathe 1.3s ease-in-out infinite; }
+.floatnav-player[data-state="loading"] .floatnav-time { letter-spacing: .12em; }
+@keyframes fnp-breathe { 0%, 100% { opacity: .42; } 50% { opacity: 1; } }
+/* The Listen control in the part-actions bar reads as preparing, not clickable,
+   while loading (it already dims to .65); ignore taps there too — Stop cancels. */
+.part-actions[data-narration-state="loading"] .part-listen { pointer-events: none; cursor: progress; }
+
 @media (prefers-reduced-motion: reduce) {
   .floatnav-progress-input::-webkit-slider-thumb { transition: none; }
   .floatnav-player, .floatnav[data-armed] .floatnav-player { transition: opacity 0s, visibility 0s; }
   .floatnav-inner { transition: box-shadow var(--motion-slow) var(--ease-standard); }   /* no radius morph */
+  .floatnav-player[data-state="loading"] .floatnav-play .fn-ico-play,
+  .floatnav-player[data-state="loading"] .floatnav-time { animation: none; opacity: .7; }
 }
 
 /* Narration breathing room — while the dock is armed (reading.js mirrors the
