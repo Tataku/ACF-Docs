@@ -1938,6 +1938,53 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   font-weight: var(--weight-medium);
 }
 
+/* ── Sidebar refinement — a quiet instrument panel ─────────────────────────
+   Stealth scrollbar, muted structural labels, one accent marker for the active
+   part, borderless SOON. CSS-only, shared across the reading pages, reversible. */
+
+/* Stealth scrollbar: no chrome at rest (fixes the default OS scrollbar on short
+   / zoomed viewports), a thin hairline thumb only on hover/focus. */
+.sidebar { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.sidebar:hover, .sidebar:focus-within { scrollbar-color: var(--rule) transparent; }
+.sidebar::-webkit-scrollbar { width: 10px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb {
+  background: transparent; border-radius: 99px;
+  border: 3px solid transparent; background-clip: padding-box;
+}
+.sidebar:hover::-webkit-scrollbar-thumb,
+.sidebar:focus-within::-webkit-scrollbar-thumb { background: var(--rule); background-clip: padding-box; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); background-clip: padding-box; }
+
+/* Tighter, more intentional rhythm */
+.sidebar-head { margin-bottom: var(--space-8); }
+.sidebar-nav { gap: var(--space-5); }
+
+/* Section labels: quiet micro-caps; the accent is reserved for the active part,
+   not the labels. A thin hairline separates movement groups. */
+.side-movement { color: var(--ink-faint); font-size: 0.64rem; letter-spacing: 0.2em; margin-bottom: var(--space-3); }
+.sidebar-nav > .side-movement:not(:first-child) {
+  margin-top: var(--space-2);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--rule-faint);
+}
+
+/* Active part: one calm accent rail-marker, no noisy fill. */
+.side-part.current { position: relative; }
+.side-part.current::before {
+  content: ''; position: absolute; left: calc(-1 * var(--space-2)); top: 50%;
+  transform: translateY(-50%); width: 2px; height: 1.05em; border-radius: 2px;
+  background: var(--accent);
+}
+/* Hover is a quiet wash; keep it lighter than the active state. */
+a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); }
+
+/* SOON: borderless, stealth micro-caps — an instrument label, not a pill. */
+.soon {
+  border: 0; padding: 0; margin-left: var(--space-2); border-radius: 0;
+  font-size: 0.58rem; letter-spacing: 0.18em; color: var(--ink-faint); opacity: 0.85;
+}
+
 /* ---- Reading column ------------------------------------------------------ */
 .shell-main { min-width: 0; }
 .doc-breadcrumb {

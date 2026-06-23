@@ -15,6 +15,7 @@ await esbuild.build({
   sourcemap: false,
   target: ['es2019'],
   jsx: 'transform',
+  loader: { '.css': 'text' },   // framework-charts.css is imported as a string and injected at runtime
   define: { 'process.env.NODE_ENV': '"production"' },
   outfile: 'public/site-b/site-b-charts.js',
   legalComments: 'none',
