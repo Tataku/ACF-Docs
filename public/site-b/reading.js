@@ -358,11 +358,21 @@
 
       // --- readable text -----------------------------------------------------
       var blocks = null;
+      // Normalize a few tokens that read awkwardly aloud — applied ONLY to the
+      // narration text (TTS + Web Speech), never to the visible page. Conservative:
+      // unambiguous cases only (named ratio, scores, N-times multipliers, ampersand).
+      function speakNorm(t) {
+        return t
+          .replace(/\b60\s*\/\s*40\b/g, 'sixty-forty')        // "the 60/40 portfolio" → not "sixty slash forty"
+          .replace(/\b8\s*\/\s*10\b/g, 'eight out of ten')    // score "(8/10)"
+          .replace(/(\d)\s*[x×]\b/g, '$1 times')         // 6x / 10x / 100x → "… times", not "ex"
+          .replace(/\s*&\s*/g, ' and ');                      // "S&P" → "S and P"
+      }
       function buildBlocks() {
         if (blocks) return blocks;
         blocks = [];
         document.querySelectorAll('.shell-main .section-title, .shell-main .prose-lead, .shell-main .prose p')
-          .forEach(function (n) { var t = (n.textContent || '').trim(); if (t) blocks.push(t); });
+          .forEach(function (n) { var t = speakNorm((n.textContent || '').trim()); if (t) blocks.push(t); });
         return blocks;
       }
       // Segment the page for the API path. The first segments are deliberately
