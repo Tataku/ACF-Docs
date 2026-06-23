@@ -22,14 +22,21 @@
 
 :root {
   /* ---- Surface: paper & ink (light, editorial) ---------------------------- */
-  --paper:          #f5f7fa;   /* page background — cool platinum (was warm green-cream #fbfdfc) */
-  --paper-warm:     #ebeef3;   /* cool grey tint band (CTA) — was a warm green tint; name kept */
-  --surface-raised: #ffffff;   /* raised card fill (white) on the platinum page */
-  --ink:            #0a0e12;   /* primary reading ink */
-  --ink-quiet:      #4a5560;   /* secondary / captions / labels */
-  --ink-faint:      #69727d;   /* tertiary / metadata — darkened to clear AA (4.5:1) */
-  --rule:           #d5dae1;   /* hairline rules — cool grey */
-  --rule-faint:     #e7eaf0;   /* faintest dividers — cool grey */
+  --paper:          #f7f4ec;   /* page background — warm paper, harmonized with the chart paper */
+  --paper-warm:     #efe9dc;   /* warm tint band (CTA) */
+  --surface-raised: #fbf8f1;   /* raised card fill — warm off-white (harmonizes with chart paper, not pure white) */
+  --ink:            #16130d;   /* primary reading ink — warm near-black */
+  --ink-quiet:      #514b40;   /* secondary / captions / labels — warm */
+  --ink-faint:      #6e695c;   /* tertiary / metadata — warm (matches chart muted text) */
+  --rule:           #dcd6ca;   /* hairline rules — warm */
+  --rule-faint:     #ece6da;   /* faintest dividers — warm */
+
+  /* ---- Chart / exhibit paper — promoted from the chart palette (light) so the
+     page, cards and exhibits read as one warm-paper system. --------------------- */
+  --exhibit-paper:       #f3efe6;   /* chart card paper */
+  --exhibit-paper-edge:  #d7d0c1;   /* chart card border */
+  --exhibit-paper-muted: #6e695c;   /* chart muted text */
+  --exhibit-bridge:      #f1ebe0;   /* quiet warm zone that bridges page → exhibit */
 
   /* ---- Accent: emerald foundation, recomputed for paper ------------------- */
   --brand-emerald:  #10b981;   /* dashboard brand reference — NOT used as ink on paper */
@@ -211,6 +218,13 @@
   --ink-faint:      #828b95;   /* tertiary / metadata */
   --rule:           #2a3137;   /* hairline rules */
   --rule-faint:     #1f262c;   /* faintest dividers */
+
+  /* ---- Chart / exhibit paper (dark equivalents — the chart uses the dark
+     terminal palette here; tokens kept for parity / bridge treatment) ------ */
+  --exhibit-paper:       #0c1219;
+  --exhibit-paper-edge:  #1f2835;
+  --exhibit-paper-muted: #7e8896;
+  --exhibit-bridge:      #10151b;
 
   /* ---- Accent: emerald regains legibility on dark ----------------------- */
   --accent:         #34d399;   /* bright teal-emerald — display / large accents */

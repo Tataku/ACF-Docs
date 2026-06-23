@@ -2118,6 +2118,18 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-4px); }
 }
+/* Return-to-top — a round chevron button at the head of the floating nav,
+   connected to the Framework / Next segments (a divider follows it). Quiet,
+   theme-aware; smooth-scrolls to top unless reduced motion is requested. */
+.floatnav-top {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; flex: 0 0 auto;
+  padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--floatnav-fg); cursor: pointer;
+  transition: background var(--motion-base) var(--ease-standard);
+}
+.floatnav-top:hover, .floatnav-top:focus-visible { background: var(--floatnav-hover); }
+.floatnav-top .fn-icon { width: 1rem; height: 1rem; }
 .floatnav-home {
   display: inline-flex;
   align-items: center;
