@@ -51,52 +51,6 @@
       <p class="pictures-lede">Each chart makes one claim and shows the mechanism. Hover, tap, or pin for the deeper explanation; sources sit behind each Details toggle.</p>
     </header>
 
-<figure class="exhibit" data-wide id="exhibit-s1" data-chart="S1" data-fc-chart="sig-payoff" data-mode="conceptual">
-      <header class="ex-head">
-        <p class="ex-eyebrow"><span class="ex-idx">S1</span> &middot; Payoff shape &middot; Signature
-          <span class="ex-mode" aria-label="Conceptual exhibit. Illustrative framework diagram, not historical data.">&#9676;</span></p>
-        <h3 class="ex-title">Shape the Payoff</h3>
-        <p class="ex-sub">The payoff shape the whole framework is built to produce</p>
-      </header>
-      <div class="ex-plot">
-        <svg viewBox="0 0 760 420" role="img" aria-labelledby="exs1-t exs1-d">
-          <title id="exs1-t">Shape the Payoff</title>
-          <desc id="exs1-d">A conceptual payoff curve with a capped left side and a free right side, above a symmetric reference line.</desc>
-          <line class="cx-grid" x1="70" y1="370" x2="710" y2="370"/>
-          <line class="cx-grid" x1="380" y1="60" x2="380" y2="370"/>
-          <path class="cx-line2" d="M110 318 L660 96"/>
-          <path class="cx-areaq" d="M110 252 L380 244 L110 318 Z" opacity=".5"/>
-          <path class="cx-thesis" pathLength="1" d="M110 252 C 230 252, 320 248, 380 238 C 470 222, 570 158, 660 56"/>
-          <circle class="cx-dotq" cx="110" cy="252" r="3.5"/>
-          <circle class="cx-dot" cx="660" cy="56" r="4"/>
-          <text class="cx-lbl cx-build" x="118" y="234">downside capped</text>
-          <text class="cx-lbl cx-lbl--a cx-build" x="440" y="48">upside left free to run</text>
-          <text class="cx-lbl cx-build" x="510" y="140" text-anchor="end" opacity=".8">symmetric reference</text>
-          <text class="cx-lbl cx-lbl--up" x="110" y="398">Adverse outcome</text>
-          <text class="cx-lbl cx-lbl--up" x="362" y="398">Base</text>
-          <text class="cx-lbl cx-lbl--up" x="548" y="398">Favourable outcome</text>
-          <circle class="cx-hit" cx="110" cy="252" r="16" tabindex="0" data-tip-name="Left tail" data-tip="The adverse side is structurally capped. Losses are bounded by design, not by forecast accuracy."/>
-          <circle class="cx-hit" cx="380" cy="240" r="16" tabindex="0" data-tip-name="Base case" data-tip="Near the base case the framework gives up little against a symmetric position."/>
-          <circle class="cx-hit" cx="660" cy="56" r="16" tabindex="0" data-tip-name="Right tail" data-tip="The favourable side is left open. Occasional large outcomes do the compounding work."/>
-        </svg>
-      </div>
-      <div class="ex-explain">
-        <p class="ex-claim">ACF shapes exposure: the left side is capped, the right side is left free to run.</p>
-          <p class="ex-body">A symmetric position gives back on the left what it makes on the right. ACF caps the downside and keeps the upside open, so being roughly right occasionally still compounds. The whole system exists to defend that shape.</p>
-        <p class="ex-takeaway">Survive the left tail; stay convex on the right tail.</p>
-      </div>
-      <footer class="ex-foot">
-        <p class="ex-disclosure">Conceptual diagram &middot; Illustrative framework exhibit, not historical data</p>
-        <details class="ex-details">
-          <summary>Details, sources &amp; methodology</summary>
-          <ul class="ex-sources">
-            <li><span class="src-role">verifies-concept</span>ACF &middot; Part 1 &middot; Survivable compounding under uncertainty</li>
-            <li><span class="src-role">verifies-concept</span>ACF &middot; Part 6 &middot; Convexity Integrity Score</li>
-          </ul>
-        </details>
-      </footer>
-    </figure>
-
 <figure class="exhibit" data-wide id="exhibit-01" data-chart="01" data-fc-chart="p1-hedge-broke" data-mode="representative">
         <header class="ex-head">
           <p class="ex-eyebrow"><span class="ex-idx">01</span> &middot; Diversification &middot; Fragility
@@ -333,6 +287,52 @@
           </details>
         </footer>
       </figure>
+
+<figure class="exhibit" data-wide id="exhibit-s1" data-chart="S1" data-fc-chart="sig-payoff" data-mode="conceptual">
+      <header class="ex-head">
+        <p class="ex-eyebrow"><span class="ex-idx">S1</span> &middot; Payoff shape &middot; Signature
+          <span class="ex-mode" aria-label="Conceptual exhibit. Illustrative framework diagram, not historical data.">&#9676;</span></p>
+        <h3 class="ex-title">Shape the Payoff</h3>
+        <p class="ex-sub">The payoff shape the whole framework is built to produce</p>
+      </header>
+      <div class="ex-plot">
+        <svg viewBox="0 0 760 420" role="img" aria-labelledby="exs1-t exs1-d">
+          <title id="exs1-t">Shape the Payoff</title>
+          <desc id="exs1-d">A conceptual payoff curve with a capped left side and a free right side, above a symmetric reference line.</desc>
+          <line class="cx-grid" x1="70" y1="370" x2="710" y2="370"/>
+          <line class="cx-grid" x1="380" y1="60" x2="380" y2="370"/>
+          <path class="cx-line2" d="M110 318 L660 96"/>
+          <path class="cx-areaq" d="M110 252 L380 244 L110 318 Z" opacity=".5"/>
+          <path class="cx-thesis" pathLength="1" d="M110 252 C 230 252, 320 248, 380 238 C 470 222, 570 158, 660 56"/>
+          <circle class="cx-dotq" cx="110" cy="252" r="3.5"/>
+          <circle class="cx-dot" cx="660" cy="56" r="4"/>
+          <text class="cx-lbl cx-build" x="118" y="234">downside capped</text>
+          <text class="cx-lbl cx-lbl--a cx-build" x="440" y="48">upside left free to run</text>
+          <text class="cx-lbl cx-build" x="510" y="140" text-anchor="end" opacity=".8">symmetric reference</text>
+          <text class="cx-lbl cx-lbl--up" x="110" y="398">Adverse outcome</text>
+          <text class="cx-lbl cx-lbl--up" x="362" y="398">Base</text>
+          <text class="cx-lbl cx-lbl--up" x="548" y="398">Favourable outcome</text>
+          <circle class="cx-hit" cx="110" cy="252" r="16" tabindex="0" data-tip-name="Left tail" data-tip="The adverse side is structurally capped. Losses are bounded by design, not by forecast accuracy."/>
+          <circle class="cx-hit" cx="380" cy="240" r="16" tabindex="0" data-tip-name="Base case" data-tip="Near the base case the framework gives up little against a symmetric position."/>
+          <circle class="cx-hit" cx="660" cy="56" r="16" tabindex="0" data-tip-name="Right tail" data-tip="The favourable side is left open. Occasional large outcomes do the compounding work."/>
+        </svg>
+      </div>
+      <div class="ex-explain">
+        <p class="ex-claim">ACF shapes exposure: the left side is capped, the right side is left free to run.</p>
+          <p class="ex-body">A symmetric position gives back on the left what it makes on the right. ACF caps the downside and keeps the upside open, so being roughly right occasionally still compounds. The whole system exists to defend that shape.</p>
+        <p class="ex-takeaway">Survive the left tail; stay convex on the right tail.</p>
+      </div>
+      <footer class="ex-foot">
+        <p class="ex-disclosure">Conceptual diagram &middot; Illustrative framework exhibit, not historical data</p>
+        <details class="ex-details">
+          <summary>Details, sources &amp; methodology</summary>
+          <ul class="ex-sources">
+            <li><span class="src-role">verifies-concept</span>ACF &middot; Part 1 &middot; Survivable compounding under uncertainty</li>
+            <li><span class="src-role">verifies-concept</span>ACF &middot; Part 6 &middot; Convexity Integrity Score</li>
+          </ul>
+        </details>
+      </footer>
+    </figure>
 
 <figure class="exhibit" data-wide id="exhibit-06" data-chart="06" data-fc-chart="p1-convexity-survival" data-mode="representative">
         <header class="ex-head">
