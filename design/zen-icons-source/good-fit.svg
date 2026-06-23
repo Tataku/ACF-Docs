@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-fg-d3bl0="0.8:71.2823:/src/app/App.tsx:213:25:8352:36:e:ZenIcon::::::B7z6" data-fgid-d3bl0=":r2qk:" data-fg-bufm0=":0:/src/app/components/icons/ZenIcon.tsx:954:5:42978:294:e:svg:x:1" data-fgid-bufm0=":r2ql:" data-fg-callsite-d3bl0=""><path d="M 50 13 
+          A 37 36.6 0 1 1 50 87 
+          A 36.6 37 0 1 1 50 13 
+          Z 
+          M 50 17 
+          A 32.6 33 0 1 0 50 83 
+          A 33 32.6 0 1 0 50 17 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 33.76256313292354 51.23743686707646 Q 36.69479617995717 58.30520382004283 43.76256313292354 61.23743686707646 A 1.75 1.75 0 0 1 46.23743686707646 58.76256313292354 Q 41.99809703885628 53.00190296114372 36.23743686707646 48.76256313292354 A 1.75 1.75 0 0 1 33.76256313292354 51.23743686707646 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 46.23743686707646 61.23743686707646 Q 58.60520382004283 53.60520382004283 66.23743686707645 41.23743686707646 A 1.75 1.75 0 0 1 63.76256313292354 38.76256313292354 Q 53.301902961143725 48.301902961143725 43.76256313292354 58.76256313292354 A 1.75 1.75 0 0 1 46.23743686707646 61.23743686707646 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 50 7 
+          A 43 42.8 0 1 1 50 93 
+          A 42.8 43 0 1 1 50 7 
+          Z 
+          M 50 9 
+          A 40.8 41 0 1 0 50 91 
+          A 41 40.8 0 1 0 50 9 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path></svg>

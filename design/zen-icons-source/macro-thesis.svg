@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-fg-d3bl0="0.8:71.2823:/src/app/App.tsx:213:25:8352:36:e:ZenIcon::::::B7z6" data-fgid-d3bl0=":r2qk:" data-fg-bufm0=":0:/src/app/components/icons/ZenIcon.tsx:954:5:42978:294:e:svg:x:1" data-fgid-bufm0=":r2ql:" data-fg-callsite-d3bl0=""><path d="M 50 12.75 
+          A 37.25 36.8 0 1 1 50 87.25 
+          A 36.8 37.25 0 1 1 50 12.75 
+          Z 
+          M 50 17.25 
+          A 32.3 32.75 0 1 0 50 82.75 
+          A 32.75 32.3 0 1 0 50 17.25 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 50 15 Q 25.95 50 50 85 Q 34.95 50 50 15 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 50 15 Q 65.95 50 50 85 Q 74.95 50 50 15 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 15 51.575 Q 50 55.925000000000004 85 51.575 A 1.575 1.575 0 0 1 85 48.425 Q 50 49.175000000000004 15 48.425 A 1.575 1.575 0 0 1 15 51.575 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path></svg>

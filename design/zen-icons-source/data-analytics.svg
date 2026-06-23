@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-fg-d3bl0="0.8:71.2823:/src/app/App.tsx:213:25:8352:36:e:ZenIcon::::::B7z6" data-fgid-d3bl0=":r2qk:" data-fg-bufm0=":0:/src/app/components/icons/ZenIcon.tsx:954:5:42978:294:e:svg:x:1" data-fgid-bufm0=":r2ql:" data-fg-callsite-d3bl0=""><path d="M 20 81.4 Q 50 84.60000000000001 80 81.4 A 1.4 1.4 0 0 1 80 78.6 Q 50 78.60000000000001 20 78.6 A 1.4 1.4 0 0 1 20 81.4 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 21.4 80 Q 22.2 50 21.4 20 A 1.4 1.4 0 0 1 18.6 20 Q 16.2 50 18.6 80 A 1.4 1.4 0 0 1 21.4 80 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 20.735 65.98 Q 33.285 61.88 40.735 50.98 A 1.2249999999999999 1.2249999999999999 0 0 1 39.265 49.02 Q 30.135 57.68 19.265 64.02 A 1.2249999999999999 1.2249999999999999 0 0 1 20.735 65.98 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 39.702893859330494 51.18842456267803 Q 49.77845651551691 53.38617393793236 59.702893859330494 56.18842456267803 A 1.2249999999999999 1.2249999999999999 0 0 1 60.297106140669506 53.81157543732197 Q 51.05176854695766 48.29292581216937 40.297106140669506 48.81157543732197 A 1.2249999999999999 1.2249999999999999 0 0 1 39.702893859330494 51.18842456267803 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 61.01926161056386 55.679507740375904 Q 75.47534962565508 43.650233083770054 81.01926161056386 25.679507740375907 A 1.2249999999999999 1.2249999999999999 0 0 1 78.98073838943614 24.320492259624093 Q 71.10708558038141 40.7380570535876 58.98073838943614 54.320492259624096 A 1.2249999999999999 1.2249999999999999 0 0 1 61.01926161056386 55.679507740375904 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 40 46 
+          A 4 3.8 0 1 1 40 54 
+          A 3.8 4 0 1 1 40 46 
+          Z 
+          M 40 48 
+          A 1.8 2 0 1 0 40 52 
+          A 2 1.8 0 1 0 40 48 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 60 51 
+          A 4 3.8 0 1 1 60 59 
+          A 3.8 4 0 1 1 60 51 
+          Z 
+          M 60 53 
+          A 1.8 2 0 1 0 60 57 
+          A 2 1.8 0 1 0 60 53 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 80 19.5 
+          A 5.5 5.2 0 1 1 80 30.5 
+          A 5.2 5.5 0 1 1 80 19.5 
+          Z 
+          M 80 22.5 
+          A 2.2 2.5 0 1 0 80 27.5 
+          A 2.5 2.2 0 1 0 80 22.5 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path></svg>

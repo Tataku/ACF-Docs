@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-fg-d3bl0="0.8:71.2823:/src/app/App.tsx:213:25:8352:36:e:ZenIcon::::::B7z6" data-fgid-d3bl0=":r2qk:" data-fg-bufm0=":0:/src/app/components/icons/ZenIcon.tsx:954:5:42978:294:e:svg:x:1" data-fgid-bufm0=":r2ql:" data-fg-callsite-d3bl0=""><path d="M 50 17.75 
+          A 12.25 11.8 0 1 1 50 42.25 
+          A 11.8 12.25 0 1 1 50 17.75 
+          Z 
+          M 50 22.25 
+          A 7.300000000000001 7.75 0 1 0 50 37.75 
+          A 7.75 7.300000000000001 0 1 0 50 22.25 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 30 80 Q 50 54.05 70 80 Q 50 45.05 30 80 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 22 35.75 
+          A 9.25 8.8 0 1 1 22 54.25 
+          A 8.8 9.25 0 1 1 22 35.75 
+          Z 
+          M 22 40.25 
+          A 4.300000000000001 4.75 0 1 0 22 49.75 
+          A 4.75 4.300000000000001 0 1 0 22 40.25 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 10 80 Q 23.81121506177483 63.62243012354966 30 70 Q 19.786292702275208 55.572585404550416 10 80 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 78 35.75 
+          A 9.25 8.8 0 1 1 78 54.25 
+          A 8.8 9.25 0 1 1 78 35.75 
+          Z 
+          M 78 40.25 
+          A 4.300000000000001 4.75 0 1 0 78 49.75 
+          A 4.75 4.300000000000001 0 1 0 78 40.25 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 90 80 Q 79.81121506177483 56.37756987645034 70 70 Q 75.7862927022752 64.42741459544959 90 80 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path></svg>

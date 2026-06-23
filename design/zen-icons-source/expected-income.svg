@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-fg-d3bl0="0.8:71.2823:/src/app/App.tsx:213:25:8352:36:e:ZenIcon::::::B7z6" data-fgid-d3bl0=":r2qk:" data-fg-bufm0=":0:/src/app/components/icons/ZenIcon.tsx:954:5:42978:294:e:svg:x:1" data-fgid-bufm0=":r2ql:" data-fg-callsite-d3bl0=""><path d="M 35 47.75 
+          A 17.25 16.8 0 1 1 35 82.25 
+          A 16.8 17.25 0 1 1 35 47.75 
+          Z 
+          M 35 52.25 
+          A 12.3 12.75 0 1 0 35 77.75 
+          A 12.75 12.3 0 1 0 35 52.25 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 33.775 55 Q 31.424999999999997 65 33.775 75 A 1.2249999999999999 1.2249999999999999 0 0 1 36.225 75 Q 36.675 65 36.225 55 A 1.2249999999999999 1.2249999999999999 0 0 1 33.775 55 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 56.209948515365866 56.00829042947156 Q 71.33844639445996 43.198705328716635 81.20994851536587 26.008290429471558 A 1.575 1.575 0 0 1 78.79005148463413 23.991709570528442 Q 66.15295275717769 38.877460630981396 53.790051484634134 53.99170957052844 A 1.575 1.575 0 0 1 56.209948515365866 56.00829042947156 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 65 26.575 Q 72.5 29.275 80 26.575 A 1.575 1.575 0 0 1 80 23.425 Q 72.5 22.525 65 23.425 A 1.575 1.575 0 0 1 65 26.575 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 81.575 40 Q 84.275 32.5 81.575 25 A 1.575 1.575 0 0 1 78.425 25 Q 77.525 32.5 78.425 40 A 1.575 1.575 0 0 1 81.575 40 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path></svg>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-fg-d3bl0="0.8:71.2823:/src/app/App.tsx:213:25:8352:36:e:ZenIcon::::::B7z6" data-fgid-d3bl0=":r2qk:" data-fg-bufm0=":0:/src/app/components/icons/ZenIcon.tsx:954:5:42978:294:e:svg:x:1" data-fgid-bufm0=":r2ql:" data-fg-callsite-d3bl0=""><path d="M 50 18 
+          A 32 31.6 0 1 1 50 82 
+          A 31.6 32 0 1 1 50 18 
+          Z 
+          M 50 22 
+          A 27.6 28 0 1 0 50 78 
+          A 28 27.6 0 1 0 50 22 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 25.989949493661165 75.98994949366117 Q 53.904163056034264 53.904163056034264 75.98994949366117 25.989949493661165 A 1.4 1.4 0 0 1 74.01005050633883 24.010050506338835 Q 49.66152236891497 49.66152236891497 24.010050506338835 74.01005050633883 A 1.4 1.4 0 0 1 25.989949493661165 75.98994949366117 Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path></svg>

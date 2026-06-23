@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-fg-d3bl0="0.8:71.2823:/src/app/App.tsx:213:25:8352:36:e:ZenIcon::::::B7z6" data-fgid-d3bl0=":r2qk:" data-fg-bufm0=":0:/src/app/components/icons/ZenIcon.tsx:954:5:42978:294:e:svg:x:1" data-fgid-bufm0=":r2ql:" data-fg-callsite-d3bl0=""><path d="M 50 13 
+          A 37 36.6 0 1 1 50 87 
+          A 36.6 37 0 1 1 50 13 
+          Z 
+          M 50 17 
+          A 32.6 33 0 1 0 50 83 
+          A 33 32.6 0 1 0 50 17 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 35 44 
+          A 6 5.6 0 1 1 35 56 
+          A 5.6 6 0 1 1 35 44 
+          Z 
+          M 35 48 
+          A 1.6 2 0 1 0 35 52 
+          A 2 1.6 0 1 0 35 48 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 50 44 
+          A 6 5.6 0 1 1 50 56 
+          A 5.6 6 0 1 1 50 44 
+          Z 
+          M 50 48 
+          A 1.6 2 0 1 0 50 52 
+          A 2 1.6 0 1 0 50 48 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path><path d="M 65 44 
+          A 6 5.6 0 1 1 65 56 
+          A 5.6 6 0 1 1 65 44 
+          Z 
+          M 65 48 
+          A 1.6 2 0 1 0 65 52 
+          A 2 1.6 0 1 0 65 48 
+          Z" fill-rule="evenodd" data-fg-bufm2=":0:/src/app/components/icons/ZenIcon.tsx:964:9:43210:41:e:path"></path></svg>
