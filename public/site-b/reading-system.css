@@ -1697,6 +1697,49 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
 }
 .series-progress li[aria-current="step"] { background: var(--accent); }
 
+/* ── Framework signal — contained glyph-decode stamp ────────────────────────
+   A small monospace "system signature" above each Part title. The decode
+   (glyph-text.js) runs ONLY inside this surface, never on the live <h1>, so it
+   can never resize the title or shift the page. Dimensions are reserved purely
+   in CSS: it is a full-width single-line block, so its HEIGHT is the fixed
+   line-box (explicit line-height, not font metrics) and its WIDTH is the
+   column — both independent of the scrambling text. nowrap + overflow:hidden
+   means the text can change every frame with zero reflow. */
+.doc-signal {
+  display: block;
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  line-height: 1.5;                  /* fixed line-box → height never depends on the glyphs */
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;               /* never wrap → width never depends on the glyphs */
+  overflow: hidden;                  /* clip on very narrow screens, never push layout */
+  text-overflow: clip;
+}
+/* leading "status" square — a quiet terminal/system tell */
+.doc-signal::before {
+  content: '';
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  margin-right: 0.7em;
+  border-radius: 1px;
+  background: var(--accent);
+  vertical-align: middle;
+}
+/* subtle ambient "field energy" once the label has resolved — opacity only, so
+   it can never affect layout; disabled under reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .doc-signal[data-glyph-done]::before { animation: doc-signal-pulse 2.8s ease-in-out infinite; }
+}
+@keyframes doc-signal-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
 .doc-kicker {
   font-family: var(--font-sans);
   font-size: var(--text-xs);
