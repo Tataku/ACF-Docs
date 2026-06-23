@@ -38,6 +38,38 @@ function rateLimited(ip) {
   return recent.length > RL_MAX;
 }
 
+// Same-origin gate (POST only). The funded key must not be drivable by arbitrary
+// cross-site or scripted callers, so a generation request is accepted only when it
+// looks like it came from one of our own pages: the request's Origin/Referer host
+// must equal the host the request arrived on (zero-config, works on every domain /
+// preview URL), or match NARRATION_ALLOWED_ORIGINS (comma-separated hosts/origins,
+// for when the docs and the API live on different domains). Browsers always send
+// Origin on POST; we fall back to Referer. This is not unspoofable, but it blocks
+// the realistic abuse vectors — other sites' JS and header-less scripts — and any
+// mis-fire degrades gracefully (the client falls back to the browser voice).
+function hostOf(value) {
+  try {
+    return new URL(value).host;
+  } catch (e) {
+    return '';
+  }
+}
+function requestAllowed(req) {
+  const callerHost =
+    hostOf(req.headers['origin'] || '') ||
+    hostOf(req.headers['referer'] || req.headers['referrer'] || '');
+  if (!callerHost) return false; // no browser Origin/Referer -> not a page request
+
+  const selfHost = req.headers['x-forwarded-host'] || req.headers['host'] || '';
+  if (selfHost && callerHost === selfHost) return true; // same-origin
+
+  return (process.env.NARRATION_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .some((allowed) => callerHost === (hostOf(allowed) || allowed));
+}
+
 export default async function handler(req, res) {
   const apiKey = process.env.OPENAI_API_KEY || '';
 
@@ -60,6 +92,12 @@ export default async function handler(req, res) {
   // -------------------------------------------------------------------------
   // POST -> generate audio
   // -------------------------------------------------------------------------
+  // Reject anything that doesn't look like a request from our own pages before
+  // spending a provider call. fallback:'browser' keeps a rare mis-fire graceful.
+  if (!requestAllowed(req)) {
+    return res.status(403).json({ error: 'ORIGIN_NOT_ALLOWED', fallback: 'browser' });
+  }
+
   if (!apiKey) {
     return res.status(503).json({
       error: 'PROVIDER_NOT_CONFIGURED',
