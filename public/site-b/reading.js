@@ -366,7 +366,11 @@
           .replace(/\b60\s*\/\s*40\b/g, 'sixty-forty')        // "the 60/40 portfolio" → not "sixty slash forty"
           .replace(/\b8\s*\/\s*10\b/g, 'eight out of ten')    // score "(8/10)"
           .replace(/(\d)\s*[x×]\b/g, '$1 times')         // 6x / 10x / 100x → "… times", not "ex"
-          .replace(/\s*&\s*/g, ' and ');                      // "S&P" → "S and P"
+          .replace(/\s*&\s*/g, ' and ')                       // "S&P" → "S and P"
+          // confirmed-by-ear custom initialisms: force letter-by-letter reading
+          .replace(/\bCIS\b/g, 'C I S')                       // Convexity Integrity Score — not "siss"
+          .replace(/\bTAM\b/g, 'T A M')                       // total addressable market
+          .replace(/\bDCA\b/g, 'D C A');                      // dollar-cost averaging
       }
       function buildBlocks() {
         if (blocks) return blocks;
