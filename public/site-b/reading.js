@@ -750,8 +750,16 @@
       var dur = NARRATION.duration(), cur = NARRATION.currentTime();
       var active = (st === 'playing' || st === 'paused' || st === 'loading');
       // The rail opens only while narration is active; the dock pins the nav up.
-      if (active) { nav.hidden = false; nav.setAttribute('data-armed', ''); nav.setAttribute('data-visible', ''); nav.setAttribute('data-pinned', ''); }
-      else { nav.removeAttribute('data-armed'); nav.removeAttribute('data-pinned'); if (window.scrollY <= 600) nav.removeAttribute('data-visible'); }
+      // Mirror the active state onto the document root (guarded, so <html> styles
+      // don't recompute every progress frame) — CSS uses [data-narrating] to add
+      // bottom breathing room so the fixed dock doesn't sit over end-of-page content.
+      if (active) {
+        nav.hidden = false; nav.setAttribute('data-armed', ''); nav.setAttribute('data-visible', ''); nav.setAttribute('data-pinned', '');
+        if (!root.hasAttribute('data-narrating')) root.setAttribute('data-narrating', '');
+      } else {
+        nav.removeAttribute('data-armed'); nav.removeAttribute('data-pinned'); if (window.scrollY <= 600) nav.removeAttribute('data-visible');
+        if (root.hasAttribute('data-narrating')) root.removeAttribute('data-narrating');
+      }
       player.setAttribute('data-state', st);
       playBtn.setAttribute('aria-label', st === 'playing' ? 'Pause narration' : 'Play narration');
       playBtn.setAttribute('aria-pressed', st === 'playing' ? 'true' : 'false');
