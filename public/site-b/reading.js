@@ -327,6 +327,21 @@
     if (listenBtn) {
       var synth = window.speechSynthesis || null;
 
+      // --- startup instrumentation (quiet; behind a debug flag) ---------------
+      // Enable via window.ACF_NARRATION_DEBUG = true or localStorage
+      // 'acf-narration-debug' = '1'. Marks the click → request → first-audio →
+      // playback chain so startup delay is measurable; silent in production.
+      var NDEBUG = false;
+      try { NDEBUG = (window.ACF_NARRATION_DEBUG === true) || (window.localStorage && localStorage.getItem('acf-narration-debug') === '1'); } catch (e) {}
+      var markT0 = 0;
+      function mark(label, extra) {
+        if (!NDEBUG) return;
+        var t = window.performance ? performance.now() : Date.now();
+        try { console.debug('[narration] ' + label + (markT0 ? ' +' + Math.round(t - markT0) + 'ms' : '') + (extra != null ? ' · ' + extra : '')); } catch (e) {}
+      }
+      var SLOW_FALLBACK_MS = 6000;   // if the API hasn't produced first audio by now, fall back to Web Speech
+      var loadTimer = 0;             // the slow-API safety-net timer (cleared on success / stop)
+
       // --- floatnav scrubber: estimated progress clock ------------------------
       // partActions owns the engine; narrationDock() is pure UI that drives it via
       // the NARRATION controller exposed at the end. Progress is a wall-clock
@@ -411,7 +426,7 @@
         listenBtn.setAttribute('aria-pressed', (s === 'playing' || s === 'paused') ? 'true' : 'false');
         if (listenLabel) {
           listenLabel.textContent =
-            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Loading' : 'Listen';
+            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Preparing…' : 'Listen';
         }
         listenBtn.setAttribute('aria-label',
           s === 'playing' ? 'Pause narration' : s === 'paused' ? 'Resume narration' : 'Listen to this part');
@@ -429,18 +444,20 @@
       function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; } return h.toString(36); }
 
       function fetchSegment(text) {
-        var key = hash(text);
-        if (cache.has(key)) return Promise.resolve(cache.get(key));
-        if (pending.has(key)) return pending.get(key);   // dedup concurrent requests
+        var key = text.length + ':' + hash(text);        // length + hash → stable, collision-resistant
+        if (cache.has(key)) { mark('cache-hit', key); return Promise.resolve(cache.get(key)); }
+        if (pending.has(key)) return pending.get(key);   // dedup concurrent requests (no double-generate)
         var ctrl = new AbortController();
         controllers.add(ctrl);
         function done() { controllers.delete(ctrl); pending.delete(key); }
+        mark('request-start', key);
         var p = fetch('/api/narration', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: text }),
           signal: ctrl.signal
         }).then(function (r) {
+          mark('response', r.status);
           if (!r.ok) {
             return r.json().catch(function () { return {}; }).then(function (e) {
               var err = new Error((e && e.message) || ('HTTP ' + r.status));
@@ -461,23 +478,25 @@
 
       var LOOKAHEAD = 1; // warm this many upcoming segments while one plays
       function playApi(i, myRun) {
-        if (myRun !== runId) return;
+        if (myRun !== runId) { mark('stale-ignored', 'playApi ' + i); return; }
         var list = buildSegments();
         if (i >= list.length) { finish(myRun); return; }
         fetchSegment(list[i]).then(function (url) {
-          if (myRun !== runId) return;
+          if (myRun !== runId) { mark('stale-ignored', 'segment ' + i); return; }
+          clearTimeout(loadTimer);                // first audio arrived — cancel the slow-API safety net
           audio = new Audio(url);
           audio.onended = function () { if (myRun === runId) playApi(i + 1, myRun); };
           audio.onerror = function () { if (myRun === runId) { setState('error'); announce('Narration error'); } };
           var p = audio.play();
           if (p && p.catch) p.catch(function () { if (myRun === runId) setState('error'); });
           setState('playing');
+          if (i === 0) mark('first-audio-playing');
           // look-ahead: warm upcoming segments so playback stays gapless
           for (var k = 1; k <= LOOKAHEAD; k++) { if (list[i + k]) fetchSegment(list[i + k]).catch(function () {}); }
         }).catch(function (err) {
-          if (myRun !== runId || (err && err.name === 'AbortError')) return;
+          if (myRun !== runId || (err && err.name === 'AbortError')) { mark('aborted', 'segment ' + i); return; }
           // Provider failed: fall back to Web Speech from the top (once), else quiet error.
-          if (synth && ((err && err.fallback === 'browser') || i === 0)) { method = 'browser'; startBrowser(myRun); return; }
+          if (synth && ((err && err.fallback === 'browser') || i === 0)) { mark('fallback-browser', 'segment ' + i); method = 'browser'; startBrowser(myRun); return; }
           setState('error'); announce('Narration unavailable');
         });
       }
@@ -486,6 +505,7 @@
       var bIdx = 0, bList = null;
       function startBrowser(myRun) {
         if (!synth) { setState('error'); return; }
+        clearTimeout(loadTimer);
         bList = buildBlocks(); bIdx = 0;
         synth.cancel(); setState('playing'); announce('Playing audio');
         speakNext(myRun);
@@ -501,13 +521,28 @@
 
       // --- transport ---------------------------------------------------------
       function start() {
+        if (STATE === 'loading' || STATE === 'playing' || STATE === 'paused') { mark('dup-suppressed', 'start@' + STATE); return; }   // coalesce repeat clicks
         runId++; var myRun = runId;
-        setState('loading'); announce('Loading audio');
+        markT0 = window.performance ? performance.now() : Date.now();
+        mark('click→start');
+        setState('loading'); announce('Preparing narration');
+        clearTimeout(loadTimer);
+        loadTimer = setTimeout(function () {        // safety net: API too slow → Web Speech (overlap-safe via runId)
+          if (myRun !== runId || STATE !== 'loading') return;
+          if (method === 'api' && synth) {
+            mark('slow-fallback');
+            runId++; var r2 = runId;                // invalidate the in-flight API attempt
+            controllers.forEach(function (c) { try { c.abort(); } catch (e) {} });
+            controllers.clear(); pending.clear();
+            startBrowser(r2);
+          }
+        }, SLOW_FALLBACK_MS);
         (method ? Promise.resolve(method) : resolveCapability()).then(function (m) {
-          if (myRun !== runId) return;            // stopped while resolving
+          if (myRun !== runId) { mark('stale-ignored', 'capability'); return; }   // stopped / fell back while resolving
+          mark('method', m);
           if (m === 'api') playApi(0, myRun);
-          else if (m === 'browser') startBrowser(myRun);
-          else { setState('idle'); announce('Narration unavailable'); }
+          else if (m === 'browser') { clearTimeout(loadTimer); startBrowser(myRun); }
+          else { clearTimeout(loadTimer); setState('idle'); announce('Narration unavailable'); }
         });
       }
       function pause() {
@@ -523,12 +558,13 @@
         setState('playing'); announce('Audio resumed');
       }
       function stop() {
-        runId++;                                  // invalidate async work + onended/onend
+        clearTimeout(loadTimer);                  // cancel the slow-API safety net
+        runId++;                                  // invalidate async work + onended/onend + in-flight fetches
         if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
         if (synth) synth.cancel();
         controllers.forEach(function (c) { try { c.abort(); } catch (e) {} });
         controllers.clear(); pending.clear();
-        setState('idle'); announce('Audio stopped');
+        setState('idle'); announce('Audio stopped'); mark('stop');
       }
       function finish(myRun) {
         if (myRun !== runId) return;
@@ -558,10 +594,11 @@
       function prewarm() {
         if (prewarmed) return;
         prewarmed = true;
+        mark('prewarm-start');
         (method ? Promise.resolve(method) : resolveCapability()).then(function (m) {
           if (m !== 'api') return;
           var list = buildSegments();
-          if (list.length) fetchSegment(list[0]).catch(function () {});
+          if (list.length) fetchSegment(list[0]).then(function () { mark('prewarm-ready'); }).catch(function () {});
         });
       }
 
@@ -584,12 +621,27 @@
       listenBtn.addEventListener('click', function () {
         if (STATE === 'playing') pause();
         else if (STATE === 'paused') resume();
-        else if (STATE === 'loading') stop();     // cancel a pending load
+        else if (STATE === 'loading') mark('dup-suppressed', 'listen@loading');  // ignore repeat — Stop cancels
         else start();                             // idle / error
       });
-      // Warm the first segment ahead of the click on hover/focus intent.
+      // Warm the first segment ahead of the click. Hover/focus = explicit intent
+      // (always). Ambient triggers (page idle, first scroll, Listen entering the
+      // viewport) each fire once and are skipped under Data Saver, so we never
+      // pre-generate audio on metered connections without intent.
       listenBtn.addEventListener('mouseenter', prewarm);
       listenBtn.addEventListener('focus', prewarm);
+      function autoPrewarm() {
+        try { if (navigator.connection && navigator.connection.saveData) return; } catch (e) {}
+        prewarm();
+      }
+      window.addEventListener('scroll', function onceScroll() { window.removeEventListener('scroll', onceScroll); autoPrewarm(); }, { passive: true });
+      if (window.requestIdleCallback) requestIdleCallback(autoPrewarm, { timeout: 4000 });
+      if ('IntersectionObserver' in window) {
+        var pwIo = new IntersectionObserver(function (es) {
+          if (es.some(function (e) { return e.isIntersecting; })) { pwIo.disconnect(); autoPrewarm(); }
+        }, { rootMargin: '0px 0px 20% 0px' });
+        pwIo.observe(listenBtn);
+      }
       stopBtn.addEventListener('click', stop);
       window.addEventListener('pagehide', function () {
         stop();
@@ -761,12 +813,19 @@
         if (root.hasAttribute('data-narrating')) root.removeAttribute('data-narrating');
       }
       player.setAttribute('data-state', st);
-      playBtn.setAttribute('aria-label', st === 'playing' ? 'Pause narration' : 'Play narration');
+      var loading = (st === 'loading');
+      playBtn.setAttribute('aria-label', st === 'playing' ? 'Pause narration' : loading ? 'Preparing narration' : 'Play narration');
       playBtn.setAttribute('aria-pressed', st === 'playing' ? 'true' : 'false');
-      var hasDur = isFinite(dur) && dur > 0.1;
+      // Keep the scrubber inert (disabled, no false position) until real playback,
+      // and show a quiet "preparing" marker instead of a misleading full duration.
+      var hasDur = !loading && isFinite(dur) && dur > 0.1;
       input.disabled = !hasDur;
       if (scrubbing) return;                          // don't fight the user's drag
-      if (hasDur) {
+      if (loading) {
+        input.value = '0'; input.style.setProperty('--fnp-fill', '0%');
+        input.removeAttribute('aria-valuetext');
+        timeEl.textContent = '···';                   // pulses via CSS while [data-state="loading"]
+      } else if (hasDur) {
         var frac = Math.min(1, cur / dur);
         input.value = String(Math.round(frac * 1000));
         input.style.setProperty('--fnp-fill', (frac * 100).toFixed(1) + '%');
