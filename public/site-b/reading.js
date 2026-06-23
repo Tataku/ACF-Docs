@@ -171,6 +171,13 @@
     nav.addEventListener('mouseleave', hideSoon);
     nav.addEventListener('focusin', function () { clearTimeout(idle); });
     nav.addEventListener('focusout', hideSoon);
+
+    // Return-to-top: smooth unless the reader prefers reduced motion.
+    var toTop = nav.querySelector('.floatnav-top');
+    if (toTop) toTop.addEventListener('click', function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, left: 0, behavior: reduce ? 'auto' : 'smooth' });
+    });
   }
 
   /* ---- Section reveal: fade + rise each [data-reveal] as it scrolls in ---- *
