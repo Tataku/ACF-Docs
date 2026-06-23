@@ -9,6 +9,10 @@
 
   var root = document.documentElement;
 
+  // Set by partActions() once its narration engine is built; read by
+  // narrationDock() to drive that single engine from the floating-nav rail.
+  var NARRATION = null;
+
   /* ---- Theme toggle (shared by cover + Part pages) ----------------------- *
    * The pre-paint <head> script sets data-theme; this only handles the click.  */
   function theme() {
@@ -156,14 +160,16 @@
     function hideSoon() {
       clearTimeout(idle);
       idle = setTimeout(function () {
+        if (nav.hasAttribute('data-pinned')) return;            // narration playing: keep transport visible
         if (!nav.matches(':hover') && !nav.contains(document.activeElement)) {
           nav.removeAttribute('data-visible');
         }
       }, 3200);
     }
     function onScroll() {
-      if (window.scrollY > threshold) { nav.setAttribute('data-visible', ''); hideSoon(); }
-      else { nav.removeAttribute('data-visible'); clearTimeout(idle); }
+      if (nav.hasAttribute('data-pinned') || window.scrollY > threshold) {
+        nav.setAttribute('data-visible', ''); hideSoon();
+      } else { nav.removeAttribute('data-visible'); clearTimeout(idle); }
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
@@ -321,6 +327,20 @@
     if (listenBtn) {
       var synth = window.speechSynthesis || null;
 
+      // --- floatnav scrubber: estimated progress clock ------------------------
+      // partActions owns the engine; narrationDock() is pure UI that drives it via
+      // the NARRATION controller exposed at the end. Progress is a wall-clock
+      // estimate (~chars/sec) that runs while STATE==='playing' and re-syncs on
+      // seek — one model across both the API (segment) and Web Speech (block)
+      // engines, neither of which has a single seekable timeline.
+      function nowSec() { return (window.performance ? performance.now() : Date.now()) / 1000; }
+      function estDur(t) { return Math.max(1.4, (t ? t.length : 0) / 14.5); }
+      var clkBase = 0, clkStart = 0, clkRunning = false, progRaf = 0, onTick = null;
+      function units() { return method === 'api' ? buildSegments() : buildBlocks(); }
+      function aggDur() { var u = units(), t = 0, i; for (i = 0; i < u.length; i++) t += estDur(u[i]); return t; }
+      function clkNow() { return clkRunning ? clkBase + (nowSec() - clkStart) : clkBase; }
+      function progressLoop() { if (onTick) onTick(); if (STATE === 'playing') progRaf = requestAnimationFrame(progressLoop); }
+
       // --- readable text -----------------------------------------------------
       var blocks = null;
       function buildBlocks() {
@@ -381,6 +401,10 @@
       // --- state -------------------------------------------------------------
       var STATE = 'idle';
       function setState(s) {
+        // progress clock: run only while actually playing; freeze on leave; reset at idle
+        if (s === 'playing') { if (!clkRunning) { clkStart = nowSec(); clkRunning = true; requestAnimationFrame(progressLoop); } }
+        else if (clkRunning) { clkBase += nowSec() - clkStart; clkRunning = false; }
+        if (s === 'idle') clkBase = 0;
         STATE = s;
         bar.setAttribute('data-narration-state', s);
         listenBtn.setAttribute('aria-busy', s === 'loading' ? 'true' : 'false');
@@ -391,6 +415,7 @@
         }
         listenBtn.setAttribute('aria-label',
           s === 'playing' ? 'Pause narration' : s === 'paused' ? 'Resume narration' : 'Listen to this part');
+        if (onTick) onTick();
       }
 
       // --- API audio engine --------------------------------------------------
@@ -509,6 +534,20 @@
         if (myRun !== runId) return;
         audio = null; setState('idle'); announce('Audio finished');
       }
+      // Seek the estimate to time t by restarting at the segment/block covering it.
+      function seekTo(t) {
+        var dur = aggDur(); if (!(dur > 0)) return;
+        t = Math.max(0, Math.min(t, dur));
+        var u = units(), before = 0, j = 0, d;
+        for (j = 0; j < u.length; j++) { d = estDur(u[j]); if (before + d > t) break; before += d; }
+        if (j >= u.length) j = u.length - 1;
+        clkBase = before; clkStart = nowSec(); clkRunning = false;   // setState('playing') restarts the clock
+        runId++; var myRun = runId;
+        if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
+        if (method === 'api') { setState('loading'); playApi(j, myRun); }
+        else if (synth) { try { synth.cancel(); } catch (e) {} bIdx = j; setState('playing'); speakNext(myRun); }
+        else { setState('idle'); }
+      }
 
       // --- prewarm -----------------------------------------------------------
       // On hover/focus (clear intent, before the click) resolve capability and
@@ -557,6 +596,23 @@
         cache.forEach(function (u) { try { URL.revokeObjectURL(u); } catch (e) {} });
         cache.clear();
       });
+
+      // Expose a minimal controller so the floatnav dock drives this SAME engine
+      // (one audio instance). narrationDock() reads state/duration/time and calls
+      // playPause / stop / seek; it subscribes for state + progress updates.
+      NARRATION = {
+        state:       function () { return STATE; },
+        duration:    aggDur,
+        currentTime: function () { return Math.min(clkNow(), aggDur()); },
+        playPause:   function () {
+          if (STATE === 'playing') pause();
+          else if (STATE === 'paused') resume();
+          else if (STATE !== 'loading') start();
+        },
+        stop:        stop,
+        seek:        seekTo,
+        subscribe:   function (cb) { onTick = cb; if (cb) cb(); }
+      };
 
       // Visibility: Web Speech => usable immediately. Otherwise reveal only if
       // the capability check confirms a provider (avoid a dead button).
@@ -644,6 +700,94 @@
     });
   }
 
+  /* ---- Voice narration mini-player ------------------------------------------ *
+   * One shared controller, one audio source, one piece of UI: a slim transport
+   * (play/pause · scrub slider · time-remaining) docked above the floating-nav
+   * pill. Engine-agnostic — it prefers a real <audio> narration source when one
+   * is wired (exact timeline + seeking), and otherwise drives the existing Web
+   * Speech narration with a derived timeline so the same scrubber still works.
+   * The UI appears only once narration is armed, is keyboard-operable, theme-aware,
+   * never autoplays, never spawns overlapping playback, and is torn down on unload. */
+  /* ---- Voice-narration dock — floating-nav transport for partActions() ------ *
+   * partActions() owns the audio engine (OpenAI TTS / Web Speech) and exposes the
+   * NARRATION controller. This builds the floatnav lower rail (play/pause · scrub
+   * · time-remaining), mirrors the engine state, and drives that ONE engine — no
+   * second audio instance. Pure UI: a no-op without a floatnav or controller.     */
+  function narrationDock() {
+    var nav = document.querySelector('.floatnav');
+    var inner = nav && nav.querySelector('.floatnav-inner');
+    if (!nav || !inner || !NARRATION) return;
+
+    // Fold the quick-nav controls into a main row, then attach the rail beneath
+    // them INSIDE the same dock surface (one pill, two rows).
+    var main = document.createElement('div');
+    main.className = 'floatnav-main';
+    while (inner.firstChild) main.appendChild(inner.firstChild);
+    inner.appendChild(main);
+    inner.classList.add('is-dock');
+
+    var player = document.createElement('div');
+    player.className = 'floatnav-player';
+    player.setAttribute('data-state', 'idle');
+    player.innerHTML =
+      '<button type="button" class="floatnav-play" aria-label="Play narration" aria-pressed="false">' +
+        '<svg class="fn-icon fn-ico-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.2v13.6L19 12z"/></svg>' +
+        '<svg class="fn-icon fn-ico-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 5h3.1v14H7zM13.9 5H17v14h-3.1z"/></svg>' +
+      '</button>' +
+      '<input type="range" class="floatnav-progress-input" min="0" max="1000" value="0" step="1" aria-label="Narration position" disabled>' +
+      '<span class="floatnav-time" aria-hidden="true">-0:00</span>';
+    inner.appendChild(player);
+    var playBtn = player.querySelector('.floatnav-play');
+    var input   = player.querySelector('.floatnav-progress-input');
+    var timeEl  = player.querySelector('.floatnav-time');
+
+    var scrubbing = false;
+    function fmt(sec) { sec = Math.max(0, Math.floor(sec)); var m = Math.floor(sec / 60), s = sec % 60; return '-' + m + ':' + (s < 10 ? '0' : '') + s; }
+    function spoken(sec) { sec = Math.max(0, Math.round(sec)); var m = Math.floor(sec / 60), s = sec % 60; return (m ? m + ' minute' + (m === 1 ? '' : 's') + ' ' : '') + s + ' second' + (s === 1 ? '' : 's') + ' remaining'; }
+
+    function paint() {
+      var st = NARRATION.state();
+      var dur = NARRATION.duration(), cur = NARRATION.currentTime();
+      var active = (st === 'playing' || st === 'paused' || st === 'loading');
+      // The rail opens only while narration is active; the dock pins the nav up.
+      if (active) { nav.hidden = false; nav.setAttribute('data-armed', ''); nav.setAttribute('data-visible', ''); nav.setAttribute('data-pinned', ''); }
+      else { nav.removeAttribute('data-armed'); nav.removeAttribute('data-pinned'); if (window.scrollY <= 600) nav.removeAttribute('data-visible'); }
+      player.setAttribute('data-state', st);
+      playBtn.setAttribute('aria-label', st === 'playing' ? 'Pause narration' : 'Play narration');
+      playBtn.setAttribute('aria-pressed', st === 'playing' ? 'true' : 'false');
+      var hasDur = isFinite(dur) && dur > 0.1;
+      input.disabled = !hasDur;
+      if (scrubbing) return;                          // don't fight the user's drag
+      if (hasDur) {
+        var frac = Math.min(1, cur / dur);
+        input.value = String(Math.round(frac * 1000));
+        input.style.setProperty('--fnp-fill', (frac * 100).toFixed(1) + '%');
+        input.setAttribute('aria-valuetext', spoken(dur - cur));
+        timeEl.textContent = fmt(dur - cur);
+      } else {
+        input.value = '0'; input.style.setProperty('--fnp-fill', '0%'); timeEl.textContent = '-0:00';
+      }
+    }
+
+    playBtn.addEventListener('click', function () { NARRATION.playPause(); });
+    input.addEventListener('input', function () {
+      scrubbing = true;
+      var dur = NARRATION.duration(); if (!(dur > 0)) return;
+      var frac = Number(input.value) / 1000;
+      input.style.setProperty('--fnp-fill', (frac * 100).toFixed(1) + '%');
+      input.setAttribute('aria-valuetext', spoken(dur - frac * dur));
+      timeEl.textContent = fmt(dur - frac * dur);
+    });
+    input.addEventListener('change', function () {
+      var dur = NARRATION.duration(); scrubbing = false;
+      if (dur > 0) NARRATION.seek((Number(input.value) / 1000) * dur);
+    });
+    input.addEventListener('pointerup', function () { scrubbing = false; });
+    input.addEventListener('blur', function () { scrubbing = false; });
+
+    NARRATION.subscribe(paint);                       // initial paint + every state/progress tick
+  }
+
   /* ---- init -------------------------------------------------------------- */
   theme();
   scrollSpy();
@@ -656,6 +800,7 @@
   highlights();
   stepperProgress();
   partActions();
+  narrationDock();
   chartBuild();
   chartTips();
   homeLinks();

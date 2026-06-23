@@ -2137,7 +2137,8 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   box-shadow: 0 8px 22px -6px rgba(10, 14, 18, .50),
               0 18px 44px -14px rgba(10, 14, 18, .42);
   animation: floatnav-bob 4.6s ease-in-out infinite;
-  transition: box-shadow var(--motion-slow) var(--ease-standard);
+  transition: box-shadow var(--motion-slow) var(--ease-standard),
+              border-radius var(--motion-base) var(--ease-emphasis);
 }
 .floatnav:hover .floatnav-inner {
   animation-play-state: paused;
@@ -2215,6 +2216,107 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
   transition: background var(--motion-base) var(--ease-standard);
 }
 .floatnav-prev:hover, .floatnav-prev:focus-visible { background: var(--floatnav-hover); }
+
+/* ---------------------------------------------------------------------------
+   NARRATION MINI-PLAYER — an attached lower rail of the floating-nav dock.
+   reading.js folds the quick-nav controls into .floatnav-main and appends this
+   rail inside the SAME surface (.floatnav-inner.is-dock), so nav + audio read
+   as one instrument: shared background, shadow and border, one radius, an
+   internal divider, and no gap. The rail opens only when narration is armed.
+   Theme-aware via the same inverted --floatnav-* tokens the pill already uses.
+   --------------------------------------------------------------------------- */
+/* Dock surface: stack the quick-nav row above the narration rail. A lone pill
+   (no rail attached) keeps the original single-row stadium exactly. */
+.floatnav-inner.is-dock { flex-direction: column; align-items: stretch; gap: 0; padding: 0; overflow: hidden; }
+.floatnav-main { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2); }
+.floatnav[data-armed] .floatnav-inner.is-dock { border-radius: 20px; }
+/* Rest the float-bob while narration is open so the scrubber is a steady target
+   (the pill still bobs as quick-nav; it settles the moment you engage the rail). */
+.floatnav[data-armed] .floatnav-inner { animation: none; }
+
+/* The rail: a subordinate lower lip, divided from the nav row, collapsed until
+   armed. The dock is position:fixed, so opening it never reflows page content. */
+.floatnav-player {
+  --fnp-track: rgba(255, 255, 255, .24);
+  --fnp-fill: 0%;
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: 0 var(--space-2);
+  color: var(--floatnav-fg);
+  max-height: 0; opacity: 0; visibility: hidden; pointer-events: none;
+  transition: max-height var(--motion-base) var(--ease-standard),
+              opacity 140ms var(--ease-standard),
+              padding var(--motion-base) var(--ease-standard),
+              visibility 0s linear var(--motion-base);
+}
+[data-theme="dark"] .floatnav-player { --fnp-track: rgba(0, 0, 0, .22); }
+.floatnav[data-armed] .floatnav-player {
+  max-height: 3rem; opacity: 1; visibility: visible; pointer-events: auto;
+  padding: 0 var(--space-2) var(--space-2);          /* snug: no divider, no top gap, rests under the nav row */
+  transition: max-height var(--motion-base) var(--ease-emphasis),
+              opacity var(--motion-base) var(--ease-standard) 40ms,
+              padding var(--motion-base) var(--ease-standard),
+              visibility 0s;
+}
+
+/* Play / pause — a bare icon (no circle), left-aligned with the nav controls. */
+.floatnav-play {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 auto; height: 1.5rem; padding: 0;
+  border: 0; background: none; color: var(--floatnav-fg); cursor: pointer;
+  transition: opacity var(--motion-base) var(--ease-standard);
+}
+.floatnav-play:hover { opacity: .65; }
+.floatnav-play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.floatnav-play .fn-icon { width: 1.1rem; height: 1.1rem; }
+.floatnav-play .fn-ico-play { margin-left: 1px; }    /* optical centering of the play triangle */
+.floatnav-play .fn-ico-pause { display: none; }
+.floatnav-player[data-state="playing"] .fn-ico-play  { display: none; }
+.floatnav-player[data-state="playing"] .fn-ico-pause { display: inline; }
+
+/* Range input: transparent surround, accent fill to --fnp-fill, faint track after. */
+.floatnav-progress-input {
+  -webkit-appearance: none; appearance: none;
+  flex: 1 1 0; min-width: 5rem; align-self: center;   /* basis 0 → rail conforms to the nav row's width */
+  height: 1.5rem; margin: 0; padding: 0;
+  background: transparent; cursor: pointer;
+}
+.floatnav-progress-input:disabled { cursor: default; opacity: .5; }
+.floatnav-progress-input::-webkit-slider-runnable-track {
+  height: 3px; border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) 0 var(--fnp-fill), var(--fnp-track) var(--fnp-fill) 100%);
+}
+.floatnav-progress-input::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 11px; height: 11px; margin-top: -4px; border-radius: 50%;
+  background: var(--floatnav-fg);
+  box-shadow: 0 0 0 2px var(--floatnav-bg), 0 1px 3px rgba(0, 0, 0, .45);
+  transition: transform var(--motion-base) var(--ease-standard);
+}
+.floatnav-progress-input::-moz-range-track    { height: 3px; border-radius: 999px; background: var(--fnp-track); }
+.floatnav-progress-input::-moz-range-progress { height: 3px; border-radius: 999px; background: var(--accent); }
+.floatnav-progress-input::-moz-range-thumb {
+  width: 11px; height: 11px; border: 0; border-radius: 50%;
+  background: var(--floatnav-fg); box-shadow: 0 0 0 2px var(--floatnav-bg);
+}
+.floatnav-progress-input:hover::-webkit-slider-thumb,
+.floatnav-progress-input:focus-visible::-webkit-slider-thumb { transform: scale(1.18); }
+.floatnav-progress-input:focus-visible { outline: none; }
+.floatnav-progress-input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--floatnav-bg), 0 0 0 4px var(--accent); }
+.floatnav-progress-input:focus-visible::-moz-range-thumb     { box-shadow: 0 0 0 2px var(--floatnav-bg), 0 0 0 4px var(--accent); }
+
+.floatnav-time {
+  flex: 0 0 auto; min-width: 3.1em; text-align: right;
+  font-family: var(--font-mono); font-size: .72rem; font-variant-numeric: tabular-nums;
+  color: var(--floatnav-fg); opacity: .68; white-space: nowrap;
+}
+.floatnav-player[data-state="error"] .floatnav-time { color: #e0623f; opacity: .9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .floatnav-progress-input::-webkit-slider-thumb { transition: none; }
+  .floatnav-player, .floatnav[data-armed] .floatnav-player { transition: opacity 0s, visibility 0s; }
+  .floatnav-inner { transition: box-shadow var(--motion-slow) var(--ease-standard); }   /* no radius morph */
+}
+
 .fn-soon {
   font-size: 0.6rem;
   text-transform: uppercase;
