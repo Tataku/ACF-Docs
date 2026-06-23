@@ -1809,6 +1809,36 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
 .no-js [data-copy-link],
 .no-js [data-share-native] { display: none; }
 
+/* AI narration transport — reading.js upgrades the Listen control into an
+   OpenAI-TTS player (with a Web Speech fallback) and tracks state in a
+   `data-narration-state` attribute on .part-actions (idle | loading | playing |
+   paused | error). These rules override the base aria-pressed icon swap so the
+   button reads play -> pause -> resume; the Stop control is injected by JS and
+   stays hidden until narration is active, so there is no layout shift at rest. */
+.part-listen .icon-pause { display: none; }
+.part-actions[data-narration-state] .part-listen .icon-play  { display: block; }
+.part-actions[data-narration-state] .part-listen .icon-stop  { display: none; }
+.part-actions[data-narration-state] .part-listen .icon-pause { display: none; }
+.part-actions[data-narration-state="playing"] .part-listen .icon-play  { display: none; }
+.part-actions[data-narration-state="playing"] .part-listen .icon-pause { display: block; }
+.part-actions[data-narration-state="loading"] .part-listen { opacity: 0.65; }
+
+/* Injected Stop control — inherits .part-action; shown only while active. */
+.part-listen-stop { display: none; }
+.part-actions[data-narration-state="loading"] .part-listen-stop,
+.part-actions[data-narration-state="playing"] .part-listen-stop,
+.part-actions[data-narration-state="paused"]  .part-listen-stop { display: inline-flex; }
+
+/* Zen brush icons — the brush artwork sits inset in its 100×100 viewBox, so it
+   reads ~15% smaller than the retained geometric (24-viewBox) icons. A scoped
+   optical bump restores weight parity without resizing the layout box or
+   touching the geometric set. Targets only the brush icons (viewBox 0 0 100 100)
+   inside these three controls; the display-swap/sizing rules elsewhere are
+   unaffected. */
+.part-actions svg[viewBox="0 0 100 100"],
+.floatnav svg[viewBox="0 0 100 100"],
+.sidebar-toggle svg[viewBox="0 0 100 100"] { transform: scale(1.15); }
+
 /* ============================================================================
    PART READING SHELL  (part-1-foundation.html)
    Sidebar (parts nav + nested scroll-spy) | reading column. The cover owns the
