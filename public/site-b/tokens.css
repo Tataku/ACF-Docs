@@ -221,14 +221,14 @@
   --paper:          #14171a;   /* page background */
   --paper-warm:     #191d21;   /* whisper-light tint — full measure only */
   --surface-raised: #1b2129;   /* raised card fill — a step up from --paper */
-  /* Semantic ink hierarchy (dark) — editorial inks lean toward warm paper; small
-     utility/metadata text stays a crisp, cooler neutral for small-size legibility.
-     Warmth follows editorial importance, NOT raw font size. */
-  --ink-display:    #f4f0e8;   /* display / headings — warmest paper off-white */
-  --ink-body:       #e9e3d7;   /* main prose — warm readable off-white */
-  --ink-muted:      #c9c2b5;   /* secondary / supporting — warm muted gray */
+  /* Semantic ink hierarchy (dark) — paper warmth is a HIGHLIGHT on large editorial
+     text only; long-reading body stays a clean off-white (not a brown wash). Warmth
+     follows editorial importance, NOT raw font size; the steps are subtle. */
+  --ink-display:    #f3efe6;   /* display / headings — the chart paper itself (warmest) */
+  --ink-body:       #eef1f2;   /* main prose — clean soft off-white, not browner than display */
+  --ink-muted:      #c8cbc6;   /* secondary / supporting — restrained neutral warm-gray (not sepia) */
   --ink-micro:      #d8dce0;   /* small metadata / labels — crisp cooler neutral */
-  --ink-disabled:   #948c7d;   /* disabled / SOON — quiet warm gray (legible, low key) */
+  --ink-disabled:   #9b9385;   /* disabled / SOON — quiet but legible (lifted off muddy) */
   --ink:            var(--ink-body);    /* legacy alias → body */
   --ink-quiet:      var(--ink-muted);   /* legacy alias → muted */
   --ink-faint:      var(--ink-micro);   /* legacy alias → micro (metadata/labels) */
