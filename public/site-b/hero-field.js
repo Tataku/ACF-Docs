@@ -126,6 +126,13 @@
   draw();
   requestAnimationFrame(frame);
 
+  // Load-in cascade settle re-measure: the hero band is measured while the
+  // page's load-in transforms (translateY) are still animating, so the first
+  // getBoundingClientRect can sit low. Re-measure once after the cascade
+  // settles. Mirrors the app's landingHeroField.js. Fire-and-forget — this
+  // page script has no teardown path, so the bare timeout needs no clearing.
+  setTimeout(function () { resize(); draw(); }, 900);
+
   hero.addEventListener('pointermove', function (e) {
     var r = canvas.getBoundingClientRect();
     mouse.x = e.clientX - r.left;
