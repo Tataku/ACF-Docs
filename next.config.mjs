@@ -15,17 +15,19 @@ const withNextra = nextra({
  *   /part-1-foundation                 -> /site-b/part-1-foundation.html
  *   /part-2-lineage-macro-thesis       -> /site-b/part-2-lineage-macro.html
  *   /part-3-bitcoin-convexity-backbone -> /site-b/part-3-bitcoin-convexity.html
+ *   /part-4-tax-architecture-roc-strategy -> /site-b/part-4-tax-architecture.html
  *   /part-1-pictures                   -> /site-b/part-1-pictures.html   (new route)
  *
  * The raw /site-b/* URLs keep working but carry `X-Robots-Tag: noindex`, so the
  * clean routes stay the single indexable surface (no duplicate content). The
  * noindex matches the original request path, so the clean routes are unaffected
- * and remain indexable. Parts 4-6 / 7 are untouched and still render from MDX. */
+ * and remain indexable. Parts 5-6 / 7 are untouched and still render from MDX. */
 const siteBRewrites = [
   { source: "/", destination: "/site-b/cover-docs.html" },
   { source: "/part-1-foundation", destination: "/site-b/part-1-foundation.html" },
   { source: "/part-2-lineage-macro-thesis", destination: "/site-b/part-2-lineage-macro.html" },
   { source: "/part-3-bitcoin-convexity-backbone", destination: "/site-b/part-3-bitcoin-convexity.html" },
+  { source: "/part-4-tax-architecture-roc-strategy", destination: "/site-b/part-4-tax-architecture.html" },
   { source: "/part-1-pictures", destination: "/site-b/part-1-pictures.html" }
 ];
 
