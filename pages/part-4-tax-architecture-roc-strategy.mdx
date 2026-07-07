@@ -26,11 +26,9 @@ Part 3 established Bitcoin as the framework's convexity backbone–a structurall
 
 *Side note: While Bitcoin was built to behave like a currency, U.S. tax rules treat it as property—meaning capital gains apply today. If Bitcoin were ever exempted from capital gains, the tax advantages of many wrapper structures would matter less, and factors like custody, access, and convenience would dominate.*
 
-Wrapper Engineering North Star
+### Wrapper Engineering North Star
 
-Maximize Roth capacity for frictionless, deployable convexity.
-
-**The wrapper engineering north star: maximize Roth capacity for deployable convexity.** Tax-free compounding over 30-60 year horizons dominates most other portfolio decisions for positions that may be rotated or rebalanced. Early Roth accumulation also controls future tax exposure by reducing pre-tax balances subject to Required Minimum Distributions or RMDs (forced taxable withdrawals beginning age 73, rising to 75 in 2033) and IRMAA surcharges on Medicare premiums. The flexibility to withdraw tax-free in any income environment—whether retirement brackets are 12% or 37%—eliminates decades of tax-regime risk. This does not mean converting blindly or filling Roth with never-sold positions; it means converting strategically within favorable brackets and reserving Roth for positions where tax-free trading provides structural advantage.
+**Maximize Roth capacity for frictionless, deployable convexity.** Tax-free compounding over 30-60 year horizons dominates most other portfolio decisions for positions that may be rotated or rebalanced. Early Roth accumulation also controls future tax exposure by reducing pre-tax balances subject to Required Minimum Distributions or RMDs (forced taxable withdrawals beginning age 73, rising to 75 in 2033) and IRMAA surcharges on Medicare premiums. The flexibility to withdraw tax-free in any income environment—whether retirement brackets are 12% or 37%—eliminates decades of tax-regime risk. This does not mean converting blindly or filling Roth with never-sold positions; it means converting strategically within favorable brackets and reserving Roth for positions where tax-free trading provides structural advantage.
 
 ### Wrapper Engineering as Structural Edge
 
@@ -141,6 +139,11 @@ Tax-free compound interest is the ninth wonder. The framework's cornerstone allo
 
 Consider the mathematics:
 
+{/* EXHIBIT PLACEHOLDER — P4-03 "The Tax Wedge" (canonical wrapper/tax comparison exhibit).
+    Spec: /chart-specs/SIGNATURE_CHART_SPECS_SLICE_1.md · status: spec-only, not built or wired.
+    Part 4 is the canonical home for this comparison; Part 5 references it (approved decision 1).
+    The scenario callout below is the detailed methodology layer that the exhibit will summarise. */}
+
 <Callout type="warning" title="Scenario / Comparison">
 
 **Scenario (Convexity Illustration):** $7,500 lump-sum investment, 30-year horizon, 100× appreciation to $750,000 *This thought experiment holds contribution timing constant to isolate wrapper tax friction on a single right-tail outcome.* **Roth outcome:** $7,500 → $750,000 (100× appreciation) Withdrawals: $750,000 tax-free **Net proceeds: $750,000** **Taxable outcome (illustrative approach: borrow-against via SBLOC/PAL):** $7,500 → $750,000 (100× appreciation) Borrow $300,000 against position (40% LTV) at 8% annually = $24,000/year interest Interest serviced from portfolio income (STRC, dividends) or external cashflow—no forced asset sales Over 20 years: $480,000 cumulative interest paid; loan balance remains $300,000 Asset value at death: $750,000; basis step-up may eliminate $742,500 embedded gain Estate repays loan: heirs receive $750,000 asset - $300,000 loan = $450,000 net **Total economic access (time-separated): $300,000 lifetime liquidity via borrowing + $450,000 net to heirs = $750,000 gross value path, less $480,000 cumulative interest cost** This outcome assumes uninterrupted debt service capacity and stable collateral value; failure of either converts deferral into forced realization. *Rates float; lender can re-margin or demand repayment; forced liquidation risk exists if collateral declines or income stops.* **Pre-Tax outcome:** $7,500 → $750,000 (100× appreciation) Withdrawals taxed as ordinary income (assume 24% effective federal bracket) Tax on withdrawal: $180,000 **Net proceeds: $570,000** **Wrapper comparison:** • Roth: $750,000 tax-free, no interest drag, full liquidity without financing risk • Taxable (borrow-against): defers realization but incurs $480k interest over 20 years; net to estate $450k after loan payoff • Pre-Tax: $570,000 after 24% ordinary income tax—worst outcome **Key insight:** Roth eliminates both tax leakage and financing costs; taxable borrow-against can defer capital gains realization but introduces interest-rate risk, margin-call risk, and cumulative interest expense that erodes economic advantage unless portfolio income fully covers debt service. *Note: LTCG rates vary by income (0%, 15%, 20%); state taxes additional. Borrow rates and terms vary by lender and creditworthiness. Interest deductibility depends on use-of-funds tracing and net investment income limitations, and may be partially or entirely disallowed.*
@@ -176,6 +179,20 @@ The framework's Roth allocation strategy:
 **Investor profile:** Age 35, $140,000 annual income (under Roth IRA MAGI limits), $7,500 annual Roth IRA limit, 30-year horizon. Bitcoin allocation maintained separately in taxable/cold storage per framework backbone governance. **Years 1-5:** Max Roth IRA ($7,500/year) → High-conviction Torque positions AI infrastructure (NVDA, ASML), defense modernization (LMT, RTX), emerging thematic plays Total invested: $37,500 in Roth; Bitcoin accumulated separately in taxable **Years 6-15:** Continue $7,500 annually to Roth, rotating as theses evolve Tax-free rotation enables rebalancing without friction penalties Positions exited at thesis breaks; gains reinvested without tax drag **Years 16-30:** Systematic contributions, sector rotation to emerging opportunities Using a hypothetical high-growth return path (for illustration only) **Roth value at 30 years: ~$4.2M, zero taxes owed on gains or withdrawals** **Counterfactual (same positions in taxable):** Same $4.2M terminal value, but multiple rotation events triggered LTCG taxes throughout. Cumulative tax drag: $400K-$600K+ depending on rotation frequency and bracket. Net after-tax: ~$3.6-3.8M. **Wrapper differential: $400K-$600K+ (10-15% of terminal wealth)** *Note: This case study illustrates why Roth capacity is most valuable for positions that may be rotated. Bitcoin (held via "never sell" discipline) compounds in taxable without rotation friction, preserving Roth space for Torque. Actual returns depend on position selection and market conditions (addressed in Parts 5-6).*
 
 </Callout>
+
+#### Options in Roth Accounts: Purchased Convexity Only
+
+Roth accounts permit options trading with strict limitations under the framework: purchased convexity only (long calls, long puts, defined-risk spreads), never undefined-risk strategies (naked options, short vol, leverage amplification).
+
+Options represent optional tactical overlays for expressing high-conviction theses with capped downside—not core holdings or income generation mechanisms. Purchased options are negative-expected-value instruments most of the time (premium decay exceeds realized gains), justified only when thesis conviction warrants defined-risk asymmetric exposure.
+
+Example: long-dated calls on AI infrastructure names during early adoption phase, long puts as portfolio insurance during systemic stress signals.
+
+Hard cap: 3–5% of Roth account value measured as maximum loss at entry (premium paid). If $75,000 Roth account, maximum options allocation: $3,750 at-risk capital.
+
+Philosophical anchor: survivability > profitability. The Roth account must not be positionable to fail. Purchased options lose 100% in many scenarios—acceptable when sized appropriately, catastrophic when oversized.
+
+The framework prohibits naked options, undefined-risk positions, or strategies that could impair account survivability regardless of probabilistic edge. Strategy selection, entry/exit discipline, and position sizing protocols addressed in Part 5.
 
 ---
 
@@ -301,20 +318,6 @@ This spread is path-dependent—it exists today but may compress or invert durin
 - **Liquidity and regime risk:** Margin availability can disappear during systemic stress when needed most
 
 Margin sizing constraints, maximum leverage ratios, and deleveraging tripwires are addressed in Part 5 under Ballast construction and risk management protocols.
-
-#### Options in Roth Accounts: Purchased Convexity Only
-
-Roth accounts permit options trading with strict limitations under the framework: purchased convexity only (long calls, long puts, defined-risk spreads), never undefined-risk strategies (naked options, short vol, leverage amplification).
-
-Options represent optional tactical overlays for expressing high-conviction theses with capped downside—not core holdings or income generation mechanisms. Purchased options are negative-expected-value instruments most of the time (premium decay exceeds realized gains), justified only when thesis conviction warrants defined-risk asymmetric exposure.
-
-Example: long-dated calls on AI infrastructure names during early adoption phase, long puts as portfolio insurance during systemic stress signals.
-
-Hard cap: 3–5% of Roth account value measured as maximum loss at entry (premium paid). If $75,000 Roth account, maximum options allocation: $3,750 at-risk capital.
-
-Philosophical anchor: survivability > profitability. The Roth account must not be positionable to fail. Purchased options lose 100% in many scenarios—acceptable when sized appropriately, catastrophic when oversized.
-
-The framework prohibits naked options, undefined-risk positions, or strategies that could impair account survivability regardless of probabilistic edge. Strategy selection, entry/exit discipline, and position sizing protocols addressed in Part 5.
 
 ---
 
