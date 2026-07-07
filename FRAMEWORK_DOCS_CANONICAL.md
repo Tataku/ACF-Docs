@@ -1,84 +1,118 @@
 # Framework Docs — Canonical Location & Agent Entry Point
 
-> **Canonicality note — established 2026-07-07** (Closed-Loop readiness pre-flight).
-> This file resolves a long-standing drift: the ACF framework narrative exists in
-> more than one place, on more than one domain. It states which copy is
-> authoritative *now* and how agents should treat the others. It is a pointer +
-> guardrail, not a rewrite. Reversible by a superseding owner decision.
+> **Corrected 2026-07-07 (v2).** This supersedes the v1 note. **v1 was wrong:** it
+> declared the MDX canonical and the HTML "frozen." Owner direction + repo evidence
+> (`next.config.mjs` `beforeFiles` rewrites + `public/site-b/`) establish the opposite —
+> the new Framework Docs surface is the hand-authored **Site B HTML**, and the MDX is
+> being **retired/shadowed** as Site B expands. See "What changed" at the bottom.
 
 ---
 
-## 1. Canonical source of the framework narrative
+## 1. Canonical surface: Site B HTML (`ACF-Docs/public/site-b/`)
 
-**The living, authoritative framework narrative is the published MDX in this repo:**
+The new, canonical Framework Docs are **hand-authored static HTML** in
+`ACF-Docs/public/site-b/`, styled by the agency reading system and enhanced with
+**React chart "islands."** This is where Parts 4–6 (and 7) get authored.
 
-```
-ACF-Docs/pages/part-1-foundation.mdx
-ACF-Docs/pages/part-2-lineage-macro-thesis.mdx
-ACF-Docs/pages/part-3-bitcoin-convexity-backbone.mdx
-ACF-Docs/pages/part-4-tax-architecture-roc-strategy.mdx
-ACF-Docs/pages/part-5-portfolio-construction-position-management.mdx
-ACF-Docs/pages/part-6-convexity-framework-integrity-scoring.mdx
-ACF-Docs/pages/part-7-intro-deck.mdx
-```
+**Current Site B coverage (2026-07-07):**
 
-- Published at **docs.acfdashboard.com** (Nextra site; nav in `pages/_meta.json`).
-- These are the **rewrite target** for any framework-content work, including the
-  Parts 4–6 rewrite. Edit *here*.
-
-## 2. The other copies — do not treat as canonical, do not break
-
-| Location | What it is | Treatment |
+| Route | Site B file | State |
 |---|---|---|
-| `ACFDashboard/ACF - Framework Documents - Parts 1-6/PartN_*_FINAL.html` | A **separate, production-served** HTML copy on the **app** domain (`acfdashboard.com/part1`–`/part6`). | **Frozen / reference. DO NOT rewrite or rename as part of docs work.** The folder name (with spaces) and each `PartN_*_FINAL.html` filename are a **production routing contract** — `vercel.json:54-65` rewrites `/part1`–`/part6` to them and `vite.config.ts:322-325` copies them into `dist/`. Renaming/moving/deleting silently 404s production (`ACFDashboard/docs/REPO_STRUCTURE.md` §4). |
-| `ACFDashboard/ACF - Framework Documents - CIS, FIS, Governance/FRAMEWORK_MASTER_INDEX_v2.md` | A **historical index** (dated Jan 15 2026) that points at the `.html` working versions and says "Parts 1-4 Complete". | **Historical / superseded as a canonicality pointer.** Useful as context for the HTML copy; NOT the current authoritative narrative. Carries a canonicality banner as of 2026-07-07. |
-| `ACFDashboard` in-app Framework Doc viewer (`FrameworkDocViewerPage`) | App surface that renders framework content. | Out of scope for the docs rewrite; follows the app's own routing. |
+| `/` (cover) | `public/site-b/cover-docs.html` | ✅ authored |
+| `/part-1-foundation` | `public/site-b/part-1-foundation.html` | ✅ authored |
+| `/part-1-pictures` | `public/site-b/part-1-pictures.html` | ✅ authored |
+| `/part-2-lineage-macro-thesis` | `public/site-b/part-2-lineage-macro.html` | ✅ authored |
+| `/part-3-bitcoin-convexity-backbone` | `public/site-b/part-3-bitcoin-convexity.html` | ✅ authored (6 chart islands) |
+| `/part-4-tax-architecture-roc-strategy` | `public/site-b/part-4-tax-architecture.html` | 🔨 **in progress** (shell authored; not yet routed) |
+| `/part-5-…` · `/part-6-…` · `/part-7-…` | — | ⏳ **still MDX; need migration** |
 
-## 3. Unresolved owner decision (soft blocker — does NOT block the rewrite)
+## 2. How Site B works (the pattern to replicate for 4–6)
 
-Whether the app-domain HTML copy should (a) redirect to docs.acfdashboard.com,
-(b) be regenerated *from* this MDX, or (c) continue as an independent parallel
-copy is an **open owner decision** (first raised in
-`ACFDashboard/docs/ROADMAP_AUDIT.md:192`, still unresolved). Until the owner
-decides, **the MDX is canonical for content and the HTML stays frozen and
-production-wired.** The rewrite proceeds against the MDX regardless.
+- **Pages:** static `.html` on the Part 3 template — `<head>` theme-before-paint script +
+  self-hosted Inter/JetBrains Mono `@font-face` + `tokens.css` + `reading-system.css`;
+  `<body>` = `.shell` → `nav.sidebar` (the six parts) + `main.shell-main` (`doc-header` →
+  `.section`s → `footer` → `.next-up`) + `nav.floatnav`; scripts `site-b-charts.js` +
+  `reading.js` + `glyph-text.js` (all `defer`).
+- **Design vocabulary (classes from `reading-system.css`):** `.section` / `.section-eyebrow`
+  / `.section-title` / `.measure` / `.prose` / `.prose-lead`; `.gloss` glossary buttons
+  (`data-gloss="<id>"` — the 25 ids live in `public/site-b/acf-glossary.json`);
+  `aside.callout.callout-info|callout-insight|callout-transition`; `ol.architecture-list`
+  / `ol.proc-steps` (`data-stepper`); `.compare` tables + `.compare-key`; `.failure-modes`
+  grid; `blockquote.pull-quote` (`.hl`); `.rule-mark` dividers; `.key-term` / `.part-ref`.
+- **Charts = islands:** a placeholder `<figure class="fc-mount" id="exhibit-<chartId>"
+  data-fc-chart="<chartId>"></figure>` in the HTML is hydrated at runtime by
+  `public/site-b/site-b-charts.js` (built from `components/framework-charts/site-b-island.jsx`
+  via `scripts/build-site-b-charts.mjs`), which mounts the real `<FrameworkChart>` engine +
+  `chart-specs.mjs` spec for that id. **A `data-fc-chart` placeholder only renders a chart
+  once its spec exists in `chart-specs.mjs` and `site-b-charts.js` is rebuilt.**
+- **Routing:** `next.config.mjs` `beforeFiles` rewrites map clean routes → Site B HTML and
+  **shadow** the MDX. Only `/`, part-1, -2, -3, part-1-pictures are rewritten today; Parts
+  4–6/7 have no rewrite, so they **still serve MDX**. Raw `/site-b/*` carries
+  `X-Robots-Tag: noindex` so the clean routes are the single indexable surface.
+
+## 3. The MDX (`ACF-Docs/pages/part-*.mdx`) — retiring, source-only
+
+- The MDX pages **still build** and serve Parts 4–6/7, but they are being **retired/shadowed**
+  as Site B expands. Use them as **source/reference material** for the Site B rewrite — **do
+  not keep polishing them as the target format.**
+- When Site B covers a part and its route is rewritten, that part's MDX is superseded; the MDX
+  is deleted wholesale once Site B covers all parts (and the `next.config.mjs` revert block +
+  the MDX pages are removed together).
+
+## 4. NOT the canonical surface
+
+- `ACFDashboard/ACF - Framework Documents - Parts 1-6/PartN_*_FINAL.html` (production-served at
+  the **app** domain `/part1`–`/part6` via that repo's `vercel.json`) and
+  `ACFDashboard/docs/framework/part-*.html` are **older/other** HTML surfaces — **not** the
+  new Site B target. Do not author framework content there. (They remain production-wired on the
+  app side; their fate is a separate owner decision.)
+
+## 5. The migration sequence (owner-defined)
+
+1. Apply the agency reading system + chart handoff design to **rewrite Parts 4–6** as Site B HTML.
+2. **Create the Parts 4–6 charts** (add specs to `chart-specs.mjs` → rebuild `site-b-charts.js` →
+   `validate:charts`) and embed them as `data-fc-chart` islands.
+3. Add the `next.config.mjs` rewrites for `/part-4…/5…/6…` once each Site B page is verified.
+4. **Retire the MDX fully** (delete `pages/part-*.mdx` + the revert block).
+5. Figure out **in-app** presentation (ACFDashboard) of the framework docs without MDX — later.
+
+## 5a. Authoring pipeline + "marketing agency notes" (per the Calibration Handoff Brief, 2026-07-06)
+
+- **"Marketing agency notes" = the CALIBRATION standard, not the chart/reading-system design.**
+  Tone/register rules: reduce advisory-combative posture → professorial/institutional; scope every
+  claim (fiduciary-grade, conditional); reduce rhetorical emphasis while preserving the author's
+  voice + manifesto backbone; preserve technical rigor; a normalization standard (no em dashes;
+  shorthand → prose; percentages spelled out; headings use colons); tax/leverage claims carry
+  "under current law / subject to legislative change / not guaranteed."
+- **Pipeline that produced Parts 1–3:** Dale **calibrates the MDX** section-by-section (output =
+  MDX + a change log), then **the agency converts MDX → the self-contained Site B HTML**. So the
+  MDX is the **active authoring/calibration source** for Parts 4–6 (retired only after all parts
+  ship as Site B), and the Site B HTML is the **published output**.
+- **Companion rule files (NOT in this repo — held by the owner's calibration workspace):**
+  `AGENTS.md` (§5 normalization table · §6–7 locked canonical phrasing + verbatim voiced lines to
+  preserve · §8 Bitcoin doctrine), `ACF_Project_State.md` (open flags + the exact Roth-figure fix:
+  2026 IRA limit is **$7,500 per person**), `CLAUDE.md` (adapter). **Line-level calibration of a
+  Part requires these** — do not calibrate locked phrasing blind.
+- **OPEN (owner-pending):** whether an agent should (a) return **calibrated MDX + change log** for
+  the agency to convert, or (b) **hand-author the Site B HTML directly**. Resolve before Part 4
+  content work.
+
+## 6. Chart plan + specs (format-agnostic, still valid)
+
+The Parts 4–6 **content audit**, the **legibility standard** (it is the agency/engine
+doctrine), and the **signature chart specs** survive the format change and feed the Site B
+work directly: `PARTS_4-6_REWRITE_AND_CHART_PLAN_v1.md` + `chart-specs/SIGNATURE_CHART_SPECS_SLICE_1.md`
+(P4-03 tax wedge · P5-01 three postures · P6-01 two-score architecture · P6-04 weekly loop).
+The chart inventory + engine doctrine remain at `public/agency-chart-handoff/` +
+`components/framework-charts/`.
 
 ---
 
-## 4. Chart system — machine-readable entry point (use FIRST, do not rediscover)
+## What changed from v1 (the correction)
 
-**Do not re-scan the repo to learn chart state.** Read the inventory:
-
-```
-ACF-Docs/public/agency-chart-handoff/chart-inventory.json   ← 28 charts, machine-readable
-ACF-Docs/public/agency-chart-handoff/README-agency-chart-handoff.md   ← engine doctrine + taste guardrails
-ACF-Docs/components/framework-charts/chart-specs.mjs         ← chart specs
-```
-
-Each inventory entry carries `chartId · idx · part · group · status · wiredPublic ·
-layout · dataMode · primaryClaim · sources · agencyNotes`. Extract the fields you
-need (e.g. with a script); **do not read the 2,268-line JSON cover-to-cover.**
-
-**Current coverage (as of 2026-07-07):**
-
-- **28 charts**, covering **Parts 1–3 + landing + signature only.**
-  `part-1: 6 · part-2: 9 · part-3: 8 · docs-landing: 4 · signature: 2`.
-- **Parts 4, 5, 6 have ZERO charts** → they need **net-new chart design**.
-- Status: `needs-design-review: 19 · implemented: 7 · deferred: 2`.
-- **`wiredPublic: false` for all 28** — every chart is handoff-only; none is wired
-  into a live published page yet.
-
-**Triage taxonomy** for the existing 28 exhibits: **keep · redesign · relocate ·
-scrap · defer** — decide each against its `status`, `agencyNotes`, and the engine
-doctrine (one chart = one claim; honest disclosure footer; interaction matches
-concept). **Public wiring is a separate decision from design approval** — a chart
-can be design-approved while staying `wiredPublic: false` until an explicit
-wiring slice.
-
-## 5. Token discipline for framework-docs runs
-
-1. Read this note + `chart-inventory.json` (fields only) **first** — that is the map.
-2. Then read **only** the specific Part MDX sections in scope — never the whole `pages/` tree.
-3. Extract inventory fields with a script; do not read the full JSON.
-4. No whole-repo sweep without a stated trigger.
-5. Do not touch the app-domain HTML copy or `vercel.json` / `vite.config.ts` routing.
+v1 (2026-07-07, superseded) declared the ACF-Docs **MDX** canonical and the ACFDashboard HTML
+"frozen." That was wrong on both counts: the live site already serves **Site B HTML** for `/`,
+part-1/-2/-3 (MDX shadowed), and the owner's strategy is to retire the MDX as Site B expands to
+Parts 4–6/7. The v1 error came from auditing only the MDX + the ACFDashboard HTML + the master
+index, and **missing `public/site-b/` and `next.config.mjs`** entirely. Corrected per owner
+direction (2026-07-07) + `next.config.mjs` + `public/site-b/`.
