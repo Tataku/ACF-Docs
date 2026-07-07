@@ -25,8 +25,8 @@ import {
   resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming,
 } from '../components/framework-charts/chart-specs.mjs';
 
-const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'both']);
-const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2', 'part-3']);
+const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'part-4', 'both']);
+const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2', 'part-3', 'part-4']);
 const STATUSES = new Set(['implemented', 'needs-design-review', 'spec-only', 'deferred']);
 const MODES = new Set(DATA_MODES);
 const ROLES = new Set(SOURCE_ROLES);
@@ -258,7 +258,7 @@ for (const s of FRAMEWORK_CHART_SPECS) {
 
 // group coverage (what the agency reviews)
 const byGroup = (g) => FRAMEWORK_CHART_SPECS.filter((s) => s.group === g).map((s) => s.chartId);
-['signature', 'docs-landing', 'part-1', 'part-2', 'part-3'].forEach((g) => ok(byGroup(g).length >= 1, `group ${g} has no charts`));
+['signature', 'docs-landing', 'part-1', 'part-2', 'part-3', 'part-4'].forEach((g) => ok(byGroup(g).length >= 1, `group ${g} has no charts`));
 
 console.log(`✓ framework chart specs valid — ${FRAMEWORK_CHART_SPECS.length} charts, ${checks} assertions passed`);
 console.log(`  signature   : ${byGroup('signature').join(', ')}`);
@@ -266,6 +266,7 @@ console.log(`  docs-landing: ${byGroup('docs-landing').join(', ')}`);
 console.log(`  part-1      : ${byGroup('part-1').join(', ')}`);
 console.log(`  part-2      : ${byGroup('part-2').join(', ')}`);
 console.log(`  part-3      : ${byGroup('part-3').join(', ')}`);
+console.log(`  part-4      : ${byGroup('part-4').join(', ')}`);
 console.log(`  wired public: ${FRAMEWORK_CHART_SPECS.filter((s) => s.wiredPublic).map((s) => s.chartId).join(', ') || '(none)'}`);
 
 // engine doctrine coverage (vNext)

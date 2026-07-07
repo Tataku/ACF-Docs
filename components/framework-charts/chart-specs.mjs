@@ -679,6 +679,20 @@ const p3Scenario = (() => {
   };
 })();
 
+// Tax wedge (single) — after-tax value KEPT per $1 invested, as a winning position
+// scales. Three straight retained-value lines diverging from a common origin at
+// (1×, 1×): Roth keeps ~100% of the gain, taxable ~76% (after 23.8% LTCG + NIIT on
+// the gain), pre-tax ~68% (ordinary income on withdrawal). The gap between the Roth
+// and pre-tax lines is the wedge — it widens with the size of the win. Representative
+// retained-fraction bands, not a specific investor's return.
+const taxWedge = (() => {
+  const n = 60, x0 = 1, x1 = 30;
+  const roth = curve(x0, x1, n, (t, x) => x);                       // keeps 100% of the gain
+  const taxable = curve(x0, x1, n, (t, x) => 1 + (x - 1) * 0.762);  // keeps ~76.2% (100% − 23.8%)
+  const pretax = curve(x0, x1, n, (t, x) => 1 + (x - 1) * 0.68);    // keeps ~68% (ordinary income)
+  return { roth, taxable, pretax };
+})();
+
 // ════════════════════════════════════════════════════════════════════════════
 // SPEC REGISTRY
 // ════════════════════════════════════════════════════════════════════════════
@@ -1950,6 +1964,60 @@ export const FRAMEWORK_CHART_SPECS = [
     ],
     mobileTapTargets: ['borrow', 'mature', 'target', 'reserve'],
     implementationNotes: 'SIMULATION — illustrative trajectory; ranges (10–15% / 30–50%) from Part 3 allocation guidance. Phase thresholds shown as guides.',
+  },
+
+  /* ── PART 4 · TAX ARCHITECTURE ─────────────────────────────────────────── */
+  {
+    chartId: 'p4-tax-wedge', idx: 'P4-01', group: 'part-4', intendedPlacement: 'part-4',
+    experienceRole: 'comparison',
+    claimStack: {
+      primaryClaim: 'The after-tax wedge between wrappers widens as the win grows',
+      visualProof: 'Three retained-value lines diverge from a common origin as the gross outcome scales; the shaded gap is the tax wedge',
+      interactionRole: 'Hover a wrapper line to see how much of the gain it keeps and why',
+      readerAction: 'Follow the gap between Roth and pre-tax as the outcome scales right',
+      caution: 'Representative retained-fraction bands, not a specific investor’s return',
+    },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a wrapper line ties its retained share to the tax that produces it' },
+    status: 'implemented', wiredPublic: false,
+    title: 'The Tax Wedge', setupLine: 'After-tax value kept per dollar invested, as a winning position scales',
+    claimLabel: 'WRAPPER · RETENTION',
+    frameworkClaim: 'Wrapper placement is a dominant structural return multiplier: the after-tax wedge between wrappers widens as the win grows.',
+    readerTakeaway: 'Roth keeps essentially the whole win; taxable and pre-tax each surrender a slice that grows with the size of the outcome.',
+    chartType: 'Three diverging retained-value lines (Roth, taxable, pre-tax) with a shaded wedge between the best and worst wrapper.',
+    visualDataMode: 'representative',
+    disclosure: DISCLOSURE.representative, footerCta: 'View sources',
+    sources: [
+      { provider: 'IRS', label: '2026 Roth IRA contribution limit and eligibility ($7,500 per person)', role: 'verifies-concept', url: 'https://www.irs.gov/retirement-plans/roth-iras' },
+      { provider: 'IRC · 26 U.S.C. §1(h) + §1411', label: 'Long-term capital gains rates and the 3.8% net investment income tax', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/1411' },
+      { provider: 'Author calculation', label: 'Retained-fraction bands by wrapper (Roth ~100% · taxable ~76% · pre-tax ~68%) applied to a scaling gross outcome', role: 'methodology' },
+    ],
+    explainerHeadline: 'The bigger the win, the more wrapper choice decides what you keep.',
+    explainerBody: 'A Roth removes tax leakage on qualified withdrawals, so essentially the whole gain is retained. A taxable account surrenders long-term capital gains tax and the net investment income tax on the gain, keeping roughly three-quarters to five-sixths. A pre-tax account is taxed as ordinary income on withdrawal, keeping the smallest share of a large win. The slice each surrenders is minor on a modest gain and material on a right-tail outcome, which is why tax-free compounding matters most precisely where convexity is largest. Ranges are illustrative and depend on income, filing status, state taxes, and the rules in force.',
+    explainerConcept: 'Wrapper edge',
+    concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Right-tail outcomes', link: '/part-1-foundation' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
+    layout: 'single',
+    ariaSummary: 'Three lines rise from a common origin at a one-times outcome. The Roth line tracks the full gross outcome up to thirty times; the taxable line rises less steeply, keeping roughly three-quarters of each additional unit of gain; the pre-tax line is shallowest. The gap between the Roth line and the pre-tax line is shaded as the tax wedge and grows steadily wider toward the right.',
+    domain: { xMin: 1, xMax: 30, yMin: 1, yMax: 30 }, yUnit: '×',
+    xTicks: [{ v: 1, label: '1×' }, { v: 10, label: '10×' }, { v: 20, label: '20×' }, { v: 30, label: '30× gross' }],
+    yTicks: [{ v: 1, label: '1×' }, { v: 10, label: '10×' }, { v: 20, label: '20×' }, { v: 30, label: '30× kept' }],
+    series: [
+      { key: 'pretax', tier: 'tertiary', label: 'Pre-tax · ~68%', pts: taxWedge.pretax, labelDy: 4 },
+      { key: 'taxable', tier: 'secondary', label: 'Taxable · ~76%', pts: taxWedge.taxable, labelDy: 2 },
+      { key: 'roth', tier: 'primary', label: 'Roth · ~100%', pts: taxWedge.roth },
+    ],
+    areas: [{ id: 'wedge', topKey: 'roth', botKey: 'pretax', kind: 'gap', xFrom: 1, label: 'tax friction · widens with the win' }],
+    guides: [],
+    markers: [],
+    levels: [],
+    notes: [],
+    primaryKey: 'roth',
+    hoverTargets: [
+      { id: 'roth', kind: 'series', seriesKey: 'roth', label: 'Roth', name: 'Roth · keeps ~100%', why: 'Qualified withdrawals are not taxed, so essentially the entire gain is retained. This line is the ceiling the other wrappers are measured against.', claim: 'Roth keeps the whole win.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'taxable', kind: 'series', seriesKey: 'taxable', label: 'Taxable', name: 'Taxable · keeps ~75 to 85%', why: 'After long-term capital gains and the net investment income tax on the gain, roughly three-quarters to five-sixths survives, depending on income and state.', claim: 'Taxable surrenders a slice to realized-gain tax.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'pretax', kind: 'series', seriesKey: 'pretax', label: 'Pre-tax', name: 'Pre-tax · keeps ~60 to 80%', why: 'Ordinary-income tax applies to the withdrawal, so the smallest share of a large win is retained. The wedge is widest here.', claim: 'Pre-tax keeps the least of a large win.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+    ],
+    mobileTapTargets: ['roth', 'taxable', 'pretax'],
+    implementationNotes: 'Signature Part 4 exhibit. Three straight retained-value lines diverging from a common origin at (1×, 1×); the Roth↔pre-tax gap is the shaded wedge and is the visual claim, mirroring the p1-cpi-assets gap composition. Representative retained-fraction bands (Roth ~100% · taxable ~76% via 23.8% LTCG+NIIT · pre-tax ~68% ordinary income) — not a specific investor’s return. Restrained green thesis line on Roth; taxable and pre-tax recede.',
   },
 ];
 
