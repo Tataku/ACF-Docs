@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="canonical" href="https://docs.acfdashboard.com/part-4-tax-architecture-roc-strategy">
+  <title>Part 4 — Tax Architecture and ROC Strategy · The Adaptive Convexity Framework</title>
+  <meta name="description" content="Wrapper engineering as a dominant structural return multiplier: the three-wrapper architecture, Roth prioritization for deployable convexity, taxable ballast and return-of-capital income, and the tactical use of pre-tax accounts.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
+  <!-- Self-hosted webfonts (OFL 1.1 — licenses in fonts/). Inter v4.1 + JetBrains Mono v2.304; replaces the Google Fonts CDN load. -->
+  <link rel="preload" href="fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/InterVariable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/InterVariable-Italic.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('fonts/JetBrainsMono-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('fonts/JetBrainsMono-Medium.woff2') format('woff2');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('fonts/JetBrainsMono-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/site-b/tokens.css">
+  <link rel="stylesheet" href="/site-b/reading-system.css">
+</head>
+<body>
+  <a class="skip-link" href="#edge">Skip to content</a>
+
+  <!-- Mobile: open the parts sidebar -->
+  <button type="button" class="drawer-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Open parts navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+  </button>
+  <div class="drawer-backdrop" hidden></div>
+
+  <div class="shell">
+    <!-- Sidebar: brand + theme + the six parts (this IS the Part-page nav) -->
+    <nav class="sidebar" id="sidebar" aria-label="Parts">
+      <div class="sidebar-bar">
+        <button type="button" class="sidebar-toggle" aria-pressed="false" aria-label="Collapse sidebar">
+          <svg class="icon-collapse" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 59.01 34.01 Q 49.65 39.65 44.01 49.01 A 1.4 1.4 0 0 1 45.99 50.99 Q 53.89 43.89 60.99 35.99 A 1.4 1.4 0 0 1 59.01 34.01 Z" fill-rule="evenodd"></path><path d="M 44.01 50.99 Q 49.65 60.35 59.01 65.99 A 1.4 1.4 0 0 1 60.99 64.01 Q 53.89 56.11 45.99 49.01 A 1.4 1.4 0 0 1 44.01 50.99 Z" fill-rule="evenodd"></path></svg>
+          <svg class="icon-expand" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 44.01 35.99 Q 49.65 45.35 59.01 50.99 A 1.4 1.4 0 0 1 60.99 49.01 Q 53.89 41.11 45.99 34.01 A 1.4 1.4 0 0 1 44.01 35.99 Z" fill-rule="evenodd"></path><path d="M 59.01 49.01 Q 49.65 54.65 44.01 64.01 A 1.4 1.4 0 0 1 45.99 65.99 Q 53.89 58.89 60.99 50.99 A 1.4 1.4 0 0 1 59.01 49.01 Z" fill-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <div class="sidebar-head">
+        <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
+          <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+            <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+            <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+          </svg>
+          <span class="brand-word">ACF</span>
+        </a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <p class="side-movement">Philosophy</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-1-foundation"><span class="spnum">01</span><span>Foundation &amp; Philosophy</span></a></li>
+          <li><a class="side-part" href="/part-2-lineage-macro-thesis"><span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span></a></li>
+        </ul>
+
+        <p class="side-movement">Architecture</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-3-bitcoin-convexity-backbone"><span class="spnum">03</span><span>Bitcoin &mdash; Convexity Backbone</span></a></li>
+          <li>
+            <a class="side-part current" href="/part-4-tax-architecture-roc-strategy" aria-current="page">
+              <span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy</span>
+            </a>
+            <ol class="on-this-page" data-spy aria-label="On this page">
+              <li><a href="#edge">The Structural Edge</a></li>
+              <li><a href="#wrappers">Three-Wrapper Architecture</a></li>
+              <li><a href="#roth">Roth Prioritization</a></li>
+              <li><a href="#taxable">Taxable Accounts</a></li>
+              <li><a href="#pretax">Pre-Tax Accounts</a></li>
+              <li><a href="#resilience">Legislative Resilience</a></li>
+            </ol>
+          </li>
+        </ul>
+
+        <p class="side-movement">Implementation</p>
+        <ul class="side-parts">
+          <li><span class="side-part pending"><span class="spnum">05</span><span>Portfolio Construction &amp; Position Management <span class="soon">Soon</span></span></span></li>
+        </ul>
+
+        <p class="side-movement">Governance</p>
+        <ul class="side-parts">
+          <li><span class="side-part pending"><span class="spnum">06</span><span>Convexity &amp; Framework Integrity Scoring <span class="soon">Soon</span></span></span></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="shell-main">
+      <header class="doc-header">
+        <div class="measure">
+          <div class="doc-signal" data-glyph-text>Framework Documentation</div>
+          <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
+          <p class="doc-kicker">Part 4 of 6 &middot; &approx; 20 min read</p>
+          <h1 class="doc-title">Tax Architecture and ROC Strategy</h1>
+
+          <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
+          <div class="part-actions" role="group" aria-label="Part actions">
+            <button type="button" class="part-action part-listen" data-listen aria-pressed="false">
+              <svg class="pa-icon icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z"></path></svg>
+              <svg class="pa-icon icon-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7" y="7" width="10" height="10" rx="1.5"></rect></svg>
+              <span class="part-action-label" data-listen-label>Listen</span>
+            </button>
+
+            <div class="part-share">
+              <a class="part-action" data-share="x" href="https://x.com/intent/post" target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4l16 16M20 4L4 20"></path></svg>
+              </a>
+              <a class="part-action" data-share="email" href="mailto:" aria-label="Share by email">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M4 7l8 6 8-6"></path></svg>
+              </a>
+              <button type="button" class="part-action" data-copy-link aria-label="Copy link to this part">
+                <svg class="pa-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 36.5 39.58 Q 60.5 43.27 84.5 39.58 A 1.58 1.58 0 0 1 84.5 36.42 Q 60.5 36.52 36.5 36.42 A 1.58 1.58 0 0 1 36.5 39.58 Z M 81.43 36.5 Q 77.74 60.5 81.43 84.5 A 1.58 1.58 0 0 1 84.58 84.5 Q 84.49 60.5 84.58 36.5 A 1.58 1.58 0 0 1 81.43 36.5 Z M 84.5 81.43 Q 60.5 77.74 36.5 81.43 A 1.58 1.58 0 0 1 36.5 84.58 Q 60.5 84.49 84.5 84.58 A 1.58 1.58 0 0 1 84.5 81.43 Z M 39.58 84.5 Q 43.27 60.5 39.58 36.5 A 1.58 1.58 0 0 1 36.42 36.5 Q 36.52 60.5 36.42 84.5 A 1.58 1.58 0 0 1 39.58 84.5 Z" fill-rule="evenodd"></path><path d="M 18 19.58 Q 40.5 23.18 63 19.58 A 1.58 1.58 0 0 1 63 16.43 Q 40.5 16.43 18 16.43 A 1.58 1.58 0 0 1 18 19.58 Z" fill-rule="evenodd"></path><path d="M 16.43 18 Q 12.83 40.5 16.43 63 A 1.58 1.58 0 0 1 19.58 63 Q 19.58 40.5 19.58 18 A 1.58 1.58 0 0 1 16.43 18 Z" fill-rule="evenodd"></path><path d="M 61.43 18 Q 58.88 23 61.43 28 A 1.58 1.58 0 0 1 64.58 28 Q 65.63 23 64.58 18 A 1.58 1.58 0 0 1 61.43 18 Z" fill-rule="evenodd"></path><path d="M 18 64.58 Q 23 67.13 28 64.58 A 1.58 1.58 0 0 1 28 61.43 Q 23 60.38 18 61.43 A 1.58 1.58 0 0 1 18 64.58 Z" fill-rule="evenodd"></path></svg>
+                <span class="part-action-label" data-copy-label>Copy link</span>
+              </button>
+              <button type="button" class="part-action part-share-native" data-share-native hidden aria-label="Share">
+                <svg class="pa-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 51.58 65 Q 55.18 42.5 51.58 20 A 1.58 1.58 0 0 1 48.43 20 Q 48.43 42.5 48.43 65 A 1.58 1.58 0 0 1 51.58 65 Z" fill-rule="evenodd"></path><path d="M 36.11 36.11 Q 45.65 30.65 51.11 21.11 A 1.58 1.58 0 0 1 48.89 18.89 Q 40.88 25.88 33.89 33.89 A 1.58 1.58 0 0 1 36.11 36.11 Z" fill-rule="evenodd"></path><path d="M 66.11 33.89 Q 60.65 24.35 51.11 18.89 A 1.58 1.58 0 0 1 48.89 21.11 Q 55.88 29.12 63.89 36.11 A 1.58 1.58 0 0 1 66.11 33.89 Z" fill-rule="evenodd"></path><path d="M 25 81.58 Q 50 85.33 75 81.58 A 1.58 1.58 0 0 1 75 78.43 Q 50 78.58 25 78.43 A 1.58 1.58 0 0 1 25 81.58 Z" fill-rule="evenodd"></path><path d="M 26.58 80 Q 29.13 75 26.58 70 A 1.58 1.58 0 0 1 23.43 70 Q 22.38 75 23.43 80 A 1.58 1.58 0 0 1 26.58 80 Z" fill-rule="evenodd"></path><path d="M 76.58 80 Q 79.13 75 76.58 70 A 1.58 1.58 0 0 1 73.43 70 Q 72.38 75 73.43 80 A 1.58 1.58 0 0 1 76.58 80 Z" fill-rule="evenodd"></path></svg>
+              </button>
+            </div>
+
+            <span class="part-actions-status visually-hidden" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </header>
+
+    <!-- ===== SECTION · THE STRUCTURAL EDGE =============================== -->
+    <section class="section" id="edge" aria-labelledby="edge-title">
+      <div class="measure">
+        <p class="section-eyebrow">The Hidden Multiplier</p>
+        <h2 class="section-title" id="edge-title">Wrapper engineering as a structural edge.</h2>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">Tax friction compounds over time. Over multi-decade horizons, the choice of account structure determines whether extreme appreciation becomes durable wealth or leaks a material share of terminal value to taxes, often on the order of 15 to 35 percent or more depending on income, the net investment income tax, state taxes, and the withdrawal profile. Wrapper engineering treats that choice as a design variable rather than a compliance afterthought: the systematic routing of capital to the <button type="button" class="gloss" data-gloss="tax-wrapper" aria-expanded="false">wrappers</button> that minimize lifetime friction and preserve <button type="button" class="gloss" data-gloss="right-tail-outcomes" aria-expanded="false">right-tail outcomes</button>.</p>
+        <p>Conventional guidance defaults to pre-tax contributions for the current-year deduction, treats Roth accounts as supplementary vehicles for younger investors, and uses taxable accounts as overflow once contribution limits are reached. That sequence optimizes for current-year tax savings rather than terminal wealth. Wrapper engineering starts from a different arithmetic: over multi-decade horizons, the differential compounding produced by tax treatment can rival, and in some cases exceed, the return contribution of asset selection itself. The framework treats wrapper placement as a dominant structural return multiplier and applies to it the same rigor it applies to asset selection and position sizing.</p>
+        <p><strong>Jurisdiction scope.</strong> This part uses United States tax wrappers, the Roth IRA, the taxable brokerage account, and pre-tax retirement accounts, as the reference implementation. The underlying logic, routing convexity to the lowest-friction wrapper and preserving tax-advantaged capacity for the positions that benefit most, is portable to other jurisdictions by substituting local tax-advantaged structures.</p>
+      </div>
+
+      <aside class="callout callout-insight" aria-label="Key insight">
+        <div class="ci-head">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M9 18h6"></path>
+            <path d="M10 21h4"></path>
+            <path d="M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.2 1 2V16h6v-.5c0-.8.5-1.5 1-2A6 6 0 0 0 12 3z"></path>
+          </svg>
+          <p class="callout-label">Key Insight</p>
+        </div>
+        <p>A mediocre asset in an optimal wrapper can produce superior terminal wealth compared with an exceptional asset in a suboptimal one. The distinction the framework draws is between generating gains and keeping them; over long horizons the second determines as much of the outcome as the first.</p>
+      </aside>
+
+      <div class="measure prose">
+        <p>The intellectual lineage the framework draws on largely leaves this gap open. Taleb addresses payoff asymmetry and antifragility but not wrapper routing; Druckenmiller&rsquo;s concentration doctrine operates chiefly in institutional vehicles where personal tax wrappers are not the binding constraint; Soros treats tax architecture as exogenous to reflexivity and timing; and Edelman advocates for investor education and disciplined crypto inclusion without formalizing wrapper optimization as a structural multiplier. The framework fills that gap deliberately, elevating wrapper selection from a compliance exercise to an engineering discipline.</p>
+      </div>
+
+      <aside class="callout callout-info" aria-label="North star">
+        <p class="callout-label">Wrapper Engineering North Star</p>
+        <ul>
+          <li><strong>Maximize Roth capacity for frictionless, deployable convexity.</strong> Tax-free compounding over horizons of thirty to sixty years tends to dominate most other portfolio decisions for positions that may be rotated or rebalanced.</li>
+          <li><strong>Convert strategically, not blindly.</strong> Early Roth accumulation also reduces future pre-tax balances subject to required minimum distributions and to income-related Medicare surcharges. The point is not to fill Roth with never-sold positions, but to reserve it for exposures where tax-free trading provides a structural advantage.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · THREE-WRAPPER ARCHITECTURE ======================== -->
+    <section class="section" id="wrappers" aria-labelledby="wrappers-title">
+      <div class="measure">
+        <p class="section-eyebrow">The Three Containers</p>
+        <h2 class="section-title" id="wrappers-title">Three wrappers, three roles.</h2>
+      </div>
+      <div class="measure prose">
+        <p>The framework deploys capital across three wrapper types, each matched to a payoff profile and a portfolio function. The organizing principle is to match a position&rsquo;s expected payoff distribution and trading behavior to a wrapper&rsquo;s tax treatment.</p>
+      </div>
+
+      <div class="compare">
+        <table>
+          <caption>Wrapper treatment and the payoff profile each is matched to</caption>
+          <thead>
+            <tr>
+              <th scope="col">Wrapper</th>
+              <th scope="col">Tax treatment</th>
+              <th scope="col">Matched role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">Roth accounts</th><td>Tax-free growth and qualified withdrawals</td><td><button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button> convexity that may rotate</td></tr>
+            <tr><th scope="row">Taxable accounts</th><td>Tax on realized gains and distributions</td><td>Bitcoin backbone, return-of-capital ballast, harvesting satellites</td></tr>
+            <tr><th scope="row">Pre-tax accounts</th><td>Tax-deferred; taxed as income on withdrawal</td><td>Employer match; occasional bracket arbitrage</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">Roth suits positions that may be rotated tax-free &middot; taxable suits never-sold or income-producing holdings &middot; pre-tax is tactical, not structural</p>
+
+      <div class="measure prose">
+        <p>Positions with right-tail potential that may be rotated belong in Roth, where tax-free compounding and frictionless trading turn appreciation into durable wealth. Bitcoin, held under a never-sell discipline, belongs in taxable, where a step-up in basis under current law and borrow-against strategies preserve optionality without consuming scarce Roth capacity. New capital follows a hierarchical sequence rather than a fixed split.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="proc-steps" data-stepper>
+          <li><p><span class="lead">Capture any employer match first.</span> Contribute to the match threshold, in a Roth 401(k) bucket if the plan offers one, otherwise pre-tax. A dollar-for-dollar match is an immediate return that dominates wrapper suboptimality.</p></li>
+          <li><p><span class="lead">Maximize the Roth IRA next.</span> Fund the annual Roth IRA limit. Above the income thresholds, a backdoor Roth, a non-deductible traditional IRA contribution converted to Roth, preserves access under current law, subject to the pro-rata rule when other pre-tax IRA balances exist.</p></li>
+          <li><p><span class="lead">Route remaining capital by position type.</span> Send never-sold Bitcoin to taxable cold storage, rotating Torque to Roth, income and ballast to taxable, and, in an unusually high-income year, a deductible pre-tax contribution intended for later conversion.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · ROTH PRIORITIZATION =============================== -->
+    <section class="section" id="roth" aria-labelledby="roth-title">
+      <div class="measure">
+        <p class="section-eyebrow">Tax-Free Convexity</p>
+        <h2 class="section-title" id="roth-title">Reserving Roth for Torque.</h2>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">Roth capacity is scarce. The annual Roth IRA contribution limit for 2026 is 7,500 dollars per person, which bounds the tax-free space available each year. The framework therefore reserves Roth for its highest-value use: high-conviction positions that may be rotated, where tax-free compounding and friction-free trading generate the most value over time.</p>
+        <p>The wrapper comparison below is the canonical exhibit for how much of a right-tail outcome each wrapper preserves. It belongs to Part 4; later parts reference it rather than restating it.</p>
+      </div>
+
+      <!-- Chart island: P4-03 "The Tax Wedge" — canonical wrapper/tax comparison.
+           Spec: /chart-specs/SIGNATURE_CHART_SPECS_SLICE_1.md · status: placeholder only.
+           The chart spec is not yet registered in chart-specs.mjs and site-b-charts.js is not
+           yet rebuilt, so this figure renders empty until the chart-registration slice. -->
+      <figure class="fc-mount" id="exhibit-p4-tax-wedge" data-fc-chart="p4-tax-wedge"></figure>
+
+      <div class="measure prose">
+        <p>The pattern the exhibit makes visible is consistent. In a Roth, essentially all of a gain is retained, since qualified withdrawals are not taxed. In a taxable account, roughly 75 to 85 percent is retained after long-term capital gains and the net investment income tax, depending on income. In a pre-tax account, roughly 60 to 80 percent is retained after ordinary-income tax on withdrawal. The wedge between these widens as returns grow, so tax-free compounding matters most precisely where convexity is largest. These ranges are illustrative and depend on income, filing status, state taxes, and the rules in force at the time.</p>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Roth allocation discipline">
+        <p class="callout-label">Roth Allocation Discipline</p>
+        <ul>
+          <li><strong>Scarce capacity, reserved for Torque.</strong> Positions with meaningful upside that may require tactical rebalancing, sector rotation, or thesis-driven exits benefit most from tax-free trading. Reserve the annual limit for them.</li>
+          <li><strong>Bitcoin is held outside Roth by default.</strong> The backbone is not traded, so it does not need Roth&rsquo;s tax-free trading benefit. Taxable cold storage, with basis step-up under current law and borrow-against optionality, preserves Roth space for rotating positions.</li>
+          <li><strong>Conviction with restraint.</strong> Friction-free trading enables rotation; it does not require it. Roth&rsquo;s advantage compounds through sustained conviction, not frequent turnover. Rotation discipline is governed by <button type="button" class="gloss" data-gloss="cis" aria-expanded="false">CIS</button> scoring, developed in Part 6.</li>
+          <li><strong>Access at any income.</strong> Earners above the direct Roth IRA thresholds can reach Roth through a backdoor conversion under current law. Confirm eligibility and the pro-rata treatment with a qualified professional.</li>
+        </ul>
+      </aside>
+
+      <div class="measure prose">
+        <p>Structural advantages matter only when they are usable. Many employer plans offer a Roth 401(k) bucket, but plan menus typically restrict investment options to a curated set of funds. The self-directed positioning and rotation the framework relies on is generally available in a Roth IRA rather than an employer plan, so the sequence maximizes the Roth IRA before directing additional capital to a Roth 401(k) bucket with a narrower investment universe. The rules that follow describe how wrapper engineering routes capital once a backbone has been selected; position sizing, diversification, and rotation mechanics are developed in Part 5.</p>
+      </div>
+
+      <!-- Moved from the taxable discussion: options are a Roth-account topic. -->
+      <div class="measure prose">
+        <p><span class="key-term">Options within the Roth: purchased convexity only.</span> Roth accounts permit options under a strict limitation: purchased convexity only, meaning long calls, long puts, and defined-risk spreads, never undefined-risk strategies such as naked options or short volatility. Purchased options are tactical overlays for expressing a high-conviction thesis with capped downside, not core holdings or income generators. They carry negative expected value much of the time, since premium decay usually exceeds realized gains, and are justified only when conviction warrants defined-risk, asymmetric exposure. A representative use is a long-dated call on an infrastructure theme during an early adoption phase, or a long put as portfolio insurance during periods of systemic stress.</p>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Options sizing">
+        <p class="callout-label">Sizing And Survivability</p>
+        <ul>
+          <li><strong>Hard cap of 3 to 5 percent</strong> of Roth account value, measured as maximum loss at entry, the premium paid. In a 75,000 dollar Roth, that is roughly 3,750 dollars of at-risk capital.</li>
+          <li><strong>Survivability before profitability.</strong> Purchased options can lose their full premium; that is acceptable when sized appropriately and damaging when it is not. The framework prohibits naked or undefined-risk positions that could impair account survivability regardless of any probabilistic edge.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · TAXABLE ACCOUNTS ================================== -->
+    <section class="section" id="taxable" aria-labelledby="taxable-title">
+      <div class="measure">
+        <p class="section-eyebrow">Income, Ballast, and Harvesting</p>
+        <h2 class="section-title" id="taxable-title">The work taxable accounts do.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Taxable accounts carry the positions that do not need Roth&rsquo;s tax-free trading: the Bitcoin backbone, income-producing <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">ballast</button>, and tactical satellites suited to tax-loss harvesting. The framework prioritizes ballast that generates stable, high-percentage return-of-capital distributions, ideally paid monthly. A return-of-capital distribution reduces cost basis rather than triggering immediate tax, which defers the liability and supplies regular liquidity for deployment into Bitcoin accumulation or tactical rotation without forced sales.</p>
+        <p>The current best-in-class implementation is a perpetual preferred instrument that pays a monthly distribution adjusting to roughly 11 percent annually, historically characterized as return of capital. Tax treatment should be verified each year through issuer 1099-DIV reporting, since classification can change with company operations. This position is best-in-class rather than structurally irreplaceable; it should be evaluated against Part 5&rsquo;s ballast criteria, and replaced if a superior candidate emerges or its risk profile changes.</p>
+      </div>
+
+      <div class="measure">
+        <div class="failure-modes">
+          <div><span class="name">Credit and issuer concentration</span><p>The distribution depends entirely on the issuer&rsquo;s financial health and capital management.</p></div>
+          <div><span class="name">Interest-rate sensitivity</span><p>Rising rates or widening credit spreads can pressure preferred valuations.</p></div>
+          <div><span class="name">Classification risk</span><p>Return-of-capital treatment can change with issuer operations, converting tax-deferred distributions into taxable income.</p></div>
+          <div><span class="name">Correlation under stress</span><p>Bitcoin drawdowns can compress the issuer&rsquo;s distributable income and the instrument&rsquo;s market price.</p></div>
+          <div><span class="name">No maturity</span><p>The perpetual structure offers no guaranteed return of principal.</p></div>
+        </div>
+      </div>
+
+      <div class="measure prose">
+        <p><span class="key-term">Tax-loss harvesting.</span> Realizing losses to offset gains, or up to 3,000 dollars of ordinary income annually with unlimited carryforward, creates durable tax assets. Not every position is a suitable candidate. When distributions are characterized as return of capital, they steadily reduce basis, which makes realized losses unlikely; such a position is held for basis step-up, not harvesting. The framework&rsquo;s harvesting candidates are tactical satellites, held at satellite size rather than ballast concentration, and directly held Bitcoin, which under current rules is not subject to the wash-sale restriction that applies to securities, though that treatment may change as guidance evolves.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="proc-steps" data-stepper>
+          <li><p><span class="lead">Review quarterly for material losses.</span> Flag taxable positions down more than 20 percent from cost basis.</p></li>
+          <li><p><span class="lead">Harvest where the thesis holds.</span> If the thesis is intact, realize the loss and immediately redeploy into a substantially similar but non-identical position to avoid a wash sale. If the thesis is breaking, harvest and redeploy to a higher-conviction opportunity.</p></li>
+          <li><p><span class="lead">Track carryforwards as durable assets.</span> Harvested losses shelter future gains across years; maintain a record so the carryforward is not lost.</p></li>
+        </ol>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Margin overlay">
+        <p class="callout-label">Margin: An Optional Overlay</p>
+        <ul>
+          <li><strong>Conditional, not structural.</strong> When income-producing positions yield more than the margin borrowing rate, the spread creates positive carry. This is a tactical overlay that functions only while borrow rates stay below distributable yields, a regime-dependent and non-permanent relationship.</li>
+          <li><strong>Revocable by design.</strong> Margin is a broker privilege that can be repriced or withdrawn during stress. Borrow rates float and can spike; collateral declines can force liquidation at inopportune times. The framework treats margin as optional and non-core; it is not required for the framework to function. Sizing limits and deleveraging tripwires are developed in Part 5.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · PRE-TAX ACCOUNTS ================================== -->
+    <section class="section" id="pretax" aria-labelledby="pretax-title">
+      <div class="measure">
+        <p class="section-eyebrow">Tactical, Not Structural</p>
+        <h2 class="section-title" id="pretax-title">Pre-tax accounts: inferior, occasionally useful.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Pre-tax accounts face structural disadvantages for long-duration convex strategies. Ordinary-income taxation on withdrawal, compared with preferential long-term capital gains treatment, imposes a differential that compounds over multi-decade horizons. Required minimum distributions begin at age 73, rising to 75 in 2033 under current law, and force taxable withdrawals regardless of need. Heirs generally inherit the full income-tax liability, without the basis step-up a taxable account receives. And withdrawals before age 59 and a half generally incur a penalty in addition to income tax.</p>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Gross is not net">
+        <p class="callout-label">Gross Is Not Net</p>
+        <p>A pre-tax balance represents a joint claim between the investor and the tax authority, with taxes deferred rather than eliminated. As returns compound, the dollar value of the deferred tax obligation compounds alongside them, so the net ownership share falls as terminal value rises. A Roth removes this joint claim by paying taxes upfront, converting all future appreciation into fully owned capital.</p>
+      </aside>
+
+      <div class="measure prose">
+        <p>Despite that inferiority, pre-tax accounts have specific uses where they add value.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li><p class="step-title">Capture the employer match, always</p><p class="step-body">A dollar-for-dollar match is an immediate 100 percent return that dominates any wrapper suboptimality. Contribute to the match threshold, then redirect additional capital to the Roth IRA and taxable accounts.</p></li>
+          <li><p class="step-title">Arbitrage an unusually high-income year</p><p class="step-body">When a one-time income spike pushes the marginal rate well above its normal level, a deductible pre-tax contribution captures the deduction at the higher rate, to be converted to Roth in a later, lower-bracket year. The captured differential is the bracket spread applied to the contribution.</p></li>
+          <li><p class="step-title">Use a mega backdoor Roth where the plan allows it</p><p class="step-body">If a 401(k) plan permits after-tax contributions beyond the standard deferral limit and an in-plan Roth conversion or in-service rollover, after-tax contributions can be converted to Roth, extending annual Roth capacity well beyond the IRA limit, up to the plan&rsquo;s overall additions limit. Availability depends on plan design; confirm with the plan administrator.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · LEGISLATIVE RESILIENCE ============================ -->
+    <section class="section" id="resilience" aria-labelledby="resilience-title">
+      <div class="measure">
+        <p class="section-eyebrow">Under Uncertain Rules</p>
+        <h2 class="section-title" id="resilience-title">Built for changing tax law.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Tax rules can change. Contribution limits, income thresholds, distribution requirements, step-up treatment, and the tax-free status of Roth withdrawals are all subject to legislative modification, as are pre-tax deduction rules, distribution ages, and rates. The framework does not assume any of these are permanent. It prioritizes multi-wrapper diversification and tactical flexibility to limit worst-case outcomes across plausible policy scenarios.</p>
+        <p>Roth accounts have paid tax at a known rate; an adverse change would represent incremental taxation on already-taxed capital. Pre-tax accounts have deferred all taxation, so an adverse change accelerates or increases a liability that was always present. The framework favors Roth not because its rules are guaranteed, but because Roth structures exhibit a more favorable risk asymmetry under legislative uncertainty. The capacity to convert pre-tax balances to Roth in low-income years, together with multi-wrapper allocation, preserves the optionality to adapt as rules evolve.</p>
+        <p>Wrapper engineering compounds quietly and permanently. Asset selection drives returns; wrapper selection determines how much of those returns are kept. That distinction, between generating gains and preserving them, separates ordinary long-term outcomes from durable wealth. Wrapper decisions define architecture, not allocation; position construction, sizing, and rotation discipline are developed in Parts 5 and 6.</p>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Scope and disclaimer">
+        <p class="callout-label">Scope</p>
+        <p>Tax and leverage treatments described here reflect current United States law and are subject to legislative change; step-up in basis, borrow-against strategies, and wash-sale treatment in particular are policy-dependent and not guaranteed. This framework does not constitute tax, legal, or financial advice. Consult qualified professionals for your specific situation.</p>
+      </aside>
+
+      <!-- Chapter-end transition -->
+      <aside class="callout callout-transition" aria-label="End of part">
+        <p class="callout-label">End of Part 4</p>
+        <p>Part 4 established wrapper engineering as a dominant structural return multiplier that governs how capital is routed once a backbone is selected: deployable convexity to the lowest-friction wrapper, never-sold and income-producing holdings to taxable, and pre-tax accounts reserved for tactical use. It defined architecture rather than allocation. Part 5 turns that architecture into concrete positions.</p>
+      </aside>
+    </section>
+
+      <!-- Forward pointer: the next part -->
+      <aside class="next-up" aria-label="Next in the series">
+        <div class="measure">
+          <p class="next-up-label">Next up</p>
+          <div class="next-up-card pending">
+            <span class="next-up-num">05</span>
+            <span class="next-up-body">
+              <span class="next-up-title">Portfolio Construction &amp; Position Management <span class="soon">Soon</span></span>
+              <span class="next-up-teaser">Translating wrapper-optimized architecture into concrete positions across three behavioral postures, with the governance that maintains integrity through cycles.</span>
+            </span>
+            <span class="next-up-arrow" aria-hidden="true">&rarr;</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Marks Part 4 read once it scrolls into view (drives cover completion) -->
+      <div data-progress-sentinel data-part="4" aria-hidden="true"></div>
+
+      <footer class="site-footer">
+        <div class="measure foot-base">
+          <span>&copy; 2026 Adaptive Convexity Framework</span>
+          <span>Part 4 &middot; Tax Architecture and ROC Strategy</span>
+        </div>
+      </footer>
+
+</main>
+  </div>
+
+  <!-- Floating reading nav — home + prev/next part, surfaces while scrolling -->
+  <nav class="floatnav" aria-label="Reading navigation" hidden>
+    <div class="floatnav-inner">
+      <button type="button" class="floatnav-top" aria-label="Back to top">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 35.99 60.99 Q 45.35 55.35 50.99 45.99 A 1.4 1.4 0 0 1 49.01 44.01 Q 41.11 51.11 34.01 59.01 A 1.4 1.4 0 0 1 35.99 60.99 Z" fill-rule="evenodd"></path><path d="M 49.01 45.99 Q 54.65 55.35 64.01 60.99 A 1.4 1.4 0 0 1 65.99 59.01 Q 58.89 51.11 50.99 44.01 A 1.4 1.4 0 0 1 49.01 45.99 Z" fill-rule="evenodd"></path></svg>
+      </button>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-home" href="/">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 23.5 21.23 Q 47.5 24.42 71.5 21.23 A 1.22 1.22 0 0 1 71.5 18.77 Q 47.5 19.17 23.5 18.77 A 1.22 1.22 0 0 1 23.5 21.23 Z M 68.78 18.5 Q 65.14 50 68.78 81.5 A 1.22 1.22 0 0 1 71.22 81.5 Q 70.39 50 71.22 18.5 A 1.22 1.22 0 0 1 68.78 18.5 Z M 71.5 78.78 Q 47.5 75.59 23.5 78.78 A 1.22 1.22 0 0 1 23.5 81.22 Q 47.5 80.84 71.5 81.22 A 1.22 1.22 0 0 1 71.5 78.78 Z M 26.23 81.5 Q 29.87 50 26.23 18.5 A 1.22 1.22 0 0 1 23.78 18.5 Q 24.62 50 23.78 81.5 A 1.22 1.22 0 0 1 26.23 81.5 Z" fill-rule="evenodd"></path><path d="M 35 21.23 Q 55 22.98 75 21.23 A 1.22 1.22 0 0 1 75 18.77 Q 55 17.73 35 18.77 A 1.22 1.22 0 0 1 35 21.23 Z" fill-rule="evenodd"></path><path d="M 73.78 20 Q 72.03 40 73.78 60 A 1.22 1.22 0 0 1 76.22 60 Q 77.28 40 76.22 20 A 1.22 1.22 0 0 1 73.78 20 Z" fill-rule="evenodd"></path><path d="M 33.5 35.88 Q 47.5 37.97 61.5 35.88 A 0.88 0.88 0 0 1 61.5 34.13 Q 47.5 34.22 33.5 34.13 A 0.88 0.88 0 0 1 33.5 35.88 Z M 59.13 33.5 Q 57.34 42.5 59.13 51.5 A 0.88 0.88 0 0 1 60.88 51.5 Q 61.09 42.5 60.88 33.5 A 0.88 0.88 0 0 1 59.13 33.5 Z M 61.5 49.13 Q 47.5 47.04 33.5 49.13 A 0.88 0.88 0 0 1 33.5 50.88 Q 47.5 50.79 61.5 50.88 A 0.88 0.88 0 0 1 61.5 49.13 Z M 35.88 51.5 Q 37.67 42.5 35.88 33.5 A 0.88 0.88 0 0 1 34.13 33.5 Q 33.92 42.5 34.13 51.5 A 0.88 0.88 0 0 1 35.88 51.5 Z" fill-rule="evenodd"></path><path d="M 46.13 50 Q 44.43 57.5 46.13 65 A 0.88 0.88 0 0 1 47.88 65 Q 48.18 57.5 47.88 50 A 0.88 0.88 0 0 1 46.13 50 Z" fill-rule="evenodd"></path></svg>
+        <span class="fn-home-label">Framework</span>
+      </a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-prev" href="/part-3-bitcoin-convexity-backbone">&larr; Part 3</a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <span class="floatnav-next" aria-disabled="true">Next &middot; Part 5</span>
+    </div>
+  </nav>
+
+  <!-- Progressive enhancement: theme, scroll-spy, drawer, completion, floatnav -->
+  <script src="/site-b/site-b-charts.js" defer></script>
+  <script src="/site-b/reading.js" defer></script>
+  <script src="/site-b/glyph-text.js" defer></script>
+</body>
+</html>
