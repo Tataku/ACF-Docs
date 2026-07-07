@@ -323,6 +323,18 @@
       "related": ["ballast", "posture", "sequence-of-returns-risk"],
       "appearsLater": { "part": 5, "topic": "Reserve capital and redeployment rules" },
       "chart": null
+    },
+    {
+      "id": "return-of-capital",
+      "term": "Return of capital",
+      "aliases": ["return of capital", "ROC", "return-of-capital income", "return of capital distribution"],
+      "wave": 2,
+      "definition": "A distribution treated as a return of your own invested capital rather than taxable income. It reduces cost basis and defers tax rather than eliminating it; classification can change and depends on current law.",
+      "length": "medium",
+      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
+      "related": ["tax-wrapper", "ballast"],
+      "appearsLater": { "part": 5, "topic": "The Ballast posture" },
+      "chart": null
     }
   ]
 }
