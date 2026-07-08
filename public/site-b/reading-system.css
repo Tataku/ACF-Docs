@@ -23,7 +23,13 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  /* Faint top atmosphere: a soft light source at the top of the page so content
+     doesn't sit on a flat sheet. Viewport-anchored (fixed) so it stays overhead
+     while reading; barely perceptible via the theme-scoped --page-glow. */
+  background-color: var(--paper);
+  background-image: radial-gradient(120% 70% at 50% 0%, var(--page-glow), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font-serif);
   font-optical-sizing: auto;
@@ -339,6 +345,7 @@ body {
   background: var(--surface-raised);
   border: 1px solid var(--rule);
   border-radius: var(--radius-card);
+  box-shadow: var(--surface-highlight), var(--elevation-1);
   padding: var(--space-5) var(--space-6);
 }
 /* Title is the card's primary element: enlarged + the theme-tuned accent green
@@ -1261,6 +1268,7 @@ body {
   background: var(--surface-raised);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
+  box-shadow: var(--surface-highlight), var(--elevation-1);
 }
 .wb-icon { width: 1.9rem; height: 1.9rem; color: var(--accent); align-self: flex-start; }
 .wb-lead {
@@ -2281,15 +2289,15 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   color: var(--floatnav-fg);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   backdrop-filter: blur(16px) saturate(1.4);
-  box-shadow: 0 8px 22px -6px rgba(10, 14, 18, .50),
-              0 18px 44px -14px rgba(10, 14, 18, .42);
+  box-shadow: var(--surface-highlight), var(--elevation-3);
   animation: floatnav-bob 4.6s ease-in-out infinite;
   transition: box-shadow var(--motion-slow) var(--ease-standard),
               border-radius var(--motion-base) var(--ease-emphasis);
 }
 .floatnav:hover .floatnav-inner {
   animation-play-state: paused;
-  box-shadow: 0 12px 28px -6px rgba(10, 14, 18, .55),
+  box-shadow: var(--surface-highlight),
+              0 12px 28px -6px rgba(10, 14, 18, .55),
               0 28px 64px -16px rgba(10, 14, 18, .50);
 }
 @keyframes floatnav-bob {

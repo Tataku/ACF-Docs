@@ -174,6 +174,18 @@
   /* ---- Stepper: dim for steps ahead of the reading focus (JS-driven) ------- */
   --step-dim: 0.4;
 
+  /* ---- Elevation / depth system (light) ----------------------------------- *
+   * One tokenized highlight/shadow model, applied to the reusable raised-card
+   * families. Each elevation = a tight CONTACT shadow + a soft AMBIENT shadow;
+   * --surface-highlight is a top-edge hairline (light-from-above). Tune the
+   * whole document by editing these values — never add ad-hoc card shadows.   */
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px rgba(15, 23, 42, .08), 0 10px 28px rgba(15, 23, 42, .08);
+  --elevation-2: 0 2px 6px rgba(15, 23, 42, .10), 0 18px 48px rgba(15, 23, 42, .10);
+  --elevation-3: 0 4px 12px rgba(15, 23, 42, .12), 0 24px 72px rgba(15, 23, 42, .14);
+  --surface-highlight: inset 0 1px 0 rgba(255, 255, 255, .70);
+  --page-glow: rgba(255, 255, 255, .45);   /* faint top atmosphere on paper */
+
   /* ---- Floating reading nav (Part pages) — surface-matched dock ------------ *
    * The pill matches the ACTIVE page theme (a light dock on paper, a dark
    * cockpit dock at night) rather than inverting, so it reads as part of the
@@ -269,6 +281,13 @@
   --floatnav-line:  rgba(255, 255, 255, .10);
   --floatnav-hover: rgba(255, 255, 255, .07);
   --floatnav-edge:  rgba(52, 211, 153, .26);    /* dark-theme accent hairline */
+
+  /* ---- Elevation / depth system (dark) — lit-from-above on the night field - */
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, .32), 0 10px 28px rgba(0, 0, 0, .18);
+  --elevation-2: 0 2px 6px rgba(0, 0, 0, .36), 0 18px 48px rgba(0, 0, 0, .24);
+  --elevation-3: 0 4px 12px rgba(0, 0, 0, .42), 0 24px 72px rgba(0, 0, 0, .32);
+  --surface-highlight: inset 0 1px 0 rgba(255, 255, 255, .045);
+  --page-glow: rgba(255, 255, 255, .022);   /* soft top light source */
 
   /* ---- Feature surface — emerald edge + glow so the panel reads on dark ----- */
   --feature-edge:   rgba(52, 211, 153, .30);
