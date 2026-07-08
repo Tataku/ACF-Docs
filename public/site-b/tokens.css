@@ -140,6 +140,15 @@
   --measure-figure: 1400px; /* WIDE figures, charts, tables — they breathe past prose */
   --page-gutter:    clamp(1.25rem, 3vw, 2.25rem);  /* bounded fluid gutter (additive) */
 
+  /* ---- Unified FEATURE width ---------------------------------------------- *
+   * ONE width shared by every non-text "special" element — pull-quotes,
+   * callouts / Key Insights, card grids, charts / exhibits. It sits SLIGHTLY
+   * wider than the 66ch text column (a deliberate step-out), and uses a smaller
+   * gutter than prose so it reads a touch wider than text at EVERY viewport
+   * (never edge-to-edge). Retune the whole system by editing these two values. */
+  --measure-feature: 47rem;                        /* ~ text column + a small step-out */
+  --feature-gutter:  clamp(0.75rem, 2vw, 1.5rem);  /* < --page-gutter → always wider than text */
+
   /* ---- Shell layout: cover nav + Part-page sidebar & sidenote margin ------- *
    * Consumed by the nav bar (cover) and the reading shell (Part pages).        */
   --nav-height:     4rem;    /* cover nav bar height */

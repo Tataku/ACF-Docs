@@ -56,6 +56,21 @@ body {
 .measure-wide { max-width: calc(var(--measure-wide) + 2 * var(--page-gutter)); margin-inline: auto; padding-inline: var(--page-gutter); }
 .measure-full { max-width: calc(var(--measure-full) + 2 * var(--page-gutter)); margin-inline: auto; padding-inline: var(--page-gutter); }
 
+/* ── UNIFIED FEATURE WIDTH ──────────────────────────────────────────────────
+   ONE width for every non-text "special" element — pull-quotes, callouts /
+   Key Insights, card grids, charts / exhibits. Capped at --measure-feature and
+   centred; on narrow screens it reserves only the small --feature-gutter, so it
+   always renders SLIGHTLY wider than the text column and never edge-to-edge.
+   `.measure-feature` is the wrapper form (for grids nested one level under a
+   generic wrapper); the self-sizing specials below reference --measure-feature
+   directly in their own rules. Retune everything via the two tokens. */
+.feature-width,
+.measure-feature {
+  max-width: min(var(--measure-feature), calc(100% - 2 * var(--feature-gutter)));
+  margin-inline: auto;
+  padding-inline: 0;
+}
+
 /* Viewport continuity — open the vertical rhythm a notch on wide (1600) and
    ultrawide (2560). Prose stays capped; only rhythm + (clamped) display type
    grow. The 768 mobile line lives in the existing @media blocks below. */
@@ -154,7 +169,7 @@ body {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  max-width: var(--measure-wide);
+  max-width: min(var(--measure-feature), calc(100% - 2 * var(--feature-gutter)));   /* unified feature width */
   margin: var(--space-16) auto;
   padding: clamp(2.25rem, 5vw, 3.25rem) clamp(1.5rem, 5vw, 3rem);
   border-radius: var(--radius-card);
@@ -576,7 +591,7 @@ body {
 /* ============================================================================
    #11  CALLOUTS — three distinct variants
    ============================================================================ */
-.callout { max-width: var(--measure); margin: var(--space-12) auto; padding-inline: var(--page-gutter); }
+.callout { max-width: min(var(--measure-feature), calc(100% - 2 * var(--feature-gutter))); margin: var(--space-12) auto; padding-inline: 0; }   /* unified feature width */
 .callout-label {
   font-family: var(--font-sans);
   font-size: var(--text-xs);
@@ -2693,10 +2708,10 @@ html[data-narrating] .shell-main { padding-bottom: var(--dock-clear); }
    export chart scale (--exhibit-max), centered — it must not be trapped in the
    prose measure. The shell lane (--exhibit-col) gives it the room. */
 .exhibit.fc-live { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; overflow-x: clip;
-  max-width: min(var(--exhibit-max), calc(100% - 2 * var(--page-gutter))); margin-inline: auto; }
+  max-width: min(var(--measure-feature), calc(100% - 2 * var(--feature-gutter))); margin-inline: auto; }   /* unified feature width */
 /* New chart slots inserted into Part 2/3 (no static fallback): layout only, the
    React engine renders its own card. Same wide exhibit lane as live exhibits. */
-.fc-mount { max-width: min(var(--exhibit-max), calc(100% - 2 * var(--page-gutter))); margin: var(--space-8) auto; overflow-x: clip; }
+.fc-mount { max-width: min(var(--measure-feature), calc(100% - 2 * var(--feature-gutter))); margin: var(--space-8) auto; overflow-x: clip; }   /* unified feature width */
 
 .ex-head { margin-bottom: var(--space-3); }
 .ex-eyebrow {
