@@ -137,33 +137,55 @@ body {
 
 /* ============================================================================
    #3  PULL-QUOTE / APHORISM
+   A quiet institutional doctrine callout. The oversized quote mark is a
+   BACKGROUND ATMOSPHERE layer (::before, painted below the in-flow text) — a
+   watermark glyph, never readable punctuation. The text stays the hero and is
+   never obscured. Reusable: any <blockquote class="pull-quote"> gets the
+   treatment; wrap a key phrase in <span class="hl"> for the signature green
+   emphasis. Clipped by overflow:hidden so the glyph can bleed inside the card.
    ============================================================================ */
 .pull-quote {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   max-width: var(--measure-wide);
   margin: var(--space-16) auto;
-  padding: var(--space-12) var(--space-10);
+  padding: clamp(2.25rem, 5vw, 3.25rem) clamp(1.5rem, 5vw, 3rem);
   border-radius: var(--radius-card);
-  background: var(--feature-bg);
+  background:
+    radial-gradient(120% 100% at 14% 8%, rgba(52, 211, 153, .07), transparent 46%),
+    var(--feature-bg);
   color: var(--feature-ink);
   border: 1px solid var(--feature-edge);
   box-shadow: var(--feature-shadow);
   font-family: var(--font-serif);
   font-weight: var(--weight-normal);
-  font-size: var(--text-2xl);
+  font-size: clamp(1.5rem, 1.05rem + 1.7vw, 2.15rem);
   line-height: var(--leading-snug);
   letter-spacing: -0.01em;
   text-align: center;
   text-wrap: balance;
 }
+/* Oversized quote mark — background watermark, top-left, behind the text.
+   z-index:-1 paints it above the panel background/glow but below the in-flow
+   text, so it can never reduce legibility. Faded feature accent, low opacity.
+   Absolutely positioned → contributes no layout height (the card stays compact). */
 .pull-quote::before {
   content: '\201C';
-  display: block;
-  font-size: var(--text-4xl);
-  line-height: 0.5;
-  color: var(--feature-accent);
-  margin-bottom: var(--space-4);
+  position: absolute;
+  z-index: -1;
+  top: clamp(-0.75rem, 1vw, 0.5rem);
+  left: clamp(0.5rem, 3vw, 2rem);
+  font-size: clamp(6rem, 15vw, 12rem);
+  line-height: 0.8;
+  font-weight: var(--weight-semibold);
+  color: rgba(52, 211, 153, .10);
+  pointer-events: none;
+  user-select: none;
 }
-@media (max-width: 768px) { .pull-quote { font-size: var(--text-xl); } }
+@media (max-width: 768px) {
+  .pull-quote::before { color: rgba(52, 211, 153, .085); }
+}
 /* .hl phrase inside the dark pull-quote panel reads in the bright feature accent */
 .pull-quote .hl {
   color: var(--feature-accent);
