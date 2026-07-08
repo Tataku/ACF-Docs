@@ -2060,9 +2060,22 @@ html { scroll-padding-top: var(--space-10); }
   padding: var(--space-2);
   margin-inline: calc(-1 * var(--space-2));
   border-radius: var(--radius);
+  /* Ported from the dashboard nav-item hover: a quiet accent wash + a 2px slide
+     + a faint accent glow. The dashboard keeps bg/transform instant to avoid
+     ghost-trails in its DENSE nav; this rail has only ~6 items, so the slide is
+     transitioned smoothly for a more premium feel. */
+  transition: color var(--motion-base) var(--ease-standard),
+              background var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard),
+              transform var(--motion-base) var(--ease-emphasis);
 }
 .side-part .spnum { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-faint); }
-a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); color: var(--ink); }
+a.side-part:hover, a.side-part:focus-visible {
+  background: var(--accent-faint);
+  color: var(--ink);
+  transform: translateX(2px);
+  box-shadow: 0 0 8px rgba(52, 211, 153, .10);
+}
 .side-part.current { color: var(--ink); font-weight: var(--weight-semibold); }
 .side-part.current .spnum { color: var(--accent); }
 .side-part.pending { color: var(--ink-faint); cursor: default; }
