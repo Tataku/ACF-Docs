@@ -174,14 +174,16 @@
   /* ---- Stepper: dim for steps ahead of the reading focus (JS-driven) ------- */
   --step-dim: 0.4;
 
-  /* ---- Floating reading nav (Part pages) — inverted pill ------------------- *
-   * bg/fg ride --ink/--paper so they flip per theme for free; the translucent
-   * overlays (line/hover) are theme-specific (white over the dark light-theme
-   * pill, black over the near-white dark-theme pill — see [data-theme="dark"]). */
-  --floatnav-bg:    var(--ink);
-  --floatnav-fg:    var(--paper);
-  --floatnav-line:  rgba(255, 255, 255, .16);
-  --floatnav-hover: rgba(255, 255, 255, .10);
+  /* ---- Floating reading nav (Part pages) — surface-matched dock ------------ *
+   * The pill matches the ACTIVE page theme (a light dock on paper, a dark
+   * cockpit dock at night) rather than inverting, so it reads as part of the
+   * reading surface. fg rides --ink for legible text/icons in both themes;
+   * bg + edge are theme-specific translucent surfaces (see [data-theme="dark"]). */
+  --floatnav-bg:    rgba(251, 248, 241, .90);   /* --surface-raised, translucent */
+  --floatnav-fg:    var(--ink);
+  --floatnav-line:  rgba(0, 0, 0, .10);
+  --floatnav-hover: rgba(0, 0, 0, .05);
+  --floatnav-edge:  rgba(13, 125, 107, .26);    /* light-theme accent hairline */
 
   /* ---- Feature surface — dark emerald-accented panels for signature moments - *
    * bg/ink/accent are fixed (the surface is always dark); only edge + shadow
@@ -262,9 +264,11 @@
   --confidence-med:   #f59e0b;
   --confidence-low:   #8a929c;
 
-  /* ---- Floating reading nav — pill is now near-white, so overlays go dark - */
-  --floatnav-line:  rgba(0, 0, 0, .14);
-  --floatnav-hover: rgba(0, 0, 0, .07);
+  /* ---- Floating reading nav — dark cockpit dock, light overlays ----------- */
+  --floatnav-bg:    rgba(20, 24, 28, .92);      /* dark surface (≈ --paper) */
+  --floatnav-line:  rgba(255, 255, 255, .10);
+  --floatnav-hover: rgba(255, 255, 255, .07);
+  --floatnav-edge:  rgba(52, 211, 153, .26);    /* dark-theme accent hairline */
 
   /* ---- Feature surface — emerald edge + glow so the panel reads on dark ----- */
   --feature-edge:   rgba(52, 211, 153, .30);
