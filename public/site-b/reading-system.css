@@ -341,6 +341,9 @@ body {
   border-radius: var(--radius-card);
   padding: var(--space-5) var(--space-6);
 }
+/* Title is the card's primary element: enlarged + the theme-tuned accent green
+   (bright emerald on dark, deep teal on light paper — --accent stays legible in
+   both themes, where the fixed --feature-accent would wash out on paper). */
 .failure-modes .name {
   display: block;
   font-family: var(--font-sans);
@@ -349,20 +352,8 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--track-wider);
   line-height: 1.35;
-  color: var(--ink);
+  color: var(--accent);
   margin-bottom: var(--space-3);
-}
-/* Short accent rule above the title — a green anchor that makes the six failure
-   modes scannable, without recolouring the title text (keeps light-theme
-   legibility, where a full-accent title would be too low-contrast on paper). */
-.failure-modes .name::before {
-  content: "";
-  display: block;
-  width: 1.75rem;
-  height: 2px;
-  margin-bottom: var(--space-3);
-  border-radius: 999px;
-  background: var(--feature-accent);
 }
 .failure-modes p {
   font-family: var(--font-sans);
