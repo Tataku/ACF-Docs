@@ -174,14 +174,28 @@
   /* ---- Stepper: dim for steps ahead of the reading focus (JS-driven) ------- */
   --step-dim: 0.4;
 
-  /* ---- Floating reading nav (Part pages) — inverted pill ------------------- *
-   * bg/fg ride --ink/--paper so they flip per theme for free; the translucent
-   * overlays (line/hover) are theme-specific (white over the dark light-theme
-   * pill, black over the near-white dark-theme pill — see [data-theme="dark"]). */
-  --floatnav-bg:    var(--ink);
-  --floatnav-fg:    var(--paper);
-  --floatnav-line:  rgba(255, 255, 255, .16);
-  --floatnav-hover: rgba(255, 255, 255, .10);
+  /* ---- Elevation / depth system (light) ----------------------------------- *
+   * One tokenized highlight/shadow model, applied to the reusable raised-card
+   * families. Each elevation = a tight CONTACT shadow + a soft AMBIENT shadow;
+   * --surface-highlight is a top-edge hairline (light-from-above). Tune the
+   * whole document by editing these values — never add ad-hoc card shadows.   */
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px rgba(15, 23, 42, .08), 0 10px 28px rgba(15, 23, 42, .08);
+  --elevation-2: 0 2px 6px rgba(15, 23, 42, .10), 0 18px 48px rgba(15, 23, 42, .10);
+  --elevation-3: 0 4px 12px rgba(15, 23, 42, .12), 0 24px 72px rgba(15, 23, 42, .14);
+  --surface-highlight: inset 0 1px 0 rgba(255, 255, 255, .70);
+  --page-glow: rgba(255, 255, 255, .45);   /* faint top atmosphere on paper */
+
+  /* ---- Floating reading nav (Part pages) — surface-matched dock ------------ *
+   * The pill matches the ACTIVE page theme (a light dock on paper, a dark
+   * cockpit dock at night) rather than inverting, so it reads as part of the
+   * reading surface. fg rides --ink for legible text/icons in both themes;
+   * bg + edge are theme-specific translucent surfaces (see [data-theme="dark"]). */
+  --floatnav-bg:    rgba(251, 248, 241, .90);   /* --surface-raised, translucent */
+  --floatnav-fg:    var(--ink);
+  --floatnav-line:  rgba(0, 0, 0, .10);
+  --floatnav-hover: rgba(0, 0, 0, .05);
+  --floatnav-edge:  rgba(13, 125, 107, .26);    /* light-theme accent hairline */
 
   /* ---- Feature surface — dark emerald-accented panels for signature moments - *
    * bg/ink/accent are fixed (the surface is always dark); only edge + shadow
@@ -262,9 +276,18 @@
   --confidence-med:   #f59e0b;
   --confidence-low:   #8a929c;
 
-  /* ---- Floating reading nav — pill is now near-white, so overlays go dark - */
-  --floatnav-line:  rgba(0, 0, 0, .14);
-  --floatnav-hover: rgba(0, 0, 0, .07);
+  /* ---- Floating reading nav — dark cockpit dock, light overlays ----------- */
+  --floatnav-bg:    rgba(20, 24, 28, .92);      /* dark surface (≈ --paper) */
+  --floatnav-line:  rgba(255, 255, 255, .10);
+  --floatnav-hover: rgba(255, 255, 255, .07);
+  --floatnav-edge:  rgba(52, 211, 153, .26);    /* dark-theme accent hairline */
+
+  /* ---- Elevation / depth system (dark) — lit-from-above on the night field - */
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, .32), 0 10px 28px rgba(0, 0, 0, .18);
+  --elevation-2: 0 2px 6px rgba(0, 0, 0, .36), 0 18px 48px rgba(0, 0, 0, .24);
+  --elevation-3: 0 4px 12px rgba(0, 0, 0, .42), 0 24px 72px rgba(0, 0, 0, .32);
+  --surface-highlight: inset 0 1px 0 rgba(255, 255, 255, .045);
+  --page-glow: rgba(255, 255, 255, .022);   /* soft top light source */
 
   /* ---- Feature surface — emerald edge + glow so the panel reads on dark ----- */
   --feature-edge:   rgba(52, 211, 153, .30);

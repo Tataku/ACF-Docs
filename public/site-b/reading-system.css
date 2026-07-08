@@ -23,7 +23,13 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  /* Faint top atmosphere: a soft light source at the top of the page so content
+     doesn't sit on a flat sheet. Viewport-anchored (fixed) so it stays overhead
+     while reading; barely perceptible via the theme-scoped --page-glow. */
+  background-color: var(--paper);
+  background-image: radial-gradient(120% 70% at 50% 0%, var(--page-glow), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font-serif);
   font-optical-sizing: auto;
@@ -339,17 +345,22 @@ body {
   background: var(--surface-raised);
   border: 1px solid var(--rule);
   border-radius: var(--radius-card);
+  box-shadow: var(--surface-highlight), var(--elevation-1);
   padding: var(--space-5) var(--space-6);
 }
+/* Title is the card's primary element: enlarged + the theme-tuned accent green
+   (bright emerald on dark, deep teal on light paper — --accent stays legible in
+   both themes, where the fixed --feature-accent would wash out on paper). */
 .failure-modes .name {
   display: block;
   font-family: var(--font-sans);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--track-wider);
-  color: var(--ink);
-  margin-bottom: var(--space-2);
+  line-height: 1.35;
+  color: var(--accent);
+  margin-bottom: var(--space-3);
 }
 .failure-modes p {
   font-family: var(--font-sans);
@@ -593,15 +604,36 @@ body {
 .callout-info li { padding: var(--space-1) 0; }
 .callout-info li strong { color: var(--ink); font-weight: var(--weight-semibold); }
 
-/* KEY INSIGHT — emphatic CARD. Bordered raised surface + accent icon + title;
-   body in full --ink (an insight to read, not muted fine-print). Adapted from
-   the Supabase feature-card pattern (user reference). */
+/* KEY INSIGHT — emphatic CARD in the doctrine family (shares the pull-quote's
+   dark feature surface + atmospheric glyph language, at a smaller scale). A mono
+   label reads first; the insight body is the hero. The oversized "signal orb" is
+   a background layer (::before, painted below the copy) — never obscures reading. */
 .callout-insight {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: var(--space-6) var(--space-8);
-  background: var(--feature-bg);
+  background:
+    radial-gradient(120% 90% at 10% 0%, rgba(52, 211, 153, .08), transparent 38%),
+    var(--feature-bg);
   border: 1px solid var(--feature-edge);
   border-radius: var(--radius-card);
   box-shadow: var(--feature-shadow);
+}
+/* Signal orb — a soft blurred accent disc behind the icon corner. z-index:-1
+   keeps it under the in-flow copy; overflow:hidden clips its bleed. */
+.callout-insight::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * var(--space-4));
+  left: var(--space-4);
+  width: clamp(4rem, 9vw, 6.5rem);
+  height: clamp(4rem, 9vw, 6.5rem);
+  border-radius: 999px;
+  background: rgba(52, 211, 153, .10);
+  filter: blur(24px);
+  pointer-events: none;
 }
 .callout-insight .ci-head {
   display: flex;
@@ -617,15 +649,18 @@ body {
 }
 .callout-insight .callout-label {
   color: var(--feature-ink);
-  font-size: var(--text-md);
-  text-transform: none;
-  letter-spacing: -0.005em;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--track-wide);
   margin: 0;
 }
 .callout-insight > p {
   font-family: var(--font-serif);
-  font-size: var(--text-md);
+  font-size: clamp(1.1rem, 1.5vw, 1.28rem);
   line-height: var(--leading-normal);
+  letter-spacing: -0.01em;
   color: var(--feature-ink);
 }
 
@@ -1233,6 +1268,7 @@ body {
   background: var(--surface-raised);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
+  box-shadow: var(--surface-highlight), var(--elevation-1);
 }
 .wb-icon { width: 1.9rem; height: 1.9rem; color: var(--accent); align-self: flex-start; }
 .wb-lead {
@@ -2032,9 +2068,22 @@ html { scroll-padding-top: var(--space-10); }
   padding: var(--space-2);
   margin-inline: calc(-1 * var(--space-2));
   border-radius: var(--radius);
+  /* Ported from the dashboard nav-item hover: a quiet accent wash + a 2px slide
+     + a faint accent glow. The dashboard keeps bg/transform instant to avoid
+     ghost-trails in its DENSE nav; this rail has only ~6 items, so the slide is
+     transitioned smoothly for a more premium feel. */
+  transition: color var(--motion-base) var(--ease-standard),
+              background var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard),
+              transform var(--motion-base) var(--ease-emphasis);
 }
 .side-part .spnum { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-faint); }
-a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); color: var(--ink); }
+a.side-part:hover, a.side-part:focus-visible {
+  background: var(--accent-faint);
+  color: var(--ink);
+  transform: translateX(2px);
+  box-shadow: 0 0 8px rgba(52, 211, 153, .10);
+}
 .side-part.current { color: var(--ink); font-weight: var(--weight-semibold); }
 .side-part.current .spnum { color: var(--accent); }
 .side-part.pending { color: var(--ink-faint); cursor: default; }
@@ -2227,24 +2276,28 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   pointer-events: auto;
 }
 .floatnav:hover { transform: translateY(-3px); }
-/* Inner = the visible pill: inverted fill, elevation, and the perpetual float bob. */
+/* Inner = the visible pill: surface-matched cockpit dock, hairline accent edge,
+   elevation, and the perpetual float bob. */
 .floatnav-inner {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-2);
+  padding: var(--space-1);
   border-radius: 999px;
   background: var(--floatnav-bg);
+  border: 1px solid var(--floatnav-edge);
   color: var(--floatnav-fg);
-  box-shadow: 0 8px 22px -6px rgba(10, 14, 18, .50),
-              0 18px 44px -14px rgba(10, 14, 18, .42);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: var(--surface-highlight), var(--elevation-3);
   animation: floatnav-bob 4.6s ease-in-out infinite;
   transition: box-shadow var(--motion-slow) var(--ease-standard),
               border-radius var(--motion-base) var(--ease-emphasis);
 }
 .floatnav:hover .floatnav-inner {
   animation-play-state: paused;
-  box-shadow: 0 12px 28px -6px rgba(10, 14, 18, .55),
+  box-shadow: var(--surface-highlight),
+              0 12px 28px -6px rgba(10, 14, 18, .55),
               0 28px 64px -16px rgba(10, 14, 18, .50);
 }
 @keyframes floatnav-bob {
@@ -2256,7 +2309,7 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
    theme-aware; smooth-scrolls to top unless reduced motion is requested. */
 .floatnav-top {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 2rem; height: 2rem; flex: 0 0 auto;
+  width: 2.3rem; height: 2.3rem; flex: 0 0 auto;
   padding: 0; border: 0; border-radius: 50%;
   background: transparent; color: var(--floatnav-fg); cursor: pointer;
   transition: background var(--motion-base) var(--ease-standard);
@@ -2267,6 +2320,7 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: 2.3rem;
   padding: var(--space-2) var(--space-4);
   border-radius: 999px;
   font-family: var(--font-sans);
@@ -2291,6 +2345,7 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: 2.3rem;
   padding: var(--space-2) var(--space-4);
   border-radius: 999px;
   font-family: var(--font-sans);
@@ -2307,6 +2362,7 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
 .floatnav-prev {
   display: inline-flex;
   align-items: center;
+  min-height: 2.3rem;
   padding: var(--space-2) var(--space-4);
   border-radius: 999px;
   font-family: var(--font-sans);
@@ -2339,7 +2395,7 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
 /* The rail: a subordinate lower lip, divided from the nav row, collapsed until
    armed. The dock is position:fixed, so opening it never reflows page content. */
 .floatnav-player {
-  --fnp-track: rgba(255, 255, 255, .24);
+  --fnp-track: rgba(0, 0, 0, .14);
   --fnp-fill: 0%;
   display: flex; align-items: center; gap: var(--space-2);
   padding: 0 var(--space-2);
@@ -2350,7 +2406,7 @@ a.floatnav-next:hover, a.floatnav-next:focus-visible { background: var(--accent-
               padding var(--motion-base) var(--ease-standard),
               visibility 0s linear var(--motion-base);
 }
-[data-theme="dark"] .floatnav-player { --fnp-track: rgba(0, 0, 0, .22); }
+[data-theme="dark"] .floatnav-player { --fnp-track: rgba(255, 255, 255, .20); }
 .floatnav[data-armed] .floatnav-player {
   max-height: 3rem; opacity: 1; visibility: visible; pointer-events: auto;
   padding: 0 var(--space-2) var(--space-2);          /* snug: no divider, no top gap, rests under the nav row */
