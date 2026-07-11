@@ -14,7 +14,7 @@ The new, canonical Framework Docs are **hand-authored static HTML** in
 `ACF-Docs/public/site-b/`, styled by the agency reading system and enhanced with
 **React chart "islands."** This is where Parts 4–6 (and 7) get authored.
 
-**Current Site B coverage (2026-07-07):**
+**Current Site B coverage (2026-07-11):**
 
 | Route | Site B file | State |
 |---|---|---|
@@ -22,9 +22,14 @@ The new, canonical Framework Docs are **hand-authored static HTML** in
 | `/part-1-foundation` | `public/site-b/part-1-foundation.html` | ✅ authored |
 | `/part-1-pictures` | `public/site-b/part-1-pictures.html` | ✅ authored |
 | `/part-2-lineage-macro-thesis` | `public/site-b/part-2-lineage-macro.html` | ✅ authored |
-| `/part-3-bitcoin-convexity-backbone` | `public/site-b/part-3-bitcoin-convexity.html` | ✅ authored (6 chart islands) |
-| `/part-4-tax-architecture-roc-strategy` | `public/site-b/part-4-tax-architecture.html` | 🔨 **in progress** (shell authored; not yet routed) |
+| `/part-3-bitcoin-convexity-backbone` | `public/site-b/part-3-bitcoin-convexity.html` | ✅ authored + routed (6 chart islands, design-final; chart placement repaired 2026-07-11) |
+| `/part-4-tax-architecture-roc-strategy` | `public/site-b/part-4-tax-architecture.html` | ✅ authored + routed (3 chart islands: `p4-tax-wedge` · `p4-roc-yield` · `p4-gross-not-net`) |
 | `/part-5-…` · `/part-6-…` · `/part-7-…` | — | ⏳ **still MDX; need migration** |
+
+> **Chart status (2026-07-11):** every chart on a live reading page (Parts 1–4) is `status: implemented`
+> with an explicit `claimStack` and correct in-section placement. Remaining `needs-design-review` charts
+> (`sig-shape` S1/S2 alternate, `dl-regime-map`, `dl-tripwire-loop`) are landing/gallery-only, not on a
+> live route. Parts 5–6 charts (P5-01…05, P6-01…05) are still net-new — see §6.
 
 ## 2. How Site B works (the pattern to replicate for 4–6)
 
