@@ -698,22 +698,12 @@ const taxWedge = (() => {
 // together, so the dollar claim compounds alongside the balance. Conceptual shape.
 const p4GrossNet = (() => {
   const n = 80, rate = 0.30;
-  const bal = (t) => 1 + 11 * Math.pow(t, 1.25);   // gentle convex balance that fills the frame (today = 1x)
-  const gross = curve(0, 25, n, (t) => bal(t));
-  const net = curve(0, 25, n, (t) => bal(t) * (1 - rate));
-  return { gross, net };
+  const bal = (t) => 1 + 11 * Math.pow(t, 1.25);            // gentle convex balance that fills the frame (today = 1x)
+  const net = curve(0, 25, n, (t) => bal(t) * (1 - rate));  // the share you keep (top dual panel)
+  const claim = curve(0, 25, n, (t) => bal(t) * rate);      // the tax authority's deferred claim (bottom dual panel)
+  return { net, claim };
 })();
-
-// Part 4 · "ROC Changes the Yield" — capital redeployed from one distribution over the
-// deployment window (before basis exhaustion). Return of capital defers tax (basis
-// reduction) so the full ~11% redeploys; a taxed dividend redeploys only the after-tax
-// share (~11% × (1 − 0.238)). Conceptual shape — deferral, not elimination.
-const p4Roc = (() => {
-  const n = 60, yrs = 8;
-  const roc = curve(0, yrs, n, (t) => Math.pow(1.11, yrs * t));
-  const dividend = curve(0, yrs, n, (t) => Math.pow(1.084, yrs * t));
-  return { roc, dividend };
-})();
+// p4-roc-yield is authored as a branching FLOW diagram (no data generator needed).
 
 // ════════════════════════════════════════════════════════════════════════════
 // SPEC REGISTRY
@@ -2131,19 +2121,19 @@ export const FRAMEWORK_CHART_SPECS = [
     chartId: 'p4-gross-not-net', idx: 'P4-02', group: 'part-4', intendedPlacement: 'part-4',
     experienceRole: 'mechanism',
     claimStack: {
-      primaryClaim: 'A pre-tax balance is shared — the deferred tax compounds right alongside you',
-      visualProof: 'One compounding balance drawn as a filled stack: the owned net fills the lower region and the tax authority’s claim is the shaded band riding on top, so the claim stays a slice of every dollar as the balance grows',
-      interactionRole: 'Hover the gross line, the net line, or the claim band to see who owns which share',
-      readerAction: 'Watch the shaded tax claim grow as the balance compounds',
+      primaryClaim: 'A pre-tax balance is shared — the deferred tax compounds in step with what you keep',
+      visualProof: 'Two stacked panels over the same years: the share you keep rises on top, and the tax authority’s deferred claim rises in lockstep below it, the same shape scaled down',
+      interactionRole: 'Hover either panel to see which share it is and how it tracks the other',
+      readerAction: 'Watch the lower claim rise in step with the balance you keep above',
       caution: 'Conceptual shape at a representative blended rate; tax is deferred, not eliminated, under current law',
     },
-    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering the band ties the growing dollar claim to the compounding balance that produces it' },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a panel ties the deferred claim below to the balance it is a share of' },
     status: 'implemented', wiredPublic: false,
-    title: 'Gross Is Not Net', setupLine: 'A pre-tax balance and the deferred tax claim embedded inside it, compounding together',
+    title: 'Gross Is Not Net', setupLine: 'The share you keep and the deferred tax claim, compounding in the same step',
     claimLabel: 'PRE-TAX · JOINT CLAIM',
     frameworkClaim: 'A pre-tax balance is a joint claim between the investor and the tax authority; the deferred obligation compounds alongside the balance rather than disappearing.',
     readerTakeaway: 'Only the net is yours, and the part you owe grows as you do.',
-    chartType: 'One compounding pre-tax balance split into the owned net and the deferred tax claim, which widen together over time.',
+    chartType: 'Two stacked panels sharing one time axis: the retained net above, the deferred tax claim below, rising in lockstep.',
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
@@ -2151,53 +2141,54 @@ export const FRAMEWORK_CHART_SPECS = [
       { provider: 'IRC · 26 U.S.C. §72', label: 'Ordinary-income tax on qualified-plan and annuity withdrawals', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/72' },
     ],
     explainerHeadline: 'The tax you defer compounds with the balance you keep.',
-    explainerBody: 'A pre-tax dollar went in untaxed, so from the first day a share of the balance is a deferred claim owned by the tax authority, not by you. As the balance compounds, the dollar value of that claim compounds with it — deferral moves the tax, it does not remove it. Only the net below the band is fully yours. A Roth pays the tax upfront and removes the joint claim, converting later appreciation into fully owned capital. Ranges are illustrative and depend on income, filing status, state taxes, and the rules in force.',
+    explainerBody: 'A pre-tax dollar went in untaxed, so from the first day a share of the balance is a deferred claim owned by the tax authority, not by you. The upper panel is the share you keep; the lower panel is that claim — the same shape, scaled down, rising in the same step. Deferral moves the tax, it does not remove it, so the claim never shrinks as a share and grows in dollars right alongside you. A Roth pays the tax upfront and removes the lower panel entirely, converting later appreciation into fully owned capital. Ranges are illustrative and depend on income, filing status, state taxes, and the rules in force.',
     explainerConcept: 'Wrapper edge',
     concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' }],
-    layout: 'single',
-    ariaSummary: 'One pre-tax balance rising as it compounds, drawn as a filled stack: a solid lower region is the owned net share, and a shaded band above it, up to the gross line, is the tax authority’s claim. Both regions grow together, so the claim band stays a persistent slice of every dollar and widens in absolute terms as the balance rises.',
-    domain: { xMin: 0, xMax: 25, yMin: 0, yMax: 13 }, yUnit: '×',
+    layout: 'dual',
+    ariaSummary: 'Two stacked panels over twenty-five years sharing one time axis. The upper panel shows the retained net share rising and filled; the lower, smaller panel shows the deferred tax claim rising in exactly the same shape, scaled down. As the balance compounds, both rise together, so the claim stays a fixed share and grows in dollars alongside the net.',
+    xDomain: { xMin: 0, xMax: 25 },
     xTicks: [{ v: 0, label: 'today' }, { v: 12.5, label: '+12 yrs' }, { v: 25, label: '+25 yrs' }],
-    yTicks: [{ v: 1, label: '1×' }, { v: 5, label: '5×' }, { v: 10, label: '10×' }],
-    series: [
-      { key: 'gross', tier: 'reference', label: 'Gross balance', pts: p4GrossNet.gross },
-      { key: 'net', tier: 'primary', label: 'Net · yours', pts: p4GrossNet.net },
+    connective: 'the lower claim is already inside your balance — it compounds in step, and it was never yours',
+    panels: [
+      {
+        id: 'yours', label: 'Net · what you keep', domain: { yMin: 0, yMax: 9 }, yUnit: '×',
+        yTicks: [{ v: 1, label: '1×' }, { v: 5, label: '5×' }],
+        series: [{ key: 'net', tier: 'primary', label: 'Net · yours', pts: p4GrossNet.net }],
+        areas: [{ id: 'ownedFill', topKey: 'net', kind: 'under', opacity: 0.16, label: '' }],
+      },
+      {
+        id: 'owed', label: 'The tax authority’s claim', domain: { yMin: 0, yMax: 4 }, yUnit: '×',
+        yTicks: [{ v: 1, label: '1×' }, { v: 3, label: '3×' }],
+        series: [{ key: 'claim', tier: 'secondary', label: 'Deferred claim', pts: p4GrossNet.claim }],
+        areas: [{ id: 'claimFill', topKey: 'claim', kind: 'under', tone: 'muted', opacity: 0.16, label: '' }],
+      },
     ],
-    areas: [
-      { id: 'owned', topKey: 'net', kind: 'under', opacity: 0.15, label: '' },
-      { id: 'claim', topKey: 'gross', botKey: 'net', kind: 'gap', xFrom: 0, opacity: 0.19, label: 'the tax authority’s claim · compounds with the balance' },
-    ],
-    guides: [],
-    markers: [{ id: 'claimGrows', type: 'enso', x: 18, y: R((valueAt(p4GrossNet.gross, 18) + valueAt(p4GrossNet.net, 18)) / 2), r: 12, label: 'the claim rides on top, and grows', labelAnchor: 'end', labelDy: -12 }],
-    levels: [],
-    notes: [],
     primaryKey: 'net',
     hoverTargets: [
-      { id: 'net', kind: 'series', seriesKey: 'net', label: 'Net', name: 'Net · what you actually own', why: 'The share left after the ordinary-income tax that eventually comes due. This is the only part that is truly yours to compound.', claim: 'Only the net is yours.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'gross', kind: 'series', seriesKey: 'gross', label: 'Gross', name: 'Gross · the statement number', why: 'The headline pre-tax balance. It flatters the true position because it counts dollars the tax authority still has a claim on.', claim: 'Gross overstates what you keep.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'claim', kind: 'gap', label: 'Deferred tax claim', name: 'The deferred tax claim', why: 'Deferral moves the tax into the future; it does not remove it. As the balance compounds, the dollar claim compounds alongside it — a co-owner that grows with you.', claim: 'The tax claim compounds too.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'net', panel: 'yours', kind: 'series', seriesKey: 'net', label: 'Net', name: 'Net · what you actually own', why: 'The share left after the ordinary-income tax that eventually comes due. This is the only part that is truly yours to compound.', claim: 'Only the net is yours.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'claim', panel: 'owed', kind: 'series', seriesKey: 'claim', label: 'Claim', name: 'The deferred tax claim', why: 'Deferral moves the tax into the future; it does not remove it. The claim rises in exactly the same step as the balance — a co-owner that grows with you and was never yours.', claim: 'The claim compounds in step.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
     ],
-    mobileTapTargets: ['net', 'gross', 'claim'],
-    implementationNotes: 'Conceptual Part 4 exhibit for the "Gross Is Not Net" callout. Deliberately NOT a diverging-line wedge (distinct from p4-tax-wedge / p4-roc-yield): a filled part-of-whole STACK — net filled to baseline (under) as the owned share, plus a shaded gap band (net→gross) as the tax authority’s claim — so the reader reads proportion / ownership, not divergence. One compounding balance (7% representative), ~70% owned / ~30% deferred blended ordinary rate. Conceptual — deferral not elimination; under current law.',
+    mobileTapTargets: ['net', 'claim'],
+    implementationNotes: 'Conceptual Part 4 exhibit for the "Gross Is Not Net" callout. Authored as a stacked DUAL (distinct from p4-tax-wedge single fan and p4-roc-yield flow): retained net (accent, top panel) + the deferred tax claim (muted, bottom panel) share one time axis and rise in the same t^1.25 shape, so the claim reads as a fixed share compounding in lockstep; the connective links them. ~70% net / ~30% deferred blended ordinary rate. Conceptual — deferral not elimination; under current law.',
   },
 
   {
     chartId: 'p4-roc-yield', idx: 'P4-03', group: 'part-4', intendedPlacement: 'part-4',
-    experienceRole: 'mechanism',
+    experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'Deferring the tax through return of capital keeps more of each distribution deployed',
-      visualProof: 'A filled pool of capital kept at work under the return-of-capital line, with the taxed-dividend path running lower as a reference, marked where tax is taken each year against a single mark for the deferral held to sale',
-      interactionRole: 'Hover either line to see how much of the distribution stays deployable under each tax treatment',
-      readerAction: 'Follow the gap open as the deferred and taxed distributions redeploy',
-      caution: 'Conceptual shape; return of capital defers tax by reducing basis, it is not tax-free, and the deferral ends at basis exhaustion or sale — under current law',
+      primaryClaim: 'Return of capital defers the tax, so more of each distribution goes back to work now',
+      visualProof: 'A branching flow: one distribution forks into two tax treatments — return of capital, untaxed now, and a taxed dividend — that converge on how much capital returns to work, more of it under return of capital',
+      interactionRole: 'Hover any node to see how its tax treatment changes what redeploys',
+      readerAction: 'Follow the distribution down its two paths to what actually redeploys',
+      caution: 'Conceptual diagram; return of capital defers tax by reducing basis, it is not tax-free, and the deferral ends at basis exhaustion or sale — under current law',
     },
-    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a line ties its redeployed capital to the tax timing that produces it' },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a node ties its tax treatment to how much of the distribution redeploys' },
     status: 'implemented', wiredPublic: false,
-    title: 'ROC Changes the Yield', setupLine: 'Capital redeployed from one distribution, taxed on receipt versus deferred as return of capital',
+    title: 'ROC Changes the Yield', setupLine: 'One distribution, two tax treatments, and how much of it goes back to work',
     claimLabel: 'RETURN OF CAPITAL · DEFERRAL',
     frameworkClaim: 'A return-of-capital distribution defers tax by reducing basis, so more of each distribution stays available to redeploy than an equivalent distribution taxed on receipt.',
     readerTakeaway: 'Deferring the tax keeps more of the distribution working during the deployment years.',
-    chartType: 'Two redeployed-capital lines from one distribution stream: full return-of-capital redeployment versus after-tax dividend redeployment.',
+    chartType: 'Branching flow: one distribution forks into return-of-capital and taxed-dividend treatments, converging on redeployed capital.',
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
@@ -2205,36 +2196,30 @@ export const FRAMEWORK_CHART_SPECS = [
       { provider: 'IRS · Publication 550', label: 'Return of capital reduces cost basis rather than being taxed on receipt', role: 'verifies-concept', url: 'https://www.irs.gov/forms-pubs/about-publication-550' },
     ],
     explainerHeadline: 'Return of capital defers the tax, so more of the distribution keeps working.',
-    explainerBody: 'A return-of-capital distribution is not taxed on receipt; instead it reduces cost basis, deferring the liability to a later sale. During the deployment years that means the full distribution, roughly eleven percent in the framework’s best-in-class ballast, is available to redeploy, while an equivalent distribution taxed on receipt gives up a share, roughly the long-term capital gains and net investment income tax, every year. Deferral is not elimination: once basis is exhausted the distributions become taxable, and any deferred tax comes due at sale unless erased by a step-up in basis. Ranges are illustrative and depend on income, filing status, and the rules in force.',
+    explainerBody: 'A return-of-capital distribution is not taxed on receipt; instead it reduces cost basis, deferring the liability to a later sale. Follow one distribution down two paths: as return of capital, the full amount, roughly eleven percent in the framework’s best-in-class ballast, goes back to work now; as a taxed dividend, a share is taken first, roughly the long-term capital gains and net investment income tax, and only the remainder redeploys. Deferral is not elimination: once basis is exhausted the distributions become taxable, and any deferred tax comes due at sale unless erased by a step-up in basis. Ranges are illustrative and depend on income, filing status, and the rules in force.',
     explainerConcept: 'Return of capital',
     concepts: [{ label: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' }],
-    layout: 'single',
-    ariaSummary: 'Over eight deployment years, the return-of-capital line rises as a filled pool of capital kept at work; a lower taxed-dividend reference line rises more slowly and carries small dots at several years marking the tax taken each year, while a ring near the end marks the return-of-capital tax deferred to a later sale.',
-    domain: { xMin: 0, xMax: 8, yMin: 1, yMax: 2.6 }, yUnit: '×',
-    xTicks: [{ v: 0, label: 'yr 0' }, { v: 4, label: 'yr 4' }, { v: 8, label: 'yr 8' }],
-    yTicks: [{ v: 1, label: '1×' }, { v: 1.5, label: '1.5×' }, { v: 2, label: '2×' }],
-    series: [
-      { key: 'dividend', tier: 'reference', label: 'Taxed dividend', pts: p4Roc.dividend, labelDy: 4 },
-      { key: 'roc', tier: 'primary', label: 'Return of capital', pts: p4Roc.roc },
-    ],
-    areas: [{ id: 'working', topKey: 'roc', kind: 'under', opacity: 0.14, label: 'capital kept at work by deferring the tax' }],
-    guides: [],
-    markers: [
-      { id: 'tax1', type: 'dot', x: 2, y: R(valueAt(p4Roc.dividend, 2)), r: 2.6 },
-      { id: 'tax2', type: 'dot', x: 4, y: R(valueAt(p4Roc.dividend, 4)), r: 2.6, label: 'dividend taxed each year', labelAnchor: 'start', labelDy: 16 },
-      { id: 'tax3', type: 'dot', x: 6, y: R(valueAt(p4Roc.dividend, 6)), r: 2.6 },
-      { id: 'deferred', type: 'enso', x: 7.1, y: R(valueAt(p4Roc.roc, 7.1)), r: 12, label: 'tax deferred · due at sale', labelAnchor: 'end', labelDy: -14 },
-    ],
-    levels: [],
-    notes: [],
+    layout: 'flow',
+    ariaSummary: 'A branching flow diagram. One distribution on the left forks into two tax treatments in the middle: return of capital, not taxed now because it reduces basis, and a taxed dividend, taxed on receipt each year. Both converge on a final node — capital back to work — with more of it redeployed under return of capital.',
+    flow: {
+      stages: [
+        { id: 's1', label: 'Source', nodes: [{ id: 'dist', label: 'One distribution', sub: 'from an income position' }] },
+        { id: 's2', label: 'Tax treatment', nodes: [
+          { id: 'roc', label: 'Return of capital', sub: 'not taxed now · basis reduced' },
+          { id: 'dividend', label: 'Taxed dividend', sub: 'taxed on receipt, each year' },
+        ] },
+        { id: 's3', label: 'Redeployed now', nodes: [{ id: 'deployable', label: 'Capital back to work', sub: 'more of it under return of capital' }] },
+      ],
+    },
     primaryKey: 'roc',
     hoverTargets: [
-      { id: 'roc', kind: 'series', seriesKey: 'roc', label: 'Return of capital', name: 'Return of capital · full distribution redeployed', why: 'A return-of-capital distribution reduces basis instead of being taxed now, so the whole distribution stays available to redeploy during the deployment years.', claim: 'Deferral keeps the full distribution working.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'dividend', kind: 'series', seriesKey: 'dividend', label: 'Taxed dividend', name: 'Dividend taxed on receipt', why: 'A distribution taxed each year gives up a share to tax before it can be redeployed, so it compounds from a smaller base.', claim: 'Tax on receipt shrinks what redeploys.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'deferred', kind: 'marker', label: 'Deferred to sale', name: 'The deferred tax', why: 'Deferral moves the tax into the future; it does not remove it. The dividend is taxed every year — the dots on the lower line — while the return of capital holds the tax until a later sale, where a basis step-up can erase it.', claim: 'Deferral is a timing edge, not free money.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'dist', kind: 'node', label: 'One distribution', name: 'One distribution', why: 'A single payout from an income position — the same dollars either way. What changes is how the tax is handled.', claim: 'Same distribution, two treatments.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'roc', kind: 'node', label: 'Return of capital', name: 'Return of capital', why: 'Not taxed on receipt; it reduces cost basis instead, deferring the liability to a later sale. The full amount goes back to work now.', claim: 'The whole distribution redeploys.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'dividend', kind: 'node', label: 'Taxed dividend', name: 'Taxed dividend', why: 'Taxed on receipt every year, so a share is taken before anything can be redeployed, and it compounds from a smaller base.', claim: 'Tax on receipt shrinks what redeploys.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'deployable', kind: 'node', label: 'Capital back to work', name: 'What redeploys', why: 'The capital available to put back to work now. Deferring the tax leaves more of it — a timing edge, not free money, since the deferred tax comes due at sale unless a basis step-up erases it.', claim: 'More redeploys under deferral.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
     ],
-    mobileTapTargets: ['roc', 'dividend', 'deferred'],
-    implementationNotes: 'Conceptual Part 4 exhibit for the taxable/ROC section. Deliberately NOT a diverging-line wedge (distinct from p4-tax-wedge / p4-gross-not-net): a filled capital-at-work pool (roc under-fill) + the taxed-dividend as a lower reference line + tax-timing markers (recurring dots on the dividend = taxed each year; one ring on roc = deferred to sale), so the reader reads WHEN the tax bites. 8-year deployment window (before basis exhaustion): ROC redeploys the full ~11% distribution (tax deferred via basis reduction), the taxed dividend ~after-tax (~11% × (1 − 0.238)). Conceptual — deferral not elimination; caution + explainer state basis exhaustion + tax-at-sale; under current law.',
+    mobileTapTargets: ['dist', 'roc', 'dividend', 'deployable'],
+    implementationNotes: 'Conceptual Part 4 exhibit for the taxable/ROC section, authored as a branching FLOW (distinct from p4-tax-wedge single fan and p4-gross-not-net dual): one distribution forks into two tax treatments (return of capital = deferred, taxed dividend = taxed now) and converges on redeployed capital, more of it under ROC. Diamond structure (1→2→1) keeps connectors clean. ROC ~11% distribution, dividend ~after-tax (~11% × (1 − 0.238)). Conceptual — deferral not elimination; caution + explainer state basis exhaustion + tax-at-sale; under current law.',
   },
 ];
 
