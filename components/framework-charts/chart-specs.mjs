@@ -1244,7 +1244,14 @@ export const FRAMEWORK_CHART_SPECS = [
   /* ── PART 2 · LINEAGE & MACRO THESIS ────────────────────────────────────── */
   {
     chartId: 'p2-method-before-macro', idx: 'P2-01', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'The method stays fixed while the macro thesis rotates with each regime',
+      visualProof: 'A flat method-lineage axis through the centre with the macro-thesis line arcing above it, crossing at two regime-transition dots, then below and back above across regimes A, B and C',
+      interactionRole: 'Hover the thesis, the axis, or a transition to read what moves, what holds fixed, and what gets reassessed',
+      readerAction: 'Trace the thesis as it orbits the unmoving axis',
+      caution: 'Conceptual field from the Part 2 lineage argument; illustrative, not measured data',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Method Before Macro', setupLine: 'The method is the axis; the macro thesis rotates around it as the regime changes',
     claimLabel: 'LINEAGE · METHOD',
     frameworkClaim: 'The framework’s method persists across regimes; the macro thesis changes with the environment.',
@@ -1282,7 +1289,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p2-ruin-comes-first', idx: 'P2-02', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'You cannot compound from zero, so survival must come first',
+      visualProof: 'Two similarly volatile paths: one oscillates and recovers, the other crosses a charcoal point-of-no-return line at the ruin mark and flatlines near zero',
+      interactionRole: 'Hover the ruin mark or either path to read why matched volatility hid one twin’s fatal fragility',
+      readerAction: 'Trace the path that crosses the line and never recovers',
+      caution: 'Conceptual paths from the Part 2 lineage; illustrative, not measured',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Ruin Comes First', setupLine: 'Two portfolios, similar volatility, very different left tails',
     claimLabel: 'FRAGILITY · SURVIVAL',
     frameworkClaim: 'Fragility is nonlinear and ruin is irreversible; survival must precede optimization.',
@@ -1320,7 +1334,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p2-conviction-needs-exit', idx: 'P2-03', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'Conviction earns a large position only when an exit caps the loss',
+      visualProof: 'Two conviction-vs-size lines: the with-exits line flattens at a charcoal sizing-cap while the no-exit line climbs past it to an unbounded-risk dot',
+      interactionRole: 'Hover either line, the cap level, or the runaway dot to read how the exit sets the ceiling',
+      readerAction: 'See the with-exits line flatten where the no-exit line runs on',
+      caution: 'Conceptual sizing-versus-conviction shapes; illustrative, not measured data',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Conviction Needs an Exit', setupLine: 'Position size can scale with conviction only because an exit caps the downside',
     claimLabel: 'CONCENTRATION · DISCIPLINE',
     frameworkClaim: 'Concentration only works when paired with monitoring and disciplined exits.',
@@ -1358,7 +1379,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p2-markets-feed-back', idx: 'P2-04', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'Price does not just reflect fundamentals — it can change them',
+      visualProof: 'Two four-stage lanes — price, capital, fundamentals, validation — one reinforcing and one reversing, each arcing back to price',
+      interactionRole: 'Hover a stage to see why it drives the next, and how the same loop runs either direction',
+      readerAction: 'Trace the loop back to price',
+      caution: 'Conceptual reflexivity diagram; illustrative, not measured data',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Markets Feed Back', setupLine: 'Price changes capital behavior; capital changes fundamentals; fundamentals feed back into price.',
     claimLabel: 'REFLEXIVITY · FEEDBACK',
     frameworkClaim: 'Prices do not only reflect fundamentals; they can change fundamentals.',
@@ -1397,7 +1425,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p2-time-changes-prudence', idx: 'P2-05', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'A long enough horizon makes convex, tax-free compounding the prudent choice',
+      visualProof: 'Two compounding lines — convex tax-free and conventional — hug early then split wide in the final decades, with an ensō marker where prudence flips',
+      interactionRole: 'Hover either path or the flip mark for why it matters; the intro scales both multiples to your starting value and horizon',
+      readerAction: 'Trace the split that only opens late',
+      caution: 'Representative simulation of illustrative compounding, not a forecast or backtest',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Time Changes Prudence', setupLine: 'Conventional versus convex, tax-free compounding over a 70-year horizon',
     claimLabel: 'HORIZON · PRUDENCE',
     frameworkClaim: 'Longer horizons change what counts as prudent; tax-free compounding and convex exposure become more important.',
@@ -1435,7 +1470,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p2-capital-finds-bottleneck', idx: 'P2-06', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'Capital concentrates where structural force hits its binding constraint',
+      visualProof: 'Five descending stage-nodes — force, required buildout, bottleneck, capital pathway, investable exposure — each transforming the prior and narrowing into the emphasised final node',
+      interactionRole: 'Hover any stage to read why it matters and the claim it carries, ending where the thesis becomes ownable',
+      readerAction: 'Trace the cascade down to the ownable exposure',
+      caution: 'Conceptual capital-flow cascade; illustrative, not measured data',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Capital Finds the Bottleneck', setupLine: 'A structural force only matters where it is constrained — that is where capital lands',
     claimLabel: 'THESIS · CAPITAL FLOW',
     frameworkClaim: 'A valid thesis must map structural force into capital-flow pathways.',
@@ -1472,7 +1514,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p2-narrative-not-thesis', idx: 'P2-07', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'A narrative earns thesis status only by surviving four gates',
+      visualProof: 'An entry narrative node feeding four vertical gates — persistence, capital flow, falsifiable, conviction — with a survivor band that thins at each into the lone thesis node',
+      interactionRole: 'Hover any gate to read what it tests and which threads fall away there',
+      readerAction: 'Trace the survivor band as it thins gate by gate',
+      caution: 'Conceptual validation gauntlet from Part 2; illustrative, not measured',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Narrative Is Not Thesis', setupLine: 'A story becomes a thesis only after it survives four gates',
     claimLabel: 'THESIS · VALIDATION',
     frameworkClaim: 'A valid macro thesis needs persistence, capital-flow implications, falsifiability, and multi-year runway.',
@@ -1511,7 +1560,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p2-phase-changes-sizing', idx: 'P2-08', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'One valid thesis still wants a different size at each phase',
+      visualProof: 'A flat, high validity line above a sizing curve that starts small, peaks through the mid-cycle buildout, and trims into the late phase, with an ensō mark at the crowded trim',
+      interactionRole: 'Hover the sizing curve, the flat validity line, or the trim mark to see why size moves while validity holds',
+      readerAction: 'Trace the sizing curve rise and fall beneath the flat validity line',
+      caution: 'Conceptual sizing across a thesis lifecycle; illustrative, not measured data',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Phase Changes Sizing', setupLine: 'The same valid thesis carries different sizing early, mid, and late',
     claimLabel: 'PHASE · SIZING',
     frameworkClaim: 'A thesis can remain structurally valid while its deployment phase changes sizing and risk posture.',
@@ -1547,7 +1603,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p2-liquidity-sets-tide', idx: 'P2-09', group: 'part-2', intendedPlacement: 'part-2',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'Convex assets amplify the liquidity tide rather than merely track it',
+      visualProof: 'A gently oscillating liquidity line beside a same-rhythm convex-asset line that follows with a lag and swings far wider, plus a lead dot where liquidity turns first',
+      interactionRole: 'Hover the liquidity, asset, or lead-dot marks to see which line is the driver and which amplifies and lags',
+      readerAction: 'Trace the liquidity turn, then the asset’s wider follow',
+      caution: 'Representative shapes, not historical liquidity or Bitcoin; illustrative, not a forecast',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Liquidity Sets the Tide', setupLine: 'A representative liquidity impulse and the convex asset that amplifies it',
     claimLabel: 'LIQUIDITY · SENSITIVITY',
     frameworkClaim: 'In the current thesis, liquidity cycles shape Bitcoin and long-duration asset sensitivity.',
@@ -1585,7 +1648,14 @@ export const FRAMEWORK_CHART_SPECS = [
   /* ── PART 3 · BITCOIN — CONVEXITY BACKBONE ──────────────────────────────── */
   {
     chartId: 'p3-power-law-holds', idx: 'P3-01', group: 'part-3', intendedPlacement: 'part-3',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'Bitcoin has mostly stayed inside a rising power-law corridor',
+      visualProof: 'On a log scale, a rising power-law corridor and fair-value midline; the price line oscillates inside — twice into the euphoria band above, once below capitulation, now back within',
+      interactionRole: 'Hover the price, either band, or the current-regime dot to read what each excursion signals',
+      readerAction: 'Trace the price against the corridor bands',
+      caution: 'Representative power-law shape, not historical price; illustrative, not a forecast',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Power Law Holds', setupLine: 'Price against a log power-law corridor — central tendency, with euphoria and capitulation bands',
     claimLabel: 'VALUATION · POWER LAW',
     frameworkClaim: 'Bitcoin’s long-term path can be contextualized by power-law behavior — a regime heuristic, not a prediction.',
@@ -1639,7 +1709,7 @@ export const FRAMEWORK_CHART_SPECS = [
       caution: 'Conceptual scoring from the Part 3 comparison; illustrative, not measured',
     },
     interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a requirement row reveals the rationale behind each asset score' },
-    status: 'needs-design-review', wiredPublic: false,
+    status: 'implemented', wiredPublic: false,
     title: 'One Asset, Ten Tests', setupLine: 'The ten backbone requirements, scored across candidate reserve assets',
     claimLabel: 'BACKBONE · REQUIREMENTS',
     frameworkClaim: 'Bitcoin uniquely satisfies the framework’s requirements for a convexity backbone asset.',
@@ -1698,7 +1768,7 @@ export const FRAMEWORK_CHART_SPECS = [
       caution: 'Representative paths, not historical Bitcoin; illustrative, not a forecast',
     },
     interaction: { type: 'readerContext', gesture: 'type', conceptMatch: 'Entering a starting value scales the representative drawdown into a portfolio-impact figure' },
-    status: 'needs-design-review', wiredPublic: false,
+    status: 'implemented', wiredPublic: false,
     title: 'Volatility Is the Toll', setupLine: 'Large Bitcoin drawdowns, small total-portfolio impact at a managed allocation',
     claimLabel: 'VOLATILITY · SIZING',
     frameworkClaim: 'Bitcoin volatility is the cost of convexity; sizing decides whether it is survivable.',
@@ -1757,7 +1827,7 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     interaction: { type: 'scenario', gesture: 'choose', conceptMatch: 'Selecting a posture and a shock re-shapes the three lanes through the shock zone and updates the survival readout' },
     motionProfile: { type: 'scenarioUpdate', duration: 'calm' },
-    status: 'needs-design-review', wiredPublic: false,
+    status: 'implemented', wiredPublic: false,
     title: 'Exposure Is Not Control', setupLine: 'The question is not which posture wins cleanly. It is which one survives the path.',
     claimLabel: 'CONTROL · INTERACTIVE',
     tryThis: 'Change the shock and watch which posture stays usable.',
@@ -1809,7 +1879,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-models-must-converge', idx: 'P3-05', group: 'part-3', intendedPlacement: 'part-3',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'The valuation models earn conviction only where they converge',
+      visualProof: 'A shaded model-range envelope that starts wide, pinches to a tight waist at mid-chart convergence, then fans wide again into divergence, with the price line threading its middle and a ring marking the narrow point',
+      interactionRole: 'Hover the convergence mark or the price line to read why the envelope’s width, not the price level, is the signal',
+      readerAction: 'Watch the band pinch tight, then fan apart',
+      caution: 'Representative envelope from four models, not historical; illustrative, not a forecast',
+    },
+    status: 'implemented', wiredPublic: false,
     title: 'Models Must Converge', setupLine: 'The valuation models are most useful where they agree; divergence signals caution',
     claimLabel: 'VALUATION · CONVERGENCE',
     frameworkClaim: 'Power-law, realized price, production cost, and liquidity models are most useful when they converge.',
@@ -1863,7 +1940,7 @@ export const FRAMEWORK_CHART_SPECS = [
     interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'The price index drives the DCA unit bars by default: units = dollars ÷ price; hover adds the lean-in / slow detail' },
     motionProfile: { type: 'timeSweep', duration: 'calm', relatedElements: [['priceIndex', 'unitBars']] },
     formula: 'DCA $ ÷ price = units',
-    status: 'needs-design-review', wiredPublic: false,
+    status: 'implemented', wiredPublic: false,
     title: 'Accumulate, Don’t Trade', setupLine: 'Fixed-dollar DCA buys more units when Bitcoin is lower',
     claimLabel: 'DISCIPLINE · ACCUMULATION',
     frameworkClaim: 'Valuation models guide accumulation pacing and conviction, not selling the reserve.',
