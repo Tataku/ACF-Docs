@@ -40,7 +40,7 @@
       "diagram"
     ]
   },
-  "count": 29,
+  "count": 30,
   "charts": [
     {
       "chartId": "sig-payoff",
@@ -2348,6 +2348,85 @@
         }
       ],
       "agencyNotes": "Signature Part 4 exhibit. Three straight retained-value lines diverging from a common origin at (1×, 1×); the Roth↔pre-tax gap is the shaded wedge and is the visual claim, mirroring the p1-cpi-assets gap composition. Representative retained-fraction bands (Roth ~100% · taxable ~76% via 23.8% LTCG+NIIT · pre-tax ~68% ordinary income) — not a specific investor’s return. Restrained green thesis line on Roth; taxable and pre-tax recede."
+    },
+    {
+      "chartId": "p4-gross-not-net",
+      "idx": "P4-02",
+      "title": "Gross Is Not Net",
+      "group": "part-4",
+      "part": "part-4",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "single",
+      "dataMode": "conceptual",
+      "claimLabel": "PRE-TAX · JOINT CLAIM",
+      "primaryClaim": "A pre-tax balance is shared — the deferred tax compounds right alongside you",
+      "visualProof": "One compounding balance split by a shaded band: the owned net below, the tax authority’s deferred claim above, both widening as the balance rises",
+      "readerAction": "Watch the shaded tax claim grow as the balance compounds",
+      "readerTakeaway": "Only the net is yours, and the part you owe grows as you do.",
+      "experienceRole": "mechanism",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": "Hovering the band ties the growing dollar claim to the compounding balance that produces it"
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 4",
+          "label": "Pre-tax accounts as a joint claim; gross is not net",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-4-tax-architecture-roc-strategy"
+        },
+        {
+          "provider": "IRC · 26 U.S.C. §72",
+          "label": "Ordinary-income tax on qualified-plan and annuity withdrawals",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "https://www.law.cornell.edu/uscode/text/26/72"
+        }
+      ],
+      "agencyNotes": "Conceptual Part 4 exhibit for the \"Gross Is Not Net\" callout in the pre-tax section. One compounding balance (7% representative) split by a shaded gap into the owned net (~70%) and the deferred tax claim (~30% representative blended ordinary rate). Reuses the single + areas gap composition (same family as p4-tax-wedge / p1-cpi-assets). Conceptual — no specific investor, no promissory language; deferral not elimination; under current law."
     }
   ]
 }

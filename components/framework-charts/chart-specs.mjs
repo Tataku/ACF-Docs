@@ -693,6 +693,16 @@ const taxWedge = (() => {
   return { roth, taxable, pretax };
 })();
 
+// Part 4 · "Gross Is Not Net" — one pre-tax balance compounding, split into the owned
+// net and the deferred tax claim (representative 30% blended ordinary rate). Both grow
+// together, so the dollar claim compounds alongside the balance. Conceptual shape.
+const p4GrossNet = (() => {
+  const n = 80, yrs = 40, rate = 0.30;
+  const gross = curve(0, yrs, n, (t) => Math.pow(1.07, yrs * t));
+  const net = curve(0, yrs, n, (t) => Math.pow(1.07, yrs * t) * (1 - rate));
+  return { gross, net };
+})();
+
 // ════════════════════════════════════════════════════════════════════════════
 // SPEC REGISTRY
 // ════════════════════════════════════════════════════════════════════════════
@@ -2095,6 +2105,57 @@ export const FRAMEWORK_CHART_SPECS = [
     ],
     mobileTapTargets: ['roth', 'taxable', 'pretax'],
     implementationNotes: 'Signature Part 4 exhibit. Three straight retained-value lines diverging from a common origin at (1×, 1×); the Roth↔pre-tax gap is the shaded wedge and is the visual claim, mirroring the p1-cpi-assets gap composition. Representative retained-fraction bands (Roth ~100% · taxable ~76% via 23.8% LTCG+NIIT · pre-tax ~68% ordinary income) — not a specific investor’s return. Restrained green thesis line on Roth; taxable and pre-tax recede.',
+  },
+
+  {
+    chartId: 'p4-gross-not-net', idx: 'P4-02', group: 'part-4', intendedPlacement: 'part-4',
+    experienceRole: 'mechanism',
+    claimStack: {
+      primaryClaim: 'A pre-tax balance is shared — the deferred tax compounds right alongside you',
+      visualProof: 'One compounding balance split by a shaded band: the owned net below, the tax authority’s deferred claim above, both widening as the balance rises',
+      interactionRole: 'Hover the gross line, the net line, or the claim band to see who owns which share',
+      readerAction: 'Watch the shaded tax claim grow as the balance compounds',
+      caution: 'Conceptual shape at a representative blended rate; tax is deferred, not eliminated, under current law',
+    },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering the band ties the growing dollar claim to the compounding balance that produces it' },
+    status: 'implemented', wiredPublic: false,
+    title: 'Gross Is Not Net', setupLine: 'A pre-tax balance and the deferred tax claim embedded inside it, compounding together',
+    claimLabel: 'PRE-TAX · JOINT CLAIM',
+    frameworkClaim: 'A pre-tax balance is a joint claim between the investor and the tax authority; the deferred obligation compounds alongside the balance rather than disappearing.',
+    readerTakeaway: 'Only the net is yours, and the part you owe grows as you do.',
+    chartType: 'One compounding pre-tax balance split into the owned net and the deferred tax claim, which widen together over time.',
+    visualDataMode: 'conceptual',
+    disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 4', label: 'Pre-tax accounts as a joint claim; gross is not net', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' },
+      { provider: 'IRC · 26 U.S.C. §72', label: 'Ordinary-income tax on qualified-plan and annuity withdrawals', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/72' },
+    ],
+    explainerHeadline: 'The tax you defer compounds with the balance you keep.',
+    explainerBody: 'A pre-tax dollar went in untaxed, so from the first day a share of the balance is a deferred claim owned by the tax authority, not by you. As the balance compounds, the dollar value of that claim compounds with it — deferral moves the tax, it does not remove it. Only the net below the band is fully yours. A Roth pays the tax upfront and removes the joint claim, converting later appreciation into fully owned capital. Ranges are illustrative and depend on income, filing status, state taxes, and the rules in force.',
+    explainerConcept: 'Wrapper edge',
+    concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' }],
+    layout: 'single',
+    ariaSummary: 'One pre-tax balance compounding upward over forty years. A shaded band splits it into the owned net share below and the deferred tax claim above; as the balance rises, the dollar value of the tax claim rises proportionally with it, so the gap between gross and net widens steadily toward the right.',
+    domain: { xMin: 0, xMax: 40, yMin: 0, yMax: 16 }, yUnit: '×',
+    xTicks: [{ v: 0, label: 'yr 0' }, { v: 20, label: 'yr 20' }, { v: 40, label: 'yr 40' }],
+    yTicks: [{ v: 1, label: '1×' }, { v: 5, label: '5×' }, { v: 10, label: '10×' }, { v: 15, label: '15×' }],
+    series: [
+      { key: 'gross', tier: 'reference', label: 'Gross balance', pts: p4GrossNet.gross },
+      { key: 'net', tier: 'primary', label: 'Net · yours', pts: p4GrossNet.net },
+    ],
+    areas: [{ id: 'claim', topKey: 'gross', botKey: 'net', kind: 'gap', xFrom: 0, label: 'deferred tax claim · compounds with the balance' }],
+    guides: [],
+    markers: [],
+    levels: [],
+    notes: [],
+    primaryKey: 'net',
+    hoverTargets: [
+      { id: 'net', kind: 'series', seriesKey: 'net', label: 'Net', name: 'Net · what you actually own', why: 'The share left after the ordinary-income tax that eventually comes due. This is the only part that is truly yours to compound.', claim: 'Only the net is yours.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'gross', kind: 'series', seriesKey: 'gross', label: 'Gross', name: 'Gross · the statement number', why: 'The headline pre-tax balance. It flatters the true position because it counts dollars the tax authority still has a claim on.', claim: 'Gross overstates what you keep.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'claim', kind: 'gap', label: 'Deferred tax claim', name: 'The deferred tax claim', why: 'Deferral moves the tax into the future; it does not remove it. As the balance compounds, the dollar claim compounds alongside it — a co-owner that grows with you.', claim: 'The tax claim compounds too.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+    ],
+    mobileTapTargets: ['net', 'gross', 'claim'],
+    implementationNotes: 'Conceptual Part 4 exhibit for the "Gross Is Not Net" callout in the pre-tax section. One compounding balance (7% representative) split by a shaded gap into the owned net (~70%) and the deferred tax claim (~30% representative blended ordinary rate). Reuses the single + areas gap composition (same family as p4-tax-wedge / p1-cpi-assets). Conceptual — no specific investor, no promissory language; deferral not elimination; under current law.',
   },
 ];
 
