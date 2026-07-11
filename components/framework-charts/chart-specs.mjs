@@ -703,6 +703,17 @@ const p4GrossNet = (() => {
   return { gross, net };
 })();
 
+// Part 4 · "ROC Changes the Yield" — capital redeployed from one distribution over the
+// deployment window (before basis exhaustion). Return of capital defers tax (basis
+// reduction) so the full ~11% redeploys; a taxed dividend redeploys only the after-tax
+// share (~11% × (1 − 0.238)). Conceptual shape — deferral, not elimination.
+const p4Roc = (() => {
+  const n = 60, yrs = 8;
+  const roc = curve(0, yrs, n, (t) => Math.pow(1.11, yrs * t));
+  const dividend = curve(0, yrs, n, (t) => Math.pow(1.084, yrs * t));
+  return { roc, dividend };
+})();
+
 // ════════════════════════════════════════════════════════════════════════════
 // SPEC REGISTRY
 // ════════════════════════════════════════════════════════════════════════════
@@ -2156,6 +2167,57 @@ export const FRAMEWORK_CHART_SPECS = [
     ],
     mobileTapTargets: ['net', 'gross', 'claim'],
     implementationNotes: 'Conceptual Part 4 exhibit for the "Gross Is Not Net" callout in the pre-tax section. One compounding balance (7% representative) split by a shaded gap into the owned net (~70%) and the deferred tax claim (~30% representative blended ordinary rate). Reuses the single + areas gap composition (same family as p4-tax-wedge / p1-cpi-assets). Conceptual — no specific investor, no promissory language; deferral not elimination; under current law.',
+  },
+
+  {
+    chartId: 'p4-roc-yield', idx: 'P4-03', group: 'part-4', intendedPlacement: 'part-4',
+    experienceRole: 'mechanism',
+    claimStack: {
+      primaryClaim: 'Deferring the tax through return of capital keeps more of each distribution deployed',
+      visualProof: 'Two redeployed-capital lines from one distribution: the return-of-capital line keeps the whole distribution at work while the taxed-dividend line redeploys only the after-tax share and falls behind',
+      interactionRole: 'Hover either line to see how much of the distribution stays deployable under each tax treatment',
+      readerAction: 'Follow the gap open as the deferred and taxed distributions redeploy',
+      caution: 'Conceptual shape; return of capital defers tax by reducing basis, it is not tax-free, and the deferral ends at basis exhaustion or sale — under current law',
+    },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a line ties its redeployed capital to the tax timing that produces it' },
+    status: 'implemented', wiredPublic: false,
+    title: 'ROC Changes the Yield', setupLine: 'Capital redeployed from one distribution, taxed on receipt versus deferred as return of capital',
+    claimLabel: 'RETURN OF CAPITAL · DEFERRAL',
+    frameworkClaim: 'A return-of-capital distribution defers tax by reducing basis, so more of each distribution stays available to redeploy than an equivalent distribution taxed on receipt.',
+    readerTakeaway: 'Deferring the tax keeps more of the distribution working during the deployment years.',
+    chartType: 'Two redeployed-capital lines from one distribution stream: full return-of-capital redeployment versus after-tax dividend redeployment.',
+    visualDataMode: 'conceptual',
+    disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 4', label: 'Return-of-capital ballast; basis reduction defers the liability', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' },
+      { provider: 'IRS · Publication 550', label: 'Return of capital reduces cost basis rather than being taxed on receipt', role: 'verifies-concept', url: 'https://www.irs.gov/forms-pubs/about-publication-550' },
+    ],
+    explainerHeadline: 'Return of capital defers the tax, so more of the distribution keeps working.',
+    explainerBody: 'A return-of-capital distribution is not taxed on receipt; instead it reduces cost basis, deferring the liability to a later sale. During the deployment years that means the full distribution, roughly eleven percent in the framework’s best-in-class ballast, is available to redeploy, while an equivalent distribution taxed on receipt gives up a share, roughly the long-term capital gains and net investment income tax, every year. Deferral is not elimination: once basis is exhausted the distributions become taxable, and any deferred tax comes due at sale unless erased by a step-up in basis. Ranges are illustrative and depend on income, filing status, and the rules in force.',
+    explainerConcept: 'Return of capital',
+    concepts: [{ label: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' }],
+    layout: 'single',
+    ariaSummary: 'Two lines rising from a common origin over eight deployment years. The return-of-capital line redeploys the full distribution and rises faster; the taxed-dividend line redeploys only the after-tax share and rises more slowly, so a gap opens between them toward the right.',
+    domain: { xMin: 0, xMax: 8, yMin: 1, yMax: 2.6 }, yUnit: '×',
+    xTicks: [{ v: 0, label: 'yr 0' }, { v: 4, label: 'yr 4' }, { v: 8, label: 'yr 8' }],
+    yTicks: [{ v: 1, label: '1×' }, { v: 1.5, label: '1.5×' }, { v: 2, label: '2×' }],
+    series: [
+      { key: 'dividend', tier: 'reference', label: 'Taxed dividend', pts: p4Roc.dividend, labelDy: 4 },
+      { key: 'roc', tier: 'primary', label: 'Return of capital', pts: p4Roc.roc },
+    ],
+    areas: [{ id: 'deferral', topKey: 'roc', botKey: 'dividend', kind: 'gap', xFrom: 0, label: 'capital kept working by deferring the tax' }],
+    guides: [],
+    markers: [],
+    levels: [],
+    notes: [],
+    primaryKey: 'roc',
+    hoverTargets: [
+      { id: 'roc', kind: 'series', seriesKey: 'roc', label: 'Return of capital', name: 'Return of capital · full distribution redeployed', why: 'A return-of-capital distribution reduces basis instead of being taxed now, so the whole distribution stays available to redeploy during the deployment years.', claim: 'Deferral keeps the full distribution working.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'dividend', kind: 'series', seriesKey: 'dividend', label: 'Taxed dividend', name: 'Dividend taxed on receipt', why: 'A distribution taxed each year gives up a share to tax before it can be redeployed, so it compounds from a smaller base.', claim: 'Tax on receipt shrinks what redeploys.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'deferral', kind: 'gap', label: 'Deferral advantage', name: 'The deferral advantage', why: 'The capital kept at work by deferring the tax. It is a timing advantage, not free money: the deferred tax comes due at sale unless erased by a basis step-up.', claim: 'The gap is deferral, not elimination.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
+    ],
+    mobileTapTargets: ['roc', 'dividend', 'deferral'],
+    implementationNotes: 'Conceptual Part 4 exhibit for the taxable/ROC section. Two redeployed-capital lines over an 8-year deployment window (before basis exhaustion): ROC redeploys the full ~11% distribution (tax deferred via basis reduction), the taxed dividend redeploys ~after-tax (~11% × (1 − 0.238)). Reuses the single + areas gap composition. Conceptual — deferral not elimination; the caution + explainer state basis exhaustion + tax-at-sale; under current law.',
   },
 ];
 

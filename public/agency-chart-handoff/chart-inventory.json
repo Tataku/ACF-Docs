@@ -40,7 +40,7 @@
       "diagram"
     ]
   },
-  "count": 30,
+  "count": 31,
   "charts": [
     {
       "chartId": "sig-payoff",
@@ -2427,6 +2427,85 @@
         }
       ],
       "agencyNotes": "Conceptual Part 4 exhibit for the \"Gross Is Not Net\" callout in the pre-tax section. One compounding balance (7% representative) split by a shaded gap into the owned net (~70%) and the deferred tax claim (~30% representative blended ordinary rate). Reuses the single + areas gap composition (same family as p4-tax-wedge / p1-cpi-assets). Conceptual — no specific investor, no promissory language; deferral not elimination; under current law."
+    },
+    {
+      "chartId": "p4-roc-yield",
+      "idx": "P4-03",
+      "title": "ROC Changes the Yield",
+      "group": "part-4",
+      "part": "part-4",
+      "status": "implemented",
+      "wiredPublic": false,
+      "layout": "single",
+      "dataMode": "conceptual",
+      "claimLabel": "RETURN OF CAPITAL · DEFERRAL",
+      "primaryClaim": "Deferring the tax through return of capital keeps more of each distribution deployed",
+      "visualProof": "Two redeployed-capital lines from one distribution: the return-of-capital line keeps the whole distribution at work while the taxed-dividend line redeploys only the after-tax share and falls behind",
+      "readerAction": "Follow the gap open as the deferred and taxed distributions redeploy",
+      "readerTakeaway": "Deferring the tax keeps more of the distribution working during the deployment years.",
+      "experienceRole": "mechanism",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": "Hovering a line ties its redeployed capital to the tax timing that produces it"
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 4",
+          "label": "Return-of-capital ballast; basis reduction defers the liability",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-4-tax-architecture-roc-strategy"
+        },
+        {
+          "provider": "IRS · Publication 550",
+          "label": "Return of capital reduces cost basis rather than being taxed on receipt",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "https://www.irs.gov/forms-pubs/about-publication-550"
+        }
+      ],
+      "agencyNotes": "Conceptual Part 4 exhibit for the taxable/ROC section. Two redeployed-capital lines over an 8-year deployment window (before basis exhaustion): ROC redeploys the full ~11% distribution (tax deferred via basis reduction), the taxed dividend redeploys ~after-tax (~11% × (1 − 0.238)). Reuses the single + areas gap composition. Conceptual — deferral not elimination; the caution + explainer state basis exhaustion + tax-at-sale; under current law."
     }
   ]
 }
