@@ -722,7 +722,15 @@ export const FRAMEWORK_CHART_SPECS = [
   /* ── SIGNATURE / REUSABLE ──────────────────────────────────────────────── */
   {
     chartId: 'sig-payoff', idx: 'S1', group: 'signature', intendedPlacement: 'both',
-    status: 'needs-design-review', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'Cap the left tail, leave the right tail free to run',
+      visualProof: 'The ACF curve flattens to a defined-downside floor on the left and bends upward past breakeven, pulling away from a straight symmetric reference line toward the asymmetric-upside mark',
+      interactionRole: 'Hover the floor, the breakeven, or the upside mark to see where the shape caps loss and where it opens up',
+      readerAction: 'Compare the capped left against the open right',
+      caution: 'Conceptual payoff shape; illustrative, not a prediction or a specific return',
+    },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering the floor and the upside mark contrasts the capped loss with the open gain' },
+    status: 'implemented', wiredPublic: false,
     title: 'Shape the Payoff', setupLine:'The payoff shape the whole framework is built to produce',
     claimLabel: 'PAYOFF SHAPE · SIGNATURE',
     frameworkClaim: 'ACF shapes exposure: the left side is capped, the right side is left free to run.',

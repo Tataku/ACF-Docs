@@ -48,14 +48,14 @@
       "title": "Shape the Payoff",
       "group": "signature",
       "part": "both",
-      "status": "needs-design-review",
+      "status": "implemented",
       "wiredPublic": false,
       "layout": "single",
       "dataMode": "conceptual",
       "claimLabel": "PAYOFF SHAPE · SIGNATURE",
-      "primaryClaim": "ACF shapes exposure: the left side is capped, the right side is left free to run.",
-      "visualProof": "Conceptual payoff curve vs a symmetric reference line.",
-      "readerAction": null,
+      "primaryClaim": "Cap the left tail, leave the right tail free to run",
+      "visualProof": "The ACF curve flattens to a defined-downside floor on the left and bends upward past breakeven, pulling away from a straight symmetric reference line toward the asymmetric-upside mark",
+      "readerAction": "Compare the capped left against the open right",
       "readerTakeaway": "Survive the left tail; stay convex on the right tail.",
       "experienceRole": "evidence",
       "storyBeats": [
@@ -78,7 +78,7 @@
       "interaction": {
         "type": "hover",
         "gesture": "hover",
-        "conceptMatch": null
+        "conceptMatch": "Hovering the floor and the upside mark contrasts the capped loss with the open gain"
       },
       "motionProfile": {
         "type": "timeSweep",
