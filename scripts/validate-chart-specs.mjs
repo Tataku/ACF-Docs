@@ -117,7 +117,7 @@ for (const s of FRAMEWORK_CHART_SPECS) {
       : s.layout === 'loop' ? (s.loop.nodes || []).map((n) => n.id)
         : s.layout === 'systemLoop' ? (s.systemLoop.nodes || []).map((n) => n.id)
           : s.layout === 'governanceLoop' ? (s.governanceLoop.nodes || []).map((n) => n.id)
-          : s.layout === 'feedbackLoop' ? [...new Set((s.feedbackLoop.lanes || []).flatMap((l) => l.nodes.map((n) => n.stage)))]
+          : s.layout === 'feedbackLoop' ? (s.feedbackLoop.stations || []).map((n) => n.id)
           : s.layout === 'bridge' ? (s.bridge.stages || []).map((n) => n.id)
             : s.layout === 'gate' ? (s.gate.nodes || []).map((n) => n.id)
               : s.layout === 'scorecard' ? (s.scorecard.requirements || []).map((r) => r.id)

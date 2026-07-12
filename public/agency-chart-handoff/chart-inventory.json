@@ -1211,7 +1211,7 @@
       "dataMode": "conceptual",
       "claimLabel": "REFLEXIVITY · FEEDBACK",
       "primaryClaim": "Price does not just reflect fundamentals — it can change them",
-      "visualProof": "Two four-stage lanes — price, capital, fundamentals, validation — one reinforcing and one reversing, each arcing back to price",
+      "visualProof": "One four-station spine — price, capital, fundamentals, validation — where each link reads two ways at once (reinforcing above the axis, reversing below) and a return arc closes validation back to price",
       "readerAction": "Trace the loop back to price",
       "readerTakeaway": "Price is an input, not just an output.",
       "experienceRole": "diagram",
@@ -1268,7 +1268,7 @@
           "url": "/part-2-lineage-macro-thesis"
         }
       ],
-      "agencyNotes": "feedbackLoop layout (additive primitive; NOT the systemLoop ring, which is reserved for true circular systems). Two lanes share one mechanism — reinforcing (accent, arrows thicken) and reversing (stress, arrows thin) — each looping back to price. Teaches reflexivity as causal feedback, two directions, at a glance."
+      "agencyNotes": "feedbackLoop layout, redesigned to a single spine (was two mirrored lanes). Four stations on one axis; every forward link carries both regimes at once — reinforcing above (accent), reversing below (stress) — and a prominent return arc closes validation → price. Halves the redundancy of the old two-lane form and foregrounds the loop itself: price is an input, not just an output. Not the systemLoop ring (an earlier, superseded concept)."
     },
     {
       "chartId": "p2-time-changes-prudence",
