@@ -457,6 +457,9 @@ body {
   font-weight: var(--weight-semibold);
 }
 .compare .yes { color: var(--accent); font-weight: var(--weight-semibold); }
+/* Primary (emphasised) column sits on the --accent-faint tint, which drops --accent
+   below AA in light theme; use the deeper --accent-link (matches the column default). */
+.compare .col-primary.yes { color: var(--accent-link); }
 .compare .partial { color: var(--ink-faint); }
 .compare .no { color: var(--ink-faint); opacity: 0.45; }
 .compare tfoot th, .compare tfoot td {
@@ -684,6 +687,7 @@ body {
   border: 1px solid var(--feature-edge);
   border-radius: var(--radius-card);
   box-shadow: var(--feature-shadow);
+  color: var(--feature-ink); /* self-consistent light ink on the always-dark inverted panel (both themes) */
 }
 /* Signal orb — a soft blurred accent disc behind the icon corner. z-index:-1
    keeps it under the in-flow copy; overflow:hidden clips its bleed. */
