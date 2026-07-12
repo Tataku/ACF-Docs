@@ -175,25 +175,22 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(allSeg.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a laneBar segment`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else if (s.layout === 'feedbackLoop') {
-    // reflexivity as a horizontal figure-eight racetrack: two loops of stage cards around a shared PRICE hub
+    // reflexivity as two mirrored loops that share three central mechanism cards
     const fl = s.feedbackLoop;
-    ok(fl && fl.shared && fl.shared.id, `${w} feedbackLoop needs a shared hub stage`);
     ok(fl && Array.isArray(fl.loops) && fl.loops.length === 2, `${w} feedbackLoop needs exactly 2 loops`);
     const loops = fl.loops || [];
-    loops.forEach((lp, li) => ok(Array.isArray(lp.nodes) && lp.nodes.length === 5, `${w} feedbackLoop loop ${li} needs exactly 5 stage cards`));
-    const seq = (loops[0]?.nodes || []).map((n) => n.id);
-    // the first card in each loop is the price state and must reuse the shared hub id
-    ok(seq[0] === fl.shared?.id, `${w} feedbackLoop first card must reuse the shared hub id (${fl.shared?.id})`);
-    // every loop must share the same ordered card ids (a hover lights the stage in both loops)
-    loops.forEach((lp, li) => ok(JSON.stringify((lp.nodes || []).map((n) => n.id)) === JSON.stringify(seq), `${w} feedbackLoop loop ${li} card ids must match loop 0`));
-    const stageIds = [...new Set(seq)];   // price appears once as the shared hub + per-loop state card
-    ok(stageIds.length === seq.length, `${w} feedbackLoop has duplicate non-price stage ids`);
-    ok(s.primaryKey === fl.shared?.id, `${w} primaryKey ${s.primaryKey} must be the shared feedbackLoop hub`);
+    loops.forEach((lp, li) => ok(Array.isArray(lp.states) && lp.states.length === 4, `${w} feedbackLoop loop ${li} needs exactly 4 states`));
+    const seq = (loops[0]?.states || []).map((n) => n.id);
+    ok(new Set(seq).size === seq.length, `${w} feedbackLoop has duplicate state ids`);
+    // both loops must share the same ordered state ids (a hover lights the state in both loops)
+    loops.forEach((lp, li) => ok(JSON.stringify((lp.states || []).map((n) => n.id)) === JSON.stringify(seq), `${w} feedbackLoop loop ${li} state ids must match loop 0`));
+    // three shared mechanism cards, each pinned to a row
+    ok(Array.isArray(fl.mechanisms) && fl.mechanisms.length === 3, `${w} feedbackLoop needs exactly 3 mechanisms`);
+    (fl.mechanisms || []).forEach((m) => ok(m.id && m.title && ['top', 'mid', 'bot'].includes(m.row), `${w} feedbackLoop mechanism needs id, title, and row in {top,mid,bot}`));
+    ok(seq.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} is not a feedbackLoop state`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
-    // every stage id needs a hover target
-    stageIds.forEach((id) => ok(s.hoverTargets.some((t) => t.id === id), `${w} feedbackLoop stage ${id} has no hover target`));
-    // micro-explainer anchors must reference real stage ids
-    loops.forEach((lp, li) => (lp.micro || []).forEach((mi) => ok(seq.includes(mi.anchor), `${w} feedbackLoop loop ${li} micro anchor ${mi.anchor} is not a stage`)));
+    // every state id needs a hover target
+    seq.forEach((id) => ok(s.hoverTargets.some((t) => t.id === id), `${w} feedbackLoop state ${id} has no hover target`));
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);
