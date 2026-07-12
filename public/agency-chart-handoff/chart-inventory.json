@@ -52,7 +52,7 @@
       "hierarchy"
     ]
   },
-  "count": 31,
+  "count": 30,
   "charts": [
     {
       "chartId": "sig-payoff",
@@ -1743,77 +1743,6 @@
         }
       ],
       "agencyNotes": "Signature Part 3 visual. Baked in log space (y = log10 price; ticks are decades) so the corridor reads straight and calm. Representative shape — production can wire a real log-log fit behind the same spec. Restrained green thesis line, no orange/neon."
-    },
-    {
-      "chartId": "p3-ten-tests",
-      "idx": "P3-02",
-      "title": "One Asset, Ten Tests",
-      "group": "part-3",
-      "part": "part-3",
-      "status": "implemented",
-      "wiredPublic": false,
-      "layout": "scorecard",
-      "dataMode": "conceptual",
-      "claimLabel": "BACKBONE · REQUIREMENTS",
-      "primaryClaim": "Only Bitcoin clears all ten backbone requirements at once",
-      "visualProof": "A requirement × asset matrix with shape-coded meet/partial/fail glyphs and a 10/10 column",
-      "readerAction": "Scan the column that clears every row",
-      "readerTakeaway": "No alternative clears all ten at once.",
-      "experienceRole": "matrix",
-      "visualRelationship": "matrix",
-      "storyBeats": [
-        {
-          "kind": "context",
-          "label": "Establish the backdrop",
-          "timing": "early"
-        },
-        {
-          "kind": "mechanism",
-          "label": "Reveal the mechanism",
-          "timing": "middle"
-        },
-        {
-          "kind": "consequence",
-          "label": "Resolve the takeaway",
-          "timing": "late"
-        }
-      ],
-      "interaction": {
-        "type": "hover",
-        "gesture": "hover",
-        "conceptMatch": "Hovering a requirement row reveals the rationale behind each asset score"
-      },
-      "motionProfile": {
-        "type": "rowSweep",
-        "duration": "calm"
-      },
-      "motionTiming": {
-        "sweepMs": 1500,
-        "fastMs": 480,
-        "mediumMs": 900,
-        "staggerMs": 90
-      },
-      "backgroundRoles": [],
-      "mobileBehavior": {
-        "interaction": "scroll-x",
-        "chartHeight": "auto",
-        "note": "Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable."
-      },
-      "tryThis": null,
-      "tryThisMobile": null,
-      "readerContext": null,
-      "disclosureMode": "conceptual",
-      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
-      "sources": [
-        {
-          "provider": "ACF · Part 3",
-          "label": "Backbone requirements and asset comparison",
-          "seriesId": null,
-          "role": "verifies-concept",
-          "url": "/part-3-bitcoin-convexity-backbone"
-        }
-      ],
-      "agencyNotes": "New scorecard primitive: requirement rows × asset columns, quiet meet/partial/fail glyphs (shape-coded, not colour-only), Bitcoin column emphasised. Scores and aggregates taken from the Part 3 comparison table."
     },
     {
       "chartId": "p3-volatility-is-the-toll",

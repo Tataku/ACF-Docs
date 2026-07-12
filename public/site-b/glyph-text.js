@@ -1,16 +1,26 @@
 /* ============================================================================
    ACF GLYPH-TEXT — contained "decode / crystallize" system-activation effect
    ----------------------------------------------------------------------------
-   Progressive enhancement for small, FIXED-DIMENSION label surfaces — the
-   framework "signal" stamp near the top of each live Part page. Dependency-free,
-   no build step. A signal resolves left -> right out of a pool of monospace
-   glyphs over a single requestAnimationFrame pass, then settles to clean static
-   text. Plays once per element. No Matrix rain, no looping.
+   Progressive enhancement for small, FIXED-DIMENSION label surfaces.
+   Dependency-free, no build step. A signal resolves left -> right out of a pool
+   of monospace glyphs over a single requestAnimationFrame pass, then settles to
+   clean static text. Plays once per element. No Matrix rain, no looping.
+
+   TWO approved surfaces (both small, both green, both FIXED-DIMENSION):
+     1. The framework "signal" stamp near the top of each live Part page
+        (Part 1's "Manifesto" eyebrow is the reference instance).
+     2. The green section-eyebrow signal labels that open each main reading
+        subsection across the live Part pages — markup
+        <p class="section-eyebrow section-signal" data-glyph-text>. This is an
+        INTENTIONAL second use: the eyebrow is the same small, monospace-boxed
+        green label type as the framework stamp, so the decode reads as the same
+        calm "system activation," not a new heading style.
 
    This is a RARE "system activation" treatment, not a heading style. It is used
    ONLY on elements explicitly marked [data-glyph-text]. It is never applied to
-   the live <h1>/<h2>/<h3> headings, chart/exhibit titles, the table of contents,
-   body copy, citations, table labels, or any analytics/data surface.
+   the live <h1>/<h2>/<h3> headings, chart/exhibit titles (including ex-eyebrow),
+   the table of contents, navigation, body copy, citations, table labels, or any
+   analytics/data surface.
 
    WHY a dedicated surface (and NOT the live headings): titles are large,
    proportional display type in live layout — scrambling them resized the

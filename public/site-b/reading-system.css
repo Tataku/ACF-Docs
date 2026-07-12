@@ -466,6 +466,56 @@ body {
   color: var(--ink);
   padding-top: var(--space-4);
 }
+/* Mobile: the six-column matrix stops scrolling sideways and stacks into one
+   card per requirement, with each asset labelled inline — the comparison stays
+   scannable without a horizontal swipe. Asset labels are injected by column
+   position, so no per-cell markup is needed; row-header scope is preserved. */
+@media (max-width: 560px) {
+  .compare { overflow-x: visible; -webkit-overflow-scrolling: auto; }
+  .compare table,
+  .compare tbody,
+  .compare tfoot,
+  .compare tr,
+  .compare tbody th,
+  .compare tfoot th,
+  .compare td { display: block; width: auto; }
+  .compare thead {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .compare tbody tr, .compare tfoot tr {
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-card);
+    background: var(--surface-raised);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  .compare tfoot tr { border-color: var(--accent-faint); }
+  .compare tbody th, .compare tfoot th {
+    position: static; min-width: 0; z-index: auto;
+    background: transparent; border-right: none;
+    border-bottom: 1px solid var(--rule-faint);
+    padding: 0 0 var(--space-2); margin-bottom: var(--space-2);
+    font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--ink);
+  }
+  .compare td {
+    display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4);
+    text-align: right; white-space: normal; border-bottom: none;
+    padding: var(--space-1) 0; font-size: var(--text-sm);
+  }
+  .compare td::before {
+    font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--weight-regular);
+    letter-spacing: 0; text-transform: none; color: var(--ink-muted); text-align: left;
+  }
+  .compare tbody td:nth-of-type(1)::before, .compare tfoot td:nth-of-type(1)::before { content: 'Bitcoin'; }
+  .compare tbody td:nth-of-type(2)::before, .compare tfoot td:nth-of-type(2)::before { content: 'Gold'; }
+  .compare tbody td:nth-of-type(3)::before, .compare tfoot td:nth-of-type(3)::before { content: 'Real Estate'; }
+  .compare tbody td:nth-of-type(4)::before, .compare tfoot td:nth-of-type(4)::before { content: 'Commodities'; }
+  .compare tbody td:nth-of-type(5)::before, .compare tfoot td:nth-of-type(5)::before { content: 'S&P 500'; }
+  .compare .col-primary { background: transparent; color: inherit; }
+  .compare tbody td.col-primary::before,
+  .compare tfoot td.col-primary::before { color: var(--accent-link); font-weight: var(--weight-medium); }
+}
 .compare-key {
   max-width: var(--measure-figure);
   margin: calc(-1 * var(--space-8)) auto var(--space-12);
