@@ -104,10 +104,32 @@ validator delegates multi-lane integrity to `validateMultiLaneSpec`. So the docs
 engine is already on the shared contract; the dashboard adoption is a drop-in of the
 same two functions behind its own renderer.
 
+## Sharing mechanism — copy-with-sync (owner decision)
+
+The cross-repo sharing mechanism is **(c) copy-with-a-sync-script** (owner
+decision, July 2026 — see `/CHART_ENGINE_UNIFICATION_PROPOSAL_v1.md` §6), with
+**ACF-Docs as the canonical home**. The tool is `scripts/sync-chart-foundation.mjs`:
+
+```bash
+npm run sync:chart-foundation -- --dest <consumer-dir>            # copy the bricks
+npm run sync:chart-foundation -- --dest <consumer-dir> --check    # drift guard (exit 1)
+```
+
+- Every synced `.mjs` module is stamped with an `AUTO-SYNCED … DO NOT EDIT`
+  banner naming this directory as the place to edit, plus a
+  `chart-foundation.manifest.json` recording the source commit and content hashes.
+- `--check` recomputes what a fresh sync would write from the *current* source
+  and compares byte-for-byte (ignoring the banner's commit stamp): a consumer-side
+  manual edit **or** a canonical source that moved forward both report as drift —
+  usable as a consumer-side CI guard.
+- The destination is always passed explicitly. Nothing is hardcoded, and running
+  the sync **into ACFDashboard remains an owner-gated slice in that repo** — this
+  script only makes the mechanism real on the canonical side.
+
 ## Roadmap (owner-gated, cross-repo)
 
 Phase B/C of the proposal adds the remaining shared modules here (token contract,
 hover/inspect, scales, formatter facade, reveal motion), sourced largely from
 ACFDashboard's already-built-but-under-adopted `shared/chartViz` + `chartInteraction`
 + `lib/charts` + `shared/formatters.ts`. Nothing in ACFDashboard is touched until the
-sharing mechanism and canonical home are chosen.
+remaining owner decisions land (adoption slice + review ownership).

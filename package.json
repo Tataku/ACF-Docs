@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test:chart-core": "node --test components/framework-charts/chart-core/tests/*.test.mjs",
+    "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
     "validate:charts": "node scripts/validate-chart-specs.mjs",
     "build:inventory": "node scripts/build-chart-inventory.mjs",
     "audit:chart-experience": "node scripts/audit-chart-experience.mjs",
