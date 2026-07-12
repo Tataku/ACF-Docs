@@ -175,21 +175,25 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(allSeg.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a laneBar segment`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else if (s.layout === 'feedbackLoop') {
-    // reflexivity as a figure-eight: two circular flows tangent at a shared stage, sharing satellite ids
+    // reflexivity as a horizontal figure-eight racetrack: two loops of stage cards around a shared PRICE hub
     const fl = s.feedbackLoop;
-    ok(fl && fl.shared && fl.shared.id, `${w} feedbackLoop needs a shared hinge stage`);
-    ok(fl && Array.isArray(fl.loops) && fl.loops.length >= 2, `${w} feedbackLoop needs >= 2 loops`);
+    ok(fl && fl.shared && fl.shared.id, `${w} feedbackLoop needs a shared hub stage`);
+    ok(fl && Array.isArray(fl.loops) && fl.loops.length === 2, `${w} feedbackLoop needs exactly 2 loops`);
     const loops = fl.loops || [];
-    loops.forEach((lp, li) => ok(Array.isArray(lp.nodes) && lp.nodes.length === 3, `${w} feedbackLoop loop ${li} needs exactly 3 satellite nodes (left · vertex · right)`));
-    const satIds = (loops[0]?.nodes || []).map((n) => n.id);
-    // every loop must share the same ordered satellite ids (a hover lights the stage in both loops)
-    loops.forEach((lp, li) => ok(JSON.stringify((lp.nodes || []).map((n) => n.id)) === JSON.stringify(satIds), `${w} feedbackLoop loop ${li} satellite ids must match loop 0`));
-    const stageIds = [fl.shared?.id, ...satIds];
-    ok(new Set(stageIds).size === stageIds.length, `${w} feedbackLoop has duplicate stage ids`);
-    ok(s.primaryKey === fl.shared?.id, `${w} primaryKey ${s.primaryKey} must be the shared feedbackLoop hinge`);
+    loops.forEach((lp, li) => ok(Array.isArray(lp.nodes) && lp.nodes.length === 5, `${w} feedbackLoop loop ${li} needs exactly 5 stage cards`));
+    const seq = (loops[0]?.nodes || []).map((n) => n.id);
+    // the first card in each loop is the price state and must reuse the shared hub id
+    ok(seq[0] === fl.shared?.id, `${w} feedbackLoop first card must reuse the shared hub id (${fl.shared?.id})`);
+    // every loop must share the same ordered card ids (a hover lights the stage in both loops)
+    loops.forEach((lp, li) => ok(JSON.stringify((lp.nodes || []).map((n) => n.id)) === JSON.stringify(seq), `${w} feedbackLoop loop ${li} card ids must match loop 0`));
+    const stageIds = [...new Set(seq)];   // price appears once as the shared hub + per-loop state card
+    ok(stageIds.length === seq.length, `${w} feedbackLoop has duplicate non-price stage ids`);
+    ok(s.primaryKey === fl.shared?.id, `${w} primaryKey ${s.primaryKey} must be the shared feedbackLoop hub`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
-    // every stage id (shared + satellites) needs a hover target
+    // every stage id needs a hover target
     stageIds.forEach((id) => ok(s.hoverTargets.some((t) => t.id === id), `${w} feedbackLoop stage ${id} has no hover target`));
+    // micro-explainer anchors must reference real stage ids
+    loops.forEach((lp, li) => (lp.micro || []).forEach((mi) => ok(seq.includes(mi.anchor), `${w} feedbackLoop loop ${li} micro anchor ${mi.anchor} is not a stage`)));
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);

@@ -945,53 +945,82 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   );
 }
 
-/* FeedbackLoopSvg — reflexivity as a FIGURE-EIGHT of two circular flows
- * (single consumer: p2-markets-feed-back). The reinforcing (virtuous) loop and
- * the reversing (vicious) loop are two ellipses tangent at PRICE — the one term
- * both cycles pivot on, drawn once at the waist where they cross. The top loop
- * flows price → capital in → fundamentals improve → validation confirms → back
- * to price, a solid accent ring whose chevrons thicken with momentum. The bottom
- * loop mirrors it in reverse — capital out, fundamentals weaken, validation
- * breaks — a thinner dashed stress ring with a snap where the loop fails. The ∞
- * crossing at price is the shape of feedback itself; the punchline sits below. */
+/* FeedbackLoopSvg — reflexivity as a HORIZONTAL figure-eight (single consumer:
+ * p2-markets-feed-back). A wide racetrack of ten stage cards rings a shared PRICE
+ * hub at the centre. The top half is the REINFORCING loop, read left→right — price
+ * rises, capital flows in, buildout expands, fundamentals improve, validation
+ * confirms — and sweeps back into price. The bottom half is the REVERSING loop, an
+ * equally-real mirror — price falls, capital tightens, buildout slows, fundamentals
+ * weaken, validation breaks — sweeping back into the same hub. The loops are drawn as
+ * confident, balanced brush strokes (Brush.brushLine) with clear brush arrowheads;
+ * sparse marginal micro-explainers name the collision points where one mechanism
+ * becomes the next. Price at the crossing is the shared signal both loops write to. */
 function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const fl = spec.feedbackLoop;
   const loops = fl.loops;
-  const shared = fl.shared;                       // { id:'price', label:'Price' } — the waist
+  const shared = fl.shared;                       // { id:'price', label:'Price' } — the hub
   const F = coarse ? 1.02 : 1;
+  const cosd = (d) => Math.cos((d * Math.PI) / 180), sind = (d) => Math.sin((d * Math.PI) / 180);
   const cx = width / 2;
-  const NW = coarse ? 82 : 116, NH = coarse ? 34 : 40;
-  const pad = { t: 20, b: 10 }, punchBand = 26, gap = 4;
-  const rx = Math.min(width * 0.30, coarse ? 118 : 196);
-  const ry = Math.min(coarse ? 82 : 96, Math.max(60, (height - pad.t - pad.b - NH - punchBand - 2 * gap) / 4));
-  const topVy = pad.t + NH / 2 + gap;             // fundamentals (top vertex) centre
-  const wy = topVy + 2 * ry;                      // waist / shared price y
-  const cyT = wy - ry, cyB = wy + ry;             // ellipse centres
-  const punchY = wy + 2 * ry + NH / 2 + 15;
+  const NW = coarse ? 58 : 116, NH = coarse ? 30 : 40;
+  const pad = { t: 16, b: 8 }, punchBand = coarse ? 20 : 26;
+  const Rx = Math.min(width * 0.42, coarse ? 150 : 288);
+  const cy = (pad.t + NH / 2 + (height - punchBand - NH / 2)) / 2;
+  const Ry = Math.min(coarse ? 118 : 150, cy - pad.t - NH / 2);
+  const punchY = height - (coarse ? 6 : 8);
+  const gid = `fbl-price-${(spec.chartId || 'p').replace(/[^a-z0-9]/gi, '')}`;
   const toneCol = (t) => (t === 'stress' ? pal.bandStress : accent);
   const toneTxt = (t) => (t === 'stress' ? pal.bandStressText : accent);
-  const D = Math.PI / 180;
 
-  // three satellites per loop sit at left / far-vertex / right; price is the shared tangent.
-  // point(a) = (cx + rx cos a, cyc + ry sin a). top loop increases a from price(90°);
-  // bottom loop decreases a from price(270°) — so both reach capital(left) first, mirrored.
-  const nodePos = (ti, idx) => {
-    const cyc = ti === 0 ? cyT : cyB;
-    if (idx === 0) return { x: cx - rx, y: cyc };                 // capital — left
-    if (idx === 1) return { x: cx, y: ti === 0 ? cyc - ry : cyc + ry }; // fundamentals — far vertex
-    return { x: cx + rx, y: cyc };                                // validation — right
-  };
-  const priceP = { x: cx, y: wy };
-  const nodes = [{ id: shared.id, label: shared.label, x: cx, y: wy, ti: -1, shared: true, tone: 'accent' }];
-  loops.forEach((lp, ti) => lp.nodes.forEach((nd, idx) => { const p = nodePos(ti, idx); nodes.push({ ...nd, ti, idx, x: p.x, y: p.y, tone: lp.tone }); }));
+  // ten perimeter stages on a wide ellipse; top loop reads L→R over the top, bottom L→R under.
+  const ANG = { 0: [200, 235, 270, 305, 340], 1: [160, 125, 90, 55, 20] };   // per-loop stage angles
+  const per = (a) => ({ x: cx + Rx * cosd(a), y: cy + Ry * sind(a) });
+  const hub = { x: cx, y: cy };
+  const nodes = [{ id: shared.id, label: shared.label, x: cx, y: cy, hub: true, tone: 'accent', li: -1, si: -1 }];
+  const geom = loops.map((lp, li) => {
+    const angs = ANG[li];
+    const stages = lp.nodes.map((nd, si) => ({ ...nd, li, si, a: angs[si], ...per(angs[si]), tone: lp.tone }));
+    stages.forEach((s) => nodes.push(s));
+    return { li, tone: lp.tone, incr: li === 0, stages };
+  });
 
-  const anchorOf = (t) => {
-    if (t.id === shared.id) return priceP;
-    const idx = loops[0].nodes.findIndex((n) => n.id === t.id);
-    return idx < 0 ? null : nodePos(0, idx);                      // anchor tooltips on the top-loop instance
-  };
-  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 40 : 28, NW / 2); nodes.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  // box-edge point in a given direction from a node centre (so strokes/heads meet the card cleanly)
+  const boxEdge = (n, dx, dy, padPx) => { const w = (n.hub ? NW + 8 : NW) / 2 + (padPx || 0), h = (n.hub ? NH + 6 : NH) / 2 + (padPx || 0); const L = Math.hypot(dx, dy) || 1; const ux = dx / L, uy = dy / L; const s = Math.min(w / (Math.abs(ux) || 1e-6), h / (Math.abs(uy) || 1e-6)); return { x: n.x + ux * s, y: n.y + uy * s, ux, uy }; };
+  const tanAt = (a, incr) => { const tx = -Rx * sind(a) * (incr ? 1 : -1), ty = Ry * cosd(a) * (incr ? 1 : -1); const L = Math.hypot(tx, ty) || 1; return { x: tx / L, y: ty / L }; };
+  const arcPts = (a0, a1, incr) => { const out = []; let d0 = a0, d1 = a1; if (incr && d1 < d0) d1 += 360; if (!incr && d1 > d0) d1 -= 360; const N = 10; for (let i = 0; i <= N; i++) { const a = d0 + (d1 - d0) * (i / N); out.push(per(a)); } return out; };
+  const curvePts = (p0, p1, bow) => { const mx = (p0.x + p1.x) / 2, my = (p0.y + p1.y) / 2; const dx = p1.x - p0.x, dy = p1.y - p0.y; const L = Math.hypot(dx, dy) || 1; const cxp = mx + (-dy / L) * bow, cyp = my + (dx / L) * bow; const out = []; const N = 10; for (let i = 0; i <= N; i++) { const t = i / N, u = 1 - t; out.push({ x: u * u * p0.x + 2 * u * t * cxp + t * t * p1.x, y: u * u * p0.y + 2 * u * t * cyp + t * t * p1.y }); } return out; };
+
+  // build each loop's flowing centreline (hub → s0 → … → s4 → hub) + per-stage arrowheads
+  const draw = geom.map((g) => {
+    const s = g.stages, incr = g.incr;
+    const path = [];
+    const heads = [];
+    // entry: hub → s0 (price state)
+    const e0 = boxEdge(nodes[0], s[0].x - cx, s[0].y - cy, 3);
+    const e0b = boxEdge(s[0], cx - s[0].x, cy - s[0].y, 3);
+    const entry = curvePts(e0, e0b, incr ? -22 : 22);
+    path.push(...entry);
+    heads.push({ x: e0b.x, y: e0b.y, dir: Math.atan2(e0b.y - entry[entry.length - 2].y, e0b.x - entry[entry.length - 2].x) });
+    // perimeter arcs s_i → s_{i+1}
+    for (let i = 0; i < s.length - 1; i++) {
+      const seg = arcPts(s[i].a, s[i + 1].a, incr);
+      path.push(...seg.slice(1));
+      const tEnd = tanAt(s[i + 1].a, incr);
+      const edge = boxEdge(s[i + 1], -tEnd.x, -tEnd.y, 3);
+      heads.push({ x: edge.x, y: edge.y, dir: Math.atan2(tEnd.y, tEnd.x) });
+    }
+    // return: s4 → hub
+    const r0 = boxEdge(s[s.length - 1], cx - s[s.length - 1].x, cy - s[s.length - 1].y, 3);
+    const r1 = boxEdge(nodes[0], s[s.length - 1].x - cx, s[s.length - 1].y - cy, 3);
+    const ret = curvePts(r0, r1, incr ? -30 : 30);
+    path.push(...ret.slice(1));
+    heads.push({ x: r1.x, y: r1.y, dir: Math.atan2(r1.y - ret[ret.length - 2].y, r1.x - ret[ret.length - 2].x) });
+    return { li: g.li, tone: g.tone, d: Brush.brushLine(path, { seed: 30 + g.li * 40, weight: coarse ? 1.5 : 2.1, intensity: 0.5, taper: 0.14, modulate: 0.22 }), heads };
+  });
+
+  const anchorOf = (t) => { if (t.id === shared.id) return hub; const s = geom[0].stages.find((n) => n.id === t.id); return s ? { x: s.x, y: s.y } : null; };
+  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 34 : 24, NW / 2 - 6); nodes.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
   const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -1001,87 +1030,66 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   const anchor = isActiveHere ? anchorOf(active) : null;
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) { const meta = targets.find((t) => t.id === active.id); if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === shared.id ? 'HINGE' : 'STAGE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />; }
+  if (!coarse && isActiveHere && anchor) { const meta = targets.find((t) => t.id === active.id); if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === shared.id ? 'HUB' : 'STAGE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />; }
 
-  const wrap = (s) => { const wd = s.split(' '); if (wd.length < 2 || s.length <= 10) return [s]; const mid = Math.ceil(s.length / 2); let a = ''; let bi = 0; for (let i = 0; i < wd.length; i++) { if ((a + ' ' + wd[i]).trim().length <= mid) { a = (a + ' ' + wd[i]).trim(); bi = i + 1; } else break; } if (!a) { a = wd[0]; bi = 1; } return [a, wd.slice(bi).join(' ')].filter(Boolean); };
-
-  // flow chevrons: brush arrows placed at the midpoint of each of the 4 arcs, pointing along travel
-  const chevrons = loops.map((lp, ti) => {
-    const cyc = ti === 0 ? cyT : cyB, incr = ti === 0;
-    const seq = ti === 0 ? [90, 180, 270, 360] : [270, 180, 90, 0];   // price → capital → fundamentals → validation
-    const closing = ti === 0 ? 450 : -90;                              // validation → price
-    const angs = [...seq, closing];
-    const out = [];
-    for (let k = 0; k < angs.length - 1; k++) {
-      const am = ((angs[k] + angs[k + 1]) / 2) * D;
-      const x = cx + rx * Math.cos(am), y = cyc + ry * Math.sin(am);
-      const tx = -rx * Math.sin(am) * (incr ? 1 : -1), tyv = ry * Math.cos(am) * (incr ? 1 : -1);
-      const dir = Math.atan2(tyv, tx);
-      const len = lp.tone === 'stress' ? (coarse ? 8 : 10) : (coarse ? 9 : 11) + k * 1.6;   // reinforce grows
-      const wt = lp.tone === 'stress' ? Math.max(0.4, 0.85 - k * 0.16) : 0.55 + k * 0.16;    // reinforce thickens
-      out.push({ x, y, dir, len, wt, k, isBreak: lp.tone === 'stress' && k === angs.length - 2 });
-    }
-    return { ti, tone: lp.tone, marks: out };
-  });
+  const shortLabel = (n) => { if (!coarse) return n.label; if (n.hub) return 'Price'; if (n.id === 'price') return n.tone === 'stress' ? 'Price ↓' : 'Price ↑'; return n.id.charAt(0).toUpperCase() + n.id.slice(1); };
+  const wrap = (s) => { const wd = s.split(' '); if (wd.length < 2 || s.length <= 9) return [s]; const mid = Math.ceil(s.length / 2); let a = ''; let bi = 0; for (let i = 0; i < wd.length; i++) { if ((a + ' ' + wd[i]).trim().length <= mid) { a = (a + ' ' + wd[i]).trim(); bi = i + 1; } else break; } if (!a) { a = wd[0]; bi = 1; } return [a, wd.slice(bi).join(' ')].filter(Boolean); };
+  const ahLen = coarse ? 9 : 13;
 
   return (
     <div style={{ position: 'relative' }}>
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Reflexivity as two circular flows'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {/* the two rings (flow tracks) */}
-        {loops.map((lp, ti) => {
-          const cyc = ti === 0 ? cyT : cyB, col = toneCol(lp.tone), rev = lp.tone === 'stress';
-          const lit = focusId ? (focusId === shared.id || lp.nodes.some((n) => n.id === focusId)) : true;
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={accent} /><stop offset="100%" stopColor={pal.bandStress} />
+          </linearGradient>
+        </defs>
+        {/* the two flowing brush loops */}
+        {draw.map((g) => {
+          const col = toneCol(g.tone), lit = !focusId || focusId === shared.id || geom[g.li].stages.some((n) => n.id === focusId);
           return (
-            <ellipse key={`ring${ti}`} cx={cx} cy={cyc} rx={rx} ry={ry} fill="none" stroke={col} strokeWidth={rev ? 1.2 : 1.6} strokeDasharray={rev ? '5 5' : undefined} opacity={entered ? (lit ? (rev ? 0.5 : 0.62) : 0.22) : 0} style={{ transition: reduce ? 'opacity 360ms ease' : `opacity 720ms ease ${180 + ti * 140}ms` }} />
-          );
-        })}
-        {/* directional flow chevrons (brush) */}
-        {chevrons.map((cv) => (
-          <g key={`cv${cv.ti}`} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : `opacity 760ms ease ${360 + cv.ti * 140}ms` }}>
-            {cv.marks.map((m, i) => {
-              const col = toneCol(cv.tone), lit = !focusId || focusId === shared.id;
-              if (m.isBreak) return (
-                <g key={i} opacity={0.9}>
-                  <path d={`M${m.x - 8} ${m.y - 5} L${m.x - 2} ${m.y + 5} L${m.x + 3} ${m.y - 5} L${m.x + 8} ${m.y + 4}`} fill="none" stroke={col} strokeWidth={1.3} strokeLinejoin="round" strokeLinecap="round" />
-                </g>
-              );
-              return <path key={i} d={Brush.brushArrow(m.x, m.y, m.len, m.dir, { seed: 40 + cv.ti * 17 + i * 5, weight: m.wt, intensity: 0.55 })} fill={col} opacity={focusId && !lit ? 0.3 : (cv.tone === 'stress' ? 0.72 : 0.9)} style={{ transition: trans('opacity') }} />;
-            })}
-          </g>
-        ))}
-        {/* loop identity labels — centred inside each ring */}
-        {loops.map((lp, ti) => {
-          const cyc = ti === 0 ? cyT : cyB;
-          return (
-            <g key={`lab${ti}`} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : `opacity 560ms ease ${520 + ti * 120}ms` }}>
-              <text x={cx} y={cyc - 3} textAnchor="middle" style={halo(pal, 10 * F, toneTxt(lp.tone), 600)}>{lp.label}</text>
-              {lp.sub && <text x={cx} y={cyc + 11} textAnchor="middle" style={halo(pal, 7.6 * F, pal.text4)}>{lp.sub}</text>}
+            <g key={`loop${g.li}`} style={{ opacity: entered ? (lit ? 1 : 0.34) : 0, transition: reduce ? 'opacity 420ms ease' : `opacity 900ms ease ${160 + g.li * 160}ms` }}>
+              <path d={g.d} fill={col} opacity={g.tone === 'stress' ? 0.82 : 0.9} />
+              {g.heads.map((h, i) => <path key={i} d={Brush.brushArrow(h.x, h.y, ahLen, h.dir, { seed: 70 + g.li * 20 + i * 4, weight: coarse ? 0.95 : 1.25, intensity: 0.5, head: 0.46 })} fill={col} opacity={g.tone === 'stress' ? 0.9 : 0.96} />)}
             </g>
           );
         })}
-        {/* buildout edge label — the mechanism, on the capital → fundamentals arc */}
-        {loops.map((lp, ti) => {
-          if (!lp.edgeLabel) return null;
-          const cyc = ti === 0 ? cyT : cyB, am = 225 * D;   // upper-left of each ring
-          const x = cx + (rx + (coarse ? 8 : 13)) * Math.cos(am), y = cyc + (ry + 3) * Math.sin(am);
-          return <text key={`el${ti}`} x={x} y={y} textAnchor="end" style={{ ...halo(pal, 7.4 * F, pal.text3), opacity: entered ? (focusId ? 0.35 : 0.9) : 0, transition: 'opacity 500ms ease 700ms', fontStyle: 'italic' }}>{lp.edgeLabel}</text>;
+        {/* loop identity labels — inside each half, offset from the hub */}
+        {geom.map((g) => {
+          const ly = cy + (g.li === 0 ? -Ry * 0.46 : Ry * 0.46), lp = loops[g.li];
+          return (
+            <g key={`lab${g.li}`} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : `opacity 620ms ease ${560 + g.li * 120}ms` }}>
+              <text x={cx} y={ly} textAnchor="middle" style={halo(pal, 10.5 * F, toneTxt(g.tone), 600)}>{lp.label}</text>
+              {lp.sub && <text x={cx} y={ly + 13} textAnchor="middle" style={halo(pal, 8 * F, pal.text4)}>{`— ${lp.sub} —`}</text>}
+            </g>
+          );
         })}
-        {/* punchline — the core insight, below the crossing */}
+        {/* sparse marginal micro-explainers at the collision points */}
+        {!coarse && geom.map((g) => (loops[g.li].micro || []).map((mi, i) => {
+          const s = g.stages.find((n) => n.id === mi.anchor); if (!s) return null;
+          const outX = s.x + (s.x < cx ? -1 : 1) * (NW / 2 + 12), ty0 = s.y + (mi.dy || 0);
+          const anchorEnd = s.x >= cx;
+          return (
+            <g key={`mi${g.li}-${i}`} style={{ opacity: entered ? 0.92 : 0, transition: reduce ? 'opacity 320ms ease' : `opacity 620ms ease ${820 + i * 90}ms` }}>
+              {wrap(mi.text).map((ln, li) => <text key={li} x={outX} y={ty0 + li * 11} textAnchor={anchorEnd ? 'start' : 'end'} style={{ ...halo(pal, 8 * F, pal.text3), fontStyle: 'italic' }}>{ln}</text>)}
+            </g>
+          );
+        }))}
+        {/* punchline */}
         {fl.punchline && (
-          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 980ms' }}>
+          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 1000ms' }}>
             <text x={cx} y={punchY} textAnchor="middle" style={{ ...haloSans(pal, 11 * F, pal.text1, 600) }}>{fl.punchline}</text>
           </g>
         )}
-        {/* nodes (price drawn once at the waist, as the shared hinge) */}
+        {/* stage cards (hub drawn last, emphasised) */}
         {nodes.map((n) => {
-          const on = focusId === n.id, col = toneCol(n.tone), lines = wrap(n.label);
-          const w = n.shared ? NW + 6 : NW, h = n.shared ? NH + 4 : NH;
-          const delay = n.shared ? 620 : 260 + n.idx * 80 + n.ti * 40;
+          const on = focusId === n.id, col = toneCol(n.tone), lines = wrap(shortLabel(n));
+          const w = n.hub ? NW + (coarse ? 6 : 8) : NW, h = n.hub ? NH + (coarse ? 4 : 6) : NH;
+          const delay = n.hub ? 700 : 300 + n.si * 70 + n.li * 40;
           return (
-            <g key={`${n.ti}-${n.idx ?? 'p'}`} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 420ms ease ${delay}ms, transform 420ms cubic-bezier(0.2,0.7,0.2,1) ${delay}ms` }}>
-              {n.shared && <rect x={n.x - w / 2 - 2} y={n.y - h / 2 - 2} width={w + 4} height={h + 4} rx={9} fill="none" stroke={pal.bandStress} strokeWidth={1} opacity={0.5} />}
-              <rect x={n.x - w / 2} y={n.y - h / 2} width={w} height={h} rx={8} fill={pal.surface} stroke={on ? col : n.shared ? accent : pal.borderHi} strokeWidth={on ? 1.8 : n.shared ? 1.6 : 1} style={{ transition: trans('stroke') }} />
-              {lines.map((ln, li) => <text key={li} x={n.x} y={n.y + (lines.length === 1 ? 4 : li === 0 ? -3 : 11)} textAnchor="middle" style={haloSans(pal, (coarse ? 8.4 : 9.6) * (lines.length > 1 ? 0.98 : 1), n.shared ? accent : pal.text1, n.shared ? 600 : 500)}>{ln}</text>)}
+            <g key={`n-${n.li}-${n.si}`} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.9)', transition: reduce ? 'opacity 300ms ease' : `opacity 420ms ease ${delay}ms, transform 420ms cubic-bezier(0.2,0.7,0.2,1) ${delay}ms` }}>
+              <rect x={n.x - w / 2} y={n.y - h / 2} width={w} height={h} rx={n.hub ? 9 : 7} fill={pal.surface} stroke={on ? col : n.hub ? `url(#${gid})` : pal.borderHi} strokeWidth={on ? 1.9 : n.hub ? 2 : 1} style={{ transition: trans('stroke') }} />
+              {lines.map((ln, li) => <text key={li} x={n.x} y={n.y + (lines.length === 1 ? (n.hub ? 4.5 : 4) : li === 0 ? -3 : 11)} textAnchor="middle" style={haloSans(pal, (n.hub ? (coarse ? 10 : 12) : coarse ? 7.4 : 9.4) * F * (lines.length > 1 ? 0.98 : 1), n.hub ? accent : n.id === 'price' ? col : pal.text1, n.hub ? 700 : n.id === 'price' ? 600 : 500)}>{ln}</text>)}
             </g>
           );
         })}
