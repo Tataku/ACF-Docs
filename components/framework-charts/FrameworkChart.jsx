@@ -946,60 +946,83 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
 }
 
 /* ── FeedbackLoopSvg — reflexivity as two lanes (reinforce / reverse) ─────────*
- * The concept is causal FEEDBACK, not a decorative orbit: the same mechanism
- * (price → capital → fundamentals → validation → back to price) runs two ways.
- * Top lane reinforces (accent, arrows thicken left→right, loops back stronger);
- * bottom lane reverses (stress, arrows thin/break, loops back weaker). A quiet
- * "REFLEXIVITY" sits between them. Reads at a glance; hover/pin adds the why.
- * Distinct from systemLoop (a single ring) — circularity isn't the only story. */
+ * The concept is causal FEEDBACK, not a decorative orbit: one BRAIDED circuit.
+ * Five substantial shared stage cards (price → capital → buildout →
+ * fundamentals → validation), each holding both direction states; a reinforcing
+ * strand (accent) and a reversing strand (stress) weave through the same cards
+ * on authored asymmetric geometry, and BOTH close solidly from validation back
+ * into price — negative reflexivity is not a broken secondary loop. Price is
+ * the strongest card and the convergence point. Reads at a glance; hover/pin
+ * adds the why. Distinct from systemLoop (a ring) — circularity isn't the story. */
 function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const fl = spec.feedbackLoop;
   const lanes = fl.lanes;
   const K = lanes[0].nodes.length;
   const stages = lanes[0].nodes.map((n) => n.stage);
-  // Shared-mechanism spine: the four stages are drawn ONCE (price · capital ·
-  // fundamentals · validation). The reinforcing direction rides above, the
-  // reversing direction below, and BOTH loop back to the same price — so the
-  // feedback (price is input AND output) is the hero, not an afterthought.
-  const pad = { l: 104, r: 44, t: 30, b: 34 };
-  const innerW = width - pad.l - pad.r;
-  const colW = innerW / K;
-  const colX = (i) => pad.l + colW * (i + 0.5);
-  const midY = pad.t + (height - pad.t - pad.b) / 2;
-  const DY = Math.min(56, (height - pad.t - pad.b) * 0.16);
-  const rowY = (li) => (li === 0 ? midY - DY : midY + DY);
-  const reinBow = pad.t + 8, revBow = height - pad.b - 8;
-  const LAB = 46;                                                // half-gap kept clear around each column for the arrows
+  // Braided reflexivity circuit — five substantial SHARED stage cards (price ·
+  // capital · buildout · fundamentals · validation), each holding both direction
+  // states. A reinforcing strand (accent) and a reversing strand (stress) weave
+  // through the same cards on authored, asymmetric, horizontally-biased geometry,
+  // and BOTH close solidly from validation back into price — negative reflexivity
+  // is not a broken secondary loop. Hand-authored in a 960×540 design space (no
+  // automatic equal spacing), scaled to the live viewBox. Price is the strongest
+  // card and the visual convergence point.
+  const fx = width / 960, fy = height / 540;
+  const CARDS = [
+    { id: 'price', cx: 118, cy: 268, w: 150, h: 92 },
+    { id: 'capital', cx: 330, cy: 192, w: 128, h: 76 },
+    { id: 'buildout', cx: 520, cy: 330, w: 132, h: 76 },
+    { id: 'fundamentals', cx: 704, cy: 178, w: 138, h: 76 },
+    { id: 'validation', cx: 876, cy: 296, w: 132, h: 80 },
+  ].map((c) => ({ ...c, x: c.cx * fx, y: c.cy * fy, W: c.w * fx, H: c.h * fy }));
+  const byId = Object.fromEntries(CARDS.map((c) => [c.id, c]));
+  const portY = (c, tone) => c.y + (tone === 'stress' ? (c.id === 'price' ? 28 : 22) : (c.id === 'price' ? 8 : 4)) * fy;
   const toneCol = (tone) => (tone === 'stress' ? pal.bandStress : accent);
   const toneTxt = (tone) => (tone === 'stress' ? pal.bandStressText : accent);
   const stageName = (id) => { const t = targets.find((tt) => tt.id === id); return t ? t.label : id; };
-  const stateFor = (li, i) => lanes[li].nodes[i].label;
+  // authored positions for the three persistent transition annotations
+  const ANNOT_POS = {
+    'capital-buildout': { x: 316, y: 302, anchor: 'middle', tick: [[398, 296], [414, 280]] },
+    'buildout-fundamentals': { x: 630, y: 252, anchor: 'start', tick: [[624, 249], [613, 259]] },
+    'validation-price': { x: 470, y: 100, anchor: 'middle', tick: [[470, 91], [470, 80]] },
+  };
 
   const geom = useMemo(() => {
-    const arrows = [], rets = [];
-    lanes.forEach((lane, li) => {
-      const y = rowY(li);
-      for (let i = 0; i < K - 1; i++) {
-        const x0 = colX(i) + LAB, tip = colX(i + 1) - LAB, len = Math.max(12, tip - x0);
-        const w = lane.tone === 'stress' ? 1.05 - i * 0.24 : 0.5 + i * 0.24;   // reinforce thickens, reverse thins
-        arrows.push({ d: Brush.brushArrow(tip, y, len, 0, { seed: 60 + li * 23 + i * 7, weight: Math.max(0.3, w), intensity: 0.5, head: Math.min(0.24, 11 / len) }), tone: lane.tone });
+    const bez = (p0, c1, c2, p1, n = 22) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push({ x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x, y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y }); } return pts; };
+    const head = (tx, ty, ang, sc = 1) => { const ux = Math.cos(ang), uy = Math.sin(ang), px = -uy, py = ux, L = 12 * sc, W2 = 5 * sc, N = 8.4 * sc; return `M${tx} ${ty} L${tx - ux * L + px * W2} ${ty - uy * L + py * W2} L${tx - ux * N} ${ty - uy * N} L${tx - ux * L - px * W2} ${ty - uy * L - py * W2} Z`; };
+    const strands = [], heads = [];
+    ['accent', 'stress'].forEach((tone) => {
+      for (let i = 0; i < CARDS.length - 1; i++) {
+        const a = CARDS[i], b = CARDS[i + 1];
+        const x0 = a.x + a.W / 2 - 2, y0 = portY(a, tone);
+        const x1 = b.x - b.W / 2 - 1, y1 = portY(b, tone);
+        const g = (x1 - x0) * 0.46;
+        const pts = bez({ x: x0, y: y0 }, { x: x0 + g, y: y0 }, { x: x1 - g, y: y1 }, { x: x1 - 9, y: y1 });
+        strands.push({ d: Brush.brushLine(pts, { seed: 40 + i * 9 + (tone === 'stress' ? 400 : 0), weight: 1.7, intensity: 0.5, taper: 0.03 }), tone });
+        heads.push({ d: head(x1, y1, 0), tone });
       }
-      // return arc bows outward and lands back on price — the feedback is the hero
-      const sx = colX(K - 1), ex = colX(0), sy = li === 0 ? y - 9 : y + 9;
-      const bow = li === 0 ? reinBow : revBow;
-      rets.push({
-        arc: `M${sx} ${sy} C${sx + 26} ${bow} ${ex - 26} ${bow} ${ex} ${sy}`,
-        head: Brush.brushArrow(ex, sy, 11, li === 0 ? Math.PI / 2 : -Math.PI / 2, { seed: 150 + li * 9, weight: li === 0 ? 0.75 : 0.5, intensity: 0.5 }),
-        tone: lane.tone, li,
-      });
     });
-    return { arrows, rets };
+    // return paths — both COMPLETE, SOLID, EQUAL weight: the feedback IS the mechanism
+    const v = byId.validation, p = byId.price;
+    const retTop = [
+      ...bez({ x: v.x, y: v.y - v.H / 2 - 2 }, { x: v.x + 10 * fx, y: 140 * fy }, { x: 800 * fx, y: 74 * fy }, { x: 560 * fx, y: 72 * fy }, 20),
+      ...bez({ x: 560 * fx, y: 72 * fy }, { x: 320 * fx, y: 70 * fy }, { x: p.x - 2 * fx, y: 104 * fy }, { x: p.x, y: p.y - p.H / 2 - 12 }, 20),
+    ];
+    const retBot = [
+      ...bez({ x: v.x, y: v.y + v.H / 2 + 2 }, { x: v.x + 10 * fx, y: 452 * fy }, { x: 790 * fx, y: 490 * fy }, { x: 550 * fx, y: 490 * fy }, 20),
+      ...bez({ x: 550 * fx, y: 490 * fy }, { x: 310 * fx, y: 490 * fy }, { x: p.x - 2 * fx, y: 452 * fy }, { x: p.x, y: p.y + p.H / 2 + 12 }, 20),
+    ];
+    const rets = [
+      { d: Brush.brushLine(retTop, { seed: 210, weight: 1.7, intensity: 0.5, taper: 0.02 }), head: head(p.x, p.y - p.H / 2 - 1, Math.PI / 2), tone: 'accent' },
+      { d: Brush.brushLine(retBot, { seed: 220, weight: 1.7, intensity: 0.5, taper: 0.02 }), head: head(p.x, p.y + p.H / 2 + 1, -Math.PI / 2), tone: 'stress' },
+    ];
+    return { strands, heads, rets };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
-  const anchorOf = (a) => { const i = stages.indexOf(a.id); return i < 0 ? null : { x: colX(i), y: midY }; };
-  const resolve = (mx) => { let best = null, bd = touch ? 64 : 48; stages.forEach((s, i) => { const d = Math.abs(mx - colX(i)); if (d < bd) { bd = d; best = s; } }); return best ? targets.find((t) => t.id === best) : null; };
+  const anchorOf = (a) => { const c = byId[a.id]; return c ? { x: c.x, y: c.y } : null; };
+  const resolve = (mx) => { let best = null, bd = touch ? 74 : 60; CARDS.forEach((c) => { const d = Math.abs(mx - c.x); if (d < bd) { bd = d; best = c; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
   const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -1017,48 +1040,64 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Reflexivity as one shared mechanism run two ways. Along a shared spine of price, capital, fundamentals and validation, a reinforcing loop above runs price up, capital in, buildout funded, validation confirming, then feeds back to a stronger price; a reversing loop below runs price down, capital out, buildout starved, validation disappointing, then feeds back to a weaker price. Both loops return to the same price." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {/* shared mechanism spine — the stages drawn once, as low-contrast structure */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 640ms ease 120ms' }}>
-          <line x1={colX(0)} x2={colX(K - 1)} y1={midY} y2={midY} stroke={pal.borderHi} strokeWidth="1" strokeDasharray="1 6" opacity="0.7" />
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* forward strands — brush-textured, weaving card to card (drawn behind the cards) */}
+        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'clip-path 1100ms cubic-bezier(0.22,0.61,0.36,1) 480ms, -webkit-clip-path 1100ms cubic-bezier(0.22,0.61,0.36,1) 480ms, opacity 400ms ease 480ms' }}>
+          {geom.strands.map((s, i) => <path key={`st${i}`} d={s.d} fill={toneCol(s.tone)} opacity="0.92" />)}
         </g>
-        {/* return arcs — the feedback is the hero: both directions close back on price */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 520ms' }}>
+        {/* return paths — reveal right→left, travelling back toward price */}
+        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 0 0 100%)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 0 0 100%)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'clip-path 1000ms cubic-bezier(0.22,0.61,0.36,1) 1500ms, -webkit-clip-path 1000ms cubic-bezier(0.22,0.61,0.36,1) 1500ms, opacity 400ms ease 1500ms' }}>
           {geom.rets.map((r, i) => (
             <g key={`ret${i}`}>
-              <path d={r.arc} fill="none" stroke={toneCol(r.tone)} strokeWidth={r.li === 0 ? 2 : 1.4} strokeLinecap="round" strokeDasharray={r.li === 0 ? '0' : '5 5'} opacity={r.li === 0 ? 0.8 : 0.58} />
-              <path d={r.head} fill={toneCol(r.tone)} opacity={r.li === 0 ? 0.85 : 0.62} />
+              <path d={r.d} fill={toneCol(r.tone)} opacity="0.92" />
+              <path d={r.head} fill={toneCol(r.tone)} opacity="0.95" />
             </g>
           ))}
-          {fl.returnLabel && <text x={(colX(0) + colX(K - 1)) / 2} y={reinBow - 5} textAnchor="middle" style={{ ...halo(pal, 8, pal.text4), fontStyle: 'italic' }}>{fl.returnLabel}</text>}
         </g>
-        {/* directional arrows: reinforcing thickens above, reversing thins/breaks below */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 700ms ease 300ms' }}>
-          {geom.arrows.map((a, i) => <path key={`ar${i}`} d={a.d} fill={toneCol(a.tone)} opacity={a.tone === 'stress' ? 0.72 : 0.9} />)}
-        </g>
-        {/* lane labels (left gutter) */}
-        {lanes.map((lane, li) => (
-          <g key={lane.id} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${120 + li * 80}ms` }}>
-            <text x={10} y={rowY(li) - 2} style={halo(pal, 9, toneTxt(lane.tone), 600)}>{lane.label}</text>
-            {lane.note && <text x={10} y={rowY(li) + 11} style={halo(pal, 7.5, pal.text4)}>{lane.note}</text>}
-          </g>
-        ))}
-        {/* columns: shared stage name on the spine + reinforcing state above / reversing below */}
-        {stages.map((sid, i) => {
-          const on = focusId === sid;
-          const isP = sid === spec.primaryKey;
-          const nx = colX(i);
+        {/* shared stage cards — both states live in ONE card; the strands pass through */}
+        {CARDS.map((c, i) => {
+          const on = focusId === c.id;
+          const isP = c.id === spec.primaryKey;
+          const tealY = portY(c, 'accent'), clayY = portY(c, 'stress');
           return (
-            <g key={sid} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${nx}px ${midY}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms ease ${160 + i * 90}ms, transform 440ms cubic-bezier(0.2,0.7,0.2,1) ${160 + i * 90}ms` }}>
-              <text x={nx} y={rowY(0) - 13} textAnchor="middle" style={haloSans(pal, 11, toneTxt('accent'), 600)}>{stateFor(0, i)}</text>
-              <text x={nx} y={rowY(1) + 21} textAnchor="middle" style={haloSans(pal, 11, toneTxt('stress'), 600)}>{stateFor(1, i)}</text>
-              {isP && <circle cx={nx} cy={midY} r="11" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.6" />}
-              <path d={Brush.inkDot(nx, midY, isP ? 5 : 3.4, { seed: 30 + i * 9, intensity: 0.8 })} fill={isP ? accent : pal.markInk} />
-              {on && <circle cx={nx} cy={midY} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
-              <text x={nx} y={midY + 22} textAnchor="middle" style={haloSans(pal, 10, isP ? accent : pal.text2, isP ? 700 : 600)}>{stageName(sid)}</text>
+            <g key={c.id} style={{ opacity: entered ? (focusId && !on ? 0.42 : 1) : 0, transformOrigin: `${c.x}px ${c.y}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms ease ${120 + i * 110}ms, transform 440ms cubic-bezier(0.2,0.7,0.2,1) ${120 + i * 110}ms` }}>
+              <rect x={c.x - c.W / 2} y={c.y - c.H / 2} width={c.W} height={c.H} rx={10} fill={pal.surface} stroke={on ? accent : isP ? accent : pal.borderHi} strokeWidth={on ? 1.8 : isP ? 1.5 : 1} style={{ transition: trans('stroke') }} />
+              {/* through-card rails: the strands visibly continue through the shared card */}
+              <line x1={c.x - c.W / 2 + 7} x2={c.x + c.W / 2 - 7} y1={tealY} y2={tealY} stroke={accent} strokeWidth="1" opacity="0.28" />
+              <line x1={c.x - c.W / 2 + 7} x2={c.x + c.W / 2 - 7} y1={clayY} y2={clayY} stroke={pal.bandStress} strokeWidth="1" opacity="0.3" />
+              <text x={c.x} y={c.y - c.H / 2 + (isP ? 30 : 24) * fy} textAnchor="middle" style={haloSans(pal, isP ? 14.5 : 12.5, isP ? accent : pal.text1, isP ? 700 : 600)}>{stageName(c.id)}</text>
+              <text x={c.x} y={tealY + 3.5} textAnchor="middle" style={haloSans(pal, 10.5, toneTxt('accent'), 600)}>{lanes[0].nodes[i].label}</text>
+              <text x={c.x} y={clayY + 3.5} textAnchor="middle" style={haloSans(pal, 10.5, toneTxt('stress'), 600)}>{lanes[1].nodes[i].label}</text>
+              {[[c.x - c.W / 2, tealY, 'accent'], [c.x + c.W / 2, tealY, 'accent'], [c.x - c.W / 2, clayY, 'stress'], [c.x + c.W / 2, clayY, 'stress']].map(([px2, py2, tn], j) => (
+                <path key={j} d={Brush.inkDot(px2, py2, 2.3, { seed: 60 + i * 11 + j * 3, intensity: 0.7 })} fill={toneCol(tn)} opacity="0.85" />
+              ))}
             </g>
           );
         })}
+        {/* forward arrowheads — integrated, on top so they land crisply on the card edge */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 420ms ease 1280ms' }}>
+          {geom.heads.map((h, i) => <path key={`hd${i}`} d={h.d} fill={toneCol(h.tone)} opacity="0.95" />)}
+        </g>
+        {/* direction captions */}
+        {lanes.map((lane, li) => (
+          <g key={lane.id} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${1700 + li * 120}ms` }}>
+            <text x={40 * fx} y={(li === 0 ? 58 : 500) * fy} style={halo(pal, 9, toneTxt(lane.tone), 600)}>{lane.label}</text>
+            {lane.note && <text x={40 * fx} y={(li === 0 ? 74 : 516) * fy} style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>{lane.note}</text>}
+          </g>
+        ))}
+        {/* the three persistent transition annotations */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 520ms ease 2100ms' }}>
+          {(fl.annotations || []).map((an) => {
+            const pos = ANNOT_POS[`${an.from}-${an.to}`];
+            if (!pos) return null;
+            return (
+              <g key={`${an.from}-${an.to}`}>
+                <text x={pos.x * fx} y={pos.y * fy} textAnchor={pos.anchor} style={{ ...halo(pal, 9.5, pal.text3), fontStyle: 'italic' }}>{an.text}</text>
+                <line x1={pos.tick[0][0] * fx} y1={pos.tick[0][1] * fy} x2={pos.tick[1][0] * fx} y2={pos.tick[1][1] * fy} stroke={pal.text4} strokeWidth="1" opacity="0.7" />
+              </g>
+            );
+          })}
+        </g>
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
       </svg>
       {tooltip}
@@ -2666,7 +2705,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'flow' && <FlowSvg spec={spec} height={hh(400)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'governanceLoop' && <GovernanceLoopSvg spec={spec} height={hh(300)} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'feedbackLoop' && <FeedbackLoopSvg spec={spec} height={hh(400)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'feedbackLoop' && <FeedbackLoopSvg spec={spec} height={hh(540)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={hh(380)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={hh(150 + (spec.scorecard?.requirements.length || 8) * 32)} targets={spec.hoverTargets} {...cp} />}
