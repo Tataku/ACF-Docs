@@ -2155,6 +2155,308 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   );
 }
 
+/* ── radial arc geometry (0° = top, clockwise) ──────────────────────────────*/
+function polarTop(cx, cy, r, aDeg) { const a = (aDeg - 90) * Math.PI / 180; return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) }; }
+function arcPath(cx, cy, r, a0, a1) {
+  const p0 = polarTop(cx, cy, r, a0), p1 = polarTop(cx, cy, r, a1);
+  const large = ((((a1 - a0) % 360) + 360) % 360) > 180 ? 1 : 0;
+  return `M${p0.x.toFixed(2)} ${p0.y.toFixed(2)} A${r} ${r} 0 ${large} 1 ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}`;
+}
+
+/* ── RadialSvg — COMPOSITION: one whole, split into shares (donut) ───────────*
+ * The angular split IS the claim (you do not own the whole balance). Built on
+ * thick STROKED arcs — a clean clockwise draw-in and trivial angular hit-testing,
+ * not a chart-library pie. Direct labels + short leaders (never a detached
+ * legend). An optional quiet SCALE control (e.g. today / +12 / +25) grows the
+ * MAGNITUDE while the SHARE — the arcs — never moves, so an embedded claim is
+ * seen compounding in step. Hover/pin/tap a segment for its "why". */
+function RadialSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const R = spec.radial;
+  const segs = R.segments;
+  const scales = R.scales || null;
+  const [scaleId, setScaleId] = useState(R.defaultScale || (scales ? scales[0].id : null));
+  const scale = scales ? (scales.find((s) => s.id === scaleId) || scales[0]) : null;
+  const GAP = segs.length > 1 ? 2.4 : 0;                     // small angular gap between segments (deg)
+  const START = typeof R.startAngle === 'number' ? R.startAngle : 0;
+
+  const cx = width / 2;
+  const cy = Math.round(height * 0.46);
+  const rOuter = Math.min(width * 0.165, (height - 96) * 0.52);
+  const thick = Math.max(46, rOuter * 0.4);
+  const rMid = rOuter - thick / 2;
+  const rInner = rOuter - thick;
+  const F = coarse ? 1.55 : 1;                                // mobile is not a shrunk desktop SVG — grow the labels
+  const FC = coarse ? 1.35 : 1;                               // centre value (tighter — lives inside the hole)
+
+  // resolve each segment's angular span (shares sum ~1; normalize defensively)
+  const totalV = segs.reduce((a, s) => a + s.value, 0) || 1;
+  let cum = START;
+  const arcs = segs.map((s) => {
+    const span = (s.value / totalV) * 360;
+    const a0 = cum, a1 = cum + span, mid = a0 + span / 2;
+    cum = a1;
+    return { ...s, a0, a1, mid, span, pct: Math.round((s.value / totalV) * 100) };
+  });
+  const byId = (id) => arcs.find((a) => a.id === id);
+  const anchorOf = (t) => { const a = byId(t.id); if (!a) return null; const p = polarTop(cx, cy, rMid, a.mid); return { x: p.x, y: p.y }; };
+
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const resolve = (mx, my) => {
+    const dx = mx - cx, dy = my - cy, dist = Math.hypot(dx, dy);
+    if (dist < rInner - 14 || dist > rOuter + 14) return null;
+    let deg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;       // 0 at top, clockwise
+    deg = ((deg - START) % 360 + 360) % 360 + START;
+    const hit = arcs.find((a) => deg >= a.a0 && deg < a.a1);
+    return hit ? targets.find((t) => t.id === hit.id) : null;
+  };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="SHARE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  const pillBtn = (on) => ({
+    fontFamily: pal.mono, fontSize: 10.5, letterSpacing: '0.04em', cursor: 'pointer',
+    padding: '6px 12px', minHeight: 32, borderRadius: 5, whiteSpace: 'nowrap',
+    background: on ? (pal.name === 'light' ? 'rgba(14,140,102,0.10)' : 'rgba(16,185,129,0.12)') : 'transparent',
+    border: `1px solid ${on ? accent : pal.borderHi}`, color: on ? accent : pal.text3,
+    transition: reduce ? undefined : 'color 160ms ease, border-color 160ms ease, background 160ms ease',
+  });
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Composition donut'}
+        style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }}
+        onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* faint full ring track — the "whole" the shares divide */}
+        <circle cx={cx} cy={cy} r={rMid} fill="none" stroke={pal.cardBorder} strokeWidth={thick} opacity={entered ? 0.5 : 0} style={{ transition: reduce ? undefined : 'opacity 500ms ease' }} />
+        {/* segment arcs (thick stroked) — draw in clockwise, staggered */}
+        {arcs.map((a, i) => {
+          const col = tierColor(a.tier, pal, accent);
+          const len = rMid * (Math.max(0, a.span - GAP)) * Math.PI / 180;
+          const on = focusId === a.id;
+          const dim = focusId && !on ? 0.4 : 1;
+          return (
+            <path key={a.id} d={arcPath(cx, cy, rMid, a.a0 + GAP / 2, a.a1 - GAP / 2)} fill="none" stroke={col}
+              strokeWidth={on ? thick + 3 : thick} strokeLinecap="butt"
+              pathLength={len} strokeDasharray={len}
+              strokeDashoffset={entered ? 0 : len}
+              opacity={entered ? dim : 0}
+              style={{ transition: reduce ? 'opacity 300ms ease' : `stroke-dashoffset 760ms cubic-bezier(0.3,0.7,0.2,1) ${140 + i * 240}ms, opacity 300ms ease, stroke-width 180ms ease` }} />
+          );
+        })}
+        {/* centre label — GROSS BALANCE + the (growing) magnitude, still 100% */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 500ms ease 620ms' }}>
+          <text x={cx} y={cy - 16 * FC} textAnchor="middle" style={halo(pal, 10 * FC, pal.text3)}>{(R.centerLabel || 'TOTAL').toUpperCase()}</text>
+          <text x={cx} y={cy + 12 * FC} textAnchor="middle" style={haloSans(pal, 30 * FC, pal.text1, 600)}>{scale ? scale.center : (R.centerValue || '100%')}</text>
+          {scale && <text x={cx} y={cy + 30 * FC} textAnchor="middle" style={halo(pal, 9 * FC, pal.text4)}>= 100%</text>}
+        </g>
+        {/* direct labels + short leaders (no detached legend) */}
+        {arcs.map((a) => {
+          const side = ((a.mid % 360) + 360) % 360 < 180 ? 'r' : 'l';
+          const edge = polarTop(cx, cy, rOuter + 4, a.mid);
+          const knee = polarTop(cx, cy, rOuter + 20, a.mid);
+          const endX = side === 'r' ? Math.min(knee.x + 30, width - 16) : Math.max(knee.x - 30, 16);
+          const col = tierColor(a.tier, pal, accent);
+          const on = focusId === a.id;
+          const mag = scale ? scale.seg[a.id] : null;
+          const anchorTxt = side === 'r' ? 'start' : 'end';
+          const tx = side === 'r' ? endX : endX;
+          return (
+            <g key={`lbl${a.id}`} style={{ opacity: entered ? (focusId && !on ? 0.5 : 1) : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 460ms ease 720ms' }}>
+              <path d={`M${edge.x.toFixed(1)} ${edge.y.toFixed(1)} L${knee.x.toFixed(1)} ${knee.y.toFixed(1)} L${endX.toFixed(1)} ${knee.y.toFixed(1)}`} fill="none" stroke={on ? col : pal.borderHi} strokeWidth={on ? 1.3 : 1} style={{ transition: trans('stroke') }} />
+              <text x={tx} y={knee.y - 6 * F} textAnchor={anchorTxt} style={haloSans(pal, 12.5 * F, on || a.id === spec.primaryKey ? col : pal.text1, 600)}>{a.label}</text>
+              <text x={tx} y={knee.y + 9 * F} textAnchor={anchorTxt} style={halo(pal, 10 * F, col)}>{a.pct}%{mag ? `  ·  ${mag}` : ''}</text>
+              {a.sub && !coarse && <text x={tx} y={knee.y + 22} textAnchor={anchorTxt} style={halo(pal, 8.5, pal.text4)}>{a.sub}</text>}
+            </g>
+          );
+        })}
+        {R.caption && !coarse && <text x={cx} y={height - 14} textAnchor="middle" style={{ ...haloSans(pal, 12, pal.text2, 500), fontStyle: 'italic', opacity: entered ? 1 : 0, transition: reduce ? undefined : 'opacity 500ms ease 900ms' }}>{R.caption}</text>}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {coarse && R.caption && (
+        <div style={{ textAlign: 'center', padding: '2px 14px 8px', fontFamily: pal.sans, fontSize: 13, fontStyle: 'italic', color: pal.text2, lineHeight: 1.45 }}>{R.caption}</div>
+      )}
+      {scales && (
+        <div role="group" aria-label="Time horizon — the share holds; the balance grows" style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', padding: '10px 8px 2px' }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.12em', color: pal.text4, alignSelf: 'center', marginRight: 2 }}>HORIZON</span>
+          {scales.map((s) => (
+            <button key={s.id} type="button" className="acf-fx-focusable" aria-pressed={scale && s.id === scale.id} onClick={() => setScaleId(s.id)} style={pillBtn(scale && s.id === scale.id)}>{s.label}</button>
+          ))}
+        </div>
+      )}
+      {tooltip}
+    </div>
+  );
+}
+
+/* ── LaneBarSvg — COMPARISON: parallel lanes, one shared scale ───────────────*
+ * The seed of the multi-lane family: two (or more) horizontal 100% bars, one per
+ * lane, sharing one scale and a common left origin, so the length of the aligned
+ * COMPARE segment ("capital back to work") is directly comparable lane-to-lane.
+ * A dashed reference line drops at the shortest compare-end; the surplus on the
+ * longer lane is the visual claim. A lane may carry a hatched DEFERRED underline —
+ * a claim that exists but is not taken now (so the money is not implied to vanish).
+ * Direct in-bar labels, no detached legend. Hover/pin/tap a segment for its why. */
+function LaneBarSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
+  const svgRef = useRef(null);
+  const LB = spec.laneBar;
+  const total = LB.total;
+  const bars = LB.bars;
+  const hatchId = `acf-hatch-${spec.chartId}`;
+  const F = coarse ? 1.75 : 1;                                // mobile is not a shrunk desktop SVG — grow the labels
+  const pad = { l: 18, r: 18, t: coarse ? 52 : 44, b: 20 };
+  const barX0 = pad.l, barX1 = width - pad.r;
+  const barW = barX1 - barX0;
+  const laneGap = coarse ? 40 : 30, titleH = coarse ? 30 : 22, barH = coarse ? 62 : 46, subH = coarse ? 30 : 22;
+  const laneH = titleH + barH + subH + laneGap;
+  const xOf = (v) => barX0 + (v / total) * barW;
+
+  // geometry per bar: segment rects (cumulative), the compare-end x, the deferred strip
+  const lanes = bars.map((bar, li) => {
+    const yTop = pad.t + li * laneH;
+    const barY = yTop + titleH;
+    let cur = barX0;
+    const segs = bar.segments.map((s) => { const x0 = cur, w = (s.value / total) * barW; cur += w; return { ...s, x0, w, cx: x0 + w / 2, cy: barY + barH / 2 }; });
+    const compareSeg = segs.find((s) => s.compare);
+    const compareEnd = compareSeg ? compareSeg.x0 + compareSeg.w : null;
+    return { ...bar, li, yTop, barY, segs, compareEnd, deferred: bar.deferred || null };
+  });
+  const compareEnds = lanes.map((l) => l.compareEnd).filter((v) => v != null);
+  const minCompare = compareEnds.length ? Math.min(...compareEnds) : null;
+  const maxCompare = compareEnds.length ? Math.max(...compareEnds) : null;
+
+  // hit map: segment centre + optional deferred-strip centre
+  const anchors = {};
+  lanes.forEach((l) => {
+    l.segs.forEach((s) => { anchors[s.id] = { x: s.cx, y: s.cy }; });
+    if (l.deferred) anchors[l.deferred.id || `${l.id}-defer`] = { x: xOf(l.deferred.value) / 1, y: l.barY + barH + 12 };
+  });
+  const anchorOf = (t) => anchors[t.id] || null;
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const resolve = (mx, my) => {
+    for (const l of lanes) {
+      if (my >= l.barY - 6 && my <= l.barY + barH + 6) {
+        const hit = l.segs.find((s) => mx >= s.x0 && mx < s.x0 + s.w);
+        if (hit) return targets.find((t) => t.id === hit.id) || null;
+      }
+      if (l.deferred && my > l.barY + barH && my <= l.barY + barH + 22) {
+        const dId = l.deferred.id || `${l.id}-defer`;
+        const dEnd = xOf(l.deferred.value);
+        if (mx >= barX0 && mx <= dEnd + 8) return targets.find((t) => t.id === dId) || null;
+      }
+    }
+    return null;
+  };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
+  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+
+  const isActiveHere = active && targets.some((t) => t.id === active.id);
+  const focusId = isActiveHere ? active.id : null;
+  const anchor = isActiveHere ? anchorOf(active) : null;
+  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
+
+  let tooltip = null;
+  if (!coarse && isActiveHere && anchor) {
+    const meta = targets.find((t) => t.id === active.id);
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="CAPITAL" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+  const surplusMid = minCompare != null && maxCompare != null && maxCompare > minCompare ? (minCompare + maxCompare) / 2 : null;
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Paired comparison bars'}
+        style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }}
+        onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        <defs>
+          <pattern id={hatchId} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="6" height="6" fill="none" />
+            <line x1="0" y1="0" x2="0" y2="6" stroke={pal.tierSecondary} strokeWidth="1.1" opacity="0.6" />
+          </pattern>
+        </defs>
+        {LB.totalLabel && <text x={barX0} y={pad.t - 20} textAnchor="start" style={halo(pal, 10.5 * F, pal.text3)}>{LB.totalLabel.toUpperCase()}</text>}
+        {/* the 0 and total ticks — the shared scale both lanes share */}
+        {!coarse && <text x={barX1} y={pad.t - 20} textAnchor="end" style={halo(pal, 9.5, pal.text4)}>{total} {LB.unit || ''} EACH</text>}
+
+        {/* shared compare reference line — dropped at the shortest "capital back to work" */}
+        {minCompare != null && (
+          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 500ms ease 900ms' }}>
+            <line x1={minCompare} y1={pad.t - 6} x2={minCompare} y2={pad.t + lanes.length * laneH - laneGap + 4} stroke={pal.axis} strokeWidth="1" strokeDasharray="3 4" opacity="0.7" />
+          </g>
+        )}
+
+        {lanes.map((l) => {
+          const laneActive = l.segs.some((s) => s.id === focusId) || (l.deferred && (l.deferred.id || `${l.id}-defer`) === focusId);
+          return (
+            <g key={l.id}>
+              {/* lane title */}
+              <text x={barX0} y={l.yTop + 13 * F} textAnchor="start" style={haloSans(pal, 13 * F, pal.text1, 600)}>{l.label}</text>
+              {l.sublabel && !coarse && <text x={barX0 + measureLabelShift(l.label)} y={l.yTop + 13} textAnchor="start" style={halo(pal, 9.5, pal.text4)}>· {l.sublabel}</text>}
+              {/* faint track */}
+              <rect x={barX0} y={l.barY} width={barW} height={barH} rx={5} fill={pal.surface} stroke={pal.cardBorder} strokeWidth="1" opacity={entered ? 1 : 0} style={{ transition: reduce ? undefined : 'opacity 400ms ease' }} />
+              {/* segments (grow in left→right, staggered per lane) */}
+              {l.segs.map((s, si) => {
+                const col = tierColor(s.tier, pal, accent);
+                const on = focusId === s.id;
+                const dim = focusId && !on && !laneActive ? 0.5 : 1;
+                return (
+                  <g key={s.id} style={{ opacity: entered ? dim : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 360ms ease ${200 + l.li * 220 + si * 90}ms` }}>
+                    <rect x={s.x0} y={l.barY} width={entered ? s.w : 0} height={barH} rx={si === 0 ? 5 : 0} fill={col} opacity={s.tier === 'stress' ? 0.9 : 0.92}
+                      style={{ transition: reduce ? undefined : `width 560ms cubic-bezier(0.3,0.7,0.2,1) ${200 + l.li * 220 + si * 90}ms` }} />
+                    {s.w > (coarse ? 120 : 78) && (
+                      <>
+                        <text x={s.cx} y={l.barY + barH / 2 - (coarse ? 6 : 3)} textAnchor="middle" style={haloSans(pal, 12 * F, '#ffffff', 600)}>{s.valueLabel || `${Math.round(s.value)}`}</text>
+                        <text x={s.cx} y={l.barY + barH / 2 + (coarse ? 16 : 11)} textAnchor="middle" style={halo(pal, 8.5 * F, 'rgba(255,255,255,0.92)')}>{s.label}</text>
+                      </>
+                    )}
+                  </g>
+                );
+              })}
+              {/* narrow-segment external labels (leadered below) */}
+              {l.segs.filter((s) => s.w <= (coarse ? 120 : 78)).map((s) => (
+                <text key={`nl${s.id}`} x={s.cx} y={l.barY + barH + 12 * F} textAnchor="middle" style={halo(pal, 8.5 * F, tierColor(s.tier, pal, accent))}>{(s.valueLabel || Math.round(s.value)) + ' ' + s.label}</text>
+              ))}
+              {/* deferred underline — the claim that still exists, just not taken now */}
+              {l.deferred && (
+                <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 400ms ease ${400 + l.li * 220}ms` }}>
+                  <rect x={barX0} y={l.barY + barH + 5} width={xOf(l.deferred.value) - barX0} height={coarse ? 12 : 9} rx={2} fill={`url(#${hatchId})`} stroke={pal.tierSecondary} strokeWidth="1" strokeDasharray="3 3" opacity="0.85" />
+                  <text x={barX0 + 3} y={l.barY + barH + (coarse ? 34 : 27)} textAnchor="start" style={halo(pal, 8.5 * F, pal.text3)}>{l.deferred.label}</text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+
+        {/* surplus callout — the "still working now" gap on the longer lane (clamped in-bounds) */}
+        {surplusMid != null && (() => {
+          const label = LB.surplusLabel || `+${Math.round((maxCompare - minCompare) / barW * total)} still working now`;
+          const fs = 10 * F;
+          const halfW = Math.min(barW / 2, (label.length * fs * 0.52) / 2);
+          const sx = Math.max(barX0 + halfW, Math.min((minCompare + maxCompare) / 2, barX1 - halfW));
+          return (
+            <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 500ms ease 1000ms' }}>
+              <text x={sx} y={pad.t + lanes.length * laneH - laneGap + 20} textAnchor="middle" style={halo(pal, fs, accent)}>{label}</text>
+            </g>
+          );
+        })()}
+        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+      </svg>
+      {tooltip}
+    </div>
+  );
+}
+// approximate label advance so a lane sublabel sits after the title (viewBox units)
+function measureLabelShift(label) { return Math.min(300, 10 + (label ? label.length : 0) * 7.6); }
+
 /* ── FrameworkChart (orchestrator) ──────────────────────────────────────────*/
 export default function FrameworkChart({ id, spec: specProp, theme = 'dark', accent: accentName = 'green', className, readerContext }) {
   const spec = specProp || getChartSpec(id);
@@ -2304,6 +2606,8 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'scenario' && <ScenarioSvg spec={spec} height={hh(360)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'heartbeat' && <HeartbeatSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'sequenceRisk' && <SequenceRiskSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'radial' && <RadialSvg spec={spec} height={hh(430)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'laneBar' && <LaneBarSvg spec={spec} height={hh(390)} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={hh(426)} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}

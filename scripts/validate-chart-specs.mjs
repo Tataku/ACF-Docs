@@ -21,9 +21,12 @@ import {
   DATA_MODES, SOURCE_ROLES, CONTEXT_KEYS, LEGACY_CONTEXT_KEYS, PERSONAL_KINDS,
   INTERACTION_TYPES, GESTURES, MOTION_TYPES, MOTION_DURATIONS, MOTION_TIMING, BACKGROUND_ROLES, BANNED_PROMISE_WORDS,
   EXPERIENCE_ROLES, BEAT_KINDS, BEAT_TIMINGS, MOBILE_INTERACTIONS, CHART_HEIGHTS,
+  VISUAL_RELATIONSHIPS, LAYOUT_RELATIONSHIPS,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles, getSimulationIntro,
-  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming,
+  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming, resolveVisualRelationship,
 } from '../components/framework-charts/chart-specs.mjs';
+
+const relationshipAdvisories = [];   // soft warnings (relationship ↔ layout fit); never fail the build
 
 const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'part-4', 'both']);
 const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2', 'part-3', 'part-4']);
@@ -140,6 +143,45 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(sq && Array.isArray(sq.good) && Array.isArray(sq.bad) && sq.good.length === sq.bad.length && sq.good.length >= 4, `${w} sequenceRisk needs equal-length good/bad return sets`);
     ok(Array.isArray(sq.goodPath) && Array.isArray(sq.badPath) && sq.goodPath.length === sq.good.length + 1, `${w} sequenceRisk needs generated paths`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
+  } else if (s.layout === 'radial') {
+    // composition donut / concentric rings: segments define the angular SHARE
+    const r = s.radial;
+    ok(r && Array.isArray(r.segments) && r.segments.length >= 2, `${w} radial needs >= 2 segments`);
+    const segIds = (r.segments || []).map((seg) => seg.id);
+    ok(new Set(segIds).size === segIds.length, `${w} radial has duplicate segment ids`);
+    (r.segments || []).forEach((seg) => ok(typeof seg.value === 'number' && seg.value > 0, `${w} radial segment ${seg.id} needs a positive value`));
+    if (r.variant != null) ok(['donut', 'concentric'].includes(r.variant), `${w} radial variant must be donut|concentric: ${r.variant}`);
+    // optional quiet control: the SHARE (arcs) holds while the MAGNITUDE grows over
+    // a scale (e.g. today / +12 / +25 years) — each scale re-labels centre + segments.
+    if (r.scales != null) {
+      ok(Array.isArray(r.scales) && r.scales.length >= 2, `${w} radial.scales must have >= 2 entries when present`);
+      const scaleIds = r.scales.map((sc) => sc.id);
+      ok(new Set(scaleIds).size === scaleIds.length, `${w} radial has duplicate scale ids`);
+      r.scales.forEach((sc) => {
+        ok(sc.label && sc.label.trim(), `${w} radial scale ${sc.id} needs a label`);
+        ok(sc.center && String(sc.center).trim(), `${w} radial scale ${sc.id} needs a center value`);
+        ok(sc.seg && segIds.every((id) => String(sc.seg[id] ?? '').trim()), `${w} radial scale ${sc.id} needs a magnitude for every segment`);
+      });
+      if (r.defaultScale != null) ok(scaleIds.includes(r.defaultScale), `${w} radial defaultScale ${r.defaultScale} is not a scale id`);
+    }
+    ok(segIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a radial segment`);
+    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
+  } else if (s.layout === 'laneBar') {
+    // paired 100% split bars: each bar splits a shared total; the aligned compare
+    // segment is the visual claim (how much redeploys / is retained across bars)
+    const sb = s.laneBar;
+    ok(sb && Array.isArray(sb.bars) && sb.bars.length >= 2, `${w} laneBar needs >= 2 bars`);
+    ok(typeof sb.total === 'number' && sb.total > 0, `${w} laneBar needs a positive total`);
+    const allSeg = [];
+    (sb.bars || []).forEach((bar) => {
+      ok(bar.id && bar.label, `${w} laneBar bar ${bar.id} needs id + label`);
+      ok(Array.isArray(bar.segments) && bar.segments.length >= 1, `${w} laneBar bar ${bar.id} needs segments`);
+      (bar.segments || []).forEach((seg) => { ok(typeof seg.value === 'number' && seg.value >= 0, `${w} laneBar segment ${seg.id} needs a value >= 0`); allSeg.push(seg.id); });
+    });
+    ok(new Set(allSeg).size === allSeg.length, `${w} laneBar has duplicate segment ids`);
+    if (sb.compareSegId != null) ok(allSeg.includes(sb.compareSegId), `${w} laneBar compareSegId ${sb.compareSegId} is not a segment id`);
+    ok(allSeg.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a laneBar segment`);
+    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);
@@ -207,6 +249,20 @@ for (const s of FRAMEWORK_CHART_SPECS) {
   // Story beats + experience role — the comprehension-arc contract (resolved).
   ok(EXPERIENCE_ROLES.includes(resolveExperienceRole(s)), `${w} bad experienceRole: ${resolveExperienceRole(s)}`);
   if (s.experienceRole) ok(EXPERIENCE_ROLES.includes(s.experienceRole), `${w} explicit experienceRole invalid: ${s.experienceRole}`);
+
+  // Visual-relationship grammar — the resolved relationship is a valid enum value
+  // (hard). Whether the CHOSEN layout can honestly express a DECLARED relationship
+  // is a soft ADVISORY (collected, printed, never fails) so the grammar can be
+  // adopted incrementally without breaking legacy charts that predate it.
+  const vr = resolveVisualRelationship(s);
+  ok(VISUAL_RELATIONSHIPS.includes(vr), `${w} bad visualRelationship: ${vr}`);
+  if (s.visualRelationship) {
+    ok(VISUAL_RELATIONSHIPS.includes(s.visualRelationship), `${w} explicit visualRelationship invalid: ${s.visualRelationship}`);
+    const fit = LAYOUT_RELATIONSHIPS[s.layout];
+    if (fit && !fit.includes(s.visualRelationship)) {
+      relationshipAdvisories.push(`${w} layout '${s.layout}' is not a recommended form for relationship '${s.visualRelationship}' (fits: ${fit.join(', ')}). Pick a form from the relationship, or re-check the claim.`);
+    }
+  }
   const beats = resolveStoryBeats(s);
   ok(Array.isArray(beats) && beats.length >= 2, `${w} storyBeats must resolve to >= 2 beats`);
   let lastT = -1;
@@ -275,4 +331,11 @@ console.log(`  data modes  : ${tally((s) => s.visualDataMode)}`);
 console.log(`  interaction : ${tally((s) => resolveInteraction(s).type)}`);
 console.log(`  motion      : ${tally((s) => resolveMotionProfile(s).type)}`);
 console.log(`  experience  : ${tally((s) => resolveExperienceRole(s))}`);
+console.log(`  relationship: ${tally((s) => resolveVisualRelationship(s))}`);
 console.log(`  personalized: ${FRAMEWORK_CHART_SPECS.filter((s) => s.personalization).map((s) => s.chartId).join(', ') || '(none)'}`);
+
+// Soft advisories (relationship ↔ layout fit) — surfaced, never a gate.
+if (relationshipAdvisories.length) {
+  console.log(`\n⚠ visual-relationship advisories (${relationshipAdvisories.length}) — not failures:`);
+  relationshipAdvisories.forEach((a) => console.log(`  · ${a}`));
+}

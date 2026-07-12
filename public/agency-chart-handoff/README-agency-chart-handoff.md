@@ -57,6 +57,43 @@ input affect? What is the one idea to remember?** If it can't, it isn't finished
   structural context, accent reserved for the thesis line / selected path, organic
   brush imperfection only where it supports the concept. Human but precise.
 
+### Chart grammar — choose the FORM from the RELATIONSHIP (read this before picking a layout)
+
+The engine carries `claimStack`, `experienceRole`, `interaction`, `motion`, and
+`layout`, but the thing that most often goes wrong is **rendering a claim in a
+technically-valid-but-semantically-weak form** — a line for a *composition* claim, a
+flowchart for a *magnitude comparison*. So every chart also resolves a
+**`visualRelationship`** (`resolveVisualRelationship`, `chart-specs.mjs`): the
+semantic relationship it teaches. **Name the relationship first, then pick the form
+from this matrix — do not reach for the nearest existing layout.**
+
+`VISUAL_RELATIONSHIPS = trend · comparison · composition · flow · threshold ·
+distribution · sequence · matrix · reveal · hierarchy`. The validator hard-checks the
+value and emits a **soft advisory** (never a build failure) when a declared
+relationship sits outside its layout's `LAYOUT_RELATIONSHIPS` fit — a nudge to
+re-pick the form or re-examine the claim.
+
+| Relationship | Reach for | Not | Live example |
+|---|---|---|---|
+| **composition** — parts of one whole / ownership | **`radial`** donut (share IS the claim); a 100% split bar for 2–3 parts | a line/area (can't show a share); a pie with >5 slivers | `p4-gross-not-net` (donut) |
+| **comparison** — magnitude across a few things | **`laneBar`** (parallel lanes, one scale, aligned compare segment); `single` slope; `scenario` | a flow diagram (routing ≠ magnitude); a donut | `p4-roc-yield` (laneBar), `p3-exposure-not-control` |
+| **trend** — change through time | `single` / `dual` line·area·stepped | bars for a smooth series; a diagram | `p1-cpi-assets`, `p4-tax-wedge` (scaling divergence) |
+| **flow** — causal routing / filtering / feedback | `flow` · `bridge` · `gate` · `governanceLoop` · `feedbackLoop` | a bar/line (loses the routing); a donut | `p2-capital-finds-bottleneck` (bridge) |
+| **threshold / capacity** — against a limit | `single` with a guide/level (bullet-like); a gauge | a full time series when only the crossing matters | `p3-reserve-share-evolves` |
+| **distribution** — spread / range / density | `single` range·band·histogram | a single mean line (hides the spread) | *(open)* |
+| **sequence** — order dependence | `sequenceRisk` (shared deck, two orders) | asserting "same inputs" without showing them | `p1-sequence-risk` |
+| **matrix** — tradeoff / requirement × asset / regime | `quadrant` · `scorecard` | prose table; a bar chart of one column | `p3-ten-tests` (scorecard), `dl-regime-map` (quadrant) |
+| **reveal** — two truths, before/after | `dual` + `perspectiveSlider` (clipped spatial wipe) | an opacity toggle | `p1-policy-constraint` |
+| **hierarchy** — nesting / part-of-part | `radial` concentric (reserved) · (treemap = future) | forcing it into a flat donut | *(future)* |
+
+**The multi-lane family (`laneBar`).** `laneBar` is the first member of a **multi-lane
+comparison** family: N parallel lanes over ONE shared scale, aligned at a common
+origin so the length of the marked `compare` segment is directly comparable
+lane-to-lane. A lane may carry a hatched **deferred** underline — a claim that exists
+but is not taken *now* (so the picture never implies money vanished). It is the seed
+of a unified multi-lane vocabulary intended to be shared with the dashboard analytics
+engine (see the cross-engine note below).
+
 ### Chart doctrine metadata (resolved, with explicit override)
 Carried per spec; **derived from layout when not declared**, so the doctrine holds
 across all charts without hand-editing each. Surfaced in `chart-inventory.json`,
@@ -329,6 +366,18 @@ macro thesis), and **Part 3** (Bitcoin convexity backbone).
 
 Part 3 ships **6 active** exhibits; the two deferred specs are kept in the registry (`status: deferred`) but hidden from the handoff page pending redesign.
 
+### Part 4 · tax architecture & return-of-capital strategy
+
+Three intentionally-different forms, one per relationship — the set proves the grammar:
+
+| chartId | Title | Layout | Relationship | Mode |
+|---|---|---|---|---|
+| `p4-tax-wedge` | The Tax Wedge | single | trend (scaling divergence) | representative |
+| `p4-gross-not-net` | Gross Is Not Net | **radial** (donut) | **composition** / ownership | conceptual |
+| `p4-roc-yield` | ROC Changes the Yield | **laneBar** | **comparison** (capital back to work) | conceptual |
+
+All three are wired into the live `/part-4-tax-architecture-roc-strategy` page. They read as one system (type, palette, spacing, interaction, disclosures, motion) while their *forms* differ because their *claims* differ: a scaling wedge, an ownership split, a retained-capital comparison.
+
 The machine-readable version of **all** charts (with claims, sources,
 disclosures) is in [`chart-inventory.json`](./chart-inventory.json).
 
@@ -354,6 +403,9 @@ Base (browse): `https://github.com/Tataku/ACF-Docs/blob/main/`
 Two families, one engine:
 
 - **Data charts** — `single` (time series, payoff, distribution), `dual` (stacked panels), `quadrant` (growth × inflation regime map).
+- **Composition & comparison** (the relationship-driven forms — see the Chart Grammar matrix):
+  - `radial` — a **composition** donut: the angular split IS the claim (you do not own the whole). Built on thick stroked arcs (clean clockwise draw-in, angular hit-testing) — not a chart-library pie: direct labels + short leaders, never a detached legend. `variant: 'donut'` (single ring). An optional quiet **scale control** (`radial.scales`, e.g. today / +12 / +25) grows the *magnitude* while the arcs — the *share* — never move, so an embedded claim is seen compounding in step. Center label + value in the hole. `concentric` variant reserved (hierarchy / nested growth). Coarse pointers get bigger labels + an HTML caption + the tap-to-inspect rail (not a shrunk desktop SVG). e.g. *Gross Is Not Net*.
+  - `laneBar` — the **multi-lane comparison** seed: N parallel 100% bars over ONE shared scale, aligned at a common origin so the marked `compare` segment is directly comparable lane-to-lane. A lane may carry a hatched **deferred** underline (a claim that exists but is not taken now — never implies money vanished). A dashed reference line drops at the shortest compare-end; the surplus on the longer lane is the visual claim. Direct in-bar labels, no detached legend. e.g. *ROC Changes the Yield*.
 - **Framework diagrams** (bespoke, brush-influenced, not flowcharts):
   - `systemLoop` — reflexive self-reinforcing **ring** with a reversal cue. **Reserved** for concepts where circularity itself is the story; no spec currently uses it (kept available for a future true-ring chart).
   - `feedbackLoop` — causal feedback as **two lanes**: reinforcing (accent, arrows thicken) and reversing (stress, arrows thin), sharing one labelled mechanism (price → capital → fundamentals → validation), each looping back, with a quiet "REFLEXIVITY" between them (e.g. *Markets Feed Back*). Teaches "same mechanism, two directions" at a glance — not a decorative orbit.

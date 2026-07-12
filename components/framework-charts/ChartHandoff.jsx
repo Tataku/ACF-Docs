@@ -12,7 +12,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import FrameworkChart from './FrameworkChart';
 import { BrushChevron } from './icons';
-import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel, HORIZON_BANDS } from './chart-specs.mjs';
+import { FRAMEWORK_CHART_SPECS, HANDOFF_GROUPS, specsByGroup, footerModel, HORIZON_BANDS, resolveVisualRelationship } from './chart-specs.mjs';
 import { getPalette, getAccent } from './palette';
 
 const PLACEMENT = { both: 'Docs + Part 1', 'docs-landing': 'Docs landing', 'part-1': 'Part 1', 'part-2': 'Part 2', 'part-3': 'Part 3' };
@@ -58,6 +58,49 @@ function InventoryTable({ pal, accent, specs }) {
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: pal.mono, fontSize: 9, color: pal.text3 }}><ModeGlyph pal={pal} mode={s.visualDataMode} />{MODE[s.visualDataMode]}</span>
           <span style={{ fontFamily: pal.mono, fontSize: 9, color: STATUS[s.status].tone === 'ok' ? accent : STATUS[s.status].tone === 'warn' ? pal.bandStressText : pal.text4 }}>{STATUS[s.status].label}</span>
           <span style={{ textAlign: 'right', fontFamily: pal.mono, fontSize: 9, color: s.wiredPublic ? accent : pal.text4 }}>{s.wiredPublic ? 'LIVE' : '—'}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// The visual-relationship grammar, made visible in the gallery so an agent picks the
+// FORM from the CLAIM (not from the nearest layout). Mirrors the Chart Grammar matrix
+// in README-agency-chart-handoff.md. Live example = the first spec resolving to each.
+const GRAMMAR = [
+  { rel: 'composition', form: 'radial · donut', use: 'parts of one whole · ownership' },
+  { rel: 'comparison', form: 'laneBar · slope · scenario', use: 'magnitude across a few things' },
+  { rel: 'trend', form: 'single · dual', use: 'change through time' },
+  { rel: 'flow', form: 'flow · bridge · gate · loops', use: 'routing · filtering · feedback' },
+  { rel: 'threshold', form: 'single + guide/level', use: 'against a limit · capacity' },
+  { rel: 'distribution', form: 'single · range · band', use: 'spread · density' },
+  { rel: 'sequence', form: 'sequenceRisk', use: 'order dependence' },
+  { rel: 'matrix', form: 'quadrant · scorecard', use: 'tradeoff · requirement × asset' },
+  { rel: 'reveal', form: 'dual + perspectiveSlider', use: 'two truths · before/after' },
+  { rel: 'hierarchy', form: 'radial concentric (reserved)', use: 'nesting · part-of-part' },
+];
+function ChartGrammar({ pal, accent }) {
+  const example = {};
+  FRAMEWORK_CHART_SPECS.forEach((s) => { const r = resolveVisualRelationship(s); if (!example[r]) example[r] = s.chartId; });
+  const cols = '116px 1fr 1.2fr 150px';
+  const head = { fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.16em', color: pal.text4 };
+  return (
+    <div style={{ border: `1px solid ${pal.cardBorder}`, borderRadius: 7, overflow: 'hidden', marginBottom: 22 }}>
+      <div style={{ padding: '11px 16px', background: pal.surface, borderBottom: `1px solid ${pal.cardBorder}` }}>
+        <div style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.18em', color: accent, marginBottom: 3 }}>CHART GRAMMAR · FORM FOLLOWS THE CLAIM</div>
+        <span style={{ fontFamily: pal.sans, fontSize: 11.5, color: pal.text3 }}>Name the relationship the chart teaches, then pick the form from this row — not the nearest existing layout.</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '0 14px', padding: '9px 16px', borderBottom: `1px solid ${pal.cardBorder}`, ...head }}>
+        <span>RELATIONSHIP</span><span>REACH FOR</span><span>WHEN</span><span style={{ textAlign: 'right' }}>LIVE EXAMPLE</span>
+      </div>
+      {GRAMMAR.map((g, i) => (
+        <div key={g.rel} style={{ display: 'grid', gridTemplateColumns: cols, gap: '0 14px', alignItems: 'baseline', padding: '10px 16px', borderBottom: i < GRAMMAR.length - 1 ? `1px solid ${pal.cardBorder}` : 'none' }}>
+          <span style={{ fontFamily: pal.mono, fontSize: 11, color: pal.text1, fontWeight: 600 }}>{g.rel}</span>
+          <span style={{ fontFamily: pal.mono, fontSize: 10.5, color: accent }}>{g.form}</span>
+          <span style={{ fontFamily: pal.sans, fontSize: 11.5, color: pal.text3 }}>{g.use}</span>
+          <span style={{ textAlign: 'right', fontFamily: pal.mono, fontSize: 10 }}>{example[g.rel]
+            ? <a href={`#${example[g.rel]}`} style={{ color: pal.text3, textDecoration: 'none', borderBottom: `1px dotted ${pal.borderHi}` }}>{example[g.rel]}</a>
+            : <span style={{ color: pal.text4 }}>—</span>}</span>
         </div>
       ))}
     </div>
@@ -542,6 +585,7 @@ export default function ChartHandoff({ part = 'part-1', initialTheme = 'dark', a
           </div>
 
           <SimulationContextBar pal={pal} accent={accent} ctx={readerCtx} setCtx={setReaderCtx} compact={false} />
+          <ChartGrammar pal={pal} accent={accent} />
           <InventoryTable pal={pal} accent={accent} specs={specs} />
         </>
       )}

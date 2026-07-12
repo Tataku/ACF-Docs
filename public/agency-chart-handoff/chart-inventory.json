@@ -38,6 +38,18 @@
       "reveal",
       "matrix",
       "diagram"
+    ],
+    "visualRelationships": [
+      "trend",
+      "comparison",
+      "composition",
+      "flow",
+      "threshold",
+      "distribution",
+      "sequence",
+      "matrix",
+      "reveal",
+      "hierarchy"
     ]
   },
   "count": 31,
@@ -58,6 +70,7 @@
       "readerAction": "Compare the capped left against the open right",
       "readerTakeaway": "Survive the left tail; stay convex on the right tail.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -135,6 +148,7 @@
       "readerAction": null,
       "readerTakeaway": "Same center of gravity, deliberately reshaped tails.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -214,6 +228,7 @@
       "readerAction": "See where convexity actually pays",
       "readerTakeaway": "Patience through compression; size into confirmation; let the release run.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -293,6 +308,7 @@
       "readerAction": null,
       "readerTakeaway": "You are not allocating in a vacuum; you are allocating into weather.",
       "experienceRole": "diagram",
+      "visualRelationship": "matrix",
       "storyBeats": [
         {
           "kind": "context",
@@ -370,6 +386,7 @@
       "readerAction": null,
       "readerTakeaway": "The goal is not to avoid risk — it is to govern it.",
       "experienceRole": "diagram",
+      "visualRelationship": "flow",
       "storyBeats": [
         {
           "kind": "context",
@@ -447,6 +464,7 @@
       "readerAction": "Watch the hedge fall with the risk",
       "readerTakeaway": "When inflation drives the regime, the hedge can fall with the risk.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -533,6 +551,7 @@
       "readerAction": "Watch the diversifier sign flip",
       "readerTakeaway": "The diversifier did not disappear. The regime that produced it did.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -619,6 +638,7 @@
       "readerAction": "See how far assets outran CPI",
       "readerTakeaway": "Consumer prices roughly doubled. The assets that store capital did far more.",
       "experienceRole": "comparison",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -705,6 +725,7 @@
       "readerAction": "Reveal what the surface was hiding",
       "readerTakeaway": "For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.",
       "experienceRole": "reveal",
+      "visualRelationship": "reveal",
       "storyBeats": [
         {
           "kind": "context",
@@ -798,6 +819,7 @@
       "readerAction": "Compare the two orders of the same deck",
       "readerTakeaway": "Withdrawal-phase capital does not care about the average. It cares about the order.",
       "experienceRole": "mechanism",
+      "visualRelationship": "sequence",
       "storyBeats": [
         {
           "kind": "context",
@@ -879,6 +901,7 @@
       "readerAction": "See compounding survive the drawdown",
       "readerTakeaway": "Volatile assets can still compound — through, not around, the drawdown.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -958,6 +981,7 @@
       "readerAction": "Trace the thesis as it orbits the unmoving axis",
       "readerTakeaway": "Keep the method fixed; let the thesis move.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -1035,6 +1059,7 @@
       "readerAction": "Trace the path that crosses the line and never recovers",
       "readerTakeaway": "You cannot compound from zero.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -1112,6 +1137,7 @@
       "readerAction": "See the with-exits line flatten where the no-exit line runs on",
       "readerTakeaway": "Size up on conviction, but keep the exit.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -1189,6 +1215,7 @@
       "readerAction": "Trace the loop back to price",
       "readerTakeaway": "Price is an input, not just an output.",
       "experienceRole": "diagram",
+      "visualRelationship": "flow",
       "storyBeats": [
         {
           "kind": "context",
@@ -1259,6 +1286,7 @@
       "readerAction": "Trace the split that only opens late",
       "readerTakeaway": "A long horizon rewrites the prudent choice.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -1347,6 +1375,7 @@
       "readerAction": "Trace the cascade down to the ownable exposure",
       "readerTakeaway": "Trace the force to its bottleneck to its instruments.",
       "experienceRole": "diagram",
+      "visualRelationship": "flow",
       "storyBeats": [
         {
           "kind": "context",
@@ -1417,6 +1446,7 @@
       "readerAction": "Trace the survivor band as it thins gate by gate",
       "readerTakeaway": "Most narratives never make it through the gates.",
       "experienceRole": "diagram",
+      "visualRelationship": "flow",
       "storyBeats": [
         {
           "kind": "context",
@@ -1487,6 +1517,7 @@
       "readerAction": "Trace the sizing curve rise and fall beneath the flat validity line",
       "readerTakeaway": "Right thesis, wrong size, still a loss.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -1564,6 +1595,7 @@
       "readerAction": "Trace the liquidity turn, then the asset’s wider follow",
       "readerTakeaway": "Convex assets ride the liquidity tide, magnified.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -1648,6 +1680,7 @@
       "readerAction": "Trace the price against the corridor bands",
       "readerTakeaway": "A map of where Bitcoin sits on its adoption curve, not a forecast.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -1727,6 +1760,7 @@
       "readerAction": "Scan the column that clears every row",
       "readerTakeaway": "No alternative clears all ten at once.",
       "experienceRole": "matrix",
+      "visualRelationship": "matrix",
       "storyBeats": [
         {
           "kind": "context",
@@ -1797,6 +1831,7 @@
       "readerAction": "See the drawdown sized to your portfolio",
       "readerTakeaway": "The drawdown is the price of admission, not a reason to avoid it.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -1887,6 +1922,7 @@
       "readerAction": "Pick a posture, then stress it",
       "readerTakeaway": "The strategy that survives behaviorally is the strategy that can compound.",
       "experienceRole": "comparison",
+      "visualRelationship": "comparison",
       "storyBeats": [
         {
           "kind": "context",
@@ -1976,6 +2012,7 @@
       "readerAction": "Watch the band pinch tight, then fan apart",
       "readerTakeaway": "Agreement strengthens conviction; disagreement is the signal.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -2048,6 +2085,7 @@
       "readerAction": "Watch units rise as price falls",
       "readerTakeaway": "For an accumulator, drawdowns become unit-capture windows — if the plan survives them.",
       "experienceRole": "conversion",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -2125,6 +2163,7 @@
       "readerAction": "Follow the lifecycle left to right to the highlighted liquidity node",
       "readerTakeaway": "Liquidity comes from borrowing against the reserve, not selling it.",
       "experienceRole": "diagram",
+      "visualRelationship": "flow",
       "storyBeats": [
         {
           "kind": "context",
@@ -2202,6 +2241,7 @@
       "readerAction": "Trace the line up through the target band and the mature threshold to the governance mark",
       "readerTakeaway": "Success changes the job: from accumulating to governing the reserve.",
       "experienceRole": "evidence",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -2279,6 +2319,7 @@
       "readerAction": "Follow the gap between Roth and pre-tax as the outcome scales right",
       "readerTakeaway": "Roth keeps essentially the whole win; taxable and pre-tax each surrender a slice that grows with the size of the outcome.",
       "experienceRole": "comparison",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -2357,14 +2398,15 @@
       "part": "part-4",
       "status": "implemented",
       "wiredPublic": false,
-      "layout": "dual",
+      "layout": "radial",
       "dataMode": "conceptual",
-      "claimLabel": "PRE-TAX · JOINT CLAIM",
-      "primaryClaim": "A pre-tax balance is shared — the deferred tax compounds in step with what you keep",
-      "visualProof": "Two stacked panels over the same years: the share you keep rises on top, and the tax authority’s deferred claim rises in lockstep below it, the same shape scaled down",
-      "readerAction": "Watch the lower claim rise in step with the balance you keep above",
+      "claimLabel": "PRE-TAX · OWNERSHIP",
+      "primaryClaim": "A pre-tax statement says 100 percent, but you do not own 100 percent",
+      "visualProof": "One donut splits the gross balance into the net you keep and the deferred tax claim; a horizon control grows the balance while the 70/30 split never moves, so the claim is seen compounding in step",
+      "readerAction": "Read the split first, then step the horizon and watch the claim grow in step",
       "readerTakeaway": "Only the net is yours, and the part you owe grows as you do.",
-      "experienceRole": "mechanism",
+      "experienceRole": "evidence",
+      "visualRelationship": "composition",
       "storyBeats": [
         {
           "kind": "context",
@@ -2385,25 +2427,23 @@
       "interaction": {
         "type": "hover",
         "gesture": "hover",
-        "conceptMatch": "Hovering a panel ties the deferred claim below to the balance it is a share of"
+        "conceptMatch": "Hovering a share ties the deferred claim to the balance it is a fraction of"
       },
       "motionProfile": {
-        "type": "timeSweep",
+        "type": "diagramBuild",
         "duration": "calm"
       },
       "motionTiming": {
-        "sweepMs": 1900,
-        "fastMs": 560,
-        "mediumMs": 1100,
-        "staggerMs": 140
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
       },
-      "backgroundRoles": [
-        "regime"
-      ],
+      "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
         "chartHeight": "tall",
-        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+        "note": "Keep the donut substantial on touch; tap a segment to inspect its share. Do not shrink the ring into a token."
       },
       "tryThis": null,
       "tryThisMobile": null,
@@ -2426,7 +2466,7 @@
           "url": "https://www.law.cornell.edu/uscode/text/26/72"
         }
       ],
-      "agencyNotes": "Conceptual Part 4 exhibit for the \"Gross Is Not Net\" callout. Authored as a stacked DUAL (distinct from p4-tax-wedge single fan and p4-roc-yield flow): retained net (accent, top panel) + the deferred tax claim (muted, bottom panel) share one time axis and rise in the same t^1.25 shape, so the claim reads as a fixed share compounding in lockstep; the connective links them. ~70% net / ~30% deferred blended ordinary rate. Conceptual — deferral not elimination; under current law."
+      "agencyNotes": "Conceptual Part 4 exhibit for the \"Gross Is Not Net\" callout. Authored as a COMPOSITION donut (radial layout — distinct from p4-tax-wedge single fan and p4-roc-yield laneBar comparison): one gross balance split into retained net (accent, ~70%) + the deferred tax claim (muted slate, ~30%). The quiet HORIZON control (today / +12 / +25) grows the centre magnitude 1×→~9× and the per-segment magnitudes while the arcs never move — so the share holds and the claim is seen compounding in step. ~70/30 representative blended ordinary rate. Conceptual — deferral not elimination; under current law."
     },
     {
       "chartId": "p4-roc-yield",
@@ -2436,14 +2476,15 @@
       "part": "part-4",
       "status": "implemented",
       "wiredPublic": false,
-      "layout": "flow",
+      "layout": "laneBar",
       "dataMode": "conceptual",
       "claimLabel": "RETURN OF CAPITAL · DEFERRAL",
       "primaryClaim": "Return of capital defers the tax, so more of each distribution goes back to work now",
-      "visualProof": "A branching flow: one distribution forks into two tax treatments — return of capital, untaxed now, and a taxed dividend — that converge on how much capital returns to work, more of it under return of capital",
-      "readerAction": "Follow the distribution down its two paths to what actually redeploys",
+      "visualProof": "Two aligned bars split the same 100-unit distribution: return of capital sends the whole 100 back to work now with its tax deferred below the line, while a taxed dividend loses 24 to tax on receipt and redeploys only 76 — the surplus is the visible edge",
+      "readerAction": "Compare how far each bar’s working segment reaches; the gap is the tax taken now",
       "readerTakeaway": "Deferring the tax keeps more of the distribution working during the deployment years.",
-      "experienceRole": "diagram",
+      "experienceRole": "comparison",
+      "visualRelationship": "comparison",
       "storyBeats": [
         {
           "kind": "context",
@@ -2464,7 +2505,7 @@
       "interaction": {
         "type": "hover",
         "gesture": "hover",
-        "conceptMatch": "Hovering a node ties its tax treatment to how much of the distribution redeploys"
+        "conceptMatch": "Hovering a segment ties its tax treatment to how much of the distribution redeploys"
       },
       "motionProfile": {
         "type": "diagramBuild",
@@ -2479,8 +2520,8 @@
       "backgroundRoles": [],
       "mobileBehavior": {
         "interaction": "tap-cycle",
-        "chartHeight": "standard",
-        "note": "Diagram scales; tap nodes to cycle detail."
+        "chartHeight": "tall",
+        "note": "Bars stack full-width; keep the aligned compare segment and the difference callout legible; tap a segment to inspect."
       },
       "tryThis": null,
       "tryThisMobile": null,
@@ -2503,7 +2544,7 @@
           "url": "https://www.irs.gov/forms-pubs/about-publication-550"
         }
       ],
-      "agencyNotes": "Conceptual Part 4 exhibit for the taxable/ROC section, authored as a branching FLOW (distinct from p4-tax-wedge single fan and p4-gross-not-net dual): one distribution forks into two tax treatments (return of capital = deferred, taxed dividend = taxed now) and converges on redeployed capital, more of it under ROC. Diamond structure (1→2→1) keeps connectors clean. ROC ~11% distribution, dividend ~after-tax (~11% × (1 − 0.238)). Conceptual — deferral not elimination; caution + explainer state basis exhaustion + tax-at-sale; under current law."
+      "agencyNotes": "Conceptual Part 4 exhibit for the taxable/ROC section, authored as a laneBar COMPARISON (multi-lane family seed — distinct from p4-tax-wedge single fan and p4-gross-not-net radial donut): two aligned 100-unit bars over one shared scale. ROC redeploys the full 100 now (accent), with the ~24 of deferred tax shown as a hatched strip BELOW the bar (exists, not taken now — honest, not eliminated). Taxed dividend redeploys 76 (secondary) + 24 taxed now (stress). A dashed reference line at 76 + the surplus callout make the +24 \"still working\" the visual claim. ROC ~11% distribution; dividend after ~23.8% LTCG+NIIT on receipt. Conceptual — deferral not elimination; caution + explainer state basis exhaustion + tax-at-sale; under current law."
     }
   ]
 }

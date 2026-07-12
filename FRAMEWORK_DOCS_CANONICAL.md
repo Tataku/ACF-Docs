@@ -23,7 +23,7 @@ The new, canonical Framework Docs are **hand-authored static HTML** in
 | `/part-1-pictures` | `public/site-b/part-1-pictures.html` | ✅ authored |
 | `/part-2-lineage-macro-thesis` | `public/site-b/part-2-lineage-macro.html` | ✅ authored |
 | `/part-3-bitcoin-convexity-backbone` | `public/site-b/part-3-bitcoin-convexity.html` | ✅ authored + routed (8 chart islands, design-final; chart placement repaired 2026-07-11; `p3-cold-storage-to-borrow` lifecycle flow + `p3-reserve-share-evolves` allocation curve wired into the TAM/borrow section 2026-07-12) |
-| `/part-4-tax-architecture-roc-strategy` | `public/site-b/part-4-tax-architecture.html` | ✅ authored + routed (3 chart islands: `p4-tax-wedge` · `p4-roc-yield` · `p4-gross-not-net`) |
+| `/part-4-tax-architecture-roc-strategy` | `public/site-b/part-4-tax-architecture.html` | ✅ authored + routed (3 chart islands, each a distinct visual relationship: `p4-tax-wedge` trend/single · `p4-gross-not-net` composition/**radial donut** · `p4-roc-yield` comparison/**laneBar** — see `CHART_ENGINE_UNIFICATION_PROPOSAL_v1.md` + the Chart Grammar matrix) |
 | `/part-5-…` · `/part-6-…` · `/part-7-…` | — | ⏳ **still MDX; need migration** |
 
 > **Chart status (2026-07-11):** every chart on a live reading page (Parts 1–4) is `status: implemented`

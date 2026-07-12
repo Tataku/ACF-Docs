@@ -9,8 +9,8 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import {
   FRAMEWORK_CHART_SPECS, footerModel,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles,
-  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming,
-  INTERACTION_TYPES, MOTION_TYPES, BACKGROUND_ROLES, DATA_MODES, EXPERIENCE_ROLES,
+  resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming, resolveVisualRelationship,
+  INTERACTION_TYPES, MOTION_TYPES, BACKGROUND_ROLES, DATA_MODES, EXPERIENCE_ROLES, VISUAL_RELATIONSHIPS,
 } from '../components/framework-charts/chart-specs.mjs';
 
 const charts = FRAMEWORK_CHART_SPECS.map((s) => {
@@ -36,6 +36,8 @@ const charts = FRAMEWORK_CHART_SPECS.map((s) => {
     readerTakeaway: s.readerTakeaway,
     // teaching arc + experience role (resolved contract; takeaway = readerTakeaway)
     experienceRole: resolveExperienceRole(s),
+    // the semantic relationship the chart teaches — the form should follow from this
+    visualRelationship: resolveVisualRelationship(s),
     storyBeats: resolveStoryBeats(s),
     // interaction must match concept
     interaction: { type: interaction.type, gesture: interaction.gesture, conceptMatch: interaction.conceptMatch || null },
@@ -70,6 +72,7 @@ const out = {
     backgroundRoles: BACKGROUND_ROLES,
     dataModes: DATA_MODES,
     experienceRoles: EXPERIENCE_ROLES,
+    visualRelationships: VISUAL_RELATIONSHIPS,
   },
   count: charts.length,
   charts,
