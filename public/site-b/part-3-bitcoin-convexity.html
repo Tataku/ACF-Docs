@@ -191,7 +191,7 @@
     <!-- ===== SECTION · THE BACKBONE ======================================= -->
     <section class="section" id="backbone" aria-labelledby="backbone-title">
       <div class="measure">
-        <p class="section-eyebrow">The Reserve Asset</p>
+        <p class="section-eyebrow section-signal" data-glyph-text>The Reserve Asset</p>
         <h2 class="section-title" id="backbone-title">Bitcoin as the convexity backbone.</h2>
       </div>
       <div class="measure prose">
@@ -222,7 +222,7 @@
     <!-- ===== SECTION · STRUCTURAL IRREPLACEABILITY ======================== -->
     <section class="section" id="irreplaceability" aria-labelledby="irr-title">
       <div class="measure">
-        <p class="section-eyebrow">Structural Fit</p>
+        <p class="section-eyebrow section-signal" data-glyph-text>Structural Fit</p>
         <h2 class="section-title" id="irr-title">Why Bitcoin specifically.</h2>
       </div>
       <div class="measure prose">
@@ -286,7 +286,7 @@
     <!-- ===== SECTION · MULTI-CYCLE SURVIVABILITY ========================== -->
     <section class="section" id="survivability" aria-labelledby="surv-title">
       <div class="measure">
-        <p class="section-eyebrow">Why Not 100% Bitcoin</p>
+        <p class="section-eyebrow section-signal" data-glyph-text>Why Not 100% Bitcoin</p>
         <h2 class="section-title" id="surv-title">Optimizing for multi-cycle survivability.</h2>
       </div>
       <div class="measure prose">
@@ -328,7 +328,7 @@
     <!-- ===== SECTION · ACCUMULATE, DON'T TRADE ============================ -->
     <section class="section" id="accumulate" aria-labelledby="accum-title">
       <div class="measure">
-        <p class="section-eyebrow">Discipline, Not Timing</p>
+        <p class="section-eyebrow section-signal" data-glyph-text>Discipline, Not Timing</p>
         <h2 class="section-title" id="accum-title">Accumulate, don&rsquo;t trade.</h2>
       </div>
       <div class="measure prose">
@@ -350,7 +350,7 @@
     <!-- ===== SECTION · RISK REGISTER ====================================== -->
     <section class="section" id="risks" aria-labelledby="risk-title">
       <div class="measure">
-        <p class="section-eyebrow">Risk Register</p>
+        <p class="section-eyebrow section-signal" data-glyph-text>Risk Register</p>
         <h2 class="section-title" id="risk-title">What can break.</h2>
       </div>
       <div class="measure prose">
@@ -385,24 +385,27 @@
     <!-- ===== SECTION · VALUATION MODELS =================================== -->
     <section class="section" id="valuation" aria-labelledby="val-title">
       <div class="measure">
-        <p class="section-eyebrow">Valuation Discipline</p>
+        <p class="section-eyebrow section-signal" data-glyph-text>Valuation Discipline</p>
         <h2 class="section-title" id="val-title">Why Bitcoin can be modeled.</h2>
       </div>
       <div class="measure prose">
-        <p>Bounding the downside still leaves the harder question of what the reserve is worth &mdash; and, unlike most assets, Bitcoin can be modeled. Supply is algorithmically capped (21 million, with issuance declining through halvings roughly every four years) and value is determined by adoption, liquidity, and network effects, so Bitcoin&rsquo;s growth resembles technology platforms more than fiat currencies. On a logarithmic scale its price since 2010 has clustered around a <button type="button" class="gloss" data-gloss="power-law-corridor" aria-expanded="false">power-law trendline</button> of the form Price = A &times; (Days)<sup>B</sup>, where A and B are empirically stable constants. The framework treats this as a contextual heuristic for regime assessment, not a predictive model &mdash; the pattern could break if adoption dynamics shift.</p>
-        <p>Reliance on any single model creates brittleness, so the framework synthesizes several independent ones; their convergence is a confidence signal, their divergence a caution. <span class="part-ref">CIS scoring is developed in Part 6</span>.</p>
+        <p>Bounding the downside still leaves the harder question of what the reserve is worth &mdash; and, unlike most assets, Bitcoin can be modeled. Supply is algorithmically capped (21 million, with issuance declining through halvings roughly every four years) and value is determined by adoption, liquidity, and network effects, so Bitcoin&rsquo;s growth resembles technology platforms more than fiat currencies. On a logarithmic scale its price since 2010 has clustered around a <button type="button" class="gloss" data-gloss="power-law-corridor" aria-expanded="false">power-law trendline</button> of the form Price = A &times; (Days)<sup>B</sup>, where A and B are empirically stable constants. The framework treats this as a contextual heuristic for regime assessment, not a predictive model &mdash; the pattern could break if adoption dynamics shift. The corridor below is that trendline: most of Bitcoin&rsquo;s history has sat inside it.</p>
       </div>
 
       <!-- Chart island: p3-power-law-holds "Power Law Holds" — the log power-law corridor exhibit. -->
       <figure class="fc-mount" id="exhibit-p3-power-law-holds" data-fc-chart="p3-power-law-holds"></figure>
 
+      <div class="measure prose">
+        <p>No single model is enough on its own, so the framework synthesizes several independent ones; their convergence is a confidence signal, their divergence a caution. <span class="part-ref">CIS scoring is developed in Part 6</span>.</p>
+      </div>
+
       <div class="measure">
         <ol class="architecture-list" data-stepper>
-          <li><p class="step-title">Power-law bands</p><p class="step-body">a log-log regression (Santostasi); Bitcoin has spent ~80% of its history in the central corridor, 15% in the upper band (euphoria), 5% below the lower band (capitulation). Early 2026 central tendency ~$80&ndash;100k.</p></li>
-          <li><p class="step-title">Realized price (on-chain cost basis)</p><p class="step-body">the average price at which all Bitcoin last moved on-chain (~$35&ndash;40k); acts as support in bear markets and rises over time as adoption increases.</p></li>
-          <li><p class="step-title">Adoption &amp; network models</p><p class="step-body">Metcalfe&rsquo;s Law and S-curve adoption; strong on multi-year trend, unsuited to tactical timing. Help identify the adoption phase.</p></li>
-          <li><p class="step-title">Production cost</p><p class="step-body">~$30&ndash;50k depending on ASIC efficiency and electricity; a soft floor, since sustained trading below cost drives miner capitulation and supply tightening.</p></li>
-          <li><p class="step-title">Liquidity-adjusted (Alden)</p><p class="step-body">adjusts fair value for M2 growth, central-bank balance sheets, and real rates; a 20&ndash;30% premium during M2 expansion, a comparable discount during contraction.</p></li>
+          <li><p class="step-title">Power-law bands</p><p class="step-body">a log-log regression of price against time since genesis (Santostasi). Most of Bitcoin&rsquo;s history sits inside a rising corridor, with briefer excursions into euphoria above and capitulation below. The trend and bands are model-dependent &mdash; multi-year regime context, not a precise fair value.</p></li>
+          <li><p class="step-title">Realized price (on-chain cost basis)</p><p class="step-body">Bitcoin&rsquo;s aggregate on-chain cost basis &mdash; each coin valued at the price it last moved. It rises with adoption and marks a historically important bear-market regime level, not a hard floor: price can trade below it for extended stretches.</p></li>
+          <li><p class="step-title">Adoption &amp; network models</p><p class="step-body">Metcalfe&rsquo;s Law and S-curve adoption read value through network growth, not price. Network size is itself model-dependent &mdash; addresses are not users &mdash; so they suit multi-year trend confirmation and adoption-phase context, not tactical timing.</p></li>
+          <li><p class="step-title">Production cost</p><p class="step-body">the marginal cost to mine a coin, highly variable with ASIC efficiency and electricity &mdash; from modern fleets to older high-cost ones. A pressure zone, not a floor: sustained sub-cost prices force inefficient miners offline, and difficulty then adjusts down to the survivors&rsquo; cost base.</p></li>
+          <li><p class="step-title">Liquidity-adjusted (Alden)</p><p class="step-body">reads Bitcoin against global liquidity &mdash; M2, central-bank balance sheets, real rates. It has co-moved with liquidity over multi-month horizons and weakly over short ones, so expansion is mildly supportive and tight real rates a counterweight &mdash; not a fixed premium or discount to fair value.</p></li>
         </ol>
       </div>
 
@@ -424,8 +427,8 @@
       <aside class="callout callout-info" aria-label="Historical illustrations">
         <p class="callout-label">Through Two Cycles</p>
         <ul>
-          <li><strong>Late 2021 &middot; extension.</strong> Bitcoin ~$69k against a power-law tendency ~$55k and realized price ~$24k &mdash; materially above fair value. Framework response: extension reduces discretionary accumulation; it never prompts sales. Build dry powder from income.</li>
-          <li><strong>Late 2022 &middot; convergence on undervaluation.</strong> Bitcoin ~$16&ndash;17k against a power-law tendency ~$35k. Models converged on material undervaluation. Framework response: accelerate DCA and deploy the dry powder built during the prior extension. Core holdings never sold.</li>
+          <li><strong>Late 2021 &middot; extension.</strong> Bitcoin near $69k traded well above both its power-law trend and its realized-price cost basis &mdash; materially above fair value. Framework response: extension reduces discretionary accumulation; it never prompts sales. Build dry powder from income.</li>
+          <li><strong>Late 2022 &middot; convergence on undervaluation.</strong> Bitcoin near $16&ndash;17k traded well below its power-law trend, and the models converged on material undervaluation. Framework response: accelerate DCA and deploy the dry powder built during the prior extension. Core holdings never sold.</li>
         </ul>
       </aside>
     </section>
@@ -435,7 +438,7 @@
     <!-- ===== SECTION · TAM & IMPLEMENTATION =============================== -->
     <section class="section" id="tam" aria-labelledby="tam-title">
       <div class="measure">
-        <p class="section-eyebrow">Addressable Market &amp; Implementation</p>
+        <p class="section-eyebrow section-signal" data-glyph-text>Addressable Market &amp; Implementation</p>
         <h2 class="section-title" id="tam-title">TAM, custody, and the borrow phase.</h2>
       </div>
       <div class="measure prose">
