@@ -111,13 +111,12 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(s.quadrant && s.quadrant.path && s.quadrant.path.length >= 2, `${w} quadrant needs a path`);
     s.quadrant.path.forEach((id) => ok(wps.includes(id), `${w} quadrant path references missing waypoint ${id}`));
     ok(wps.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a waypoint`);
-  } else if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'scorecard', 'scenario'].includes(s.layout)) {
+  } else if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'bridge', 'gate', 'scorecard', 'scenario'].includes(s.layout)) {
     // node-based framework diagrams + scorecard matrix + interactive scenario
     const nodeIds = s.layout === 'flow' ? (s.flow.stages || []).flatMap((st) => st.nodes.map((nd) => nd.id))
       : s.layout === 'loop' ? (s.loop.nodes || []).map((n) => n.id)
         : s.layout === 'systemLoop' ? (s.systemLoop.nodes || []).map((n) => n.id)
           : s.layout === 'governanceLoop' ? (s.governanceLoop.nodes || []).map((n) => n.id)
-          : s.layout === 'feedbackLoop' ? (s.feedbackLoop.stations || []).map((n) => n.id)
           : s.layout === 'bridge' ? (s.bridge.stages || []).map((n) => n.id)
             : s.layout === 'gate' ? (s.gate.nodes || []).map((n) => n.id)
               : s.layout === 'scorecard' ? (s.scorecard.requirements || []).map((r) => r.id)
@@ -174,6 +173,14 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     validateMultiLaneSpec(s, (m) => ok(false, `${w} ${m}`));
     const allSeg = (s.laneBar.bars || []).flatMap((bar) => bar.segments.map((seg) => seg.id));
     ok(allSeg.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a laneBar segment`);
+    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
+  } else if (s.layout === 'feedbackLoop') {
+    // reflexivity self-reference: two nodes (price · fundamentals) + reads/writes arcs
+    const fl = s.feedbackLoop;
+    ok(fl && Array.isArray(fl.nodes) && fl.nodes.length >= 2, `${w} feedbackLoop needs >= 2 nodes`);
+    const nodeIds = (fl.nodes || []).map((n) => n.id);
+    ok(new Set(nodeIds).size === nodeIds.length, `${w} feedbackLoop has duplicate node ids`);
+    ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a feedbackLoop node`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;

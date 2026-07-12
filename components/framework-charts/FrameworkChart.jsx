@@ -952,29 +952,36 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
  * bottom lane reverses (stress, arrows thin/break, loops back weaker). A quiet
  * "REFLEXIVITY" sits between them. Reads at a glance; hover/pin adds the why.
  * Distinct from systemLoop (a single ring) — circularity isn't the only story. */
-/* FeedbackLoopSvg — reflexivity as ONE spine (single consumer: p2-markets-feed-back).
- * Four stations on a shared axis (price → capital → fundamentals → validation), each
- * forward link carrying BOTH regimes at once: a reinforcing reading above the axis
- * (accent) and a reversing reading below it (stress). A prominent return arc closes
- * validation → price — the reflexivity itself ("price is an input, not just an output").
- * Redesigned from the earlier two-lane form, which duplicated the same chain twice. */
+/* FeedbackLoopSvg — "Price writes the story" (single consumer: p2-markets-feed-back).
+ * Reflexivity as self-reference: Price claims only to READ the fundamentals, but by
+ * moving capital it WRITES them. Two nodes (Price · Fundamentals); a quiet dashed
+ * "reads" arc (the claim, muted) bows above and a bold accent "writes" arc (the
+ * reality — the whole insight) bows below, closed by the caption. Deliberately
+ * minimal + typographic; supersedes the earlier lane / spine attempts. */
 function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const fl = spec.feedbackLoop;
-  const stations = fl.stations;
-  const K = stations.length;
-  const F = coarse ? 1.32 : 1;
-  const pad = { l: 16, r: 16, t: coarse ? 34 : 30, b: coarse ? 40 : 34 };
-  const innerW = width - pad.l - pad.r;
-  const colW = innerW / K;
-  const colX = (i) => pad.l + colW * (i + 0.5);
-  const spineY = pad.t + (coarse ? 40 : 34);
-  const rBow = height - pad.b - (coarse ? 16 : 14);          // the return arc bottoms near the base
-  const NW = Math.min(colW - (coarse ? 8 : 16), coarse ? 104 : 132), NH = coarse ? 34 : 30;
-  const green = accent, red = pal.bandStress;
-  const nodes = stations.map((s, i) => ({ ...s, i, x: colX(i), y: spineY }));
-  const anchorOf = (a) => { const n = nodes.find((p) => p.id === a.id); return n ? { x: n.x, y: n.y } : null; };
-  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 42 : 30, NW / 2); nodes.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const nodes = fl.nodes;
+  const F = coarse ? 1.26 : 1;
+  const cx = width / 2, cy = height * 0.45;
+  const gap = Math.min(width - (coarse ? 30 : 110), 480);
+  const NW = Math.min(coarse ? 118 : 160, gap * 0.4), NH = coarse ? 42 : 46;
+  const lx = cx - gap / 2 + NW / 2, rx = cx + gap / 2 - NW / 2;    // node centres (price left, fundamentals right)
+  const eL = lx + NW / 2 + 5, eR = rx - NW / 2 - 5;               // inner edges = arc endpoints
+  const bow = coarse ? 46 : 56;
+  const pos = { [nodes[0].id]: { x: lx, y: cy }, [nodes[1].id]: { x: rx, y: cy } };
+  const arcMid = { reads: { x: (eL + eR) / 2, y: cy - bow }, writes: { x: (eL + eR) / 2, y: cy + bow } };
+  const anchorOf = (a) => pos[a.id] || arcMid[a.id] || null;
+  const resolve = (mx, my) => {
+    let best = null, bd = Math.max(touch ? 42 : 30, NW / 2);
+    Object.entries(pos).forEach(([id, p]) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = id; } });
+    if (best) return targets.find((t) => t.id === best) || null;
+    if (mx > eL - 6 && mx < eR + 6) {
+      if (my < cy - 8 && my > cy - bow - 24) return targets.find((t) => t.id === 'reads') || null;
+      if (my > cy + 8 && my < cy + bow + 24) return targets.find((t) => t.id === 'writes') || null;
+    }
+    return null;
+  };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
   const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -987,61 +994,43 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STATION" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'reads' || active.id === 'writes' ? 'ACT' : 'NODE'} accentTitle={active.id === spec.primaryKey || active.id === 'writes'} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
   }
 
-  // forward links (station i → i+1) carry the source station's reinforcing (up) + reversing (down) reading
-  const links = [];
-  for (let i = 0; i < K - 1; i++) {
-    const x0 = colX(i) + NW / 2 + 3, x1 = colX(i + 1) - NW / 2 - 3;
-    links.push({ i, id: stations[i].id, x0, x1, mx: (x0 + x1) / 2, up: stations[i].up, down: stations[i].down });
-  }
-  const rx0 = colX(K - 1), rx1 = colX(0), lastId = stations[K - 1].id;
-  const arrow = (xTip, y, dir, col, op, w) => <path d={`M${xTip - dir * 6} ${y - 3.4} L${xTip} ${y} L${xTip - dir * 6} ${y + 3.4} Z`} fill={col} opacity={op} />;
+  const readsD = `M${eR} ${cy - 4} C${eR - (eR - eL) * 0.24} ${cy - bow} ${eL + (eR - eL) * 0.24} ${cy - bow} ${eL} ${cy - 4}`;   // fundamentals -> price, bow up
+  const writesD = `M${eL} ${cy + 4} C${eL + (eR - eL) * 0.24} ${cy + bow} ${eR - (eR - eL) * 0.24} ${cy + bow} ${eR} ${cy + 4}`; // price -> fundamentals, bow down
+  const readsLit = focusId === 'reads', writesLit = focusId === 'writes';
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Reflexivity feedback loop'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        <text x={(pad.l + width - pad.r) / 2} y={pad.t - 12} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{(fl.centerLabel || 'reflexivity').toUpperCase()}</text>
-        {/* forward links — reinforcing (green, above) + reversing (red, below), both flowing forward */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 620ms ease 200ms' }}>
-          {links.map((l) => {
-            const lit = focusId === l.id; const dim = focusId && !lit ? 0.34 : 1;
-            return (
-              <g key={`lk${l.i}`} style={{ opacity: dim, transition: trans('opacity') }}>
-                <line x1={l.x0} y1={spineY - 5} x2={l.x1 - 4} y2={spineY - 5} stroke={green} strokeWidth={1.5} opacity={0.9} />
-                {arrow(l.x1, spineY - 5, 1, green, 0.9)}
-                <line x1={l.x0} y1={spineY + 5} x2={l.x1 - 4} y2={spineY + 5} stroke={red} strokeWidth={1.1} opacity={0.66} />
-                {arrow(l.x1, spineY + 5, 1, red, 0.66)}
-                {!coarse && <text x={l.mx} y={spineY - 11} textAnchor="middle" style={halo(pal, 8, green)}>{l.up}</text>}
-                {!coarse && <text x={l.mx} y={spineY + 18} textAnchor="middle" style={halo(pal, 8, pal.bandStressText)}>{l.down}</text>}
-              </g>
-            );
-          })}
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Price reads and writes the fundamentals'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {fl.eyebrow && <text x={cx} y={Math.max(15, cy - bow - 32)} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{fl.eyebrow.toUpperCase()}</text>}
+        {/* reads arc — the claim (quiet, dashed): fundamentals -> price */}
+        <g style={{ opacity: entered ? (focusId && !readsLit ? 0.28 : 1) : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 620ms ease 200ms' }}>
+          <path d={readsD} fill="none" stroke={pal.text3} strokeWidth={1.2} strokeDasharray="3 4" opacity={0.68} />
+          <path d={`M${eL + 7} ${cy - 4 - 3.6} L${eL} ${cy - 4} L${eL + 7} ${cy - 4 + 3.6} Z`} fill={pal.text3} opacity={0.78} />
+          <text x={arcMid.reads.x} y={arcMid.reads.y - 5} textAnchor="middle" style={halo(pal, 9.5 * F, pal.text3)}>{fl.readLabel || 'reads'}</text>
+          <text x={arcMid.reads.x} y={arcMid.reads.y + 8} textAnchor="middle" style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>the claim</text>
         </g>
-        {/* return arc — the loop closes: validation feeds back to price (reflexivity) */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 780ms ease 360ms' }}>
-          {(() => { const lit = focusId === lastId || focusId === stations[0].id; const dim = focusId && !lit ? 0.4 : 1; const yB = spineY + NH / 2 + 2; return (
-            <g style={{ opacity: dim, transition: trans('opacity') }}>
-              <path d={`M${rx0} ${yB} C${rx0} ${rBow} ${rx1} ${rBow} ${rx1} ${yB}`} fill="none" stroke={green} strokeWidth={1.7} opacity={0.85} />
-              <path d={`M${rx0} ${yB} C${rx0} ${rBow - 9} ${rx1} ${rBow - 9} ${rx1} ${yB}`} fill="none" stroke={red} strokeWidth={1} strokeDasharray="3 4" opacity={0.5} />
-              {arrow(rx1, yB + 4, -1, green, 0.9)}
-              <path d={`M${rx1 - 3.4} ${yB + 4 - 6} L${rx1} ${yB + 4} L${rx1 + 3.4} ${yB + 4 - 6} Z`} fill={green} opacity={0.9} />
-              <text x={(rx0 + rx1) / 2} y={rBow - 6} textAnchor="middle" style={halo(pal, 8.5 * F, pal.text3)}>{fl.returnLabel || 'the loop closes'}</text>
-              <text x={(rx0 + rx1) / 2} y={rBow + 7} textAnchor="middle" style={{ ...halo(pal, 7.5 * F, pal.text4), fontStyle: 'italic' }}>price is an input, not just an output</text>
-            </g>
-          ); })()}
+        {/* writes arc — the reality (bold, accent): price -> fundamentals. the insight. */}
+        <g style={{ opacity: entered ? (focusId && !writesLit ? 0.28 : 1) : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 780ms ease 380ms' }}>
+          <path d={writesD} fill="none" stroke={accent} strokeWidth={2.1} opacity={0.95} />
+          <path d={`M${eR - 7} ${cy + 4 - 3.9} L${eR} ${cy + 4} L${eR - 7} ${cy + 4 + 3.9} Z`} fill={accent} opacity={0.95} />
+          <text x={arcMid.writes.x} y={arcMid.writes.y + 4} textAnchor="middle" style={haloSans(pal, 11 * F, accent, 600)}>{fl.writeLabel || 'writes'}</text>
+          <text x={arcMid.writes.x} y={arcMid.writes.y + 17} textAnchor="middle" style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>the reality</text>
         </g>
-        {/* stations */}
-        {nodes.map((n) => {
-          const on = focusId === n.id; const isP = n.id === spec.primaryKey;
+        {/* nodes */}
+        {nodes.map((n, i) => {
+          const p = pos[n.id]; const on = focusId === n.id; const isP = n.id === spec.primaryKey;
           return (
-            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 300ms ease' : `opacity 420ms ease ${160 + n.i * 90}ms, transform 420ms cubic-bezier(0.2,0.7,0.2,1) ${160 + n.i * 90}ms` }}>
-              <rect x={n.x - NW / 2} y={n.y - NH / 2} width={NW} height={NH} rx={7} fill={pal.surface} stroke={on || isP ? accent : pal.borderHi} strokeWidth={on ? 1.7 : isP ? 1.3 : 1} style={{ transition: trans('stroke') }} />
-              <text x={n.x} y={n.y + 4} textAnchor="middle" style={haloSans(pal, 11.5 * F, isP ? accent : pal.text1, isP ? 600 : 500)}>{n.label}</text>
+            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.42 : 1) : 0, transformOrigin: `${p.x}px ${p.y}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 300ms ease' : `opacity 420ms ease ${140 + i * 120}ms, transform 420ms cubic-bezier(0.2,0.7,0.2,1) ${140 + i * 120}ms` }}>
+              <rect x={p.x - NW / 2} y={p.y - NH / 2} width={NW} height={NH} rx={8} fill={pal.surface} stroke={on || isP ? accent : pal.borderHi} strokeWidth={on ? 1.8 : isP ? 1.4 : 1} style={{ transition: trans('stroke') }} />
+              <text x={p.x} y={p.y + 4.5} textAnchor="middle" style={haloSans(pal, 13 * F, isP ? accent : pal.text1, isP ? 600 : 500)}>{n.label}</text>
             </g>
           );
         })}
+        {/* caption — the poetic line */}
+        {fl.caption && <text x={cx} y={Math.min(height - 8, cy + bow + (coarse ? 42 : 48))} textAnchor="middle" style={{ ...halo(pal, 10 * F, pal.text3), fontStyle: 'italic' }}>{fl.caption}</text>}
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
       </svg>
       {tooltip}

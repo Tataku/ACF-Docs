@@ -1211,8 +1211,8 @@
       "dataMode": "conceptual",
       "claimLabel": "REFLEXIVITY · FEEDBACK",
       "primaryClaim": "Price does not just reflect fundamentals — it can change them",
-      "visualProof": "One four-station spine — price, capital, fundamentals, validation — where each link reads two ways at once (reinforcing above the axis, reversing below) and a return arc closes validation back to price",
-      "readerAction": "Trace the loop back to price",
+      "visualProof": "Two nodes — price and fundamentals — joined by a quiet dashed \"reads\" arc (the claim that price reflects value) and a bold accent \"writes\" arc (the reality that price moves capital and rewrites value)",
+      "readerAction": "Read the writes arc — the one that should not exist",
       "readerTakeaway": "Price is an input, not just an output.",
       "experienceRole": "diagram",
       "visualRelationship": "flow",
@@ -1268,7 +1268,7 @@
           "url": "/part-2-lineage-macro-thesis"
         }
       ],
-      "agencyNotes": "feedbackLoop layout, redesigned to a single spine (was two mirrored lanes). Four stations on one axis; every forward link carries both regimes at once — reinforcing above (accent), reversing below (stress) — and a prominent return arc closes validation → price. Halves the redundancy of the old two-lane form and foregrounds the loop itself: price is an input, not just an output. Not the systemLoop ring (an earlier, superseded concept)."
+      "agencyNotes": "feedbackLoop layout, redesigned to the minimal \"price writes the story\" self-reference: two nodes (price · fundamentals) with a muted dashed reads arc (the conventional claim) and a bold accent writes arc (the reflexive reality — the whole insight), under the caption \"price can write the fundamentals it claims to read.\" The mechanism (capital) lives in the hover + explainer, keeping the face to one idea. Supersedes the two-lane, single-spine, and systemLoop-ring attempts."
     },
     {
       "chartId": "p2-time-changes-prudence",
