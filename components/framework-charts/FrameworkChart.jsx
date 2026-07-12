@@ -20,6 +20,7 @@ import * as Brush from './brush';
 import { BrushX, BrushChevron, BrushFrame } from './icons';
 import { getPalette, getAccent } from './palette';
 import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
+import { layoutMultiLane } from './chart-core/multilane.mjs';   // shared, framework-agnostic multi-lane model
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -2318,22 +2319,9 @@ function LaneBarSvg({ spec, width, height, pal, accent, reduce, entered, coarse,
   const barX0 = pad.l, barX1 = width - pad.r;
   const barW = barX1 - barX0;
   const laneGap = coarse ? 40 : 30, titleH = coarse ? 30 : 22, barH = coarse ? 62 : 46, subH = coarse ? 30 : 22;
-  const laneH = titleH + barH + subH + laneGap;
-  const xOf = (v) => barX0 + (v / total) * barW;
-
-  // geometry per bar: segment rects (cumulative), the compare-end x, the deferred strip
-  const lanes = bars.map((bar, li) => {
-    const yTop = pad.t + li * laneH;
-    const barY = yTop + titleH;
-    let cur = barX0;
-    const segs = bar.segments.map((s) => { const x0 = cur, w = (s.value / total) * barW; cur += w; return { ...s, x0, w, cx: x0 + w / 2, cy: barY + barH / 2 }; });
-    const compareSeg = segs.find((s) => s.compare);
-    const compareEnd = compareSeg ? compareSeg.x0 + compareSeg.w : null;
-    return { ...bar, li, yTop, barY, segs, compareEnd, deferred: bar.deferred || null };
-  });
-  const compareEnds = lanes.map((l) => l.compareEnd).filter((v) => v != null);
-  const minCompare = compareEnds.length ? Math.min(...compareEnds) : null;
-  const maxCompare = compareEnds.length ? Math.max(...compareEnds) : null;
+  // geometry from the shared, framework-agnostic multi-lane model (chart-core) —
+  // lane/segment rects, cross-lane compare stats, and the surplus delta.
+  const { lanes, laneH, xOf, minCompare, maxCompare, surplus } = layoutMultiLane(LB, { barX0, barX1, padTop: pad.t, titleH, barH, subH, laneGap });
 
   // hit map: segment centre + optional deferred-strip centre
   const anchors = {};
@@ -2370,7 +2358,7 @@ function LaneBarSvg({ spec, width, height, pal, accent, reduce, entered, coarse,
     const meta = targets.find((t) => t.id === active.id);
     if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="CAPITAL" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
   }
-  const surplusMid = minCompare != null && maxCompare != null && maxCompare > minCompare ? (minCompare + maxCompare) / 2 : null;
+  const surplusMid = surplus ? surplus.mid : null;
 
   return (
     <div style={{ position: 'relative' }}>
@@ -2438,7 +2426,7 @@ function LaneBarSvg({ spec, width, height, pal, accent, reduce, entered, coarse,
 
         {/* surplus callout — the "still working now" gap on the longer lane (clamped in-bounds) */}
         {surplusMid != null && (() => {
-          const label = LB.surplusLabel || `+${Math.round((maxCompare - minCompare) / barW * total)} still working now`;
+          const label = LB.surplusLabel || `+${surplus.deltaValue} still working now`;
           const fs = 10 * F;
           const halfW = Math.min(barW / 2, (label.length * fs * 0.52) / 2);
           const sx = Math.max(barX0 + halfW, Math.min((minCompare + maxCompare) / 2, barX1 - halfW));

@@ -25,6 +25,7 @@ import {
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles, getSimulationIntro,
   resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming, resolveVisualRelationship,
 } from '../components/framework-charts/chart-specs.mjs';
+import { validateMultiLaneSpec } from '../components/framework-charts/chart-core/multilane.mjs';
 
 const relationshipAdvisories = [];   // soft warnings (relationship ↔ layout fit); never fail the build
 
@@ -167,19 +168,11 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(segIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a radial segment`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else if (s.layout === 'laneBar') {
-    // paired 100% split bars: each bar splits a shared total; the aligned compare
-    // segment is the visual claim (how much redeploys / is retained across bars)
-    const sb = s.laneBar;
-    ok(sb && Array.isArray(sb.bars) && sb.bars.length >= 2, `${w} laneBar needs >= 2 bars`);
-    ok(typeof sb.total === 'number' && sb.total > 0, `${w} laneBar needs a positive total`);
-    const allSeg = [];
-    (sb.bars || []).forEach((bar) => {
-      ok(bar.id && bar.label, `${w} laneBar bar ${bar.id} needs id + label`);
-      ok(Array.isArray(bar.segments) && bar.segments.length >= 1, `${w} laneBar bar ${bar.id} needs segments`);
-      (bar.segments || []).forEach((seg) => { ok(typeof seg.value === 'number' && seg.value >= 0, `${w} laneBar segment ${seg.id} needs a value >= 0`); allSeg.push(seg.id); });
-    });
-    ok(new Set(allSeg).size === allSeg.length, `${w} laneBar has duplicate segment ids`);
-    if (sb.compareSegId != null) ok(allSeg.includes(sb.compareSegId), `${w} laneBar compareSegId ${sb.compareSegId} is not a segment id`);
+    // multi-lane comparison: structural integrity is delegated to the shared,
+    // framework-agnostic contract (chart-core/multilane.mjs) so it is enforced once
+    // for BOTH engines; the primaryKey checks are chart-spec-specific.
+    validateMultiLaneSpec(s, (m) => ok(false, `${w} ${m}`));
+    const allSeg = (s.laneBar.bars || []).flatMap((bar) => bar.segments.map((seg) => seg.id));
     ok(allSeg.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a laneBar segment`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else {
