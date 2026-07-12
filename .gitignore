@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # Lockfile — this project tracks dependency ranges in package.json, not a lockfile
 package-lock.json
+
+# Claude Code local session / worktree state (tooling, never project content)
+.claude/
