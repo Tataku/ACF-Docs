@@ -1140,6 +1140,17 @@ function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
  * concentrating into a single validated thesis. Transformation, not a funnel. */
 function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
+  // Nucleus energy burst: clicking the thesis node plays a short orbiting-energy
+  // event around it (like the Onboarding start). `burst.n` re-keys the overlay so
+  // each click replays; it clears itself after the burst settles.
+  const [burst, setBurst] = useState(null);
+  const burstTimer = useRef(null);
+  const fireBurst = useCallback(() => {
+    setBurst((b) => ({ n: ((b && b.n) || 0) + 1 }));
+    if (burstTimer.current) clearTimeout(burstTimer.current);
+    burstTimer.current = setTimeout(() => setBurst(null), 2400);
+  }, []);
+  useEffect(() => () => { if (burstTimer.current) clearTimeout(burstTimer.current); }, []);
   const nodes = spec.gate.nodes; // [entry, gate, gate, gate, gate, exit]
   const K = nodes.length;
   const pad = { l: 64, r: 80, t: 50, b: 52 };
@@ -1151,24 +1162,29 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
 
   const geom = useMemo(() => {
     const rng = Brush.mulberry32(29);
-    const N = 26, frags = [], survivors = [];
+    const N = 26, frags = [];
     for (let f = 0; f < N; f++) {
       const startY = cy + (rng() - 0.5) * 2 * SPREAD;
       const r = rng();
-      const death = r < 0.34 ? 1 : r < 0.60 ? 2 : r < 0.80 ? 3 : r < 0.90 ? 4 : lastCol; // most die early; a few survive
+      // Every random fragment falls away at one of the four gates — NONE survive.
+      // The single survivor is the authored hero thread below, so exactly one
+      // thread connects the narrative to the thesis, end to end.
+      const death = r < 0.40 ? 1 : r < 0.66 ? 2 : r < 0.85 ? 3 : 4;
       const endCol = death;
       const yAt = (i) => cy + (startY - cy) * (1 - (i / lastCol) * 0.62); // drift toward centre as it survives
       const pts = []; for (let i = 0; i <= endCol; i++) pts.push({ x: X(i), y: yAt(i) });
-      if (death === lastCol) {
-        const sp = []; for (let i = 0; i <= lastCol; i++) sp.push({ x: X(i), y: cy + (startY - cy) * (1 - i / lastCol) });
-        survivors.push(Brush.brushLine(sp, { seed: 200 + f * 7, weight: 0.5, intensity: 0.5 }));
-      } else {
-        const endX = X(endCol), endY = yAt(endCol);
-        frags.push({ d: `M${X(0)} ${startY} ${Brush.smoothOpen(pts).slice(1)}`, fall: `M${endX} ${endY} Q${endX + 8} ${endY + 16} ${endX + 14} ${endY + 30 + rng() * 14}`, endCol });
-      }
+      const endX = X(endCol), endY = yAt(endCol);
+      frags.push({ d: `M${X(0)} ${startY} ${Brush.smoothOpen(pts).slice(1)}`, fall: `M${endX} ${endY} Q${endX + 8} ${endY + 16} ${endX + 14} ${endY + 30 + rng() * 14}`, endCol });
     }
+    // The one survivor — a single thread pulled TAUT between the narrative entry
+    // node and the thesis exit node. Physics: a fibre under tension runs straight,
+    // so it holds the centreline and passes clean through the eye of every gate.
+    // Only the brush texture gives it life; it does not wander.
+    const heroPts = [{ x: pos[0].x, y: cy }, { x: pos[lastCol].x, y: cy }];
+    const hero = Brush.brushLine(heroPts, { seed: 777, weight: 1.35, intensity: 0.55 });
+    const heroAura = Brush.brushLine(heroPts, { seed: 778, weight: 2.9, intensity: 0.4 });
     const gates = pos.filter((p) => p.gate).map((p) => ({ x: p.x, line: Brush.brushSegment(p.x, cy - SPREAD - 8, p.x, cy + SPREAD + 8, { seed: 60 + p.i * 8, weight: 0.7, intensity: 0.6, waver: 0.15 }) }));
-    return { frags, survivors, gates };
+    return { frags, hero, heroAura, gates };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
@@ -1176,7 +1192,13 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
   const resolve = (mx) => { let best = null, bd = touch ? 60 : 46; pos.forEach((p) => { const d = Math.abs(mx - p.x); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
-  const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+  const onClick = (e) => {
+    const res = resolve(toVB(e)[0]);
+    if (res && res.id === spec.primaryKey) fireBurst();        // thesis nucleus → energy burst
+    if (coarse) { onActive(res, 'tap'); return; }
+    if (!res) { onPin(null); return; }
+    onPin(res);
+  };
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
@@ -1212,9 +1234,18 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
             );
           })}
         </g>
-        {/* survivors: concentrate into the thesis (lift when the thesis is selected) */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 1000ms ease 320ms' }}>
-          {geom.survivors.map((d, i) => <path key={`sv${i}`} d={d} fill={accent} opacity={exitSel ? 1 : anySel ? 0.28 : 0.9} style={{ transition: reduce ? undefined : 'opacity 240ms ease' }} />)}
+        {/* the one survivor: a single thread connecting narrative → thesis, drawn
+            fuller than the field that fell away. Aura underlay gives it presence;
+            it lifts when the thesis is selected, recedes (but never dies) at a gate.
+            Draws in left→right (the canonical clip-path wipe) so it reads as being
+            pulled taut through the gauntlet, after the field of fragments settles. */}
+        <g style={{
+          opacity: entered ? 1 : 0,
+          clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)',
+          transition: reduce ? 'opacity 360ms ease' : 'clip-path 1300ms cubic-bezier(0.22,0.61,0.36,1) 420ms, -webkit-clip-path 1300ms cubic-bezier(0.22,0.61,0.36,1) 420ms, opacity 500ms ease 420ms',
+        }}>
+          <path d={geom.heroAura} fill={accent} opacity={exitSel ? 0.5 : anySel ? 0.14 : 0.34} style={{ transition: reduce ? undefined : 'opacity 240ms ease' }} />
+          <path d={geom.hero} fill={accent} opacity={exitSel ? 1 : anySel ? 0.5 : 0.96} style={{ transition: reduce ? undefined : 'opacity 240ms ease' }} />
         </g>
         {/* gates */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 220ms' }}>
@@ -1234,6 +1265,36 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
             </g>
           );
         })}
+        {/* nucleus energy burst — orbiting energy rotates around the thesis on click */}
+        {burst && (() => {
+          const tx = X(lastCol);
+          if (reduce) {
+            // reduced motion: a single quiet highlight ring, no rotation
+            return <circle key={`burst${burst.n}`} cx={tx} cy={cy} r="16" fill="none" stroke={accent} strokeWidth="1.2" opacity="0.5" pointerEvents="none" />;
+          }
+          const orbits = [{ r: 16, n: 3, dur: 1.5, dir: 1 }, { r: 23, n: 2, dur: 2.3, dir: -1 }];
+          return (
+            <g key={`burst${burst.n}`} pointerEvents="none">
+              {/* expanding energy ring released on click */}
+              <circle cx={tx} cy={cy} r="11" fill="none" stroke={accent} strokeWidth="1.6">
+                <animate attributeName="r" from="11" to="40" dur="0.9s" fill="freeze" />
+                <animate attributeName="opacity" from="0.7" to="0" dur="0.9s" fill="freeze" />
+                <animate attributeName="stroke-width" from="1.8" to="0.3" dur="0.9s" fill="freeze" />
+              </circle>
+              {/* electron shells: tilted orbits + particles rotating around the nucleus */}
+              {orbits.map((o, oi) => (
+                <g key={oi}>
+                  <animateTransform attributeName="transform" type="rotate" from={`0 ${tx} ${cy}`} to={`${o.dir * 360} ${tx} ${cy}`} dur={`${o.dur}s`} repeatCount="indefinite" />
+                  <ellipse cx={tx} cy={cy} rx={o.r} ry={o.r * 0.48} fill="none" stroke={accent} strokeWidth="0.8" opacity="0.32" />
+                  {Array.from({ length: o.n }).map((_, pi) => {
+                    const a = (pi / o.n) * Math.PI * 2;
+                    return <circle key={pi} cx={tx + Math.cos(a) * o.r} cy={cy + Math.sin(a) * o.r * 0.48} r="2.2" fill={accent} opacity="0.95" />;
+                  })}
+                </g>
+              ))}
+            </g>
+          );
+        })()}
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
       </svg>
       {tooltip}
