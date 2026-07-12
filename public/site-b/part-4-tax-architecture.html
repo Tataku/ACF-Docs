@@ -337,7 +337,7 @@
       </div>
 
       <!-- Chart island: p4-roc-yield "ROC Changes the Yield" — the return-of-capital deferral exhibit.
-           Spec: components/framework-charts/chart-specs.mjs (idx P4-03 · group part-4 · single).
+           Spec: components/framework-charts/chart-specs.mjs (idx P4-03 · group part-4 · flow diamond: source → tax treatment → redeployed).
            Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
       <figure class="fc-mount" id="exhibit-p4-roc-yield" data-fc-chart="p4-roc-yield"></figure>
 
@@ -389,8 +389,12 @@
         <p>A pre-tax balance represents a joint claim between the investor and the tax authority, with taxes deferred rather than eliminated. As returns compound, the dollar value of the deferred tax obligation compounds alongside them, so the net ownership share falls as terminal value rises. A Roth removes this joint claim by paying taxes upfront, converting all future appreciation into fully owned capital.</p>
       </aside>
 
+      <div class="measure prose">
+        <p>The exhibit below separates that single balance into the two claims it actually holds: the share that is yours, stacked above the share already owed. Both grow as the balance compounds, which is precisely why the deferred obligation is not a footnote but a second position rising in step.</p>
+      </div>
+
       <!-- Chart island: p4-gross-not-net "Gross Is Not Net" — the pre-tax joint-claim exhibit.
-           Spec: components/framework-charts/chart-specs.mjs (idx P4-02 · group part-4 · single).
+           Spec: components/framework-charts/chart-specs.mjs (idx P4-02 · group part-4 · dual panels: yours vs owed).
            Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
       <figure class="fc-mount" id="exhibit-p4-gross-not-net" data-fc-chart="p4-gross-not-net"></figure>
 
