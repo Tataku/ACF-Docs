@@ -1990,7 +1990,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-cold-storage-to-borrow', idx: 'P3-07', group: 'part-3', intendedPlacement: 'part-3',
-    status: 'deferred', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'A matured reserve can fund liquidity without a forced sale',
+      visualProof: 'A five-stage lifecycle reading left to right — accumulate, self-custody, mature reserve, collateralized loan — terminating in a highlighted liquidity node that carries no sale and no taxable event',
+      interactionRole: 'Hover any stage to see what it contributes to reaching liquidity without selling the reserve',
+      readerAction: 'Follow the lifecycle left to right to the highlighted liquidity node',
+      caution: 'Conceptual lifecycle; borrowing introduces leverage, counterparty, and liquidation risk, and depends on tax treatment that can change',
+    },
+    status: 'implemented', wiredPublic: true,
     title: 'Cold Storage to Borrow', setupLine: 'The reserve lifecycle: accumulate, self-custody, mature, borrow — without a forced sale',
     claimLabel: 'LIFECYCLE · RESERVE',
     frameworkClaim: 'The Bitcoin reserve moves from accumulation to collateralized borrowing without forced sale.',
