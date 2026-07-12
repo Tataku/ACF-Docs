@@ -36,7 +36,7 @@ export const LAYOUT_RELATIONSHIPS = {
   sequenceRisk: ['sequence'],
   heartbeat: ['trend', 'comparison'],
   flow: ['flow'], bridge: ['flow'], gate: ['flow'], loop: ['flow'],
-  systemLoop: ['flow'], governanceLoop: ['flow'], feedbackLoop: ['flow'],
+  systemLoop: ['flow'], governanceLoop: ['flow'], feedbackLoop: ['flow'], reflexivityLoop: ['flow'],
 };
 
 /**
@@ -55,7 +55,7 @@ export function resolveVisualRelationship(spec) {
   if (L === 'sequenceRisk') return 'sequence';
   if (L === 'dual' && spec.perspectiveSlider) return 'reveal';
   if (L === 'dual') return 'comparison';
-  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate'].includes(L)) return 'flow';
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate'].includes(L)) return 'flow';
   return 'trend';                                                      // single / heartbeat default
 }
 

@@ -191,6 +191,25 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
     // every state id needs a hover target
     seq.forEach((id) => ok(s.hoverTargets.some((t) => t.id === id), `${w} feedbackLoop state ${id} has no hover target`));
+  } else if (s.layout === 'reflexivityLoop') {
+    // authored off-centre figure-eight: two lobes sharing one Price node at the crossing
+    const rlx = s.reflexivityLoop || {};
+    ok(rlx.shared && typeof rlx.shared === 'string', `${w} reflexivityLoop needs a shared (price) stage`);
+    ok(Array.isArray(rlx.reinforce) && rlx.reinforce.length >= 4, `${w} reflexivityLoop reinforce lobe needs >= 4 stages`);
+    ok(Array.isArray(rlx.reverse) && rlx.reverse.length >= 4, `${w} reflexivityLoop reverse lobe needs >= 4 stages`);
+    ok((rlx.reinforce || []).some((n) => n.stage === 'buildout'), `${w} reflexivityLoop reinforce lobe missing explicit buildout stage`);
+    ok((rlx.reverse || []).some((n) => n.stage === 'buildout'), `${w} reflexivityLoop reverse lobe missing explicit buildout stage`);
+    // both lobes must share the same ordered satellite stage ids
+    const rSeq = (rlx.reinforce || []).map((n) => n.stage);
+    ok(JSON.stringify(rSeq) === JSON.stringify((rlx.reverse || []).map((n) => n.stage)), `${w} reflexivityLoop reverse lobe stage ids must match reinforce`);
+    const nodeIds = [...new Set([rlx.shared, ...rSeq])];
+    ok(nodeIds.length >= 3, `${w} reflexivityLoop needs >= 3 distinct stages`);
+    ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} is not a reflexivityLoop stage`);
+    ok(s.primaryKey === rlx.shared, `${w} reflexivityLoop primaryKey must be the shared (crossing) stage`);
+    ok(!rlx.annotations || (Array.isArray(rlx.annotations) && rlx.annotations.length <= 3), `${w} reflexivityLoop allows at most 3 annotations`);
+    (rlx.annotations || []).forEach((an) => ok(nodeIds.includes(an.from) && nodeIds.includes(an.to) && an.text, `${w} reflexivityLoop annotation must tie two real stages with text`));
+    // every stage id needs a hover target
+    nodeIds.forEach((id) => ok(s.hoverTargets.some((t) => t.id === id), `${w} reflexivityLoop stage ${id} has no hover target`));
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);

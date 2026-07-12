@@ -85,7 +85,7 @@ export const DISCLOSURE = {
 
 export const DATA_MODES = ['representative', 'historical', 'simulation', 'conceptual'];
 export const SOURCE_ROLES = ['verifies-concept', 'backs-series', 'methodology', 'target-source'];
-export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar'];
+export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar'];
 
 // Visual-relationship grammar — DEFINITIONS live in the shared, downward-only
 // chart-core/grammar.mjs (leaf); re-exported here under the same names so the
@@ -190,7 +190,7 @@ export function resolveMotionProfile(spec) {
   if (spec.motionProfile && spec.motionProfile.type) return spec.motionProfile;
   // radial (arcs) and laneBar (bars) build like diagrams — staged reveal of the
   // composition/comparison, not a left→right time sweep.
-  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant', 'radial', 'laneBar'];
+  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'quadrant', 'radial', 'laneBar'];
   let type = 'timeSweep';
   if (diagrams.includes(spec.layout)) type = 'diagramBuild';
   else if (spec.layout === 'scenario') type = 'scenarioUpdate';
@@ -225,7 +225,7 @@ export function resolveExperienceRole(spec) {
   if (L === 'scorecard') return 'matrix';
   if (L === 'laneBar') return 'comparison';
   if (L === 'radial') return 'evidence';
-  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
   return 'evidence';
 }
 
@@ -257,7 +257,7 @@ export function resolveMobileBehavior(spec) {
   if (L === 'scorecard') return { interaction: 'scroll-x', chartHeight: 'auto', note: 'Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable.' };
   if (L === 'radial') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Keep the donut substantial on touch; tap a segment to inspect its share. Do not shrink the ring into a token.' };
   if (L === 'laneBar') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Bars stack full-width; keep the aligned compare segment and the difference callout legible; tap a segment to inspect.' };
-  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
   return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Tap to cycle elements; keep the thesis line and labels legible.' };
 }
 
@@ -1400,64 +1400,62 @@ export const FRAMEWORK_CHART_SPECS = [
     chartId: 'p2-markets-feed-back', idx: 'P2-04', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
       primaryClaim: 'Price does not just reflect fundamentals — it can change them',
-      visualProof: 'Two loops side by side — reinforcing on the left, its reversing mirror on the right — that both run through the same three mechanisms in the centre: financing conditions, execution capacity, and real-world outcomes. Dotted ties show the shared machinery transmits a rising price and a falling price alike.',
-      interactionRole: 'Hover any state to light its role in both the reinforcing and the reversing loop',
-      readerAction: 'Trace either loop, then see the three shared mechanisms the other loop runs through too',
-      caution: 'Conceptual reflexivity diagram; a tendency, not a guaranteed sequence',
+      visualProof: 'An off-centre figure-eight sharing one Price node at the crossing: an upper reinforcing loop and a lower, equally weighted reversing loop, each running price → capital → buildout → fundamentals → validation and arcing back into price.',
+      interactionRole: 'Hover a stage to see why it drives the next, and how the same mechanism runs either direction',
+      readerAction: 'Follow the arrows around each lobe back to price',
+      caution: 'Conceptual reflexivity diagram; a tendency, not a formula — illustrative, not measured data',
     },
     status: 'implemented', wiredPublic: false,
     title: 'Markets Feed Back', setupLine: 'Price changes capital behavior; capital changes fundamentals; fundamentals feed back into price.',
     claimLabel: 'REFLEXIVITY · FEEDBACK',
     frameworkClaim: 'Prices do not only reflect fundamentals; they can change fundamentals.',
     readerTakeaway: 'Price is an input, not just an output.',
-    chartType: 'Two mirrored reflexive loops (reinforcing left, reversing right) that share three central mechanism cards — financing conditions, execution capacity, real-world outcomes — dotted to both sides.',
+    chartType: 'Off-centre figure-eight reflexivity diagram: two equally weighted loops (reinforcing and reversing) sharing one Price node at the crossing, each running price, capital, buildout, fundamentals, validation.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 2', label: 'Soros lineage · reflexivity', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
     explainerHeadline: 'Price can write the fundamentals it claims to read.',
     explainerBody: 'A rising price can attract capital; capital funds the buildout; the buildout improves the fundamentals; better fundamentals appear to validate the price — which feeds back into price. The same chain can run in reverse: a falling price starves the buildout, fundamentals weaken, and the validation breaks.',
     explainerConcept: 'Reflexivity',
     concepts: [{ label: 'Reflexivity', link: '/part-2-lineage-macro-thesis' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }],
-    layout: 'feedbackLoop',
-    ariaSummary: 'Reflexivity drawn as two loops side by side that share their mechanisms. On the left, the reinforcing loop in the accent colour: price rises, capital flows in, fundamentals improve, and validation confirms, circling back to price — positive feedback that builds economy and conviction. On the right, the reversing loop in the stress colour, an equal-and-opposite mirror: price falls, capital tightens, fundamentals weaken, and validation breaks, circling back to price — negative feedback that tightens conditions and confidence. Between the two loops sit three mechanism cards that both loops run through, tied to each side with dotted lines: capital responds to price signals, where financing conditions change; buildout changes with funding conditions, where execution adapts to capital; and fundamentals reflect real-world execution, where execution becomes reality. The point is that the same machinery transmits a rising price and a falling price alike — price is an input to the mechanism, not just its output.',
-    feedbackLoop: {
-      eyebrow: 'reflexivity',
-      loops: [
-        {
-          id: 'reinforce', label: 'REINFORCING', dir: 'UPWARD', sub: 'Momentum compounds', tone: 'accent',
-          legend: 'Positive feedback builds economy and conviction.',
-          states: [
-            { id: 'price', label: 'Price rises', icon: 'up' },
-            { id: 'capital', label: 'Capital flows in', icon: 'bank' },
-            { id: 'fundamentals', label: 'Fundamentals improve', icon: 'bars' },
-            { id: 'validation', label: 'Validation confirms', icon: 'bars' },
-          ],
-        },
-        {
-          id: 'reverse', label: 'REVERSING', dir: 'DOWNWARD', sub: 'Momentum contracts', tone: 'stress',
-          legend: 'Negative feedback tightens conditions and confidence.',
-          states: [
-            { id: 'price', label: 'Price falls', icon: 'down' },
-            { id: 'capital', label: 'Capital tightens', icon: 'bank' },
-            { id: 'fundamentals', label: 'Fundamentals weaken', icon: 'bars' },
-            { id: 'validation', label: 'Validation breaks', icon: 'bars' },
-          ],
-        },
+    layout: 'reflexivityLoop',
+    ariaSummary: 'Reflexivity drawn as an off-centre figure-eight with a single shared Price node at the crossing. The upper reinforcing loop runs price up, capital in, buildout expanding, fundamentals improving, validation confirming, then back into price. The lower, equally weighted reversing loop runs price down, capital tightening, buildout slowing, fundamentals weakening, validation breaking, then back into price. Fundamentals bend toward price only with a lag; validation is a tendency, not a guarantee; the reverse loop is equally real.',
+    reflexivityLoop: {
+      shared: 'price',
+      priceLabel: 'Price',
+      reinforceLabel: 'REINFORCING',
+      reinforceNote: 'price rises · capital flows in · buildout expands · fundamentals improve · validation confirms',
+      reverseLabel: 'REVERSING',
+      reverseNote: 'price falls · capital tightens · buildout slows · fundamentals weaken · validation breaks',
+      reinforce: [
+        { stage: 'capital', label: 'Capital in' },
+        { stage: 'buildout', label: 'Buildout expands' },
+        { stage: 'fundamentals', label: 'Fundamentals improve' },
+        { stage: 'validation', label: 'Validation confirms' },
       ],
-      mechanisms: [
-        { id: 'financing', row: 'top', icon: 'bank', title: 'Capital responds to price signals', sub: 'Where financing conditions change' },
-        { id: 'execution', row: 'mid', icon: 'crane', title: 'Buildout changes with funding conditions', sub: 'Where execution adapts to capital' },
-        { id: 'outcomes', row: 'bot', icon: 'bars', title: 'Fundamentals reflect real-world execution', sub: 'Where execution becomes reality' },
+      reverse: [
+        { stage: 'capital', label: 'Capital tightens' },
+        { stage: 'buildout', label: 'Buildout slows' },
+        { stage: 'fundamentals', label: 'Fundamentals weaken' },
+        { stage: 'validation', label: 'Validation breaks' },
+      ],
+      // <=3 marginal transition annotations tied to specific reinforcing edges — the
+      // three transmission ideas, kept sparse and subordinate (never summary cards).
+      annotations: [
+        { from: 'capital', to: 'buildout', text: 'financing changes capacity' },
+        { from: 'buildout', to: 'fundamentals', text: 'execution becomes evidence' },
+        { from: 'validation', to: 'price', text: 'evidence feeds back into price' },
       ],
     },
     primaryKey: 'price',
     hoverTargets: [
-      { id: 'price', kind: 'stage', label: 'Price', name: 'Price — the shared signal', why: 'The observable both loops read from and write to. A rising price turns the reinforcing loop; a falling price turns the reversing one. Either way price is a participant in the system, not just a readout of it — every loop feeds back here.', claim: 'Price moves the market it claims to measure.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
-      { id: 'capital', kind: 'stage', label: 'Capital', name: 'Capital', why: 'Responds to the price signal through the same mechanism in both loops — financing conditions. A rising price draws it in with cheaper financing, talent and attention; a falling price tightens and withdraws them. Capital is the transmission belt from perception to the real buildout.', claim: 'Capital follows the signal and funds — or starves — the buildout.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
-      { id: 'fundamentals', kind: 'stage', label: 'Fundamentals', name: 'Fundamentals', why: 'Reflect the real-world execution the buildout produced — the shared mechanism where execution becomes reality. They improve when it expands and weaken when it slows, bending toward the price with a lag, not instantly, in whichever loop is turning.', claim: 'The fundamentals bend toward the price.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
-      { id: 'validation', kind: 'stage', label: 'Validation', name: 'Validation', why: 'Improved fundamentals appear to ratify the original move, and that evidence feeds back into price — closing the reinforcing loop. But validation does not always follow: when fundamentals weaken the confirmation breaks, and the reversing loop closes instead.', claim: 'Evidence feeds back into price — until it breaks.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'price', kind: 'stage', label: 'Price', name: 'Price', why: 'Not just a readout of value — a signal that pulls capital toward it, or away. It sits at the crossing, shared by both loops, and can change the fundamentals it claims to read.', claim: 'Price moves first — and can move the fundamentals.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'capital', kind: 'stage', label: 'Capital', name: 'Capital', why: 'Follows the price signal: it floods in on the way up and drains out on the way down, funding or starving the buildout. The same node runs both directions.', claim: 'Capital chases the signal — in or out.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
+      { id: 'buildout', kind: 'stage', label: 'Buildout', name: 'Buildout', why: 'The real capacity capital pays for — mines, rigs, teams, supply. It expands while financing is cheap and stalls the moment it dries up.', claim: 'Financing sets the pace of capacity.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'fundamentals', kind: 'stage', label: 'Fundamentals', name: 'Fundamentals', why: 'Genuinely change as the buildout lands — but with a LAG, bending toward price over time rather than snapping to it. The story becomes partly true, or quietly hollows out.', claim: 'Fundamentals bend toward price, with a lag.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'validation', kind: 'stage', label: 'Validation', name: 'Validation', why: 'Improved fundamentals CAN ratify the price and reinforce the loop — but confirmation is a tendency, not a guarantee. When it disappoints, the same loop reverses, fast.', claim: 'Confirmation feeds the next move — either way, and not always.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
     ],
-    mobileTapTargets: ['price', 'capital', 'fundamentals', 'validation'],
-    implementationNotes: 'feedbackLoop layout redesigned as two loops that SHARE their mechanisms (owner brief 2026-07, preferred organization), built from the Soros reflexivity text. Left column is the reinforcing loop (accent — price rises · capital flows in · fundamentals improve · validation confirms), right column its equal-and-opposite reversing mirror (stress — price falls · capital tightens · fundamentals weaken · validation breaks); each is carried by solid brush arrows (Brush.brushLine + Brush.brushArrow heads, weight ~1.5 — the earlier heavy 2.1 fill was retired). The centre column holds the three MECHANISMS both loops run through — financing conditions, execution capacity, real-world outcomes — dotted to each side, because the same machinery transmits an up-move and a down-move alike (the "three shared terms" the owner asked to surface). Loop labels carry an ensō cycle mark + direction; a two-entry legend sits at the bottom. Four hoverable loop states (price · capital · fundamentals · validation); the three mechanism cards are static and self-describing. Simple stroked icons per card (arrow · bank · bars · crane). Balanced weight — neither loop dominates. Fixed 660px design width so the wide layout scales down cleanly on mobile. Guardrails honored in copy: fundamentals bend with a lag (not instantly), validation does not always follow, the mechanism is a tendency not a formula, the reverse loop is equally real. Supersedes the horizontal racetrack, vertical figure-eight, two-track causal-story, spiral, two-lane, single-spine, and two-node attempts.',
+    mobileTapTargets: ['price', 'capital', 'buildout', 'fundamentals', 'validation'],
+    implementationNotes: 'reflexivityLoop is a NEW composition primitive (layout id + ReflexivityLoopSvg renderer + Brush.brushLoopPath), authored to break the card-grid feedbackLoop instinct (owner architectural brief 2026-07, ultracode multi-agent build — candidate panel + adversarial visual judge). An off-centre figure-eight: two brush RIBBONS (brushLoopPath: Catmull-Rom densify + smoothstep taper + deterministic belly swell + faint filament) ARE the two loops — no cards, no grid, no vertical spine. Reinforcing (accent, upper lobe) + reversing (stress, lower lobe) share ONE filled Price coin at the crossing (accent-top / stress-bottom wedges + outer ring, 1.25x satellite radius). Five stages per lobe incl explicit buildout; integrated Brush.brushArrow heads between every stage carry the causal direction without labels; ink-dot satellites with halo labels; exactly three subordinate marginal annotations (financing changes capacity · execution becomes evidence · evidence feeds back into price). Materially taller canvas (hh(600) vs the old hh(360)); mobile authors its OWN tall two-ring geometry (1000x1360 viewBox) — not a scaled desktop. Readability floor enforced (node labels ~14.6px desktop / ~9.7px mobile). Guardrails honoured in copy: fundamentals bend with a lag (not instantly), validation is a tendency not a guarantee, the reverse loop is equally real. Supersedes the shared-mechanism 3-column, horizontal racetrack, vertical figure-eight, causal-story, spiral, lane, spine, and two-node attempts (feedbackLoop renderer retained as dead code, no consumer).',
   },
 
   {

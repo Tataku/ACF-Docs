@@ -301,6 +301,69 @@ export function dcaWindow(x0, x1, yTop, yBot, opts = {}) {
  * "unit-capture window": the contours are driven by price weakness and pulse
  * height, so the field bulges where Bitcoin is cheap and the DCA pulses are
  * tall, and pinches shut as the advantage fades. Not a rectangle, not a wedge. */
+/* ── brushLoopPath — authored lobe / arc ribbon (first-class loop primitive) ──
+ * centerline: authored {x,y} samples (already in chart space) for one lobe/arc.
+ * Returns { core, filaments }:
+ *   core      — the main filled ribbon `d` (one confident authored stroke),
+ *   filaments — array of faint parallel offset `d` strings (empty when 0).
+ * The authored centreline is Catmull-Rom smoothed then uniformly resampled, so
+ * the ribbon reads as ONE stroke and passes through the samples. Width is a
+ * smoothstep taperIn/taperOut cap × a deterministic belly swell — the outline
+ * breathes at sub-unit tolerance while the centreline is honoured exactly. Brush
+ * geometry is first-class here: the loop IS this ribbon, not decoration. */
+export function brushLoopPath(centerline, opts = {}) {
+  const {
+    weight = 6, taperIn = 0.14, taperOut = 0.14, filaments = 1,
+    intensity = 0.5, seed = 7, step = 6, closed = false, belly = 0.14,
+  } = opts;
+  const src = centerline;
+  const M = src.length;
+  if (M < 2) return { core: '', filaments: [] };
+  const cr = (p0, p1, p2, p3, t) => {
+    const t2 = t * t, t3 = t2 * t;
+    return {
+      x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+      y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3),
+    };
+  };
+  const dense = [];
+  const segs = closed ? M : M - 1;
+  const sub = 20;
+  for (let i = 0; i < segs; i++) {
+    const p0 = src[(i - 1 + M) % M], p1 = src[i % M], p2 = src[(i + 1) % M], p3 = src[(i + 2) % M];
+    for (let j = 0; j < sub; j++) dense.push(cr(p0, p1, p2, p3, j / sub));
+  }
+  if (!closed) dense.push(src[M - 1]);
+  const { pts, total } = resamplePolyline(dense, step);
+  const rng = mulberry32(seed + 71);
+  const n = pts.length;
+  const smooth = (u) => { const c = Math.max(0, Math.min(1, u)); return c * c * (3 - 2 * c); };
+  for (let i = 0; i < n; i++) {
+    const t = total ? pts[i].s / total : 0;
+    const ein = taperIn > 0 ? smooth(t / taperIn) : 1;
+    const eout = taperOut > 0 ? smooth((1 - t) / taperOut) : 1;
+    const cap = Math.min(ein, eout);
+    const mod = 1 + belly * Math.sin(t * Math.PI) + belly * 0.34 * Math.sin(t * Math.PI * 3 + seed);
+    const micro = (rng() - 0.5) * 0.06 * intensity;          // sub-unit edge only
+    pts[i].w = Math.max(0.1, weight * (0.14 + 0.86 * cap) * mod + micro);
+  }
+  const core = strokeToPath(pts, { seed: seed + 5, jitter: 0.035 * intensity, edge: 0.28 * intensity });
+  const fils = [];
+  for (let k = 0; k < filaments; k++) {
+    const side = k % 2 === 0 ? 1 : -1;
+    const off = weight * (0.44 + 0.16 * k) * side;
+    const fp = [];
+    for (let i = 0; i < n; i++) {
+      const prev = pts[Math.max(0, i - 1)], next = pts[Math.min(n - 1, i + 1)];
+      const dx = next.x - prev.x, dy = next.y - prev.y, L = Math.hypot(dx, dy) || 1;
+      const nx = -dy / L, ny = dx / L;
+      fp.push({ x: pts[i].x + nx * off, y: pts[i].y + ny * off, w: Math.max(0.05, pts[i].w * 0.12) });
+    }
+    fils.push(strokeToPath(fp, { seed: seed + 30 + k * 7, jitter: 0.03 * intensity, edge: 0.2 * intensity }));
+  }
+  return { core, filaments: fils };
+}
+
 export function unitCaptureField(topPts, botPts, opts = {}) {
   const { seed = 1, intensity = 0.7, grainCount = 22 } = opts;
   const rng = mulberry32(seed + 23);
@@ -322,5 +385,5 @@ export function unitCaptureField(topPts, botPts, opts = {}) {
 
 export default {
   mulberry32, closedBezier, smoothOpen, strokeToPath, resamplePolyline,
-  brushLine, enso, inkDot, brushSegment, pressureField, washRect, brushArrow, dcaWindow, unitCaptureField,
+  brushLine, enso, inkDot, brushSegment, pressureField, washRect, brushArrow, dcaWindow, unitCaptureField, brushLoopPath,
 };

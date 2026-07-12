@@ -1207,12 +1207,12 @@
       "part": "part-2",
       "status": "implemented",
       "wiredPublic": false,
-      "layout": "feedbackLoop",
+      "layout": "reflexivityLoop",
       "dataMode": "conceptual",
       "claimLabel": "REFLEXIVITY · FEEDBACK",
       "primaryClaim": "Price does not just reflect fundamentals — it can change them",
-      "visualProof": "Two loops side by side — reinforcing on the left, its reversing mirror on the right — that both run through the same three mechanisms in the centre: financing conditions, execution capacity, and real-world outcomes. Dotted ties show the shared machinery transmits a rising price and a falling price alike.",
-      "readerAction": "Trace either loop, then see the three shared mechanisms the other loop runs through too",
+      "visualProof": "An off-centre figure-eight sharing one Price node at the crossing: an upper reinforcing loop and a lower, equally weighted reversing loop, each running price → capital → buildout → fundamentals → validation and arcing back into price.",
+      "readerAction": "Follow the arrows around each lobe back to price",
       "readerTakeaway": "Price is an input, not just an output.",
       "experienceRole": "diagram",
       "visualRelationship": "flow",
@@ -1268,7 +1268,7 @@
           "url": "/part-2-lineage-macro-thesis"
         }
       ],
-      "agencyNotes": "feedbackLoop layout redesigned as two loops that SHARE their mechanisms (owner brief 2026-07, preferred organization), built from the Soros reflexivity text. Left column is the reinforcing loop (accent — price rises · capital flows in · fundamentals improve · validation confirms), right column its equal-and-opposite reversing mirror (stress — price falls · capital tightens · fundamentals weaken · validation breaks); each is carried by solid brush arrows (Brush.brushLine + Brush.brushArrow heads, weight ~1.5 — the earlier heavy 2.1 fill was retired). The centre column holds the three MECHANISMS both loops run through — financing conditions, execution capacity, real-world outcomes — dotted to each side, because the same machinery transmits an up-move and a down-move alike (the \"three shared terms\" the owner asked to surface). Loop labels carry an ensō cycle mark + direction; a two-entry legend sits at the bottom. Four hoverable loop states (price · capital · fundamentals · validation); the three mechanism cards are static and self-describing. Simple stroked icons per card (arrow · bank · bars · crane). Balanced weight — neither loop dominates. Fixed 660px design width so the wide layout scales down cleanly on mobile. Guardrails honored in copy: fundamentals bend with a lag (not instantly), validation does not always follow, the mechanism is a tendency not a formula, the reverse loop is equally real. Supersedes the horizontal racetrack, vertical figure-eight, two-track causal-story, spiral, two-lane, single-spine, and two-node attempts."
+      "agencyNotes": "reflexivityLoop is a NEW composition primitive (layout id + ReflexivityLoopSvg renderer + Brush.brushLoopPath), authored to break the card-grid feedbackLoop instinct (owner architectural brief 2026-07, ultracode multi-agent build — candidate panel + adversarial visual judge). An off-centre figure-eight: two brush RIBBONS (brushLoopPath: Catmull-Rom densify + smoothstep taper + deterministic belly swell + faint filament) ARE the two loops — no cards, no grid, no vertical spine. Reinforcing (accent, upper lobe) + reversing (stress, lower lobe) share ONE filled Price coin at the crossing (accent-top / stress-bottom wedges + outer ring, 1.25x satellite radius). Five stages per lobe incl explicit buildout; integrated Brush.brushArrow heads between every stage carry the causal direction without labels; ink-dot satellites with halo labels; exactly three subordinate marginal annotations (financing changes capacity · execution becomes evidence · evidence feeds back into price). Materially taller canvas (hh(600) vs the old hh(360)); mobile authors its OWN tall two-ring geometry (1000x1360 viewBox) — not a scaled desktop. Readability floor enforced (node labels ~14.6px desktop / ~9.7px mobile). Guardrails honoured in copy: fundamentals bend with a lag (not instantly), validation is a tendency not a guarantee, the reverse loop is equally real. Supersedes the shared-mechanism 3-column, horizontal racetrack, vertical figure-eight, causal-story, spiral, lane, spine, and two-node attempts (feedbackLoop renderer retained as dead code, no consumer)."
     },
     {
       "chartId": "p2-time-changes-prudence",

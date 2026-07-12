@@ -38,7 +38,7 @@ const labelCount = (s) => {
   return n;
 };
 
-const DIAGRAMISH = new Set(['scorecard', 'quadrant', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'flow', 'loop']);
+const DIAGRAMISH = new Set(['scorecard', 'quadrant', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'flow', 'loop']);
 const active = SPECS.filter((s) => s.status !== 'deferred');     // deferred = intentionally parked
 const derived = { claimStack: [], storyBeats: [], experienceRole: [], mobileBehavior: [] };
 const needsReview = [];
