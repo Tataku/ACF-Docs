@@ -2369,6 +2369,22 @@ function RadialSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
   const segs = R.segments;
   const scales = R.scales || null;
   const [scaleId, setScaleId] = useState(R.defaultScale || (scales ? scales[0].id : null));
+  // horizon-step transition: on each step the changing magnitudes rise in and
+  // a one-shot growth pulse rings outward — the share never moves, only the
+  // balance grows. CSS transitions armed via double-rAF (SMIL can't be used:
+  // late-mounted finite SMIL is already past on the document timeline).
+  const [stepN, setStepN] = useState(0);
+  const [stepIn, setStepIn] = useState(false);
+  const stepScale = (id) => { if (id !== scaleId) { setScaleId(id); setStepN((n) => n + 1); } };
+  useEffect(() => {
+    if (stepN === 0 || reduce) return undefined;
+    setStepIn(false);
+    let id2 = 0;
+    const id1 = requestAnimationFrame(() => { id2 = requestAnimationFrame(() => setStepIn(true)); });
+    return () => { cancelAnimationFrame(id1); if (id2) cancelAnimationFrame(id2); };
+  }, [stepN, reduce]);
+  const stepFx = stepN > 0 && !reduce;
+  const riseStyle = stepFx ? { opacity: stepIn ? 1 : 0, transform: stepIn ? 'translate(0, 0)' : 'translate(0, 6px)', transition: stepIn ? 'opacity 300ms ease, transform 340ms cubic-bezier(0.2,0.7,0.2,1)' : 'none' } : undefined;
   const scale = scales ? (scales.find((s) => s.id === scaleId) || scales[0]) : null;
   const GAP = segs.length > 1 ? 2.4 : 0;                     // small angular gap between segments (deg)
   const START = typeof R.startAngle === 'number' ? R.startAngle : 0;
@@ -2447,10 +2463,18 @@ function RadialSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
               style={{ transition: reduce ? 'opacity 300ms ease' : `stroke-dashoffset 760ms cubic-bezier(0.3,0.7,0.2,1) ${140 + i * 240}ms, opacity 300ms ease, stroke-width 180ms ease` }} />
           );
         })}
+        {/* one-shot growth pulse — rings outward on each horizon step: the
+            balance GREW; the arcs (the share) never moved */}
+        {stepFx && (
+          <circle key={`pulse${stepN}`} cx={cx} cy={cy} r={rOuter + 2} fill="none" stroke={accent} strokeWidth="2" pointerEvents="none"
+            style={{ opacity: stepIn ? 0 : 0.55, transform: stepIn ? 'scale(1.11)' : 'scale(1)', transformOrigin: `${cx}px ${cy}px`, transition: stepIn ? 'opacity 780ms ease, transform 780ms cubic-bezier(0.2,0.7,0.2,1)' : 'none' }} />
+        )}
         {/* centre label — GROSS BALANCE + the (growing) magnitude, still 100% */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 500ms ease 620ms' }}>
           <text x={cx} y={cy - 16 * FC} textAnchor="middle" style={halo(pal, 10 * FC, pal.text3)}>{(R.centerLabel || 'TOTAL').toUpperCase()}</text>
-          <text x={cx} y={cy + 12 * FC} textAnchor="middle" style={haloSans(pal, 30 * FC, pal.text1, 600)}>{scale ? scale.center : (R.centerValue || '100%')}</text>
+          <g key={`cv-${scaleId}`} style={riseStyle}>
+            <text x={cx} y={cy + 12 * FC} textAnchor="middle" style={haloSans(pal, 30 * FC, pal.text1, 600)}>{scale ? scale.center : (R.centerValue || '100%')}</text>
+          </g>
           {scale && <text x={cx} y={cy + 30 * FC} textAnchor="middle" style={halo(pal, 9 * FC, pal.text4)}>= 100%</text>}
         </g>
         {/* direct labels + short leaders (no detached legend) */}
@@ -2468,7 +2492,9 @@ function RadialSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
             <g key={`lbl${a.id}`} style={{ opacity: entered ? (focusId && !on ? 0.5 : 1) : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 460ms ease 720ms' }}>
               <path d={`M${edge.x.toFixed(1)} ${edge.y.toFixed(1)} L${knee.x.toFixed(1)} ${knee.y.toFixed(1)} L${endX.toFixed(1)} ${knee.y.toFixed(1)}`} fill="none" stroke={on ? col : pal.borderHi} strokeWidth={on ? 1.3 : 1} style={{ transition: trans('stroke') }} />
               <text x={tx} y={knee.y - 6 * F} textAnchor={anchorTxt} style={haloSans(pal, 12.5 * F, on || a.id === spec.primaryKey ? col : pal.text1, 600)}>{a.label}</text>
-              <text x={tx} y={knee.y + 9 * F} textAnchor={anchorTxt} style={halo(pal, 10 * F, col)}>{a.pct}%{mag ? `  ·  ${mag}` : ''}</text>
+              <g key={`mag-${a.id}-${scaleId}`} style={riseStyle}>
+                <text x={tx} y={knee.y + 9 * F} textAnchor={anchorTxt} style={halo(pal, 10 * F, col)}>{a.pct}%{mag ? `  ·  ${mag}` : ''}</text>
+              </g>
               {a.sub && !coarse && <text x={tx} y={knee.y + 22} textAnchor={anchorTxt} style={halo(pal, 8.5, pal.text4)}>{a.sub}</text>}
             </g>
           );
@@ -2483,7 +2509,7 @@ function RadialSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
         <div role="group" aria-label="Time horizon — the share holds; the balance grows" style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', padding: '10px 8px 2px' }}>
           <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.12em', color: pal.text4, alignSelf: 'center', marginRight: 2 }}>HORIZON</span>
           {scales.map((s) => (
-            <button key={s.id} type="button" className="acf-fx-focusable" aria-pressed={scale && s.id === scale.id} onClick={() => setScaleId(s.id)} style={pillBtn(scale && s.id === scale.id)}>{s.label}</button>
+            <button key={s.id} type="button" className="acf-fx-focusable" aria-pressed={scale && s.id === scale.id} onClick={() => stepScale(s.id)} style={pillBtn(scale && s.id === scale.id)}>{s.label}</button>
           ))}
         </div>
       )}
