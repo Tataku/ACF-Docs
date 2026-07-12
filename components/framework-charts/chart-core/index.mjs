@@ -17,13 +17,12 @@
  *   · shared reveal motion (draw-in / wipe-in — comprehension-first)
  * ─────────────────────────────────────────────────────────────────────────── */
 
-// Visual-relationship grammar (definition SSOT stays in chart-specs.mjs; re-exported
-// here as the unified surface so a consumer imports the whole foundation from one place).
+// Visual-relationship grammar (defined inside chart-core — downward-only).
 export {
   VISUAL_RELATIONSHIPS,
   LAYOUT_RELATIONSHIPS,
   resolveVisualRelationship,
-} from '../chart-specs.mjs';
+} from './grammar.mjs';
 
 // Multi-lane comparison model.
 export {
@@ -32,9 +31,15 @@ export {
   layoutMultiLane,
 } from './multilane.mjs';
 
-// Value-formatter facade (money / compact-money / percent).
+// Value-formatter facade — HONEST semantics. The illustrative-named functions are
+// the docs teaching policy (lossy: non-positive→$0, coarse); FORMAT_PROFILES names
+// the fuller contract, most profiles owned by the consuming app's finance formatters.
 export {
-  formatMoney,
-  formatCompactMoney,
-  formatPercent,
+  FORMAT_PROFILES,
+  formatIllustrativeMoney,
+  formatIllustrativeCompactMoney,
+  formatFractionPercent,
+  formatMoney,          // compat alias of formatIllustrativeMoney
+  formatCompactMoney,   // compat alias of formatIllustrativeCompactMoney
+  formatPercent,        // compat alias of formatFractionPercent
 } from './format.mjs';

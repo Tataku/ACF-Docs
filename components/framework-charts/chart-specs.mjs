@@ -22,9 +22,10 @@
  *
  * Pure ESM: imported by both the Next.js components and the Node validator.
  * ─────────────────────────────────────────────────────────────────────────── */
-// Value formatters live in the shared chart-core facade (one definition for both
-// engines); re-exported below under their existing names so consumers don't change.
-import { formatMoney, formatCompactMoney as _formatCompactMoney, formatPercent as _formatPercent } from './chart-core/format.mjs';
+// Value formatters live in the shared chart-core facade (chart-core/format.mjs).
+// They are the docs engine's ILLUSTRATIVE policy (coarse, non-positive→$0) — NOT a
+// universal financial formatter; re-exported below under the established docs names.
+import { formatIllustrativeMoney, formatIllustrativeCompactMoney, formatFractionPercent } from './chart-core/format.mjs';
 
 // ── deterministic helpers (self-contained: no runtime imports) ───────────────
 function mulberry32(a) {
@@ -86,32 +87,11 @@ export const DATA_MODES = ['representative', 'historical', 'simulation', 'concep
 export const SOURCE_ROLES = ['verifies-concept', 'backs-series', 'methodology', 'target-source'];
 export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar'];
 
-// ── Visual-relationship grammar (the semantic layer above `layout`) ───────────
-// `layout` says which RENDERER draws the chart; `visualRelationship` says which
-// RELATIONSHIP the chart teaches. Encoding the relationship explicitly stops an
-// agent from picking a technically-valid-but-semantically-weak form (a line for a
-// composition claim, a flowchart for a magnitude comparison). Derived from layout
-// when not declared; signature / ambiguous charts should declare it.
-export const VISUAL_RELATIONSHIPS = ['trend', 'comparison', 'composition', 'flow', 'threshold', 'distribution', 'sequence', 'matrix', 'reveal', 'hierarchy'];
-
-// Which relationships each layout can HONESTLY express. Used for the validator's
-// advisory (a declared relationship outside its layout's set is a soft warning,
-// never a hard failure — legacy charts keep validating). The relationship→form
-// SELECTION guidance (which form to REACH FOR per relationship) lives in the
-// agency handoff README's "Chart Grammar" matrix; this is the inverse check.
-export const LAYOUT_RELATIONSHIPS = {
-  single: ['trend', 'comparison', 'threshold', 'distribution'],
-  dual: ['trend', 'comparison', 'reveal'],
-  quadrant: ['matrix'],
-  radial: ['composition', 'hierarchy'],
-  laneBar: ['comparison', 'composition'],
-  scorecard: ['matrix'],
-  scenario: ['comparison'],
-  sequenceRisk: ['sequence'],
-  heartbeat: ['trend', 'comparison'],
-  flow: ['flow'], bridge: ['flow'], gate: ['flow'], loop: ['flow'],
-  systemLoop: ['flow'], governanceLoop: ['flow'], feedbackLoop: ['flow'],
-};
+// Visual-relationship grammar — DEFINITIONS live in the shared, downward-only
+// chart-core/grammar.mjs (leaf); re-exported here under the same names so the
+// validator / inventory / renderers keep importing them from chart-specs. The
+// dependency runs chart-core/grammar → chart-specs → engine (never upward).
+export { VISUAL_RELATIONSHIPS, LAYOUT_RELATIONSHIPS, resolveVisualRelationship } from './chart-core/grammar.mjs';
 
 // Interaction must MATCH the concept (a reveal reveals; a selector changes the path).
 export const INTERACTION_TYPES = ['none', 'hover', 'scenario', 'beforeAfterReveal', 'readerContext', 'returnOrder', 'slider'];
@@ -170,9 +150,9 @@ export const HORIZON_BANDS = [
 // ── standardized formatting (no cents, no false precision) ────────────────────
 // Canonical definitions live in chart-core/format.mjs; re-exported here under the
 // established names so every existing consumer keeps working unchanged.
-export const formatStartingValue = formatMoney;   // (was a byte-identical inline copy)
-export const formatCompactMoney = _formatCompactMoney;
-export const formatPercent = _formatPercent;
+export const formatStartingValue = formatIllustrativeMoney;   // (was a byte-identical inline copy)
+export const formatCompactMoney = formatIllustrativeCompactMoney;
+export const formatPercent = formatFractionPercent;
 export function formatHorizon(id) {
   const b = HORIZON_BANDS.find((h) => h.id === id);
   return b ? b.label : '30+ years';
@@ -249,25 +229,7 @@ export function resolveExperienceRole(spec) {
   return 'evidence';
 }
 
-// visual relationship: the SEMANTIC form the chart teaches (composition vs
-// comparison vs trend vs flow …). Complements experienceRole (KIND of learning)
-// and layout (which RENDERER). Explicit spec.visualRelationship wins; otherwise
-// derived from layout so the doctrine holds across the whole registry without
-// hand-editing every legacy spec. Signature / ambiguous charts should declare it
-// so the form is chosen from the relationship, not from the nearest layout.
-export function resolveVisualRelationship(spec) {
-  if (spec.visualRelationship) return spec.visualRelationship;
-  const L = spec.layout;
-  if (L === 'radial') return 'composition';
-  if (L === 'laneBar') return 'comparison';
-  if (L === 'quadrant' || L === 'scorecard') return 'matrix';
-  if (L === 'scenario') return 'comparison';
-  if (L === 'sequenceRisk') return 'sequence';
-  if (L === 'dual' && spec.perspectiveSlider) return 'reveal';
-  if (L === 'dual') return 'comparison';
-  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate'].includes(L)) return 'flow';
-  return 'trend';                                                      // single / heartbeat default
-}
+// (resolveVisualRelationship is defined in chart-core/grammar.mjs and re-exported above.)
 // story beats: the comprehension arc the chart should build in. Explicit wins;
 // otherwise derived context → mechanism → (action, if interactive) → consequence.
 export function resolveStoryBeats(spec) {
@@ -2253,16 +2215,17 @@ export const FRAMEWORK_CHART_SPECS = [
     laneBar: {
       total: 100, unit: 'units', totalLabel: 'The same $100 distribution, two tax treatments',
       surplusLabel: '+24 still working now under ROC',
+      compareKey: 'deploy',                                  // the shared "capital back to work" dimension, compared across lanes
       bars: [
         {
           id: 'roc', label: 'Return of capital', sublabel: 'not taxed on receipt',
-          segments: [{ id: 'roc-deploy', label: 'redeploys now', value: 100, tier: 'primary', valueLabel: '100', compare: true }],
+          segments: [{ id: 'roc-deploy', key: 'deploy', label: 'redeploys now', value: 100, tier: 'primary', valueLabel: '100' }],
           deferred: { id: 'roc-defer', value: 24, label: 'tax deferred to basis · due at a later sale (not taken now)' },
         },
         {
           id: 'div', label: 'Taxed dividend', sublabel: 'taxed on receipt each year',
           segments: [
-            { id: 'div-deploy', label: 'redeploys now', value: 76, tier: 'secondary', valueLabel: '76', compare: true },
+            { id: 'div-deploy', key: 'deploy', label: 'redeploys now', value: 76, tier: 'secondary', valueLabel: '76' },
             { id: 'div-tax', label: 'taxed now', value: 24, tier: 'stress', valueLabel: '24' },
           ],
         },

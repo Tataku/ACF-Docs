@@ -1,25 +1,50 @@
 /* ───────────────────────────────────────────────────────────────────────────
- * Formatter facade — the shared, framework-agnostic number/currency/percent
- * formatters (chart-engine unification, Phase C seed — see chart-core/README.md).
+ * Value formatters — HONEST semantic boundary.
  *
- * PURE (no React, no palette, no DOM, no charting library). The canonical home for
- * the value formatters both engines print on axes, labels, and readouts, so there
- * is ONE definition instead of a divergent copy per engine (the docs engine's old
- * inline `fmtMoney` was byte-identical to `formatStartingValue` — now both resolve
- * here). ACFDashboard has its own canonical `shared/formatters.ts` PLUS a divergent
- * Data-page copy; consolidating those onto this facade is the owner-gated cross-repo
- * follow-up. No cents, no false precision — illustrative scaling, never exact.
+ * PURE, framework-agnostic. These are the DOCS ENGINE's ILLUSTRATIVE formatting
+ * policy: exhibits scale representative numbers, they never report exact finance.
+ * That policy is deliberately lossy and MUST NOT be adopted blindly for real
+ * financial values:
+ *   · non-positive money collapses to "$0"  → would erase losses / withdrawals /
+ *     negative P&L / liabilities / refunds
+ *   · values are coarsely rounded            → would drop cents and small amounts
+ *   · precision is intentionally suppressed
+ *
+ * So the functions are named for what they ARE (illustrative), not for a false
+ * universal. ACFDashboard KEEPS its own canonical financial formatters
+ * (`shared/formatters.ts`) for precise / signed / currency values — this module
+ * does not replace them. The eventual shared surface is a set of named PROFILES
+ * (below), only two of which are implemented here; the rest stay consumer-owned.
  * ─────────────────────────────────────────────────────────────────────────── */
 
-/** Coarse money — round to the nearest $100 (or $1,000 above $100k), no cents. */
-export function formatMoney(n) {
+/**
+ * The semantic formatting profiles a unified chart layer needs. This is a
+ * CONTRACT / documentation surface, not a promise that all are implemented here.
+ * Implemented in THIS module: `illustrative`, `illustrativeCompact`,
+ * `percentFromFraction`. Everything else is owned by the consuming app's
+ * financial formatters (e.g. ACFDashboard) and must not be faked with the
+ * illustrative policy.
+ */
+export const FORMAT_PROFILES = Object.freeze({
+  illustrative: 'illustrative',                 // coarse, rounded, non-positive→$0, cents suppressed (DOCS teaching policy — implemented here)
+  illustrativeCompact: 'illustrativeCompact',   // compact illustrative ($1.2M/$12k), non-positive→$0 (implemented here)
+  preciseCurrency: 'preciseCurrency',           // exact currency incl. cents (consumer-owned)
+  signedPnl: 'signedPnl',                        // signed P&L incl. losses / negatives (consumer-owned)
+  compactPortfolio: 'compactPortfolio',          // compact portfolio value preserving sign (consumer-owned)
+  percentFromFraction: 'percentFromFraction',    // 0.05 → "5%" (implemented here: formatFractionPercent)
+  percentFromPoints: 'percentFromPoints',        // 5 → "5%" (percentage-points input; consumer-owned, not implemented here)
+});
+
+/** ILLUSTRATIVE money — round to nearest $100 (or $1,000 above $100k); non-positive → "$0".
+ *  Lossy on purpose (no cents, no negatives). Do NOT use for real financial values. */
+export function formatIllustrativeMoney(n) {
   if (!isFinite(n) || n <= 0) return '$0';
   const r = n >= 100000 ? Math.round(n / 1000) * 1000 : Math.round(n / 100) * 100;
   return '$' + r.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
 
-/** Compact money — $1.2M / $12k / $340 (one significant tail digit at millions). */
-export function formatCompactMoney(n) {
+/** ILLUSTRATIVE compact money — $1.2M / $12k / $340; non-positive → "$0". Lossy on purpose. */
+export function formatIllustrativeCompactMoney(n) {
   if (!isFinite(n) || n <= 0) return '$0';
   const abs = Math.abs(n);
   if (abs >= 1e6) return '$' + (Math.round(n / 1e5) / 10).toLocaleString('en-US') + 'M';
@@ -27,10 +52,20 @@ export function formatCompactMoney(n) {
   return '$' + Math.round(n).toLocaleString('en-US');
 }
 
-/** Percent from a fraction (0.05 → "5%"); trims trailing zeros. */
-export function formatPercent(x, digits = 0) {
+/** Percent from a FRACTION (0.05 → "5%"); trims trailing zeros. Sign-preserving. */
+export function formatFractionPercent(x, digits = 0) {
   if (!isFinite(x)) return '0%';
   return `${(x * 100).toFixed(digits).replace(/\.0+$/, '')}%`;
 }
 
-export default { formatMoney, formatCompactMoney, formatPercent };
+// ── Docs compatibility aliases ───────────────────────────────────────────────
+// Kept so existing docs-engine imports keep working; the names above are canonical.
+export const formatMoney = formatIllustrativeMoney;
+export const formatCompactMoney = formatIllustrativeCompactMoney;
+export const formatPercent = formatFractionPercent;
+
+export default {
+  FORMAT_PROFILES,
+  formatIllustrativeMoney, formatIllustrativeCompactMoney, formatFractionPercent,
+  formatMoney, formatCompactMoney, formatPercent,
+};
