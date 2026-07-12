@@ -992,6 +992,20 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   // gets an opacity boost there — both loops land at the same visual weight
   const toneOp = (tone, base = 0.9) => (tone === 'stress' && pal.name !== 'light' ? Math.min(1, base + 0.1) : base);
   const stageName = (id) => { const t = targets.find((tt) => tt.id === id); return t ? t.label : id; };
+  // MOBILE — the transposed möbius, authored separately in a 390×600 design
+  // space (not the desktop shrunk): cards stack vertically with price anchored
+  // on top; the teal rail descends the LEFT states, the clay rail the RIGHT,
+  // diverging as the loop matures; both returns sweep up the margins back into
+  // the same price card (teal → left edge, clay → right edge).
+  const MW = 390, MH = 600;
+  const MC = [
+    { id: 'price', cy: 97, tl: 153, tr: 237 },
+    { id: 'capital', cy: 190, tl: 143, tr: 249 },
+    { id: 'buildout', cy: 283, tl: 133, tr: 257 },
+    { id: 'fundamentals', cy: 376, tl: 123, tr: 267 },
+    { id: 'validation', cy: 469, tl: 115, tr: 275 },
+  ].map((c) => ({ ...c, top: c.cy - 29, bot: c.cy + 29, L: c.tl - 26, R: c.tr + 26 }));
+  const mById = Object.fromEntries(MC.map((c) => [c.id, c]));
   // authored positions for the three persistent transition annotations
   const ANNOT_POS = {
     'capital-buildout': { x: 384, y: 356, anchor: 'middle', tick: [[384, 346], [384, 312]] },
@@ -1002,6 +1016,37 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   const geom = useMemo(() => {
     const bez = (p0, c1, c2, p1, n = 20) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push({ x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x, y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y }); } return pts; };
     const head = (tx, ty, ang, sc = 1) => { const ux = Math.cos(ang), uy = Math.sin(ang), px = -uy, py = ux, L = 12 * sc, W2 = 5 * sc, N = 8.4 * sc; return `M${tx} ${ty} L${tx - ux * L + px * W2} ${ty - uy * L + py * W2} L${tx - ux * N} ${ty - uy * N} L${tx - ux * L - px * W2} ${ty - uy * L - py * W2} Z`; };
+    if (coarse) {
+      // transposed möbius: vertical S-curves down the two rails, arrowheads
+      // landing 3px clear of each card's top edge; returns up both margins
+      const strands = [], heads = [];
+      ['accent', 'stress'].forEach((tone) => {
+        for (let i = 0; i < MC.length - 1; i++) {
+          const a = MC[i], b = MC[i + 1];
+          const x0 = tone === 'stress' ? a.tr : a.tl, x1 = tone === 'stress' ? b.tr : b.tl;
+          const tip = b.top - 3, g = (tip - a.bot) * 0.5;
+          const pts = bez({ x: x0, y: a.bot }, { x: x0, y: a.bot + g }, { x: x1, y: tip - g }, { x: x1, y: tip - 10 });
+          strands.push({ d: Brush.brushLine(pts, { seed: 62 + i * 9 + (tone === 'stress' ? 300 : 0), weight: 1.25, intensity: 0.55, taper: 0.04 }), tone });
+          heads.push({ d: head(x1, tip, Math.PI / 2), tone });
+        }
+      });
+      const p = mById.price, v = mById.validation;
+      const retTop = [
+        ...bez({ x: v.tl, y: v.bot + 3 }, { x: v.tl, y: 556 }, { x: 78, y: 562 }, { x: 32, y: 508 }),
+        ...bez({ x: 32, y: 508 }, { x: 18, y: 420 }, { x: 22, y: 150 }, { x: 62, y: 104 }),
+        ...bez({ x: 62, y: 104 }, { x: 80, y: 97 }, { x: 104, y: 97 }, { x: p.L - 11, y: 97 }),
+      ];
+      const retBot = [
+        ...bez({ x: v.tr, y: v.bot + 3 }, { x: v.tr, y: 556 }, { x: 312, y: 562 }, { x: 358, y: 508 }),
+        ...bez({ x: 358, y: 508 }, { x: 372, y: 420 }, { x: 368, y: 150 }, { x: 328, y: 104 }),
+        ...bez({ x: 328, y: 104 }, { x: 310, y: 97 }, { x: 286, y: 97 }, { x: p.R + 11, y: 97 }),
+      ];
+      const rets = [
+        { d: Brush.brushLine(retTop, { seed: 210, weight: 1.4, intensity: 0.5, taper: 0.04 }), head: head(p.L - 3, 97, 0, 1.15), tone: 'accent' },
+        { d: Brush.brushLine(retBot, { seed: 220, weight: 1.4, intensity: 0.5, taper: 0.04 }), head: head(p.R + 3, 97, Math.PI, 1.15), tone: 'stress' },
+      ];
+      return { strands, heads, rets };
+    }
     // gap ribbons — the teal path CLIMBS card to card, the clay path FALLS.
     // Consistent anchors: every segment leaves flush from the exit port, runs a
     // horizontal-tangent S-curve, and lands its arrowhead 3px clear of the next
@@ -1036,13 +1081,14 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
     ];
     return { strands, heads, rets };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height]);
+  }, [width, height, coarse]);
 
-  const anchorOf = (a) => { const c = byId[a.id]; return c ? { x: c.x, y: CY } : null; };
+  const anchorOf = (a) => { if (coarse) { const c = mById[a.id]; return c ? { x: 195, y: c.cy } : null; } const c = byId[a.id]; return c ? { x: c.x, y: CY } : null; };
   const resolve = (mx) => { let best = null, bd = Infinity; CARDS.forEach((c) => { const d = Math.abs(mx - c.x); const lim = c.W / 2 + (touch ? 26 : 18); if (d < lim && d < bd) { bd = d; best = c; } }); return best ? targets.find((t) => t.id === best.id) : null; };
-  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const resolveM = (my) => { let best = null, bd = Infinity; MC.forEach((c) => { const d = Math.abs(my - c.cy); if (d < 46 && d < bd) { bd = d; best = c; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); const vw = coarse ? MW : width, vh = coarse ? MH : height; return [(e.clientX - r.left) * (vw / r.width), (e.clientY - r.top) * (vh / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
-  const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+  const onClick = (e) => { if (coarse) { onActive(resolveM(toVB(e)[1]), 'tap'); return; } const res = resolve(toVB(e)[0]); if (!res) { onPin(null); return; } onPin(res); };
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
@@ -1053,6 +1099,63 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
     if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+  }
+
+  if (coarse) {
+    // MOBILE — transposed möbius, authored for 390×600 (detail lives in the tap rail)
+    const MANNOT = { 'capital-buildout': 240, 'buildout-fundamentals': 333, 'validation-price': 550 };
+    return (
+      <div style={{ position: 'relative' }}>
+        <svg ref={svgRef} viewBox={`0 0 ${MW} ${MH}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', cursor: 'pointer', touchAction: 'manipulation' }} onClick={onClick}>
+          {/* rails descend — teal down the left states, clay down the right */}
+          <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 0 100% 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 0 100% 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'clip-path 1100ms cubic-bezier(0.22,0.61,0.36,1) 480ms, -webkit-clip-path 1100ms cubic-bezier(0.22,0.61,0.36,1) 480ms, opacity 400ms ease 480ms' }}>
+            {geom.strands.map((s, i) => <path key={`st${i}`} d={s.d} fill={toneCol(s.tone)} opacity={toneOp(s.tone)} />)}
+          </g>
+          {/* returns sweep up both margins back into price — reveal bottom→top */}
+          <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(100% 0 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(100% 0 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'clip-path 1000ms cubic-bezier(0.22,0.61,0.36,1) 1500ms, -webkit-clip-path 1000ms cubic-bezier(0.22,0.61,0.36,1) 1500ms, opacity 400ms ease 1500ms' }}>
+            {geom.rets.map((r, i) => (
+              <g key={`ret${i}`}><path d={r.d} fill={toneCol(r.tone)} opacity={toneOp(r.tone)} /><path d={r.head} fill={toneCol(r.tone)} opacity={toneOp(r.tone, 0.95)} /></g>
+            ))}
+          </g>
+          {MC.map((c, i) => {
+            const on = focusId === c.id;
+            const isP = c.id === spec.primaryKey;
+            return (
+              <g key={c.id} style={{ opacity: entered ? (focusId && !on ? 0.45 : 1) : 0, transformOrigin: `195px ${c.cy}px`, transform: entered ? 'none' : 'scale(0.95)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms ease ${120 + i * 110}ms, transform 440ms cubic-bezier(0.2,0.7,0.2,1) ${120 + i * 110}ms` }}>
+                <rect x={c.L} y={c.top} width={c.R - c.L} height={c.bot - c.top} rx={10} fill={pal.surface} stroke={on ? accent : isP ? accent : pal.borderHi} strokeWidth={on ? 1.9 : isP ? 1.7 : 1} style={{ transition: trans('stroke') }} />
+                <line x1={c.tl} x2={c.tl} y1={c.top + 7} y2={c.bot - 7} stroke={accent} strokeWidth="1.2" opacity="0.3" />
+                <line x1={c.tr} x2={c.tr} y1={c.top + 7} y2={c.bot - 7} stroke={pal.bandStress} strokeWidth="1.2" opacity={pal.name === 'light' ? 0.32 : 0.38} />
+                <line x1={c.tl + 9} x2={c.tr - 9} y1={c.cy} y2={c.cy} stroke={pal.borderHi} strokeWidth="1" opacity="0.3" />
+                <text x={195} y={c.cy + 4.5} textAnchor="middle" style={haloSans(pal, isP ? 13.5 : 12.5, isP ? accent : pal.text1, 700)}>{stageName(c.id)}</text>
+                <text x={c.tl} y={c.cy + 3.5} textAnchor="middle" style={haloSans(pal, 10.5, toneTxt('accent'), 600)}>{lanes[0].nodes[i].label}</text>
+                <text x={c.tr} y={c.cy + 3.5} textAnchor="middle" style={haloSans(pal, 10.5, toneTxt('stress'), 600)}>{lanes[1].nodes[i].label}</text>
+                {[[c.tl, c.top], [c.tl, c.bot], [c.tr, c.top], [c.tr, c.bot]].map(([px2, py2], j) => (
+                  <path key={j} d={Brush.inkDot(px2, py2, 2.2, { seed: 60 + i * 11 + j * 3, intensity: 0.7 })} fill={toneCol(j < 2 ? 'accent' : 'stress')} opacity="0.85" />
+                ))}
+                {isP && <><path d={Brush.inkDot(c.L, c.cy, 2.5, { seed: 171, intensity: 0.7 })} fill={accent} opacity="0.9" /><path d={Brush.inkDot(c.R, c.cy, 2.5, { seed: 172, intensity: 0.7 })} fill={pal.bandStress} opacity={toneOp('stress', 0.9)} /></>}
+              </g>
+            );
+          })}
+          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 420ms ease 1280ms' }}>
+            {geom.heads.map((h, i) => <path key={`hd${i}`} d={h.d} fill={toneCol(h.tone)} opacity={toneOp(h.tone, 0.95)} />)}
+          </g>
+          {lanes.map((lane, li) => (
+            <g key={lane.id} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${1700 + li * 120}ms` }}>
+              <text x={li === 0 ? 14 : 376} y={30} textAnchor={li === 0 ? 'start' : 'end'} style={halo(pal, 8.5, toneTxt(lane.tone), 600)}>{lane.label}</text>
+              {lane.note && <text x={li === 0 ? 14 : 376} y={44} textAnchor={li === 0 ? 'start' : 'end'} style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>{lane.note}</text>}
+            </g>
+          ))}
+          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 520ms ease 2100ms' }}>
+            {(fl.annotations || []).map((an) => {
+              const ay = MANNOT[`${an.from}-${an.to}`];
+              if (!ay) return null;
+              return <text key={`${an.from}-${an.to}`} x={195} y={ay} textAnchor="middle" style={{ ...halo(pal, 9.5, pal.text3), fontStyle: 'italic' }}>{an.text}</text>;
+            })}
+          </g>
+          {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
+        </svg>
+      </div>
+    );
   }
 
   return (
