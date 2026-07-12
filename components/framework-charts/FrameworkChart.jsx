@@ -1284,6 +1284,16 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
     burstTimer.current = setTimeout(() => setBurst(null), 2400);
   }, []);
   useEffect(() => () => { if (burstTimer.current) clearTimeout(burstTimer.current); }, []);
+  // release ring uses the CSS-transition idiom armed via double-rAF — finite
+  // SMIL on late-mounted elements is already past on the document timeline
+  const [burstIn, setBurstIn] = useState(false);
+  useEffect(() => {
+    if (!burst || reduce) return undefined;
+    setBurstIn(false);
+    let id2 = 0;
+    const id1 = requestAnimationFrame(() => { id2 = requestAnimationFrame(() => setBurstIn(true)); });
+    return () => { cancelAnimationFrame(id1); if (id2) cancelAnimationFrame(id2); };
+  }, [burst, reduce]);
   const nodes = spec.gate.nodes; // [entry, gate, gate, gate, gate, exit]
   const K = nodes.length;
   const pad = { l: 64, r: 80, t: 50, b: 52 };
@@ -1409,11 +1419,8 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
           return (
             <g key={`burst${burst.n}`} pointerEvents="none">
               {/* expanding energy ring released on click */}
-              <circle cx={tx} cy={cy} r="11" fill="none" stroke={accent} strokeWidth="1.6">
-                <animate attributeName="r" from="11" to="40" dur="0.9s" fill="freeze" />
-                <animate attributeName="opacity" from="0.7" to="0" dur="0.9s" fill="freeze" />
-                <animate attributeName="stroke-width" from="1.8" to="0.3" dur="0.9s" fill="freeze" />
-              </circle>
+              <circle cx={tx} cy={cy} r="11" fill="none" stroke={accent} strokeWidth="1.6" vectorEffect="non-scaling-stroke"
+                style={{ opacity: burstIn ? 0 : 0.7, transform: burstIn ? 'scale(3.6)' : 'scale(1)', transformOrigin: `${tx}px ${cy}px`, transition: burstIn ? 'opacity 900ms ease-out, transform 900ms cubic-bezier(0.2,0.7,0.2,1)' : 'none' }} />
               {/* electron shells: tilted orbits + particles rotating around the nucleus */}
               {orbits.map((o, oi) => (
                 <g key={oi}>
