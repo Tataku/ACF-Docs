@@ -27,19 +27,82 @@ const tags = (html, name) => [...html.matchAll(new RegExp(`<${name}\\b([^>]*)>`,
 const ids = html => new Set([...html.matchAll(/\sid\s*=\s*(["'])(.*?)\1/gms)].map(m => m[2]));
 const canonical = html => { const m = html.match(/<link\b([^>]*\brel\s*=\s*(["'])canonical\2[^>]*)>/ims); return m ? attr(m[1]).href : null; };
 const clean = p => p.length > 1 ? p.replace(/\/$/, '') : p;
+const visualReferenceClasses = ['part-ref', 'lineage-ref'];
+
+const runtimeSourceFile = path.join(root, 'scripts', 'reference-integrity-runtime.js');
+const readingRuntimeFile = path.join(site, 'reading.js');
+const runtimeStart = '/* ACF_REFERENCE_INTEGRITY_START */';
+const runtimeEnd = '/* ACF_REFERENCE_INTEGRITY_END */';
+const fallbackStyle = '<style id="acf-reference-integrity-fallback">.part-ref.is-pending-reference,.lineage-ref.is-pending-reference{color:inherit!important;border:0!important;background:none!important;text-decoration:none!important;cursor:default!important}.part-ref.is-pending-reference::before,.part-ref.is-pending-reference::after,.lineage-ref.is-pending-reference::before,.lineage-ref.is-pending-reference::after{content:none!important}</style>';
+
+function installReferenceRuntime() {
+  if (!fs.existsSync(runtimeSourceFile) || !fs.existsSync(readingRuntimeFile)) {
+    errors.push('reference integrity runtime or reading.js is missing');
+    return;
+  }
+  const payload = read(runtimeSourceFile).trim();
+  let reading = read(readingRuntimeFile);
+  const block = `${runtimeStart}\n${payload}\n${runtimeEnd}\n`;
+  const existingStart = reading.indexOf(runtimeStart);
+  const existingEnd = reading.indexOf(runtimeEnd);
+  if (existingStart !== -1 && existingEnd > existingStart) {
+    const after = existingEnd + runtimeEnd.length;
+    reading = reading.slice(0, existingStart) + block + reading.slice(after).replace(/^\n?/, '');
+  } else {
+    reading = `${reading.trimEnd()}\n\n${block}`;
+  }
+  if (!check) fs.writeFileSync(readingRuntimeFile, reading);
+  else if (read(readingRuntimeFile) !== reading) errors.push('reading.js is missing the generated reference integrity runtime');
+
+  for (const page of pages) {
+    const file = path.join(site, page.file);
+    if (!fs.existsSync(file)) continue;
+    let html = read(file);
+    if (!html.includes('acf-reference-integrity-fallback')) html = html.replace('</head>', `  ${fallbackStyle}\n</head>`);
+    if (!check) fs.writeFileSync(file, html);
+    else if (read(file) !== html) errors.push(`${page.route}: missing reference-integrity fallback style`);
+  }
+}
+
+installReferenceRuntime();
 
 for (const p of pages) {
   const file = path.join(site, p.file);
   if (!fs.existsSync(file)) { errors.push(`${p.route}: missing ${p.file}`); continue; }
   const html = read(file), pageIds = ids(html), seen = new Set();
   [...html.matchAll(/\sid\s*=\s*(["'])(.*?)\1/gms)].forEach(m => { if (seen.has(m[2])) errors.push(`${p.route}: duplicate id #${m[2]}`); seen.add(m[2]); });
-  const record = { ...p, html, ids: pageIds, anchors: tags(html, 'a'), figures: tags(html, 'figure').filter(x => x['data-fc-chart']), glossary: [...html.matchAll(/\bdata-gloss\s*=\s*(["'])(.*?)\1/gims)].map(m => m[2]) };
+  const record = {
+    ...p,
+    html,
+    ids: pageIds,
+    anchors: tags(html, 'a'),
+    figures: tags(html, 'figure').filter(x => x['data-fc-chart']),
+    glossary: [...html.matchAll(/\bdata-gloss\s*=\s*(["'])(.*?)\1/gims)].map(m => m[2]),
+  };
   byRoute.set(p.route, record);
   const raw = `/site-b/${p.file}`;
   [p.route, raw, p.file, `/${p.file}`].forEach(v => aliases[v] = p.route);
   aliases[`${origin}${p.route}`] = p.route; aliases[`${origin}${raw}`] = p.route;
   if (p.file === 'cover-docs.html') aliases['cover-docs.html'] = '/';
   if (canonical(html) !== `${origin}${p.route}`) errors.push(`${p.route}: incorrect or missing canonical URL`);
+
+  for (const className of visualReferenceClasses) {
+    const openTags = [...html.matchAll(new RegExp(`<([a-z][\\w:-]*)\\b([^>]*\\bclass\\s*=\\s*(["'])[^"']*\\b${className}\\b[^"']*\\3[^>]*)>`, 'gims'))];
+    for (const match of openTags) {
+      const tagName = match[1].toLowerCase();
+      const attrs = attr(match[2]);
+      if (tagName === 'a' && (!attrs.href || attrs.href === '#' || /^javascript:/i.test(attrs.href))) errors.push(`${p.route}: .${className} anchor has inert href`);
+      if (tagName !== 'a') warnings.push(`${p.route}: runtime-upgraded .${className} found as <${tagName}>`);
+    }
+  }
+  const navTargets = tags(html, 'a').filter(a => a['data-nav-target']);
+  navTargets.forEach(a => {
+    if (!a.href) errors.push(`${p.route}: [data-nav-target] anchor missing href`);
+    if (a.href && a['data-nav-target'] !== a.href) errors.push(`${p.route}: data-nav-target ${a['data-nav-target']} does not match href ${a.href}`);
+  });
+  const nonAnchorNavTargets = [...html.matchAll(/<([a-z][\w:-]*)\b([^>]*\bdata-nav-target\s*=\s*(["'])(.*?)\3[^>]*)>/gims)]
+    .filter(m => m[1].toLowerCase() !== 'a');
+  nonAnchorNavTargets.forEach(m => warnings.push(`${p.route}: runtime-upgraded [data-nav-target] found as <${m[1].toLowerCase()}>`));
 }
 
 let anchorCount = 0;
@@ -49,9 +112,10 @@ for (const p of byRoute.values()) for (const a of p.anchors) {
   if (!/^https?:\/\//i.test(href) && (/\.html(?:[?#]|$)/i.test(href) || href.startsWith('/site-b/'))) errors.push(`${p.route}: raw HTML route ${href}`);
   if (/^(mailto:|tel:)/i.test(href)) continue;
   let u; try { u = new URL(href, `${origin}${p.route}`); } catch { errors.push(`${p.route}: malformed href ${href}`); continue; }
-  if (u.origin !== origin || !u.hash) continue;
+  if (u.origin !== origin) continue;
   const route = aliases[clean(u.pathname)] || clean(u.pathname), target = byRoute.get(route);
-  if (target && !target.ids.has(u.hash.slice(1))) errors.push(`${p.route}: ${href} targets missing ${u.hash}`);
+  if (!target) { errors.push(`${p.route}: ${href} targets unknown canonical route ${route}`); continue; }
+  if (u.hash && !target.ids.has(u.hash.slice(1))) errors.push(`${p.route}: ${href} targets missing ${u.hash}`);
 }
 
 const mounts = [], charts = {};
@@ -85,11 +149,26 @@ for (const t of terms) {
   glossaryNav[t.id] = { later, chart };
 }
 
+const sections = Object.fromEntries([...byRoute].map(([route, page]) => [route, [...page.ids].sort()]));
 const registry = {
-  version: 1, canonicalOrigin: origin,
+  version: 2,
+  canonicalOrigin: origin,
   pages: pages.map(({ part, route, file, title }) => ({ part, route, file, title })),
-  aliases, charts, glossary: glossaryNav,
-  audit: { pages: byRoute.size, anchors: anchorCount, chartSpecs: FRAMEWORK_CHART_SPECS.length, liveChartMounts: mounts.length, glossaryTerms: terms.length, glossaryTermsAlreadyTagged: tagged.size, glossaryTermsAutoTagEligible: terms.filter(t => !tagged.has(t.id)).length, unresolvedGlossaryCharts, warnings }
+  aliases,
+  sections,
+  charts,
+  glossary: glossaryNav,
+  audit: {
+    pages: byRoute.size,
+    anchors: anchorCount,
+    chartSpecs: FRAMEWORK_CHART_SPECS.length,
+    liveChartMounts: mounts.length,
+    glossaryTerms: terms.length,
+    glossaryTermsAlreadyTagged: tagged.size,
+    glossaryTermsAutoTagEligible: terms.filter(t => !tagged.has(t.id)).length,
+    unresolvedGlossaryCharts,
+    warnings,
+  },
 };
 const serialized = `${JSON.stringify(registry, null, 2)}\n`;
 if (errors.length) { console.error(`Navigation audit failed (${errors.length})`); errors.forEach(e => console.error(`- ${e}`)); process.exit(1); }
