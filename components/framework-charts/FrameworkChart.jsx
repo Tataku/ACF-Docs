@@ -1033,15 +1033,19 @@ function ReflexivityLoopSvg({ spec, width, height, pal, accent, reduce, entered,
       const b = an.to === rl.shared ? P : POS.rein[an.to];
       // the return edge (…→price) converges on the crossing, where the ribbon tail
       // would graze the label; park it in the clear gap just left of the waist instead.
-      if (an.to === rl.shared) return { text: an.text, x: P.x - VW * 0.19, y: P.y + 2 };
+      if (an.to === rl.shared) return { text: an.text, x: P.x - VW * 0.19, y: P.y + 2, anchor: 'middle' };
       const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
       const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
       const nx = -dy / L, ny = dx / L;
       const outward = ((mid.x - POS.ctrTop.x) * nx + (mid.y - POS.ctrTop.y) * ny) >= 0 ? 1 : -1;
-      const oGap = R.weight + 24;                                  // clear the ribbon half-width + legibility margin
-      let ax = mid.x + nx * oGap * outward, ay = mid.y + ny * oGap * outward;
-      if (ay < 56) { ax = mid.x - nx * oGap * outward; ay = mid.y - ny * oGap * outward; }   // keep clear of the top lane notes → drop inside the lobe
-      return { text: an.text, x: ax, y: ay };
+      const oGap = R.weight + 24;
+      // place the note INSIDE the lobe (toward centre) and flow the text toward the
+      // open interior — the widened lobe leaves no room outboard, and this keeps wide
+      // notes off the outer ribbon shoulder and off the top lane-note row.
+      const inx = -nx * outward, iny = -ny * outward;
+      const ax = mid.x + inx * oGap, ay = Math.max(58, mid.y + iny * oGap);
+      const anchor = inx > 0.4 ? 'start' : inx < -0.4 ? 'end' : 'middle';
+      return { text: an.text, x: ax, y: ay, anchor };
     });
     return { reinRibbon, revRibbon, arrows, anns };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1102,7 +1106,7 @@ function ReflexivityLoopSvg({ spec, width, height, pal, accent, reduce, entered,
 
         {/* marginal transition annotations (<=3, subordinate; desktop only) */}
         {geom.anns.map((an, i) => (
-          <text key={`an${i}`} x={an.x} y={an.y} textAnchor="middle" style={{ ...halo(pal, F.micro, pal.text3), fontStyle: 'italic' }}>{an.text}</text>
+          <text key={`an${i}`} x={an.x} y={an.y} textAnchor={an.anchor || 'middle'} style={{ ...halo(pal, F.micro, pal.text3), fontStyle: 'italic' }}>{an.text}</text>
         ))}
 
         {/* satellite nodes (both lobes) — ink dots + halo'd labels, no cards */}
