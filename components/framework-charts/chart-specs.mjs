@@ -2034,7 +2034,14 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'p3-reserve-share-evolves', idx: 'P3-08', group: 'part-3', intendedPlacement: 'part-3',
-    status: 'deferred', wiredPublic: false,
+    claimStack: {
+      primaryClaim: 'A starting reserve can mature into a share large enough that governing it replaces building it',
+      visualProof: 'A reserve-share line rising over twenty years from about twelve percent, crossing a target band near fifteen percent and a mature threshold near thirty percent into a thirty-to-fifty-percent zone marked where borrow-phase governance begins',
+      interactionRole: 'Hover the rising line, the target and mature thresholds, or the governance mark to see why the job changes as the share grows',
+      readerAction: 'Trace the line up through the target band and the mature threshold to the governance mark',
+      caution: 'Illustrative simulation; ranges follow the Part 3 allocation guidance and are not a forecast for any specific portfolio',
+    },
+    status: 'implemented', wiredPublic: true,
     title: 'Reserve Share Evolves', setupLine: 'A 10–15% reserve can mature into a 30–50% share, where borrow-phase governance begins',
     claimLabel: 'ALLOCATION · PHASE',
     frameworkClaim: 'A 10–15% reserve can evolve into a 30–50% mature share, at which point borrow-phase governance matters.',
