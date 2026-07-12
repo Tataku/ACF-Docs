@@ -31,3 +31,10 @@ export {
   validateMultiLaneSpec,
   layoutMultiLane,
 } from './multilane.mjs';
+
+// Value-formatter facade (money / compact-money / percent).
+export {
+  formatMoney,
+  formatCompactMoney,
+  formatPercent,
+} from './format.mjs';

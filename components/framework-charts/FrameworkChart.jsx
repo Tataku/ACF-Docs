@@ -21,6 +21,7 @@ import { BrushX, BrushChevron, BrushFrame } from './icons';
 import { getPalette, getAccent } from './palette';
 import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
 import { layoutMultiLane } from './chart-core/multilane.mjs';   // shared, framework-agnostic multi-lane model
+import { formatMoney } from './chart-core/format.mjs';          // shared value-formatter facade
 
 const { useState, useEffect, useRef, useMemo, useCallback, useId } = React;
 
@@ -109,12 +110,9 @@ const haloSans = (pal, size, color, w = 600) => ({
 });
 
 // ── reader context (optional, page-level) ───────────────────────────────────
-// Coarse money formatting — no cents; illustrative scaling, never precise.
-function fmtMoney(n) {
-  if (!isFinite(n) || n <= 0) return '$0';
-  const r = n >= 100000 ? Math.round(n / 1000) * 1000 : Math.round(n / 100) * 100;
-  return '$' + r.toLocaleString('en-US', { maximumFractionDigits: 0 });
-}
+// Coarse money formatting — no cents; illustrative scaling, never precise. Uses the
+// shared chart-core facade (was a byte-identical inline copy of formatStartingValue).
+const fmtMoney = formatMoney;
 // The personalized CALLOUT below the plot — the one computed figure the intro line
 // can't carry (e.g. the dollar size of a drawdown, or the multiples at a horizon)
 // — is resolved in chart-specs (getSimulationNote), beside the data it scales.

@@ -22,6 +22,9 @@
  *
  * Pure ESM: imported by both the Next.js components and the Node validator.
  * ─────────────────────────────────────────────────────────────────────────── */
+// Value formatters live in the shared chart-core facade (one definition for both
+// engines); re-exported below under their existing names so consumers don't change.
+import { formatMoney, formatCompactMoney as _formatCompactMoney, formatPercent as _formatPercent } from './chart-core/format.mjs';
 
 // ── deterministic helpers (self-contained: no runtime imports) ───────────────
 function mulberry32(a) {
@@ -165,22 +168,11 @@ export const HORIZON_BANDS = [
 ];
 
 // ── standardized formatting (no cents, no false precision) ────────────────────
-export function formatStartingValue(n) {
-  if (!isFinite(n) || n <= 0) return '$0';
-  const r = n >= 100000 ? Math.round(n / 1000) * 1000 : Math.round(n / 100) * 100;
-  return '$' + r.toLocaleString('en-US', { maximumFractionDigits: 0 });
-}
-export function formatCompactMoney(n) {
-  if (!isFinite(n) || n <= 0) return '$0';
-  const abs = Math.abs(n);
-  if (abs >= 1e6) return '$' + (Math.round(n / 1e5) / 10).toLocaleString('en-US') + 'M';
-  if (abs >= 1e4) return '$' + Math.round(n / 1e3) + 'k';
-  return '$' + Math.round(n).toLocaleString('en-US');
-}
-export function formatPercent(x, digits = 0) {
-  if (!isFinite(x)) return '0%';
-  return `${(x * 100).toFixed(digits).replace(/\.0+$/, '')}%`;
-}
+// Canonical definitions live in chart-core/format.mjs; re-exported here under the
+// established names so every existing consumer keeps working unchanged.
+export const formatStartingValue = formatMoney;   // (was a byte-identical inline copy)
+export const formatCompactMoney = _formatCompactMoney;
+export const formatPercent = _formatPercent;
 export function formatHorizon(id) {
   const b = HORIZON_BANDS.find((h) => h.id === id);
   return b ? b.label : '30+ years';

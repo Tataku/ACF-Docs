@@ -19,7 +19,8 @@ SVG exhibit can share the *model* even though they don't share a *renderer*.
 | Module | What it owns | Consumed by |
 |---|---|---|
 | `multilane.mjs` | The **multi-lane comparison** contract (`MultiLaneSpec`) + `validateMultiLaneSpec` + `layoutMultiLane` (reference geometry: lane/segment rects, cross-lane compare stats, surplus delta) | `FrameworkChart.LaneBarSvg` (docs) · *(dashboard: pending adoption)* |
-| `index.mjs` | The unified import surface — re-exports the visual-relationship grammar (defined in `chart-specs.mjs`) + the multi-lane model | any consumer wanting the whole foundation from one place |
+| `format.mjs` | The **value-formatter facade** — `formatMoney` / `formatCompactMoney` / `formatPercent` (one definition; the docs engine's old inline `fmtMoney` + `formatStartingValue` now resolve here) | `chart-specs.mjs` re-exports · `FrameworkChart` · *(dashboard `formatters.ts` + forked Data-page copy: pending consolidation)* |
+| `index.mjs` | The unified import surface — re-exports the visual-relationship grammar (defined in `chart-specs.mjs`) + the multi-lane model + the formatter facade | any consumer wanting the whole foundation from one place |
 
 The visual-relationship **grammar** (`VISUAL_RELATIONSHIPS`, `resolveVisualRelationship`,
 `LAYOUT_RELATIONSHIPS`) is defined in `chart-specs.mjs` (its SSOT) and re-exported
