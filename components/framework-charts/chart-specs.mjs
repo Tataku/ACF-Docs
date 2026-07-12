@@ -1400,7 +1400,7 @@ export const FRAMEWORK_CHART_SPECS = [
     chartId: 'p2-markets-feed-back', idx: 'P2-04', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
       primaryClaim: 'Price does not just reflect fundamentals — it can change them',
-      visualProof: 'One braided circuit through five shared stages — price, capital, buildout, fundamentals, validation — a reinforcing path and a reversing path weaving through the same cards, both closing back into price',
+      visualProof: 'One horizontal row of five shared stage cards — price, capital, buildout, fundamentals, validation — each split into its reinforcing and reversing state, a teal ribbon through the top states, a clay ribbon through the bottom states, and two complete return arcs closing validation back into price above and below the row',
       interactionRole: 'Hover a stage to see why it drives the next, and how the same mechanism runs either direction',
       readerAction: 'Trace either path back into price',
       caution: 'Conceptual reflexivity diagram; illustrative, not measured data',
@@ -1410,7 +1410,7 @@ export const FRAMEWORK_CHART_SPECS = [
     claimLabel: 'REFLEXIVITY · FEEDBACK',
     frameworkClaim: 'Prices do not only reflect fundamentals; they can change fundamentals.',
     readerTakeaway: 'Price is an input, not just an output.',
-    chartType: 'Braided reflexivity circuit: a reinforcing and a reversing path through five shared stages, both closing back into price.',
+    chartType: 'Reflexivity circuit: five shared stages split into reinforcing and reversing states, both paths closing back into price.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 2', label: 'Soros lineage · reflexivity', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
     explainerHeadline: 'Price can write the fundamentals it claims to read.',
@@ -1418,7 +1418,7 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerConcept: 'Reflexivity',
     concepts: [{ label: 'Reflexivity', link: '/part-2-lineage-macro-thesis' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }],
     layout: 'feedbackLoop',
-    ariaSummary: 'Reflexivity as one braided circuit through five shared stages: price, capital, buildout, fundamentals, validation. A reinforcing path runs price rises, capital flows in, buildout expands, fundamentals improve, validation confirms, then closes back into price. A reversing path runs price falls, capital tightens, buildout slows, fundamentals weaken, validation breaks, then closes back into the same price. Both directions share every stage and both feed back into price.',
+    ariaSummary: 'Reflexivity as one shared mechanism in a single row of five stages: price, capital, buildout, fundamentals, validation. Each stage holds two states. A reinforcing path runs left to right through the top states — price rises, capital flows in, buildout expands, fundamentals improve, validation confirms — then arcs back above the row into price. A reversing path runs through the bottom states — price falls, capital tightens, buildout slows, fundamentals weaken, validation breaks — then arcs back below the row into the same price. Both loops are complete and both feed back into price.',
     feedbackLoop: {
       centerLabel: 'reflexivity',
       returnLabel: 'evidence feeds back into price',
@@ -1445,7 +1445,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'validation', kind: 'node', label: 'Validation', name: 'Validation', why: 'Improved fundamentals ratify the price and the loop reinforces; disappointment breaks it and the same loop reverses, fast.', claim: 'Confirmation feeds the next move — either way.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['price', 'capital', 'buildout', 'fundamentals', 'validation'],
-    implementationNotes: 'feedbackLoop layout — braided reflexivity circuit (NOT the systemLoop ring, which is reserved for true circular systems). Five substantial shared stage cards (price · capital · buildout · fundamentals · validation), each holding both direction states; a reinforcing path (accent) and a reversing path (stress) weave through the same cards on authored, asymmetric geometry, and BOTH close solidly from validation back into price — negative reflexivity is not a broken secondary loop. Three persistent transition annotations. Desktop-first; mobile adaptation follows visual approval.',
+    implementationNotes: 'feedbackLoop layout — linear reflexivity circuit (NOT the systemLoop ring, which is reserved for true circular systems). ONE clean horizontal row of five shared stage cards (price · capital · buildout · fundamentals · validation), each vertically split into its reinforcing state (top) and reversing state (bottom). A teal ribbon runs left→right through the top states; a clay ribbon runs through the bottom states; BOTH close from validation back into price — teal return arc above the system, clay below — complete, solid, equally weighted, directionally obvious. No staggered cards, no braiding, no path overlap: the causal structure stays linear; artistry lives in the brush strokes and asymmetric return-arc curvature. Three persistent transition annotations. Desktop-first; mobile adaptation follows visual approval.',
   },
 
   {
