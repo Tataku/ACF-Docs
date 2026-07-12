@@ -1400,9 +1400,9 @@ export const FRAMEWORK_CHART_SPECS = [
     chartId: 'p2-markets-feed-back', idx: 'P2-04', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
       primaryClaim: 'Price does not just reflect fundamentals — it can change them',
-      visualProof: 'Two four-stage lanes — price, capital, fundamentals, validation — one reinforcing and one reversing, each arcing back to price',
-      interactionRole: 'Hover a stage to see why it drives the next, and how the same loop runs either direction',
-      readerAction: 'Trace the loop back to price',
+      visualProof: 'One horizontal row of five shared stage cards — price, capital, buildout, fundamentals, validation — each split into its reinforcing and reversing state, a teal ribbon through the top states, a clay ribbon through the bottom states, and two complete return arcs closing validation back into price above and below the row',
+      interactionRole: 'Hover a stage to see why it drives the next, and how the same mechanism runs either direction',
+      readerAction: 'Trace either path back into price',
       caution: 'Conceptual reflexivity diagram; illustrative, not measured data',
     },
     status: 'implemented', wiredPublic: false,
@@ -1410,7 +1410,7 @@ export const FRAMEWORK_CHART_SPECS = [
     claimLabel: 'REFLEXIVITY · FEEDBACK',
     frameworkClaim: 'Prices do not only reflect fundamentals; they can change fundamentals.',
     readerTakeaway: 'Price is an input, not just an output.',
-    chartType: 'Two-lane reflexivity diagram: a reinforcing loop and its reversal across price, capital, fundamentals, validation.',
+    chartType: 'Reflexivity circuit: five shared stages split into reinforcing and reversing states, both paths closing back into price.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 2', label: 'Soros lineage · reflexivity', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
     explainerHeadline: 'Price can write the fundamentals it claims to read.',
@@ -1418,28 +1418,34 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerConcept: 'Reflexivity',
     concepts: [{ label: 'Reflexivity', link: '/part-2-lineage-macro-thesis' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }],
     layout: 'feedbackLoop',
-    ariaSummary: 'Reflexivity shown as two lanes that share one mechanism. The reinforcing lane runs price up, capital in, buildout funded, validation confirming, price stronger. The reversing lane runs price down, capital out, buildout starved, validation disappointing, price weaker. Both feed back into price.',
+    ariaSummary: 'Reflexivity as one shared mechanism in a single row of five stages: price, capital, buildout, fundamentals, validation. Each stage holds two states. A reinforcing path runs left to right through the top states — price rises, capital flows in, buildout expands, fundamentals improve, validation confirms — then arcs back above the row into price. A reversing path runs through the bottom states — price falls, capital tightens, buildout slows, fundamentals weaken, validation breaks — then arcs back below the row into the same price. Both loops are complete and both feed back into price.',
     feedbackLoop: {
       centerLabel: 'reflexivity',
-      returnLabel: 'the loop feeds back to price',
+      returnLabel: 'evidence feeds back into price',
       lanes: [
-        { id: 'reinforce', label: 'REINFORCING', note: 'self-feeds', tone: 'accent', nodes: [
-          { stage: 'price', label: 'Price ↑' }, { stage: 'capital', label: 'Capital in' }, { stage: 'fundamentals', label: 'Buildout' }, { stage: 'validation', label: 'Validates' },
+        { id: 'reinforce', label: 'REINFORCING', note: 'when price rises', tone: 'accent', nodes: [
+          { stage: 'price', label: 'rises' }, { stage: 'capital', label: 'flows in' }, { stage: 'buildout', label: 'expands' }, { stage: 'fundamentals', label: 'improve' }, { stage: 'validation', label: 'confirms' },
         ] },
-        { id: 'reverse', label: 'REVERSING', note: 'breaks down', tone: 'stress', nodes: [
-          { stage: 'price', label: 'Price ↓' }, { stage: 'capital', label: 'Capital out' }, { stage: 'fundamentals', label: 'Starved' }, { stage: 'validation', label: 'Disappoints' },
+        { id: 'reverse', label: 'REVERSING', note: 'when price falls', tone: 'stress', nodes: [
+          { stage: 'price', label: 'falls' }, { stage: 'capital', label: 'tightens' }, { stage: 'buildout', label: 'slows' }, { stage: 'fundamentals', label: 'weaken' }, { stage: 'validation', label: 'breaks' },
         ] },
+      ],
+      annotations: [
+        { from: 'capital', to: 'buildout', text: 'financing changes capacity' },
+        { from: 'buildout', to: 'fundamentals', text: 'execution becomes evidence' },
+        { from: 'validation', to: 'price', text: 'evidence feeds back into price' },
       ],
     },
     primaryKey: 'price',
     hoverTargets: [
-      { id: 'price', kind: 'node', label: 'Price', name: 'Price', why: 'Not just a readout of value — a signal that pulls capital toward it, or away. The loop starts and ends here.', claim: 'Price moves first.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
-      { id: 'capital', kind: 'node', label: 'Capital', name: 'Capital', why: 'Follows the price signal: it floods in on the way up and drains out on the way down, funding or starving the buildout.', claim: 'Capital chases the signal.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
-      { id: 'fundamentals', kind: 'node', label: 'Fundamentals', name: 'Fundamentals', why: 'Genuinely change because capital arrived — or left. The story becomes partly true, or quietly hollows out.', claim: 'The narrative funds itself.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'price', kind: 'node', label: 'Price', name: 'Price', why: 'Not just a readout of value — a signal that pulls capital toward it, or away. Both directions of the loop start and end here.', claim: 'Price moves first.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'capital', kind: 'node', label: 'Capital', name: 'Capital', why: 'Follows the price signal: it flows in on the way up and tightens on the way down, funding or starving the buildout.', claim: 'Capital chases the signal.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
+      { id: 'buildout', kind: 'node', label: 'Buildout', name: 'Buildout', why: 'Capital arriving is not yet fundamentals — it becomes rigs, plants, networks, teams. The buildout is where financing turns into real capacity, or quietly stalls.', claim: 'Financing changes capacity.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'fundamentals', kind: 'node', label: 'Fundamentals', name: 'Fundamentals', why: 'Genuinely change because the buildout ran — or slowed. The story becomes partly true, or quietly hollows out.', claim: 'The narrative funds itself.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
       { id: 'validation', kind: 'node', label: 'Validation', name: 'Validation', why: 'Improved fundamentals ratify the price and the loop reinforces; disappointment breaks it and the same loop reverses, fast.', claim: 'Confirmation feeds the next move — either way.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
     ],
-    mobileTapTargets: ['price', 'capital', 'fundamentals', 'validation'],
-    implementationNotes: 'feedbackLoop layout (additive primitive; NOT the systemLoop ring, which is reserved for true circular systems). Two lanes share one mechanism — reinforcing (accent, arrows thicken) and reversing (stress, arrows thin) — each looping back to price. Teaches reflexivity as causal feedback, two directions, at a glance.',
+    mobileTapTargets: ['price', 'capital', 'buildout', 'fundamentals', 'validation'],
+    implementationNotes: 'feedbackLoop layout — linear reflexivity circuit (NOT the systemLoop ring, which is reserved for true circular systems). ONE clean horizontal row of five shared stage cards (price · capital · buildout · fundamentals · validation), each vertically split into its reinforcing state (top) and reversing state (bottom). A teal ribbon runs left→right through the top states; a clay ribbon runs through the bottom states; BOTH close from validation back into price — teal return arc above the system, clay below — complete, solid, equally weighted, directionally obvious. No staggered cards, no braiding, no path overlap: the causal structure stays linear; artistry lives in the brush strokes and asymmetric return-arc curvature. Three persistent transition annotations. Desktop-first; mobile adaptation follows visual approval.',
   },
 
   {
