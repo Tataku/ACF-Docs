@@ -970,21 +970,39 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   // weighted, directionally obvious. The causal structure stays linear; the
   // artistry lives in the brush strokes and the asymmetric return-arc
   // curvature. Hand-authored 960×540 design space (uneven, accelerating gaps).
-  const fx = width / 960, fy = height / 540;
-  const CY = 270 * fy;                                             // the spine — both states diverge from it
-  // The two rails DIVERGE from the spine stage by stage: the teal path literally
-  // RISES as the reinforcing loop matures, the clay path literally FALLS — the
-  // price movement is the geometry. Both then wrap around (möbius-like) back
-  // into the same tight price card where they began.
-  // width system: one anchor width (price, 152) + one standard width (140);
-  // gaps accelerate gently left→right (44 · 48 · 52 · 56)
-  const CARDS = [
+  // The two rails DIVERGE stage by stage: the teal path literally RISES as the
+  // reinforcing loop matures, the clay path literally FALLS — the price
+  // movement is the geometry. Both wrap around (möbius-like) back into the
+  // same tight price card where they began.
+  //
+  // MOBILE keeps the SAME left→right orientation — never transposed. It is the
+  // same composition re-authored in a narrower 500×440 design space: tighter
+  // cards, proportionally LARGER type (so it renders legibly at ~78% scale on
+  // a 390px viewport), compact angled arrowheads bridging the narrow gaps, and
+  // the same two returns closing above and below into price.
+  const M = coarse;
+  const VW = M ? 500 : width, VH = M ? 440 : height;
+  const fx = M ? 1 : width / 960, fy = M ? 1 : height / 540;
+  const CY = (M ? 220 : 270) * fy;
+  const TITLE_Y = (M ? 225 : 274) * fy;
+  const F = M ? { tp: 16, t: 14, s: 12, a: 11.5, c: 10, cn: 8.5 } : { tp: 15.5, t: 13.5, s: 11, a: 10, c: 9, cn: 7.5 };
+  // width system: one anchor width (price) + a standard width; gaps accelerate
+  // gently left→right on desktop and stay compact on mobile
+  const CARD_DEFS = M ? [
+    { id: 'price', x0: 8, x1: 84, rt: 200, rb: 240 },
+    { id: 'capital', x0: 96, x1: 178, rt: 190, rb: 250 },
+    { id: 'buildout', x0: 190, x1: 274, rt: 180, rb: 260 },
+    { id: 'fundamentals', x0: 286, x1: 390, rt: 170, rb: 270 },
+    { id: 'validation', x0: 402, x1: 494, rt: 162, rb: 278 },
+  ] : [
     { id: 'price', x0: 24, x1: 176, rt: 246, rb: 294 },
     { id: 'capital', x0: 220, x1: 360, rt: 240, rb: 300 },
     { id: 'buildout', x0: 408, x1: 548, rt: 224, rb: 316 },
     { id: 'fundamentals', x0: 600, x1: 740, rt: 204, rb: 336 },
     { id: 'validation', x0: 796, x1: 936, rt: 180, rb: 360 },
-  ].map((c) => ({ ...c, L: c.x0 * fx, R: c.x1 * fx, x: ((c.x0 + c.x1) / 2) * fx, W: (c.x1 - c.x0) * fx, RT: c.rt * fy, RB: c.rb * fy, top: (c.rt - 18) * fy, bot: (c.rb + 18) * fy }));
+  ];
+  const PAD_V = M ? 16 : 18;
+  const CARDS = CARD_DEFS.map((c) => ({ ...c, L: c.x0 * fx, R: c.x1 * fx, x: ((c.x0 + c.x1) / 2) * fx, W: (c.x1 - c.x0) * fx, RT: c.rt * fy, RB: c.rb * fy, top: (c.rt - PAD_V) * fy, bot: (c.rb + PAD_V) * fy }));
   const byId = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   const toneCol = (tone) => (tone === 'stress' ? pal.bandStress : accent);
   const toneTxt = (tone) => (tone === 'stress' ? pal.bandStressText : accent);
@@ -993,7 +1011,11 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   const toneOp = (tone, base = 0.9) => (tone === 'stress' && pal.name !== 'light' ? Math.min(1, base + 0.1) : base);
   const stageName = (id) => { const t = targets.find((tt) => tt.id === id); return t ? t.label : id; };
   // authored positions for the three persistent transition annotations
-  const ANNOT_POS = {
+  const ANNOT_POS = M ? {
+    'capital-buildout': { x: 184, y: 322, anchor: 'middle', tick: [[184, 312], [184, 264]] },
+    'buildout-fundamentals': { x: 280, y: 128, anchor: 'middle', tick: [[280, 136], [280, 166]] },
+    'validation-price': { x: 250, y: 84, anchor: 'middle', tick: [[250, 74], [250, 60]] },
+  } : {
     'capital-buildout': { x: 384, y: 356, anchor: 'middle', tick: [[384, 346], [384, 312]] },
     'buildout-fundamentals': { x: 574, y: 176, anchor: 'middle', tick: [[574, 184], [574, 208]] },
     'validation-price': { x: 440, y: 92, anchor: 'middle', tick: [[440, 82], [440, 66]] },
@@ -1002,6 +1024,36 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   const geom = useMemo(() => {
     const bez = (p0, c1, c2, p1, n = 20) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push({ x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x, y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y }); } return pts; };
     const head = (tx, ty, ang, sc = 1) => { const ux = Math.cos(ang), uy = Math.sin(ang), px = -uy, py = ux, L = 12 * sc, W2 = 5 * sc, N = 8.4 * sc; return `M${tx} ${ty} L${tx - ux * L + px * W2} ${ty - uy * L + py * W2} L${tx - ux * N} ${ty - uy * N} L${tx - ux * L - px * W2} ${ty - uy * L - py * W2} Z`; };
+    if (M) {
+      // SAME orientation as desktop, compact: the narrow gaps are bridged by
+      // angled arrowheads (tip 2px clear of the next card) — the through-card
+      // rails and port dots carry the path's continuity; the two returns close
+      // above and below into price exactly like the desktop.
+      const strands = [], heads = [];
+      ['accent', 'stress'].forEach((tone) => {
+        for (let i = 0; i < CARDS.length - 1; i++) {
+          const a = CARDS[i], b = CARDS[i + 1];
+          const y0 = tone === 'stress' ? a.RB : a.RT, y1 = tone === 'stress' ? b.RB : b.RT;
+          const tip = b.L - 2;
+          const ang = Math.atan2(y1 - y0, tip - (a.R - 2));
+          heads.push({ d: head(tip, y1, ang, 0.95), tone });
+        }
+      });
+      const p = byId.price, v = byId.validation;
+      const retTop = [
+        ...bez({ x: v.x, y: v.top - 4 }, { x: v.x + 6, y: 92 }, { x: 392, y: 56 }, { x: 290, y: 56 }),
+        ...bez({ x: 290, y: 56 }, { x: 180, y: 56 }, { x: 50, y: 74 }, { x: p.x, y: p.top - 11 }),
+      ];
+      const retBot = [
+        ...bez({ x: v.x, y: v.bot + 4 }, { x: v.x + 8, y: 352 }, { x: 396, y: 384 }, { x: 292, y: 386 }),
+        ...bez({ x: 292, y: 386 }, { x: 180, y: 388 }, { x: 50, y: 368 }, { x: p.x, y: p.bot + 11 }),
+      ];
+      const rets = [
+        { d: Brush.brushLine(retTop, { seed: 210, weight: 1.5, intensity: 0.5, taper: 0.04 }), head: head(p.x, p.top - 3, Math.PI / 2, 1.1), tone: 'accent' },
+        { d: Brush.brushLine(retBot, { seed: 220, weight: 1.5, intensity: 0.5, taper: 0.04 }), head: head(p.x, p.bot + 3, -Math.PI / 2, 1.1), tone: 'stress' },
+      ];
+      return { strands, heads, rets };
+    }
     // gap ribbons — the teal path CLIMBS card to card, the clay path FALLS.
     // Consistent anchors: every segment leaves flush from the exit port, runs a
     // horizontal-tangent S-curve, and lands its arrowhead 3px clear of the next
@@ -1036,11 +1088,11 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
     ];
     return { strands, heads, rets };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height]);
+  }, [width, height, coarse]);
 
   const anchorOf = (a) => { const c = byId[a.id]; return c ? { x: c.x, y: CY } : null; };
   const resolve = (mx) => { let best = null, bd = Infinity; CARDS.forEach((c) => { const d = Math.abs(mx - c.x); const lim = c.W / 2 + (touch ? 26 : 18); if (d < lim && d < bd) { bd = d; best = c; } }); return best ? targets.find((t) => t.id === best.id) : null; };
-  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (VW / r.width), (e.clientY - r.top) * (VH / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
   const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
 
@@ -1057,7 +1109,7 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${VW} ${VH}`} width="100%" role="group" aria-label={spec.ariaSummary} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* forward strands — brush-textured, card to card (drawn behind the cards) */}
         <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'clip-path 1100ms cubic-bezier(0.22,0.61,0.36,1) 480ms, -webkit-clip-path 1100ms cubic-bezier(0.22,0.61,0.36,1) 480ms, opacity 400ms ease 480ms' }}>
           {geom.strands.map((s, i) => <path key={`st${i}`} d={s.d} fill={toneCol(s.tone)} opacity={toneOp(s.tone)} />)}
@@ -1084,9 +1136,9 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
               <line x1={c.L + 7} x2={c.R - 7} y1={c.RB} y2={c.RB} stroke={pal.bandStress} strokeWidth="1.2" opacity={pal.name === 'light' ? 0.32 : 0.38} />
               {/* a faint connector ties the two states of the shared stage */}
               <line x1={c.x} x2={c.x} y1={c.RT + 9} y2={c.RB - 9} stroke={pal.borderHi} strokeWidth="1" opacity="0.3" />
-              <text x={c.x} y={274 * fy} textAnchor="middle" style={haloSans(pal, isP ? 15.5 : 13.5, isP ? accent : pal.text1, 700)}>{stageName(c.id)}</text>
-              <text x={c.x} y={c.RT + 4} textAnchor="middle" style={haloSans(pal, 11, toneTxt('accent'), 600)}>{lanes[0].nodes[i].label}</text>
-              <text x={c.x} y={c.RB + 4} textAnchor="middle" style={haloSans(pal, 11, toneTxt('stress'), 600)}>{lanes[1].nodes[i].label}</text>
+              <text x={c.x} y={TITLE_Y} textAnchor="middle" style={haloSans(pal, isP ? F.tp : F.t, isP ? accent : pal.text1, 700)}>{stageName(c.id)}</text>
+              <text x={c.x} y={c.RT + 4} textAnchor="middle" style={haloSans(pal, F.s, toneTxt('accent'), 600)}>{lanes[0].nodes[i].label}</text>
+              <text x={c.x} y={c.RB + 4} textAnchor="middle" style={haloSans(pal, F.s, toneTxt('stress'), 600)}>{lanes[1].nodes[i].label}</text>
               {[[c.L, c.RT, 'accent'], [c.R, c.RT, 'accent'], [c.L, c.RB, 'stress'], [c.R, c.RB, 'stress']].map(([px2, py2, tn], j) => (
                 <path key={j} d={Brush.inkDot(px2, py2, 2.3, { seed: 60 + i * 11 + j * 3, intensity: 0.7 })} fill={toneCol(tn)} opacity="0.85" />
               ))}
@@ -1103,8 +1155,8 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
         {/* direction captions */}
         {lanes.map((lane, li) => (
           <g key={lane.id} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${1700 + li * 120}ms` }}>
-            <text x={28 * fx} y={(li === 0 ? 40 : 508) * fy} style={halo(pal, 9, toneTxt(lane.tone), 600)}>{lane.label}</text>
-            {lane.note && <text x={28 * fx} y={(li === 0 ? 56 : 524) * fy} style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>{lane.note}</text>}
+            <text x={(M ? 12 : 28) * fx} y={(li === 0 ? (M ? 26 : 40) : (M ? 414 : 508)) * fy} style={halo(pal, F.c, toneTxt(lane.tone), 600)}>{lane.label}</text>
+            {lane.note && <text x={(M ? 12 : 28) * fx} y={(li === 0 ? (M ? 40 : 56) : (M ? 428 : 524)) * fy} style={{ ...halo(pal, F.cn, pal.text4), fontStyle: 'italic' }}>{lane.note}</text>}
           </g>
         ))}
         {/* the three persistent transition annotations */}
@@ -1114,7 +1166,7 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
             if (!pos) return null;
             return (
               <g key={`${an.from}-${an.to}`}>
-                <text x={pos.x * fx} y={pos.y * fy} textAnchor={pos.anchor} style={{ ...halo(pal, 10, pal.text3), fontStyle: 'italic' }}>{an.text}</text>
+                <text x={pos.x * fx} y={pos.y * fy} textAnchor={pos.anchor} style={{ ...halo(pal, F.a, pal.text3), fontStyle: 'italic' }}>{an.text}</text>
                 <line x1={pos.tick[0][0] * fx} y1={pos.tick[0][1] * fy} x2={pos.tick[1][0] * fx} y2={pos.tick[1][1] * fy} stroke={pal.text4} strokeWidth="1" opacity="0.85" />
               </g>
             );
