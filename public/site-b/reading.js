@@ -339,7 +339,7 @@
         var t = window.performance ? performance.now() : Date.now();
         try { console.debug('[narration] ' + label + (markT0 ? ' +' + Math.round(t - markT0) + 'ms' : '') + (extra != null ? ' · ' + extra : '')); } catch (e) {}
       }
-      var SLOW_FALLBACK_MS = 6000;   // if the API hasn't produced first audio by now, fall back to Web Speech
+      var SLOW_FALLBACK_MS = 8000;   // if the API hasn't produced first audio by now, fall back to Web Speech (non-sticky; prewarm usually makes this moot)
       var loadTimer = 0;             // the slow-API safety-net timer (cleared on success / stop)
 
       // --- floatnav scrubber: estimated progress clock ------------------------
@@ -457,40 +457,64 @@
       var controllers = new Set();
       function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; } return h.toString(36); }
 
+      // Fetch (and cache) one segment's AI audio. Transient failures — rate
+      // limits, 5xx, timeouts, network blips — are RETRIED on the premium voice
+      // (short backoff, bounded) before anyone considers the browser fallback,
+      // so a momentary hiccup no longer knocks a reader down to the robotic
+      // Web Speech voice. Aborts (Stop) and definitive auth/config failures are
+      // not retried. err.code / err.status are surfaced so the caller can tell a
+      // dead key (stick to browser) from a transient blip (keep the AI voice).
       function fetchSegment(text) {
         var key = text.length + ':' + hash(text);        // length + hash → stable, collision-resistant
         if (cache.has(key)) { mark('cache-hit', key); return Promise.resolve(cache.get(key)); }
         if (pending.has(key)) return pending.get(key);   // dedup concurrent requests (no double-generate)
-        var ctrl = new AbortController();
-        controllers.add(ctrl);
-        function done() { controllers.delete(ctrl); pending.delete(key); }
-        mark('request-start', key);
-        var p = fetch('/api/narration', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text }),
-          signal: ctrl.signal
-        }).then(function (r) {
-          mark('response', r.status);
-          if (!r.ok) {
-            return r.json().catch(function () { return {}; }).then(function (e) {
-              var err = new Error((e && e.message) || ('HTTP ' + r.status));
-              err.fallback = e && e.fallback;
-              throw err;
-            });
-          }
-          return r.blob();
-        }).then(function (blob) {
-          var u = URL.createObjectURL(blob);
-          cache.set(key, u);
-          done();
-          return u;
-        }, function (err) { done(); throw err; });
+
+        function attempt(n) {
+          var ctrl = new AbortController();
+          controllers.add(ctrl);
+          mark('request-start', key + (n ? ' retry#' + n : ''));
+          return fetch('/api/narration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text }),
+            signal: ctrl.signal
+          }).then(function (r) {
+            controllers.delete(ctrl);
+            mark('response', r.status);
+            if (!r.ok) {
+              return r.json().catch(function () { return {}; }).then(function (e) {
+                var err = new Error((e && e.message) || ('HTTP ' + r.status));
+                err.fallback = e && e.fallback;
+                err.code = e && e.error;
+                err.status = r.status;
+                throw err;
+              });
+            }
+            return r.blob();
+          }, function (err) { controllers.delete(ctrl); throw err; })  // network / abort
+          .then(function (blob) {
+            var u = URL.createObjectURL(blob);
+            cache.set(key, u);
+            return u;
+          }, function (err) {
+            var aborted = err && err.name === 'AbortError';
+            var definitive = err && (err.status === 401 || err.status === 503 || err.code === 'VALIDATION_FAILED');
+            if (!aborted && !definitive && n < 2) {                 // retry transient failures on the AI voice
+              return new Promise(function (r2) { setTimeout(r2, 350 * (n + 1)); }).then(function () { return attempt(n + 1); });
+            }
+            throw err;
+          });
+        }
+
+        var p = attempt(0).then(
+          function (u) { pending.delete(key); return u; },
+          function (err) { pending.delete(key); throw err; }
+        );
         pending.set(key, p);
         return p;
       }
 
-      var LOOKAHEAD = 1; // warm this many upcoming segments while one plays
+      var LOOKAHEAD = 2; // warm this many upcoming segments while one plays (keeps playback + short seeks gapless)
       function playApi(i, myRun) {
         if (myRun !== runId) { mark('stale-ignored', 'playApi ' + i); return; }
         var list = buildSegments();
@@ -509,8 +533,23 @@
           for (var k = 1; k <= LOOKAHEAD; k++) { if (list[i + k]) fetchSegment(list[i + k]).catch(function () {}); }
         }).catch(function (err) {
           if (myRun !== runId || (err && err.name === 'AbortError')) { mark('aborted', 'segment ' + i); return; }
-          // Provider failed: fall back to Web Speech from the top (once), else quiet error.
-          if (synth && ((err && err.fallback === 'browser') || i === 0)) { mark('fallback-browser', 'segment ' + i); method = 'browser'; startBrowser(myRun); return; }
+          // The segment already retried transient failures on the AI voice; if we
+          // land here it has genuinely failed. Fall back to Web Speech, but only
+          // STICK the session to the browser voice for a DEFINITIVE failure — a
+          // dead / missing key. A transient failure (rate limit, 5xx, timeout)
+          // falls back for THIS attempt only, so the next Listen click retries
+          // the premium AI voice instead of reverting for good. (This is the fix
+          // for "narration keeps reverting to the in-browser voice.")
+          var definitive = err && (
+            err.status === 401 || err.status === 503 ||
+            err.code === 'PROVIDER_NOT_CONFIGURED' || err.code === 'UPSTREAM_AUTH_FAILED'
+          );
+          if (synth) {
+            if (definitive) { mark('fallback-browser-stick', 'segment ' + i); method = 'browser'; }
+            else mark('fallback-browser-transient', 'segment ' + i);
+            startBrowser(myRun);
+            return;
+          }
           setState('error'); announce('Narration unavailable');
         });
       }
@@ -612,7 +651,15 @@
         (method ? Promise.resolve(method) : resolveCapability()).then(function (m) {
           if (m !== 'api') return;
           var list = buildSegments();
-          if (list.length) fetchSegment(list[0]).then(function () { mark('prewarm-ready'); }).catch(function () {});
+          if (!list.length) return;
+          // Warm the small head segments (the ramp keeps these tiny) so BOTH the
+          // first click and the first gapless hand-off are instant. Sequential +
+          // bounded to two — no bulk pre-generation on load, and a no-op under
+          // Data Saver (the ambient callers gate on navigator.connection.saveData).
+          fetchSegment(list[0]).then(function () {
+            mark('prewarm-ready');
+            if (list[1]) fetchSegment(list[1]).catch(function () {});
+          }).catch(function () {});
         });
       }
 
