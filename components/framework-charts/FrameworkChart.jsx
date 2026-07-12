@@ -958,43 +958,51 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   const lanes = fl.lanes;
   const K = lanes[0].nodes.length;
   const stages = lanes[0].nodes.map((n) => n.stage);
-  const pad = { l: 92, r: 24, t: 26, b: 30 };
+  // Shared-mechanism spine: the four stages are drawn ONCE (price · capital ·
+  // fundamentals · validation). The reinforcing direction rides above, the
+  // reversing direction below, and BOTH loop back to the same price — so the
+  // feedback (price is input AND output) is the hero, not an afterthought.
+  const pad = { l: 104, r: 44, t: 30, b: 34 };
   const innerW = width - pad.l - pad.r;
   const colW = innerW / K;
   const colX = (i) => pad.l + colW * (i + 0.5);
-  const yTop = pad.t + 50, yBot = height - pad.b - 50, midY = (yTop + yBot) / 2;
-  const NW = Math.min(colW - 14, 118), NH = 34;
-  const laneY = (li) => (li === 0 ? yTop : yBot);
+  const midY = pad.t + (height - pad.t - pad.b) / 2;
+  const DY = Math.min(56, (height - pad.t - pad.b) * 0.16);
+  const rowY = (li) => (li === 0 ? midY - DY : midY + DY);
+  const reinBow = pad.t + 8, revBow = height - pad.b - 8;
+  const LAB = 46;                                                // half-gap kept clear around each column for the arrows
   const toneCol = (tone) => (tone === 'stress' ? pal.bandStress : accent);
   const toneTxt = (tone) => (tone === 'stress' ? pal.bandStressText : accent);
-  const nodes = [];
-  lanes.forEach((lane, li) => lane.nodes.forEach((nd, i) => nodes.push({ ...nd, li, i, x: colX(i), y: laneY(li), tone: lane.tone })));
-  const stageAnchor = (id) => { const i = stages.indexOf(id); return i < 0 ? null : { x: colX(i), y: midY }; };
+  const stageName = (id) => { const t = targets.find((tt) => tt.id === id); return t ? t.label : id; };
+  const stateFor = (li, i) => lanes[li].nodes[i].label;
 
   const geom = useMemo(() => {
     const arrows = [], rets = [];
     lanes.forEach((lane, li) => {
-      const y = laneY(li);
+      const y = rowY(li);
       for (let i = 0; i < K - 1; i++) {
-        const x0 = colX(i) + NW / 2, tip = colX(i + 1) - NW / 2 - 4, len = Math.max(10, tip - x0);
-        const w = lane.tone === 'stress' ? 0.92 - i * 0.17 : 0.5 + i * 0.17;   // reinforce thickens, reverse thins
-        arrows.push({ d: Brush.brushArrow(tip, y, len, 0, { seed: 60 + li * 23 + i * 7, weight: Math.max(0.34, w), intensity: 0.5 }), tone: lane.tone });
+        const x0 = colX(i) + LAB, tip = colX(i + 1) - LAB, len = Math.max(12, tip - x0);
+        const w = lane.tone === 'stress' ? 1.05 - i * 0.24 : 0.5 + i * 0.24;   // reinforce thickens, reverse thins
+        arrows.push({ d: Brush.brushArrow(tip, y, len, 0, { seed: 60 + li * 23 + i * 7, weight: Math.max(0.3, w), intensity: 0.5, head: Math.min(0.24, 11 / len) }), tone: lane.tone });
       }
-      // return arc bows OUTWARD (above the top lane / below the bottom lane), arrowhead back into price
-      const sx = colX(K - 1), ex = colX(0);
-      const sy = li === 0 ? y - NH / 2 - 2 : y + NH / 2 + 2;
-      const bow = li === 0 ? pad.t + 4 : height - pad.b - 4;
-      rets.push({ arc: `M${sx} ${sy} C${sx} ${bow} ${ex} ${bow} ${ex} ${sy}`, head: Brush.brushArrow(ex, sy, 9, li === 0 ? Math.PI / 2 : -Math.PI / 2, { seed: 150 + li * 9, weight: 0.55, intensity: 0.45 }), tone: lane.tone });
+      // return arc bows outward and lands back on price — the feedback is the hero
+      const sx = colX(K - 1), ex = colX(0), sy = li === 0 ? y - 9 : y + 9;
+      const bow = li === 0 ? reinBow : revBow;
+      rets.push({
+        arc: `M${sx} ${sy} C${sx + 26} ${bow} ${ex - 26} ${bow} ${ex} ${sy}`,
+        head: Brush.brushArrow(ex, sy, 11, li === 0 ? Math.PI / 2 : -Math.PI / 2, { seed: 150 + li * 9, weight: li === 0 ? 0.75 : 0.5, intensity: 0.5 }),
+        tone: lane.tone, li,
+      });
     });
     return { arrows, rets };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
-  const anchorOf = (a) => stageAnchor(a.id);
-  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 40 : 30, NW / 2); nodes.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.stage) : null; };
+  const anchorOf = (a) => { const i = stages.indexOf(a.id); return i < 0 ? null : { x: colX(i), y: midY }; };
+  const resolve = (mx) => { let best = null, bd = touch ? 64 : 48; stages.forEach((s, i) => { const d = Math.abs(mx - colX(i)); if (d < bd) { bd = d; best = s; } }); return best ? targets.find((t) => t.id === best) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
-  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
-  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(toVB(e)[0]), 'hover'); };
+  const onClick = (e) => { const res = resolve(toVB(e)[0]); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
@@ -1009,33 +1017,45 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Reflexivity as two lanes: a reinforcing loop (price rises, capital enters, buildout funds, validation confirms, price strengthens) and a reversing loop (price falls, capital leaves, buildout starves, validation disappoints, price breaks). Both feed back into price." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {/* return arcs (loop feeds back to price) — quiet, drawn behind the nodes */}
-        <g style={{ opacity: entered ? 0.6 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 240ms' }}>
-          {geom.rets.map((r, i) => <g key={`ret${i}`}><path d={r.arc} fill="none" stroke={toneCol(r.tone)} strokeWidth="1" strokeDasharray="3 5" opacity="0.5" /><path d={r.head} fill={toneCol(r.tone)} opacity="0.7" /></g>)}
-          <text x={(pad.l + width - pad.r) / 2} y={midY - 3} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{(fl.centerLabel || 'reflexivity').toUpperCase()}</text>
-          {fl.returnLabel && <text x={(pad.l + width - pad.r) / 2} y={midY + 12} textAnchor="middle" style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>{fl.returnLabel}</text>}
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Reflexivity as one shared mechanism run two ways. Along a shared spine of price, capital, fundamentals and validation, a reinforcing loop above runs price up, capital in, buildout funded, validation confirming, then feeds back to a stronger price; a reversing loop below runs price down, capital out, buildout starved, validation disappointing, then feeds back to a weaker price. Both loops return to the same price." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* shared mechanism spine — the stages drawn once, as low-contrast structure */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 640ms ease 120ms' }}>
+          <line x1={colX(0)} x2={colX(K - 1)} y1={midY} y2={midY} stroke={pal.borderHi} strokeWidth="1" strokeDasharray="1 6" opacity="0.7" />
         </g>
-        {/* lane connectors */}
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 700ms ease 180ms' }}>
-          {geom.arrows.map((a, i) => <path key={`ar${i}`} d={a.d} fill={toneCol(a.tone)} opacity={a.tone === 'stress' ? 0.7 : 0.85} />)}
+        {/* return arcs — the feedback is the hero: both directions close back on price */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 520ms' }}>
+          {geom.rets.map((r, i) => (
+            <g key={`ret${i}`}>
+              <path d={r.arc} fill="none" stroke={toneCol(r.tone)} strokeWidth={r.li === 0 ? 2 : 1.4} strokeLinecap="round" strokeDasharray={r.li === 0 ? '0' : '5 5'} opacity={r.li === 0 ? 0.8 : 0.58} />
+              <path d={r.head} fill={toneCol(r.tone)} opacity={r.li === 0 ? 0.85 : 0.62} />
+            </g>
+          ))}
+          {fl.returnLabel && <text x={(colX(0) + colX(K - 1)) / 2} y={reinBow - 5} textAnchor="middle" style={{ ...halo(pal, 8, pal.text4), fontStyle: 'italic' }}>{fl.returnLabel}</text>}
+        </g>
+        {/* directional arrows: reinforcing thickens above, reversing thins/breaks below */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 700ms ease 300ms' }}>
+          {geom.arrows.map((a, i) => <path key={`ar${i}`} d={a.d} fill={toneCol(a.tone)} opacity={a.tone === 'stress' ? 0.72 : 0.9} />)}
         </g>
         {/* lane labels (left gutter) */}
         {lanes.map((lane, li) => (
           <g key={lane.id} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${120 + li * 80}ms` }}>
-            <text x={8} y={laneY(li) - 2} style={halo(pal, 9, toneTxt(lane.tone), 600)}>{lane.label}</text>
-            {lane.note && <text x={8} y={laneY(li) + 11} style={halo(pal, 7.5, pal.text4)}>{lane.note}</text>}
+            <text x={10} y={rowY(li) - 2} style={halo(pal, 9, toneTxt(lane.tone), 600)}>{lane.label}</text>
+            {lane.note && <text x={10} y={rowY(li) + 11} style={halo(pal, 7.5, pal.text4)}>{lane.note}</text>}
           </g>
         ))}
-        {/* nodes (both lanes; a focused stage emphasises its whole column) */}
-        {nodes.map((n) => {
-          const on = focusId === n.stage;
-          const isP = n.stage === spec.primaryKey;
-          const col = toneCol(n.tone);
+        {/* columns: shared stage name on the spine + reinforcing state above / reversing below */}
+        {stages.map((sid, i) => {
+          const on = focusId === sid;
+          const isP = sid === spec.primaryKey;
+          const nx = colX(i);
           return (
-            <g key={`${n.li}-${n.i}`} style={{ opacity: entered ? (focusId && !on ? 0.38 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms ease ${140 + n.i * 80 + n.li * 40}ms, transform 440ms cubic-bezier(0.2,0.7,0.2,1) ${140 + n.i * 80 + n.li * 40}ms` }}>
-              <rect x={n.x - NW / 2} y={n.y - NH / 2} width={NW} height={NH} rx={7} fill={pal.surface} stroke={on ? col : (isP ? col : pal.borderHi)} strokeWidth={on ? 1.7 : (isP ? 1.3 : 1)} style={{ transition: trans('stroke') }} />
-              <text x={n.x} y={n.y + 4} textAnchor="middle" style={haloSans(pal, 11, isP ? col : pal.text1, isP ? 600 : 500)}>{n.label}</text>
+            <g key={sid} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${nx}px ${midY}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms ease ${160 + i * 90}ms, transform 440ms cubic-bezier(0.2,0.7,0.2,1) ${160 + i * 90}ms` }}>
+              <text x={nx} y={rowY(0) - 13} textAnchor="middle" style={haloSans(pal, 11, toneTxt('accent'), 600)}>{stateFor(0, i)}</text>
+              <text x={nx} y={rowY(1) + 21} textAnchor="middle" style={haloSans(pal, 11, toneTxt('stress'), 600)}>{stateFor(1, i)}</text>
+              {isP && <circle cx={nx} cy={midY} r="11" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.6" />}
+              <path d={Brush.inkDot(nx, midY, isP ? 5 : 3.4, { seed: 30 + i * 9, intensity: 0.8 })} fill={isP ? accent : pal.markInk} />
+              {on && <circle cx={nx} cy={midY} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
+              <text x={nx} y={midY + 22} textAnchor="middle" style={haloSans(pal, 10, isP ? accent : pal.text2, isP ? 700 : 600)}>{stageName(sid)}</text>
             </g>
           );
         })}
@@ -2646,7 +2666,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'flow' && <FlowSvg spec={spec} height={hh(400)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'governanceLoop' && <GovernanceLoopSvg spec={spec} height={hh(300)} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'feedbackLoop' && <FeedbackLoopSvg spec={spec} height={hh(330)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'feedbackLoop' && <FeedbackLoopSvg spec={spec} height={hh(400)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={hh(380)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={hh(150 + (spec.scorecard?.requirements.length || 8) * 32)} targets={spec.hoverTargets} {...cp} />}
