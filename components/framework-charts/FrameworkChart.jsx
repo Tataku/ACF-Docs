@@ -945,114 +945,109 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   );
 }
 
-/* ── ReflexivityLoopSvg — authored off-centre figure-eight (single consumer:
- * p2-markets-feed-back). Two brush RIBBONS (Brush.brushLoopPath) are the loops
- * themselves — no cards, no grid, no spine. Reinforcing (accent) + reversing
- * (stress) share ONE filled Price coin at the crossing; integrated brush
- * arrowheads carry the causal direction; <=3 marginal annotations name the
- * transmission points. Materially taller canvas; mobile authors its own tall
- * two-ring geometry. Supersedes the card-grid feedbackLoop for this chart. */
-// FINAL best-of-breed: stacked-lobes-v2 base with the Price node upgraded to a
-// FILLED blended "coin" (accent top-half + stress bottom-half wedges + outer ring)
-// at a clearly-larger radius, so it reads as the shared anchor at the crossing
-// (the one weakness of the winning render). Everything else is drop-in verbatim.
-
-function ReflexivityLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
+/* ── MarketsFeedBackSignatureSvg — SIGNATURE renderer (chart-ID escape hatch) ──
+ * Bespoke, hand-authored geometry for p2-markets-feed-back ONLY. Registered by
+ * chartId (SIGNATURE_RENDERERS) so this one chart uses authored composition while
+ * the FrameworkChart shell keeps owning title, palette, hover/pin/tap, reduced
+ * motion, a11y, explainer, sources and the responsive container. This is NOT a
+ * generic layout — there is no automatic ellipse/node placement. An off-centre
+ * figure-eight of two EQUAL brush ribbons crossing at a substantial shared PRICE
+ * card; five stages per lobe read LEFT→RIGHT in causal order (capital · buildout ·
+ * fundamentals · validation); a brush arrowhead at every transition; at most three
+ * anchored micro-explainers; no central spine; no tiny crossover dot. The lobe
+ * centrelines are hand-placed control anchors rendered as cubic-Bézier-smoothed
+ * brush ribbons (Brush.brushLoopPath) — brush texture integrated INTO the path.
+ * Mobile geometry is authored separately (two stacked rings), never scaled down. */
+function MarketsFeedBackSignatureSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
-  const rl = spec.reflexivityLoop;
+  const sg = spec.signature;
   const M = coarse;
   const VW = width;
-  const VH = M ? 1360 : height;                                   // coarse authors its own tall viewBox
+  const VH = M ? 1480 : height;                       // mobile authors its own tall viewBox
 
-  // type + mark scale (viewBox units). Coarse deliberately large so labels stay
-  // above the ~9px floor after the phone down-scale; micro-annotations drop on coarse.
-  const F = M ? { node: 27, price: 31, lane: 22, note: 18, micro: 0 }
-              : { node: 15.5, price: 17, lane: 10.5, note: 9, micro: 10.5 };
-  // Price is a prominent filled coin (~1.4x node) so it commands as the crossing
-  // anchor; node dots enlarged so both register as confident marks, not specks.
-  const R = M ? { node: 15, price: 22, arrow: 36, weight: 12 }
-             : { node: 10, price: 14, arrow: 22, weight: 7 };
-
-  // Desktop crossing sits LEFT of the horizontal centre (off-axis, authored — not a
-  // machined orbit). Mobile keeps the seam centred between the two stacked rings.
-  const PX = VW * (M ? 0.5 : 0.46);
-  const PY = VH * 0.5;
-  const P = { x: PX, y: PY };
+  // type + mark scale (viewBox units). Deliberately large on coarse — never shrink
+  // type to rescue geometry.
+  const F = M ? { node: 30, price: 40, lane: 25, micro: 0 }
+             : { node: 16.5, price: 23, lane: 11, micro: 11 };
+  const RB = M ? 16 : 9;                               // ribbon weight — substantial
+  const DOT = M ? 12 : 7;
+  const AR = M ? 40 : 24;                              // arrowhead length
 
   const fr = (fx, fy) => ({ x: VW * fx, y: VH * fy });
-  // Desktop lobes are deliberately ASYMMETRIC: the reinforcing lobe is wider/taller
-  // and skews up-right; the reversing lobe is smaller and shifts down-left. Extremes
-  // span x 0.135–0.870 (>=70% width). This breaks the mirror-symmetry the earlier
-  // pass read as mechanical.
-  const POS = M ? {
-    rein: { capital: fr(0.80, 0.44), buildout: fr(0.72, 0.205), fundamentals: fr(0.28, 0.205), validation: fr(0.20, 0.44) },
-    rev:  { capital: fr(0.20, 0.56), buildout: fr(0.28, 0.795), fundamentals: fr(0.72, 0.795), validation: fr(0.80, 0.56) },
-    ctrTop: fr(0.5, 0.31), ctrBot: fr(0.5, 0.69),
+  // Substantial shared PRICE card at the crossover, off horizontal centre (desktop).
+  const card = M
+    ? { x: VW * 0.5, y: VH * 0.5, w: Math.min(VW * 0.42, 360), h: 96 }
+    : { x: VW * 0.435, y: VH * 0.5, w: 184, h: 82 };
+  const P = { x: card.x, y: card.y };
+
+  // Hand-placed anchor points (deliberate composition, not a formula). Five stages
+  // per lobe read left→right: capital · buildout · fundamentals · validation.
+  // Desktop lobes are asymmetric (reinforcing wider & skewed higher-right).
+  const A = M ? {
+    rein: { capital: fr(0.175, 0.395), buildout: fr(0.235, 0.145), fundamentals: fr(0.765, 0.145), validation: fr(0.825, 0.395) },
+    rev:  { capital: fr(0.175, 0.605), buildout: fr(0.235, 0.855), fundamentals: fr(0.765, 0.855), validation: fr(0.825, 0.605) },
   } : {
-    rein: { capital: fr(0.870, 0.360), buildout: fr(0.790, 0.095), fundamentals: fr(0.330, 0.125), validation: fr(0.135, 0.355) },
-    rev:  { capital: fr(0.160, 0.610), buildout: fr(0.275, 0.855), fundamentals: fr(0.680, 0.835), validation: fr(0.795, 0.605) },
-    ctrTop: fr(0.520, 0.235), ctrBot: fr(0.478, 0.730),
+    rein: { capital: fr(0.140, 0.415), buildout: fr(0.320, 0.120), fundamentals: fr(0.610, 0.100), validation: fr(0.860, 0.330) },
+    rev:  { capital: fr(0.165, 0.600), buildout: fr(0.315, 0.880), fundamentals: fr(0.595, 0.888), validation: fr(0.835, 0.645) },
   };
-  const off = M ? { x: 34, y: 15 } : { x: 26, y: 8 };
-  const reinStart = { x: P.x + off.x, y: P.y - off.y }, reinEnd = { x: P.x - off.x, y: P.y - off.y };
-  const revStart = { x: P.x - off.x, y: P.y + off.y }, revEnd = { x: P.x + off.x, y: P.y + off.y };
-
-  const reinSats = rl.reinforce, revSats = rl.reverse;
+  const ctr = { rein: fr(0.5, M ? 0.27 : 0.235), rev: fr(0.5, M ? 0.73 : 0.755) };
   const order = ['capital', 'buildout', 'fundamentals', 'validation'];
-  const seqPts = (map, s, e) => [s, ...order.map((k) => map[k]), e];
 
-  const nodes = [{ stage: rl.shared, label: rl.priceLabel, x: P.x, y: P.y, price: true, lobe: 'shared', ctr: null }];
-  reinSats.forEach((sd) => nodes.push({ ...sd, x: POS.rein[sd.stage].x, y: POS.rein[sd.stage].y, tone: 'rein', lobe: 'rein', ctr: POS.ctrTop }));
-  revSats.forEach((sd) => nodes.push({ ...sd, x: POS.rev[sd.stage].x, y: POS.rev[sd.stage].y, tone: 'rev', lobe: 'rev', ctr: POS.ctrBot }));
-  const byStageRein = {}; nodes.forEach((n) => { if (n.lobe === 'rein') byStageRein[n.stage] = n; });
-  const stageAnchor = (id) => (id === rl.shared ? { x: P.x, y: P.y } : (byStageRein[id] ? { x: byStageRein[id].x, y: byStageRein[id].y } : null));
+  // Card connection points: each lobe leaves the card near-left and returns near-right.
+  const cxo = card.w * 0.24, cyo = card.h / 2 + 2;
+  const conn = {
+    rein: { out: { x: P.x - cxo, y: P.y - cyo }, in: { x: P.x + cxo, y: P.y - cyo } },
+    rev:  { out: { x: P.x - cxo, y: P.y + cyo }, in: { x: P.x + cxo, y: P.y + cyo } },
+  };
 
   const toneCol = (t) => (t === 'rev' ? pal.bandStress : accent);
   const toneTxt = (t) => (t === 'rev' ? pal.bandStressText : accent);
 
+  const nodes = [{ stage: sg.shared, x: P.x, y: P.y, price: true }];
+  ['rein', 'rev'].forEach((lobe) => (sg[lobe === 'rein' ? 'reinforce' : 'reverse'] || []).forEach((sd) => {
+    const a = A[lobe][sd.stage];
+    nodes.push({ ...sd, x: a.x, y: a.y, lobe, tone: lobe, ctr: ctr[lobe] });
+  }));
+  const byStage = {}; nodes.forEach((n) => { if (n.lobe === 'rein') byStage[n.stage] = n; });
+  const stageAnchor = (id) => (id === sg.shared ? { x: P.x, y: P.y - card.h / 2 - 6 } : (byStage[id] ? { x: byStage[id].x, y: byStage[id].y } : null));
+
   const geom = useMemo(() => {
-    const reinChain = [P, POS.rein.capital, POS.rein.buildout, POS.rein.fundamentals, POS.rein.validation, P];
-    const revChain = [P, POS.rev.capital, POS.rev.buildout, POS.rev.fundamentals, POS.rev.validation, P];
-    const reinRibbon = Brush.brushLoopPath(seqPts(POS.rein, reinStart, reinEnd), { weight: R.weight, taperIn: 0.11, taperOut: 0.11, filaments: 1, intensity: 0.5, seed: 41, step: M ? 8 : 6 });
-    const revRibbon = Brush.brushLoopPath(seqPts(POS.rev, revStart, revEnd), { weight: R.weight, taperIn: 0.11, taperOut: 0.11, filaments: 1, intensity: 0.5, seed: 88, step: M ? 8 : 6 });
-    const arrowsFor = (chain, tone, seed0) => {
-      const out = [];
-      for (let i = 1; i < chain.length; i++) {
-        const a = chain[i - 1], b = chain[i];
-        const dir = Math.atan2(b.y - a.y, b.x - a.x);
-        const rB = (i === chain.length - 1) ? R.price : R.node;
-        const back = rB + (M ? 15 : 10);
+    const buildLobe = (lobe) => {
+      const c = conn[lobe];
+      const pts = [c.out, A[lobe].capital, A[lobe].buildout, A[lobe].fundamentals, A[lobe].validation, c.in];
+      const ribbon = Brush.brushLoopPath(pts, { weight: RB, taperIn: 0.1, taperOut: 0.1, filaments: 1, intensity: 0.5, seed: lobe === 'rein' ? 41 : 88, step: M ? 9 : 6, belly: 0.12 });
+      const heads = [];
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1], b = pts[i], dir = Math.atan2(b.y - a.y, b.x - a.x);
+        const last = i === pts.length - 1;
+        const back = last ? cxo * 0.2 + 6 : DOT + (M ? 16 : 11);
         const tip = { x: b.x - Math.cos(dir) * back, y: b.y - Math.sin(dir) * back };
-        out.push({ d: Brush.brushArrow(tip.x, tip.y, R.arrow, dir, { seed: seed0 + i * 7, weight: M ? 1.55 : 1.4, intensity: 0.5, head: 0.48 }), tone });
+        heads.push({ x: tip.x, y: tip.y, dir });
       }
-      return out;
+      return { ribbon, heads };
     };
-    const arrows = [...arrowsFor(reinChain, 'rein', 60), ...arrowsFor(revChain, 'rev', 130)];
-    const anns = M ? [] : (rl.annotations || []).slice(0, 3).map((an) => {
-      const a = an.from === rl.shared ? P : POS.rein[an.from];
-      const b = an.to === rl.shared ? P : POS.rein[an.to];
-      // the return edge (…→price) converges on the crossing, where the ribbon tail
-      // would graze the label; park it in the clear gap just left of the waist instead.
-      if (an.to === rl.shared) return { text: an.text, x: P.x - VW * 0.19, y: P.y + 2, anchor: 'middle' };
+    const rein = buildLobe('rein'), rev = buildLobe('rev');
+    // <=3 anchored micro-explainers on specific reinforcing transitions; placed just
+    // inside the lobe toward its centre so wide notes never ride a stroke or the frame.
+    const anns = M ? [] : (sg.annotations || []).slice(0, 3).map((an) => {
+      const a = an.from === sg.shared ? { x: P.x, y: P.y - card.h / 2 } : A.rein[an.from];
+      const b = an.to === sg.shared ? { x: P.x, y: P.y - card.h / 2 } : A.rein[an.to];
       const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
       const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
       const nx = -dy / L, ny = dx / L;
-      const outward = ((mid.x - POS.ctrTop.x) * nx + (mid.y - POS.ctrTop.y) * ny) >= 0 ? 1 : -1;
-      const oGap = R.weight + 24;
-      // place the note INSIDE the lobe (toward centre) and flow the text toward the
-      // open interior — the widened lobe leaves no room outboard, and this keeps wide
-      // notes off the outer ribbon shoulder and off the top lane-note row.
+      const outward = ((mid.x - ctr.rein.x) * nx + (mid.y - ctr.rein.y) * ny) >= 0 ? 1 : -1;
+      const oGap = RB + 22;
       const inx = -nx * outward, iny = -ny * outward;
-      const ax = mid.x + inx * oGap, ay = Math.max(58, mid.y + iny * oGap);
+      const ax = mid.x + inx * oGap, ay = Math.max(64, mid.y + iny * oGap);
       const anchor = inx > 0.4 ? 'start' : inx < -0.4 ? 'end' : 'middle';
       return { text: an.text, x: ax, y: ay, anchor };
     });
-    return { reinRibbon, revRibbon, arrows, anns };
+    return { rein, rev, anns };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, VH, coarse]);
 
-  const anchorOf = (a) => stageAnchor(a.id);
-  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 46 : 34, R.node * (M ? 2.4 : 3.2)); nodes.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.stage) : null; };
+  const anchorOf = (t) => stageAnchor(t.id);
+  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 44 : 32, DOT * (M ? 2.6 : 3.4)); nodes.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.stage) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (VW / r.width), (e.clientY - r.top) * (VH / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
   const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -1062,86 +1057,78 @@ function ReflexivityLoopSvg({ spec, width, height, pal, accent, reduce, entered,
   const anchor = isActiveHere ? anchorOf(active) : null;
   const trans = (p, ms = 220) => (reduce ? undefined : `${p} ${ms}ms ease`);
   const grpIn = (delay) => ({ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : `opacity 720ms ease ${delay}ms` });
-
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
-    const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / VW) * 100} yPct={(anchor.y / VH) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
-  }
+  if (!coarse && isActiveHere && anchor) { const meta = targets.find((t) => t.id === active.id); if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / VW) * 100} yPct={(anchor.y / VH) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />; }
 
-  const ribbonFill = (tone, on, other) => (other ? (M ? 0.34 : 0.28) : (on ? 1 : 0.9));
+  const ribbonOp = (lobe, other) => other ? 0.3 : (lobe === 'rev' ? (pal.name === 'light' ? 0.95 : 1) : (pal.name === 'light' ? 0.9 : 0.88));
+  const gid = `sig-price-${(spec.chartId || 'p').replace(/[^a-z0-9]/gi, '')}`;
 
   return (
     <div style={{ position: 'relative' }}>
       <svg ref={svgRef} viewBox={`0 0 ${VW} ${VH}`} width="100%" role="group"
-        aria-label={spec.ariaSummary || 'Reflexivity drawn as an off-centre figure-eight sharing one Price node at the crossing.'}
+        aria-label={spec.ariaSummary || 'Reflexivity drawn as an off-centre figure-eight of two equal loops crossing at a shared Price card.'}
         style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={accent} /><stop offset="100%" stopColor={pal.bandStress} /></linearGradient>
+        </defs>
 
-        {/* lobe labels + doctrine sub-notes (subordinate; the ribbons lead) */}
+        {/* lobe identity labels (subordinate; the ribbons lead) */}
         <g style={grpIn(80)}>
-          <text x={M ? VW * 0.5 : 20} y={M ? VH * 0.045 : 26} textAnchor={M ? 'middle' : 'start'} style={halo(pal, F.lane, toneTxt('rein'), 700)}>{rl.reinforceLabel}</text>
-          {!M && rl.reinforceNote && <text x={20} y={40} style={{ ...halo(pal, F.note, pal.text4), fontStyle: 'italic' }}>{rl.reinforceNote}</text>}
-          <text x={M ? VW * 0.5 : 20} y={M ? VH * 0.972 : VH - 22} textAnchor={M ? 'middle' : 'start'} style={halo(pal, F.lane, toneTxt('rev'), 700)}>{rl.reverseLabel}</text>
-          {!M && rl.reverseNote && <text x={20} y={VH - 9} style={{ ...halo(pal, F.note, pal.text4), fontStyle: 'italic' }}>{rl.reverseNote}</text>}
+          <text x={M ? VW * 0.5 : 20} y={M ? VH * 0.04 : 24} textAnchor={M ? 'middle' : 'start'} style={halo(pal, F.lane, toneTxt('rein'), 700)}>{sg.reinforceLabel}</text>
+          {!M && sg.reinforceNote && <text x={20} y={39} style={{ ...halo(pal, F.lane - 2.5, pal.text4), fontStyle: 'italic' }}>{sg.reinforceNote}</text>}
+          <text x={M ? VW * 0.5 : 20} y={M ? VH * 0.975 : VH - 22} textAnchor={M ? 'middle' : 'start'} style={halo(pal, F.lane, toneTxt('rev'), 700)}>{sg.reverseLabel}</text>
+          {!M && sg.reverseNote && <text x={20} y={VH - 8} style={{ ...halo(pal, F.lane - 2.5, pal.text4), fontStyle: 'italic' }}>{sg.reverseNote}</text>}
         </g>
 
-        {/* ribbons — the two lobes, EQUAL weight; brush geometry IS the loop */}
-        <g style={grpIn(120)}>
-          {[['rein', geom.reinRibbon], ['rev', geom.revRibbon]].map(([tone, rb]) => {
-            const on = focusId && (focusId === rl.shared || nodes.some((n) => n.lobe === tone && n.stage === focusId));
-            const other = focusId && focusId !== rl.shared && !nodes.some((n) => n.lobe === tone && n.stage === focusId);
-            return (
-              <g key={tone} style={{ opacity: ribbonFill(tone, on, other), transition: trans('opacity') }}>
-                {rb.filaments.map((d, i) => <path key={`f${i}`} d={d} fill={toneCol(tone)} opacity={tone === 'rev' ? 0.44 : 0.32} />)}
-                <path d={rb.core} fill={toneCol(tone)} opacity={tone === 'rev' ? (pal.name === 'light' ? 0.95 : 1) : (pal.name === 'light' ? 0.88 : 0.85)} />
-              </g>
-            );
-          })}
-        </g>
-
-        {/* directional arrowheads between every stage (carry the causal flow) */}
-        <g style={grpIn(320)}>
-          {geom.arrows.map((a, i) => <path key={`ar${i}`} d={a.d} fill={toneCol(a.tone)} opacity={0.94} />)}
-        </g>
-
-        {/* marginal transition annotations (<=3, subordinate; desktop only) */}
-        {geom.anns.map((an, i) => (
-          <text key={`an${i}`} x={an.x} y={an.y} textAnchor={an.anchor || 'middle'} style={{ ...halo(pal, F.micro, pal.text3), fontStyle: 'italic' }}>{an.text}</text>
-        ))}
-
-        {/* satellite nodes (both lobes) — ink dots + halo'd labels, no cards */}
-        {nodes.filter((n) => !n.price).map((n) => {
-          const on = focusId === n.stage;
-          const dim = focusId && focusId !== n.stage && focusId !== rl.shared;
-          const col = toneCol(n.tone);
-          const outx = (n.x - n.ctr.x), outy = (n.y - n.ctr.y), ol = Math.hypot(outx, outy) || 1;
-          const gap = (M ? 30 : 22) + R.node;
-          const lx = n.x + (outx / ol) * gap, ly = n.y + (outy / ol) * gap + F.node * 0.34;
+        {/* two brush ribbons — the loops themselves, equal weight */}
+        {['rein', 'rev'].map((lobe) => {
+          const rb = geom[lobe], col = toneCol(lobe);
+          const other = focusId && focusId !== sg.shared && !nodes.some((n) => n.lobe === lobe && n.stage === focusId);
           return (
-            <g key={`${n.lobe}-${n.stage}`} style={{ opacity: entered ? (dim ? 0.34 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.9)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${180 + order.indexOf(n.stage) * 70}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${180 + order.indexOf(n.stage) * 70}ms` }}>
-              <path d={Brush.inkDot(n.x, n.y, on ? R.node * 1.18 : R.node, { seed: 30 + n.stage.length * 9 + (n.tone === 'rev' ? 50 : 0), intensity: 0.8 })} fill={col} style={{ transition: trans('opacity') }} />
-              {on && <circle cx={n.x} cy={n.y} r={R.node * 1.8} fill="none" stroke={col} strokeWidth={M ? 2 : 1.2} opacity={0.9} />}
-              <text x={lx} y={ly} textAnchor="middle" style={haloSans(pal, F.node, on ? col : pal.text1, on ? 700 : 600)}>{n.label}</text>
+            <g key={`rb${lobe}`} style={{ ...grpIn(140), opacity: entered ? ribbonOp(lobe, other) : 0, transition: reduce ? 'opacity 420ms ease' : `opacity 820ms ease ${140 + (lobe === 'rev' ? 140 : 0)}ms` }}>
+              {rb.ribbon.filaments.map((d, i) => <path key={`f${i}`} d={d} fill={col} opacity={lobe === 'rev' ? 0.42 : 0.32} />)}
+              <path d={rb.ribbon.core} fill={col} />
             </g>
           );
         })}
 
-        {/* shared PRICE node — FILLED blended coin (accent top / stress bottom) at
-            the crossing, 1.25x satellite radius, so it reads as the shared anchor */}
-        {(() => {
-          const on = focusId === rl.shared;
-          const rr = R.price;
-          const topWedge = `M${P.x - rr} ${P.y} A${rr} ${rr} 0 0 1 ${P.x + rr} ${P.y} Z`;
-          const botWedge = `M${P.x + rr} ${P.y} A${rr} ${rr} 0 0 1 ${P.x - rr} ${P.y} Z`;
-          const dim = focusId && !on;
+        {/* integrated brush arrowheads at every transition */}
+        <g style={grpIn(340)}>
+          {['rein', 'rev'].map((lobe) => geom[lobe].heads.map((h, i) => (
+            <path key={`ar${lobe}${i}`} d={Brush.brushArrow(h.x, h.y, AR, h.dir, { seed: 60 + (lobe === 'rev' ? 40 : 0) + i * 7, weight: M ? 1.6 : 1.45, intensity: 0.5, head: 0.5 })} fill={toneCol(lobe)} opacity={0.96} />
+          )))}
+        </g>
+
+        {/* anchored micro-explainers (<=3, desktop only) */}
+        {geom.anns.map((an, i) => (
+          <text key={`an${i}`} x={an.x} y={an.y} textAnchor={an.anchor} style={{ ...halo(pal, F.micro, pal.text3), fontStyle: 'italic' }}>{an.text}</text>
+        ))}
+
+        {/* stage nodes — ink dot on the ribbon + bold label offset OUTWARD (never on a stroke) */}
+        {nodes.filter((n) => !n.price).map((n) => {
+          const on = focusId === n.stage, dim = focusId && focusId !== n.stage && focusId !== sg.shared, col = toneCol(n.tone);
+          const ox = n.x - n.ctr.x, oy = n.y - n.ctr.y, ol = Math.hypot(ox, oy) || 1;
+          const gap = (M ? 34 : 24) + DOT;
+          const lx = n.x + (ox / ol) * gap, ly = n.y + (oy / ol) * gap + F.node * 0.34;
+          const anc = Math.abs(ox) < ol * 0.3 ? 'middle' : (ox > 0 ? 'start' : 'end');
           return (
-            <g style={{ opacity: entered ? (dim ? 0.55 : 1) : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 520ms ease 120ms', transformOrigin: `${P.x}px ${P.y}px`, transform: entered ? 'none' : 'scale(0.9)' }}>
-              <path d={topWedge} fill={accent} opacity={0.95} />
-              <path d={botWedge} fill={pal.bandStress} opacity={0.95} />
-              <circle cx={P.x} cy={P.y} r={rr} fill="none" stroke={pal.cardBorder} strokeWidth={M ? 2 : 1.4} />
-              <circle cx={P.x} cy={P.y} r={rr * 0.34} fill={pal.markInk} />
-              {on && <circle cx={P.x} cy={P.y} r={rr * 1.7} fill="none" stroke={pal.text2} strokeWidth={M ? 2 : 1.2} opacity={0.8} />}
-              <text x={P.x} y={M ? P.y - rr - 14 : P.y - rr - 9} textAnchor="middle" style={haloSans(pal, F.price, pal.text1, 700)}>{rl.priceLabel}</text>
+            <g key={`${n.lobe}-${n.stage}`} style={{ opacity: entered ? (dim ? 0.32 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.9)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${200 + order.indexOf(n.stage) * 70}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${200 + order.indexOf(n.stage) * 70}ms` }}>
+              <path d={Brush.inkDot(n.x, n.y, on ? DOT * 1.2 : DOT, { seed: 30 + n.stage.length * 9 + (n.tone === 'rev' ? 50 : 0), intensity: 0.8 })} fill={col} style={{ transition: trans('opacity') }} />
+              {on && <circle cx={n.x} cy={n.y} r={DOT * 1.9} fill="none" stroke={col} strokeWidth={M ? 2.4 : 1.4} opacity={0.9} />}
+              <text x={lx} y={ly} textAnchor={anc} style={haloSans(pal, F.node, on ? col : pal.text1, on ? 700 : 600)}>{n.label}</text>
+            </g>
+          );
+        })}
+
+        {/* substantial shared PRICE card at the crossover (accent→stress blended border) */}
+        {(() => {
+          const on = focusId === sg.shared, dim = focusId && !on;
+          return (
+            <g style={{ opacity: entered ? (dim ? 0.6 : 1) : 0, transformOrigin: `${P.x}px ${P.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : 'opacity 520ms ease 120ms' }}>
+              <rect x={P.x - card.w / 2 - 3} y={P.y - card.h / 2 - 3} width={card.w + 6} height={card.h + 6} rx={M ? 18 : 13} fill="none" stroke={`url(#${gid})`} strokeWidth={M ? 4 : 2.6} opacity={0.9} />
+              <rect x={P.x - card.w / 2} y={P.y - card.h / 2} width={card.w} height={card.h} rx={M ? 15 : 11} fill={pal.surface} stroke={on ? accent : pal.borderHi} strokeWidth={on ? 2 : 1.2} />
+              <text x={P.x} y={P.y - (M ? 6 : 3)} textAnchor="middle" style={haloSans(pal, F.price, pal.text1, 700)}>{sg.priceLabel}</text>
+              <text x={P.x} y={P.y + (M ? 26 : 16)} textAnchor="middle" style={halo(pal, F.micro || F.lane - 4, pal.text4)}>the shared signal</text>
             </g>
           );
         })()}
@@ -1152,6 +1139,8 @@ function ReflexivityLoopSvg({ spec, width, height, pal, accent, reduce, entered,
     </div>
   );
 }
+
+const SIGNATURE_RENDERERS = { 'p2-markets-feed-back': MarketsFeedBackSignatureSvg };
 
 /* FeedbackLoopSvg — reflexivity as two loops that share their MECHANISMS (single
  * consumer: p2-markets-feed-back). Left = the REINFORCING loop (price rises ·
@@ -2859,7 +2848,10 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'governanceLoop' && <GovernanceLoopSvg spec={spec} height={hh(300)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'feedbackLoop' && <FeedbackLoopSvg spec={spec} height={hh(360)} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'reflexivityLoop' && <ReflexivityLoopSvg spec={spec} height={hh(600)} targets={spec.hoverTargets} {...cp} />}
+        {/* signature-renderer escape hatch: authored geometry registered by chartId,
+            rendered inside this same exhibit shell (see SIGNATURE_RENDERERS). */}
+        {spec.layout === 'signature' && SIGNATURE_RENDERERS[spec.chartId]
+          && React.createElement(SIGNATURE_RENDERERS[spec.chartId], { spec, height: hh(640), targets: spec.hoverTargets, ...cp })}
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={hh(380)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={hh(150 + (spec.scorecard?.requirements.length || 8) * 32)} targets={spec.hoverTargets} {...cp} />}

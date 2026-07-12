@@ -1207,7 +1207,7 @@
       "part": "part-2",
       "status": "implemented",
       "wiredPublic": false,
-      "layout": "reflexivityLoop",
+      "layout": "signature",
       "dataMode": "conceptual",
       "claimLabel": "REFLEXIVITY · FEEDBACK",
       "primaryClaim": "Price does not just reflect fundamentals — it can change them",
@@ -1268,7 +1268,7 @@
           "url": "/part-2-lineage-macro-thesis"
         }
       ],
-      "agencyNotes": "reflexivityLoop is a NEW composition primitive (layout id + ReflexivityLoopSvg renderer + Brush.brushLoopPath), authored to break the card-grid feedbackLoop instinct (owner architectural brief 2026-07, ultracode multi-agent build — candidate panel + adversarial visual judge). An off-centre figure-eight: two brush RIBBONS (brushLoopPath: Catmull-Rom densify + smoothstep taper + deterministic belly swell + faint filament) ARE the two loops — no cards, no grid, no vertical spine. Reinforcing (accent, upper lobe) + reversing (stress, lower lobe) share ONE filled Price coin at the crossing (accent-top / stress-bottom wedges + outer ring, 1.25x satellite radius). Five stages per lobe incl explicit buildout; integrated Brush.brushArrow heads between every stage carry the causal direction without labels; ink-dot satellites with halo labels; exactly three subordinate marginal annotations (financing changes capacity · execution becomes evidence · evidence feeds back into price). Materially taller canvas (hh(600) vs the old hh(360)); mobile authors its OWN tall two-ring geometry (1000x1360 viewBox) — not a scaled desktop. Readability floor enforced (node labels ~14.6px desktop / ~9.7px mobile). Guardrails honoured in copy: fundamentals bend with a lag (not instantly), validation is a tendency not a guarantee, the reverse loop is equally real. Supersedes the shared-mechanism 3-column, horizontal racetrack, vertical figure-eight, causal-story, spiral, lane, spine, and two-node attempts (feedbackLoop renderer retained as dead code, no consumer)."
+      "agencyNotes": "p2-markets-feed-back uses a SIGNATURE renderer (MarketsFeedBackSignatureSvg), registered by chartId via the FrameworkChart SIGNATURE_RENDERERS escape hatch (layout: signature). The generic feedbackLoop/reflexivityLoop layouts no longer own this chart geometry (owner architectural brief 2026-07). The FrameworkChart shell still owns title, palette/theme, hover/pin/tap, reduced motion, a11y, explainer, sources and the responsive container; only the SVG body is authored. Composition: an off-centre figure-eight of two EQUAL brush ribbons (Brush.brushLoopPath — brush integrated into the authored centreline) crossing at a substantial shared PRICE card; five stages per lobe read LEFT to RIGHT in causal order (capital, buildout, fundamentals, validation), reinforcing above / reversing below; a brush arrowhead at every transition; at most three anchored micro-explainers placed inside the lobe; no central spine, no tiny crossover dot. Hand-placed anchors (deliberate composition, not automatic ellipse/node layout). Mobile geometry authored separately (two stacked rings, not a scaled desktop). Guardrails in copy: fundamentals bend with a lag, validation is a tendency not a guarantee, the reverse loop is equally real. Do not generalize until the signature chart passes visual review; then extract only the reusable infinity-path + annotation primitives."
     },
     {
       "chartId": "p2-time-changes-prudence",

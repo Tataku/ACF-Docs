@@ -85,7 +85,7 @@ export const DISCLOSURE = {
 
 export const DATA_MODES = ['representative', 'historical', 'simulation', 'conceptual'];
 export const SOURCE_ROLES = ['verifies-concept', 'backs-series', 'methodology', 'target-source'];
-export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar'];
+export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'signature', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar'];
 
 // Visual-relationship grammar — DEFINITIONS live in the shared, downward-only
 // chart-core/grammar.mjs (leaf); re-exported here under the same names so the
@@ -190,7 +190,7 @@ export function resolveMotionProfile(spec) {
   if (spec.motionProfile && spec.motionProfile.type) return spec.motionProfile;
   // radial (arcs) and laneBar (bars) build like diagrams — staged reveal of the
   // composition/comparison, not a left→right time sweep.
-  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'quadrant', 'radial', 'laneBar'];
+  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'signature', 'bridge', 'gate', 'quadrant', 'radial', 'laneBar'];
   let type = 'timeSweep';
   if (diagrams.includes(spec.layout)) type = 'diagramBuild';
   else if (spec.layout === 'scenario') type = 'scenarioUpdate';
@@ -225,7 +225,7 @@ export function resolveExperienceRole(spec) {
   if (L === 'scorecard') return 'matrix';
   if (L === 'laneBar') return 'comparison';
   if (L === 'radial') return 'evidence';
-  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'signature', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
   return 'evidence';
 }
 
@@ -257,7 +257,7 @@ export function resolveMobileBehavior(spec) {
   if (L === 'scorecard') return { interaction: 'scroll-x', chartHeight: 'auto', note: 'Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable.' };
   if (L === 'radial') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Keep the donut substantial on touch; tap a segment to inspect its share. Do not shrink the ring into a token.' };
   if (L === 'laneBar') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Bars stack full-width; keep the aligned compare segment and the difference callout legible; tap a segment to inspect.' };
-  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'reflexivityLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'signature', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
   return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Tap to cycle elements; keep the thesis line and labels legible.' };
 }
 
@@ -1417,9 +1417,9 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerBody: 'A rising price can attract capital; capital funds the buildout; the buildout improves the fundamentals; better fundamentals appear to validate the price — which feeds back into price. The same chain can run in reverse: a falling price starves the buildout, fundamentals weaken, and the validation breaks.',
     explainerConcept: 'Reflexivity',
     concepts: [{ label: 'Reflexivity', link: '/part-2-lineage-macro-thesis' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }],
-    layout: 'reflexivityLoop',
+    layout: 'signature',
     ariaSummary: 'Reflexivity drawn as an off-centre figure-eight with a single shared Price node at the crossing. The upper reinforcing loop runs price up, capital in, buildout expanding, fundamentals improving, validation confirming, then back into price. The lower, equally weighted reversing loop runs price down, capital tightening, buildout slowing, fundamentals weakening, validation breaking, then back into price. Fundamentals bend toward price only with a lag; validation is a tendency, not a guarantee; the reverse loop is equally real.',
-    reflexivityLoop: {
+    signature: {
       shared: 'price',
       priceLabel: 'Price',
       reinforceLabel: 'REINFORCING',
@@ -1455,7 +1455,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'validation', kind: 'stage', label: 'Validation', name: 'Validation', why: 'Improved fundamentals CAN ratify the price and reinforce the loop — but confirmation is a tendency, not a guarantee. When it disappoints, the same loop reverses, fast.', claim: 'Confirmation feeds the next move — either way, and not always.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['price', 'capital', 'buildout', 'fundamentals', 'validation'],
-    implementationNotes: 'reflexivityLoop is a NEW composition primitive (layout id + ReflexivityLoopSvg renderer + Brush.brushLoopPath), authored to break the card-grid feedbackLoop instinct (owner architectural brief 2026-07, ultracode multi-agent build — candidate panel + adversarial visual judge). An off-centre figure-eight: two brush RIBBONS (brushLoopPath: Catmull-Rom densify + smoothstep taper + deterministic belly swell + faint filament) ARE the two loops — no cards, no grid, no vertical spine. Reinforcing (accent, upper lobe) + reversing (stress, lower lobe) share ONE filled Price coin at the crossing (accent-top / stress-bottom wedges + outer ring, 1.25x satellite radius). Five stages per lobe incl explicit buildout; integrated Brush.brushArrow heads between every stage carry the causal direction without labels; ink-dot satellites with halo labels; exactly three subordinate marginal annotations (financing changes capacity · execution becomes evidence · evidence feeds back into price). Materially taller canvas (hh(600) vs the old hh(360)); mobile authors its OWN tall two-ring geometry (1000x1360 viewBox) — not a scaled desktop. Readability floor enforced (node labels ~14.6px desktop / ~9.7px mobile). Guardrails honoured in copy: fundamentals bend with a lag (not instantly), validation is a tendency not a guarantee, the reverse loop is equally real. Supersedes the shared-mechanism 3-column, horizontal racetrack, vertical figure-eight, causal-story, spiral, lane, spine, and two-node attempts (feedbackLoop renderer retained as dead code, no consumer).',
+    implementationNotes: 'p2-markets-feed-back uses a SIGNATURE renderer (MarketsFeedBackSignatureSvg), registered by chartId via the FrameworkChart SIGNATURE_RENDERERS escape hatch (layout: signature). The generic feedbackLoop/reflexivityLoop layouts no longer own this chart geometry (owner architectural brief 2026-07). The FrameworkChart shell still owns title, palette/theme, hover/pin/tap, reduced motion, a11y, explainer, sources and the responsive container; only the SVG body is authored. Composition: an off-centre figure-eight of two EQUAL brush ribbons (Brush.brushLoopPath — brush integrated into the authored centreline) crossing at a substantial shared PRICE card; five stages per lobe read LEFT to RIGHT in causal order (capital, buildout, fundamentals, validation), reinforcing above / reversing below; a brush arrowhead at every transition; at most three anchored micro-explainers placed inside the lobe; no central spine, no tiny crossover dot. Hand-placed anchors (deliberate composition, not automatic ellipse/node layout). Mobile geometry authored separately (two stacked rings, not a scaled desktop). Guardrails in copy: fundamentals bend with a lag, validation is a tendency not a guarantee, the reverse loop is equally real. Do not generalize until the signature chart passes visual review; then extract only the reusable infinity-path + annotation primitives.',
   },
 
   {
