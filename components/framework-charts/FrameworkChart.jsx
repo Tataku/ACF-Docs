@@ -971,54 +971,67 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   // artistry lives in the brush strokes and the asymmetric return-arc
   // curvature. Hand-authored 960×540 design space (uneven, accelerating gaps).
   const fx = width / 960, fy = height / 540;
-  const CY = 270 * fy;
-  const RAIL_T = 268 * fy, RAIL_B = 296 * fy, DIV_Y = 282 * fy;   // state rows + divider (shared across the row)
+  const CY = 270 * fy;                                             // the spine — both states diverge from it
+  // The two rails DIVERGE from the spine stage by stage: the teal path literally
+  // RISES as the reinforcing loop matures, the clay path literally FALLS — the
+  // price movement is the geometry. Both then wrap around (möbius-like) back
+  // into the same tight price card where they began.
   const CARDS = [
-    { id: 'price', x0: 24, x1: 174, h: 96 },
-    { id: 'capital', x0: 220, x1: 348, h: 82 },
-    { id: 'buildout', x0: 398, x1: 530, h: 82 },
-    { id: 'fundamentals', x0: 584, x1: 742, h: 82 },
-    { id: 'validation', x0: 800, x1: 942, h: 82 },
-  ].map((c) => ({ ...c, L: c.x0 * fx, R: c.x1 * fx, x: ((c.x0 + c.x1) / 2) * fx, W: (c.x1 - c.x0) * fx, H: c.h * fy, top: 270 * fy - (c.h * fy) / 2, bot: 270 * fy + (c.h * fy) / 2 }));
+    { id: 'price', x0: 24, x1: 174, rt: 246, rb: 294 },
+    { id: 'capital', x0: 220, x1: 348, rt: 240, rb: 300 },
+    { id: 'buildout', x0: 398, x1: 530, rt: 224, rb: 316 },
+    { id: 'fundamentals', x0: 584, x1: 742, rt: 204, rb: 336 },
+    { id: 'validation', x0: 800, x1: 942, rt: 180, rb: 360 },
+  ].map((c) => ({ ...c, L: c.x0 * fx, R: c.x1 * fx, x: ((c.x0 + c.x1) / 2) * fx, W: (c.x1 - c.x0) * fx, RT: c.rt * fy, RB: c.rb * fy, top: (c.rt - 18) * fy, bot: (c.rb + 18) * fy }));
   const byId = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   const toneCol = (tone) => (tone === 'stress' ? pal.bandStress : accent);
   const toneTxt = (tone) => (tone === 'stress' ? pal.bandStressText : accent);
   const stageName = (id) => { const t = targets.find((tt) => tt.id === id); return t ? t.label : id; };
   // authored positions for the three persistent transition annotations
   const ANNOT_POS = {
-    'capital-buildout': { x: 373, y: 354, anchor: 'middle', tick: [[373, 344], [373, 320]] },
-    'buildout-fundamentals': { x: 557, y: 194, anchor: 'middle', tick: [[557, 202], [557, 224]] },
-    'validation-price': { x: 462, y: 114, anchor: 'middle', tick: [[462, 104], [462, 90]] },
+    'capital-buildout': { x: 373, y: 356, anchor: 'middle', tick: [[373, 346], [373, 314]] },
+    'buildout-fundamentals': { x: 557, y: 176, anchor: 'middle', tick: [[557, 184], [557, 206]] },
+    'validation-price': { x: 440, y: 96, anchor: 'middle', tick: [[440, 86], [440, 70]] },
   };
 
   const geom = useMemo(() => {
     const bez = (p0, c1, c2, p1, n = 20) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push({ x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x, y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y }); } return pts; };
     const head = (tx, ty, ang, sc = 1) => { const ux = Math.cos(ang), uy = Math.sin(ang), px = -uy, py = ux, L = 12 * sc, W2 = 5 * sc, N = 8.4 * sc; return `M${tx} ${ty} L${tx - ux * L + px * W2} ${ty - uy * L + py * W2} L${tx - ux * N} ${ty - uy * N} L${tx - ux * L - px * W2} ${ty - uy * L - py * W2} Z`; };
-    // gap ribbons — straight, brush-textured, integrated arrowhead into the next card
-    const strands = [];
-    [['accent', RAIL_T], ['stress', RAIL_B]].forEach(([tone, y]) => {
+    // gap ribbons — the teal path CLIMBS card to card, the clay path FALLS,
+    // diverging from the spine; brush-textured with an arrowhead into each card
+    const strands = [], heads = [];
+    ['accent', 'stress'].forEach((tone) => {
       for (let i = 0; i < CARDS.length - 1; i++) {
         const a = CARDS[i], b = CARDS[i + 1];
-        const tip = b.L - 1, len = tip - (a.R - 2);
-        strands.push({ d: Brush.brushArrow(tip, y, len, 0, { seed: 62 + i * 9 + (tone === 'stress' ? 300 : 0), weight: 1.15, intensity: 0.55, head: Math.min(0.3, 12 / len) }), tone });
+        const y0 = tone === 'stress' ? a.RB : a.RT, y1 = tone === 'stress' ? b.RB : b.RT;
+        const x0 = a.R - 2, tip = b.L - 1;
+        const g = (tip - x0) * 0.5;
+        const pts = bez({ x: x0, y: y0 }, { x: x0 + g, y: y0 }, { x: tip - g, y: y1 }, { x: tip - 9, y: y1 });
+        strands.push({ d: Brush.brushLine(pts, { seed: 62 + i * 9 + (tone === 'stress' ? 300 : 0), weight: 1.3, intensity: 0.55, taper: 0.04 }), tone });
+        heads.push({ d: head(tip, y1, 0), tone });
       }
     });
-    // return arcs — both COMPLETE, SOLID, EQUAL: teal closes above, clay below,
-    // each with its own authored (asymmetric) curvature, landing on the price card
-    const v = byId.validation, p = byId.price;
+    // price-direction ticks inside the price card: rises ↗ (teal) · falls ↘ (clay)
+    const p = byId.price, v = byId.validation;
+    const priceTicks = [
+      { stroke: Brush.brushSegment(60 * fx, 251 * fy, 76 * fx, 241 * fy, { seed: 91, weight: 0.95, intensity: 0.6, waver: 0.12 }), head: head(78 * fx, 240 * fy, Math.atan2(-10 * fy, 16 * fx), 0.55), tone: 'accent' },
+      { stroke: Brush.brushSegment(60 * fx, 289 * fy, 76 * fx, 299 * fy, { seed: 92, weight: 0.95, intensity: 0.6, waver: 0.12 }), head: head(78 * fx, 300 * fy, Math.atan2(10 * fy, 16 * fx), 0.55), tone: 'stress' },
+    ];
+    // return arcs — the möbius wrap: both routes close from validation back into
+    // the SAME tight price card. COMPLETE, SOLID, EQUAL; asymmetric curvatures.
     const retTop = [
-      ...bez({ x: v.x, y: v.top - 4 }, { x: v.x + 12 * fx, y: 128 * fy }, { x: 716 * fx, y: 84 * fy }, { x: 478 * fx, y: 82 * fy }),
-      ...bez({ x: 478 * fx, y: 82 * fy }, { x: 246 * fx, y: 80 * fy }, { x: p.x + 8 * fx, y: 120 * fy }, { x: p.x, y: p.top - 8 }),
+      ...bez({ x: v.x, y: v.top - 4 }, { x: v.x + 12 * fx, y: 118 * fy }, { x: 700 * fx, y: 66 * fy }, { x: 452 * fx, y: 62 * fy }),
+      ...bez({ x: 452 * fx, y: 62 * fy }, { x: 240 * fx, y: 60 * fy }, { x: p.x + 10 * fx, y: 130 * fy }, { x: p.x, y: p.top - 8 }),
     ];
     const retBot = [
-      ...bez({ x: v.x, y: v.bot + 4 }, { x: v.x + 14 * fx, y: 424 * fy }, { x: 744 * fx, y: 468 * fy }, { x: 540 * fx, y: 470 * fy }),
-      ...bez({ x: 540 * fx, y: 470 * fy }, { x: 296 * fx, y: 472 * fy }, { x: p.x + 10 * fx, y: 436 * fy }, { x: p.x, y: p.bot + 8 }),
+      ...bez({ x: v.x, y: v.bot + 4 }, { x: v.x + 16 * fx, y: 448 * fy }, { x: 720 * fx, y: 488 * fy }, { x: 500 * fx, y: 488 * fy }),
+      ...bez({ x: 500 * fx, y: 488 * fy }, { x: 280 * fx, y: 488 * fy }, { x: p.x + 12 * fx, y: 420 * fy }, { x: p.x, y: p.bot + 8 }),
     ];
     const rets = [
       { d: Brush.brushLine(retTop, { seed: 210, weight: 1.5, intensity: 0.5, taper: 0.04 }), head: head(p.x, p.top - 1, Math.PI / 2), tone: 'accent' },
       { d: Brush.brushLine(retBot, { seed: 220, weight: 1.5, intensity: 0.5, taper: 0.04 }), head: head(p.x, p.bot + 1, -Math.PI / 2), tone: 'stress' },
     ];
-    return { strands, rets };
+    return { strands, heads, priceTicks, rets };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
@@ -1055,32 +1068,45 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
             </g>
           ))}
         </g>
-        {/* shared stage cards — one row, each card split into its two states */}
+        {/* the spine — the quiet centreline both states diverge from */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 640ms ease 160ms' }}>
+          <line x1={24 * fx} x2={942 * fx} y1={CY} y2={CY} stroke={pal.borderHi} strokeWidth="1" strokeDasharray="1 6" opacity="0.55" />
+        </g>
+        {/* shared stage cards — one row; each card stretches with the divergence,
+            its title anchored on the spine, its two states riding the rails */}
         {CARDS.map((c, i) => {
           const on = focusId === c.id;
           const isP = c.id === spec.primaryKey;
           return (
             <g key={c.id} style={{ opacity: entered ? (focusId && !on ? 0.42 : 1) : 0, transformOrigin: `${c.x}px ${CY}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 300ms ease' : `opacity 440ms ease ${120 + i * 110}ms, transform 440ms cubic-bezier(0.2,0.7,0.2,1) ${120 + i * 110}ms` }}>
-              <rect x={c.L} y={c.top} width={c.W} height={c.H} rx={10} fill={pal.surface} stroke={on ? accent : isP ? accent : pal.borderHi} strokeWidth={on ? 1.8 : isP ? 1.6 : 1} style={{ transition: trans('stroke') }} />
+              <rect x={c.L} y={c.top} width={c.W} height={c.bot - c.top} rx={10} fill={pal.surface} stroke={on ? accent : isP ? accent : pal.borderHi} strokeWidth={on ? 1.8 : isP ? 1.6 : 1} style={{ transition: trans('stroke') }} />
               {/* the ribbons visibly continue through the card, under each state */}
-              <line x1={c.L + 7} x2={c.R - 7} y1={RAIL_T} y2={RAIL_T} stroke={accent} strokeWidth="1.2" opacity="0.3" />
-              <line x1={c.L + 7} x2={c.R - 7} y1={RAIL_B} y2={RAIL_B} stroke={pal.bandStress} strokeWidth="1.2" opacity="0.32" />
-              {/* state divider — one shared card, two states */}
-              <line x1={c.L + 8} x2={c.R - 8} y1={DIV_Y} y2={DIV_Y} stroke={pal.borderHi} strokeWidth="1" opacity="0.7" />
-              <text x={c.x} y={c.top + (isP ? 26 : 22) * fy} textAnchor="middle" style={haloSans(pal, isP ? 15 : 12.5, isP ? accent : pal.text1, isP ? 700 : 600)}>{stageName(c.id)}</text>
-              <text x={c.x} y={RAIL_T + 4} textAnchor="middle" style={haloSans(pal, 11, toneTxt('accent'), 600)}>{lanes[0].nodes[i].label}</text>
-              <text x={c.x} y={RAIL_B + 4} textAnchor="middle" style={haloSans(pal, 11, toneTxt('stress'), 600)}>{lanes[1].nodes[i].label}</text>
-              {[[c.L, RAIL_T, 'accent'], [c.R, RAIL_T, 'accent'], [c.L, RAIL_B, 'stress'], [c.R, RAIL_B, 'stress']].map(([px2, py2, tn], j) => (
+              <line x1={c.L + 7} x2={c.R - 7} y1={c.RT} y2={c.RT} stroke={accent} strokeWidth="1.2" opacity="0.3" />
+              <line x1={c.L + 7} x2={c.R - 7} y1={c.RB} y2={c.RB} stroke={pal.bandStress} strokeWidth="1.2" opacity="0.32" />
+              {/* the spine crosses the card; a faint connector ties state to state */}
+              <line x1={c.L + 8} x2={c.R - 8} y1={CY} y2={CY} stroke={pal.borderHi} strokeWidth="1" opacity="0.6" />
+              <line x1={c.x} x2={c.x} y1={c.RT + 9} y2={c.RB - 9} stroke={pal.borderHi} strokeWidth="1" opacity="0.3" />
+              <text x={c.x} y={274 * fy} textAnchor="middle" style={haloSans(pal, isP ? 14.5 : 12.5, isP ? accent : pal.text1, isP ? 700 : 600)}>{stageName(c.id)}</text>
+              <text x={c.x} y={c.RT + 4} textAnchor="middle" style={haloSans(pal, 11, toneTxt('accent'), 600)}>{lanes[0].nodes[i].label}</text>
+              <text x={c.x} y={c.RB + 4} textAnchor="middle" style={haloSans(pal, 11, toneTxt('stress'), 600)}>{lanes[1].nodes[i].label}</text>
+              {isP && geom.priceTicks.map((tk, j) => (
+                <g key={`tk${j}`}><path d={tk.stroke} fill={toneCol(tk.tone)} opacity="0.9" /><path d={tk.head} fill={toneCol(tk.tone)} opacity="0.9" /></g>
+              ))}
+              {[[c.L, c.RT, 'accent'], [c.R, c.RT, 'accent'], [c.L, c.RB, 'stress'], [c.R, c.RB, 'stress']].map(([px2, py2, tn], j) => (
                 <path key={j} d={Brush.inkDot(px2, py2, 2.3, { seed: 60 + i * 11 + j * 3, intensity: 0.7 })} fill={toneCol(tn)} opacity="0.85" />
               ))}
             </g>
           );
         })}
+        {/* forward arrowheads — on top so they land crisply on each card edge */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 420ms ease 1280ms' }}>
+          {geom.heads.map((h, i) => <path key={`hd${i}`} d={h.d} fill={toneCol(h.tone)} opacity="0.95" />)}
+        </g>
         {/* direction captions */}
         {lanes.map((lane, li) => (
           <g key={lane.id} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${1700 + li * 120}ms` }}>
-            <text x={28 * fx} y={(li === 0 ? 58 : 494) * fy} style={halo(pal, 9, toneTxt(lane.tone), 600)}>{lane.label}</text>
-            {lane.note && <text x={28 * fx} y={(li === 0 ? 74 : 510) * fy} style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>{lane.note}</text>}
+            <text x={28 * fx} y={(li === 0 ? 40 : 508) * fy} style={halo(pal, 9, toneTxt(lane.tone), 600)}>{lane.label}</text>
+            {lane.note && <text x={28 * fx} y={(li === 0 ? 56 : 524) * fy} style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>{lane.note}</text>}
           </g>
         ))}
         {/* the three persistent transition annotations */}
