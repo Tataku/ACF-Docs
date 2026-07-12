@@ -945,43 +945,53 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   );
 }
 
-/* ── FeedbackLoopSvg — reflexivity as two lanes (reinforce / reverse) ─────────*
- * The concept is causal FEEDBACK, not a decorative orbit: the same mechanism
- * (price → capital → fundamentals → validation → back to price) runs two ways.
- * Top lane reinforces (accent, arrows thicken left→right, loops back stronger);
- * bottom lane reverses (stress, arrows thin/break, loops back weaker). A quiet
- * "REFLEXIVITY" sits between them. Reads at a glance; hover/pin adds the why.
- * Distinct from systemLoop (a single ring) — circularity isn't the only story. */
-/* FeedbackLoopSvg — "Price writes the story" (single consumer: p2-markets-feed-back).
- * Reflexivity as self-reference: Price claims only to READ the fundamentals, but by
- * moving capital it WRITES them. Two nodes (Price · Fundamentals); a quiet dashed
- * "reads" arc (the claim, muted) bows above and a bold accent "writes" arc (the
- * reality — the whole insight) bows below, closed by the caption. Deliberately
- * minimal + typographic; supersedes the earlier lane / spine attempts. */
+/* FeedbackLoopSvg — reflexivity as a FIGURE-EIGHT of two circular flows
+ * (single consumer: p2-markets-feed-back). The reinforcing (virtuous) loop and
+ * the reversing (vicious) loop are two ellipses tangent at PRICE — the one term
+ * both cycles pivot on, drawn once at the waist where they cross. The top loop
+ * flows price → capital in → fundamentals improve → validation confirms → back
+ * to price, a solid accent ring whose chevrons thicken with momentum. The bottom
+ * loop mirrors it in reverse — capital out, fundamentals weaken, validation
+ * breaks — a thinner dashed stress ring with a snap where the loop fails. The ∞
+ * crossing at price is the shape of feedback itself; the punchline sits below. */
 function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const fl = spec.feedbackLoop;
-  const nodes = fl.nodes;
-  const F = coarse ? 1.26 : 1;
-  const cx = width / 2, cy = height * 0.45;
-  const gap = Math.min(width - (coarse ? 30 : 110), 480);
-  const NW = Math.min(coarse ? 118 : 160, gap * 0.4), NH = coarse ? 42 : 46;
-  const lx = cx - gap / 2 + NW / 2, rx = cx + gap / 2 - NW / 2;    // node centres (price left, fundamentals right)
-  const eL = lx + NW / 2 + 5, eR = rx - NW / 2 - 5;               // inner edges = arc endpoints
-  const bow = coarse ? 46 : 56;
-  const pos = { [nodes[0].id]: { x: lx, y: cy }, [nodes[1].id]: { x: rx, y: cy } };
-  const arcMid = { reads: { x: (eL + eR) / 2, y: cy - bow }, writes: { x: (eL + eR) / 2, y: cy + bow } };
-  const anchorOf = (a) => pos[a.id] || arcMid[a.id] || null;
-  const resolve = (mx, my) => {
-    let best = null, bd = Math.max(touch ? 42 : 30, NW / 2);
-    Object.entries(pos).forEach(([id, p]) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = id; } });
-    if (best) return targets.find((t) => t.id === best) || null;
-    if (mx > eL - 6 && mx < eR + 6) {
-      if (my < cy - 8 && my > cy - bow - 24) return targets.find((t) => t.id === 'reads') || null;
-      if (my > cy + 8 && my < cy + bow + 24) return targets.find((t) => t.id === 'writes') || null;
-    }
-    return null;
+  const loops = fl.loops;
+  const shared = fl.shared;                       // { id:'price', label:'Price' } — the waist
+  const F = coarse ? 1.02 : 1;
+  const cx = width / 2;
+  const NW = coarse ? 82 : 116, NH = coarse ? 34 : 40;
+  const pad = { t: 20, b: 10 }, punchBand = 26, gap = 4;
+  const rx = Math.min(width * 0.30, coarse ? 118 : 196);
+  const ry = Math.min(coarse ? 82 : 96, Math.max(60, (height - pad.t - pad.b - NH - punchBand - 2 * gap) / 4));
+  const topVy = pad.t + NH / 2 + gap;             // fundamentals (top vertex) centre
+  const wy = topVy + 2 * ry;                      // waist / shared price y
+  const cyT = wy - ry, cyB = wy + ry;             // ellipse centres
+  const punchY = wy + 2 * ry + NH / 2 + 15;
+  const toneCol = (t) => (t === 'stress' ? pal.bandStress : accent);
+  const toneTxt = (t) => (t === 'stress' ? pal.bandStressText : accent);
+  const D = Math.PI / 180;
+
+  // three satellites per loop sit at left / far-vertex / right; price is the shared tangent.
+  // point(a) = (cx + rx cos a, cyc + ry sin a). top loop increases a from price(90°);
+  // bottom loop decreases a from price(270°) — so both reach capital(left) first, mirrored.
+  const nodePos = (ti, idx) => {
+    const cyc = ti === 0 ? cyT : cyB;
+    if (idx === 0) return { x: cx - rx, y: cyc };                 // capital — left
+    if (idx === 1) return { x: cx, y: ti === 0 ? cyc - ry : cyc + ry }; // fundamentals — far vertex
+    return { x: cx + rx, y: cyc };                                // validation — right
   };
+  const priceP = { x: cx, y: wy };
+  const nodes = [{ id: shared.id, label: shared.label, x: cx, y: wy, ti: -1, shared: true, tone: 'accent' }];
+  loops.forEach((lp, ti) => lp.nodes.forEach((nd, idx) => { const p = nodePos(ti, idx); nodes.push({ ...nd, ti, idx, x: p.x, y: p.y, tone: lp.tone }); }));
+
+  const anchorOf = (t) => {
+    if (t.id === shared.id) return priceP;
+    const idx = loops[0].nodes.findIndex((n) => n.id === t.id);
+    return idx < 0 ? null : nodePos(0, idx);                      // anchor tooltips on the top-loop instance
+  };
+  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 40 : 28, NW / 2); nodes.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
   const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
   const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
@@ -990,47 +1000,91 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   const focusId = isActiveHere ? active.id : null;
   const anchor = isActiveHere ? anchorOf(active) : null;
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
-
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
-    const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'reads' || active.id === 'writes' ? 'ACT' : 'NODE'} accentTitle={active.id === spec.primaryKey || active.id === 'writes'} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
-  }
+  if (!coarse && isActiveHere && anchor) { const meta = targets.find((t) => t.id === active.id); if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === shared.id ? 'HINGE' : 'STAGE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />; }
 
-  const readsD = `M${eR} ${cy - 4} C${eR - (eR - eL) * 0.24} ${cy - bow} ${eL + (eR - eL) * 0.24} ${cy - bow} ${eL} ${cy - 4}`;   // fundamentals -> price, bow up
-  const writesD = `M${eL} ${cy + 4} C${eL + (eR - eL) * 0.24} ${cy + bow} ${eR - (eR - eL) * 0.24} ${cy + bow} ${eR} ${cy + 4}`; // price -> fundamentals, bow down
-  const readsLit = focusId === 'reads', writesLit = focusId === 'writes';
+  const wrap = (s) => { const wd = s.split(' '); if (wd.length < 2 || s.length <= 10) return [s]; const mid = Math.ceil(s.length / 2); let a = ''; let bi = 0; for (let i = 0; i < wd.length; i++) { if ((a + ' ' + wd[i]).trim().length <= mid) { a = (a + ' ' + wd[i]).trim(); bi = i + 1; } else break; } if (!a) { a = wd[0]; bi = 1; } return [a, wd.slice(bi).join(' ')].filter(Boolean); };
+
+  // flow chevrons: brush arrows placed at the midpoint of each of the 4 arcs, pointing along travel
+  const chevrons = loops.map((lp, ti) => {
+    const cyc = ti === 0 ? cyT : cyB, incr = ti === 0;
+    const seq = ti === 0 ? [90, 180, 270, 360] : [270, 180, 90, 0];   // price → capital → fundamentals → validation
+    const closing = ti === 0 ? 450 : -90;                              // validation → price
+    const angs = [...seq, closing];
+    const out = [];
+    for (let k = 0; k < angs.length - 1; k++) {
+      const am = ((angs[k] + angs[k + 1]) / 2) * D;
+      const x = cx + rx * Math.cos(am), y = cyc + ry * Math.sin(am);
+      const tx = -rx * Math.sin(am) * (incr ? 1 : -1), tyv = ry * Math.cos(am) * (incr ? 1 : -1);
+      const dir = Math.atan2(tyv, tx);
+      const len = lp.tone === 'stress' ? (coarse ? 8 : 10) : (coarse ? 9 : 11) + k * 1.6;   // reinforce grows
+      const wt = lp.tone === 'stress' ? Math.max(0.4, 0.85 - k * 0.16) : 0.55 + k * 0.16;    // reinforce thickens
+      out.push({ x, y, dir, len, wt, k, isBreak: lp.tone === 'stress' && k === angs.length - 2 });
+    }
+    return { ti, tone: lp.tone, marks: out };
+  });
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Price reads and writes the fundamentals'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {fl.eyebrow && <text x={cx} y={Math.max(15, cy - bow - 32)} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{fl.eyebrow.toUpperCase()}</text>}
-        {/* reads arc — the claim (quiet, dashed): fundamentals -> price */}
-        <g style={{ opacity: entered ? (focusId && !readsLit ? 0.28 : 1) : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 620ms ease 200ms' }}>
-          <path d={readsD} fill="none" stroke={pal.text3} strokeWidth={1.2} strokeDasharray="3 4" opacity={0.68} />
-          <path d={`M${eL + 7} ${cy - 4 - 3.6} L${eL} ${cy - 4} L${eL + 7} ${cy - 4 + 3.6} Z`} fill={pal.text3} opacity={0.78} />
-          <text x={arcMid.reads.x} y={arcMid.reads.y - 5} textAnchor="middle" style={halo(pal, 9.5 * F, pal.text3)}>{fl.readLabel || 'reads'}</text>
-          <text x={arcMid.reads.x} y={arcMid.reads.y + 8} textAnchor="middle" style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>the claim</text>
-        </g>
-        {/* writes arc — the reality (bold, accent): price -> fundamentals. the insight. */}
-        <g style={{ opacity: entered ? (focusId && !writesLit ? 0.28 : 1) : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 780ms ease 380ms' }}>
-          <path d={writesD} fill="none" stroke={accent} strokeWidth={2.1} opacity={0.95} />
-          <path d={`M${eR - 7} ${cy + 4 - 3.9} L${eR} ${cy + 4} L${eR - 7} ${cy + 4 + 3.9} Z`} fill={accent} opacity={0.95} />
-          <text x={arcMid.writes.x} y={arcMid.writes.y + 4} textAnchor="middle" style={haloSans(pal, 11 * F, accent, 600)}>{fl.writeLabel || 'writes'}</text>
-          <text x={arcMid.writes.x} y={arcMid.writes.y + 17} textAnchor="middle" style={{ ...halo(pal, 7.5, pal.text4), fontStyle: 'italic' }}>the reality</text>
-        </g>
-        {/* nodes */}
-        {nodes.map((n, i) => {
-          const p = pos[n.id]; const on = focusId === n.id; const isP = n.id === spec.primaryKey;
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Reflexivity as two circular flows'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+        {/* the two rings (flow tracks) */}
+        {loops.map((lp, ti) => {
+          const cyc = ti === 0 ? cyT : cyB, col = toneCol(lp.tone), rev = lp.tone === 'stress';
+          const lit = focusId ? (focusId === shared.id || lp.nodes.some((n) => n.id === focusId)) : true;
           return (
-            <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.42 : 1) : 0, transformOrigin: `${p.x}px ${p.y}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 300ms ease' : `opacity 420ms ease ${140 + i * 120}ms, transform 420ms cubic-bezier(0.2,0.7,0.2,1) ${140 + i * 120}ms` }}>
-              <rect x={p.x - NW / 2} y={p.y - NH / 2} width={NW} height={NH} rx={8} fill={pal.surface} stroke={on || isP ? accent : pal.borderHi} strokeWidth={on ? 1.8 : isP ? 1.4 : 1} style={{ transition: trans('stroke') }} />
-              <text x={p.x} y={p.y + 4.5} textAnchor="middle" style={haloSans(pal, 13 * F, isP ? accent : pal.text1, isP ? 600 : 500)}>{n.label}</text>
+            <ellipse key={`ring${ti}`} cx={cx} cy={cyc} rx={rx} ry={ry} fill="none" stroke={col} strokeWidth={rev ? 1.2 : 1.6} strokeDasharray={rev ? '5 5' : undefined} opacity={entered ? (lit ? (rev ? 0.5 : 0.62) : 0.22) : 0} style={{ transition: reduce ? 'opacity 360ms ease' : `opacity 720ms ease ${180 + ti * 140}ms` }} />
+          );
+        })}
+        {/* directional flow chevrons (brush) */}
+        {chevrons.map((cv) => (
+          <g key={`cv${cv.ti}`} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : `opacity 760ms ease ${360 + cv.ti * 140}ms` }}>
+            {cv.marks.map((m, i) => {
+              const col = toneCol(cv.tone), lit = !focusId || focusId === shared.id;
+              if (m.isBreak) return (
+                <g key={i} opacity={0.9}>
+                  <path d={`M${m.x - 8} ${m.y - 5} L${m.x - 2} ${m.y + 5} L${m.x + 3} ${m.y - 5} L${m.x + 8} ${m.y + 4}`} fill="none" stroke={col} strokeWidth={1.3} strokeLinejoin="round" strokeLinecap="round" />
+                </g>
+              );
+              return <path key={i} d={Brush.brushArrow(m.x, m.y, m.len, m.dir, { seed: 40 + cv.ti * 17 + i * 5, weight: m.wt, intensity: 0.55 })} fill={col} opacity={focusId && !lit ? 0.3 : (cv.tone === 'stress' ? 0.72 : 0.9)} style={{ transition: trans('opacity') }} />;
+            })}
+          </g>
+        ))}
+        {/* loop identity labels — centred inside each ring */}
+        {loops.map((lp, ti) => {
+          const cyc = ti === 0 ? cyT : cyB;
+          return (
+            <g key={`lab${ti}`} style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : `opacity 560ms ease ${520 + ti * 120}ms` }}>
+              <text x={cx} y={cyc - 3} textAnchor="middle" style={halo(pal, 10 * F, toneTxt(lp.tone), 600)}>{lp.label}</text>
+              {lp.sub && <text x={cx} y={cyc + 11} textAnchor="middle" style={halo(pal, 7.6 * F, pal.text4)}>{lp.sub}</text>}
             </g>
           );
         })}
-        {/* caption — the poetic line */}
-        {fl.caption && <text x={cx} y={Math.min(height - 8, cy + bow + (coarse ? 42 : 48))} textAnchor="middle" style={{ ...halo(pal, 10 * F, pal.text3), fontStyle: 'italic' }}>{fl.caption}</text>}
+        {/* buildout edge label — the mechanism, on the capital → fundamentals arc */}
+        {loops.map((lp, ti) => {
+          if (!lp.edgeLabel) return null;
+          const cyc = ti === 0 ? cyT : cyB, am = 225 * D;   // upper-left of each ring
+          const x = cx + (rx + (coarse ? 8 : 13)) * Math.cos(am), y = cyc + (ry + 3) * Math.sin(am);
+          return <text key={`el${ti}`} x={x} y={y} textAnchor="end" style={{ ...halo(pal, 7.4 * F, pal.text3), opacity: entered ? (focusId ? 0.35 : 0.9) : 0, transition: 'opacity 500ms ease 700ms', fontStyle: 'italic' }}>{lp.edgeLabel}</text>;
+        })}
+        {/* punchline — the core insight, below the crossing */}
+        {fl.punchline && (
+          <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 760ms ease 980ms' }}>
+            <text x={cx} y={punchY} textAnchor="middle" style={{ ...haloSans(pal, 11 * F, pal.text1, 600) }}>{fl.punchline}</text>
+          </g>
+        )}
+        {/* nodes (price drawn once at the waist, as the shared hinge) */}
+        {nodes.map((n) => {
+          const on = focusId === n.id, col = toneCol(n.tone), lines = wrap(n.label);
+          const w = n.shared ? NW + 6 : NW, h = n.shared ? NH + 4 : NH;
+          const delay = n.shared ? 620 : 260 + n.idx * 80 + n.ti * 40;
+          return (
+            <g key={`${n.ti}-${n.idx ?? 'p'}`} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 420ms ease ${delay}ms, transform 420ms cubic-bezier(0.2,0.7,0.2,1) ${delay}ms` }}>
+              {n.shared && <rect x={n.x - w / 2 - 2} y={n.y - h / 2 - 2} width={w + 4} height={h + 4} rx={9} fill="none" stroke={pal.bandStress} strokeWidth={1} opacity={0.5} />}
+              <rect x={n.x - w / 2} y={n.y - h / 2} width={w} height={h} rx={8} fill={pal.surface} stroke={on ? col : n.shared ? accent : pal.borderHi} strokeWidth={on ? 1.8 : n.shared ? 1.6 : 1} style={{ transition: trans('stroke') }} />
+              {lines.map((ln, li) => <text key={li} x={n.x} y={n.y + (lines.length === 1 ? 4 : li === 0 ? -3 : 11)} textAnchor="middle" style={haloSans(pal, (coarse ? 8.4 : 9.6) * (lines.length > 1 ? 0.98 : 1), n.shared ? accent : pal.text1, n.shared ? 600 : 500)}>{ln}</text>)}
+            </g>
+          );
+        })}
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
       </svg>
       {tooltip}
@@ -2577,7 +2631,7 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'flow' && <FlowSvg spec={spec} height={hh(400)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'systemLoop' && <SystemLoopSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'governanceLoop' && <GovernanceLoopSvg spec={spec} height={hh(300)} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'feedbackLoop' && <FeedbackLoopSvg spec={spec} height={hh(330)} targets={spec.hoverTargets} {...cp} />}
+        {spec.layout === 'feedbackLoop' && <FeedbackLoopSvg spec={spec} height={hh(470)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'bridge' && <BridgeSvg spec={spec} height={hh(420)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'gate' && <GateSvg spec={spec} height={hh(380)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'scorecard' && <ScorecardSvg spec={spec} height={hh(150 + (spec.scorecard?.requirements.length || 8) * 32)} targets={spec.hoverTargets} {...cp} />}

@@ -175,13 +175,21 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(allSeg.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a laneBar segment`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else if (s.layout === 'feedbackLoop') {
-    // reflexivity self-reference: two nodes (price · fundamentals) + reads/writes arcs
+    // reflexivity as a figure-eight: two circular flows tangent at a shared stage, sharing satellite ids
     const fl = s.feedbackLoop;
-    ok(fl && Array.isArray(fl.nodes) && fl.nodes.length >= 2, `${w} feedbackLoop needs >= 2 nodes`);
-    const nodeIds = (fl.nodes || []).map((n) => n.id);
-    ok(new Set(nodeIds).size === nodeIds.length, `${w} feedbackLoop has duplicate node ids`);
-    ok(nodeIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a feedbackLoop node`);
+    ok(fl && fl.shared && fl.shared.id, `${w} feedbackLoop needs a shared hinge stage`);
+    ok(fl && Array.isArray(fl.loops) && fl.loops.length >= 2, `${w} feedbackLoop needs >= 2 loops`);
+    const loops = fl.loops || [];
+    loops.forEach((lp, li) => ok(Array.isArray(lp.nodes) && lp.nodes.length === 3, `${w} feedbackLoop loop ${li} needs exactly 3 satellite nodes (left · vertex · right)`));
+    const satIds = (loops[0]?.nodes || []).map((n) => n.id);
+    // every loop must share the same ordered satellite ids (a hover lights the stage in both loops)
+    loops.forEach((lp, li) => ok(JSON.stringify((lp.nodes || []).map((n) => n.id)) === JSON.stringify(satIds), `${w} feedbackLoop loop ${li} satellite ids must match loop 0`));
+    const stageIds = [fl.shared?.id, ...satIds];
+    ok(new Set(stageIds).size === stageIds.length, `${w} feedbackLoop has duplicate stage ids`);
+    ok(s.primaryKey === fl.shared?.id, `${w} primaryKey ${s.primaryKey} must be the shared feedbackLoop hinge`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
+    // every stage id (shared + satellites) needs a hover target
+    stageIds.forEach((id) => ok(s.hoverTargets.some((t) => t.id === id), `${w} feedbackLoop stage ${id} has no hover target`));
   } else {
     const seriesList = s.layout === 'dual' ? s.panels.flatMap((p) => p.series) : s.series;
     ok(seriesList && seriesList.length >= 1, `${w} no series`);

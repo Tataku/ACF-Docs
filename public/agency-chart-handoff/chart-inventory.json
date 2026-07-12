@@ -1211,8 +1211,8 @@
       "dataMode": "conceptual",
       "claimLabel": "REFLEXIVITY · FEEDBACK",
       "primaryClaim": "Price does not just reflect fundamentals — it can change them",
-      "visualProof": "Two nodes — price and fundamentals — joined by a quiet dashed \"reads\" arc (the claim that price reflects value) and a bold accent \"writes\" arc (the reality that price moves capital and rewrites value)",
-      "readerAction": "Read the writes arc — the one that should not exist",
+      "visualProof": "Two circular flows drawn as a figure-eight that crosses at PRICE: a reinforcing loop on top — price draws capital in, funds the buildout, improves fundamentals, and the validation feeds back into price — and a reversing loop below that runs the same circle in reverse and breaks.",
+      "readerAction": "Trace either loop around and back through price — the shared hinge where they cross",
       "readerTakeaway": "Price is an input, not just an output.",
       "experienceRole": "diagram",
       "visualRelationship": "flow",
@@ -1268,7 +1268,7 @@
           "url": "/part-2-lineage-macro-thesis"
         }
       ],
-      "agencyNotes": "feedbackLoop layout, redesigned to the minimal \"price writes the story\" self-reference: two nodes (price · fundamentals) with a muted dashed reads arc (the conventional claim) and a bold accent writes arc (the reflexive reality — the whole insight), under the caption \"price can write the fundamentals it claims to read.\" The mechanism (capital) lives in the hover + explainer, keeping the face to one idea. Supersedes the two-lane, single-spine, and systemLoop-ring attempts."
+      "agencyNotes": "feedbackLoop layout redesigned as a FIGURE-EIGHT of two circular flows (owner brief 2026-07), built from the Soros reflexivity text. Two ellipse loops are tangent at a single shared PRICE node (the waist / hinge, drawn once): top loop reinforcing (accent, solid ring, brush chevrons thicken with momentum), bottom loop reversing (stress, dashed ring, chevrons thin + a jagged snap on the closing arc). Each loop runs price → capital → fundamentals → validation → back to price; \"buildout\" is the labelled mechanism on the capital→fundamentals arc (funded vs starved). Four shared stage ids (price · capital · fundamentals · validation); hovering a stage lights it in both loops. The punchline — \"Price can write the fundamentals it claims to read\" — sits below the crossing. Guardrails honored in copy: fundamentals bend with a lag (not instantly), validation does not always follow, the mechanism is a tendency not a formula, and the reverse loop is drawn as equally real. Arrows use the design-system brush (Brush.brushArrow). Supersedes the two-track causal-story, spiral, two-lane, single-spine, and two-node attempts."
     },
     {
       "chartId": "p2-time-changes-prudence",
