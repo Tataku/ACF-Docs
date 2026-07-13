@@ -308,7 +308,10 @@ function PlotSvg({
       else if (a.kind === 'under') { topPx = top.pts.map((p) => ({ x: x(p.x), y: y(p.y) })); botPx = top.pts.map((p) => ({ x: x(p.x), y: y(dom.yMin) })); }
       else if (a.botKey && seriesByKey[a.botKey]) { topPx = top.pts.map((p) => ({ x: x(p.x), y: y(p.y) })); botPx = seriesByKey[a.botKey].pts.map((p) => ({ x: x(p.x), y: y(p.y) })); }
       else return;
-      if (a.xFrom != null) { topPx = topPx.filter((_, i) => top.pts[i].x >= a.xFrom); botPx = botPx.filter((_, i) => top.pts[i].x >= a.xFrom); }
+      if (a.xFrom != null || a.xTo != null) {
+        const keep = top.pts.map((p) => (a.xFrom == null || p.x >= a.xFrom) && (a.xTo == null || p.x <= a.xTo));
+        topPx = topPx.filter((_, i) => keep[i]); botPx = botPx.filter((_, i) => keep[i]);
+      }
       out.areas.push({ a, d: areaPath(topPx, botPx), labelX: a.labelX != null ? x(a.labelX) : a.xFrom != null ? x((a.xFrom + dom.xMax) / 2) : x((dom.xMin + dom.xMax) * 0.6) });
     });
     (panel.bands || []).forEach((b) => {
@@ -439,7 +442,7 @@ function PlotSvg({
           ))}
           </g>
           {geom.areas.map((ar, i) => {
-            const toneC = ar.a.tone === 'muted' ? pal.tierSecondary : ar.a.tone === 'accent' ? accent : null;
+            const toneC = ar.a.tone === 'muted' ? pal.tierSecondary : ar.a.tone === 'accent' ? accent : ar.a.tone === 'stress' ? pal.bandStress : null;
             const c = toneC || (ar.a.kind === 'peak' ? pal.bandStress : ar.a.kind === 'under' || ar.a.kind === 'edge' ? accent : pal.tierSecondary);
             const op = ar.a.opacity != null ? ar.a.opacity : ar.a.kind === 'under' ? 0.10 : ar.a.kind === 'peak' ? 0.10 : ar.a.kind === 'edge' ? 0.13 : 0.09;
             return <path key={`ar${i}`} d={ar.d} fill={c} opacity={op} />;
@@ -879,20 +882,28 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   const sBottom = rowY + NH / 2 + 3;
 
   const geom = useMemo(() => {
+    const bez = (p0, c1, c2, p1, n = 20) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push({ x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x, y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y }); } return pts; };
+    const head = (tx, ty, ang, sc = 1) => { const ux = Math.cos(ang), uy = Math.sin(ang), px = -uy, py = ux, L = 12 * sc, W2 = 5 * sc, Nn = 8.4 * sc; return `M${tx} ${ty} L${tx - ux * L + px * W2} ${ty - uy * L + py * W2} L${tx - ux * Nn} ${ty - uy * Nn} L${tx - ux * L - px * W2} ${ty - uy * L - py * W2} Z`; };
     const arrows = [];                           // rightward brush arrows in the gaps
     for (let i = 0; i < N - 1; i++) {
       const a = pos[i], b = pos[i + 1];
-      const x0 = a.x + NW / 2, tip = b.x - NW / 2 - 4, len = Math.max(10, tip - x0);
-      arrows.push(Brush.brushArrow(tip, rowY, len, 0, { seed: 50 + i * 13, weight: 0.66, intensity: 0.5 }));
+      const x0 = a.x + NW / 2, tip = b.x - NW / 2 - 3, len = Math.max(10, tip - x0);
+      arrows.push(Brush.brushArrow(tip, rowY, len, 0, { seed: 50 + i * 13, weight: 1.05, intensity: 0.5, head: Math.min(0.3, 12 / len) }));
     }
-    // subtle return arc underneath: from the last node back to the first; control
-    // points are pushed below the viewBox so the belly is low and round, framing
-    // the "evidence updates the thesis" caption inside the loop.
-    const sx = pos[N - 1].x, ex = pos[0].x, arcY = height + 36;
-    const arc = `M${sx} ${sBottom} C${sx} ${arcY} ${ex} ${arcY} ${ex} ${sBottom}`;
-    const ret = Brush.brushArrow(ex, sBottom + 1, 11, -Math.PI / 2, { seed: 131, weight: 0.6, intensity: 0.5 }); // ↑ into thesis
-    const bellyY = 0.25 * sBottom + 0.75 * arcY; // cubic midpoint y (lowest visible point)
-    return { arrows, arc, ret, labX: (sx + ex) / 2, labY: Math.min(rowY + NH / 2 + 36, (sBottom + bellyY) / 2) };
+    // the return is the CLAIM — a complete, solid arc carrying evidence from
+    // the governed response back into the thesis: asymmetric belly held inside
+    // the plot, brush-textured, landing an arrowhead 3px clear of the card
+    const sx = pos[N - 1].x, ex = pos[0].x;
+    const cardBot = rowY + NH / 2;
+    const belly = height - 40;
+    const midX = (sx + ex) / 2 + innerW * 0.06;
+    const retPts = [
+      ...bez({ x: sx, y: cardBot + 6 }, { x: sx + 10, y: belly - 34 }, { x: sx - innerW * 0.16, y: belly }, { x: midX, y: belly }),
+      ...bez({ x: midX, y: belly }, { x: ex + innerW * 0.15, y: belly }, { x: ex - 8, y: belly - 44 }, { x: ex, y: cardBot + 12 }),
+    ];
+    const retD = Brush.brushLine(retPts, { seed: 131, weight: 1.35, intensity: 0.5, taper: 0.05 });
+    const retHead = head(ex, cardBot + 3, -Math.PI / 2, 1.05);
+    return { arrows, retD, retHead, cardBot, labX: midX, labY: belly - 16, tickY0: belly - 10, tickY1: belly - 3 };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
@@ -916,25 +927,38 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   return (
     <div style={{ position: 'relative' }}>
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Governed path: a thesis creates exposure and risk; a tripwire checkpoint governs the response, which updates the thesis." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {/* connectors + return arc (quiet; the nodes carry the meaning) */}
-        <g style={{ opacity: entered ? 0.7 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 220ms' }}>
-          {geom.arrows.map((d, i) => <path key={`ar${i}`} d={d} fill={accent} opacity="0.7" />)}
-          <path d={geom.arc} fill="none" stroke={pal.tierReference} strokeWidth="1" strokeDasharray="3 5" opacity="0.7" />
-          <path d={geom.ret} fill={pal.tierReference} opacity="0.85" />
-          <text x={geom.labX} y={geom.labY} textAnchor="middle" style={{ ...halo(pal, 8.5, pal.text4), fontStyle: 'italic' }}>{(gl.returnLabel || 'evidence updates the thesis').toUpperCase()}</text>
+        {/* forward connectors — wipe in left→right after the cards */}
+        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 420ms, -webkit-clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 420ms, opacity 360ms ease 420ms' }}>
+          {geom.arrows.map((d, i) => <path key={`ar${i}`} d={d} fill={accent} opacity="0.9" />)}
+        </g>
+        {/* the return — reveals right→left, travelling back toward the thesis */}
+        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 0 0 100%)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 0 0 100%)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'clip-path 950ms cubic-bezier(0.22,0.61,0.36,1) 1250ms, -webkit-clip-path 950ms cubic-bezier(0.22,0.61,0.36,1) 1250ms, opacity 400ms ease 1250ms' }}>
+          <path d={geom.retD} fill={accent} opacity="0.8" />
+          <path d={geom.retHead} fill={accent} opacity="0.9" />
+        </g>
+        {/* return label — anchored to the arc with a leader tick, fades in last */}
+        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 520ms ease 2050ms' }}>
+          <text x={geom.labX} y={geom.labY} textAnchor="middle" style={{ ...halo(pal, 9.5, pal.text3), fontStyle: 'italic' }}>{gl.returnLabel || 'evidence updates the thesis'}</text>
+          <line x1={geom.labX} y1={geom.tickY0} x2={geom.labX} y2={geom.tickY1} stroke={pal.text4} strokeWidth="1" opacity="0.85" />
         </g>
         {pos.map((n) => {
           const on = focusId === n.id;
           const isP = n.id === spec.primaryKey;
+          const isLast = n.i === N - 1;
           const stroke = on || isP ? accent : n.gov ? pal.bandRegime : pal.borderHi;
           const top = n.y - n.h / 2, bot = n.y + n.h / 2;
           return (
             <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${110 + n.i * 90}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${110 + n.i * 90}ms` }}>
-              {/* checkpoint gate posts — a quiet guardrail, not an alarm */}
-              {n.gov && [-1, 1].map((s) => <line key={s} x1={n.x + s * (NW / 2)} y1={top - 7} x2={n.x + s * (NW / 2)} y2={bot + 7} stroke={pal.bandRegime} strokeWidth="2" strokeLinecap="round" opacity={on ? 0.9 : 0.7} />)}
+              {/* checkpoint gate posts — a quiet brush guardrail, not an alarm */}
+              {n.gov && [-1, 1].map((s) => <path key={s} d={Brush.brushSegment(n.x + s * (NW / 2), top - 8, n.x + s * (NW / 2), bot + 8, { seed: 77 + (s + 1) * 5, weight: 1.05, intensity: 0.55, waver: 0.16 })} fill={pal.bandRegime} opacity={on ? 0.95 : 0.75} />)}
               <rect x={n.x - NW / 2} y={top} width={NW} height={n.h} rx={8} fill={pal.surface} stroke={stroke} strokeWidth={on ? 1.7 : n.gov ? 1.4 : 1} style={{ transition: trans('stroke') }} />
               <text x={n.x} y={n.y - (n.sub ? 4 : -4)} textAnchor="middle" style={haloSans(pal, 12.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
               {n.sub && <text x={n.x} y={n.y + 13} textAnchor="middle" style={halo(pal, 7.5, n.gov ? pal.bandRegimeText : pal.text4)}>{n.sub}</text>}
+              {/* connection anchors: gap ports on every card edge; the return's
+                  departure port on Adjust and landing port on Thesis */}
+              {n.i > 0 && <path d={Brush.inkDot(n.x - NW / 2, rowY, 2.2, { seed: 90 + n.i * 7, intensity: 0.7 })} fill={accent} opacity="0.85" />}
+              {n.i < N - 1 && <path d={Brush.inkDot(n.x + NW / 2, rowY, 2.2, { seed: 91 + n.i * 7, intensity: 0.7 })} fill={accent} opacity="0.85" />}
+              {(isP || isLast) && <path d={Brush.inkDot(n.x, bot, 2.5, { seed: isP ? 171 : 173, intensity: 0.7 })} fill={accent} opacity="0.9" />}
             </g>
           );
         })}

@@ -762,6 +762,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'sig-shape', idx: 'S2', group: 'signature', intendedPlacement: 'docs-landing',
+    claimStack: {
+      primaryClaim: 'ACF reshapes the distribution of outcomes, not just the average',
+      visualProof: 'A symmetric bell against the ACF-shaped curve, with the transfer made visible: the loss mass removed on the left washed in the stress tone, the gain mass added on the right washed in the accent',
+      interactionRole: 'Hover the curves or the tail markers to read what was traded for what',
+      readerAction: 'Compare the two tails against the same base case',
+      caution: 'Conceptual outcome distributions; illustrative, not measured returns',
+    },
     status: 'needs-design-review', wiredPublic: false,
     title: 'Bend the Tail', setupLine:'ACF reshapes the distribution of outcomes, it does not just chase higher returns',
     claimLabel: 'EXPOSURE SHAPING · SIGNATURE',
@@ -787,7 +794,14 @@ export const FRAMEWORK_CHART_SPECS = [
       { key: 'symmetric', tier: 'reference', label: 'Symmetric', pts: shape.symmetric, labelDy: 16 },
       { key: 'shaped', tier: 'primary', label: 'ACF shaped', pts: shape.shaped, labelDy: -10 },
     ],
-    areas: [{ id: 'underShaped', topKey: 'shaped', kind: 'under', label: '' }],
+    areas: [
+      { id: 'underShaped', topKey: 'shaped', kind: 'under', label: '' },
+      // the mechanism made visible: probability mass MOVES — the loss mass the
+      // structure removed (stress wash, left) becomes the gain mass added
+      // (accent wash, right); same centre of gravity, reshaped tails
+      { id: 'lossRemoved', topKey: 'symmetric', botKey: 'shaped', xTo: -0.2, tone: 'stress', opacity: 0.16, label: 'loss mass removed', labelX: -1.9 },
+      { id: 'gainAdded', topKey: 'shaped', botKey: 'symmetric', xFrom: 0.95, tone: 'accent', opacity: 0.15, label: 'gain mass added', labelX: 2.7 },
+    ],
     markers: [
       { id: 'truncated', type: 'dot', x: -1.3, y: R(valueAt(shape.shaped, -1.3)), r: 3.2, label: 'left tail truncated', labelAnchor: 'start', labelDy: -14 },
       { id: 'extended', type: 'dot', x: 2.4, y: R(valueAt(shape.shaped, 2.4)), r: 3.2, label: 'right tail extended', labelAnchor: 'end', labelDy: -14 },
@@ -909,6 +923,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'dl-tripwire-loop', idx: 'L3', group: 'docs-landing', intendedPlacement: 'docs-landing',
+    claimStack: {
+      primaryClaim: 'ACF is a closed-loop operating system, not a fixed set of weights',
+      visualProof: 'A calm left-to-right governed path — thesis, exposure, risk, the tripwire checkpoint, adjust — closed by one complete solid return arc carrying evidence back into the thesis',
+      interactionRole: 'Hover or tap a step to read what it contributes and what the tripwire governs',
+      readerAction: 'Follow the path to the tripwire, then trace the return back to the thesis',
+      caution: 'Conceptual governance loop; the full tripwire taxonomy lives in Part 6',
+    },
     status: 'needs-design-review', wiredPublic: false,
     title: 'Govern the Thesis', setupLine:'A thesis creates exposure; tripwires keep the response disciplined.',
     claimLabel: 'SYSTEM · GOVERNED LOOP',
