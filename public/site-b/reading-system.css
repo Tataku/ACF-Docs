@@ -2409,12 +2409,16 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
 }
 .floatnav-home:hover, .floatnav-home:focus-visible { background: var(--floatnav-hover); }
 .fn-icon { width: 1.05rem; height: 1.05rem; flex: 0 0 auto; }
-/* Mobile: the floatnav holds Home + Prev + Next — drop the "Framework" word
-   (keep the house icon) and tighten segment padding so all three fit. */
+/* Mobile: the dock holds Top + Prev + Next ONLY. The Framework/home segment is
+   a desktop affordance — a phone reader mid-Part never exits from the thumb
+   dock — so it is removed entirely (with its divider) and its room goes to the
+   Part links. The pill must contain its segments: the inner is width-bounded
+   and the links may shrink, so Next can never bleed past the rounded edge. */
 @media (max-width: 600px) {
-  .fn-home-label { display: none; }
-  .floatnav-home, .floatnav-prev, .floatnav-next { padding-inline: var(--space-3); }
-  .floatnav-div { margin-inline: 0; }
+  .floatnav-home, .floatnav-home + .floatnav-div { display: none; }
+  .floatnav-inner { max-width: 100%; }
+  .floatnav-prev, .floatnav-next { padding-inline: var(--space-3); flex: 0 1 auto; min-width: 0; overflow: hidden; }
+  .floatnav-div { margin-inline: 0; flex: 0 0 auto; }
 }
 .floatnav-div { width: 1px; height: 1.4rem; background: var(--floatnav-line); margin-inline: var(--space-1); }
 .floatnav-next {
