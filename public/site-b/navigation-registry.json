@@ -37,6 +37,18 @@
       "route": "/part-4-tax-architecture-roc-strategy",
       "file": "part-4-tax-architecture.html",
       "title": "Part 4 · Tax Architecture & ROC Strategy"
+    },
+    {
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "file": "part-5-portfolio-construction.html",
+      "title": "Part 5 · Portfolio Construction & Position Management"
+    },
+    {
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "file": "part-6-convexity-scoring.html",
+      "title": "Part 6 · Convexity & Framework Integrity Scoring"
     }
   ],
   "aliases": {
@@ -75,7 +87,19 @@
     "part-4-tax-architecture.html": "/part-4-tax-architecture-roc-strategy",
     "/part-4-tax-architecture.html": "/part-4-tax-architecture-roc-strategy",
     "https://docs.acfdashboard.com/part-4-tax-architecture-roc-strategy": "/part-4-tax-architecture-roc-strategy",
-    "https://docs.acfdashboard.com/site-b/part-4-tax-architecture.html": "/part-4-tax-architecture-roc-strategy"
+    "https://docs.acfdashboard.com/site-b/part-4-tax-architecture.html": "/part-4-tax-architecture-roc-strategy",
+    "/part-5-portfolio-construction-position-management": "/part-5-portfolio-construction-position-management",
+    "/site-b/part-5-portfolio-construction.html": "/part-5-portfolio-construction-position-management",
+    "part-5-portfolio-construction.html": "/part-5-portfolio-construction-position-management",
+    "/part-5-portfolio-construction.html": "/part-5-portfolio-construction-position-management",
+    "https://docs.acfdashboard.com/part-5-portfolio-construction-position-management": "/part-5-portfolio-construction-position-management",
+    "https://docs.acfdashboard.com/site-b/part-5-portfolio-construction.html": "/part-5-portfolio-construction-position-management",
+    "/part-6-convexity-framework-integrity-scoring": "/part-6-convexity-framework-integrity-scoring",
+    "/site-b/part-6-convexity-scoring.html": "/part-6-convexity-framework-integrity-scoring",
+    "part-6-convexity-scoring.html": "/part-6-convexity-framework-integrity-scoring",
+    "/part-6-convexity-scoring.html": "/part-6-convexity-framework-integrity-scoring",
+    "https://docs.acfdashboard.com/part-6-convexity-framework-integrity-scoring": "/part-6-convexity-framework-integrity-scoring",
+    "https://docs.acfdashboard.com/site-b/part-6-convexity-scoring.html": "/part-6-convexity-framework-integrity-scoring"
   },
   "sections": {
     "/": [
@@ -220,6 +244,61 @@
       "theme-toggle",
       "wrappers",
       "wrappers-title"
+    ],
+    "/part-5-portfolio-construction-position-management": [
+      "acf-reference-integrity-fallback",
+      "ballast",
+      "ballast-title",
+      "exhibit-p5-ballast-rotation",
+      "exhibit-p5-change-hierarchy",
+      "exhibit-p5-earned-size",
+      "exhibit-p5-earnings-window",
+      "exhibit-p5-force-channels",
+      "exhibit-p5-liquidity-throttle",
+      "exhibit-p5-momentum-gate",
+      "exhibit-p5-operating-system",
+      "exhibit-p5-posture-sizing",
+      "exhibit-p5-wrapper-compounding",
+      "forces",
+      "forces-title",
+      "governance",
+      "governance-title",
+      "hype",
+      "hype-title",
+      "management",
+      "management-title",
+      "postures",
+      "postures-title",
+      "rebalancing",
+      "rebalancing-title",
+      "sidebar",
+      "theme-toggle",
+      "torque",
+      "torque-title"
+    ],
+    "/part-6-convexity-framework-integrity-scoring": [
+      "acf-reference-integrity-fallback",
+      "cis",
+      "cis-title",
+      "completion",
+      "completion-title",
+      "exhibit-p6-cis-composition",
+      "exhibit-p6-cis-fis-matrix",
+      "exhibit-p6-decay-drift",
+      "exhibit-p6-fis-waterfall",
+      "exhibit-p6-weekly-loop",
+      "failure",
+      "failure-title",
+      "fis",
+      "fis-title",
+      "interaction",
+      "interaction-title",
+      "kernel",
+      "kernel-title",
+      "sidebar",
+      "theme-toggle",
+      "weekly",
+      "weekly-title"
     ]
   },
   "charts": {
@@ -762,18 +841,294 @@
       "route": "/part-4-tax-architecture-roc-strategy",
       "hash": "#exhibit-p4-gross-not-net",
       "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-gross-not-net"
+    },
+    "p5-operating-system": {
+      "chartId": "p5-operating-system",
+      "idx": "P5-01",
+      "title": "One Portfolio. Three Behaviors. One Backbone.",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-operating-system",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-operating-system"
+    },
+    "P5-01": {
+      "chartId": "p5-operating-system",
+      "idx": "P5-01",
+      "title": "One Portfolio. Three Behaviors. One Backbone.",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-operating-system",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-operating-system"
+    },
+    "p5-earned-size": {
+      "chartId": "p5-earned-size",
+      "idx": "P5-02",
+      "title": "Position Size Must Be Earned",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-earned-size",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-earned-size"
+    },
+    "P5-02": {
+      "chartId": "p5-earned-size",
+      "idx": "P5-02",
+      "title": "Position Size Must Be Earned",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-earned-size",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-earned-size"
+    },
+    "p5-ballast-rotation": {
+      "chartId": "p5-ballast-rotation",
+      "idx": "P5-04",
+      "title": "Ballast Preserves the Right to Buy",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-ballast-rotation",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-ballast-rotation"
+    },
+    "P5-04": {
+      "chartId": "p5-ballast-rotation",
+      "idx": "P5-04",
+      "title": "Ballast Preserves the Right to Buy",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-ballast-rotation",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-ballast-rotation"
+    },
+    "p5-posture-sizing": {
+      "chartId": "p5-posture-sizing",
+      "idx": "P5-03",
+      "title": "The Same Score Does Not Create the Same Position",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-posture-sizing",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing"
+    },
+    "P5-03": {
+      "chartId": "p5-posture-sizing",
+      "idx": "P5-03",
+      "title": "The Same Score Does Not Create the Same Position",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-posture-sizing",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing"
+    },
+    "p5-earnings-window": {
+      "chartId": "p5-earnings-window",
+      "idx": "P5-05",
+      "title": "Conviction Does Not Eliminate Binary Risk",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-earnings-window",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-earnings-window"
+    },
+    "P5-05": {
+      "chartId": "p5-earnings-window",
+      "idx": "P5-05",
+      "title": "Conviction Does Not Eliminate Binary Risk",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-earnings-window",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-earnings-window"
+    },
+    "p5-momentum-gate": {
+      "chartId": "p5-momentum-gate",
+      "idx": "P5-06",
+      "title": "Conviction Requires Market Confirmation",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-momentum-gate",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate"
+    },
+    "P5-06": {
+      "chartId": "p5-momentum-gate",
+      "idx": "P5-06",
+      "title": "Conviction Requires Market Confirmation",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-momentum-gate",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate"
+    },
+    "p5-liquidity-throttle": {
+      "chartId": "p5-liquidity-throttle",
+      "idx": "P5-09",
+      "title": "When Correlation Rises, Diversification Shrinks",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-liquidity-throttle",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-liquidity-throttle"
+    },
+    "P5-09": {
+      "chartId": "p5-liquidity-throttle",
+      "idx": "P5-09",
+      "title": "When Correlation Rises, Diversification Shrinks",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-liquidity-throttle",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-liquidity-throttle"
+    },
+    "p5-force-channels": {
+      "chartId": "p5-force-channels",
+      "idx": "P5-07",
+      "title": "One Regime Force. Multiple Economic Expressions.",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-force-channels",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-force-channels"
+    },
+    "P5-07": {
+      "chartId": "p5-force-channels",
+      "idx": "P5-07",
+      "title": "One Regime Force. Multiple Economic Expressions.",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-force-channels",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-force-channels"
+    },
+    "p5-wrapper-compounding": {
+      "chartId": "p5-wrapper-compounding",
+      "idx": "P5-08",
+      "title": "Tax Drag Compounds Too",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-wrapper-compounding",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-wrapper-compounding"
+    },
+    "P5-08": {
+      "chartId": "p5-wrapper-compounding",
+      "idx": "P5-08",
+      "title": "Tax Drag Compounds Too",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-wrapper-compounding",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-wrapper-compounding"
+    },
+    "p5-change-hierarchy": {
+      "chartId": "p5-change-hierarchy",
+      "idx": "P5-10",
+      "title": "Know What You Are Changing",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-change-hierarchy",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-change-hierarchy"
+    },
+    "P5-10": {
+      "chartId": "p5-change-hierarchy",
+      "idx": "P5-10",
+      "title": "Know What You Are Changing",
+      "part": 5,
+      "route": "/part-5-portfolio-construction-position-management",
+      "hash": "#exhibit-p5-change-hierarchy",
+      "href": "/part-5-portfolio-construction-position-management#exhibit-p5-change-hierarchy"
+    },
+    "p6-cis-composition": {
+      "chartId": "p6-cis-composition",
+      "idx": "P6-01",
+      "title": "CIS Measures the Position, Not the Portfolio",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-cis-composition",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition"
+    },
+    "P6-01": {
+      "chartId": "p6-cis-composition",
+      "idx": "P6-01",
+      "title": "CIS Measures the Position, Not the Portfolio",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-cis-composition",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition"
+    },
+    "p6-fis-waterfall": {
+      "chartId": "p6-fis-waterfall",
+      "idx": "P6-02",
+      "title": "FIS Starts at 100",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-fis-waterfall",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall"
+    },
+    "P6-02": {
+      "chartId": "p6-fis-waterfall",
+      "idx": "P6-02",
+      "title": "FIS Starts at 100",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-fis-waterfall",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall"
+    },
+    "p6-cis-fis-matrix": {
+      "chartId": "p6-cis-fis-matrix",
+      "idx": "P6-03",
+      "title": "Good Assets Can Still Form a Bad Portfolio",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-cis-fis-matrix",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-fis-matrix"
+    },
+    "P6-03": {
+      "chartId": "p6-cis-fis-matrix",
+      "idx": "P6-03",
+      "title": "Good Assets Can Still Form a Bad Portfolio",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-cis-fis-matrix",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-fis-matrix"
+    },
+    "p6-weekly-loop": {
+      "chartId": "p6-weekly-loop",
+      "idx": "P6-04",
+      "title": "The Weekly Evidence Loop",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-weekly-loop",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-weekly-loop"
+    },
+    "P6-04": {
+      "chartId": "p6-weekly-loop",
+      "idx": "P6-04",
+      "title": "The Weekly Evidence Loop",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-weekly-loop",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-weekly-loop"
+    },
+    "p6-decay-drift": {
+      "chartId": "p6-decay-drift",
+      "idx": "P6-05",
+      "title": "Failure Rarely Arrives All at Once",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-decay-drift",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-decay-drift"
+    },
+    "P6-05": {
+      "chartId": "p6-decay-drift",
+      "idx": "P6-05",
+      "title": "Failure Rarely Arrives All at Once",
+      "part": 6,
+      "route": "/part-6-convexity-framework-integrity-scoring",
+      "hash": "#exhibit-p6-decay-drift",
+      "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-decay-drift"
     }
   },
   "glossary": {
     "convexity": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · How convexity is expressed through Posture"
+      },
       "chart": {
         "href": "/part-1-foundation#exhibit-s1",
         "label": "View the chart → S1 · Shape the Payoff"
       }
     },
     "cis": {
-      "later": null,
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · The formal scoring definition"
+      },
       "chart": {
         "href": "/part-1-foundation#exhibit-dl-tripwire-loop",
         "label": "View the chart → L3 · Govern the Thesis"
@@ -790,14 +1145,20 @@
       }
     },
     "tripwire": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Tripwires as position-management gates"
+      },
       "chart": {
         "href": "/part-1-foundation#exhibit-dl-tripwire-loop",
         "label": "View the chart → L3 · Govern the Thesis"
       }
     },
     "momentum-filter": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Momentum as the sizing gate"
+      },
       "chart": null
     },
     "tax-wrapper": {
@@ -808,15 +1169,24 @@
       "chart": null
     },
     "torque": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · The Torque posture"
+      },
       "chart": null
     },
     "ballast": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · The Ballast posture"
+      },
       "chart": null
     },
     "hype": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · The Hype posture and its limits"
+      },
       "chart": null
     },
     "fiscal-dominance": {
@@ -837,14 +1207,20 @@
       "chart": null
     },
     "fragility": {
-      "later": null,
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Fragility inside the CIS score"
+      },
       "chart": {
         "href": "/part-1-foundation#exhibit-01",
         "label": "View the chart → 01 · The Hedge Broke"
       }
     },
     "posture": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · The Posture pairs in full"
+      },
       "chart": {
         "href": "/#exhibit-dl-regime-map",
         "label": "View the chart → L2 · Capital Has Weather"
@@ -886,7 +1262,10 @@
       "chart": null
     },
     "agentic-verification": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Verification inside position management"
+      },
       "chart": null
     },
     "tam": {
@@ -904,37 +1283,52 @@
       "chart": null
     },
     "sequence-of-returns-risk": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Position sizing against sequence risk"
+      },
       "chart": {
         "href": "/part-1-foundation#exhibit-05",
         "label": "View the chart → 05 · Path Changes Everything"
       }
     },
     "barbell": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Portfolio construction and posture expression"
+      },
       "chart": null
     },
     "dca": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Accumulation discipline and position management"
+      },
       "chart": {
         "href": "/part-1-foundation#exhibit-06",
         "label": "View the chart → 06 · Survive the Path"
       }
     },
     "dry-powder": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Reserve capital and redeployment rules"
+      },
       "chart": null
     },
     "return-of-capital": {
-      "later": null,
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · The Ballast posture"
+      },
       "chart": null
     }
   },
   "audit": {
-    "pages": 6,
-    "anchors": 110,
-    "chartSpecs": 30,
-    "liveChartMounts": 37,
+    "pages": 8,
+    "anchors": 168,
+    "chartSpecs": 45,
+    "liveChartMounts": 52,
     "glossaryTerms": 26,
     "glossaryTermsAlreadyTagged": 26,
     "glossaryTermsAutoTagEligible": 0,
