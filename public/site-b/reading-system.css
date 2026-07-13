@@ -501,20 +501,26 @@ body {
     padding: 0 0 var(--space-2); margin-bottom: var(--space-2);
     font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--ink);
   }
+  /* block + floated label (NOT flex): in a flex td every inline child — a link,
+     a text node — becomes its own flex item and space-between tears mixed
+     content apart; floating the label keeps the cell value one wrapping unit */
   .compare td {
-    display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4);
-    text-align: right; white-space: normal; border-bottom: none;
+    display: block; text-align: right; white-space: normal; border-bottom: none;
     padding: var(--space-1) 0; font-size: var(--text-sm);
   }
+  .compare td::after { content: ''; display: block; clear: both; }
   .compare td::before {
+    float: left; margin-right: var(--space-4);
     font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--weight-regular);
     letter-spacing: 0; text-transform: none; color: var(--ink-muted); text-align: left;
   }
-  .compare tbody td:nth-of-type(1)::before, .compare tfoot td:nth-of-type(1)::before { content: 'Bitcoin'; }
-  .compare tbody td:nth-of-type(2)::before, .compare tfoot td:nth-of-type(2)::before { content: 'Gold'; }
-  .compare tbody td:nth-of-type(3)::before, .compare tfoot td:nth-of-type(3)::before { content: 'Real Estate'; }
-  .compare tbody td:nth-of-type(4)::before, .compare tfoot td:nth-of-type(4)::before { content: 'Commodities'; }
-  .compare tbody td:nth-of-type(5)::before, .compare tfoot td:nth-of-type(5)::before { content: 'S&P 500'; }
+  /* labels travel WITH each table's markup (data-label per cell), so any
+     .compare table stacks correctly on mobile — not just the asset matrix
+     these rules were first written for */
+  .compare tbody td::before, .compare tfoot td::before { content: attr(data-label); }
+  /* caption: a blockified table would otherwise shrink table-caption to
+     min-content (one word per line) — flow it full-width above the cards */
+  .compare caption { display: block; width: auto; margin: 0 0 var(--space-3); padding-bottom: 0; }
   .compare .col-primary { background: transparent; color: inherit; }
   .compare tbody td.col-primary::before,
   .compare tfoot td.col-primary::before { color: var(--accent-link); font-weight: var(--weight-medium); }
@@ -522,6 +528,7 @@ body {
 .compare-key {
   max-width: var(--measure-figure);
   margin: calc(-1 * var(--space-8)) auto var(--space-12);
+  padding-inline: var(--page-gutter);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--track-wide);
