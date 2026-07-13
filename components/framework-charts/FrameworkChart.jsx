@@ -1724,7 +1724,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
       <div style={{ fontFamily: pal.mono, fontSize: 13, fontWeight: 600, color: tone || pal.text1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
     </div>
   );
-  const cell = (val, tone) => <td style={{ padding: '5px 8px', fontFamily: pal.mono, fontSize: 9.5, color: tone, fontWeight: 600, textAlign: 'center' }}>{val}</td>;
+  const cell = (val, tone) => <td style={{ padding: coarse ? '5px 4px' : '5px 8px', fontFamily: pal.mono, fontSize: 9.5, color: tone, fontWeight: 600, textAlign: 'center' }}>{val}</td>;
 
   const activePk = pinned || hovered;                           // pin wins over hover
   let tooltip = null;
@@ -1810,17 +1810,17 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 
       {/* survival readout — clearer than control scores; updates with the shock */}
       <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${pal.cardBorder}`, overflowX: 'auto' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 420 }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: coarse ? 0 : 420 }}>
           <thead>
             <tr>
-              <th style={{ textAlign: 'left', padding: '0 8px 6px 0', fontFamily: pal.mono, fontSize: 7.5, letterSpacing: '0.12em', color: pal.text4, fontWeight: 500 }}>UNDER THIS SHOCK</th>
-              {['Participates', 'Has reserve', 'Forced-error risk', 'Followable'].map((h) => <th key={h} style={{ padding: '0 8px 6px', fontFamily: pal.mono, fontSize: 7.5, letterSpacing: '0.08em', color: pal.text4, fontWeight: 500, textAlign: 'center' }}>{h}</th>)}
+              <th style={{ textAlign: 'left', padding: coarse ? '0 4px 6px 0' : '0 8px 6px 0', fontFamily: pal.mono, fontSize: 7.5, letterSpacing: '0.12em', color: pal.text4, fontWeight: 500, whiteSpace: coarse ? 'normal' : undefined }}>UNDER THIS SHOCK</th>
+              {['Participates', 'Has reserve', 'Forced-error risk', 'Followable'].map((h) => <th key={h} style={{ padding: coarse ? '0 4px 6px' : '0 8px 6px', fontFamily: pal.mono, fontSize: 7.5, letterSpacing: '0.08em', color: pal.text4, fontWeight: 500, textAlign: 'center', whiteSpace: coarse ? 'normal' : undefined }}>{h}</th>)}
             </tr>
           </thead>
           <tbody>
             {lanes.map((l) => (
               <tr key={l.pk} style={{ background: l.sel ? (pal.name === 'light' ? 'rgba(20,16,8,0.03)' : 'rgba(255,255,255,0.03)') : 'transparent' }}>
-                <td style={{ padding: '5px 8px 5px 0', fontFamily: pal.sans, fontSize: 11, fontWeight: l.sel ? 700 : 600, color: l.sel ? accent : pal.text1, whiteSpace: 'nowrap' }}>{byId(l.pk).short}</td>
+                <td style={{ padding: coarse ? '5px 4px 5px 0' : '5px 8px 5px 0', fontFamily: pal.sans, fontSize: 11, fontWeight: l.sel ? 700 : 600, color: l.sel ? accent : pal.text1, whiteSpace: coarse ? 'normal' : 'nowrap' }}>{byId(l.pk).short}</td>
                 {cell(tierOf(l.s), toneFor('part', tierOf(l.s)))}
                 {cell(reserveOf(l.s), toneFor('reserve', reserveOf(l.s)))}
                 {cell(feOf(l.s), toneFor('fe', feOf(l.s)))}
