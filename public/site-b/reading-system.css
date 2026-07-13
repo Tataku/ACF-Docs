@@ -518,6 +518,32 @@ body {
      .compare table stacks correctly on mobile — not just the asset matrix
      these rules were first written for */
   .compare tbody td::before, .compare tfoot td::before { content: attr(data-label); }
+  /* sentence-length value columns: the floated side-by-side pattern reads
+     ragged once a value wraps around the label — prose cells get the label
+     on its own line and a left-aligned value instead (short value columns
+     keep the compact side-by-side treatment) */
+  .compare td[data-label="Sizing rationale"],
+  .compare td[data-label="Rationale"],
+  .compare td[data-label="Why"],
+  .compare td[data-label="Rule"],
+  .compare td[data-label="Action"],
+  .compare td[data-label="Tax treatment"],
+  .compare td[data-label="Matched role"],
+  .compare td[data-label="What the engine detects"],
+  .compare td[data-label="Diagnosis"],
+  .compare td[data-label="Exception"] { text-align: left; }
+  .compare td[data-label="Sizing rationale"]::before,
+  .compare td[data-label="Rationale"]::before,
+  .compare td[data-label="Why"]::before,
+  .compare td[data-label="Rule"]::before,
+  .compare td[data-label="Action"]::before,
+  .compare td[data-label="Tax treatment"]::before,
+  .compare td[data-label="Matched role"]::before,
+  .compare td[data-label="What the engine detects"]::before,
+  .compare td[data-label="Diagnosis"]::before,
+  .compare td[data-label="Exception"]::before {
+    float: none; display: block; margin: 0 0 2px;
+  }
   /* caption: a blockified table would otherwise shrink table-caption to
      min-content (one word per line) — flow it full-width above the cards */
   .compare caption { display: block; width: auto; margin: 0 0 var(--space-3); padding-bottom: 0; }
@@ -534,6 +560,11 @@ body {
   letter-spacing: var(--track-wide);
   color: var(--ink-faint);
   text-align: center;
+}
+/* centered mono runs 8+ lines deep on phones — left-align at the breakpoint
+   where the table above it becomes stacked cards */
+@media (max-width: 560px) {
+  .compare-key { text-align: left; }
 }
 
 /* ============================================================================
@@ -2287,6 +2318,14 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
 .next-up-teaser { display: block; font-family: var(--font-sans); font-size: var(--text-sm); color: var(--ink-quiet); line-height: var(--leading-normal); }
 .next-up-arrow { color: var(--ink-faint); font-size: var(--text-lg); }
 .next-up-card.pending .next-up-title { color: var(--ink-quiet); }
+/* phones: the numeral + arrow columns squeeze the body to ~half the card —
+   stack the card instead (numeral above the title; the card border already
+   carries the affordance the arrow duplicated) */
+@media (max-width: 560px) {
+  .next-up-card { display: block; padding: var(--space-5); }
+  .next-up-num { font-size: var(--text-lg); margin-bottom: var(--space-1); }
+  .next-up-arrow { display: none; }
+}
 
 /* ---- Mobile: sidebar → off-canvas drawer --------------------------------- */
 .drawer-toggle { display: none; }
@@ -3598,7 +3637,11 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 
 @media (max-width: 768px) {
   .posture-trio { grid-template-columns: 1fr; gap: var(--space-4); }
-  .posture-hero { column-gap: var(--space-5); }
+  /* the chip takes its own line; the stat set flows below as one aligned row,
+     instead of the first stat sharing the chip's line and the rest wrapping
+     at a different offset */
+  .posture-hero { column-gap: var(--space-5); row-gap: var(--space-4); }
+  .posture-hero .posture-hero-chip { flex-basis: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
   .posture-card { transition: none; }
