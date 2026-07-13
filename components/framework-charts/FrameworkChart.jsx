@@ -288,17 +288,19 @@ function PlotSvg({
   targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion, readerContext,
 }) {
   const svgRef = useRef(null);
-  // Mobile is a narrower DESIGN SPACE, not a shrunk desktop: at 560 units the
-  // same user-px type renders ~1.8× larger on a phone (mirrors the approved
-  // feedbackLoop mobile doctrine — re-author the space, never just scale down).
-  const width = coarse ? 560 : widthProp;
+  // The container is NEVER resized for mobile — the viewBox keeps the layout's
+  // authored proportions (sizing rules: orchestrator heights + `tall` room), so
+  // the data geometry is never distorted. Type is a REGISTER, not a scale: on
+  // coarse the same design space carries a ~1.8× type register (bigger user-px
+  // fonts change nothing about the curve), plus proportionally bolder imagery.
+  const width = widthProp;
   const FS = coarse
-    ? { axis: 11, unit: 10.5, tick: 10.5, band: 10.5, area: 10.5, mark: 10.5, endP: 12.5, endS: 12, note: 12 }
+    ? { axis: 17, unit: 15, tick: 16, band: 17, area: 17, mark: 17, endP: 20, endS: 18.5, note: 19 }
     : { axis: 10, unit: 9, tick: 9, band: 9.5, area: 9.5, mark: 9.5, endP: 11.5, endS: 11, note: 11.5 };
   const dom = { ...xDomain, ...panel.domain };
   const labels = (panel.series || []).filter((s) => s.label).map((s) => s.label);
   const longest = labels.reduce((m, l) => Math.max(m, l.length), 0);
-  const pad = { l: 18, r: Math.max(74, longest * 7 + 26), t: 30, b: hideX ? 14 : 40 };
+  const pad = { l: 18, r: Math.max(74, longest * (coarse ? 11.5 : 7) + 26), t: 30, b: hideX ? 14 : 40 };
   const x = (v) => pad.l + ((v - dom.xMin) / (dom.xMax - dom.xMin)) * (width - pad.l - pad.r);
   const y = (v) => pad.t + (1 - (v - dom.yMin) / (dom.yMax - dom.yMin)) * (height - pad.t - pad.b);
   const HIT = { line: touch ? 20 : 12, marker: touch ? 32 : 24, level: touch ? 20 : 12 };
@@ -403,7 +405,9 @@ function PlotSvg({
   const fadeAt = (px, dur = TM.fast, extra = 0) => ({ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity ${dur}ms ${EASE} ${Math.round(120 + TM.path * xFrac(px) + extra)}ms` });
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  // A tap on coarse surfaces the SAME pinned tooltip at the element (anchored,
+  // brush frame, ✕ dismiss) — touch readers get the tooltip, not only the rail.
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
     if (meta) {
       // seriesByKey[key] IS the raw series object (has .pts directly). Read it
@@ -415,7 +419,7 @@ function PlotSvg({
       const dec = panel.yUnit === '%' || (panel.domain && panel.domain.yMax <= 5) ? 2 : 1;
       const unit = (panel.valueUnit || panel.yUnit || 'val').toUpperCase();
       const vt = showValues && raw != null ? getTooltipValueText(panel, readerContext, { raw, unit, dec, valueNote }) : null;
-      tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
+      tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL[active.kind] || 'ELEMENT'} accentTitle={active.kind === 'series' && active.seriesKey === primary.key} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
     }
   }
 
@@ -542,21 +546,22 @@ function PlotSvg({
 function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const q = spec.quadrant;
-  // MOBILE keeps the same map, re-authored in a narrower, squarer design space
-  // (500×430) so quadrant names and axis words render legibly at phone scale —
-  // never a shrunk desktop (mirrors the approved feedbackLoop mobile doctrine).
+  // The container keeps its authored proportions on every viewport (never
+  // resized for mobile). On coarse the SAME map carries a larger type register
+  // and bolder waypoints/path — legibility comes from the register, never from
+  // re-proportioning the composition.
   const M = coarse;
-  const VW = M ? 500 : width, VH = M ? 430 : height;
-  const F = M ? { cell: 15.5, sub: 10, axis: 10, wp: 10.5 } : { cell: 15, sub: 9.5, axis: 9.5, wp: 9.5 };
-  const DOT = M ? { wp: 5, now: 6.4, ring: 12 } : { wp: 3.4, now: 4.4, ring: 9 };
-  const pad = M ? { l: 30, r: 30, t: 30, b: 34 } : { l: 80, r: 80, t: 34, b: 40 };
+  const VW = width, VH = height;
+  const F = M ? { cell: 24, sub: 15, axis: 15, wp: 15 } : { cell: 15, sub: 9.5, axis: 9.5, wp: 9.5 };
+  const DOT = M ? { wp: 6, now: 8, ring: 14 } : { wp: 3.4, now: 4.4, ring: 9 };
+  const pad = { l: 80, r: 80, t: 34, b: 40 };
   const x = (v) => pad.l + ((v + 1) / 2) * (VW - pad.l - pad.r);
   const y = (v) => pad.t + (1 - (v + 1) / 2) * (VH - pad.t - pad.b);     // +1 (high inflation) at top
   const cx = x(0), cy = y(0);
   const wps = q.path.map((id) => ({ id, ...q.waypoints[id] }));
   const geom = useMemo(() => {
     const px = wps.map((w) => ({ x: x(w.x), y: y(w.y), id: w.id }));
-    return { px, line: Brush.brushLine(px, { seed: 19, weight: M ? 1 : 0.8, intensity: 0.7 }) };
+    return { px, line: Brush.brushLine(px, { seed: 19, weight: M ? 1.2 : 0.8, intensity: 0.7 }) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [VW, VH, M]);
   const HITR = touch ? 34 : 26;
@@ -573,9 +578,9 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.waypoint} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / VW) * 100} yPct={(anchor.y / VH) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.waypoint} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / VW) * 100} yPct={(anchor.y / VH) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -594,11 +599,11 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
             the label yields): reflation sits high above wp3, goldilocks low
             below wp1; the left cells hold the original line. */}
         {q.cells.map((c, i) => {
-          const ay = c.qy > 0 ? (c.qx > 0 ? 0.72 : 0.62) : (c.qx > 0 ? -0.78 : -0.62);
+          const ay = c.qy > 0 ? (c.qx > 0 ? 0.72 : 0.62) : (c.qx > 0 ? (M ? -0.8 : -0.78) : -0.62);
           return (
             <g key={`cell${i}`}>
               <text x={x(c.qx * 0.55)} y={y(ay)} textAnchor="middle" style={haloSans(pal, F.cell, pal.text2, 600)}>{c.label}</text>
-              <text x={x(c.qx * 0.55)} y={y(ay) + (M ? 18 : 16)} textAnchor="middle" style={halo(pal, F.sub, pal.text4)}>{c.sub}</text>
+              <text x={x(c.qx * 0.55)} y={y(ay) + (M ? 26 : 16)} textAnchor="middle" style={halo(pal, F.sub, pal.text4)}>{c.sub}</text>
             </g>
           );
         })}
@@ -616,7 +621,7 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
               // by default; only an explicitly-flagged label (e.g. "Now") stays.
               const tgt = targets.find((t) => t.id === p.id);
               const show = focusId === p.id || (tgt && tgt.persistentLabel);
-              return show && tgt ? <text x={p.x} y={p.y - (M ? 14 : 11)} textAnchor="middle" style={halo(pal, F.wp, p.id === spec.primaryKey ? accent : pal.text2)}>{tgt.label}</text> : null;
+              return show && tgt ? <text x={p.x} y={p.y - (M ? 20 : 11)} textAnchor="middle" style={halo(pal, F.wp, p.id === spec.primaryKey ? accent : pal.text2)}>{tgt.label}</text> : null;
             })()}
           </g>
         ))}
@@ -663,9 +668,9 @@ function LoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
   const NW = 168, NH = 56;
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.node} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.node} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -737,9 +742,9 @@ function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.node} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.node} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -851,9 +856,9 @@ function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coar
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="NODE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="NODE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -909,42 +914,32 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   const nodes = gl.nodes;
   const N = nodes.length;
   const govIdx = gl.governorId ? nodes.findIndex((n) => n.id === gl.governorId) : -1;
-  // MOBILE keeps the SAME left→right governed path — never transposed — re-
-  // authored in a 500×310 design space: per-card widths sized to their copy,
-  // compact arrowheads bridging the narrow gaps, proportionally larger type
-  // (mirrors the approved feedbackLoop mobile doctrine).
+  // The container keeps its authored proportions on every viewport (never
+  // resized for mobile) — the SAME left→right governed path, never transposed.
+  // On coarse the composition carries a larger type register, wider cards (so
+  // the bigger subs still fit), and bolder ports/return — legibility from the
+  // register, never from re-proportioning.
   const M = coarse;
-  const VW = M ? 500 : width, VH = M ? 310 : height;
-  const F = M ? { label: 14, sub: 8.5, ret: 10.5 } : { label: 13.5, sub: 8.5, ret: 10.5 };
+  const VW = width, VH = height;
+  const F = M ? { label: 18, sub: 12, ret: 15 } : { label: 13.5, sub: 8.5, ret: 10.5 };
   const pad = { l: 24, r: 24, t: 26, b: 24 };
   const innerW = VW - pad.l - pad.r;
-  const rowY = M ? 62 : pad.t + 52;
-  const NH = M ? 46 : 44, NHg = M ? 56 : 54;     // the checkpoint sits a touch taller
-  const MOBILE_DEFS = [                          // authored per-card widths (longest sub sets the card)
-    { x0: 9, x1: 87 }, { x0: 97, x1: 185 }, { x0: 195, x1: 287 }, { x0: 297, x1: 385 }, { x0: 395, x1: 491 },
-  ];
+  const rowY = pad.t + 52;
+  const NH = M ? 54 : 44, NHg = M ? 64 : 54;     // the checkpoint sits a touch taller
   const colW = innerW / N;
-  const pos = nodes.map((nd, i) => {
-    const W = M && MOBILE_DEFS[i] ? MOBILE_DEFS[i].x1 - MOBILE_DEFS[i].x0 : Math.min(colW - 16, 128);
-    const x = M && MOBILE_DEFS[i] ? (MOBILE_DEFS[i].x0 + MOBILE_DEFS[i].x1) / 2 : pad.l + colW * (i + 0.5);
-    return { ...nd, i, x, W, y: rowY, gov: i === govIdx, h: i === govIdx ? NHg : NH };
-  });
+  const NW = Math.min(colW - 16, M ? 150 : 128);
+  const pos = nodes.map((nd, i) => ({ ...nd, i, x: pad.l + colW * (i + 0.5), W: NW, y: rowY, gov: i === govIdx, h: i === govIdx ? NHg : NH }));
   const byId = (id) => pos.find((p) => p.id === id);
-  const PORT = M ? { edge: 3, ret: 3.4 } : { edge: 2.2, ret: 2.5 };
+  const PORT = M ? { edge: 3.4, ret: 3.8 } : { edge: 2.2, ret: 2.5 };
 
   const geom = useMemo(() => {
     const bez = (p0, c1, c2, p1, n = 20) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push({ x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x, y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y }); } return pts; };
     const head = (tx, ty, ang, sc = 1) => { const ux = Math.cos(ang), uy = Math.sin(ang), px = -uy, py = ux, L = 12 * sc, W2 = 5 * sc, Nn = 8.4 * sc; return `M${tx} ${ty} L${tx - ux * L + px * W2} ${ty - uy * L + py * W2} L${tx - ux * Nn} ${ty - uy * Nn} L${tx - ux * L - px * W2} ${ty - uy * L - py * W2} Z`; };
-    const arrows = [];                           // rightward connectors in the gaps
+    const arrows = [];                           // rightward brush arrows in the gaps
     for (let i = 0; i < N - 1; i++) {
       const a = pos[i], b = pos[i + 1];
-      if (M) {
-        // narrow gaps: a compact angled head alone bridges card to card
-        arrows.push(head(b.x - b.W / 2 - 2, rowY, 0, 0.9));
-      } else {
-        const x0 = a.x + a.W / 2, tip = b.x - b.W / 2 - 3, len = Math.max(10, tip - x0);
-        arrows.push(Brush.brushArrow(tip, rowY, len, 0, { seed: 50 + i * 13, weight: 1.05, intensity: 0.5, head: Math.min(0.3, 12 / len) }));
-      }
+      const x0 = a.x + a.W / 2, tip = b.x - b.W / 2 - 3, len = Math.max(10, tip - x0);
+      arrows.push(Brush.brushArrow(tip, rowY, len, 0, { seed: 50 + i * 13, weight: M ? 1.3 : 1.05, intensity: 0.5, head: Math.min(0.34, (M ? 14 : 12) / len) }));
     }
     // the return is the CLAIM — a complete, solid arc carrying evidence from
     // the governed response back into the thesis: asymmetric belly held inside
@@ -957,8 +952,8 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
       ...bez({ x: sx, y: cardBot + 6 }, { x: sx + 10, y: belly - 34 }, { x: sx - innerW * 0.16, y: belly }, { x: midX, y: belly }),
       ...bez({ x: midX, y: belly }, { x: ex + innerW * 0.15, y: belly }, { x: ex - 8, y: belly - 44 }, { x: ex, y: cardBot + 12 }),
     ];
-    const retD = Brush.brushLine(retPts, { seed: 131, weight: M ? 1.5 : 1.35, intensity: 0.5, taper: 0.05 });
-    const retHead = head(ex, cardBot + 3, -Math.PI / 2, M ? 1.1 : 1.05);
+    const retD = Brush.brushLine(retPts, { seed: 131, weight: M ? 1.6 : 1.35, intensity: 0.5, taper: 0.05 });
+    const retHead = head(ex, cardBot + 3, -Math.PI / 2, M ? 1.15 : 1.05);
     return { arrows, retD, retHead, cardBot, labX: midX, labY: belly - 16, tickY0: belly - 10, tickY1: belly - 3 };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [VW, VH, M]);
@@ -977,9 +972,9 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === gl.governorId ? 'CHECKPOINT' : 'STEP'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / VW) * 100} yPct={(anchor.y / VH) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === gl.governorId ? 'CHECKPOINT' : 'STEP'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / VW) * 100} yPct={(anchor.y / VH) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -1010,8 +1005,8 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
               {/* checkpoint gate posts — a quiet brush guardrail, not an alarm */}
               {n.gov && [-1, 1].map((s) => <path key={s} d={Brush.brushSegment(n.x + s * (n.W / 2), top - 8, n.x + s * (n.W / 2), bot + 8, { seed: 77 + (s + 1) * 5, weight: 1.05, intensity: 0.55, waver: 0.16 })} fill={pal.bandRegime} opacity={on ? 0.95 : 0.75} />)}
               <rect x={n.x - n.W / 2} y={top} width={n.W} height={n.h} rx={8} fill={pal.surface} stroke={stroke} strokeWidth={on ? 1.7 : n.gov ? 1.4 : 1} style={{ transition: trans('stroke') }} />
-              <text x={n.x} y={n.y - (n.sub ? 4 : -4)} textAnchor="middle" style={haloSans(pal, F.label, isP ? accent : pal.text1, 600)}>{n.label}</text>
-              {n.sub && <text x={n.x} y={n.y + (M ? 14 : 13)} textAnchor="middle" style={halo(pal, F.sub, n.gov ? pal.bandRegimeText : pal.text4)}>{n.sub}</text>}
+              <text x={n.x} y={n.y - (n.sub ? (M ? 6 : 4) : -4)} textAnchor="middle" style={haloSans(pal, F.label, isP ? accent : pal.text1, 600)}>{n.label}</text>
+              {n.sub && <text x={n.x} y={n.y + (M ? 16 : 13)} textAnchor="middle" style={halo(pal, F.sub, n.gov ? pal.bandRegimeText : pal.text4)}>{n.sub}</text>}
               {/* connection anchors: gap ports on every card edge; the return's
                   departure port on Adjust and landing port on Thesis */}
               {n.i > 0 && <path d={Brush.inkDot(n.x - n.W / 2, rowY, PORT.edge, { seed: 90 + n.i * 7, intensity: 0.7 })} fill={accent} opacity="0.85" />}
@@ -1184,9 +1179,9 @@ function FeedbackLoopSvg({ spec, width, height, pal, accent, reduce, entered, co
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -1309,9 +1304,9 @@ function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="STAGE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -1438,9 +1433,9 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
   const emTrans = reduce ? undefined : 'opacity 240ms ease, stroke 240ms ease';
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="GATE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="GATE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -1562,9 +1557,9 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
   };
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="REQUIREMENT" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="REQUIREMENT" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   return (
@@ -1897,9 +1892,9 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
   const dim = (id) => (focusId && focusId !== id ? 0.4 : 1);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) { const vt = getTooltipValueText(spec, readerContext, {}); tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
+    if (meta) { const vt = getTooltipValueText(spec, readerContext, {}); tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'heartbeat' ? 'VALUATION' : 'MECHANISM'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
   }
 
   return (
@@ -2148,9 +2143,9 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   const anchor = isActiveHere ? anchorOf(active) : null;
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) { const sd = active.id === 'good' ? goodEnd * P : active.id === 'bad' ? badEnd * P : null; const vt = sd != null ? getTooltipValueText(spec, readerContext, { dollars: sd, rawLabel: `${active.id === 'good' ? 'Good' : 'Bad'} sequence · representative simulation` }) : null; tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} onUnpin={() => onPin(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
+    if (meta) { const sd = active.id === 'good' ? goodEnd * P : active.id === 'bad' ? badEnd * P : null; const vt = sd != null ? getTooltipValueText(spec, readerContext, { dollars: sd, rawLabel: `${active.id === 'good' ? 'Good' : 'Bad'} sequence · representative simulation` }) : null; tooltip = <TargetTooltip meta={meta} kindLabel={active.id === 'deck' ? 'RETURN SET' : active.id === 'depletion' ? 'THRESHOLD' : 'SEQUENCE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />; }
   }
 
   const block = (val, cx, mid, key, delay) => {
@@ -2331,7 +2326,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
   const fadeIn = (delay) => ({ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : `opacity 620ms ${EZ} ${delay}ms` });
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
     if (meta) {
       let valueText = null;
@@ -2340,7 +2335,7 @@ function BeforeAfterRevealSvg({ spec, width, height, pal, accent, reduce, entere
         valueText = `${v.toFixed(active.id === 'debt' ? 0 : 1)} % of GDP · ${valueNote}`;
       }
       const kl = { debt: 'BACKDROP', int: 'COST', threshold: 'THRESHOLD', burden: 'TRIPWIRE', pressure: 'PRESSURE' }[active.id] || 'ELEMENT';
-      tooltip = <TargetTooltip meta={meta} kindLabel={kl} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={valueText} />;
+      tooltip = <TargetTooltip meta={meta} kindLabel={kl} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={valueText} />;
     }
   }
 
@@ -2517,9 +2512,9 @@ function RadialSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="SHARE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="SHARE" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
 
   const pillBtn = (on) => ({
@@ -2661,9 +2656,9 @@ function LaneBarSvg({ spec, width, height, pal, accent, reduce, entered, coarse,
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
 
   let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
+  if (isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="CAPITAL" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel="CAPITAL" accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={coarse || (!!pinned && active.id === pinned.id)} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => (coarse ? onActive(null, 'tap') : onPin(null))} valueText={null} />;
   }
   const surplusMid = surplus ? surplus.mid : null;
 
