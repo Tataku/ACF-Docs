@@ -220,6 +220,89 @@
     els.forEach(function (el) { obs.observe(el); });
   }
 
+  /* ---- Title motion: soft swipe + settle for title text ONLY ------------- *
+   * Adds `.title-in` to .doc-title / .section-title / .sub-title as each enters
+   * view. The CSS hides titles only under <html class="js"> + motion-allowed
+   * (same doctrine as [data-reveal]), so JS-off and reduced-motion readers see
+   * finished titles immediately. Scope is deliberately titles-only — body copy
+   * never animates, so the page stays calm.                                    */
+  function titleMotion() {
+    var els = document.querySelectorAll('.doc-title, .section-title, .sub-title');
+    if (!els.length) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add('title-in'); });
+      return;
+    }
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('title-in'); obs.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.2 });
+    els.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ---- Hamburger carve: title text wraps around the fixed drawer toggle --- *
+   * The toggle is fixed chrome; titles scrolling beneath it would sit under
+   * the button. Each title carries an empty floated ::before sized by the
+   * --carve-w/--carve-h custom properties; on every scrolled frame the title
+   * that currently intersects the toggle's (padded) hitbox gets the float
+   * sized to the overlap, so its text reflows around the button IN REAL TIME
+   * and stays legible. Zero cost when nothing intersects (vars stay unset).
+   * The carve is legibility, not decoration — it runs under reduced motion.   */
+  function hamburgerCarve() {
+    var toggle = document.querySelector('.drawer-toggle');
+    if (!toggle) return;
+    var els = Array.prototype.slice.call(document.querySelectorAll('.doc-title, .section-title, .sub-title'));
+    if (!els.length) return;
+    var PAD = 10;                                   // breathing room around the button
+    var box = null;                                 // fixed rect: recompute on resize only
+    var carved = [];                                // els currently carved, for cheap clearing
+
+    function measure() {
+      if (getComputedStyle(toggle).display === 'none') { box = null; return; }
+      var r = toggle.getBoundingClientRect();
+      box = { right: r.right + PAD, bottom: r.bottom + PAD, left: r.left };
+    }
+
+    function frame() {
+      if (!box) return;
+      var next = [];
+      for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        var r = el.getBoundingClientRect();
+        // overlap: the title's top edge is above the toggle's padded bottom
+        // AND its bottom is below the toggle's top region AND it starts left
+        // of the toggle's padded right edge (titles are left-aligned).
+        var h = Math.min(box.bottom - r.top, r.height);
+        var w = box.right - r.left;
+        if (h > 0 && w > 0 && r.top < box.bottom && r.bottom > 0) {
+          el.style.setProperty('--carve-w', Math.min(w, r.width * 0.7).toFixed(1) + 'px');
+          el.style.setProperty('--carve-h', h.toFixed(1) + 'px');
+          next.push(el);
+        }
+      }
+      for (var j = 0; j < carved.length; j++) {
+        if (next.indexOf(carved[j]) === -1) {
+          carved[j].style.removeProperty('--carve-w');
+          carved[j].style.removeProperty('--carve-h');
+        }
+      }
+      carved = next;
+    }
+
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () { frame(); ticking = false; });
+    }
+    measure();
+    frame();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', function () { measure(); onScroll(); }, { passive: true });
+  }
+
   /* ---- Quote-highlight system: light each .hl phrase as it scrolls into view *
    * The CSS hides the green-bold + underline behind <html class="js"> + motion,
    * so JS-off / reduced-motion readers get the emphasis immediately.            */
@@ -938,6 +1021,8 @@
   progressWrite();
   progressPaint();
   sectionReveal();
+  titleMotion();
+  hamburgerCarve();
   highlights();
   stepperProgress();
   partActions();
