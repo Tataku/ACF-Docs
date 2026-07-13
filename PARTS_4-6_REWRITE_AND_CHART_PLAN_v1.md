@@ -1,5 +1,10 @@
 # Framework Docs Parts 4–6 — Rewrite & Chart System Plan v1.0
 
+> **Historical artifact (superseded 2026-07-13).** The "canonical target: MDX" line below
+> reflects the since-corrected v1 of `FRAMEWORK_DOCS_CANONICAL.md`. Parts 4–6 shipped as
+> Site B HTML with chart islands (Parts 5–6 via PR #137), and the MDX pages are deleted.
+> The content audit + chart concepts here fed that work; kept for lineage only.
+
 > **Mode:** DIAGNOSE → PLAN ONLY. No prose rewritten, no charts built, no HTML touched, no charts wired.
 > **Mission-ID:** `mission.framework-docs.parts-4-6-rewrite-and-chart-plan`
 > **Canonical target:** ACF-Docs MDX — `pages/part-4-*.mdx`, `part-5-*.mdx`, `part-6-*.mdx` (per `FRAMEWORK_DOCS_CANONICAL.md`).

@@ -4,6 +4,6 @@ Adaptive Convexity Framework: A structured macro portfolio system integrating th
 > **Agents / contributors, start here:** the canonical framework-docs location, the
 > treatment of the parallel app-domain HTML copy, and the machine-readable chart
 > inventory entry point are declared in [`FRAMEWORK_DOCS_CANONICAL.md`](./FRAMEWORK_DOCS_CANONICAL.md).
-> The living framework narrative is the published MDX under `pages/part-*.mdx`
-> (docs.acfdashboard.com).
+> The living framework narrative is the hand-authored Site B HTML under
+> `public/site-b/` (docs.acfdashboard.com); the legacy MDX part pages were retired 2026-07-13.
 
