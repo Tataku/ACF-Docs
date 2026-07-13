@@ -3298,11 +3298,11 @@
       "tryThisMobile": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
-      "disclosure": "Conceptual composition · Component weights are the canonical CIS v2.1 defaults (tunable Parameters; the structure is Doctrine)",
+      "disclosure": "Conceptual composition · Component weights are the live engine defaults (thesis-adaptive Parameters, bounded ±0.10; the structure is Doctrine)",
       "sources": [
         {
-          "provider": "ACF · CIS Specification v2.1",
-          "label": "Component weights C40/R25/M25/E10 and tunable ranges",
+          "provider": "ACF Dashboard · frameworkDocService.js",
+          "label": "Live component weights C40/R25/M25/E10 with thesis-adaptive bounds (±0.10, renormalized)",
           "seriesId": null,
           "role": "verifies-concept",
           "url": null
@@ -3328,8 +3328,8 @@
       "layout": "waterfall",
       "dataMode": "conceptual",
       "claimLabel": "PART 6 · FIS ATTRIBUTION",
-      "primaryClaim": "FIS is subtractive: every point below 100 is a named, repairable violation",
-      "visualProof": "A waterfall starting at one hundred and stepping down through seven illustrative bucket deductions — allocation drift the largest, complexity the smallest — landing on a 78, in the Acceptable band",
+      "primaryClaim": "FIS is subtractive: every point below 100 is a named, repairable violation scored by the live engine",
+      "visualProof": "A waterfall starting at one hundred and stepping down through the live engine’s five bucket deductions — allocation the largest cap, complexity the smallest — landing on an 83, in the Strong band above the 70 line",
       "readerAction": "Follow the score down step by step, then read the band it lands in",
       "readerTakeaway": "Fix the violation. Recover the points.",
       "experienceRole": "mechanism",
@@ -3376,24 +3376,24 @@
       "tryThisMobile": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
-      "disclosure": "Conceptual diagram · Illustrative example portfolio; bucket caps are canonical FIS v1.1.1, penalty sizes are not",
+      "disclosure": "Conceptual diagram · Illustrative example portfolio; bucket caps, thresholds, and bands are the live FIS v2.1 engine values, penalty sizes are not",
       "sources": [
         {
-          "provider": "ACF · FIS Specification v1.1.1",
-          "label": "Penalty buckets, caps (25/20/15/15/15/10/10), and status bands",
+          "provider": "ACF Dashboard · fisCalculator.js",
+          "label": "Live FIS v2.1 kernel — five buckets (25/15/15/15/10), severity clamp 0.2–12%, shared four-band register",
           "seriesId": null,
           "role": "verifies-concept",
           "url": null
         },
         {
           "provider": "ACF · Part 6",
-          "label": "Subtractive scoring and value-weighted penalties",
+          "label": "Subtractive scoring and attribution doctrine",
           "seriesId": null,
           "role": "verifies-concept",
           "url": "/part-6-convexity-framework-integrity-scoring"
         }
       ],
-      "agencyNotes": "NEW waterfall layout. Start and result columns anchor the run; deductions are floating stress-tier steps with dashed connectors; band boundaries (90/80/70/60) are quiet horizontal guides. Explicitly illustrative — every example penalty sits inside its canonical cap; the FIS bucket table remains adjacent as the exact-value companion."
+      "agencyNotes": "waterfall layout aligned to the LIVE FIS v2.1 kernel (continuity pass 2026-07-13, live math trumps spec v1.1.1): five buckets 25/15/15/15/10, shared four-band guides at 70/60/50, concentration fires beyond-cap at 15/40/60 with Bitcoin excluded by archetype, governance + dead-capital value-weighted 0.2–12%, max total penalty 80 (floor 20). Explicitly illustrative penalties inside live caps; the bucket table remains adjacent as the exact-value companion."
     },
     {
       "chartId": "p6-cis-fis-matrix",
@@ -3464,8 +3464,8 @@
           "url": "/part-6-convexity-framework-integrity-scoring"
         },
         {
-          "provider": "ACF · FIS Specification v1.1.1",
-          "label": "Status thresholds (High >80 · Low <70)",
+          "provider": "ACF Dashboard · cisBands.js",
+          "label": "The shared four-band register — 70 is the compliance line on both scores",
           "seriesId": null,
           "role": "verifies-concept",
           "url": null

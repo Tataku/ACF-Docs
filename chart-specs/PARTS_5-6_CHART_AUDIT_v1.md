@@ -150,3 +150,41 @@ Tracked in `chart-specs.mjs` (`status` field) + this table at PR time. Target: a
 `wiredPublic: true`, embedded in `public/site-b/part-5-portfolio-construction.html` and
 `part-6-convexity-scoring.html`, routed via `next.config.mjs`, validated by `validate:charts`, screenshot QA
 at 1280 / 768 / 390 px.
+
+
+---
+
+## 6. Live-app continuity pass (owner directive, 2026-07-13): live math trumps everything
+
+Source hierarchy revised per owner: **live dashboard code > specs > doc prose.** Three code audits (CIS engine,
+FIS kernel, governance surfaces) established the following; Parts 5–6 pages + exhibits were realigned.
+
+### 6.1 Live truths adopted into the docs
+
+| Area | Live behavior (file evidence in PR discussion) | Doc action |
+|---|---|---|
+| FIS kernel | **v2.1, five buckets** (Allocation 25 · Governance 15 · Dead capital 15 · Concentration 15 · Complexity 10 hard cap); caps sum to 80 → floor 20; wrapper drift + CIS-band compliance live INSIDE Allocation (targets Roth .45/taxable .35/pretax .20); Tax-Architecture + Posture-Drift buckets are NOT scored | Chart 6.2 + §fis tables rebuilt on the five-bucket kernel; wrapper continuity sentence added |
+| FIS bands | Shared four-band register (70+ Strong · 60–69 Moderate · 50–59 Caution · <50 Weak) — not 90/80/70/60 | Interpretation table + waterfall band guides + 6.3 matrix thresholds realigned to the 70 line |
+| FIS value-weighting | Only governance + dead-capital scale by position size (0.2%–12% clamp); other buckets flat | Copy scoped truthfully |
+| **FIS §7.5 re-determination** | Live concentration penalties fire **beyond the caps** (single >15 · top-3 >40 · top-5 >60, BTC excluded by archetype, override acknowledged-but-billed) while live sizing caps are 15/35/50 — the beyond-cap penalty design is REAL in the v2.1 kernel. **The earlier recommendation to change spec §7.5 to 35/50 is retracted**; the lagging artifact is spec v1.1.1's framing, not the thresholds | Docs describe caps (sizing) and beyond-cap penalties (FIS) as two live layers |
+| CIS weights | 40/25/25/10 live; SSOT-driven, thesis-adaptive within ±0.10, renormalized | 6.1 caution + §cis copy updated |
+| CIS clamps | ±3/±5/±8 + **±6 derived-proxy** + init ±20 / thesis ±15 + legal bypasses (structural rescore, model divergence) | §cis + 6.4 hover updated |
+| CIS confidence | Derived in-engine from evidence-source quality (venue/size caps), not practitioner-asserted | §cis corrected |
+| Archetypes | BITCOIN / ETF / LEVERED_ETF / OPERATING_EQUITY; lens + labeling only — **floors removed**; no cash-like archetype | §cis corrected |
+| 18% override | Live gate: CIS ≥80 + documentation | 5.3 hover + Part 5 copy |
+| Earnings | T-5 → 3% trim is a live engine action; T-21 blackout doctrine-only | 5.5 caution + copy attribution |
+| Action frequency | 7d recalc / 3d adds / 5d trims / exits unlimited-on-tripwire — live verbatim | Kept; attributed |
+| Weekly loop | Live engine runs ingest → CIS → FIS → governance → action → **decision logging** (rolling ~1yr log); trigger precedence tripwire > earnings > FIS<70 > CIS-drift(10) | 6.4 caution upgraded to live truth; §weekly copy |
+| Failure diagnostics | All five live: stale >90d (billed), drift warn 10 / fail 20, corr >0.7 flagged (informational), +50%-on-stale flagged, wrapper inside Allocation | 6.5 hovers + §failure copy |
+| Momentum | Doctrine ladder (10/25/40, full/−25–30%/watch/exit) NOT coded; live gates = 200MA/50MA/RSI + cohort confluence tripwire (flag → hedge → trim 25% of torque cohort; 6 of 9 signals live) | 5.6 caution reframed doctrine-vs-live; Part 5 "in the dashboard today" passage |
+| Regime throttle | VIX-25 / gross 10–20% / 2-week resumption NOT coded (live stress bands differ; cohort reset 5 trading days); corr 0.7 diagnostic live | 5.9 caution reframed; copy attribution |
+| Add/freeze · Hype stops | −20% freeze, ≤25%/wk cadence, 15–25% stops, 3–6mo limits: doctrine-only (caps 5/10 + frequency limits are live) | Copy attribution |
+| Wrapper routing | Live wrapper-fit engine scores candidates 0–100 per wrapper; Bitcoin exempt | One-line addition |
+
+### 6.2 New data-ink register (owner-requested visual elements beyond the chart engine)
+
+Added to `reading-system.css` (namespaced `.di-*`, tokens-only, light/dark automatic, reduced-motion safe):
+**score chip** (band-tinted meter under mono numerals), **posture badge** (posture-token marks),
+**band register** (the shared four-band strip CIS and FIS both read), **allocation bar** (the case-study
+composition strip on posture tokens — the honest CSS-native treemap). Applied across Parts 5–6; never inside
+dark insight callouts (contrast), meaning never color-alone.
