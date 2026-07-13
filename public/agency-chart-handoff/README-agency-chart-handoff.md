@@ -148,6 +148,9 @@ A mobile chart is **not** a hover chart squeezed onto a phone. The reader sees t
 - **Detail is contained.** The `MobileInsight` rail lives inside the card below the plot (overview ↔ inspect, 44px controls) — never a viewport overlay.
 - **Sliders are touch-first.** The before/after reveal makes the whole chart the control: tap to jump the divider, drag to scrub (pointer-captured; `touch-action: pan-y` so vertical page-scroll still works), snapping to Surface / Split / Hidden cost on release.
 - **Copy is touch-direct.** `resolveTryThis(spec, coarse)` swaps in tap/drag language on mobile (override with `tryThisMobile`).
+- **Hit zones are screen-true.** Hit thresholds are authored in design-space units, but a finger lands in screen pixels — at phone render scale a 20-unit zone in a 1000-wide space is ~7px, far under the 44px touch standard. On touch, `hitScale(svgEl, designW, touch)` inflates every resolve threshold by the design→screen ratio (capped ~3.2×; nearest-wins keeps adjacent targets separable). Any renderer with its own `resolve()` must multiply its limits by this factor on tap.
+- **Mobile is a narrower design space, not a shrunk desktop.** The proven pattern (feedbackLoop → quadrant, governanceLoop, PlotSvg): on `coarse`, re-author the SAME composition — same orientation, never transposed — in a ~500–560-unit-wide space with proportionally larger type and imagery, so it renders legibly at ~0.6–0.7 scale on a 390px viewport. PlotSvg switches to a 560-unit space with a bumped `FS` type register; quadrant re-authors at 500×430; governanceLoop at 500×310 with per-card authored widths and compact gap arrowheads.
+- **Right-margin text yields, never collides.** In PlotSvg a y-tick label is skipped when a series end-label occupies the same right-margin line (both live at the plot's right edge; the series name outranks the gridline number it would garble).
 
 ### Progressive disclosure
 
