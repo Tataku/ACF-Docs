@@ -92,6 +92,24 @@ body {
   margin: 0 0 var(--space-4);
 }
 
+/* Hamburger carve: an empty float the runtime sizes (--carve-w/--carve-h)
+   whenever a title scrolls into the fixed drawer-toggle's hitbox — the text
+   wraps around the button in real time instead of sliding beneath it.
+   Inert everywhere the vars are unset (desktop, and titles clear of the
+   button). Legibility, not decoration: active under reduced motion too. */
+.doc-title::before,
+.section-title::before,
+.sub-title::before {
+  content: '';
+  float: left;
+  width: var(--carve-w, 0px);
+  height: var(--carve-h, 0px);
+}
+/* while carved, drop balanced wrapping — balance fights the float intrusion */
+.doc-title[style*="--carve-h"],
+.section-title[style*="--carve-h"],
+.sub-title[style*="--carve-h"] { text-wrap: wrap; }
+
 .section-title {
   font-family: var(--font-serif);
   font-weight: var(--weight-normal);
@@ -1307,6 +1325,26 @@ body {
   }
   html.js [data-reveal].is-in { opacity: 1; transform: none; }
 
+  /* Title motion (JS adds .title-in): a soft left-to-right swipe that settles
+     with a small overshoot — the "click into place". Titles ONLY; body copy
+     never animates, so the page stays calm. Same js+motion gating as above. */
+  html.js .doc-title,
+  html.js .section-title,
+  html.js .sub-title { opacity: 0; }
+  html.js .doc-title.title-in,
+  html.js .section-title.title-in,
+  html.js .sub-title.title-in {
+    opacity: 1;
+    animation: acf-title-swipe 760ms var(--ease-emphasis) both;
+  }
+}
+@keyframes acf-title-swipe {
+  0%   { opacity: 0; transform: translateX(-14px); clip-path: inset(-4% 101% -8% -2%); }
+  62%  { opacity: 1; transform: translateX(3px);   clip-path: inset(-4% -2% -8% -2%); }
+  100% { opacity: 1; transform: translateX(0);     clip-path: inset(-4% -2% -8% -2%); }
+}
+@media (prefers-reduced-motion: no-preference) {
+
   /* Convexity chart — the curve draws in (rising left→right as it increases),
      the area/conventional/dots fade up beneath it, then the labels fade in. */
   html.js .signature .cvx-curve { stroke-dasharray: 1; stroke-dashoffset: 1; }
@@ -2347,7 +2385,7 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
     top: calc(var(--space-4) + env(safe-area-inset-top));
     left: calc(var(--space-4) + env(safe-area-inset-left));
     z-index: 30;
-    width: 2.75rem; height: 2.75rem;
+    width: 2.5rem; height: 2.5rem;     /* 40px — trimmed from 44px, still a workable tap target */
     align-items: center; justify-content: center;
     background: var(--paper);
     border: 1px solid var(--rule);
@@ -2355,7 +2393,7 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
     color: var(--ink);
     cursor: pointer;
   }
-  .drawer-toggle svg { width: 1.3rem; height: 1.3rem; }
+  .drawer-toggle svg { width: 1.2rem; height: 1.2rem; }
   .sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
