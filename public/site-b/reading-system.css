@@ -3377,9 +3377,9 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
     linear-gradient(to right, var(--di-band, var(--confidence-low)) var(--di-fill, 50%), var(--rule-faint) var(--di-fill, 50%));
 }
 .di-score[data-band="green"]  { --di-band: var(--confidence-high); }
-.di-score[data-band="yellow"] { --di-band: var(--confidence-med); }
-.di-score[data-band="orange"] { --di-band: var(--confidence-low); }
-.di-score[data-band="red"]    { --di-band: var(--chart-warn); }
+.di-score[data-band="yellow"] { --di-band: var(--chart-warn); }      /* 60–69 · monitor-gray (live register) */
+.di-score[data-band="orange"] { --di-band: var(--confidence-med); }  /* 50–59 · amber caution */
+.di-score[data-band="red"]    { --di-band: var(--ink-muted); }       /* <50 · heaviest ink */
 
 /* Posture badge — a small mark + small-caps label on the posture tokens.
    Markup: <span class="di-posture" data-posture="torque">Torque</span>   */
@@ -3421,9 +3421,9 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 }
 .di-band i { font-style: normal; font-weight: 700; font-size: 0.72rem; color: var(--ink-muted); display: block; }
 .di-band[data-band="green"]  { --di-band-c: var(--confidence-high); flex: 1.5; }
-.di-band[data-band="yellow"] { --di-band-c: var(--confidence-med); }
-.di-band[data-band="orange"] { --di-band-c: var(--confidence-low); }
-.di-band[data-band="red"]    { --di-band-c: var(--chart-warn); }
+.di-band[data-band="yellow"] { --di-band-c: var(--chart-warn); }      /* 60–69 · monitor-gray (live register) */
+.di-band[data-band="orange"] { --di-band-c: var(--confidence-med); }  /* 50–59 · amber caution */
+.di-band[data-band="red"]    { --di-band-c: var(--ink-muted); }       /* <50 · heaviest ink */
 
 /* Allocation bar — a CSS stacked composition strip on the posture tokens
    (the case study's honest treemap). Segments carry their own labels.
