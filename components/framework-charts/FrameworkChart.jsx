@@ -593,7 +593,7 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${VW} ${VH}`} width="100%" role="group" aria-label="Growth versus inflation regime map" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${VW} ${VH}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Quadrant matrix'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* axes */}
         <line x1={pad.l} x2={VW - pad.r} y1={cy} y2={cy} stroke={pal.grid} strokeWidth="1" />
         <line x1={cx} x2={cx} y1={pad.t} y2={VH - pad.b} stroke={pal.grid} strokeWidth="1" />
@@ -2806,7 +2806,7 @@ function WaterfallSvg({ spec, width, height, pal, accent, reduce, entered, coars
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Subtractive score waterfall: a start of one hundred loses named bucket deductions and lands on the resulting score inside its status band" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Subtractive score waterfall'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* status band guides — quiet horizontal thresholds with right labels */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 700ms ease 900ms' }}>
           {(wf.bandGuides || []).map((g, i) => (
@@ -2902,7 +2902,7 @@ function RangeStepsSvg({ spec, width, height, pal, accent, reduce, entered, coar
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Range-band columns on one shared percent scale with cap guardrails" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Range-band columns'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* y axis (suppressed for pure-progression exhibits) */}
         {!rs.hideScale && axisTicks.map((v) => (
           <g key={`t${v}`}>
@@ -3061,7 +3061,7 @@ function PostureSystemSvg({ spec, width, height, pal, accent, reduce, entered, c
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Posture operating system: rotation arcs between Torque and Ballast, a capped Hype cell, and a separately governed Bitcoin backbone band beneath" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Posture operating system'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* rotation arcs — the mechanism; wipe in opposing directions */}
         <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? dim(ps.flows[0].id) : 0, transition: reduce ? 'opacity 320ms ease' : 'clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 520ms, -webkit-clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 520ms, opacity 360ms ease 520ms' }}>
           <path d={geom.harvest} fill={accent} opacity="0.8" />

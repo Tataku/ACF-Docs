@@ -38,6 +38,11 @@ the intentional six-stage evidence progression. Ruling for Chart 5.2 (revised pe
 
 ### 1.2 Canonical values encoded in the charts (with sources)
 
+> **Superseded in part by §6 (live-app continuity pass, 2026-07-13).** Rows below reflect the spec-level
+> reconciliation of the first pass; where the LIVE engine diverges (FIS buckets/bands, archetypes, clamp
+> tiers, confidence derivation, momentum/throttle implementation status), **§6 governs** and the shipped
+> pages/exhibits follow §6.
+
 | Rule | Canonical value | Source |
 |---|---|---|
 | Torque sizing | 70+ → 8–15% · 60–69 → 4–8% · 50–59 → 2–4% · <50 → 0% | CIS v2.1 §10.2 · `part5AllocationBands.js` |
@@ -108,7 +113,7 @@ no hover-required meaning, no numeric axis on conceptual diagrams.
 | 5.9 | `p5-liquidity-throttle` | Liquidity & Correlation Regime Monitoring | bullet list | Three-state throttle with confirmation-gated return reads as a loop, not a list | Loop with checkpoint = "this is governed throttling, not prediction" | VIX>25 · spreads · corr>0.7 · pause/enforce/reduce 10–20% · repair 2+ weeks | `governanceLoop` | ◌ | Station sublabels dense — trim to signals only |
 | 5.10 | `p5-change-hierarchy` | Framework Parameterization & Overrides | prose + callout | Doctrine/parameter/override distinction is the governance keystone; currently a wall of bullets | Descending cascade shows narrowing scope of legitimate change | Doctrine = identity · Parameters = calibration in documented ranges · Overrides = temporary, reasoned, time-bounded, reversion conditions | `bridge` | ◌ | Three stages — low risk |
 | 6.1 | `p6-cis-composition` | CIS Components (immediately after) | callout text | Weights stated but hierarchy + "R scores survivability, not risk-taking" not visible | Weighted donut shows C-dominance instantly; center = the question CIS answers | C40/R25/M25/E10 · weights = Parameters (C 35–45 / R 20–30) · position-level only | `radial` (donut) | ◌ | Engine-proven at mobile (p4-gross-not-net) |
-| 6.2 | `p6-fis-waterfall` | After FIS Penalty Buckets table | buckets table | Subtractive attribution ("every deduction has an owner") never visualized | Waterfall from 100 → illustrative deductions → resulting band makes attribution + repairability visible | Bucket caps 25/20/15/15/15/10/10 bound the illustration; **explicitly labeled illustrative portfolio**, penalties < caps; status bands | `waterfall` (NEW) | ◌ | 7 steps at 390px — vertical compression + short labels |
+| 6.2 | `p6-fis-waterfall` | After FIS Penalty Buckets table | buckets table | Subtractive attribution ("every deduction has an owner") never visualized | Waterfall from 100 → illustrative deductions → resulting band makes attribution + repairability visible | ~~Spec caps 25/20/15/15/15/10/10~~ → **superseded by §6: live five-bucket kernel 25/15/15/15/10, shared four-band register** | `waterfall` (NEW) | ◌ | 5 steps at 390px — short labels |
 | 6.3 | `p6-cis-fis-matrix` | CIS × FIS Interaction (supplements the table) | interaction table | Independence of the two axes is the claim; a table reads as four rows, not two dimensions | 2×2 with axis semantics shows non-compensation spatially | High >80 · Low <70 · four actions | `quadrant` (cells variant) | ◌ | Quadrant stays square; cell copy ≤2 lines |
 | 6.4 | `p6-weekly-loop` | Weekly Workflow (top) | "01–04" plain-text sequence | The op cadence is the framework's heartbeat; loose numbered text | Loop with governance checkpoint + return arc; "no trigger is also a result" | 5 stations: CIS → FIS → gates → act-or-hold → log (log supported by canonical step 01) · weekly return | `governanceLoop` | ◌ | Engine-proven (dl-tripwire-loop) |
 | 6.5 | `p6-decay-drift` | Failure Modes (top) | five error callouts | Failure modes presented as separate events; the longitudinal compounding is the real lesson | Slow multi-indicator drift over unmeasured months; marked conceptual, normalized axis | 5 diagnostics (stale >90d · drift >10% · wrapper leakage · corr stacking · narrative substitution); **no invented market data — normalized conceptual series** | `single` (multi-series, normalized) | ◌ | 5 series → direct end-labels, thin context lines |
