@@ -263,7 +263,9 @@
     1: '/part-1-foundation',
     2: '/part-2-lineage-macro-thesis',
     3: '/part-3-bitcoin-convexity-backbone',
-    4: '/part-4-tax-architecture-roc-strategy'
+    4: '/part-4-tax-architecture-roc-strategy',
+    5: '/part-5-portfolio-construction-position-management',
+    6: '/part-6-convexity-framework-integrity-scoring'
   };
   var registry = null;
 

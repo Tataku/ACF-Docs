@@ -74,6 +74,7 @@
 
   <link rel="stylesheet" href="/site-b/tokens.css">
   <link rel="stylesheet" href="/site-b/reading-system.css">
+  <style id="acf-reference-integrity-fallback">.part-ref.is-pending-reference,.lineage-ref.is-pending-reference{color:inherit!important;border:0!important;background:none!important;text-decoration:none!important;cursor:default!important}.part-ref.is-pending-reference::before,.part-ref.is-pending-reference::after,.lineage-ref.is-pending-reference::before,.lineage-ref.is-pending-reference::after{content:none!important}</style>
 </head>
 <body>
   <a class="skip-link" href="#kernel">Skip to content</a>
@@ -575,5 +576,18 @@
   <script src="/site-b/site-b-charts.js" defer></script>
   <script src="/site-b/reading.js" defer></script>
   <script src="/site-b/glyph-text.js" defer></script>
+  <!-- Deep links land exactly: islands hydrate after the initial anchor jump,
+       so re-anchor once mounting settles — unless the reader has scrolled. -->
+  <script defer>
+    (function () {
+      if (!location.hash) return;
+      var moved = false;
+      addEventListener('wheel', function () { moved = true; }, { once: true, passive: true });
+      addEventListener('touchmove', function () { moved = true; }, { once: true, passive: true });
+      function re() { if (moved) return; var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView(); }
+      addEventListener('load', function () { setTimeout(re, 700); setTimeout(re, 1800); });
+    })();
+  </script>
+
 </body>
 </html>

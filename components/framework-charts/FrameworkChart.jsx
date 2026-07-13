@@ -522,7 +522,7 @@ function PlotSvg({
           const r = m.m.r || 13;
           const anc = m.m.labelAnchor === 'end' ? 'end' : m.m.labelAnchor === 'start' ? 'start' : 'middle';
           const lx = anc === 'end' ? m.cx - r - 6 : anc === 'start' ? m.cx + r + 6 : m.cx;
-          return <text key={`ml${i}`} x={lx} y={m.cy + (m.m.labelDy ?? -18)} textAnchor={anc} style={{ ...halo(pal, FS.mark, pal.text2), ...fadeAt(m.cx, TM.fast, 220) }}>{m.m.label}</text>;
+          return <text key={`ml${i}`} x={lx} y={m.cy + (m.m.labelDy ?? -18)} textAnchor={anc} style={{ ...halo(pal, FS.mark, pal.text2), strokeWidth: 5.2, ...fadeAt(m.cx, TM.fast, 220) }}>{m.m.label}</text>;
         })}
         {(panel.series || []).map((s) => {
           const g = geom.series[s.key];

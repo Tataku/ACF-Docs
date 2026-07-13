@@ -2784,6 +2784,7 @@ html[data-narrating] .shell-main { padding-bottom: var(--dock-clear); }
 /* New chart slots inserted into Part 2/3 (no static fallback): layout only, the
    React engine renders its own card. Same wide exhibit lane as live exhibits. */
 .fc-mount { max-width: min(var(--measure-feature), calc(100% - 2 * var(--feature-gutter))); margin: var(--space-8) auto; overflow-x: clip; }   /* unified feature width */
+.fc-mount:empty { min-height: 44rem; }   /* pre-hydration placeholder ≈ one exhibit card, so deep links do not land thousands of px short while islands mount */
 
 .ex-head { margin-bottom: var(--space-3); }
 .ex-eyebrow {
@@ -3365,17 +3366,15 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
    Markup: <span class="di-score" data-band="green" style="--di-fill:75%">
              <span class="di-score-kind">CIS</span>75</span>             */
 .di-score {
-  display: inline-flex; flex-direction: column; vertical-align: baseline;
+  display: inline; vertical-align: baseline;
   font-family: var(--font-mono); font-size: 0.82em; font-weight: 600;
-  color: var(--ink-body); line-height: 1.15; padding: 0 0.1em;
-  white-space: nowrap;
+  color: var(--ink-body); white-space: nowrap;
+  padding: 0 0.12em 0.16em;
+  /* the band meter is a background underline, so the chip stays a true
+     inline element and never disturbs the prose baseline */
+  background: linear-gradient(to right, var(--di-band, var(--confidence-low)) var(--di-fill, 50%), var(--rule-faint) var(--di-fill, 50%)) no-repeat left bottom / 100% 2px;
 }
 .di-score-kind { display: inline; font-weight: 500; font-size: 0.82em; color: var(--ink-micro); letter-spacing: 0.06em; margin-right: 0.4em; }
-.di-score::after {
-  content: ''; display: block; height: 2px; margin-top: 2px;
-  border-radius: 1px; background:
-    linear-gradient(to right, var(--di-band, var(--confidence-low)) var(--di-fill, 50%), var(--rule-faint) var(--di-fill, 50%));
-}
 .di-score[data-band="green"]  { --di-band: var(--confidence-high); }
 .di-score[data-band="yellow"] { --di-band: var(--chart-warn); }      /* 60–69 · monitor-gray (live register) */
 .di-score[data-band="orange"] { --di-band: var(--confidence-med); }  /* 50–59 · amber caution */
