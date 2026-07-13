@@ -2985,121 +2985,6 @@ function RangeStepsSvg({ spec, width, height, pal, accent, reduce, entered, coar
   );
 }
 
-/* ── PostureSystemSvg — the Part 5 operating system (posture roles + rotation) *
- * Torque and Ballast as peer blocks joined by two opposing brush rotation arcs
- * (the mechanism), Hype held in a smaller capped cell between gate posts, and
- * Bitcoin as a quiet full-width backbone band BENEATH the system, separated by
- * a dashed rule. Identity is carried by position + label, never color alone. */
-function PostureSystemSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
-  const svgRef = useRef(null);
-  const ps = spec.postureSystem;
-  const blk = (id) => ps.blocks.find((b) => b.id === id);
-  const torque = blk(ps.flows[1].to) || ps.blocks[0];
-  const ballast = blk(ps.flows[0].to) || ps.blocks[1];
-  const hype = ps.blocks.find((b) => b.capped) || ps.blocks[2];
-  const cxL = width * 0.265, cxR = width * 0.735, cyMain = height * 0.44;
-  const BW = Math.min(width * 0.24, 235), BH = 100;
-  const hypeC = { x: width / 2, y: 64, w: 205, h: 52 };
-  const bandTop = height - 98, bandH = 46;
-  const beltY = { top: cyMain - BH / 2 + 32, bot: cyMain + BH / 2 - 32 };
-  const portL = cxL + BW / 2, portR = cxR - BW / 2;
-
-  const geom = useMemo(() => {
-    const bez = (p0, c1, c2, p1, n = 22) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push({ x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x, y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y }); } return pts; };
-    const head = (tx, ty, ang, sc = 1) => { const ux = Math.cos(ang), uy = Math.sin(ang), px = -uy, py = ux, L = 12 * sc, W2 = 5 * sc, Nn = 8.4 * sc; return `M${tx} ${ty} L${tx - ux * L + px * W2} ${ty - uy * L + py * W2} L${tx - ux * Nn} ${ty - uy * Nn} L${tx - ux * L - px * W2} ${ty - uy * L - py * W2} Z`; };
-    const bellyUp = hypeC.y + hypeC.h / 2 + 46;
-    const harvestPts = bez({ x: portL + 6, y: beltY.top }, { x: width * 0.40, y: bellyUp }, { x: width * 0.60, y: bellyUp }, { x: portR - 8, y: beltY.top });
-    const hp = harvestPts[harvestPts.length - 1], hp2 = harvestPts[harvestPts.length - 2];
-    const harvestHead = head(hp.x, hp.y, Math.atan2(hp.y - hp2.y, hp.x - hp2.x), 1.05);
-    const bellyDn = cyMain + BH / 2 + 52;
-    const deployPts = bez({ x: portR - 8, y: beltY.bot }, { x: width * 0.60, y: bellyDn }, { x: width * 0.40, y: bellyDn }, { x: portL + 6, y: beltY.bot });
-    const dp = deployPts[deployPts.length - 1], dp2 = deployPts[deployPts.length - 2];
-    const deployHead = head(dp.x, dp.y, Math.atan2(dp.y - dp2.y, dp.x - dp2.x), 1.05);
-    return {
-      harvest: Brush.brushLine(harvestPts, { seed: 411, weight: 1.3, intensity: 0.5, taper: 0.05 }), harvestHead,
-      deploy: Brush.brushLine(deployPts, { seed: 413, weight: 1.3, intensity: 0.5, taper: 0.05 }), deployHead,
-      labUp: { x: width / 2, y: bellyUp + 26 }, labDn: { x: width / 2, y: bellyDn - 14 },
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height]);
-
-  const anchors = {
-    [torque.id]: { x: cxL, y: cyMain }, [ballast.id]: { x: cxR, y: cyMain }, [hype.id]: { x: hypeC.x, y: hypeC.y },
-    [ps.flows[0].id]: { x: geom.labUp.x, y: geom.labUp.y + 6 }, [ps.flows[1].id]: { x: geom.labDn.x, y: geom.labDn.y - 8 },
-    [ps.backbone.id]: { x: width / 2, y: bandTop + bandH / 2 },
-  };
-  const anchorOf = (a) => anchors[a.id] || null;
-  const resolve = (mx, my) => { let best = null, bd = touch ? 52 : 42; Object.entries(anchors).forEach(([id, p]) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = id; } }); return best ? targets.find((t) => t.id === best) : null; };
-  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
-  const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
-  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
-
-  const isActiveHere = active && targets.some((t) => t.id === active.id);
-  const focusId = isActiveHere ? active.id : null;
-  const anchor = isActiveHere ? anchorOf(active) : null;
-  const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
-  const dim = (id) => (focusId && focusId !== id ? 0.4 : 1);
-
-  let tooltip = null;
-  if (!coarse && isActiveHere && anchor) {
-    const meta = targets.find((t) => t.id === active.id);
-    const kindLabel = active.id === ps.backbone.id ? 'BACKBONE' : (active.id === ps.flows[0].id || active.id === ps.flows[1].id) ? 'ROTATION' : 'POSTURE';
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={kindLabel} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
-  }
-
-  const block = (b, x, y0, w, h, isP, delay) => {
-    const on = focusId === b.id;
-    return (
-      <g key={b.id} style={{ opacity: entered ? dim(b.id) : 0, transformOrigin: `${x}px ${y0}px`, transform: entered ? 'none' : 'scale(0.94)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${delay}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${delay}ms` }}>
-        <rect x={x - w / 2} y={y0 - h / 2} width={w} height={h} rx={9} fill={pal.surface} stroke={on || isP ? accent : pal.borderHi} strokeWidth={on ? 1.7 : isP ? 1.4 : 1} style={{ transition: trans('stroke') }} />
-        <text x={x} y={y0 - h / 2 + 30} textAnchor="middle" style={haloSans(pal, 14, isP ? accent : pal.text1, 700)}>{b.label}</text>
-        <text x={x} y={y0 + 4} textAnchor="middle" style={haloSans(pal, 9.5, pal.text2, 600)}>{b.role}</text>
-        {b.sub && <text x={x} y={y0 + 20} textAnchor="middle" style={halo(pal, 7.5, pal.text4)}>{b.sub}</text>}
-      </g>
-    );
-  };
-
-  return (
-    <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || 'Posture operating system'} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {/* rotation arcs — the mechanism; wipe in opposing directions */}
-        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? dim(ps.flows[0].id) : 0, transition: reduce ? 'opacity 320ms ease' : 'clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 520ms, -webkit-clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 520ms, opacity 360ms ease 520ms' }}>
-          <path d={geom.harvest} fill={accent} opacity="0.8" />
-          <path d={geom.harvestHead} fill={accent} opacity="0.9" />
-        </g>
-        <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 0 0 100%)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 0 0 100%)', opacity: entered ? dim(ps.flows[1].id) : 0, transition: reduce ? 'opacity 360ms ease' : 'clip-path 950ms cubic-bezier(0.22,0.61,0.36,1) 1050ms, -webkit-clip-path 950ms cubic-bezier(0.22,0.61,0.36,1) 1050ms, opacity 400ms ease 1050ms' }}>
-          <path d={geom.deploy} fill={accent} opacity="0.8" />
-          <path d={geom.deployHead} fill={accent} opacity="0.9" />
-        </g>
-        <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 520ms ease 1500ms' }}>
-          <text x={geom.labUp.x} y={geom.labUp.y} textAnchor="middle" style={{ ...halo(pal, 9.5, focusId === ps.flows[0].id ? accent : pal.text3), fontStyle: 'italic' }}>{ps.flows[0].label}</text>
-          <text x={geom.labDn.x} y={geom.labDn.y} textAnchor="middle" style={{ ...halo(pal, 9.5, focusId === ps.flows[1].id ? accent : pal.text3), fontStyle: 'italic' }}>{ps.flows[1].label}</text>
-        </g>
-        {/* the two rotation peers */}
-        {block(torque, cxL, cyMain, BW, BH, torque.id === spec.primaryKey, 110)}
-        {block(ballast, cxR, cyMain, BW, BH, ballast.id === spec.primaryKey, 210)}
-        {/* Hype — smaller, held between cap posts, structurally NOT a peer */}
-        <g style={{ opacity: entered ? dim(hype.id) : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 460ms ease 320ms' }}>
-          {[-1, 1].map((s) => <path key={s} d={Brush.brushSegment(hypeC.x + s * (hypeC.w / 2 + 9), hypeC.y - hypeC.h / 2 - 6, hypeC.x + s * (hypeC.w / 2 + 9), hypeC.y + hypeC.h / 2 + 6, { seed: 91 + (s + 1) * 3, weight: 1.05, intensity: 0.55, waver: 0.16 })} fill={pal.bandStress} opacity={focusId === hype.id ? 0.95 : 0.7} />)}
-          <rect x={hypeC.x - hypeC.w / 2} y={hypeC.y - hypeC.h / 2} width={hypeC.w} height={hypeC.h} rx={8} fill={pal.surface} stroke={focusId === hype.id ? accent : pal.borderHi} strokeWidth={focusId === hype.id ? 1.6 : 1} style={{ transition: trans('stroke') }} />
-          <text x={hypeC.x} y={hypeC.y - 3} textAnchor="middle" style={haloSans(pal, 12.5, pal.text1, 600)}>{hype.label}</text>
-          <text x={hypeC.x} y={hypeC.y + 12} textAnchor="middle" style={halo(pal, 7.5, pal.text4)}>{hype.role} · {hype.sub}</text>
-          {hype.capNote && <text x={hypeC.x} y={hypeC.y + hypeC.h / 2 + 16} textAnchor="middle" style={halo(pal, 7.5, pal.bandStressText || pal.text3)}>{hype.capNote}</text>}
-        </g>
-        {/* the separation rule + the backbone band — beneath the system, by rule */}
-        <g style={{ opacity: entered ? dim(ps.backbone.id) : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 560ms ease 1700ms' }}>
-          <line x1={24} x2={width - 24} y1={bandTop - 14} y2={bandTop - 14} stroke={pal.grid} strokeWidth="1" strokeDasharray="4 5" />
-          <rect x={24} y={bandTop} width={width - 48} height={bandH} rx={7} fill={pal.bandRegime} fillOpacity={0.18} stroke={focusId === ps.backbone.id ? accent : pal.bandRegime} strokeWidth={focusId === ps.backbone.id ? 1.4 : 1} strokeOpacity={0.7} style={{ transition: trans('stroke') }} />
-          <text x={width / 2} y={bandTop + 19} textAnchor="middle" style={haloSans(pal, 12.5, pal.text2, 600)}>{ps.backbone.label}</text>
-          <text x={width / 2} y={bandTop + 34} textAnchor="middle" style={halo(pal, 7.5, pal.text4)}>{ps.backbone.sub}</text>
-        </g>
-        {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
-      </svg>
-      {tooltip}
-    </div>
-  );
-}
-
 /* ── FrameworkChart (orchestrator) ──────────────────────────────────────────*/
 export default function FrameworkChart({ id, spec: specProp, theme = 'dark', accent: accentName = 'green', className, readerContext }) {
   const spec = specProp || getChartSpec(id);
@@ -3253,7 +3138,6 @@ export default function FrameworkChart({ id, spec: specProp, theme = 'dark', acc
         {spec.layout === 'laneBar' && <LaneBarSvg spec={spec} height={hh(390)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'waterfall' && <WaterfallSvg spec={spec} height={hh(440)} targets={spec.hoverTargets} {...cp} />}
         {spec.layout === 'rangeSteps' && <RangeStepsSvg spec={spec} height={hh(470)} targets={spec.hoverTargets} {...cp} />}
-        {spec.layout === 'postureSystem' && <PostureSystemSvg spec={spec} height={hh(470)} targets={spec.hoverTargets} {...cp} />}
         {(spec.layout === 'single' || !spec.layout) && (
           <PlotSvg panel={{ ...spec, label: undefined }} xDomain={spec.domain} xTicks={spec.xTicks} width={W} height={hh(426)} targets={spec.hoverTargets} showValues={showValues} {...cp} />
         )}

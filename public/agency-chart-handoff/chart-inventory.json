@@ -2478,20 +2478,20 @@
     {
       "chartId": "p5-operating-system",
       "idx": "P5-01",
-      "title": "One Portfolio. Three Behaviors. One Backbone.",
+      "title": "Three Jobs. One Cycle.",
       "group": "part-5",
       "part": "part-5",
       "status": "implemented",
       "wiredPublic": true,
-      "layout": "postureSystem",
+      "layout": "single",
       "dataMode": "conceptual",
-      "claimLabel": "PART 5 · OPERATING SYSTEM",
-      "primaryClaim": "The three postures form one capital-allocation system, not three static buckets",
-      "visualProof": "Torque and Ballast joined by two opposing rotation arcs — harvest strength one way, deploy into dislocation the other — with Hype held in a capped side cell and Bitcoin as a separate full-width backbone band beneath the system",
-      "readerAction": "Follow the two rotation arcs between Torque and Ballast, then note what sits outside them",
-      "readerTakeaway": "The postures are not static buckets — they form a capital-allocation system.",
-      "experienceRole": "diagram",
-      "visualRelationship": "flow",
+      "claimLabel": "PART 5 · THE THREE POSTURES",
+      "primaryClaim": "Each posture is a distinct behavior through the same market cycle — that behavior, not the ticker, is what the framework classifies",
+      "visualProof": "Four indexed paths through one cycle: Torque climbs hardest, draws down deepest, and finishes highest; Ballast barely moves and deploys reserves at the trough; Hype spikes on attention and is stopped out by rule; Bitcoin compounds quietly beneath the system on its own register",
+      "readerAction": "Follow each line through the stress phase and watch what it does differently",
+      "readerTakeaway": "Classify positions by how they will behave under stress — the cycle reveals the posture.",
+      "experienceRole": "mechanism",
+      "visualRelationship": "trend",
       "storyBeats": [
         {
           "kind": "context",
@@ -2515,20 +2515,22 @@
         "conceptMatch": null
       },
       "motionProfile": {
-        "type": "diagramBuild",
+        "type": "timeSweep",
         "duration": "calm"
       },
       "motionTiming": {
-        "sweepMs": 1400,
-        "fastMs": 520,
-        "mediumMs": 1000,
-        "staggerMs": 160
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
       },
-      "backgroundRoles": [],
+      "backgroundRoles": [
+        "regime"
+      ],
       "mobileBehavior": {
         "interaction": "tap-cycle",
         "chartHeight": "tall",
-        "note": "Blocks keep their roles legible; tap a posture or flow to read its job. The backbone band stays full-width."
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
       },
       "tryThis": null,
       "tryThisMobile": null,
@@ -2538,7 +2540,7 @@
       "sources": [
         {
           "provider": "ACF · Part 5",
-          "label": "Three-posture classification and rotation governance",
+          "label": "Three-posture classification, rotation governance, and Hype exit rules",
           "seriesId": null,
           "role": "verifies-concept",
           "url": "/part-5-portfolio-construction-position-management"
@@ -2551,7 +2553,7 @@
           "url": "/part-3-bitcoin-convexity-backbone"
         }
       ],
-      "agencyNotes": "Signature Part 5 exhibit on the NEW postureSystem layout: Torque and Ballast as peer blocks joined by two opposing brush rotation arcs (the mechanism), Hype in a smaller capped side cell with a bracket, Bitcoin as a low-contrast full-width band beneath. Posture identity is carried by position and label, never by color alone (engine tier palette; accent marks Torque as the thesis block)."
+      "agencyNotes": "REWORKED (owner review, 2026-07-13): replaced the postureSystem block diagram — which labelled the postures without showing them — with a single-layout behavioral-signature plot. Four p5Cycle paths through one stylized cycle: Torque (primary/accent) peak-to-trough ≈−59% inside the stated 50–70% band; Ballast (secondary) near-flat with the trough enso marking the rotation moment; Hype (stress tier) spike-and-collapse TERMINATING at an ink-dot stop-out (no recovery path — the terminal dot IS the claim); Bitcoin (tertiary dashed) as a quiet low register with the never-rotation-capital note. Stress phase carries the engine pressure-field band. Zero engine changes — pure PlotSvg reuse; the dead postureSystem layout was removed engine-wide in the same slice."
     },
     {
       "chartId": "p5-earned-size",

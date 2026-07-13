@@ -85,7 +85,7 @@ export const DISCLOSURE = {
 
 export const DATA_MODES = ['representative', 'historical', 'simulation', 'conceptual'];
 export const SOURCE_ROLES = ['verifies-concept', 'backs-series', 'methodology', 'target-source'];
-export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar', 'waterfall', 'rangeSteps', 'postureSystem'];
+export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar', 'waterfall', 'rangeSteps'];
 
 // Visual-relationship grammar — DEFINITIONS live in the shared, downward-only
 // chart-core/grammar.mjs (leaf); re-exported here under the same names so the
@@ -190,7 +190,7 @@ export function resolveMotionProfile(spec) {
   if (spec.motionProfile && spec.motionProfile.type) return spec.motionProfile;
   // radial (arcs) and laneBar (bars) build like diagrams — staged reveal of the
   // composition/comparison, not a left→right time sweep.
-  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant', 'radial', 'laneBar', 'waterfall', 'rangeSteps', 'postureSystem'];
+  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant', 'radial', 'laneBar', 'waterfall', 'rangeSteps'];
   let type = 'timeSweep';
   if (diagrams.includes(spec.layout)) type = 'diagramBuild';
   else if (spec.layout === 'scenario') type = 'scenarioUpdate';
@@ -227,7 +227,7 @@ export function resolveExperienceRole(spec) {
   if (L === 'radial') return 'evidence';
   if (L === 'waterfall') return 'mechanism';
   if (L === 'rangeSteps') return 'comparison';
-  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant', 'postureSystem'].includes(L)) return 'diagram';
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
   return 'evidence';
 }
 
@@ -261,7 +261,6 @@ export function resolveMobileBehavior(spec) {
   if (L === 'laneBar') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Bars stack full-width; keep the aligned compare segment and the difference callout legible; tap a segment to inspect.' };
   if (L === 'waterfall') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Deduction steps need vertical room; tap a step to inspect its bucket and cap.' };
   if (L === 'rangeSteps') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Range columns stack tight on touch; tap a band to read its rule. Guardrail labels stay outside the columns.' };
-  if (L === 'postureSystem') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Blocks keep their roles legible; tap a posture or flow to read its job. The backbone band stays full-width.' };
   if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
   return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Tap to cycle elements; keep the thesis line and labels legible.' };
 }
@@ -728,6 +727,43 @@ const p5Earnings = (() => {
   const hold = [{ x: 5, y: 3 }, { x: 10, y: 3 }, { x: 15, y: 3 }];
   const exit = [{ x: 5, y: 3 }, { x: 6, y: 2.1 }, { x: 7, y: 0.9 }, { x: 8, y: 0 }, { x: 15, y: 0 }];
   return { held, rebuild, hold, exit };
+})();
+
+// Part 5 · the posture cycle — CONCEPTUAL behavioral signatures of the three
+// postures + the separately governed backbone through ONE stylized market cycle
+// (advance → stress → recovery). Indexed shapes (start = 1), not returns: the
+// exhibit teaches BEHAVIOR — what climbs and crashes and finishes highest
+// (Torque), what refuses to move (Ballast), what spikes and stops out (Hype),
+// and what compounds untouched beneath the system (Bitcoin, drawn low as its
+// own register). Catmull-Rom through waypoints + deterministic micro-noise.
+const p5Cycle = (() => {
+  const shape = (wps, n, seed, amp) => {
+    const rng = mulberry32(seed);
+    const P = [wps[0], ...wps, wps[wps.length - 1]];
+    const segs = wps.length - 1;
+    const out = [];
+    for (let i = 0; i <= n; i++) {
+      const u = (i / n) * segs;
+      const k = Math.min(Math.floor(u), segs - 1);
+      const t = u - k, t2 = t * t, t3 = t2 * t;
+      const cr = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+      const p0 = P[k], p1 = P[k + 1], p2 = P[k + 2], p3 = P[k + 3];
+      let y = cr(p0[1], p1[1], p2[1], p3[1]);
+      if (amp) y += (rng() - 0.5) * amp;
+      out.push({ x: R(cr(p0[0], p1[0], p2[0], p3[0])), y: R(y) });
+    }
+    return out;
+  };
+  return {
+    // peak 2.12 → trough 0.86 ≈ −59% (inside the stated 50–70% band); ends highest.
+    torque: shape([[0, 1], [1.6, 1.3], [3.1, 1.74], [4.2, 2.12], [4.8, 2.0], [5.6, 1.26], [6.1, 0.86], [7, 1.24], [8.2, 1.9], [9.2, 2.5], [10, 2.92]], 80, 31, 0.04),
+    ballast: shape([[0, 1], [2, 1.08], [4.2, 1.16], [5.2, 1.1], [6.1, 1.03], [7.2, 1.11], [8.6, 1.21], [10, 1.3]], 64, 37, 0.018),
+    // spikes on attention, collapses when the story breaks, ENDS at the stop.
+    hype: shape([[0, 1], [1.6, 1.04], [2.7, 1.24], [3.6, 1.8], [4.35, 2.5], [4.95, 2.02], [5.45, 1.48], [5.9, 1.16]], 48, 41, 0.045),
+    // quiet compounding register beneath the system (vertical position is a
+    // register separator, not a relative-performance claim — stated in caution).
+    bitcoin: shape([[0, 0.5], [2.2, 0.58], [4.2, 0.7], [5.4, 0.58], [6.2, 0.54], [7.6, 0.68], [9, 0.8], [10, 0.84]], 64, 43, 0.014),
+  };
 })();
 
 // Part 6 · slow framework decay — CONCEPTUAL normalized diagnostics (100 = measured
@@ -2259,54 +2295,60 @@ export const FRAMEWORK_CHART_SPECS = [
   /* ── PART 5 · PORTFOLIO CONSTRUCTION & POSITION MANAGEMENT ─────────────── */
   {
     chartId: 'p5-operating-system', idx: 'P5-01', group: 'part-5', intendedPlacement: 'part-5',
-    experienceRole: 'diagram',
+    experienceRole: 'mechanism',
     claimStack: {
-      primaryClaim: 'The three postures form one capital-allocation system, not three static buckets',
-      visualProof: 'Torque and Ballast joined by two opposing rotation arcs — harvest strength one way, deploy into dislocation the other — with Hype held in a capped side cell and Bitcoin as a separate full-width backbone band beneath the system',
-      interactionRole: 'Hover a posture, a rotation arc, or the backbone to read the job it performs',
-      readerAction: 'Follow the two rotation arcs between Torque and Ballast, then note what sits outside them',
-      caution: 'Conceptual system diagram; aggregate posture ranges are thesis-conditional parameters and are stated in the adjacent tables, not asserted here',
+      primaryClaim: 'Each posture is a distinct behavior through the same market cycle — that behavior, not the ticker, is what the framework classifies',
+      primaryClaimNote: 'one stylized cycle: advance, stress, recovery',
+      visualProof: 'Four indexed paths through one cycle: Torque climbs hardest, draws down deepest, and finishes highest; Ballast barely moves and deploys reserves at the trough; Hype spikes on attention and is stopped out by rule; Bitcoin compounds quietly beneath the system on its own register',
+      interactionRole: 'Hover a path, the rotation moment, or the stop-out to read the behavior that defines it',
+      readerAction: 'Follow each line through the stress phase and watch what it does differently',
+      caution: 'Conceptual behavioral signatures on one stylized cycle — indexed shapes, not returns or forecasts; the backbone is drawn low to mark its separate register, not as a relative-performance claim',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'One Portfolio. Three Behaviors. One Backbone.', setupLine: 'Construction assigns behavior before it sorts tickers',
-    claimLabel: 'PART 5 · OPERATING SYSTEM',
-    frameworkClaim: 'Portfolio construction begins by assigning behavior: Torque compounds the thesis, Ballast preserves the ability to act, Hype captures reflexivity without becoming load-bearing, and Bitcoin remains separately governed beneath the system.',
-    readerTakeaway: 'The postures are not static buckets — they form a capital-allocation system.',
-    chartType: 'Posture operating-system diagram: two rotation arcs between Torque and Ballast, a capped Hype cell, and a separately governed Bitcoin backbone band.',
+    title: 'Three Jobs. One Cycle.', setupLine: 'How each posture behaves when the market advances, breaks, and recovers',
+    claimLabel: 'PART 5 \u00b7 THE THREE POSTURES',
+    frameworkClaim: 'Posture is assigned by expected behavior: Torque carries the upside and absorbs the drawdown, Ballast holds steady and funds the buy, Hype is capped and pre-committed to exit, and Bitcoin compounds beneath the system under its own Part 3 rules.',
+    readerTakeaway: 'Classify positions by how they will behave under stress \u2014 the cycle reveals the posture.',
+    chartType: 'Behavioral-signature plot: four indexed paths through one stylized market cycle (advance \u00b7 stress \u00b7 recovery), with the rotation moment and the Hype stop-out marked.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF · Part 5', label: 'Three-posture classification and rotation governance', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
-      { provider: 'ACF · Part 3', label: 'Bitcoin as the separately governed convexity backbone', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+      { provider: 'ACF \u00b7 Part 5', label: 'Three-posture classification, rotation governance, and Hype exit rules', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF \u00b7 Part 3', label: 'Bitcoin as the separately governed convexity backbone', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
     ],
-    explainerHeadline: 'Behavior is assigned first; tickers come later.',
-    explainerBody: 'Torque owns the structural force and carries the upside. Ballast withstands stress and supplies the rotation capital — trimmed into after Torque runs, deployed from during dislocations. Hype trades the narrative under hard caps and is never allowed to carry load. Bitcoin sits beneath the system under its own Part 3 rules: it is not a posture and it is never rotation capital.',
+    explainerHeadline: 'The cycle is the classifier.',
+    explainerBody: 'Run any position through a full cycle in your head and its posture declares itself. If it climbs with the thesis, collapses hard in stress, and recovers to new highs because the structural force persists \u2014 that is Torque. If it barely moves and is liquid exactly when everything else is on sale \u2014 that is Ballast, and the trough is where it earns its keep. If it spikes on attention and has no floor when the story breaks \u2014 that is Hype, and the stop was decided at entry. Bitcoin does none of these jobs: it compounds beneath the system under Part 3 rules and is never rotation capital.',
     explainerConcept: 'Posture',
     concepts: [{ label: 'Posture', link: '/part-5-portfolio-construction-position-management' }, { label: 'Ballast', link: '/part-5-portfolio-construction-position-management' }, { label: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' }],
-    layout: 'postureSystem',
-    ariaSummary: 'A system diagram. Two large blocks, Torque and Ballast, are connected by two opposing arrows: harvest strength flows from Torque to Ballast, and deploy into dislocation flows from Ballast back to Torque. A smaller Hype block sits to the side inside a cap bracket labelled never load-bearing. A full-width Bitcoin band runs beneath the whole system, labelled separately governed convexity backbone.',
-    postureSystem: {
-      blocks: [
-        { id: 'torque', label: 'Torque', role: 'Own the structural force', sub: 'compounds the thesis' },
-        { id: 'ballast', label: 'Ballast', role: 'Preserve the ability to act', sub: 'reserves · rotation capital' },
-        { id: 'hype', label: 'Hype', role: 'Trade the narrative', sub: 'never load-bearing', capped: true, capNote: '≤5% each · ≤10% aggregate' },
-      ],
-      flows: [
-        { id: 'harvest', from: 'torque', to: 'ballast', label: 'harvest strength' },
-        { id: 'deploy', from: 'ballast', to: 'torque', label: 'deploy into dislocation' },
-      ],
-      backbone: { id: 'bitcoin', label: 'Bitcoin', sub: 'separately governed convexity backbone · never rotation capital' },
-    },
+    layout: 'single',
+    ariaSummary: 'Four indexed value paths cross one stylized market cycle divided into advance, stress, and recovery phases. Torque climbs steepest, falls roughly sixty percent through the stress phase, and recovers to finish highest. Ballast stays nearly flat the whole way, dipping slightly in stress; an enso ring at the trough marks the rotation moment where reserves deploy into Torque. Hype spikes fastest during the advance, collapses in stress, and terminates at a dot marked stopped out by rule \u2014 it has no recovery path. A low dashed Bitcoin line compounds quietly beneath the whole system, labelled separately governed.',
+    domain: { xMin: 0, xMax: 10, yMin: 0.3, yMax: 3.05 }, yUnit: 'indexed \u00b7 conceptual',
+    xTicks: [{ v: 2.1, label: 'advance' }, { v: 5.5, label: 'stress' }, { v: 8.4, label: 'recovery' }],
+    yTicks: [{ v: 1, label: 'start' }],
+    bands: [
+      { id: 'stress', kind: 'shock', x0: 4.2, x1: 6.8, seed: 47, intensity: 0.72, label: 'liquidity leaves \u00b7 correlation rises', labelAnchor: 'peak' },
+    ],
+    markers: [
+      { id: 'deploy', type: 'enso', x: 6.1, y: 0.86, r: 11, label: 'Ballast deploys here', labelAnchor: 'start', labelDy: 26 },
+      { id: 'stop', type: 'dot', x: 5.9, y: 1.16, r: 4.5, label: 'Hype \u00b7 stopped out by rule', labelAnchor: 'middle', labelDy: -14 },
+    ],
+    notes: [{ x: 8.3, y: 0.52, text: 'backbone \u00b7 never rotation capital', anchor: 'middle' }],
+    series: [
+      { key: 'torque', tier: 'primary', label: 'Torque', pts: p5Cycle.torque },
+      { key: 'ballast', tier: 'secondary', label: 'Ballast', pts: p5Cycle.ballast, labelDy: -2 },
+      { key: 'hype', tier: 'stress', pts: p5Cycle.hype },
+      { key: 'bitcoin', tier: 'tertiary', label: 'Bitcoin \u00b7 Part 3', pts: p5Cycle.bitcoin, labelDy: 2 },
+    ],
     primaryKey: 'torque',
     hoverTargets: [
-      { id: 'torque', kind: 'node', label: 'Torque', name: 'Torque · own the structural force', why: 'Controlled convexity placed on regime forces that are real, durable, and capital-backed. Nonlinear upside with businesses built to survive temporary price collapse.', claim: 'Torque compounds the thesis.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'ballast', kind: 'node', label: 'Ballast', name: 'Ballast · preserve the ability to act', why: 'Stress-resilient reserves that fund disciplined buying. Ballast is rotation capital, not dead weight — it is what makes holding Torque through drawdowns possible.', claim: 'Ballast preserves optionality.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'hype', kind: 'node', label: 'Hype', name: 'Hype · capped, never load-bearing', why: 'Narrative-driven convexity with no floor when the story breaks. Hard caps — five percent per position, ten percent aggregate — keep it from ever carrying the portfolio.', claim: 'Hype is capped by rule, not by mood.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'harvest', kind: 'node', label: 'Harvest strength', name: 'Harvest strength → Ballast', why: 'After Torque runs, a controlled trim converts concentration back into reserves. Conviction stays; concentration is what gets trimmed.', claim: 'Strength is harvested, not admired.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'deploy', kind: 'node', label: 'Deploy into dislocation', name: 'Deploy Ballast → Torque', why: 'During liquidity stress or a thesis-confirming drawdown, Ballast buys convex assets while they are temporarily mispriced — without forced selling and without touching Bitcoin.', claim: 'Reserves exist to be deployed.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'bitcoin', kind: 'node', label: 'Bitcoin backbone', name: 'Bitcoin · separately governed', why: 'Held under Part 3 rules in cold storage, excluded from posture rotation and from concentration limits. It funds nothing in this loop; the system runs above it.', claim: 'The backbone is never rotation capital.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'torque', kind: 'series', seriesKey: 'torque', label: 'Torque', name: 'Torque \u00b7 carries the upside', why: 'Climbs hardest, falls hardest, finishes highest. The drawdown through stress \u2014 50 to 70 percent is normal \u2014 is the price of convexity; sizing and Ballast exist to make that price payable.', claim: 'Torque compounds the thesis.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'ballast', kind: 'series', seriesKey: 'ballast', label: 'Ballast', name: 'Ballast \u00b7 refuses to move', why: 'Engineered to hold steady while Torque swings: fortress balance sheets, durable cash flow, low correlation. Its flatness is not a lack of ambition \u2014 it is the reserve that makes holding Torque possible.', claim: 'Ballast preserves the ability to act.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'deploy', kind: 'marker', label: 'The rotation moment', name: 'The trough \u00b7 reserves deploy', why: 'This is where Ballast earns its space: at the bottom of the stress phase, reserves buy Torque while it is temporarily mispriced \u2014 no forced selling, no outside cash, and Bitcoin untouched.', claim: 'Reserves exist for this moment.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'hype', kind: 'series', seriesKey: 'hype', label: 'Hype', name: 'Hype \u00b7 rides the narrative', why: 'Spikes fastest because attention is reflexive \u2014 price drives interest drives price. There is no floor underneath when the loop breaks, which is why Hype is capped at 5 percent per position and 10 percent in aggregate.', claim: 'Hype is never load-bearing.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'stop', kind: 'marker', label: 'The stop-out', name: 'Stopped out \u00b7 by rule', why: 'Hype does not get a recovery arc. A pre-committed stop ends the position mechanically \u2014 no widening, no averaging down, no reclassifying it to Torque to avoid taking the loss.', claim: 'The exit was decided at entry.', concept: 'Stop-loss', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'bitcoin', kind: 'series', seriesKey: 'bitcoin', label: 'Bitcoin', name: 'Bitcoin \u00b7 separately governed', why: 'The backbone compounds beneath the system under Part 3 rules. It is not a posture, it is excluded from rotation and concentration limits, and nothing in the cycle above is allowed to touch it.', claim: 'The backbone is never rotation capital.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
     ],
-    mobileTapTargets: ['torque', 'ballast', 'hype', 'harvest', 'deploy', 'bitcoin'],
-    implementationNotes: 'Signature Part 5 exhibit on the NEW postureSystem layout: Torque and Ballast as peer blocks joined by two opposing brush rotation arcs (the mechanism), Hype in a smaller capped side cell with a bracket, Bitcoin as a low-contrast full-width band beneath. Posture identity is carried by position and label, never by color alone (engine tier palette; accent marks Torque as the thesis block).',
+    mobileTapTargets: ['torque', 'ballast', 'deploy', 'hype', 'stop', 'bitcoin'],
+    implementationNotes: 'REWORKED (owner review, 2026-07-13): replaced the postureSystem block diagram \u2014 which labelled the postures without showing them \u2014 with a single-layout behavioral-signature plot. Four p5Cycle paths through one stylized cycle: Torque (primary/accent) peak-to-trough \u2248\u221259% inside the stated 50\u201370% band; Ballast (secondary) near-flat with the trough enso marking the rotation moment; Hype (stress tier) spike-and-collapse TERMINATING at an ink-dot stop-out (no recovery path \u2014 the terminal dot IS the claim); Bitcoin (tertiary dashed) as a quiet low register with the never-rotation-capital note. Stress phase carries the engine pressure-field band. Zero engine changes \u2014 pure PlotSvg reuse; the dead postureSystem layout was removed engine-wide in the same slice.',
   },
 
   {
