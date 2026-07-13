@@ -174,23 +174,6 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     if (rs.footRail) ok(Array.isArray(rs.footRail.items) && rs.footRail.items.length >= 2, `${w} rangeSteps footRail needs items`);
     ok(stepIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a rangeSteps step`);
     ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
-  } else if (s.layout === 'postureSystem') {
-    // posture operating system: blocks + rotation flows + a separate backbone band
-    const ps = s.postureSystem;
-    ok(ps && Array.isArray(ps.blocks) && ps.blocks.length === 3, `${w} postureSystem needs exactly 3 posture blocks`);
-    const blockIds = ps.blocks.map((b) => b.id);
-    ok(new Set(blockIds).size === blockIds.length, `${w} postureSystem has duplicate block ids`);
-    ps.blocks.forEach((b) => ok(b.label && b.role, `${w} postureSystem block ${b.id} needs label + role`));
-    ok(Array.isArray(ps.flows) && ps.flows.length === 2, `${w} postureSystem needs the two rotation flows`);
-    ps.flows.forEach((f) => {
-      ok(blockIds.includes(f.from) && blockIds.includes(f.to), `${w} postureSystem flow ${f.id} references missing blocks`);
-      ok(f.label, `${w} postureSystem flow ${f.id} needs a label`);
-    });
-    ok(ps.backbone && ps.backbone.id && ps.backbone.label, `${w} postureSystem needs the backbone band`);
-    const allIds = [...blockIds, ...ps.flows.map((f) => f.id), ps.backbone.id];
-    ok(new Set(allIds).size === allIds.length, `${w} postureSystem has colliding ids`);
-    ok(allIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a postureSystem element`);
-    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else if (s.layout === 'heartbeat') {
     // representative valuation heartbeat + DCA unit pulses
     ok(s.heartbeat && Array.isArray(s.heartbeat.price) && s.heartbeat.price.length > 2, `${w} heartbeat needs a price path`);

@@ -845,7 +845,7 @@
     "p5-operating-system": {
       "chartId": "p5-operating-system",
       "idx": "P5-01",
-      "title": "One Portfolio. Three Behaviors. One Backbone.",
+      "title": "Three Jobs. One Cycle.",
       "part": 5,
       "route": "/part-5-portfolio-construction-position-management",
       "hash": "#exhibit-p5-operating-system",
@@ -854,7 +854,7 @@
     "P5-01": {
       "chartId": "p5-operating-system",
       "idx": "P5-01",
-      "title": "One Portfolio. Three Behaviors. One Backbone.",
+      "title": "Three Jobs. One Cycle.",
       "part": 5,
       "route": "/part-5-portfolio-construction-position-management",
       "hash": "#exhibit-p5-operating-system",
@@ -1326,7 +1326,7 @@
   },
   "audit": {
     "pages": 8,
-    "anchors": 168,
+    "anchors": 172,
     "chartSpecs": 45,
     "liveChartMounts": 52,
     "glossaryTerms": 26,

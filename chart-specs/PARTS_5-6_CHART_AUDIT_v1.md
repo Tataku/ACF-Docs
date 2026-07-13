@@ -193,3 +193,36 @@ Added to `reading-system.css` (namespaced `.di-*`, tokens-only, light/dark autom
 **band register** (the shared four-band strip CIS and FIS both read), **allocation bar** (the case-study
 composition strip on posture tokens — the honest CSS-native treemap). Applied across Parts 5–6; never inside
 dark insight callouts (contrast), meaning never color-alone.
+
+---
+
+## 7. P5-01 rework + Part 5 humanization pass (2026-07-13, owner review round 2)
+
+Owner findings: (a) Part 5 voice read less humanized than Parts 1–4; (b) the first-time
+introduction of Torque/Ballast/Hype carried no visual emphasis; (c) the P5-01 postureSystem
+block diagram "labelled the postures without showing them" — terrible as a first exhibit.
+
+**P5-01 reworked** — same `chartId` (`p5-operating-system`), new proposition: a `single`-layout
+**behavioral-signature plot**. Four `p5Cycle` indexed paths (Catmull-Rom waypoint curves,
+deterministic micro-noise) through ONE stylized cycle (advance · stress · recovery): Torque
+(primary) peak-to-trough ≈ −59% inside the stated 50–70% band, recovers highest; Ballast
+(secondary) near-flat with a trough **enso marking the rotation moment** ("Ballast deploys
+here"); Hype (stress tier) spike-and-collapse **terminating at an ink-dot stop-out** — the
+absent recovery path IS the claim; Bitcoin (tertiary dashed) as a quiet low register with the
+never-rotation-capital note (caution states the low placement is registral, not a
+relative-performance claim). Zero engine changes — pure PlotSvg reuse. The now-dead
+`postureSystem` layout (renderer + validator branch + LAYOUTS/grammar entries) was **removed
+engine-wide**; its only consumer was P5-01 v1.
+
+**Posture-introduction register** — two new components in `reading-system.css` on the same
+`--posture-*-fg` tokens as the `.di-*` register (tokens-only, both themes, reduced-motion
+safe, identity never color-alone): `.posture-trio`/`.posture-card` (three linked definition
+cards at the postures' first appearance — name, role, one behavioral sentence, sizing stats)
+and `.posture-hero`/`.ph-stat` (at-a-glance identity strip opening each posture section:
+Torque 3–15% · 40–60% · 50–70% dd; Ballast 2–8% · 20–35% · 15% min reserve; Hype 2–5% ·
+≤10% cap · 15–25% stop).
+
+**Humanization pass** — full-page prose rewrite toward the Parts 1–4 register (shorter
+declaratives, explain-then-name, narrative connective tissue) with every numeric value and
+every live-vs-doctrine attribution from §6.1 preserved verbatim. Tables, steppers,
+callouts, gloss ids, di-* elements, anchors, and the chart set (10 islands) unchanged.
