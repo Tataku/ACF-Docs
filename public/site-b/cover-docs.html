@@ -222,6 +222,31 @@
 
       </section>
 
+      <!-- Landing exhibits: the two lenses the framework thinks with. Live
+           FrameworkChart islands (site-b-charts.js) with supporting copy — a
+           chart never stands on the page without prose holding it. -->
+      <section class="dc-lens" id="lens" aria-labelledby="dc-lens-title" data-reveal>
+        <div class="dc-parts-head">
+          <p class="dc-parts-eyebrow">Before you read</p>
+          <h2 class="dc-parts-title" id="dc-lens-title">Two pictures the framework thinks with</h2>
+          <p class="dc-parts-lede">The six Parts build an operating system. These are the lenses it looks through.</p>
+        </div>
+
+        <div class="measure prose">
+          <p>The framework&rsquo;s first habit is environment awareness. Growth and inflation split markets into four seasons, and the leadership that wins in one loses in another &mdash; hard assets in stagflation, duration in deflation, risk-on growth in goldilocks. Before any position is sized, ACF asks the question this map asks: <em>which quadrant is capital moving through, and what does that weather reward?</em> Trace the representative path below and end on the live &ldquo;Now&rdquo; reading &mdash; position is re-read every season, never assumed.</p>
+        </div>
+        <figure class="fc-mount" id="exhibit-dl-regime-map" data-fc-chart="dl-regime-map"></figure>
+
+        <div class="measure prose">
+          <p>Reading the weather is half the discipline. The other half is patience about when to act on it. The framework waits for windows where the downside is defined first and the upside is allowed to accelerate &mdash; compression, then confirmation, then asymmetric release. Most of the time that means doing very little; when the window opens, it means already being positioned.</p>
+        </div>
+        <figure class="fc-mount" id="exhibit-dl-convexity-window" data-fc-chart="dl-convexity-window"></figure>
+
+        <div class="measure prose">
+          <p>Everything that follows builds on these two habits &mdash; read the environment, then wait for the window. Part 1 starts where the framework does: with the philosophy that makes both habits executable.</p>
+        </div>
+      </section>
+
       <section class="dc-resources" aria-label="Resources">
         <p class="dc-res-head">Resources</p>
         <div class="dc-res-grid">
@@ -361,6 +386,8 @@
     </footer>
   </div>
 
+  <!-- Chart islands (landing exhibits hydrate the fc-mount figures) -->
+  <script src="/site-b/site-b-charts.js" defer></script>
   <!-- Shared progressive enhancement (theme, read badges, resume) -->
   <script src="/site-b/reading.js" defer></script>
   <!-- Shared hero field (accumulation dot-matrix) -->
