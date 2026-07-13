@@ -50,6 +50,17 @@ function nearPoly(px, py, pts) {
   }
   return { d: best, i: bi };
 }
+// Hit thresholds are authored in design-space units, but a finger lands in
+// SCREEN pixels: at mobile render scale a "20-unit" zone in a 1000-wide design
+// space is ~7px on screen — far under the 44px touch standard. On touch,
+// inflate thresholds by the design→screen ratio so hit zones are screen-true;
+// capped so a phone never grows a zone past ~3.2× (adjacent targets stay
+// separable — nearest-wins resolution handles the rest).
+function hitScale(svgEl, designW, touch) {
+  if (!touch || !svgEl) return 1;
+  const w = svgEl.getBoundingClientRect().width;
+  return w > 0 ? Math.max(1, Math.min(3.2, designW / w)) : 1;
+}
 function tierColor(tier, pal, accent) {
   switch (tier) {
     case 'primary': return accent;
@@ -273,10 +284,17 @@ function FocusChip({ t, anchor, coarse, pinned, onActive, onPin, mkActive }) {
 
 /* ── PlotSvg — single chart or one dual panel (time-series family) ───────────*/
 function PlotSvg({
-  panel, xDomain, xTicks, hideX, width, height, pal, accent, reduce, entered, coarse, touch,
+  panel, xDomain, xTicks, hideX, width: widthProp, height, pal, accent, reduce, entered, coarse, touch,
   targets, active, pinned, onActive, onPin, showValues = true, valueNote = 'TRUE VALUE', bandReveal = 1, motion, readerContext,
 }) {
   const svgRef = useRef(null);
+  // Mobile is a narrower DESIGN SPACE, not a shrunk desktop: at 560 units the
+  // same user-px type renders ~1.8× larger on a phone (mirrors the approved
+  // feedbackLoop mobile doctrine — re-author the space, never just scale down).
+  const width = coarse ? 560 : widthProp;
+  const FS = coarse
+    ? { axis: 11, unit: 10.5, tick: 10.5, band: 10.5, area: 10.5, mark: 10.5, endP: 12.5, endS: 12, note: 12 }
+    : { axis: 10, unit: 9, tick: 9, band: 9.5, area: 9.5, mark: 9.5, endP: 11.5, endS: 11, note: 11.5 };
   const dom = { ...xDomain, ...panel.domain };
   const labels = (panel.series || []).filter((s) => s.label).map((s) => s.label);
   const longest = labels.reduce((m, l) => Math.max(m, l.length), 0);
@@ -328,7 +346,8 @@ function PlotSvg({
     });
     (panel.markers || []).forEach((m) => {
       const cx = x(m.x), cy = y(m.y);
-      out.markers.push({ m, cx, cy, d: m.type === 'enso' ? Brush.enso(cx, cy, m.r || 13, { seed: 97, weight: 0.85, intensity: 0.85, gapAngle: -Math.PI / 3 }) : Brush.inkDot(cx, cy, m.r || 3, { seed: 83, intensity: 0.85 }) });
+      const mr = (m.r || (m.type === 'enso' ? 13 : 3)) * (coarse ? 1.3 : 1);   // imagery holds its visual weight in the narrow mobile space
+      out.markers.push({ m, cx, cy, d: m.type === 'enso' ? Brush.enso(cx, cy, mr, { seed: 97, weight: 0.85, intensity: 0.85, gapAngle: -Math.PI / 3 }) : Brush.inkDot(cx, cy, mr, { seed: 83, intensity: 0.85 }) });
     });
     (panel.levels || []).forEach((lv) => { out.levels.push({ lv, yPx: y(lv.y), d: Brush.brushSegment(pad.l, y(lv.y), width - pad.r, y(lv.y), { seed: 67, weight: 0.6, intensity: 0.85, waver: 0.5 }) }); });
     (panel.guides || []).forEach((gd) => { out.guides.push({ gd, yPx: y(gd.y) }); });
@@ -346,12 +365,12 @@ function PlotSvg({
     return null;
   }, [geom, width, pad.r, pad.t]);
 
-  const resolve = useCallback((mx, my) => {
+  const resolve = useCallback((mx, my, k = 1) => {
     const mine = targets;
-    for (const t of mine) if (t.kind === 'marker') { const m = geom.markers.find((mm) => mm.m.id === t.id); if (m && Math.hypot(mx - m.cx, my - m.cy) < HIT.marker) return { ...t }; }
-    for (const t of mine) if (t.kind === 'level') { const lv = geom.levels.find((l) => l.lv.id === t.id) || geom.guides.find((g) => g.gd.id === t.id); if (lv && Math.abs(my - lv.yPx) < HIT.level && mx > pad.l && mx < width - pad.r) return { ...t }; }
+    for (const t of mine) if (t.kind === 'marker') { const m = geom.markers.find((mm) => mm.m.id === t.id); if (m && Math.hypot(mx - m.cx, my - m.cy) < HIT.marker * k) return { ...t }; }
+    for (const t of mine) if (t.kind === 'level') { const lv = geom.levels.find((l) => l.lv.id === t.id) || geom.guides.find((g) => g.gd.id === t.id); if (lv && Math.abs(my - lv.yPx) < HIT.level * k && mx > pad.l && mx < width - pad.r) return { ...t }; }
     const order = [...mine].filter((t) => t.kind === 'series').sort((a, b) => (a.seriesKey === primary.key ? -1 : b.seriesKey === primary.key ? 1 : 0));
-    for (const t of order) { const g = geom.series[t.seriesKey]; if (!g) continue; const dp = nearPoly(mx, my, g.px); if (dp.d < HIT.line) return { ...t, dataIdx: dp.i }; }
+    for (const t of order) { const g = geom.series[t.seriesKey]; if (!g) continue; const dp = nearPoly(mx, my, g.px); if (dp.d < HIT.line * k) return { ...t, dataIdx: dp.i }; }
     for (const t of mine) if (t.kind === 'band') { const b = geom.bands[0]; if (b && mx >= b.x0 && mx <= b.x1 && my >= b.yTop && my <= b.yBot) return { ...t }; }
     const pg = geom.series[primary.key];
     if (pg) { const idx = Math.max(0, Math.min(pg.px.length - 1, Math.round(((mx - pad.l) / (width - pad.l - pad.r)) * (pg.px.length - 1)))); const pt = targets.find((t) => t.kind === 'series' && t.seriesKey === primary.key); if (pt) return { ...pt, dataIdx: idx, fallback: true }; }
@@ -361,7 +380,7 @@ function PlotSvg({
   const toViewBox = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; const [mx, my] = toViewBox(e); onActive(resolve(mx, my), 'hover'); };
   const onLeave = () => { if (!coarse && !pinned) onActive(null, 'hover'); };
-  const onClick = (e) => { const [mx, my] = toViewBox(e); const res = resolve(mx, my); if (coarse) { onActive(res, 'tap'); return; } if (!res || res.fallback) { onPin(null); return; } onPin(res); };
+  const onClick = (e) => { const [mx, my] = toViewBox(e); const res = resolve(mx, my, hitScale(svgRef.current, width, touch)); if (coarse) { onActive(res, 'tap'); return; } if (!res || res.fallback) { onPin(null); return; } onPin(res); };
   const mkActive = (t) => ({ ...t, dataIdx: t.kind === 'series' && geom.series[t.seriesKey] ? geom.series[t.seriesKey].px.length - 1 : undefined });
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
@@ -404,17 +423,23 @@ function PlotSvg({
     <div style={{ position: 'relative' }}>
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={panel.label ? `${panel.label} panel` : undefined}
         style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}>
-        {/* grid + axes */}
+        {/* grid + axes — a tick label yields when a series end-label occupies the
+            same right-margin line (both live at the plot's right edge; the series
+            name carries more information than the gridline number it hides) */}
         {(panel.yTicks || []).map((t, i) => <line key={`g${i}`} x1={pad.l} x2={width - pad.r} y1={y(t.v)} y2={y(t.v)} stroke={pal.grid} strokeWidth="1" strokeDasharray="1 7" />)}
-        {(panel.yTicks || []).map((t, i) => <text key={`yl${i}`} x={width - pad.r + 9} y={y(t.v) + 3.5} style={{ ...halo(pal, 10, pal.axis, 500), letterSpacing: '0.03em' }}>{t.label != null ? t.label : t.v}</text>)}
-        {panel.yUnit ? <text x={pad.l} y={pad.t - 12} style={halo(pal, 9, pal.axis, 500)}>{panel.yUnit.toUpperCase()}</text> : null}
-        {!hideX && (xTicks || []).map((t, i) => { const anc = t.v === dom.xMin ? 'start' : t.v === dom.xMax ? 'end' : 'middle'; return <text key={`xl${i}`} x={x(t.v)} y={height - pad.b + 20} textAnchor={anc} style={halo(pal, 9, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
+        {(panel.yTicks || []).map((t, i) => {
+          const ty = y(t.v);
+          const clash = (panel.series || []).some((s) => s.label && !s.hidden && geom.series[s.key] && Math.abs((geom.series[s.key].end.y + 3.5 + (s.labelDy || 0)) - (ty + 3.5)) < FS.endP + 4);
+          return clash ? null : <text key={`yl${i}`} x={width - pad.r + 9} y={ty + 3.5} style={{ ...halo(pal, FS.axis, pal.axis, 500), letterSpacing: '0.03em' }}>{t.label != null ? t.label : t.v}</text>;
+        })}
+        {panel.yUnit ? <text x={pad.l} y={pad.t - 12} style={halo(pal, FS.unit, pal.axis, 500)}>{panel.yUnit.toUpperCase()}</text> : null}
+        {!hideX && (xTicks || []).map((t, i) => { const anc = t.v === dom.xMin ? 'start' : t.v === dom.xMax ? 'end' : 'middle'; return <text key={`xl${i}`} x={x(t.v)} y={height - pad.b + 20} textAnchor={anc} style={halo(pal, FS.tick, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
 
         {/* guides — structural thresholds settle early, before the data sweep */}
         {geom.guides.map((g, i) => (
           <g key={`gd${i}`} style={fadeAt(pad.l, TM.medium, -100)}>
             <line x1={pad.l} x2={width - pad.r} y1={g.yPx} y2={g.yPx} stroke={g.gd.kind === 'threshold' ? pal.invalidCharcoal : pal.tierReference} strokeWidth="0.9" strokeDasharray={g.gd.dash ? '5 5' : '1 6'} opacity={focusId === g.gd.id ? 0.95 : 0.6} style={{ transition: trans('opacity') }} />
-            {g.gd.label && <text x={g.gd.kind === 'threshold' ? width - pad.r : pad.l + 4} y={g.yPx - 6} textAnchor={g.gd.kind === 'threshold' ? 'end' : 'start'} style={halo(pal, 9, g.gd.kind === 'threshold' ? pal.invalidCharcoal : pal.axis, 500)}>{g.gd.label}</text>}
+            {g.gd.label && <text x={g.gd.kind === 'threshold' ? width - pad.r : pad.l + 4} y={g.yPx - 6} textAnchor={g.gd.kind === 'threshold' ? 'end' : 'start'} style={halo(pal, FS.tick, g.gd.kind === 'threshold' ? pal.invalidCharcoal : pal.axis, 500)}>{g.gd.label}</text>}
           </g>
         ))}
 
@@ -481,21 +506,21 @@ function PlotSvg({
         {geom.markers.map((m, i) => (m.m.label && m.m.labelAnchor === 'end') ? <line key={`ld${i}`} x1={m.cx - (m.m.r || 13) - 4} y1={m.cy - (m.m.r || 13) - 2} x2={m.cx - (m.m.r || 13) - 16} y2={m.cy - (m.m.r || 13) - 10} stroke={pal.text4} strokeWidth="0.75" opacity={entered ? 0.55 : 0} style={{ transition: trans('opacity', 400) }} /> : null)}
 
         {/* text labels — appear after the object they describe exists */}
-        {!coarse && geom.bands.map((bg, i) => bg.b.label ? <text key={`bl${i}`} x={bg.b.labelAnchor === 'peak' ? (bg.field ? bg.field.peakX : bg.xc) : bg.x0 + 10} y={pad.t + 14} textAnchor={bg.b.labelAnchor === 'peak' ? 'middle' : 'start'} style={{ ...halo(pal, 9.5, bg.field ? pal.bandStressText : pal.bandRegimeText), ...fadeAt(bg.xc, TM.fast) }}>{bg.b.label}</text> : null)}
-        {geom.areas.map((ar, i) => ar.a.label ? <text key={`al${i}`} x={ar.labelX} y={pad.t + 30} textAnchor="middle" style={{ ...halo(pal, 9.5, pal.text3), fontStyle: 'italic', ...fadeAt(ar.labelX, TM.fast) }}>{ar.a.label}</text> : null)}
+        {!coarse && geom.bands.map((bg, i) => bg.b.label ? <text key={`bl${i}`} x={bg.b.labelAnchor === 'peak' ? (bg.field ? bg.field.peakX : bg.xc) : bg.x0 + 10} y={pad.t + 14} textAnchor={bg.b.labelAnchor === 'peak' ? 'middle' : 'start'} style={{ ...halo(pal, FS.band, bg.field ? pal.bandStressText : pal.bandRegimeText), ...fadeAt(bg.xc, TM.fast) }}>{bg.b.label}</text> : null)}
+        {geom.areas.map((ar, i) => ar.a.label ? <text key={`al${i}`} x={ar.labelX} y={pad.t + 30} textAnchor="middle" style={{ ...halo(pal, FS.area, pal.text3), fontStyle: 'italic', ...fadeAt(ar.labelX, TM.fast) }}>{ar.a.label}</text> : null)}
         {!coarse && geom.markers.map((m, i) => {
           if (!m.m.label) return null;
           const r = m.m.r || 13;
           const anc = m.m.labelAnchor === 'end' ? 'end' : m.m.labelAnchor === 'start' ? 'start' : 'middle';
           const lx = anc === 'end' ? m.cx - r - 6 : anc === 'start' ? m.cx + r + 6 : m.cx;
-          return <text key={`ml${i}`} x={lx} y={m.cy + (m.m.labelDy ?? -18)} textAnchor={anc} style={{ ...halo(pal, 9.5, pal.text2), ...fadeAt(m.cx, TM.fast, 220) }}>{m.m.label}</text>;
+          return <text key={`ml${i}`} x={lx} y={m.cy + (m.m.labelDy ?? -18)} textAnchor={anc} style={{ ...halo(pal, FS.mark, pal.text2), ...fadeAt(m.cx, TM.fast, 220) }}>{m.m.label}</text>;
         })}
         {(panel.series || []).map((s) => {
           const g = geom.series[s.key];
           const c = s.tier === 'primary' ? accent : tierColor(s.tier, pal, accent);
-          return s.label && !s.hidden ? <text key={`el${s.key}`} x={g.end.x + 9} y={g.end.y + 3.5 + (s.labelDy || 0)} style={{ ...haloSans(pal, s.tier === 'primary' ? 11.5 : 11, c, s.tier === 'primary' ? 600 : 500), opacity: entered ? dimOf(s.key) : 0, transition: reduce ? 'opacity 300ms ease' : `opacity ${TM.fast}ms ${EASE} ${Math.round(120 + TM.path * xFrac(g.end.x))}ms` }}>{s.label}</text> : null;
+          return s.label && !s.hidden ? <text key={`el${s.key}`} x={g.end.x + 9} y={g.end.y + 3.5 + (s.labelDy || 0)} style={{ ...haloSans(pal, s.tier === 'primary' ? FS.endP : FS.endS, c, s.tier === 'primary' ? 600 : 500), opacity: entered ? dimOf(s.key) : 0, transition: reduce ? 'opacity 300ms ease' : `opacity ${TM.fast}ms ${EASE} ${Math.round(120 + TM.path * xFrac(g.end.x))}ms` }}>{s.label}</text> : null;
         })}
-        {geom.notes.map((n, i) => <text key={`nt${i}`} x={n.x} y={n.y} textAnchor={n.nt.anchor || 'middle'} style={{ ...haloSans(pal, 11.5, pal.text3, 500), fontStyle: 'italic', ...fadeAt(n.x, TM.fast, 120) }}>{n.nt.text}</text>)}
+        {geom.notes.map((n, i) => <text key={`nt${i}`} x={n.x} y={n.y} textAnchor={n.nt.anchor || 'middle'} style={{ ...haloSans(pal, FS.note, pal.text3, 500), fontStyle: 'italic', ...fadeAt(n.x, TM.fast, 120) }}>{n.nt.text}</text>)}
 
         {/* crosshair on series hover */}
         {anchor && isActiveHere && active.kind === 'series' && (
@@ -517,23 +542,30 @@ function PlotSvg({
 function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse, touch, targets, active, pinned, onActive, onPin }) {
   const svgRef = useRef(null);
   const q = spec.quadrant;
-  const pad = { l: 80, r: 80, t: 34, b: 40 };
-  const x = (v) => pad.l + ((v + 1) / 2) * (width - pad.l - pad.r);
-  const y = (v) => pad.t + (1 - (v + 1) / 2) * (height - pad.t - pad.b);     // +1 (high inflation) at top
+  // MOBILE keeps the same map, re-authored in a narrower, squarer design space
+  // (500×430) so quadrant names and axis words render legibly at phone scale —
+  // never a shrunk desktop (mirrors the approved feedbackLoop mobile doctrine).
+  const M = coarse;
+  const VW = M ? 500 : width, VH = M ? 430 : height;
+  const F = M ? { cell: 15.5, sub: 10, axis: 10, wp: 10.5 } : { cell: 15, sub: 9.5, axis: 9.5, wp: 9.5 };
+  const DOT = M ? { wp: 5, now: 6.4, ring: 12 } : { wp: 3.4, now: 4.4, ring: 9 };
+  const pad = M ? { l: 30, r: 30, t: 30, b: 34 } : { l: 80, r: 80, t: 34, b: 40 };
+  const x = (v) => pad.l + ((v + 1) / 2) * (VW - pad.l - pad.r);
+  const y = (v) => pad.t + (1 - (v + 1) / 2) * (VH - pad.t - pad.b);     // +1 (high inflation) at top
   const cx = x(0), cy = y(0);
   const wps = q.path.map((id) => ({ id, ...q.waypoints[id] }));
   const geom = useMemo(() => {
     const px = wps.map((w) => ({ x: x(w.x), y: y(w.y), id: w.id }));
-    return { px, line: Brush.brushLine(px, { seed: 19, weight: 0.8, intensity: 0.7 }) };
+    return { px, line: Brush.brushLine(px, { seed: 19, weight: M ? 1 : 0.8, intensity: 0.7 }) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height]);
+  }, [VW, VH, M]);
   const HITR = touch ? 34 : 26;
 
   const anchorOf = (a) => { const p = geom.px.find((pp) => pp.id === a.id); return p ? { x: p.x, y: p.y } : null; };
-  const resolve = (mx, my) => { let best = null, bd = HITR; geom.px.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
-  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  const resolve = (mx, my, k = 1) => { let best = null, bd = HITR * k; geom.px.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (VW / r.width), (e.clientY - r.top) * (VH / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
-  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+  const onClick = (e) => { const res = resolve(...toVB(e), hitScale(svgRef.current, VW, touch)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
@@ -543,27 +575,33 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.waypoint} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={TIER_LABEL.waypoint} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / VW) * 100} yPct={(anchor.y / VH) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
   }
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Growth versus inflation regime map" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${VW} ${VH}`} width="100%" role="group" aria-label="Growth versus inflation regime map" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* axes */}
-        <line x1={pad.l} x2={width - pad.r} y1={cy} y2={cy} stroke={pal.grid} strokeWidth="1" />
-        <line x1={cx} x2={cx} y1={pad.t} y2={height - pad.b} stroke={pal.grid} strokeWidth="1" />
+        <line x1={pad.l} x2={VW - pad.r} y1={cy} y2={cy} stroke={pal.grid} strokeWidth="1" />
+        <line x1={cx} x2={cx} y1={pad.t} y2={VH - pad.b} stroke={pal.grid} strokeWidth="1" />
         {/* axis labels */}
-        <text x={pad.l - 6} y={cy - 6} style={halo(pal, 9, pal.text4)}>{q.xAxis.neg}</text>
-        <text x={width - pad.r + 6} y={cy - 6} textAnchor="end" style={halo(pal, 9, pal.text4)}>{q.xAxis.pos}</text>
-        <text x={cx + 8} y={pad.t + 4} style={halo(pal, 9, pal.text4)}>{q.yAxis.pos}</text>
-        <text x={cx + 8} y={height - pad.b} style={halo(pal, 9, pal.text4)}>{q.yAxis.neg}</text>
-        {/* quadrant labels */}
-        {q.cells.map((c, i) => (
-          <g key={`cell${i}`}>
-            <text x={x(c.qx * 0.55)} y={y(c.qy * 0.62)} textAnchor="middle" style={haloSans(pal, 14, pal.text2, 600)}>{c.label}</text>
-            <text x={x(c.qx * 0.55)} y={y(c.qy * 0.62) + 16} textAnchor="middle" style={halo(pal, 8.5, pal.text4)}>{c.sub}</text>
-          </g>
-        ))}
+        <text x={pad.l - 6} y={cy - 6} style={halo(pal, F.axis, pal.text4)}>{q.xAxis.neg}</text>
+        <text x={VW - pad.r + 6} y={cy - 6} textAnchor="end" style={halo(pal, F.axis, pal.text4)}>{q.xAxis.pos}</text>
+        <text x={cx + 8} y={pad.t + 4} style={halo(pal, F.axis, pal.text4)}>{q.yAxis.pos}</text>
+        <text x={cx + 8} y={VH - pad.b} style={halo(pal, F.axis, pal.text4)}>{q.yAxis.neg}</text>
+        {/* quadrant labels — per-cell vertical anchors keep each name block clear
+            of the waypoints travelling through its quadrant (the path is data;
+            the label yields): reflation sits high above wp3, goldilocks low
+            below wp1; the left cells hold the original line. */}
+        {q.cells.map((c, i) => {
+          const ay = c.qy > 0 ? (c.qx > 0 ? 0.72 : 0.62) : (c.qx > 0 ? -0.78 : -0.62);
+          return (
+            <g key={`cell${i}`}>
+              <text x={x(c.qx * 0.55)} y={y(ay)} textAnchor="middle" style={haloSans(pal, F.cell, pal.text2, 600)}>{c.label}</text>
+              <text x={x(c.qx * 0.55)} y={y(ay) + (M ? 18 : 16)} textAnchor="middle" style={halo(pal, F.sub, pal.text4)}>{c.sub}</text>
+            </g>
+          );
+        })}
         {/* path — settles slowly through regime space */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 1500ms ease 160ms' }}>
           <path d={geom.line} fill={accent} opacity="0.5" />
@@ -571,14 +609,14 @@ function QuadrantSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         {/* waypoints — resolve in journey order; the current marker lands last */}
         {geom.px.map((p, i) => (
           <g key={`wp${i}`} style={{ opacity: entered ? (focusId && focusId !== p.id ? 0.4 : 1) : 0, transformOrigin: `${p.x}px ${p.y}px`, transform: entered ? 'none' : 'scale(0.7)', transition: reduce ? 'opacity 300ms ease' : `opacity 520ms cubic-bezier(0.22,0.61,0.36,1) ${280 + i * 240}ms, transform 520ms cubic-bezier(0.22,0.61,0.36,1) ${280 + i * 240}ms` }}>
-            <path d={Brush.inkDot(p.x, p.y, p.id === spec.primaryKey ? 4.4 : 3.4, { seed: 40 + i * 7, intensity: 0.8 })} fill={p.id === spec.primaryKey ? accent : pal.markInk} />
-            {focusId === p.id && <circle cx={p.x} cy={p.y} r="9" fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
+            <path d={Brush.inkDot(p.x, p.y, p.id === spec.primaryKey ? DOT.now : DOT.wp, { seed: 40 + i * 7, intensity: 0.8 })} fill={p.id === spec.primaryKey ? accent : pal.markInk} />
+            {focusId === p.id && <circle cx={p.x} cy={p.y} r={DOT.ring} fill="none" stroke={accent} strokeWidth="1.1" opacity="0.9" />}
             {(() => {
               // Persistent text must not collide: waypoint labels are hover-only
               // by default; only an explicitly-flagged label (e.g. "Now") stays.
               const tgt = targets.find((t) => t.id === p.id);
               const show = focusId === p.id || (tgt && tgt.persistentLabel);
-              return show && tgt ? <text x={p.x} y={p.y - 11} textAnchor="middle" style={halo(pal, 8.5, p.id === spec.primaryKey ? accent : pal.text2)}>{tgt.label}</text> : null;
+              return show && tgt ? <text x={p.x} y={p.y - (M ? 14 : 11)} textAnchor="middle" style={halo(pal, F.wp, p.id === spec.primaryKey ? accent : pal.text2)}>{tgt.label}</text> : null;
             })()}
           </g>
         ))}
@@ -871,47 +909,67 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   const nodes = gl.nodes;
   const N = nodes.length;
   const govIdx = gl.governorId ? nodes.findIndex((n) => n.id === gl.governorId) : -1;
+  // MOBILE keeps the SAME left→right governed path — never transposed — re-
+  // authored in a 500×310 design space: per-card widths sized to their copy,
+  // compact arrowheads bridging the narrow gaps, proportionally larger type
+  // (mirrors the approved feedbackLoop mobile doctrine).
+  const M = coarse;
+  const VW = M ? 500 : width, VH = M ? 310 : height;
+  const F = M ? { label: 14, sub: 8.5, ret: 10.5 } : { label: 13.5, sub: 8.5, ret: 10.5 };
   const pad = { l: 24, r: 24, t: 26, b: 24 };
-  const innerW = width - pad.l - pad.r;
+  const innerW = VW - pad.l - pad.r;
+  const rowY = M ? 62 : pad.t + 52;
+  const NH = M ? 46 : 44, NHg = M ? 56 : 54;     // the checkpoint sits a touch taller
+  const MOBILE_DEFS = [                          // authored per-card widths (longest sub sets the card)
+    { x0: 9, x1: 87 }, { x0: 97, x1: 185 }, { x0: 195, x1: 287 }, { x0: 297, x1: 385 }, { x0: 395, x1: 491 },
+  ];
   const colW = innerW / N;
-  const rowY = pad.t + 52;
-  const NH = 44, NHg = 54;                       // the checkpoint sits a touch taller
-  const NW = Math.min(colW - 16, 128);
-  const pos = nodes.map((nd, i) => ({ ...nd, i, x: pad.l + colW * (i + 0.5), y: rowY, gov: i === govIdx, h: i === govIdx ? NHg : NH }));
+  const pos = nodes.map((nd, i) => {
+    const W = M && MOBILE_DEFS[i] ? MOBILE_DEFS[i].x1 - MOBILE_DEFS[i].x0 : Math.min(colW - 16, 128);
+    const x = M && MOBILE_DEFS[i] ? (MOBILE_DEFS[i].x0 + MOBILE_DEFS[i].x1) / 2 : pad.l + colW * (i + 0.5);
+    return { ...nd, i, x, W, y: rowY, gov: i === govIdx, h: i === govIdx ? NHg : NH };
+  });
   const byId = (id) => pos.find((p) => p.id === id);
-  const sBottom = rowY + NH / 2 + 3;
+  const PORT = M ? { edge: 3, ret: 3.4 } : { edge: 2.2, ret: 2.5 };
 
   const geom = useMemo(() => {
     const bez = (p0, c1, c2, p1, n = 20) => { const pts = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push({ x: u * u * u * p0.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p1.x, y: u * u * u * p0.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p1.y }); } return pts; };
     const head = (tx, ty, ang, sc = 1) => { const ux = Math.cos(ang), uy = Math.sin(ang), px = -uy, py = ux, L = 12 * sc, W2 = 5 * sc, Nn = 8.4 * sc; return `M${tx} ${ty} L${tx - ux * L + px * W2} ${ty - uy * L + py * W2} L${tx - ux * Nn} ${ty - uy * Nn} L${tx - ux * L - px * W2} ${ty - uy * L - py * W2} Z`; };
-    const arrows = [];                           // rightward brush arrows in the gaps
+    const arrows = [];                           // rightward connectors in the gaps
     for (let i = 0; i < N - 1; i++) {
       const a = pos[i], b = pos[i + 1];
-      const x0 = a.x + NW / 2, tip = b.x - NW / 2 - 3, len = Math.max(10, tip - x0);
-      arrows.push(Brush.brushArrow(tip, rowY, len, 0, { seed: 50 + i * 13, weight: 1.05, intensity: 0.5, head: Math.min(0.3, 12 / len) }));
+      if (M) {
+        // narrow gaps: a compact angled head alone bridges card to card
+        arrows.push(head(b.x - b.W / 2 - 2, rowY, 0, 0.9));
+      } else {
+        const x0 = a.x + a.W / 2, tip = b.x - b.W / 2 - 3, len = Math.max(10, tip - x0);
+        arrows.push(Brush.brushArrow(tip, rowY, len, 0, { seed: 50 + i * 13, weight: 1.05, intensity: 0.5, head: Math.min(0.3, 12 / len) }));
+      }
     }
     // the return is the CLAIM — a complete, solid arc carrying evidence from
     // the governed response back into the thesis: asymmetric belly held inside
     // the plot, brush-textured, landing an arrowhead 3px clear of the card
     const sx = pos[N - 1].x, ex = pos[0].x;
     const cardBot = rowY + NH / 2;
-    const belly = height - 40;
+    const belly = VH - 40;
     const midX = (sx + ex) / 2 + innerW * 0.06;
     const retPts = [
       ...bez({ x: sx, y: cardBot + 6 }, { x: sx + 10, y: belly - 34 }, { x: sx - innerW * 0.16, y: belly }, { x: midX, y: belly }),
       ...bez({ x: midX, y: belly }, { x: ex + innerW * 0.15, y: belly }, { x: ex - 8, y: belly - 44 }, { x: ex, y: cardBot + 12 }),
     ];
-    const retD = Brush.brushLine(retPts, { seed: 131, weight: 1.35, intensity: 0.5, taper: 0.05 });
-    const retHead = head(ex, cardBot + 3, -Math.PI / 2, 1.05);
+    const retD = Brush.brushLine(retPts, { seed: 131, weight: M ? 1.5 : 1.35, intensity: 0.5, taper: 0.05 });
+    const retHead = head(ex, cardBot + 3, -Math.PI / 2, M ? 1.1 : 1.05);
     return { arrows, retD, retHead, cardBot, labX: midX, labY: belly - 16, tickY0: belly - 10, tickY1: belly - 3 };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, height]);
+  }, [VW, VH, M]);
 
   const anchorOf = (a) => { const p = byId(a.id); return p ? { x: p.x, y: p.y } : null; };
-  const resolve = (mx, my) => { let best = null, bd = Math.max(touch ? 40 : 30, NW / 2); pos.forEach((p) => { const d = Math.hypot(mx - p.x, my - p.y); if (d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
-  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (width / r.width), (e.clientY - r.top) * (height / r.height)]; };
+  // column hit zones (nearest card by x, no vertical gate) — the approved
+  // feedbackLoop interaction pattern; a governed path is a row of columns
+  const resolve = (mx, my, k = 1) => { let best = null, bd = Infinity; pos.forEach((p) => { const d = Math.abs(mx - p.x); const lim = (p.W / 2 + (touch ? 26 : 18)) * k; if (d < lim && d < bd) { bd = d; best = p; } }); return best ? targets.find((t) => t.id === best.id) : null; };
+  const toVB = (e) => { const r = svgRef.current.getBoundingClientRect(); return [(e.clientX - r.left) * (VW / r.width), (e.clientY - r.top) * (VH / r.height)]; };
   const onMove = (e) => { if (coarse || pinned) return; onActive(resolve(...toVB(e)), 'hover'); };
-  const onClick = (e) => { const res = resolve(...toVB(e)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
+  const onClick = (e) => { const res = resolve(...toVB(e), hitScale(svgRef.current, VW, touch)); if (coarse) { onActive(res, 'tap'); return; } if (!res) { onPin(null); return; } onPin(res); };
 
   const isActiveHere = active && targets.some((t) => t.id === active.id);
   const focusId = isActiveHere ? active.id : null;
@@ -921,12 +979,12 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === gl.governorId ? 'CHECKPOINT' : 'STEP'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={active.id === gl.governorId ? 'CHECKPOINT' : 'STEP'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / VW) * 100} yPct={(anchor.y / VH) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
   }
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Governed path: a thesis creates exposure and risk; a tripwire checkpoint governs the response, which updates the thesis." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${VW} ${VH}`} width="100%" role="group" aria-label="Governed path: a thesis creates exposure and risk; a tripwire checkpoint governs the response, which updates the thesis." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* forward connectors — wipe in left→right after the cards */}
         <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 420ms, -webkit-clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 420ms, opacity 360ms ease 420ms' }}>
           {geom.arrows.map((d, i) => <path key={`ar${i}`} d={d} fill={accent} opacity="0.9" />)}
@@ -938,7 +996,7 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
         </g>
         {/* return label — anchored to the arc with a leader tick, fades in last */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 300ms ease' : 'opacity 520ms ease 2050ms' }}>
-          <text x={geom.labX} y={geom.labY} textAnchor="middle" style={{ ...halo(pal, 9.5, pal.text3), fontStyle: 'italic' }}>{gl.returnLabel || 'evidence updates the thesis'}</text>
+          <text x={geom.labX} y={geom.labY} textAnchor="middle" style={{ ...halo(pal, F.ret, pal.text3), fontStyle: 'italic' }}>{gl.returnLabel || 'evidence updates the thesis'}</text>
           <line x1={geom.labX} y1={geom.tickY0} x2={geom.labX} y2={geom.tickY1} stroke={pal.text4} strokeWidth="1" opacity="0.85" />
         </g>
         {pos.map((n) => {
@@ -950,15 +1008,15 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
           return (
             <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${110 + n.i * 90}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${110 + n.i * 90}ms` }}>
               {/* checkpoint gate posts — a quiet brush guardrail, not an alarm */}
-              {n.gov && [-1, 1].map((s) => <path key={s} d={Brush.brushSegment(n.x + s * (NW / 2), top - 8, n.x + s * (NW / 2), bot + 8, { seed: 77 + (s + 1) * 5, weight: 1.05, intensity: 0.55, waver: 0.16 })} fill={pal.bandRegime} opacity={on ? 0.95 : 0.75} />)}
-              <rect x={n.x - NW / 2} y={top} width={NW} height={n.h} rx={8} fill={pal.surface} stroke={stroke} strokeWidth={on ? 1.7 : n.gov ? 1.4 : 1} style={{ transition: trans('stroke') }} />
-              <text x={n.x} y={n.y - (n.sub ? 4 : -4)} textAnchor="middle" style={haloSans(pal, 12.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
-              {n.sub && <text x={n.x} y={n.y + 13} textAnchor="middle" style={halo(pal, 7.5, n.gov ? pal.bandRegimeText : pal.text4)}>{n.sub}</text>}
+              {n.gov && [-1, 1].map((s) => <path key={s} d={Brush.brushSegment(n.x + s * (n.W / 2), top - 8, n.x + s * (n.W / 2), bot + 8, { seed: 77 + (s + 1) * 5, weight: 1.05, intensity: 0.55, waver: 0.16 })} fill={pal.bandRegime} opacity={on ? 0.95 : 0.75} />)}
+              <rect x={n.x - n.W / 2} y={top} width={n.W} height={n.h} rx={8} fill={pal.surface} stroke={stroke} strokeWidth={on ? 1.7 : n.gov ? 1.4 : 1} style={{ transition: trans('stroke') }} />
+              <text x={n.x} y={n.y - (n.sub ? 4 : -4)} textAnchor="middle" style={haloSans(pal, F.label, isP ? accent : pal.text1, 600)}>{n.label}</text>
+              {n.sub && <text x={n.x} y={n.y + (M ? 14 : 13)} textAnchor="middle" style={halo(pal, F.sub, n.gov ? pal.bandRegimeText : pal.text4)}>{n.sub}</text>}
               {/* connection anchors: gap ports on every card edge; the return's
                   departure port on Adjust and landing port on Thesis */}
-              {n.i > 0 && <path d={Brush.inkDot(n.x - NW / 2, rowY, 2.2, { seed: 90 + n.i * 7, intensity: 0.7 })} fill={accent} opacity="0.85" />}
-              {n.i < N - 1 && <path d={Brush.inkDot(n.x + NW / 2, rowY, 2.2, { seed: 91 + n.i * 7, intensity: 0.7 })} fill={accent} opacity="0.85" />}
-              {(isP || isLast) && <path d={Brush.inkDot(n.x, bot, 2.5, { seed: isP ? 171 : 173, intensity: 0.7 })} fill={accent} opacity="0.9" />}
+              {n.i > 0 && <path d={Brush.inkDot(n.x - n.W / 2, rowY, PORT.edge, { seed: 90 + n.i * 7, intensity: 0.7 })} fill={accent} opacity="0.85" />}
+              {n.i < N - 1 && <path d={Brush.inkDot(n.x + n.W / 2, rowY, PORT.edge, { seed: 91 + n.i * 7, intensity: 0.7 })} fill={accent} opacity="0.85" />}
+              {(isP || isLast) && <path d={Brush.inkDot(n.x, bot, PORT.ret, { seed: isP ? 171 : 173, intensity: 0.7 })} fill={accent} opacity="0.9" />}
             </g>
           );
         })}
