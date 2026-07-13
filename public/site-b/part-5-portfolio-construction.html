@@ -305,9 +305,31 @@
       </div>
       <p class="compare-key">Concentration limits apply irrespective of CIS: single position 15% default cap &middot; 18% absolute maximum with documented override &mdash; the live engine opens the override path only for positions scoring 80 or above &middot; top three &le;35% combined &middot; top five &le;50% &middot; Bitcoin operates under separate rules</p>
 
-      <div class="measure prose">
-        <p>Where a position lives matters nearly as much as how big it is. High-turnover Torque belongs in the Roth IRA, where tactical rotation compounds tax-free regardless of holding period. Buy-and-hold Torque &mdash; expected holding beyond one year &mdash; suits taxable accounts under long-term capital gains treatment, or absorbs the overflow when Roth space runs out. Pre-tax accounts are a tactical instrument: viable during accumulation with decades until withdrawal, when the current marginal rate exceeds the expected retirement rate, and when bracket arbitrage or a later Roth conversion is actually planned. This is the wrapper architecture from <a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4</a> doing its job. The dashboard operationalizes the routing directly: every candidate is scored for wrapper fit on a 0&ndash;100 scale per wrapper &mdash; Roth favoring convexity retention, taxable favoring liquidity, loss harvesting, and return-of-capital sleeves, pre-tax scored as tactical &mdash; with Bitcoin exempt from the routing entirely.</p>
+      <div class="measure">
+        <h3 class="sub-title">Where Torque lives.</h3>
       </div>
+      <div class="measure prose">
+        <p>Where a position lives matters nearly as much as how big it is. The routing follows expected turnover &mdash; the wrapper architecture from <a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4</a> doing its job.</p>
+      </div>
+
+      <div class="compare">
+        <table>
+          <caption>Torque wrapper routing by expected turnover</caption>
+          <thead>
+            <tr>
+              <th scope="col">Wrapper</th>
+              <th scope="col">Torque it suits</th>
+              <th scope="col">Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">Roth IRA</th><td data-label="Torque it suits">High-turnover Torque</td><td data-label="Why">Tactical rotation compounds tax-free regardless of holding period</td></tr>
+            <tr><th scope="row">Taxable</th><td data-label="Torque it suits">Buy-and-hold beyond one year; Roth overflow</td><td data-label="Why">Long-term capital gains treatment; harvesting pairs available</td></tr>
+            <tr><th scope="row">Pre-tax</th><td data-label="Torque it suits">Tactical only</td><td data-label="Why">Viable during accumulation with decades until withdrawal, when the current marginal rate exceeds the expected retirement rate, and when bracket arbitrage or a later Roth conversion is actually planned</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">The dashboard operationalizes the routing: every candidate is scored for wrapper fit on a 0&ndash;100 scale per wrapper &mdash; Roth favoring convexity retention, taxable favoring liquidity, loss harvesting, and return-of-capital sleeves, pre-tax scored as tactical &middot; Bitcoin is exempt from the routing entirely</p>
 
       <aside class="callout callout-info" aria-label="Torque governance">
         <p class="callout-label">Torque Governance</p>
@@ -346,6 +368,9 @@
            Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
       <figure class="fc-mount" id="exhibit-p5-ballast-rotation" data-fc-chart="p5-ballast-rotation"></figure>
 
+      <div class="measure">
+        <h3 class="sub-title">Five tests, three required.</h3>
+      </div>
       <div class="measure prose">
         <p>Qualification is a checklist, not an impression: a position must pass at least three of the five tests below. Notice what is not on the list &mdash; yield. Income can be a consequence of qualifying; it is never the reason for it. Classification follows stress resilience, and income follows business quality.</p>
       </div>
@@ -360,6 +385,9 @@
         </ol>
       </div>
 
+      <div class="measure">
+        <h3 class="sub-title">Sizing and placement.</h3>
+      </div>
       <div class="measure prose">
         <p>Ballast scores differently because it is built differently. The Convexity component carries 40 percent of the CIS composite, and capital-preserving positions &mdash; which lack the TAM headroom that drives high Convexity sub-scores &mdash; structurally score lower than Torque of equivalent quality. The same four bands apply; the allocation ranges are simply scaled to Ballast&rsquo;s role as reserve capital rather than growth engine.</p>
       </div>
@@ -418,7 +446,14 @@
       </div>
       <div class="measure prose">
         <p class="prose-lead">Torque and Ballast govern the capital the portfolio depends on. Hype governs the capital it can afford to lose. Markets occasionally misprice assets on sentiment extremes, regulatory shifts, or technical dislocations, and some of those opportunities offer asymmetric short-term payoffs with nothing structural underneath. Hype exists to capture them &mdash; price driven by attention and reflexive feedback rather than fundamental value, with no floor when the narrative breaks. A Torque position that falls 50 percent can recover, because the regime forces persist. A Hype position that falls 80 percent may simply be done; the system never needed it. Many portfolios appropriately hold no Hype at all.</p>
-        <p>The catastrophic failure mode is not holding Hype. It is holding Hype while calling it Torque. A position is Hype &mdash; whatever its label &mdash; when it shows any of these signs.</p>
+      </div>
+
+      <blockquote class="pull-quote">
+        <p>The catastrophic failure mode is not holding Hype. It is <span class="hl">holding Hype while calling it Torque</span>.</p>
+      </blockquote>
+
+      <div class="measure prose">
+        <p>A position is Hype &mdash; whatever its label &mdash; when it shows any of these signs.</p>
       </div>
 
       <div class="measure-feature">
@@ -466,8 +501,15 @@
         <h2 class="section-title" id="management-title">Governance through the cycle.</h2>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">Construction is a moment; management is a practice. Once postures are assigned, positions sized, and wrappers chosen, the framework shifts to the protocols that keep the structure true through the cycle &mdash; earnings exposure, momentum, regime stress, additions, and thesis integrity. Three protocols carry most of the weight.</p>
-        <p><span class="key-term">Earnings proximity.</span> Earnings are binary events. A company can beat estimates and fall because expectations ran higher; it can miss and rally because the miss was smaller than feared. A move of 10 to 30 percent either way is normal, and conviction about business quality predicts none of it. So the framework treats earnings as idiosyncratic risk to be sized around, not forecast. The timeline below walks a full-size position through the window: the compression, the event, and the three paths out.</p>
+        <p class="prose-lead">Construction is a moment; management is a practice. Once postures are assigned, positions sized, and wrappers chosen, the framework shifts to the protocols that keep the structure true through the cycle &mdash; earnings exposure, momentum, regime stress, additions, and thesis integrity. The first three carry most of the weight.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Protocol 01 &middot; The T-5 trim is live engine behavior</p>
+        <h3 class="sub-title">Earnings proximity: cap the binary event.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Earnings are binary events. A company can beat estimates and fall because expectations ran higher; it can miss and rally because the miss was smaller than feared. A move of 10 to 30 percent either way is normal, and conviction about business quality predicts none of it. So the framework treats earnings as idiosyncratic risk to be sized around, not forecast. The timeline below walks a full-size position through the window: the compression, the event, and the three paths out.</p>
       </div>
 
       <!-- Chart island: p5-earnings-window "Conviction Does Not Eliminate Binary Risk" — the earnings-protocol timeline.
@@ -502,7 +544,14 @@
 
       <div class="measure prose">
         <p>Of the two pre-event rules, the T-5 trim to the 3 percent cap is live engine behavior &mdash; the dashboard emits the trim as an action with its own precedence &mdash; while the T-21 to T-6 initiation blackout is doctrine the practitioner executes. Three exemptions apply by doctrine, though the engine still flags every position above the cap. Bitcoin has no earnings and answers to Part 3. Broad index ETFs diversify away single-name earnings risk. And Ballast positions at or below 5 percent, where earnings are not thesis-critical, are left alone &mdash; for stable names whose classification is not threatened by results, the administrative burden exceeds the benefit.</p>
-        <p><span class="key-term">Momentum monitoring.</span> The framework asks the market to confirm what the practitioner believes, and it asks in three dimensions. Absolute momentum: distance from the 52-week high &mdash; within 10 percent is healthy, 25 percent or more below is a correction, 40 percent or more is severe distress. Relative momentum: performance against sector and market &mdash; is the problem the company, or the tape? Breadth: the share of related names making new highs &mdash; broad participation confirms fundamental support; narrowing leadership warns of exhaustion. The gauntlet below shows how those three gates decide the capital a thesis is permitted to carry.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Protocol 02 &middot; Doctrine target &middot; live gates: 200/50-day MA + RSI</p>
+        <h3 class="sub-title">Momentum: conviction requires confirmation.</h3>
+      </div>
+      <div class="measure prose">
+        <p>The framework asks the market to confirm what the practitioner believes, and it asks in three dimensions. Absolute momentum: distance from the 52-week high &mdash; within 10 percent is healthy, 25 percent or more below is a correction, 40 percent or more is severe distress. Relative momentum: performance against sector and market &mdash; is the problem the company, or the tape? Breadth: the share of related names making new highs &mdash; broad participation confirms fundamental support; narrowing leadership warns of exhaustion. The gauntlet below shows how those three gates decide the capital a thesis is permitted to carry.</p>
       </div>
 
       <!-- Chart island: p5-momentum-gate "Conviction Requires Market Confirmation" — the three-gate momentum exhibit.
@@ -510,10 +559,38 @@
            Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
       <figure class="fc-mount" id="exhibit-p5-momentum-gate" data-fc-chart="p5-momentum-gate"></figure>
 
+      <div class="compare">
+        <table>
+          <caption>The momentum action ladder: dimensions broken to required action</caption>
+          <thead>
+            <tr>
+              <th scope="col">Dimensions negative</th>
+              <th scope="col">Action</th>
+              <th scope="col">Register</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">None</th><td data-label="Action">Full sizing per the CIS allocation table</td><td data-label="Register">Standard</td></tr>
+            <tr><th scope="row">One</th><td data-label="Action">Reduce sizing 25&ndash;30%; monitor closely</td><td data-label="Register">Caution</td></tr>
+            <tr><th scope="row">Two</th><td data-label="Action">Watch status; minimal new exposure</td><td data-label="Register">Restricted</td></tr>
+            <tr><th scope="row">All three</th><td data-label="Action">Exit &mdash; even if the CIS score is still high</td><td data-label="Register">Tripwire</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">The last rung is a tripwire, not a guideline &mdash; a high-CIS position with all three dimensions negative has broken structurally &middot; exit, reassess, re-enter when the momentum filter repairs</p>
+
       <div class="measure prose">
-        <p>The action ladder is explicit. All three dimensions positive: full sizing per the allocation table. One breaks: reduce 25 to 30 percent and watch closely. Two break: watch status, minimal new exposure. All three negative: exit &mdash; even if the CIS score is still high. That last rung is a <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwire</button>, not a guideline. A high-CIS position with all three dimensions negative has broken structurally; exit, reassess, and re-enter when the <button type="button" class="gloss" data-gloss="momentum-filter" aria-expanded="false">momentum filter</button> repairs.</p>
+        <p>That exit rung deserves one more sentence, because it is the framework&rsquo;s hardest discipline: the <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwire</button> fires on structure, not on conviction, and re-entry is explicitly permitted once the <button type="button" class="gloss" data-gloss="momentum-filter" aria-expanded="false">momentum filter</button> repairs.</p>
         <p>In the dashboard today, momentum is gated through trend and strength checks &mdash; price against the 200-day and 50-day moving averages and an RSI band &mdash; and market-level stress escalates through a cohort confluence tripwire that watches ten signals, seven of them live today, stepping flag &rarr; hedge &rarr; trim, with a 25 percent trim of the Torque cohort at the third level. The three-dimension model above is the doctrine target those surfaces implement toward.</p>
-        <p>Three companion heuristics &mdash; borrowed from Newtonian mechanics as metaphor, not law &mdash; shape the day-to-day. Inertia: positions in motion deserve patience; positions flat for 90 days deserve a thesis reexamination. Proportionality: larger positions need larger catalysts &mdash; a 12 percent Torque position trims on material fundamental change, while a 3 percent probe can exit on technical deterioration alone. Consequences: allocation is zero-sum, so before any action, name where the proceeds go and which position is implicitly underweighted.</p>
+        <p>Three companion heuristics &mdash; borrowed from Newtonian mechanics as metaphor, not law &mdash; shape the day-to-day.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li><p class="step-title">Inertia</p><p class="step-body">Positions in motion deserve patience. Positions flat for 90 days deserve a thesis reexamination.</p></li>
+          <li><p class="step-title">Proportionality</p><p class="step-body">Larger positions need larger catalysts &mdash; a 12 percent Torque position trims on material fundamental change, while a 3 percent probe can exit on technical deterioration alone.</p></li>
+          <li><p class="step-title">Consequences</p><p class="step-body">Allocation is zero-sum. Before any action, name where the proceeds go and which position is implicitly underweighted.</p></li>
+        </ol>
       </div>
 
       <aside class="callout callout-insight" aria-label="Key insight">
@@ -528,8 +605,12 @@
         <p>Capital preservation and optionality take precedence over thesis validation. A position can be fundamentally correct and still destroy capital through extended technical deterioration; exiting preserves capital and optionality for re-entry at better prices, and re-entry is explicitly permitted once momentum repairs. The exit acknowledges that the market is not currently validating the thesis &mdash; holding incurs an opportunity cost the framework refuses to accept. Conviction without confirmation is speculation; the framework demands both.</p>
       </aside>
 
+      <div class="measure">
+        <p class="sub-meta">Protocol 03 &middot; The 0.7 correlation diagnostic is live</p>
+        <h3 class="sub-title">Liquidity and correlation: throttle the regime.</h3>
+      </div>
       <div class="measure prose">
-        <p><span class="key-term">Liquidity and correlation regimes.</span> Sometimes the problem is not the position; it is the water it swims in. When cross-asset correlation rises and liquidity leaves, Torque drawdowns amplify beyond what any single-name analysis predicts &mdash; positions that looked independent in calm markets trade as one position under stress. The throttle cycle below is the framework&rsquo;s response, run as a state machine rather than a judgment call.</p>
+        <p>Sometimes the problem is not the position; it is the water it swims in. When cross-asset correlation rises and liquidity leaves, Torque drawdowns amplify beyond what any single-name analysis predicts &mdash; positions that looked independent in calm markets trade as one position under stress. The throttle cycle below is the framework&rsquo;s response, run as a state machine rather than a judgment call.</p>
       </div>
 
       <!-- Chart island: p5-liquidity-throttle "When Correlation Rises, Diversification Shrinks" — the regime-throttle exhibit.
@@ -539,9 +620,31 @@
 
       <div class="measure prose">
         <p>The stressed-regime indicators are VIX sustained above 25, credit spreads widening, and Torque positions correlating above 0.7. Of these, the correlation threshold is live &mdash; the dashboard flags average correlation above 0.7 as a stacking diagnostic &mdash; while the VIX trigger, the 10 to 20 percent gross reduction, and the two-week resumption clock are practitioner protocol; the live stress classifier uses its own volatility bands. The response is deliberately boring: pause new Torque adds, enforce posture limits strictly, consider reducing gross exposure 10 to 20 percent, and return to standard positioning only after stress indicators normalize for two weeks or more. This is regime-aware throttling, not market timing. The framework does not predict direction; it reduces exposure when correlation compression makes position-level diversification unreliable.</p>
-        <p><span class="key-term">Add and freeze rules.</span> Averaging down without discipline is how conviction destroys portfolios, so additions are governed too. A position down 20 percent or more from cost basis is frozen &mdash; no new capital without a confirming signal: a higher low, a reclaimed key level, or new thesis-supporting information. Scaling in happens over weeks, not days, with no more than 25 percent of target allocation added in any single week. Both rules &mdash; the &minus;20 percent freeze and the weekly add cadence &mdash; are practitioner discipline; the tool does not block the orders. What the live engine does enforce is cadence: recalculation no more than every 7 days, adds at least 3 days apart, trims at least 5 days apart, and exits unlimited when a tripwire fires. The size gates repeat here for completeness: no position above 15 percent without an explicit documented override &mdash; a path the engine opens only at CIS 80 or above &mdash; 18 percent absolute maximum regardless of override, and no Hype position above 5 percent under any circumstances.</p>
-        <p><span class="key-term">Thesis drift and invalidation.</span> Price volatility and thesis failure are different problems, and the framework refuses to treat them with the same tool. Every position carries one to three core assertions documented at entry &mdash; &ldquo;defense budget growth sustains through 2027,&rdquo; &ldquo;datacenter capex has three or more years to run,&rdquo; &ldquo;management is executing on margin expansion.&rdquo; When a core assertion breaks, reassessment is immediate and price is irrelevant: thesis-damaged positions are downgraded or exited, and a price recovery does not rehabilitate a broken thesis. Momentum rules handle the price problem; this protocol handles the truth problem.</p>
-        <p><span class="key-term">Known event risk beyond earnings.</span> Regulatory decisions, policy announcements, contract awards, insider lockup expirations &mdash; all receive earnings-style treatment: keep a calendar of known binary events per position, and cap exposure or hedge depending on posture. Diffuse macro noise like Fed meetings and election cycles triggers nothing unless it is directly material to a thesis. Every protocol in this section governs positions one at a time; the next widens the lens to the forces those positions share.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Protocol 04 &middot; Live cadence: 7-day recalc &middot; 3-day adds &middot; 5-day trims</p>
+        <h3 class="sub-title">Adds and freezes: discipline on the way in.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Averaging down without discipline is how conviction destroys portfolios, so additions are governed too. A position down 20 percent or more from cost basis is frozen &mdash; no new capital without a confirming signal: a higher low, a reclaimed key level, or new thesis-supporting information. Scaling in happens over weeks, not days, with no more than 25 percent of target allocation added in any single week.</p>
+        <p>Both rules &mdash; the &minus;20 percent freeze and the weekly add cadence &mdash; are practitioner discipline; the tool does not block the orders. What the live engine does enforce is cadence: recalculation no more than every 7 days, adds at least 3 days apart, trims at least 5 days apart, and exits unlimited when a tripwire fires. The size gates repeat here for completeness: no position above 15 percent without an explicit documented override &mdash; a path the engine opens only at CIS 80 or above &mdash; 18 percent absolute maximum regardless of override, and no Hype position above 5 percent under any circumstances.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Protocol 05 &middot; One to three core assertions per position</p>
+        <h3 class="sub-title">Thesis drift: price problems versus truth problems.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Price volatility and thesis failure are different problems, and the framework refuses to treat them with the same tool. Every position carries one to three core assertions documented at entry &mdash; &ldquo;defense budget growth sustains through 2027,&rdquo; &ldquo;datacenter capex has three or more years to run,&rdquo; &ldquo;management is executing on margin expansion.&rdquo; When a core assertion breaks, reassessment is immediate and price is irrelevant: thesis-damaged positions are downgraded or exited, and a price recovery does not rehabilitate a broken thesis. Momentum rules handle the price problem; this protocol handles the truth problem.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Protocol 06 &middot; Earnings-style treatment by posture</p>
+        <h3 class="sub-title">Known events beyond earnings.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Regulatory decisions, policy announcements, contract awards, insider lockup expirations &mdash; all receive earnings-style treatment: keep a calendar of known binary events per position, and cap exposure or hedge depending on posture. Diffuse macro noise like Fed meetings and election cycles triggers nothing unless it is directly material to a thesis. Every protocol in this section governs positions one at a time; the next widens the lens to the forces those positions share.</p>
       </div>
     </section>
 
@@ -555,7 +658,14 @@
       </div>
       <div class="measure prose">
         <p class="prose-lead">Sectors are not the unit of allocation; forces are. A sector matters only to the extent it captures a structural force the practitioner has identified &mdash; and Part 2 established how to identify them. The specific set varies by practitioner; 4th Turning demographic stress, AI infrastructure buildout, defense modernization, energy constraint, and monetary disorder serve as the examples throughout.</p>
-        <p>Under the example thesis, regime-aligned sectors include defense and aerospace (government customers, multi-year visibility, pricing power, strong balance sheets), AI infrastructure (semiconductors, datacenter buildout, power delivery &mdash; picks-and-shovels with order backlogs over speculative plays), energy infrastructure (traditional and nuclear power, grid modernization), and industrials tied to reshoring, where selectivity is required because many industrials are cyclical without structural tailwind. Regime-challenged sectors under the same thesis: long-duration unprofitable growth dependent on low rates (Hype if at all, never Torque), consumer discretionary without pricing power, and commercial real estate facing secular office decline and a refinancing wall. A different thesis would reach different conclusions; the mapping methodology is what stays constant.</p>
+      </div>
+
+      <div class="measure">
+        <h3 class="sub-title">Mapping one example thesis.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Under the example thesis, the regime-aligned sectors are concrete: defense and aerospace (government customers, multi-year visibility, pricing power, strong balance sheets), AI infrastructure (semiconductors, datacenter buildout, power delivery &mdash; picks-and-shovels with order backlogs over speculative plays), energy infrastructure (traditional and nuclear power, grid modernization), and industrials tied to reshoring &mdash; selectively, because many industrials are cyclical without structural tailwind.</p>
+        <p>The same thesis also names what it avoids. Regime-challenged sectors: long-duration unprofitable growth dependent on low rates (Hype if at all, never Torque), consumer discretionary without pricing power, and commercial real estate facing secular office decline and a refinancing wall. A different thesis would reach different conclusions; the mapping methodology is what stays constant.</p>
         <p>Concentration in a force is intentional. Concentration in a sector is not. The discipline is to diversify within the force &mdash; several economically distinct businesses that all monetize the same structural driver through different mechanisms &mdash; so a single sector&rsquo;s idiosyncratic failure cannot take the thesis down with it. The fan below makes that structure visible for one force. The example illustrates the methodology; it does not recommend the sectors shown.</p>
       </div>
 
@@ -603,6 +713,12 @@
       <div class="measure prose">
         <p class="prose-lead">Force-level allocation sets the portfolio&rsquo;s shape; rebalancing decides when the shape may change. The framework rejects both calendar rebalancing and threshold rebalancing, and for the same reason: both ignore what the price move is saying. A position up 50 percent appreciated for a reason &mdash; trimming it mechanically sells winners on a schedule. A position down 30 percent may be breaking &mdash; adding to it mechanically catches falling knives.</p>
         <p>Rebalancing follows conviction, not drift. On upward drift, recalculate CIS: conviction unchanged, let it run; conviction declined, trim. The question is &ldquo;does my conviction support this allocation?&rdquo; On downward drift, recalculate CIS: conviction intact and the decline temporary, add; conviction declined, reduce or exit. The question is &ldquo;does this decline change my thesis?&rdquo; The cadence is weekly CIS review and monthly formal assessment, with intra-week action only when a position moves 15 percent or more in a single week (the rebalancing-review trigger; the live weekly engine separately interrupts on any 5 percent single-day move), the earnings proximity protocol triggers, a tripwire is breached, or material news changes the thesis.</p>
+      </div>
+
+      <div class="measure">
+        <h3 class="sub-title">The tax dimension.</h3>
+      </div>
+      <div class="measure prose">
         <p>Every rebalancing decision also has a tax dimension, and it is larger than it looks. Part 4 made wrapper engineering the dominant structural return multiplier; turnover is where that multiplier gets paid or forfeited. The arithmetic deserves to be seen once at full scale. Take 100,000 dollars, a 10 percent annual pre-tax return, a 30-year horizon, and a 25 percent blended rate on realized gains &mdash; the identical asset, traded identically, in two different containers. Taxed annually, the effective after-tax return falls to roughly 7.5 percent. Compounding tax-free, the full 10 percent survives. The curves below carry both paths through time.</p>
       </div>
 
@@ -645,7 +761,13 @@
 
       <div class="measure prose">
         <p>Silent drift is not an override. A threshold that quietly stopped being enforced, a stop that was &ldquo;temporarily&rdquo; widened without a note, a cap that no longer binds because nobody checked &mdash; these are the failure signature of a framework being abandoned while its owner still believes in it. The override mechanism exists precisely so that deviation stays visible, reasoned, and reversible.</p>
-        <p><span class="key-term">Portfolio boundary and single-name sleeves.</span> The portfolio boundary is the household aggregate across all wrappers &mdash; Roth, pre-tax, taxable, and Bitcoin cold storage. All concentration limits &mdash; single position, top three, top five, sector &mdash; apply to this aggregate, not to individual accounts; a position held across multiple wrappers sums to one aggregate exposure. Wrapper-level concentration is permitted when aggregate exposure remains within limits: a Roth IRA may hold 100 percent of its value in a single position without violating framework rules, provided aggregate portfolio exposure to that position stays inside the applicable caps. When a wrapper is intentionally concentrated in a single name, it must be designated and governed as a single-name sleeve &mdash; drift monitoring required, rebalancing or trimming required if aggregate exposure breaches limits, and the designation explicit and documented. Single-name sleeves are a governance structure, not an exception mechanism.</p>
+      </div>
+
+      <div class="measure">
+        <h3 class="sub-title">The portfolio boundary and single-name sleeves.</h3>
+      </div>
+      <div class="measure prose">
+        <p>The portfolio boundary is the household aggregate across all wrappers &mdash; Roth, pre-tax, taxable, and Bitcoin cold storage. All concentration limits &mdash; single position, top three, top five, sector &mdash; apply to this aggregate, not to individual accounts; a position held across multiple wrappers sums to one aggregate exposure. Wrapper-level concentration is permitted when aggregate exposure remains within limits: a Roth IRA may hold 100 percent of its value in a single position without violating framework rules, provided aggregate portfolio exposure to that position stays inside the applicable caps. When a wrapper is intentionally concentrated in a single name, it must be designated and governed as a single-name sleeve &mdash; drift monitoring required, rebalancing or trimming required if aggregate exposure breaches limits, and the designation explicit and documented. Single-name sleeves are a governance structure, not an exception mechanism.</p>
       </div>
 
       <div class="measure prose">
