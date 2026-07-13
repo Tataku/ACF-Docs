@@ -85,7 +85,7 @@ export const DISCLOSURE = {
 
 export const DATA_MODES = ['representative', 'historical', 'simulation', 'conceptual'];
 export const SOURCE_ROLES = ['verifies-concept', 'backs-series', 'methodology', 'target-source'];
-export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar'];
+export const LAYOUTS = ['single', 'dual', 'quadrant', 'loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'scorecard', 'scenario', 'sequenceRisk', 'heartbeat', 'radial', 'laneBar', 'waterfall', 'rangeSteps', 'postureSystem'];
 
 // Visual-relationship grammar — DEFINITIONS live in the shared, downward-only
 // chart-core/grammar.mjs (leaf); re-exported here under the same names so the
@@ -190,7 +190,7 @@ export function resolveMotionProfile(spec) {
   if (spec.motionProfile && spec.motionProfile.type) return spec.motionProfile;
   // radial (arcs) and laneBar (bars) build like diagrams — staged reveal of the
   // composition/comparison, not a left→right time sweep.
-  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant', 'radial', 'laneBar'];
+  const diagrams = ['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant', 'radial', 'laneBar', 'waterfall', 'rangeSteps', 'postureSystem'];
   let type = 'timeSweep';
   if (diagrams.includes(spec.layout)) type = 'diagramBuild';
   else if (spec.layout === 'scenario') type = 'scenarioUpdate';
@@ -225,7 +225,9 @@ export function resolveExperienceRole(spec) {
   if (L === 'scorecard') return 'matrix';
   if (L === 'laneBar') return 'comparison';
   if (L === 'radial') return 'evidence';
-  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return 'diagram';
+  if (L === 'waterfall') return 'mechanism';
+  if (L === 'rangeSteps') return 'comparison';
+  if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant', 'postureSystem'].includes(L)) return 'diagram';
   return 'evidence';
 }
 
@@ -257,6 +259,9 @@ export function resolveMobileBehavior(spec) {
   if (L === 'scorecard') return { interaction: 'scroll-x', chartHeight: 'auto', note: 'Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable.' };
   if (L === 'radial') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Keep the donut substantial on touch; tap a segment to inspect its share. Do not shrink the ring into a token.' };
   if (L === 'laneBar') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Bars stack full-width; keep the aligned compare segment and the difference callout legible; tap a segment to inspect.' };
+  if (L === 'waterfall') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Deduction steps need vertical room; tap a step to inspect its bucket and cap.' };
+  if (L === 'rangeSteps') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Range columns stack tight on touch; tap a band to read its rule. Guardrail labels stay outside the columns.' };
+  if (L === 'postureSystem') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Blocks keep their roles legible; tap a posture or flow to read its job. The backbone band stays full-width.' };
   if (['loop', 'flow', 'systemLoop', 'governanceLoop', 'feedbackLoop', 'bridge', 'gate', 'quadrant'].includes(L)) return { interaction: 'tap-cycle', chartHeight: 'standard', note: 'Diagram scales; tap nodes to cycle detail.' };
   return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Tap to cycle elements; keep the thesis line and labels legible.' };
 }
@@ -703,6 +708,41 @@ const taxWedge = (() => {
 // Part 4 · "Gross Is Not Net" is authored as a COMPOSITION donut (radial layout) and
 // "ROC Changes the Yield" as a laneBar COMPARISON — both carry their shares/values in
 // the spec (radial.segments / laneBar.bars), so neither needs a data generator.
+
+// Part 5 · wrapper compounding — the VERIFIED Part 5 arithmetic ($100k · 10% tax-free
+// vs ~7.5% after annual 25% blended realization · 30y). Deterministic, no noise:
+// 1.10^30 ≈ 17.449 → ≈$1,745,000 · 1.075^30 ≈ 8.755 → ≈$875,000 · Δ ≈ $870,000.
+const p5Wrapper = (() => {
+  const n = 60;
+  const roth = curve(0, 30, n, (t, x) => 100000 * Math.pow(1.10, x), 1, 0);
+  const taxable = curve(0, 30, n, (t, x) => 100000 * Math.pow(1.075, x), 1, 0);
+  return { roth, taxable };
+})();
+
+// Part 5 · earnings risk-compression window — CONCEPTUAL step path of a 10% position
+// through the canonical protocol (T-21→T-6 initiation blackout · T-5→T-1 compress to
+// the 3% cap · T+0 observe · T+1→T+5 assess · T+6+ branch). x = trading days vs event.
+const p5Earnings = (() => {
+  const held = [{ x: -21, y: 10 }, { x: -6, y: 10 }, { x: -5, y: 9.2 }, { x: -4, y: 7.4 }, { x: -3, y: 5.6 }, { x: -2, y: 4.1 }, { x: -1, y: 3 }, { x: 0, y: 3 }, { x: 5, y: 3 }];
+  const rebuild = [{ x: 5, y: 3 }, { x: 6, y: 3.3 }, { x: 8, y: 4.4 }, { x: 10, y: 6 }, { x: 12, y: 7.8 }, { x: 14, y: 9.3 }, { x: 15, y: 10 }];
+  const hold = [{ x: 5, y: 3 }, { x: 10, y: 3 }, { x: 15, y: 3 }];
+  const exit = [{ x: 5, y: 3 }, { x: 6, y: 2.1 }, { x: 7, y: 0.9 }, { x: 8, y: 0 }, { x: 15, y: 0 }];
+  return { held, rebuild, hold, exit };
+})();
+
+// Part 6 · slow framework decay — CONCEPTUAL normalized diagnostics (100 = measured
+// health at the last completed review). Five indicators erode at different tempos
+// once reviews stop; none is market data. Smoothstep easing, deterministic.
+const p6Decay = (() => {
+  const mk = (drop, bend, seed) => curve(0, 12, 48, (t) => 100 - drop * ss(Math.pow(t, bend)), seed, 0.6);
+  return {
+    freshness: mk(58, 0.9, 11),      // stale conviction — fastest erosion
+    evidence: mk(48, 1.15, 13),      // thesis evidence decay
+    correlation: mk(42, 1.7, 17),    // correlation stacking — accelerates late
+    posture: mk(34, 1.25, 19),       // silent posture drift
+    wrapper: mk(20, 1.05, 23),       // wrapper leakage — slow, compounding
+  };
+})();
 
 // ════════════════════════════════════════════════════════════════════════════
 // SPEC REGISTRY
@@ -2216,6 +2256,799 @@ export const FRAMEWORK_CHART_SPECS = [
     mobileTapTargets: ['roc-deploy', 'div-deploy', 'div-tax', 'roc-defer'],
     implementationNotes: 'Conceptual Part 4 exhibit for the taxable/ROC section, authored as a laneBar COMPARISON (multi-lane family seed — distinct from p4-tax-wedge single fan and p4-gross-not-net radial donut): two aligned 100-unit bars over one shared scale. ROC redeploys the full 100 now (accent), with the ~24 of deferred tax shown as a hatched strip BELOW the bar (exists, not taken now — honest, not eliminated). Taxed dividend redeploys 76 (secondary) + 24 taxed now (stress). A dashed reference line at 76 + the surplus callout make the +24 "still working" the visual claim. ROC ~11% distribution; dividend after ~23.8% LTCG+NIIT on receipt. Conceptual — deferral not elimination; caution + explainer state basis exhaustion + tax-at-sale; under current law.',
   },
+  /* ── PART 5 · PORTFOLIO CONSTRUCTION & POSITION MANAGEMENT ─────────────── */
+  {
+    chartId: 'p5-operating-system', idx: 'P5-01', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'diagram',
+    claimStack: {
+      primaryClaim: 'The three postures form one capital-allocation system, not three static buckets',
+      visualProof: 'Torque and Ballast joined by two opposing rotation arcs — harvest strength one way, deploy into dislocation the other — with Hype held in a capped side cell and Bitcoin as a separate full-width backbone band beneath the system',
+      interactionRole: 'Hover a posture, a rotation arc, or the backbone to read the job it performs',
+      readerAction: 'Follow the two rotation arcs between Torque and Ballast, then note what sits outside them',
+      caution: 'Conceptual system diagram; aggregate posture ranges are thesis-conditional parameters and are stated in the adjacent tables, not asserted here',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'One Portfolio. Three Behaviors. One Backbone.', setupLine: 'Construction assigns behavior before it sorts tickers',
+    claimLabel: 'PART 5 · OPERATING SYSTEM',
+    frameworkClaim: 'Portfolio construction begins by assigning behavior: Torque compounds the thesis, Ballast preserves the ability to act, Hype captures reflexivity without becoming load-bearing, and Bitcoin remains separately governed beneath the system.',
+    readerTakeaway: 'The postures are not static buckets — they form a capital-allocation system.',
+    chartType: 'Posture operating-system diagram: two rotation arcs between Torque and Ballast, a capped Hype cell, and a separately governed Bitcoin backbone band.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 5', label: 'Three-posture classification and rotation governance', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF · Part 3', label: 'Bitcoin as the separately governed convexity backbone', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+    ],
+    explainerHeadline: 'Behavior is assigned first; tickers come later.',
+    explainerBody: 'Torque owns the structural force and carries the upside. Ballast withstands stress and supplies the rotation capital — trimmed into after Torque runs, deployed from during dislocations. Hype trades the narrative under hard caps and is never allowed to carry load. Bitcoin sits beneath the system under its own Part 3 rules: it is not a posture and it is never rotation capital.',
+    explainerConcept: 'Posture',
+    concepts: [{ label: 'Posture', link: '/part-5-portfolio-construction-position-management' }, { label: 'Ballast', link: '/part-5-portfolio-construction-position-management' }, { label: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' }],
+    layout: 'postureSystem',
+    ariaSummary: 'A system diagram. Two large blocks, Torque and Ballast, are connected by two opposing arrows: harvest strength flows from Torque to Ballast, and deploy into dislocation flows from Ballast back to Torque. A smaller Hype block sits to the side inside a cap bracket labelled never load-bearing. A full-width Bitcoin band runs beneath the whole system, labelled separately governed convexity backbone.',
+    postureSystem: {
+      blocks: [
+        { id: 'torque', label: 'Torque', role: 'Own the structural force', sub: 'compounds the thesis' },
+        { id: 'ballast', label: 'Ballast', role: 'Preserve the ability to act', sub: 'reserves · rotation capital' },
+        { id: 'hype', label: 'Hype', role: 'Trade the narrative', sub: 'never load-bearing', capped: true, capNote: '≤5% each · ≤10% aggregate' },
+      ],
+      flows: [
+        { id: 'harvest', from: 'torque', to: 'ballast', label: 'harvest strength' },
+        { id: 'deploy', from: 'ballast', to: 'torque', label: 'deploy into dislocation' },
+      ],
+      backbone: { id: 'bitcoin', label: 'Bitcoin', sub: 'separately governed convexity backbone · never rotation capital' },
+    },
+    primaryKey: 'torque',
+    hoverTargets: [
+      { id: 'torque', kind: 'node', label: 'Torque', name: 'Torque · own the structural force', why: 'Controlled convexity placed on regime forces that are real, durable, and capital-backed. Nonlinear upside with businesses built to survive temporary price collapse.', claim: 'Torque compounds the thesis.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'ballast', kind: 'node', label: 'Ballast', name: 'Ballast · preserve the ability to act', why: 'Stress-resilient reserves that fund disciplined buying. Ballast is rotation capital, not dead weight — it is what makes holding Torque through drawdowns possible.', claim: 'Ballast preserves optionality.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'hype', kind: 'node', label: 'Hype', name: 'Hype · capped, never load-bearing', why: 'Narrative-driven convexity with no floor when the story breaks. Hard caps — five percent per position, ten percent aggregate — keep it from ever carrying the portfolio.', claim: 'Hype is capped by rule, not by mood.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'harvest', kind: 'node', label: 'Harvest strength', name: 'Harvest strength → Ballast', why: 'After Torque runs, a controlled trim converts concentration back into reserves. Conviction stays; concentration is what gets trimmed.', claim: 'Strength is harvested, not admired.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'deploy', kind: 'node', label: 'Deploy into dislocation', name: 'Deploy Ballast → Torque', why: 'During liquidity stress or a thesis-confirming drawdown, Ballast buys convex assets while they are temporarily mispriced — without forced selling and without touching Bitcoin.', claim: 'Reserves exist to be deployed.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'bitcoin', kind: 'node', label: 'Bitcoin backbone', name: 'Bitcoin · separately governed', why: 'Held under Part 3 rules in cold storage, excluded from posture rotation and from concentration limits. It funds nothing in this loop; the system runs above it.', claim: 'The backbone is never rotation capital.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
+    ],
+    mobileTapTargets: ['torque', 'ballast', 'hype', 'harvest', 'deploy', 'bitcoin'],
+    implementationNotes: 'Signature Part 5 exhibit on the NEW postureSystem layout: Torque and Ballast as peer blocks joined by two opposing brush rotation arcs (the mechanism), Hype in a smaller capped side cell with a bracket, Bitcoin as a low-contrast full-width band beneath. Posture identity is carried by position and label, never by color alone (engine tier palette; accent marks Torque as the thesis block).',
+  },
+
+  {
+    chartId: 'p5-earned-size', idx: 'P5-02', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'comparison',
+    claimStack: {
+      primaryClaim: 'Capital advances only as evidence advances — size is earned, not declared',
+      visualProof: 'Four allocation bands step upward with the CIS score — zero below fifty, then two-to-four, four-to-eight, eight-to-fifteen percent — under two fixed cap rules at fifteen and eighteen percent, with the evidence stages that move the score running beneath the axis',
+      interactionRole: 'Hover a band to read what earns it, or a cap rule to read what no score can exceed',
+      readerAction: 'Climb the staircase left to right, then note the two caps that hold regardless of score',
+      caution: 'The six evidence stages are a conceptual progression; the bands and caps are the canonical CIS v2.1 sizing parameters',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'Position Size Must Be Earned', setupLine: 'Maximum justified size is not the same as currently earned size',
+    claimLabel: 'PART 5 · SIZING',
+    frameworkClaim: 'Evidence advances the score; the score advances the band; governance caps the ceiling. A high theoretical upside does not immediately earn a maximum position.',
+    readerTakeaway: 'Conviction is built through evidence. It is not declared through enthusiasm.',
+    chartType: 'Ascending staircase of the four canonical CIS-to-allocation bands with the 15% default and 18% absolute caps overlaid, and the evidence progression beneath.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual staircase · Band and cap values are canonical CIS v2.1 parameters; the evidence stages are an illustrative progression', footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · CIS Specification v2.1', label: 'Four-band Torque sizing (§10.2) and concentration caps (§10.3)', role: 'verifies-concept' },
+      { provider: 'ACF · Part 5', label: 'Torque position sizing and add-cadence governance', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+    ],
+    explainerHeadline: 'Evidence moves the score; the score moves the band; the caps never move.',
+    explainerBody: 'A position starts as thesis exposure — real enough to investigate, not proven enough to size. Commercial validation, execution, scale, and economic proof each advance the score, and the band advances with it. Even exceptional platform quality tops out at the fifteen percent default cap; eighteen percent is an absolute maximum requiring a documented override. Scaling in happens over weeks, never in one move.',
+    explainerConcept: 'Earned sizing',
+    concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }],
+    layout: 'rangeSteps',
+    ariaSummary: 'An ascending staircase. Four columns represent CIS bands: below fifty earns zero percent; fifty to fifty-nine earns two to four percent as a starter probe; sixty to sixty-nine earns four to eight percent; seventy and above earns eight to fifteen percent. Two horizontal cap rules cross all columns at fifteen percent, the default maximum, and eighteen percent, the absolute maximum with documented override. Beneath the axis, six evidence stages progress from thesis exposure through commercial validation, initial execution, scale execution, and economic proof to exceptional platform quality.',
+    rangeSteps: {
+      yUnit: '%', yMin: 0, yMax: 20, variant: 'stair',
+      columns: [
+        { id: 'b0', label: 'CIS <50', sub: 'not allocation-worthy', steps: [{ id: 's0', from: 0, to: 0, tier: 'reference', valueLabel: '0%' }] },
+        { id: 'b1', label: '50–59', sub: 'starter · probe intent', steps: [{ id: 's1', from: 2, to: 4, tier: 'tertiary', valueLabel: '2–4%' }] },
+        { id: 'b2', label: '60–69', sub: 'standard · constrained', steps: [{ id: 's2', from: 4, to: 8, tier: 'secondary', valueLabel: '4–8%' }] },
+        { id: 'b3', label: '70+', sub: 'core · full conviction', steps: [{ id: 's3', from: 8, to: 15, tier: 'primary', valueLabel: '8–15%' }] },
+      ],
+      rules: [
+        { id: 'cap15', v: 15, label: '15% default cap' },
+        { id: 'cap18', v: 18, label: '18% absolute max', emph: true },
+      ],
+      footRail: {
+        label: 'EVIDENCE ADVANCES THE SCORE',
+        items: ['Thesis exposure', 'Commercial validation', 'Initial execution', 'Scale execution', 'Economic proof', 'Platform quality'],
+      },
+    },
+    primaryKey: 's3',
+    hoverTargets: [
+      { id: 's0', kind: 'node', label: 'Below 50', name: 'CIS below 50 · 0%', why: 'Not allocation-worthy. The opportunity may be real enough to investigate — thesis exposure — but capital waits for evidence.', claim: 'Interesting is not investable.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's1', kind: 'node', label: '50–59', name: 'CIS 50–59 · 2–4%', why: 'A starter position sized for probe intent. Commercial validation is beginning — customers, contracts, backlog — but the thesis is incomplete or fragile.', claim: 'Probe size for probe evidence.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's2', kind: 'node', label: '60–69', name: 'CIS 60–69 · 4–8%', why: 'A standard position. Initial and scale execution are converting opportunity into measurable, repeatable delivery, and sizing advances with it — still constrained until conviction strengthens across components.', claim: 'Execution earns the middle band.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's3', kind: 'node', label: '70+', name: 'CIS 70+ · 8–15%', why: 'Core sizing. Economic proof — margins, cash generation, operating leverage — and exceptional platform quality justify the framework’s highest tier, still under the concentration caps.', claim: 'The top band is earned, and still capped.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cap15', kind: 'node', label: '15% cap', name: 'The 15% default maximum', why: 'No single position exceeds fifteen percent without a documented override — regardless of score, upside, or enthusiasm.', claim: 'The default ceiling holds at any score.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cap18', kind: 'node', label: '18% absolute', name: 'The 18% absolute maximum', why: 'The documented-override ceiling. Beyond it there is no legitimate path — an allocation above eighteen percent is a framework violation, not a conviction statement.', claim: 'Eighteen is the end of the ladder.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'evidence', kind: 'node', label: 'Evidence stages', name: 'The evidence progression', why: 'Thesis exposure → commercial validation → initial execution → scale execution → economic proof → exceptional platform quality. Each stage adds evidence; the score, and only the score, moves the band.', claim: 'Evidence is the only ladder.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['s0', 's1', 's2', 's3', 'cap15', 'cap18', 'evidence'],
+    implementationNotes: 'NEW rangeSteps layout in stair mode. No named "Earned Conviction Ladder" exists in framework doctrine (reconciliation 2026-07-13): the six stages ship as conceptual narrative; every number on the exhibit is the canonical four-band CIS v2.1 parameter set (0 / 2–4 / 4–8 / 8–15, caps 15/18). No invented stage→percentage mapping is asserted.',
+  },
+
+  {
+    chartId: 'p5-posture-sizing', idx: 'P5-03', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'comparison',
+    claimStack: {
+      primaryClaim: 'The same CIS score earns a different position size in each posture',
+      visualProof: 'Three aligned columns on one percent scale — Torque ranges reaching eight-to-fifteen, Ballast reserve ranges topping at five-to-eight, Hype a single capped one-to-five band — under the shared single-position cap rules at fifteen and eighteen percent',
+      interactionRole: 'Hover any band to read the score that earns it and the job that sizes it',
+      readerAction: 'Compare the 70+ band across the three columns — same score, three different ceilings',
+      caution: 'Band values are the canonical CIS v2.1 sizing parameters; aggregate guardrails are stated per column',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'The Same Score Does Not Create the Same Position', setupLine: 'CIS measures quality; governance translates it into capital by the job the position performs',
+    claimLabel: 'PART 5 · POSTURE SIZING',
+    frameworkClaim: 'CIS measures position quality. Governance translates that quality into capital according to the job the position performs — Torque, Ballast, and Hype each map the same bands to different ranges.',
+    readerTakeaway: 'Score the asset first. Size the behavior second.',
+    chartType: 'Three aligned posture columns of CIS-band allocation ranges on one shared percent scale, with the single-position cap rules overlaid.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual comparison · All ranges and caps are canonical CIS v2.1 sizing parameters', footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · CIS Specification v2.1', label: 'Posture sizing bands and concentration limits (§10.2–10.3)', role: 'verifies-concept' },
+      { provider: 'ACF · Part 5', label: 'Torque, Ballast, and Hype sizing governance', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+    ],
+    explainerHeadline: 'Quality is scored once; capital is assigned by role.',
+    explainerBody: 'Torque earns size through convexity, survivability, and execution — up to eight-to-fifteen percent at full conviction. Ballast earns size through resilience, liquidity, and rotation utility, in tighter reserve ranges with a forty percent aggregate ceiling and a fifteen percent minimum reserve. Hype never earns load-bearing status: one-to-five percent per position, ten percent aggregate, because momentum is both the thesis and the exit signal. Concentration guardrails bind across all postures: fifteen percent per position by default, eighteen absolute, thirty-five for the top three, fifty for the top five.',
+    explainerConcept: 'Posture sizing',
+    concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Posture', link: '/part-5-portfolio-construction-position-management' }, { label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }],
+    layout: 'rangeSteps',
+    ariaSummary: 'Three columns on one shared percent scale. Torque stacks three ranges: two to four percent for scores in the fifties, four to eight for the sixties, eight to fifteen at seventy and above. Ballast stacks one to three, three to five, and five to eight percent for the same score bands, with a note that aggregate Ballast stays between fifteen and forty percent. Hype shows a single one-to-five percent band with a ten percent aggregate cap. Horizontal rules cross all columns at fifteen percent, the single-position default cap, and eighteen percent, the absolute maximum.',
+    rangeSteps: {
+      yUnit: '%', yMin: 0, yMax: 20,
+      columns: [
+        { id: 'torque', label: 'Torque', sub: 'convexity engine', capNote: 'top-3 ≤35% · top-5 ≤50%', steps: [
+          { id: 't-starter', from: 2, to: 4, tier: 'tertiary', valueLabel: '50s · 2–4%' },
+          { id: 't-standard', from: 4, to: 8, tier: 'secondary', valueLabel: '60s · 4–8%' },
+          { id: 't-core', from: 8, to: 15, tier: 'primary', valueLabel: '70+ · 8–15%' },
+        ] },
+        { id: 'ballast', label: 'Ballast', sub: 'strategic reserves', capNote: 'single ≤10% · aggregate 15–40%', steps: [
+          { id: 'b-marginal', from: 1, to: 3, tier: 'tertiary', valueLabel: '50s · 1–3%' },
+          { id: 'b-standard', from: 3, to: 5, tier: 'secondary', valueLabel: '60s · 3–5%' },
+          { id: 'b-core', from: 5, to: 8, tier: 'primary', valueLabel: '70+ · 5–8%' },
+        ] },
+        { id: 'hype', label: 'Hype', sub: 'disciplined speculation', capNote: 'aggregate ≤10% · stops 15–25%', steps: [
+          { id: 'h-band', from: 1, to: 5, tier: 'stress', valueLabel: '1–5% · hard max' },
+        ] },
+      ],
+      rules: [
+        { id: 'cap15', v: 15, label: '15% single-position cap' },
+        { id: 'cap18', v: 18, label: '18% absolute max', emph: true },
+      ],
+    },
+    primaryKey: 't-core',
+    hoverTargets: [
+      { id: 't-starter', kind: 'node', label: 'Torque 50s', name: 'Torque · CIS 50–59 · 2–4%', why: 'A probe-intent starter in the convexity engine — the thesis is incomplete or fragile, and size says so.', claim: 'Starters stay small.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 't-standard', kind: 'node', label: 'Torque 60s', name: 'Torque · CIS 60–69 · 4–8%', why: 'Allocation-worthy but constrained until conviction strengthens across convexity, risk, macro, and execution.', claim: 'The middle band waits for evidence.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 't-core', kind: 'node', label: 'Torque 70+', name: 'Torque · CIS 70+ · 8–15%', why: 'Core Torque at full conviction sizing, still subject to the fifteen percent default cap and the concentration guardrails.', claim: 'Torque earns the widest range.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'b-marginal', kind: 'node', label: 'Ballast 50s', name: 'Ballast · CIS 50–59 · 1–3%', why: 'Marginal Ballast must meet the eligibility criteria and demonstrate improving quality — or face replacement by a superior survivor.', claim: 'Weak Ballast gets replaced, not excused.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'b-standard', kind: 'node', label: 'Ballast 60s', name: 'Ballast · CIS 60–69 · 3–5%', why: 'Standard reserve sizing — capital preservation and rotation utility, not upside, set the range.', claim: 'Reserves are sized for the job.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'b-core', kind: 'node', label: 'Ballast 70+', name: 'Ballast · CIS 70+ · 5–8%', why: 'Core Ballast — survivability and macro alignment strong enough to overcome the structural convexity headwind in its score. Exceptional stability can reach ten percent.', claim: 'Even the best Ballast stays a reserve.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'h-band', kind: 'node', label: 'Hype band', name: 'Hype · 1–5% · 10% aggregate', why: 'Momentum is the thesis and the exit signal, so Hype never earns load-bearing size: five percent hard per-position max, ten percent aggregate, stops at fifteen to twenty-five percent.', claim: 'Hype is capped because it has no floor.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cap15', kind: 'node', label: '15% cap', name: 'Single-position default cap', why: 'Applies across every posture, irrespective of CIS. Above it requires a documented override.', claim: 'One rule binds all three columns.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cap18', kind: 'node', label: '18% absolute', name: 'The absolute maximum', why: 'The end of every ladder in every posture — no override extends beyond eighteen percent.', claim: 'No posture escapes the ceiling.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['t-core', 'b-core', 'h-band', 'cap15', 'cap18'],
+    implementationNotes: 'NEW rangeSteps layout in columns mode: three posture columns of stacked CIS-band ranges on one shared 0–20% scale, cap rules as horizontal brush guides, per-column aggregate guardrails as quiet capNote chips. The visual claim is the 70+ row asymmetry (8–15 vs 5–8 vs a hard 5).',
+  },
+
+  {
+    chartId: 'p5-ballast-rotation', idx: 'P5-04', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'diagram',
+    claimStack: {
+      primaryClaim: 'Ballast is rotation capital — the reserve that converts drawdowns into allocation decisions',
+      visualProof: 'A five-station governed cycle — harvest strength, rebuild reserves, wait without urgency, deploy into validated weakness, participate in recovery — closed by a return arc, with the deploy station as the governed checkpoint',
+      interactionRole: 'Hover a station to read its discipline; the deploy checkpoint carries the eligibility test',
+      readerAction: 'Follow the cycle to the deploy gate, then trace the recovery back to harvest',
+      caution: 'Conceptual rotation cycle; Bitcoin is outside this loop by rule — the backbone is never a funding source',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'Ballast Preserves the Right to Buy', setupLine: 'Not the opposite of growth — the reserve that makes disciplined buying possible',
+    claimLabel: 'PART 5 · ROTATION',
+    frameworkClaim: 'Ballast is not defensive dead weight. It is the reserve that prevents forced selling and makes disciplined buying possible when convex assets become temporarily mispriced.',
+    readerTakeaway: 'Without Ballast, every drawdown is a test of endurance. With Ballast, it is a capital-allocation decision.',
+    chartType: 'Five-station rotation cycle with a governed deploy checkpoint and a recovery return arc.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 5', label: 'Ballast rotation triggers and minimum-reserve governance', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF · Part 3', label: 'Bitcoin excluded from rotation — separate governance', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+    ],
+    explainerHeadline: 'The reserve exists to be spent — at the right moment, on the right names.',
+    explainerBody: 'After Torque runs, a controlled trim rebuilds reserves; the fifteen percent minimum Ballast floor is restored before the next dislocation, not during it. Then the framework waits without urgency — reserves remove the need to call the exact bottom. Deployment is gated: only positions whose thesis, survivability, and confirmation remain intact receive capital. Recovery converts resilience back into convexity, and the cycle repeats. Bitcoin never funds any of it.',
+    explainerConcept: 'Rotation',
+    concepts: [{ label: 'Ballast', link: '/part-5-portfolio-construction-position-management' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'governanceLoop',
+    ariaSummary: 'A governed cycle of five stations: harvest strength by trimming concentration, rebuild reserves toward the minimum floor, wait without urgency, deploy into validated weakness at a governed checkpoint, and participate in recovery. A return arc closes the cycle back to harvesting the next run.',
+    governanceLoop: {
+      governorId: 'deploy',
+      returnLabel: 'recovery restores convexity · the cycle repeats',
+      nodes: [
+        { id: 'harvest', label: 'Harvest', sub: 'trim concentration, not conviction' },
+        { id: 'rebuild', label: 'Rebuild', sub: 'restore the reserve floor' },
+        { id: 'wait', label: 'Wait', sub: 'no urgency, no prediction' },
+        { id: 'deploy', label: 'Deploy', sub: 'the eligibility gate' },
+        { id: 'recover', label: 'Participate', sub: 'resilience back to convexity' },
+      ],
+    },
+    primaryKey: 'deploy',
+    hoverTargets: [
+      { id: 'harvest', kind: 'node', label: 'Harvest strength', name: 'Harvest strength', why: 'After Torque appreciates, trim a controlled portion. Concentration is what gets trimmed — the thesis and the core position stay.', claim: 'Trim concentration, not conviction.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'rebuild', kind: 'node', label: 'Rebuild reserves', name: 'Rebuild reserves', why: 'Proceeds restore liquidity before the next dislocation. Aggregate Ballast holds a fifteen percent minimum floor even in high-conviction regimes — complete depletion creates fragility.', claim: 'Reserves are rebuilt early, not in the storm.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'wait', kind: 'node', label: 'Wait without urgency', name: 'Wait without urgency', why: 'Holding reserves removes the need to predict the exact bottom. The framework does not forecast; it waits for validated weakness.', claim: 'Patience is a funded position.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'deploy', kind: 'node', label: 'Deploy', name: 'Deploy into validated weakness', why: 'The checkpoint: capital moves only into names whose thesis, survivability, and confirmation remain intact. A drawdown alone is not an invitation.', claim: 'Weakness must be validated before it is bought.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'recover', kind: 'node', label: 'Participate in recovery', name: 'Participate in recovery', why: 'Rotation converts resilience back into convexity — the reserve becomes upside participation, and the next harvest begins.', claim: 'The cycle pays in both directions.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['harvest', 'rebuild', 'wait', 'deploy', 'recover'],
+    implementationNotes: 'governanceLoop reuse (dl-tripwire-loop pattern) with the deploy station as the governed checkpoint. Bitcoin deliberately absent from the loop — stated in caution + explainer, mirroring Part 3 doctrine.',
+  },
+
+  {
+    chartId: 'p5-earnings-window', idx: 'P5-05', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'mechanism',
+    claimStack: {
+      primaryClaim: 'The framework compresses exposure before a binary event and re-earns it afterward',
+      primaryClaimNote: 'earnings are idiosyncratic risk, not a thesis referendum',
+      visualProof: 'A position path holding ten percent, compressing to the three percent cap through the T-minus-five window, holding flat through the event and assessment days, then splitting into three governed branches — rebuild, stay reduced, or exit',
+      interactionRole: 'Hover the path or a branch to read the rule that governs that segment',
+      readerAction: 'Follow the compression into T+0, then compare the three exits from the assessment window',
+      caution: 'Conceptual position path; the 3% cap and the window boundaries are the canonical protocol parameters',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'Conviction Does Not Eliminate Binary Risk', setupLine: 'A 10% position walks the earnings protocol: compress · observe · assess · re-earn',
+    claimLabel: 'PART 5 · EARNINGS WINDOW',
+    frameworkClaim: 'Earnings can move a position 10–30% without changing the long-term thesis. The framework compresses exposure before the event, preserves optionality during uncertainty, and rebuilds only after evidence arrives.',
+    readerTakeaway: 'Trim the event risk. Re-underwrite the thesis. Then earn the size again.',
+    chartType: 'Event timeline: allocation compressing to the 3% cap ahead of T+0, then branching into rebuild, hold-reduced, or exit after the assessment window.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual protocol path · The 3% cap, window boundaries, and branch rules are canonical; the 10% starting position is illustrative', footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 5', label: 'Earnings proximity protocol and post-earnings decision tree', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF · Governance Protocol v1', label: 'Earnings risk windows (§3)', role: 'verifies-concept' },
+    ],
+    explainerHeadline: 'The protocol is a timeline, not a judgment call.',
+    explainerBody: 'From T-21 to T-6, initiation is blacked out for names priced for perfection. From T-5, any position entering earnings is compressed to the three percent cap — non-negotiable, position-specific. T+0 is observed, not traded. Days one through five are the assessment window. From T+6 the position re-earns its size: rebuild deliberately if the thesis is confirmed, stay reduced while it is uncertain, exit if the evidence broke — price weakness is not the reason; broken evidence is. Bitcoin, broad index ETFs, and small non-thesis-critical Ballast are exempt.',
+    explainerConcept: 'Event risk',
+    concepts: [{ label: 'Earnings protocol', link: '/part-5-portfolio-construction-position-management' }, { label: 'Tripwire', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'single',
+    ariaSummary: 'A timeline from twenty-one trading days before earnings to fifteen days after. The position holds ten percent through the initiation-blackout window, compresses to the three percent cap across the five days before the event, and holds the cap through the announcement and the five-day assessment window. From day six it splits into three branches: thesis confirmed rebuilds toward ten percent over weeks; thesis uncertain stays at three percent; thesis damaged exits to zero. A dashed rule marks the three percent cap.',
+    domain: { xMin: -21, xMax: 15, yMin: 0, yMax: 12 }, yUnit: '%',
+    xTicks: [{ v: -21, label: 'T−21' }, { v: -5, label: 'T−5' }, { v: 0, label: 'T+0' }, { v: 5, label: 'T+5' }, { v: 15, label: 'T+15' }],
+    yTicks: [{ v: 0, label: '0%' }, { v: 3, label: '3%' }, { v: 10, label: '10%' }],
+    bands: [
+      { id: 'blackout', kind: 'regime', render: 'wash', x0: -21, x1: -6, label: 'initiation blackout · priced for perfection', labelAnchor: 'start' },
+      { id: 'compress', kind: 'shock', render: 'pressureField', x0: -5, x1: 0, seed: 47, intensity: 0.55, label: 'compress' },
+      { id: 'assess', kind: 'regime', render: 'wash', x0: 1, x1: 5, label: 'assess', labelAnchor: 'start' },
+    ],
+    guides: [{ id: 'cap', y: 3, kind: 'threshold', dash: true, label: '3% earnings cap' }],
+    markers: [{ id: 'event', type: 'enso', x: 0, y: 3, r: 11, label: 'results land', labelAnchor: 'middle', labelDy: -16 }],
+    series: [
+      { key: 'held', tier: 'primary', label: 'Position', pts: p5Earnings.held },
+      { key: 'rebuild', tier: 'secondary', label: 'Confirmed · rebuild', pts: p5Earnings.rebuild, labelDy: -4 },
+      { key: 'hold', tier: 'reference', label: 'Uncertain · stay reduced', pts: p5Earnings.hold, labelDy: 10 },
+      { key: 'exit', tier: 'stress', label: 'Damaged · exit', pts: p5Earnings.exit, labelDy: 4 },
+    ],
+    primaryKey: 'held',
+    hoverTargets: [
+      { id: 'held', kind: 'series', seriesKey: 'held', label: 'The position', name: 'The governed position', why: 'Ten percent through the blackout window, compressed to the three percent cap across T-5 to T-1, held flat through the event and the assessment days. Proceeds park in the liquidity sleeve.', claim: 'Compression is mechanical, not emotional.', concept: 'Event risk', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'rebuild', kind: 'series', seriesKey: 'rebuild', label: 'Rebuild', name: 'Thesis confirmed · rebuild', why: 'Results support the thesis, so the position re-earns its size deliberately — restored toward target over two to four weeks, never in one day.', claim: 'Rebuild deliberately.', concept: 'Earnings protocol', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'hold', kind: 'series', seriesKey: 'hold', label: 'Stay reduced', name: 'Thesis uncertain · stay reduced', why: 'Mixed results keep exposure at the cap until clarity emerges. Reduced is a position, not a failure.', claim: 'Uncertainty holds the cap.', concept: 'Earnings protocol', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'exit', kind: 'series', seriesKey: 'exit', label: 'Exit', name: 'Thesis damaged · exit', why: 'Results reveal fundamental problems: complete exit irrespective of loss size. Price weakness is not the reason; broken evidence is. No averaging down.', claim: 'Broken evidence ends the position.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'event', kind: 'marker', label: 'T+0', name: 'T+0 · observe', why: 'No action on the announcement itself — the market processes the information first. Reaction is not evidence.', claim: 'Observe, then assess.', concept: 'Event risk', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['held', 'rebuild', 'hold', 'exit', 'event'],
+    implementationNotes: 'single-layout reuse: a step path with regime/pressure window bands and three post-assessment branch series. The 3% cap guide + T window boundaries are canonical (Part 5 protocol table stays adjacent as the exact-value companion).',
+  },
+
+  {
+    chartId: 'p5-momentum-gate', idx: 'P5-06', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'diagram',
+    claimStack: {
+      primaryClaim: 'Full sizing must survive three momentum confirmations — and losing all three is an exit, not an opinion',
+      visualProof: 'A high-conviction position enters a gauntlet of three gates — absolute trend, relative performance, breadth — with the surviving band thinning at each break until only fully confirmed positions reach full sizing',
+      interactionRole: 'Hover a gate to read its question and the capital action when it is the one that breaks',
+      readerAction: 'Trace the band through the three gates and read the action ladder gate by gate',
+      caution: 'Conceptual gauntlet; the action ladder (full · reduce 25–30% · watch · exit) is the canonical Part 5 momentum table',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'Conviction Requires Market Confirmation', setupLine: 'Absolute trend, relative performance, and breadth gate the sizing a thesis can carry',
+    claimLabel: 'PART 5 · MOMENTUM GATE',
+    frameworkClaim: 'A strong thesis can remain fundamentally correct while becoming a poor current allocation. The framework requires confirmation across price, relative performance, and participation.',
+    readerTakeaway: 'Re-entry is allowed. Unbounded opportunity cost is not.',
+    chartType: 'Three-gate momentum gauntlet: conviction enters, each broken dimension thins eligible sizing, all-three-broken is the exit tripwire.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 5', label: 'Momentum dimensions and the alignment action ladder', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+    ],
+    explainerHeadline: 'The tripwire is the last row of a ladder, not a mood.',
+    explainerBody: 'All three dimensions positive: full sizing per the CIS allocation bands. One breaks: reduce twenty-five to thirty percent and monitor closely. Two break: watch status — minimal new exposure. All three negative: exit, even if CIS remains high — capital preservation overrides conviction, and re-entry is explicitly permitted once momentum repairs. The exit acknowledges the market is not currently validating the thesis; holding anyway is opportunity cost the framework refuses to accept.',
+    explainerConcept: 'Momentum gate',
+    concepts: [{ label: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' }, { label: 'Tripwire', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'gate',
+    ariaSummary: 'A validation gauntlet. A high-conviction position enters from the left and must pass three gates: absolute momentum, its own trend measured from the fifty-two-week high; relative momentum, performance against the alternatives competing for capital; and breadth, participation across the surrounding ecosystem. The surviving band thins at each gate. Only a position confirmed on all three reaches full eligible sizing; losing all three is the exit tripwire.',
+    gate: {
+      nodes: [
+        { id: 'conviction', kind: 'entry', label: 'High-CIS position', sub: 'conviction, unconfirmed' },
+        { id: 'absolute', kind: 'gate', label: 'Absolute', sub: 'holding its own trend?' },
+        { id: 'relative', kind: 'gate', label: 'Relative', sub: 'beating the alternatives?' },
+        { id: 'breadth', kind: 'gate', label: 'Breadth', sub: 'ecosystem participating?' },
+        { id: 'confirmed', kind: 'exit', label: 'Full sizing', sub: 'all three confirmed' },
+      ],
+    },
+    primaryKey: 'confirmed',
+    hoverTargets: [
+      { id: 'conviction', kind: 'node', label: 'The position', name: 'A high-CIS position', why: 'Quality is already scored — this gauntlet does not re-litigate the thesis. It asks whether the market is currently validating it.', claim: 'Conviction without confirmation is speculation.', concept: 'Momentum gate', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'absolute', kind: 'node', label: 'Absolute', name: 'Gate 1 · absolute momentum', why: 'Is the position holding its own trend? Within ten percent of the fifty-two-week high is healthy; twenty-five percent below is correction; forty percent is severe distress. One broken dimension: reduce sizing twenty-five to thirty percent.', claim: 'One break reduces; it does not exit.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'relative', kind: 'node', label: 'Relative', name: 'Gate 2 · relative momentum', why: 'Is it outperforming the sector and market alternatives competing for the same capital? Two broken dimensions: watch status — minimal new exposure.', claim: 'Two breaks freeze new capital.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'breadth', kind: 'node', label: 'Breadth', name: 'Gate 3 · breadth', why: 'Is the move supported by the surrounding ecosystem, or carried by one isolated name? Narrow leadership warns of exhaustion. All three broken: the exit tripwire fires even at high CIS.', claim: 'All three broken is an exit, not a debate.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'confirmed', kind: 'node', label: 'Full sizing', name: 'Full eligible sizing', why: 'All three dimensions confirmed: the position carries its full CIS-band allocation. Confirmation is re-checked weekly — this is a state, not a promotion.', claim: 'Full size is a confirmed state.', concept: 'Momentum gate', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['conviction', 'absolute', 'relative', 'breadth', 'confirmed'],
+    implementationNotes: 'gate-layout reuse with three gates (renderer generalized from the fixed four-gate death map; the p2 six-node chart is byte-preserved via the legacy branch). The four-state action ladder rides the gate hover copy; the Part 5 alignment table remains adjacent as the exact-value companion.',
+  },
+
+  {
+    chartId: 'p5-force-channels', idx: 'P5-07', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'diagram',
+    claimStack: {
+      primaryClaim: 'High conviction in one regime force still diversifies — across the force’s distinct economic channels',
+      visualProof: 'One structural force fanning into seven channels — compute, memory and networking, power generation, grid equipment, cooling, datacenter construction, physical security — each a different bottleneck with different customers, revenue models, and failure modes',
+      interactionRole: 'Hover a channel to read the bottleneck it owns and how its failure mode differs',
+      readerAction: 'Compare any two channels and name what fails in one but not the other',
+      caution: 'A methodology illustration using AI infrastructure as the example force — not a standing recommendation',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'One Regime Force. Multiple Economic Expressions.', setupLine: 'Diversify the pathway; preserve the thesis',
+    claimLabel: 'PART 5 · REGIME CHANNELS',
+    frameworkClaim: 'Diversification does not require abandoning the thesis. It requires owning different bottlenecks, customers, revenue models, and failure modes within the same structural force.',
+    readerTakeaway: 'Diversify the pathway. Preserve the thesis.',
+    chartType: 'One-force fan: a single regime force expressed through seven economically distinct channels.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual methodology illustration · AI infrastructure is the example force, not a recommendation', footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 5', label: 'Sector allocation through regime forces', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF · Part 2', label: 'Regime-force identification methodology', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
+    ],
+    explainerHeadline: 'Seven tickers in one industry is one trade wearing seven names.',
+    explainerBody: 'A portfolio of seven semiconductor names looks diversified by ticker and remains concentrated in one liquidity factor. The same thesis expressed through compute, power, grid equipment, cooling, construction, and security owns genuinely different bottlenecks — different customers, different revenue models, different ways to fail. The sector caps in the adjacent table still bind: thirty percent per sector, fifty percent for the top two.',
+    explainerConcept: 'Regime channels',
+    concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Sector limits', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'flow', flowHeight: 560,
+    ariaSummary: 'A fan diagram. One node on the left, an illustrative regime force labelled AI infrastructure, connects to seven channel nodes on the right: compute, memory and networking, power generation, grid equipment, cooling, datacenter construction, and physical security and defense. Each channel is a distinct bottleneck within the same structural force.',
+    flow: {
+      stages: [
+        { id: 'f', label: 'Regime force', nodes: [{ id: 'force', label: 'AI infrastructure', sub: 'illustrative regime force' }] },
+        { id: 'c', label: 'Distinct economic channels', nodes: [
+          { id: 'compute', label: 'Compute', sub: 'accelerators & fabs' },
+          { id: 'memory', label: 'Memory & networking', sub: 'bandwidth bottleneck' },
+          { id: 'power', label: 'Power generation', sub: 'electrons as constraint' },
+          { id: 'grid', label: 'Grid equipment', sub: 'transmission & transformers' },
+          { id: 'cooling', label: 'Cooling', sub: 'thermal density' },
+          { id: 'build', label: 'Datacenter construction', sub: 'shells & services' },
+          { id: 'security', label: 'Security & defense', sub: 'hardening the buildout' },
+        ] },
+      ],
+    },
+    primaryKey: 'force',
+    hoverTargets: [
+      { id: 'force', kind: 'node', label: 'The force', name: 'The structural force', why: 'One identified regime force — here, the AI infrastructure buildout, as an illustration of method. The thesis is held once; the expression is distributed.', claim: 'One thesis, many pathways.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'compute', kind: 'node', label: 'Compute', name: 'Compute', why: 'Accelerators and the fabs behind them — the most crowded expression, priced first, and exposed to design-cycle and competition risk the other channels do not share.', claim: 'The obvious channel is the crowded one.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'memory', kind: 'node', label: 'Memory & networking', name: 'Memory & networking', why: 'Bandwidth between processors is its own bottleneck with its own pricing cycle — correlated to compute demand, not to compute margins.', claim: 'Adjacent is not identical.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'power', kind: 'node', label: 'Power generation', name: 'Power generation', why: 'Datacenters are ultimately constrained by electrons. Generation assets sell to utilities and hyperscalers on multi-year contracts — a different customer and duration than chip buyers.', claim: 'The constraint migrates to power.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'grid', kind: 'node', label: 'Grid equipment', name: 'Grid equipment', why: 'Transformers and transmission gear carry multi-year backlogs and regulated demand — slower, stickier economics than anything upstream.', claim: 'Backlogs fail differently than benchmarks.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cooling', kind: 'node', label: 'Cooling', name: 'Cooling', why: 'Thermal density rises with every accelerator generation. Cooling wins on engineering spec, not on model quality — a supplier economy, not a platform economy.', claim: 'Heat is a business model.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'build', kind: 'node', label: 'Construction', name: 'Datacenter construction', why: 'Shells, services, and the firms that pour them — project-based revenue tied to capex commitments already announced, with construction-cycle rather than silicon-cycle risk.', claim: 'Someone has to build the buildings.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'security', kind: 'node', label: 'Security & defense', name: 'Physical security & defense', why: 'Critical infrastructure gets hardened — physical security and defense applications monetize the same buildout through government-adjacent budgets with their own cycle.', claim: 'The same force, a different payer.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['force', 'compute', 'power', 'grid', 'cooling', 'build', 'security'],
+    implementationNotes: 'flow-layout reuse (1→7 fan) with a spec-driven flowHeight (560) so seven channel nodes breathe. Explicitly framed as methodology illustration; sector caps stay in the adjacent table.',
+  },
+
+  {
+    chartId: 'p5-wrapper-compounding', idx: 'P5-08', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'comparison',
+    claimStack: {
+      primaryClaim: 'The same asset and the same trades end roughly 2× apart after 30 years of wrapper friction',
+      visualProof: 'Two compounding curves from the same $100,000 origin — 10% tax-free against roughly 7.5% after annual realization at a 25% blended rate — separating slowly at first, then structurally: about $875,000 versus about $1,745,000 at year 30',
+      interactionRole: 'Hover a curve or a checkpoint to read the values at 10, 20, and 30 years',
+      readerAction: 'Watch how small the gap is at year 10 and how structural it is by year 30',
+      caution: 'Deterministic arithmetic from the stated assumptions — a constant-return illustration of tax drag, not a market projection',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'Tax Drag Compounds Too', setupLine: 'Identical asset, identical return, different wrapper: $100,000 over 30 years',
+    claimLabel: 'PART 5 · WRAPPER FRICTION',
+    frameworkClaim: 'The asset and return can be identical while the wrapper produces a radically different outcome. Small annual friction becomes a structural divergence over decades.',
+    readerTakeaway: 'Wrapper placement is not administrative housekeeping. It is portfolio construction.',
+    chartType: 'Two verified compounding curves ($100k at 10% tax-free vs ~7.5% after-tax) with 10/20/30-year checkpoints and the terminal wedge labelled.',
+    visualDataMode: 'representative',
+    disclosure: 'Representative arithmetic · Constant-return illustration from stated assumptions; not a market outcome', footerCta: 'View methodology',
+    sources: [
+      { provider: 'Author calculation', label: '$100,000 × 1.10^t (tax-free) vs × 1.075^t (10% pre-tax, 25% blended annual realization); 10y $259k vs $206k · 20y $673k vs $425k · 30y ≈$1,745k vs ≈$875k', role: 'methodology' },
+      { provider: 'ACF · Part 4', label: 'The Tax Wedge — the canonical wrapper-retention exhibit this example applies over time', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' },
+    ],
+    explainerHeadline: 'A 2.5-point annual haircut becomes an $870,000 wedge.',
+    explainerBody: 'Both paths hold the identical asset earning ten percent before tax. The taxable path realizes gains annually at a twenty-five percent blended rate, compounding at roughly seven and a half percent; the tax-advantaged path compounds the full ten. At year ten the gap is about $53,000. At year twenty it is about $248,000. At year thirty the taxable path reaches about $875,000 while the tax-free path reaches about $1,745,000 — a difference of roughly $870,000 created by wrapper placement alone. Arithmetic, not opinion.',
+    explainerConcept: 'Wrapper edge',
+    concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
+    layout: 'single',
+    ariaSummary: 'Two curves start together at one hundred thousand dollars in year zero. The tax-free curve compounds at ten percent and reaches about one point seven four five million dollars by year thirty. The after-tax curve compounds at roughly seven and a half percent and reaches about eight hundred seventy-five thousand dollars. Checkpoints mark both values at years ten and twenty; the shaded gap between the curves is the wrapper drag, roughly eight hundred seventy thousand dollars at year thirty.',
+    domain: { xMin: 0, xMax: 30, yMin: 0, yMax: 1850000 }, yUnit: '$',
+    xTicks: [{ v: 0, label: 'year 0' }, { v: 10, label: '10y' }, { v: 20, label: '20y' }, { v: 30, label: '30y' }],
+    yTicks: [{ v: 0, label: '$0' }, { v: 500000, label: '$0.5M' }, { v: 1000000, label: '$1.0M' }, { v: 1500000, label: '$1.5M' }],
+    series: [
+      { key: 'taxable', tier: 'secondary', label: 'Taxable · ≈$875k', pts: p5Wrapper.taxable, labelDy: 10 },
+      { key: 'roth', tier: 'primary', label: 'Tax-free · ≈$1.745M', pts: p5Wrapper.roth },
+    ],
+    areas: [{ id: 'drag', topKey: 'roth', botKey: 'taxable', kind: 'gap', xFrom: 0, label: 'wrapper drag · ≈$870,000 by year 30' }],
+    markers: [
+      { id: 'y10', type: 'enso', x: 10, y: R(valueAt(p5Wrapper.roth, 10)), r: 9, label: '10y · $259k vs $206k', labelAnchor: 'start', labelDy: -14 },
+      { id: 'y20', type: 'enso', x: 20, y: R(valueAt(p5Wrapper.roth, 20)), r: 9, label: '20y · $673k vs $425k', labelAnchor: 'start', labelDy: -14 },
+    ],
+    guides: [], levels: [], notes: [],
+    primaryKey: 'roth',
+    hoverTargets: [
+      { id: 'roth', kind: 'series', seriesKey: 'roth', label: 'Tax-free', name: 'Tax-advantaged · full 10% compounds', why: 'Nothing is surrendered along the way, so every year compounds the full return. Terminal value ≈ $1,745,000 — about two times the taxable outcome from the identical asset.', claim: 'The wrapper keeps the whole engine running.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'taxable', kind: 'series', seriesKey: 'taxable', label: 'Taxable', name: 'Taxable · ~7.5% after annual realization', why: 'Realizing gains each year at a twenty-five percent blended rate trims the compounding rate by two and a half points — small annually, structural over thirty years. Terminal value ≈ $875,000.', claim: 'Annual friction is the quiet cost.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'y10', kind: 'marker', label: '10-year checkpoint', name: 'Year 10 · $259k vs $206k', why: 'A decade in, the gap is real but modest — about $53,000. This is the window where wrapper placement still looks like housekeeping.', claim: 'Early, the drag hides.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'y20', kind: 'marker', label: '20-year checkpoint', name: 'Year 20 · $673k vs $425k', why: 'Two decades in, the gap is about $248,000 and widening every year — the divergence is now structural, not incremental.', claim: 'By year 20 the wedge is structural.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+    ],
+    mobileTapTargets: ['roth', 'taxable', 'y10', 'y20'],
+    implementationNotes: 'single-layout reuse; deterministic generator (no noise). The verified Part 5 arithmetic; honest linear axis from $0; the terminal wedge is the gap area label. Cross-referenced to Part 4’s canonical retention exhibit (p4-tax-wedge) rather than duplicating its argument.',
+  },
+
+  {
+    chartId: 'p5-liquidity-throttle', idx: 'P5-09', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'diagram',
+    claimStack: {
+      primaryClaim: 'When correlation rises, the framework reduces exposure to the shared failure mode — it does not predict direction',
+      visualProof: 'A four-station governed cycle — normal rules, stress recognized, throttle applied, repair confirmed — with the throttle as the governed checkpoint and a return arc that resumes standard positioning only after two-plus stable weeks',
+      interactionRole: 'Hover a station to read its indicators and the capital response it triggers',
+      readerAction: 'Follow the cycle from the stress signals through the throttle to the confirmation-gated return',
+      caution: 'Regime-aware throttling, not market timing — no direction is predicted at any station',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'When Correlation Rises, Diversification Shrinks', setupLine: 'Positions that looked independent can become one trade during liquidity withdrawal',
+    claimLabel: 'PART 5 · REGIME THROTTLE',
+    frameworkClaim: 'During liquidity withdrawal, positions that appeared independent can begin moving as one trade. The framework responds by reducing exposure to the shared failure mode, not by predicting the next market direction.',
+    readerTakeaway: 'This is regime-aware throttling. It is not market timing.',
+    chartType: 'Three-state throttle cycle: normal → stressed → throttle → repair, with a confirmation-gated return to standard rules.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 5', label: 'Liquidity & correlation regime monitoring protocol', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+    ],
+    explainerHeadline: 'The stress state has thresholds; the return has a waiting period.',
+    explainerBody: 'Stress is recognized by indicators, not by mood: VIX sustained above twenty-five, credit spreads widening, Torque correlations rising above zero point seven. The throttle pauses new Torque adds, enforces posture limits strictly, and reduces gross exposure by ten to twenty percent where required. Standard positioning resumes only after the indicators normalize and stay normal for two or more weeks — the confirmation period is part of the rule, not an option.',
+    explainerConcept: 'Regime throttle',
+    concepts: [{ label: 'Correlation instability', link: '/part-1-foundation' }, { label: 'Tripwire', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'governanceLoop',
+    ariaSummary: 'A governed cycle of four stations. Normal: correlations contained, liquidity functioning, standard sizing rules. Stressed: VIX sustained above twenty-five, credit spreads widening, Torque correlation above zero point seven. Throttle, the governed checkpoint: pause new adds, enforce limits, reduce gross exposure ten to twenty percent. Repair: indicators normalize. A return arc labelled stable two-plus weeks closes the cycle back to normal rules.',
+    governanceLoop: {
+      governorId: 'throttle',
+      returnLabel: 'stable 2+ weeks → resume standard positioning',
+      nodes: [
+        { id: 'normal', label: 'Normal', sub: 'standard sizing rules' },
+        { id: 'stressed', label: 'Stressed', sub: 'VIX >25 · spreads · corr >0.7' },
+        { id: 'throttle', label: 'Throttle', sub: 'pause adds · cut gross 10–20%' },
+        { id: 'repair', label: 'Repair', sub: 'indicators normalize' },
+      ],
+    },
+    primaryKey: 'throttle',
+    hoverTargets: [
+      { id: 'normal', kind: 'node', label: 'Normal', name: 'Normal · standard rules', why: 'Correlations contained, liquidity functioning. Position-level diversification is doing its job, so the standard sizing rules apply unchanged.', claim: 'Normal is a measured state, not a default mood.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'stressed', kind: 'node', label: 'Stressed', name: 'Stressed · the indicators fire', why: 'Volatility sustained above twenty-five on the VIX, credit spreads widening, Torque correlations rising above zero point seven — diversification is quietly failing while every individual thesis still looks intact.', claim: 'Stress is declared by thresholds.', concept: 'Correlation instability', link: '/part-1-foundation' },
+      { id: 'throttle', kind: 'node', label: 'Throttle', name: 'Throttle · the governed response', why: 'Pause new Torque adds, enforce posture limits strictly, reduce gross exposure ten to twenty percent where required. The response targets the shared failure mode, not a market call.', claim: 'Cut the shared exposure, not the thesis.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'repair', kind: 'node', label: 'Repair', name: 'Repair · confirmation-gated', why: 'Indicators normalizing is necessary but not sufficient — they must stay normal for two or more weeks before deployment resumes. Patience is the rule’s last clause.', claim: 'The return waits for confirmation.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['normal', 'stressed', 'throttle', 'repair'],
+    implementationNotes: 'governanceLoop reuse with the throttle station as checkpoint and the 2+-week confirmation carried on the return arc label. All thresholds canonical (Part 5 monitoring protocol).',
+  },
+
+  {
+    chartId: 'p5-change-hierarchy', idx: 'P5-10', group: 'part-5', intendedPlacement: 'part-5',
+    experienceRole: 'diagram',
+    claimStack: {
+      primaryClaim: 'Not every adjustment has the same meaning: calibrating a parameter, documenting an override, and touching doctrine are different acts',
+      visualProof: 'A proposed change routing to exactly one of three levels — doctrine, whose change means the framework is abandoned; parameters, tunable within documented ranges; overrides, temporary and time-bounded with reversion conditions',
+      interactionRole: 'Hover a level to read what lives there and what changing it means',
+      readerAction: 'Route a change you are considering to its level before making it',
+      caution: 'Conceptual governance hierarchy; the level definitions and examples are the canonical Part 5 register',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'Know What You Are Changing', setupLine: 'Some changes calibrate the system; some suspend a rule; some abandon the framework',
+    claimLabel: 'PART 5 · CHANGE GOVERNANCE',
+    frameworkClaim: 'Doctrine changes mean framework abandonment. Parameter changes mean calibration. Override decisions mean temporary deviation for articulated reasons.',
+    readerTakeaway: 'Silent drift is not an override.',
+    chartType: 'Change-routing diagram: one proposed change classified into doctrine, parameters, or overrides — each with a different meaning.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 5', label: 'Doctrine, parameters, and overrides register', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+    ],
+    explainerHeadline: 'The hierarchy exists so drift has nowhere to hide.',
+    explainerBody: 'Doctrine defines what the framework is — three-posture classification, the Bitcoin backbone, momentum-overrides-conviction. Violating it means you are no longer implementing ACF. Parameters calibrate implementation — sizing bands, momentum thresholds, the earnings cap — tunable within documented ranges for articulated reasons. Overrides are conscious, temporary deviations: intentional, documented, time-bounded, with the conditions for reversion stated up front. Anything else is drift.',
+    explainerConcept: 'Change governance',
+    concepts: [{ label: 'Doctrine', link: '/part-5-portfolio-construction-position-management' }, { label: 'Governance', link: '/part-6-convexity-framework-integrity-scoring' }],
+    layout: 'flow',
+    ariaSummary: 'A routing diagram. One node on the left, a proposed change, connects to three levels on the right. Doctrine: defines the framework; changing it means you are no longer implementing ACF. Parameters: calibrate implementation; tunable within documented ranges without changing framework identity. Overrides: temporary, explicit, reasoned, time-bounded, with reversion conditions.',
+    flow: {
+      stages: [
+        { id: 's1', label: 'The adjustment', nodes: [{ id: 'change', label: 'A proposed change', sub: 'name what it touches' }] },
+        { id: 's2', label: 'Its level — and its meaning', nodes: [
+          { id: 'doctrine', label: 'Doctrine', sub: 'change = abandonment' },
+          { id: 'parameters', label: 'Parameters', sub: 'change = calibration' },
+          { id: 'overrides', label: 'Overrides', sub: 'change = documented deviation' },
+        ] },
+      ],
+    },
+    primaryKey: 'doctrine',
+    hoverTargets: [
+      { id: 'change', kind: 'node', label: 'The change', name: 'A proposed change', why: 'Every adjustment routes to exactly one level before it is made. Classifying it first is what separates governance from improvisation.', claim: 'Classify before you change.', concept: 'Change governance', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'doctrine', kind: 'node', label: 'Doctrine', name: 'Doctrine · non-negotiable', why: 'Three-posture classification, wrapper engineering, the separately governed Bitcoin backbone, momentum-overrides-conviction, Hype stop-losses. Changing these does not adjust ACF — it abandons it.', claim: 'You are no longer implementing ACF.', concept: 'Doctrine', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'parameters', kind: 'node', label: 'Parameters', name: 'Parameters · tunable in range', why: 'CIS component weights, sizing bands, momentum thresholds, the earnings cap, concentration limits, the Ballast ceiling — adjustable within documented ranges, with rationale, without changing what the framework is.', claim: 'You are calibrating ACF.', concept: 'Change governance', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'overrides', kind: 'node', label: 'Overrides', name: 'Overrides · temporary and documented', why: 'Conscious deviations from default parameters: intentional, documented, time-bounded, consistent with framework objectives, with explicit conditions for reversion. The framework remains the baseline.', claim: 'You are temporarily deviating — on the record.', concept: 'Change governance', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['change', 'doctrine', 'parameters', 'overrides'],
+    implementationNotes: 'flow-layout reuse (1→3 routing). The three levels are peers on the routing stage; meaning is carried in the sub-labels so the distinction survives without hover.',
+  },
+
+  /* ── PART 6 · CONVEXITY & FRAMEWORK INTEGRITY SCORING ──────────────────── */
+  {
+    chartId: 'p6-cis-composition', idx: 'P6-01', group: 'part-6', intendedPlacement: 'part-6',
+    experienceRole: 'evidence',
+    claimStack: {
+      primaryClaim: 'CIS weighs four components, and convexity carries the most weight because it is the objective function',
+      visualProof: 'A weighted donut: Convexity & Optionality at forty percent dominates; Risk & Fragility and Macro Alignment at twenty-five each; Execution & Sentiment at ten — the composition of a 0–100 position score',
+      interactionRole: 'Hover a segment to read what it measures — and, for Risk, which direction is good',
+      readerAction: 'Note that the largest slice is upside structure, and that a higher Risk score means lower fragility',
+      caution: 'Weights are Parameters (C 35–45%, R 20–30% with documented rationale); the four-component structure is Doctrine',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'CIS Measures the Position, Not the Portfolio', setupLine: 'One asset, four components, no portfolio context',
+    claimLabel: 'PART 6 · CIS COMPOSITION',
+    frameworkClaim: 'CIS asks whether an asset is attractive as a convex opportunity under radical uncertainty: upside structure, survivability, regime fit, and execution — deliberately ignoring portfolio context.',
+    readerTakeaway: 'Quality first. Portfolio construction later.',
+    chartType: 'Weighted composition donut of the four CIS components (C 40 · R 25 · M 25 · E 10).',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual composition · Component weights are the canonical CIS v2.1 defaults (tunable Parameters; the structure is Doctrine)', footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · CIS Specification v2.1', label: 'Component weights C40/R25/M25/E10 and tunable ranges', role: 'verifies-concept' },
+      { provider: 'ACF · Part 6', label: 'CIS scope: position-level, portfolio-context-free', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    explainerHeadline: 'The score is built from upside structure — everything else supports it.',
+    explainerBody: 'Convexity and optionality dominate at forty percent because convexity is what the framework selects for. Risk and fragility score survivability, not volatility — a higher component score means lower fragility. Macro alignment reads whether the current regime reinforces or resists the opportunity. Execution and sentiment carry the least weight because execution follows quality. Diversification, correlation, concentration, and wrappers are deliberately excluded: they belong to FIS and governance.',
+    explainerConcept: 'CIS',
+    concepts: [{ label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Convexity', link: '/part-1-foundation' }],
+    layout: 'radial',
+    ariaSummary: 'A composition donut of the Convexity Integrity Score. Convexity and optionality fill forty percent of the ring; risk and fragility twenty-five percent, where a higher score means greater survivability; macro alignment twenty-five percent; execution and sentiment ten percent. The center is labelled CIS, a zero-to-one-hundred position-level score.',
+    radial: {
+      variant: 'donut', centerLabel: 'CIS · 0–100',
+      caption: 'Position quality only — the portfolio is scored elsewhere.',
+      segments: [
+        { id: 'c', label: 'Convexity & Optionality', value: 0.40, tier: 'primary', sub: 'TAM headroom · optionality · catalysts · scarcity' },
+        { id: 'r', label: 'Risk & Fragility', value: 0.25, tier: 'secondary', sub: 'survivability — higher score = lower fragility' },
+        { id: 'm', label: 'Macro Alignment', value: 0.25, tier: 'tertiary', sub: 'regime fit per the Part 2 thesis' },
+        { id: 'e', label: 'Execution & Sentiment', value: 0.10, tier: 'reference', sub: 'is reality validating now?' },
+      ],
+    },
+    primaryKey: 'c',
+    hoverTargets: [
+      { id: 'c', kind: 'segment', label: 'Convexity', name: 'Convexity & Optionality · 40%', why: 'How large can the opportunity become, and how many credible paths lead there? TAM headroom, optionality surface, catalyst density, scarcity. Dominates because convexity is the objective function.', claim: 'The biggest slice is the point of the score.', concept: 'Convexity', link: '/part-1-foundation' },
+      { id: 'r', kind: 'segment', label: 'Risk & Fragility', name: 'Risk & Fragility · 25%', why: 'Can the business survive long enough for the thesis to matter? Balance sheet, business-model fragility, factor correlation, tail exposure. Scored as survivability: higher is safer.', claim: 'Higher R means lower fragility.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'm', kind: 'segment', label: 'Macro Alignment', name: 'Macro Alignment · 25%', why: 'Does the current regime reinforce or resist the opportunity? Regime sensitivity, carry direction, policy alignment against the practitioner’s Part 2 thesis.', claim: 'The regime is a scored input.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'e', kind: 'segment', label: 'Execution', name: 'Execution & Sentiment · 10%', why: 'Momentum, relative strength, technical positioning — is reality beginning to validate the thesis now? Lowest weight because execution follows quality.', claim: 'Execution confirms; it does not lead.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
+    ],
+    mobileTapTargets: ['c', 'r', 'm', 'e'],
+    implementationNotes: 'radial donut reuse (p4-gross-not-net pattern). Weights canonical CIS v2.1; the R-direction clarification (higher = safer) rides the segment sub + hover. Delta clamps and archetype awareness stay in the page prose.',
+  },
+
+  {
+    chartId: 'p6-fis-waterfall', idx: 'P6-02', group: 'part-6', intendedPlacement: 'part-6',
+    experienceRole: 'mechanism',
+    claimStack: {
+      primaryClaim: 'FIS is subtractive: every point below 100 is a named, repairable violation',
+      visualProof: 'A waterfall starting at one hundred and stepping down through seven illustrative bucket deductions — allocation drift the largest, complexity the smallest — landing on a 78, in the Acceptable band',
+      interactionRole: 'Hover a deduction to read its bucket, its canonical cap, and the rule it references',
+      readerAction: 'Follow the score down step by step, then read the band it lands in',
+      caution: 'An illustrative portfolio — the deductions are examples inside the canonical bucket caps, not universal values',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'FIS Starts at 100', setupLine: 'Every deduction names its violation — fix the violation, recover the points',
+    claimLabel: 'PART 6 · FIS ATTRIBUTION',
+    frameworkClaim: 'FIS does not reward vague portfolio quality. It identifies where construction has departed from the framework and shows exactly how much each failure costs.',
+    readerTakeaway: 'Fix the violation. Recover the points.',
+    chartType: 'Subtractive waterfall from 100 through seven illustrative bucket penalties to the resulting score and status band.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual diagram · Illustrative example portfolio; bucket caps are canonical FIS v1.1.1, penalty sizes are not', footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · FIS Specification v1.1.1', label: 'Penalty buckets, caps (25/20/15/15/15/10/10), and status bands', role: 'verifies-concept' },
+      { provider: 'ACF · Part 6', label: 'Subtractive scoring and value-weighted penalties', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    explainerHeadline: 'A penalty must be attributable, proportional, repairable, and linked to a rule.',
+    explainerBody: 'The portfolio shown loses seven points to allocation drift, five to tax architecture, three each to governance violations and dead capital, two to concentration, and one each to posture drift and complexity — landing at seventy-eight, in the Acceptable band, where the protocol is to review attribution and prioritize the top penalty. Each bucket has a canonical cap (allocation drift twenty-five points at most; complexity hard-capped at ten), and financial-impact penalties are value-weighted with a 0.2% floor and a 12% cap so one position cannot dominate the score.',
+    explainerConcept: 'FIS',
+    concepts: [{ label: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Posture', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'waterfall',
+    ariaSummary: 'A waterfall chart. The score begins at one hundred and steps down through seven illustrative deductions: allocation drift minus seven, tax architecture minus five, governance violations minus three, dead capital minus three, concentration minus two, posture drift minus one, complexity minus one. The result lands at seventy-eight, inside the Acceptable band. Horizontal guides mark the band boundaries at ninety, eighty, seventy, and sixty.',
+    waterfall: {
+      start: 100, startLabel: 'Start', unit: 'pts',
+      steps: [
+        { id: 'alloc', label: 'Allocation drift', value: -7, cap: 25, capLabel: 'cap 25 · Part 5 posture targets' },
+        { id: 'tax', label: 'Tax architecture', value: -5, cap: 20, capLabel: 'cap 20 · Part 4 wrapper rules' },
+        { id: 'gov', label: 'Governance', value: -3, cap: 15, capLabel: 'cap 15 · Part 5 sizing/momentum' },
+        { id: 'dead', label: 'Dead capital', value: -3, cap: 15, capLabel: 'cap 15 · staleness protocol' },
+        { id: 'conc', label: 'Concentration', value: -2, cap: 15, capLabel: 'cap 15 · Part 5 limits' },
+        { id: 'posture', label: 'Posture drift', value: -1, cap: 10, capLabel: 'cap 10 · posture bands' },
+        { id: 'complex', label: 'Complexity', value: -1, cap: 10, capLabel: 'hard cap 10 · tidiness' },
+      ],
+      result: { id: 'fis', label: 'FIS 78', sub: 'Acceptable · review attribution' },
+      bandGuides: [
+        { v: 90, label: '90 · Excellent' },
+        { v: 80, label: '80 · Good' },
+        { v: 70, label: '70 · Acceptable' },
+        { v: 60, label: '60 · Concerning' },
+      ],
+    },
+    primaryKey: 'fis',
+    hoverTargets: [
+      { id: 'alloc', kind: 'node', label: 'Allocation drift', name: 'Allocation drift · −7 of 25 max', why: 'Posture allocations have drifted from the thesis targets set in Part 5. The largest bucket because allocation is the portfolio’s first-order structure.', claim: 'Structure earns the biggest cap.', concept: 'Posture', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'tax', kind: 'node', label: 'Tax architecture', name: 'Tax architecture · −5 of 20 max', why: 'Positions sitting in the wrong wrappers against the Part 4 routing rules. Individually minor placements compound into structural drag.', claim: 'Wrapper misplacement is measured, not felt.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'gov', kind: 'node', label: 'Governance', name: 'Governance violations · −3 of 15 max', why: 'Breaches of the Part 5 protocols — sizing above band, momentum rules ignored, earnings caps missed. The bucket measures compliance, not judgment.', claim: 'Rules are scored, not remembered.', concept: 'Governance', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'dead', kind: 'node', label: 'Dead capital', name: 'Dead capital · −3 of 15 max', why: 'Positions with stale scores or no active thesis role — capital that is neither Torque, Ballast, nor governed Hype is quietly rotting.', claim: 'Idle capital is a scored failure.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'conc', kind: 'node', label: 'Concentration', name: 'Concentration · −2 of 15 max', why: 'Exposure beyond the single-position, top-three, or top-five limits. Value-weighted: bigger breaches cost proportionally more, capped so one name cannot dominate FIS.', claim: 'Concentration costs points before it costs capital.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'posture', kind: 'node', label: 'Posture drift', name: 'Posture drift · −1 of 10 max', why: 'Individual positions behaving outside their assigned posture — Hype creeping toward Torque treatment, Ballast quietly taking Torque risk.', claim: 'Behavior is audited against its label.', concept: 'Posture', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'complex', kind: 'node', label: 'Complexity', name: 'Complexity · −1 · hard cap 10', why: 'Portfolio tidiness: position count, overlapping exposures, structures that resist weekly review. Hard-capped — complexity can cost, but never dominate.', claim: 'Complexity has a price and a ceiling.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'fis', kind: 'node', label: 'The result', name: 'FIS 78 · Acceptable', why: 'Seventy-eight lands in the Acceptable band: review attribution and prioritize the top penalty. Every point of the gap to one hundred has a name and a repair path.', claim: 'The score is a to-do list.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    mobileTapTargets: ['alloc', 'tax', 'gov', 'dead', 'conc', 'posture', 'complex', 'fis'],
+    implementationNotes: 'NEW waterfall layout. Start and result columns anchor the run; deductions are floating stress-tier steps with dashed connectors; band boundaries (90/80/70/60) are quiet horizontal guides. Explicitly illustrative — every example penalty sits inside its canonical cap; the FIS bucket table remains adjacent as the exact-value companion.',
+  },
+
+  {
+    chartId: 'p6-cis-fis-matrix', idx: 'P6-03', group: 'part-6', intendedPlacement: 'part-6',
+    experienceRole: 'matrix',
+    claimStack: {
+      primaryClaim: 'Position quality and construction integrity are independent — neither score can rescue the other',
+      visualProof: 'A two-by-two of CIS against FIS with a named action in every cell, and a repair path that moves a weak-weak portfolio right — construction first — before it moves up to quality',
+      interactionRole: 'Hover a waypoint to read the diagnosis and the action for that cell',
+      readerAction: 'Find your quadrant, read its action, and note the order of the repair path',
+      caution: 'Conceptual diagnosis matrix; the High/Low boundaries are the canonical >80 / <70 thresholds',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'Good Assets Can Still Form a Bad Portfolio', setupLine: 'CIS grades what you own; FIS grades what it becomes when assembled',
+    claimLabel: 'PART 6 · TWO-SCORE DIAGNOSIS',
+    frameworkClaim: 'CIS evaluates what you own. FIS evaluates what those positions become when assembled together. Neither score can rescue failure in the other.',
+    readerTakeaway: 'A portfolio is healthy only when both dimensions are healthy.',
+    chartType: 'CIS × FIS two-by-two diagnosis matrix with the canonical repair path crossing it.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 6', label: 'CIS × FIS interaction and repair order', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
+      { provider: 'ACF · FIS Specification v1.1.1', label: 'Status thresholds (High >80 · Low <70)', role: 'verifies-concept' },
+    ],
+    explainerHeadline: 'Two scores, one diagnosis — and a fixed repair order.',
+    explainerBody: 'High CIS with high FIS: maintain. High CIS with low FIS is a construction issue — repair wrappers, sizing, concentration, or posture allocation, and keep the positions. Low CIS with high FIS is a quality issue — upgrade the holdings; the construction is fine. Low on both: repair construction first, because construction failures compound faster, then replace the weak positions. Position quality times construction integrity — the product is what has to be healthy.',
+    explainerConcept: 'Two-score kernel',
+    concepts: [{ label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' }],
+    layout: 'quadrant',
+    ariaSummary: 'A two-by-two matrix. The horizontal axis is construction integrity, FIS, from low to high; the vertical axis is position quality, CIS, from low to high. Top-right: maintain — good positions, well assembled. Top-left: repair construction — good positions, poorly assembled; keep the positions. Bottom-right: upgrade holdings — weak positions, clean construction. Bottom-left: construction first, then replace weak positions. A path crosses from the bottom-left through the bottom-right to the top-right, showing the canonical repair order.',
+    quadrant: {
+      xAxis: { neg: 'LOW FIS (<70)', pos: 'HIGH FIS (>80)' },
+      yAxis: { neg: 'LOW CIS (<70)', pos: 'HIGH CIS (>80)' },
+      cells: [
+        { qx: 1, qy: 1, label: 'Maintain', sub: 'good positions, well assembled' },
+        { qx: -1, qy: 1, label: 'Repair construction', sub: 'keep the positions' },
+        { qx: 1, qy: -1, label: 'Upgrade holdings', sub: 'construction is fine' },
+        { qx: -1, qy: -1, label: 'Construction first', sub: 'then replace weak positions' },
+      ],
+      path: ['weak', 'construction', 'healthy'],
+      waypoints: {
+        weak: { x: -0.55, y: -0.42 }, construction: { x: 0.5, y: -0.34 }, healthy: { x: 0.55, y: 0.42 }, positions: { x: -0.55, y: 0.4 },
+      },
+    },
+    primaryKey: 'healthy',
+    hoverTargets: [
+      { id: 'weak', kind: 'waypoint', label: 'Low / Low', name: 'Weak positions, weak construction', why: 'Comprehensive failure — and a fixed order: repair construction first because FIS failures compound faster, then replace the weak positions.', claim: 'Repair has an order.', concept: 'Two-score kernel', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'construction', kind: 'waypoint', label: 'Construction repaired', name: 'Low CIS, high FIS · upgrade the holdings', why: 'Clean assembly of weak positions. Wrappers, sizing, and allocation are right — the holdings themselves need upgrading. Construction cannot compensate for quality.', claim: 'Tidy mediocrity is still mediocrity.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'healthy', kind: 'waypoint', label: 'Both healthy', name: 'High CIS, high FIS · maintain', why: 'Good positions, well assembled. The only cell where the weekly answer is simply: hold and keep measuring.', claim: 'Health is the product of both scores.', concept: 'Two-score kernel', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'positions', kind: 'waypoint', label: 'High CIS / Low FIS', name: 'Good positions, poorly assembled', why: 'A ninety-five CIS position in the wrong wrapper still bleeds FIS points. Repair wrappers, sizing, concentration, or posture allocation — and keep the positions.', claim: 'Great assets do not excuse bad assembly.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    mobileTapTargets: ['weak', 'construction', 'healthy', 'positions'],
+    implementationNotes: 'quadrant reuse with two small engine extensions: off-path waypoints render as hoverable dots (the High-CIS/Low-FIS cell), and the path carries the canonical repair order (construction first, then quality). The interaction table remains adjacent as the exact-wording companion.',
+  },
+
+  {
+    chartId: 'p6-weekly-loop', idx: 'P6-04', group: 'part-6', intendedPlacement: 'part-6',
+    experienceRole: 'diagram',
+    claimStack: {
+      primaryClaim: 'The framework runs on a weekly evidence loop: measure, gate, act or hold, record — repeat',
+      visualProof: 'Five stations on a governed path — update CIS, calculate FIS, run the governance gates, act or deliberately hold, log the evidence — closed by a weekly return arc, with the gates as the checkpoint',
+      interactionRole: 'Hover a station to read what it produces; the gates carry the trigger list',
+      readerAction: 'Walk the five stations, then note that the loop closes weekly whether or not anything traded',
+      caution: 'Conceptual operating loop; cadence and triggers are the canonical Part 6 weekly workflow',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'The Weekly Evidence Loop', setupLine: 'Regular measurement, explicit attribution, action only on a governing threshold',
+    claimLabel: 'PART 6 · OPERATING CADENCE',
+    frameworkClaim: 'The framework does not require constant trading. It requires regular measurement, explicit attribution, and action only when evidence crosses a governing threshold.',
+    readerTakeaway: 'No trigger is also a result. When the system remains healthy, hold.',
+    chartType: 'Five-station weekly operating loop: CIS → FIS → governance gates → act-or-hold → log, returning weekly.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 6', label: 'Weekly execution sequence and action-frequency limits', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    explainerHeadline: 'Decay only shows up week over week.',
+    explainerBody: 'Each week: update the evidence behind C, R, M, and E, with delta clamps keeping any single update honest. Calculate FIS and read its attribution. Run the gates — earnings proximity, the three momentum dimensions, tripwires, posture drift. Then act, or deliberately hold: a tripwire forces an immediate response, an earnings window trims to the cap, an FIS below seventy fixes its top penalty; nothing triggered means hold. Last, the record: what changed, why, and what would reverse the decision. The log is what makes next week’s loop a measurement instead of a memory.',
+    explainerConcept: 'Weekly loop',
+    concepts: [{ label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Tripwires', link: '/part-5-portfolio-construction-position-management' }],
+    layout: 'governanceLoop',
+    ariaSummary: 'A weekly operating loop of five stations: update CIS for every position, calculate FIS for the portfolio, run the governance gates — earnings, momentum, tripwires, posture drift — then act or deliberately hold, and log what changed, why, and what would reverse it. A return arc labelled weekly closes the loop back to the first station.',
+    governanceLoop: {
+      governorId: 'gates',
+      returnLabel: 'weekly · the loop is the framework',
+      nodes: [
+        { id: 'cis', label: 'Update CIS', sub: 'C·R·M·E → clamp → log' },
+        { id: 'fis', label: 'Calculate FIS', sub: '100 − Σ penalties' },
+        { id: 'gates', label: 'Run the gates', sub: 'earnings · momentum · drift' },
+        { id: 'act', label: 'Act — or hold', sub: 'no trigger is a result' },
+        { id: 'log', label: 'Preserve the record', sub: 'what changed · what reverses it' },
+      ],
+    },
+    primaryKey: 'cis',
+    hoverTargets: [
+      { id: 'cis', kind: 'node', label: 'Update CIS', name: 'Measure position quality', why: 'For each position: refresh the evidence behind convexity, risk, macro, and execution; apply archetype lenses; clamp the delta by confidence (±3 low, ±5 medium, ±8 high) so one week cannot rewrite conviction; log the result.', claim: 'Scores are re-earned weekly.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'fis', kind: 'node', label: 'Calculate FIS', name: 'Measure portfolio integrity', why: 'Penalties by bucket, value-weighted, with attribution: one hundred minus the sum. The output is not just a number — it is the ranked list of what to fix.', claim: 'Attribution is the deliverable.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'gates', kind: 'node', label: 'The gates', name: 'Run the governance gates', why: 'Earnings proximity (T-5, cap 3%), the three momentum dimensions, tripwires, posture drift, concentration, wrappers. The checkpoint every action must pass through — in both directions.', claim: 'Nothing moves without passing the gates.', concept: 'Tripwires', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'act', kind: 'node', label: 'Act or hold', name: 'Act — or deliberately hold', why: 'Tripwire: immediate response. Earnings window: trim to the cap. FIS below seventy: fix the top penalty. CIS drift beyond ten: resize. No trigger: hold — restraint is a decision, and the action-frequency limits enforce it.', claim: 'Holding is an outcome, not an omission.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'log', kind: 'node', label: 'The record', name: 'Preserve the record', why: 'What changed, why it changed, and what evidence would reverse the decision. Longitudinal health is only visible against a written record — the log is what next week measures against.', claim: 'Unrecorded decisions decay into stories.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    mobileTapTargets: ['cis', 'fis', 'gates', 'act', 'log'],
+    implementationNotes: 'governanceLoop reuse per the approved P6-04 signature spec, extended to five stations with the evidence log as the closing operational step (supported by the canonical step 01 “→ log” and the record-keeping doctrine). The gates station is the checkpoint.',
+  },
+
+  {
+    chartId: 'p6-decay-drift', idx: 'P6-05', group: 'part-6', intendedPlacement: 'part-6',
+    experienceRole: 'mechanism',
+    claimStack: {
+      primaryClaim: 'Framework failure is usually slow: small tolerable deviations compound while they go unmeasured',
+      visualProof: 'Five normalized health indicators eroding at different tempos across twelve unmeasured months — stale conviction fastest, wrapper leakage slowest — while the dashed line of assumed health holds flat at one hundred',
+      interactionRole: 'Hover an indicator to read the failure mode it tracks and its canonical diagnostic',
+      readerAction: 'Compare the flat assumed-health line against every eroding indicator beneath it',
+      caution: 'Conceptual diagnostic with normalized values — no market data; tempos are illustrative, the diagnostics are canonical',
+    },
+    status: 'implemented', wiredPublic: true,
+    title: 'Failure Rarely Arrives All at Once', setupLine: 'What happens to a healthy portfolio in the twelve months after reviews stop',
+    claimLabel: 'PART 6 · LONGITUDINAL DECAY',
+    frameworkClaim: 'Most implementation failures begin as small, individually tolerable deviations: a stale score, an oversized winner, a misplaced asset, one more correlated position. Left unmeasured, they compound into structural fragility.',
+    readerTakeaway: 'Framework health is longitudinal. What is not remeasured eventually becomes assumed.',
+    chartType: 'Five normalized decay indicators over twelve unmeasured months against a flat assumed-health reference.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual diagnostic · Normalized values, no market data; erosion tempos illustrative, the diagnostics canonical', footerCta: 'View framework basis',
+    sources: [
+      { provider: 'ACF · Part 6', label: 'Failure modes and longitudinal diagnostics', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    explainerHeadline: 'Every line has a diagnostic; none of them fires on its own.',
+    explainerBody: 'Stale conviction: the position changes while its score stays frozen — flag anything unrecalculated past ninety days. Thesis evidence decays as the story substitutes for current analysis — recalculate after any fifty percent appreciation. Correlation stacking accelerates late: different tickers become one trade under stress — alert above zero point seven average correlation. Posture drift moves the portfolio without a decision — alert beyond ten percent from target. Wrapper leakage is the slowest and costs fifteen to twenty-five percent of terminal wealth over twenty years. A point-in-time audit catches none of the slopes — only week-over-week measurement does.',
+    explainerConcept: 'Longitudinal health',
+    concepts: [{ label: 'Failure modes', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring' }],
+    layout: 'single',
+    ariaSummary: 'A conceptual time series over twelve months without reviews. A dashed reference line holds flat at one hundred, labelled still assumed healthy. Beneath it five normalized indicators erode at different speeds: stale conviction falls fastest, thesis evidence and correlation stacking follow — correlation accelerating late — posture drift declines steadily, and wrapper leakage erodes slowest. An early marker notes that a point-in-time audit two to three months in still looks acceptable.',
+    domain: { xMin: 0, xMax: 12, yMin: 0, yMax: 112 }, yUnit: '',
+    xTicks: [{ v: 0, label: 'last review' }, { v: 3, label: '+3 mo' }, { v: 6, label: '+6 mo' }, { v: 12, label: '+12 months' }],
+    yTicks: [{ v: 100, label: '100 · measured' }, { v: 50, label: '50' }],
+    guides: [{ id: 'assumed', y: 100, kind: 'threshold', dash: true, label: 'still assumed healthy' }],
+    markers: [{ id: 'audit', type: 'enso', x: 2.5, y: R(valueAt(p6Decay.freshness, 2.5)), r: 10, label: 'a one-time audit still looks fine here', labelAnchor: 'start', labelDy: -15 }],
+    series: [
+      { key: 'wrapper', tier: 'reference', label: 'Wrapper leakage', pts: p6Decay.wrapper, labelDy: -4 },
+      { key: 'posture', tier: 'tertiary', label: 'Posture drift', pts: p6Decay.posture, labelDy: 2 },
+      { key: 'correlation', tier: 'stress', label: 'Correlation stacking', pts: p6Decay.correlation, labelDy: 4 },
+      { key: 'evidence', tier: 'secondary', label: 'Thesis evidence', pts: p6Decay.evidence, labelDy: 6 },
+      { key: 'freshness', tier: 'primary', label: 'Stale conviction', pts: p6Decay.freshness, labelDy: 8 },
+    ],
+    primaryKey: 'freshness',
+    hoverTargets: [
+      { id: 'freshness', kind: 'series', seriesKey: 'freshness', label: 'Stale conviction', name: 'Stale conviction — the fastest decay', why: 'The position changes while the score remains frozen; sizing keeps obeying a number that no longer describes the asset. Canonical diagnostic: flag positions with scores older than ninety days.', claim: 'A frozen score is a silent resize.', concept: 'Failure modes', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'evidence', kind: 'series', seriesKey: 'evidence', label: 'Thesis evidence', name: 'Narrative reinforcement', why: 'Past performance substitutes for current evidence — the thesis may already be realized. Canonical diagnostic: require recalculation after any fifty percent appreciation.', claim: 'Winners need re-scoring most.', concept: 'Failure modes', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'correlation', kind: 'series', seriesKey: 'correlation', label: 'Correlation stacking', name: 'Correlation stacking — accelerates late', why: 'Positions scored individually converge under regime stress; different tickers become the same trade. Canonical diagnostic: alert when average position correlation exceeds zero point seven.', claim: 'Stress is when diversification is audited.', concept: 'Correlation instability', link: '/part-1-foundation' },
+      { id: 'posture', kind: 'series', seriesKey: 'posture', label: 'Posture drift', name: 'Silent posture drift', why: 'Price movement re-weights the portfolio without a single decision being made — Torque appreciates from target to overweight while Ballast quietly thins. Canonical diagnostic: alert beyond ten percent from target.', claim: 'Markets rebalance you unless you notice.', concept: 'Posture', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'wrapper', kind: 'series', seriesKey: 'wrapper', label: 'Wrapper leakage', name: 'Wrapper leakage — slow and compounding', why: 'Small tax inefficiencies accumulate over long horizons; systematic misplacement costs fifteen to twenty-five percent of terminal wealth over twenty years. Canonical diagnostic: review any position contributing more than one point to the tax-architecture penalty.', claim: 'The slowest leak is the largest bill.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'audit', kind: 'marker', label: 'Point-in-time audit', name: 'The one-time audit trap', why: 'Two or three months in, every indicator still rounds to healthy. A single audit samples the level; only longitudinal measurement sees the slope.', claim: 'Levels lie; slopes tell.', concept: 'Longitudinal health', link: '/part-6-convexity-framework-integrity-scoring' },
+    ],
+    mobileTapTargets: ['freshness', 'evidence', 'correlation', 'posture', 'wrapper', 'audit'],
+    implementationNotes: 'single-layout reuse; five deterministic normalized decay curves (smoothstep tempos, seeded ±0.6 texture) against a dashed assumed-health guide at 100. Explicitly conceptual — no market data; each hover carries its canonical diagnostic threshold. End labels spaced via labelDy to avoid collision at narrow widths.',
+  },
+
 ];
 
 export const FRAMEWORK_CHART_ORDER = FRAMEWORK_CHART_SPECS.map((s) => s.chartId);
