@@ -253,12 +253,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">Portfolio diversification</th><td>FIS</td></tr>
-            <tr><th scope="row">Position sizing</th><td>Governance (Part 5)</td></tr>
-            <tr><th scope="row">Thematic overlap / crowding</th><td>FIS</td></tr>
-            <tr><th scope="row">Internal correlation</th><td>FIS</td></tr>
-            <tr><th scope="row">Tax efficiency / wrapper placement</th><td>Governance (Part 4)</td></tr>
-            <tr><th scope="row">Concentration limits</th><td>FIS</td></tr>
+            <tr><th scope="row" class="col-primary">Portfolio diversification</th><td data-label="Belongs to">FIS</td></tr>
+            <tr><th scope="row">Position sizing</th><td data-label="Belongs to">Governance (Part 5)</td></tr>
+            <tr><th scope="row">Thematic overlap / crowding</th><td data-label="Belongs to">FIS</td></tr>
+            <tr><th scope="row">Internal correlation</th><td data-label="Belongs to">FIS</td></tr>
+            <tr><th scope="row">Tax efficiency / wrapper placement</th><td data-label="Belongs to">Governance (Part 4)</td></tr>
+            <tr><th scope="row">Concentration limits</th><td data-label="Belongs to">FIS</td></tr>
           </tbody>
         </table>
       </div>
@@ -305,13 +305,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">Allocation Drift</th><td>25 pts</td><td>Part 5 posture targets</td></tr>
-            <tr><th scope="row">Tax Architecture</th><td>20 pts</td><td>Part 4 wrapper rules</td></tr>
-            <tr><th scope="row">Governance Violations</th><td>15 pts</td><td>Part 5 sizing / momentum rules</td></tr>
-            <tr><th scope="row">Dead Capital</th><td>15 pts</td><td>Part 6 staleness protocol</td></tr>
-            <tr><th scope="row">Concentration</th><td>15 pts</td><td>Part 5 concentration limits</td></tr>
-            <tr><th scope="row">Posture Drift</th><td>10 pts</td><td>Part 5 Torque / Ballast / Hype bands</td></tr>
-            <tr><th scope="row">Complexity</th><td>10 pts (hard cap)</td><td>Part 6 tidiness</td></tr>
+            <tr><th scope="row" class="col-primary">Allocation Drift</th><td data-label="Max penalty">25 pts</td><td data-label="Rule source">Part 5 posture targets</td></tr>
+            <tr><th scope="row">Tax Architecture</th><td data-label="Max penalty">20 pts</td><td data-label="Rule source">Part 4 wrapper rules</td></tr>
+            <tr><th scope="row">Governance Violations</th><td data-label="Max penalty">15 pts</td><td data-label="Rule source">Part 5 sizing / momentum rules</td></tr>
+            <tr><th scope="row">Dead Capital</th><td data-label="Max penalty">15 pts</td><td data-label="Rule source">Part 6 staleness protocol</td></tr>
+            <tr><th scope="row">Concentration</th><td data-label="Max penalty">15 pts</td><td data-label="Rule source">Part 5 concentration limits</td></tr>
+            <tr><th scope="row">Posture Drift</th><td data-label="Max penalty">10 pts</td><td data-label="Rule source">Part 5 Torque / Ballast / Hype bands</td></tr>
+            <tr><th scope="row">Complexity</th><td data-label="Max penalty">10 pts (hard cap)</td><td data-label="Rule source">Part 6 tidiness</td></tr>
           </tbody>
         </table>
       </div>
@@ -328,11 +328,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">90&ndash;100</th><td>Excellent</td><td>Maintain</td></tr>
-            <tr><th scope="row">80&ndash;89</th><td>Good</td><td>Optimize when convenient</td></tr>
-            <tr><th scope="row">70&ndash;79</th><td>Acceptable</td><td>Review attribution, prioritize top penalty</td></tr>
-            <tr><th scope="row">60&ndash;69</th><td>Concerning</td><td>Active remediation, pause new positions</td></tr>
-            <tr><th scope="row">&lt;60</th><td>Critical</td><td>Comprehensive review per Part 5 tripwires</td></tr>
+            <tr><th scope="row" class="col-primary">90&ndash;100</th><td data-label="Status">Excellent</td><td data-label="Action">Maintain</td></tr>
+            <tr><th scope="row">80&ndash;89</th><td data-label="Status">Good</td><td data-label="Action">Optimize when convenient</td></tr>
+            <tr><th scope="row">70&ndash;79</th><td data-label="Status">Acceptable</td><td data-label="Action">Review attribution, prioritize top penalty</td></tr>
+            <tr><th scope="row">60&ndash;69</th><td data-label="Status">Concerning</td><td data-label="Action">Active remediation, pause new positions</td></tr>
+            <tr><th scope="row">&lt;60</th><td data-label="Status">Critical</td><td data-label="Action">Comprehensive review per Part 5 tripwires</td></tr>
           </tbody>
         </table>
       </div>
@@ -368,10 +368,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">High (&gt;80)</th><td>High (&gt;80)</td><td>Healthy</td><td>Maintain</td></tr>
-            <tr><th scope="row">High (&gt;80)</th><td>Low (&lt;70)</td><td>Construction issue</td><td>Fix wrappers / allocation &mdash; keep positions</td></tr>
-            <tr><th scope="row">Low (&lt;70)</th><td>High (&gt;80)</td><td>Quality issue</td><td>Upgrade positions &mdash; construction is fine</td></tr>
-            <tr><th scope="row">Low (&lt;70)</th><td>Low (&lt;70)</td><td>Comprehensive</td><td>Fix FIS first (compounds faster), then CIS</td></tr>
+            <tr><th scope="row" class="col-primary">High (&gt;80)</th><td data-label="FIS">High (&gt;80)</td><td data-label="Diagnosis">Healthy</td><td data-label="Action">Maintain</td></tr>
+            <tr><th scope="row">High (&gt;80)</th><td data-label="FIS">Low (&lt;70)</td><td data-label="Diagnosis">Construction issue</td><td data-label="Action">Fix wrappers / allocation &mdash; keep positions</td></tr>
+            <tr><th scope="row">Low (&lt;70)</th><td data-label="FIS">High (&gt;80)</td><td data-label="Diagnosis">Quality issue</td><td data-label="Action">Upgrade positions &mdash; construction is fine</td></tr>
+            <tr><th scope="row">Low (&lt;70)</th><td data-label="FIS">Low (&lt;70)</td><td data-label="Diagnosis">Comprehensive</td><td data-label="Action">Fix FIS first (compounds faster), then CIS</td></tr>
           </tbody>
         </table>
       </div>
@@ -424,10 +424,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">CIS recalculation</th><td>7 days per position</td><td>Material news event</td></tr>
-            <tr><th scope="row">Position addition</th><td>3 days between adds</td><td>Earnings rebuild</td></tr>
-            <tr><th scope="row">Full exit</th><td>No limit</td><td>Tripwire triggered</td></tr>
-            <tr><th scope="row">Partial trim</th><td>5 days between trims</td><td>Earnings proximity</td></tr>
+            <tr><th scope="row" class="col-primary">CIS recalculation</th><td data-label="Minimum interval">7 days per position</td><td data-label="Exception">Material news event</td></tr>
+            <tr><th scope="row">Position addition</th><td data-label="Minimum interval">3 days between adds</td><td data-label="Exception">Earnings rebuild</td></tr>
+            <tr><th scope="row">Full exit</th><td data-label="Minimum interval">No limit</td><td data-label="Exception">Tripwire triggered</td></tr>
+            <tr><th scope="row">Partial trim</th><td data-label="Minimum interval">5 days between trims</td><td data-label="Exception">Earnings proximity</td></tr>
           </tbody>
         </table>
       </div>
