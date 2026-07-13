@@ -5,11 +5,11 @@ const withNextra = nextra({
   themeConfig: "./theme.config.jsx"
 });
 
-/* Phase 2 — promote the staged agency Site B docs design (public/site-b/) onto
- * canonical clean routes, preserving the existing production slugs. This is
- * additive routing only: the underlying MDX pages still build and are NOT
- * deleted — they are shadowed by `beforeFiles` rewrites, which take precedence
- * over the pages router. Delete this block (rewrites + headers) to fully revert.
+/* Canonical routing — the Framework Docs are hand-authored Site B HTML in
+ * public/site-b/, served on the clean production slugs via `beforeFiles`
+ * rewrites. The legacy MDX part pages are fully retired (deleted 2026-07-13);
+ * these rewrites ARE the site's routing, not a temporary shadow. Nextra still
+ * builds the internal chart-handoff pages and /api only.
  *
  *   /                                  -> /site-b/cover-docs.html
  *   /part-1-foundation                 -> /site-b/part-1-foundation.html
@@ -18,12 +18,12 @@ const withNextra = nextra({
  *   /part-4-tax-architecture-roc-strategy -> /site-b/part-4-tax-architecture.html
  *   /part-5-portfolio-construction-position-management -> /site-b/part-5-portfolio-construction.html
  *   /part-6-convexity-framework-integrity-scoring -> /site-b/part-6-convexity-scoring.html
- *   /part-1-pictures                   -> /site-b/part-1-pictures.html   (new route)
+ *   /part-1-pictures                   -> /site-b/part-1-pictures.html
  *
  * The raw /site-b/* URLs keep working but carry `X-Robots-Tag: noindex`, so the
  * clean routes stay the single indexable surface (no duplicate content). The
  * noindex matches the original request path, so the clean routes are unaffected
- * and remain indexable. Part 7 is untouched and still renders from MDX. */
+ * and remain indexable. */
 const siteBRewrites = [
   { source: "/", destination: "/site-b/cover-docs.html" },
   { source: "/part-1-foundation", destination: "/site-b/part-1-foundation.html" },

@@ -12,8 +12,14 @@ action only — it is **not** authorization to implement.
 
 ## 1. Interactive Framework Reading Layer
 
-**Status:** `deferred` — do **not** implement until explicitly authorized **and**
-all activation prerequisites below are met.
+**Status:** `largely superseded (2026-07-13)` — the Site B reading system delivered the
+substance of this item on a different architecture: all six parts are hand-authored HTML
+(`public/site-b/`) with embedded chart islands (`data-fc-chart`), a glossary layer
+(`.gloss` + `acf-glossary.json`), sidebar + floatnav navigation, guided-focus/reveal
+behavior, and reduced-motion safety. The MDX pages this item targeted were deleted
+2026-07-13 (see `FRAMEWORK_DOCS_CANONICAL.md`). Remaining live sub-scope: **citations**
+(still open) and any future glossary/nav expansion — those would now be scoped against
+Site B, not MDX. The original text is preserved below for lineage.
 **Added:** 2026-06-23
 **Type:** Reading-experience feature (docs UX), building on the existing chart system.
 

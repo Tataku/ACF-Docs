@@ -33,17 +33,20 @@
 </head>
 <body>
   <main>
-    <p class="eyebrow">Internal · Phase 1 staging · noindex</p>
-    <h1>framework-site-B — docs design preview</h1>
-    <p class="lede">Isolated static staging of the agency reading-system reference. Not wired into production docs routes. Served verbatim from <code>/site-b/</code>.</p>
+    <p class="eyebrow">Internal · directory index · noindex</p>
+    <h1>framework-site-B — canonical docs surface</h1>
+    <p class="lede">Hand-authored production Framework Docs, served on the clean routes via <code>next.config.mjs</code> rewrites. This page is an internal file index of <code>/site-b/</code>.</p>
     <ul>
       <li><a class="card" href="cover-docs.html"><span class="t">Cover — Docs</span><span class="s">cover-docs.html · hero-field + GSAP scroll</span></a></li>
       <li><a class="card" href="part-1-foundation.html"><span class="t">Part 1 — Foundation &amp; Philosophy</span><span class="s">part-1-foundation.html</span></a></li>
+      <li><a class="card" href="part-1-pictures.html"><span class="t">Part 1 — In Pictures</span><span class="s">part-1-pictures.html · visual essay</span></a></li>
       <li><a class="card" href="part-2-lineage-macro.html"><span class="t">Part 2 — Lineage &amp; Macro Thesis</span><span class="s">part-2-lineage-macro.html</span></a></li>
       <li><a class="card" href="part-3-bitcoin-convexity.html"><span class="t">Part 3 — Bitcoin: Convexity Backbone</span><span class="s">part-3-bitcoin-convexity.html</span></a></li>
-      <li><a class="card" href="part-1-pictures.html"><span class="t">Part 1 — In Pictures</span><span class="s">part-1-pictures.html · visual essay</span></a></li>
+      <li><a class="card" href="part-4-tax-architecture.html"><span class="t">Part 4 — Tax Architecture &amp; ROC Strategy</span><span class="s">part-4-tax-architecture.html</span></a></li>
+      <li><a class="card" href="part-5-portfolio-construction.html"><span class="t">Part 5 — Portfolio Construction &amp; Position Management</span><span class="s">part-5-portfolio-construction.html</span></a></li>
+      <li><a class="card" href="part-6-convexity-scoring.html"><span class="t">Part 6 — Convexity &amp; Framework Integrity Scoring</span><span class="s">part-6-convexity-scoring.html</span></a></li>
     </ul>
-    <p class="note">Reversible by design: deleting <code>public/site-b/</code> removes this preview cleanly. Parts 4–6 are pending. External runtime deps: Google Fonts + GSAP (cdnjs).</p>
+    <p class="note">All six parts are authored and routed. Fonts and GSAP are self-hosted (<code>fonts/</code> + <code>vendor/</code>); no external runtime deps. The legacy MDX pages were retired 2026-07-13.</p>
   </main>
 </body>
 </html>
