@@ -197,7 +197,7 @@
       </div>
       <div class="measure prose">
         <p class="prose-lead">Parts 1 through 5 defined what the framework believes and why: regime framing, intellectual lineage, macro thesis formation, tax architecture, and portfolio construction with its governance protocols. Part 6 is the execution kernel. It quantifies, monitors, and enforces the system defined earlier &mdash; and it introduces no new rules. Everything here operationalizes rules that already exist, through two scoring mechanisms and a weekly workflow.</p>
-        <p>The two mechanisms divide the work cleanly. The <button type="button" class="gloss" data-gloss="cis" aria-expanded="false">Convexity Integrity Score</button> quantifies the quality of each position taken on its own. The Framework Integrity Score validates how those positions have been assembled into a portfolio. Every question the framework can ask about implementation resolves to one score or the other, and never to both.</p>
+        <p>The two mechanisms divide the work cleanly. The <button type="button" class="gloss" data-gloss="cis" aria-expanded="false">Convexity Integrity Score</button> quantifies the quality of each position taken on its own. The Framework Integrity Score validates how those positions have been assembled into a portfolio. Every question the framework can ask about implementation resolves to one score or the other, and never to both. Position quality is measured first.</p>
       </div>
 
       <aside class="callout callout-insight" aria-label="Key insight">
@@ -231,7 +231,7 @@
 
       <div class="measure prose">
         <p>CIS is strictly position-level and portfolio-context-free. The same position scores identically regardless of what else is held, which wrapper contains it, or how concentrated the portfolio has become. CIS does not evaluate diversification, correlation, concentration, or tax efficiency. Any portfolio-aware logic belongs to FIS or governance &mdash; never to CIS.</p>
-        <p>The score is built from four components. <span class="key-term">Convexity &amp; Optionality (C), weighted 40 percent</span>, measures <button type="button" class="gloss" data-gloss="tam" aria-expanded="false">TAM</button> headroom, the optionality surface, catalyst density, and scarcity; it dominates the weighting because convexity is the framework&rsquo;s objective function. <span class="key-term">Risk &amp; Fragility (R), weighted 25 percent</span>, measures survivability under stress rather than price volatility &mdash; balance sheet, business-model fragility, factor correlation, tail exposure &mdash; and a higher score means lower fragility. <span class="key-term">Macro Alignment (M), weighted 25 percent</span>, measures fit to current regime forces: regime sensitivity, carry direction, and policy alignment against the Part 2 thesis. <span class="key-term">Execution &amp; Sentiment (E), weighted 10 percent</span>, measures momentum, relative strength, and technical positioning; it carries the least weight because execution follows quality. The weights are Parameters under Part 5&rsquo;s Doctrine, Parameters, and Overrides framework, tunable within reason &mdash; C between 35 and 45 percent, R between 20 and 30 percent &mdash; with documented rationale. The four-component structure itself is Doctrine.</p>
+        <p>The score is built from four components. <span class="key-term">Convexity &amp; Optionality (C), weighted 40 percent</span>, measures <button type="button" class="gloss" data-gloss="tam" aria-expanded="false">TAM</button> headroom, the optionality surface, catalyst density, and scarcity; it dominates the weighting because convexity is the framework&rsquo;s objective function. <span class="key-term">Risk &amp; Fragility (R), weighted 25 percent</span>, measures survivability under stress rather than price volatility &mdash; balance sheet, business-model fragility, factor correlation, tail exposure &mdash; and a higher score means lower fragility. <span class="key-term">Macro Alignment (M), weighted 25 percent</span>, measures fit to current regime forces: regime sensitivity, carry direction, and policy alignment against the Part 2 thesis. <span class="key-term">Execution &amp; Sentiment (E), weighted 10 percent</span>, measures momentum, relative strength, and technical positioning; it carries the least weight because execution follows quality. The weights are engine parameters, read from the framework&rsquo;s source of truth rather than asserted per session. A thesis profile may shift them, but only within a bound of &plusmn;0.10 per component, and every shift is floored, ceilinged, and renormalized so the four weights always sum to 1.0. The four-component structure itself is Doctrine.</p>
       </div>
 
       <!-- Chart island: p6-cis-composition "CIS Measures the Position, Not the Portfolio" — the four-component weighting.
@@ -266,8 +266,15 @@
 
       <div class="measure prose">
         <p><span class="key-term">Continuous scoring.</span> All subscores are floats, not bucketed tiers. A position scores 78.3, not 75 or 80. Continuity preserves information: a score that can only land on round tiers hides small week-over-week movement, and small movement is precisely what longitudinal tracking exists to see.</p>
-        <p><span class="key-term">Delta clamping.</span> Score updates are confidence-weighted, and each update is clamped to a bounded move: low confidence permits &plusmn;3 points, medium &plusmn;5, high &plusmn;8 per update. Two situations warrant wider bounds, because a baseline is being established rather than adjusted &mdash; initial scoring permits &plusmn;20, and a material thesis change permits &plusmn;15. The reason for the clamp is behavioral as much as mathematical. Unclamped scores oscillate with mood and headline flow, and a single enthusiastic week could otherwise rewrite months of accumulated conviction in one sitting. The clamp forces large re-ratings to be earned across successive updates, each requiring fresh evidence. Confidence levels are asserted by the practitioner, with system assistance &mdash; a design choice that keeps CIS decision-support rather than autonomous judgment. The system helps calibrate; the practitioner remains the one asserting how sure they are.</p>
-        <p><span class="key-term">Archetype awareness.</span> Structurally different assets cannot be scored honestly through a single lens, so CIS applies an archetype before it applies the rubric. Bitcoin evaluates against monetary TAM with maximum survivability, because that is what the asset is: a scarcity claim on a monetary market, not a business with a balance sheet. ETFs score the exposure thesis with reduced optionality, since a diversified wrapper inherits its theme&rsquo;s upside but dilutes any single holder&rsquo;s right tail. Cash-like <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">Ballast</button> scores role utility rather than convexity, because demanding convexity from an asset held for stability would misgrade it on a job it was never given. The archetype defines the scoring lens for a position&rsquo;s intrinsic characteristics &mdash; never for portfolio context or relative allocation, which remain out of scope for CIS entirely.</p>
+        <p><span class="key-term">Delta clamping.</span> Score updates are confidence-weighted, and each update is clamped to a bounded move: low confidence permits &plusmn;3 points, medium &plusmn;5, high &plusmn;8 per update, and evidence derived through a proxy rather than observed directly permits &plusmn;6. Two situations warrant wider bounds, because a baseline is being established rather than adjusted &mdash; initial scoring permits &plusmn;20, and a material thesis change permits &plusmn;15. Structural rescores &mdash; a change in the scoring model&rsquo;s version &mdash; and large corrections of model divergence may legally bypass the clamp altogether, so that a genuine re-basing is never suppressed by machinery built to resist mood. The reason for the clamp is behavioral as much as mathematical. Unclamped scores oscillate with mood and headline flow, and a single enthusiastic week could otherwise rewrite months of accumulated conviction in one sitting. The clamp forces large re-ratings to be earned across successive updates, each requiring fresh evidence. Confidence is not asserted by hand: the engine derives it from the quality of the evidence source behind each component and aggregates the result, with structural caps by venue and size &mdash; over-the-counter listings cap at low confidence, microcaps at medium. The derivation keeps CIS decision-support rather than autonomous judgment: the score declares how sure the evidence permits it to be, and the practitioner decides what to do about it.</p>
+        <p><span class="key-term">Archetype awareness.</span> Structurally different assets cannot be scored honestly through a single lens, so CIS applies an archetype before it applies the rubric. The engine recognizes four: spot Bitcoin, ETF, levered ETF, and operating equity, the default. The archetype sets the scoring lens and the labeling, nothing more. Bitcoin routes to a monetary-TAM path, because that is what the asset is: a scarcity claim on a monetary market, not a business with a balance sheet. ETFs score the exposure thesis with reduced optionality, since a diversified wrapper inherits its theme&rsquo;s upside but dilutes any single holder&rsquo;s right tail. What the archetype does not do is put a floor under the number: CIS is a pure weighted sum of its four components, with no post-aggregation floor of any kind, and there is no cash-like archetype &mdash; an asset held for stability is governed as <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">Ballast</button> by Part 5&rsquo;s posture rules, not scored on a separate rubric here. The archetype defines the scoring lens for a position&rsquo;s intrinsic characteristics &mdash; never for portfolio context or relative allocation, which remain out of scope for CIS entirely.</p>
+        <p><span class="key-term">Reading the number.</span> The score resolves into four bands. Seventy and above is <strong>Strong</strong> (green), the compliant band; 60&ndash;69 is <strong>Moderate</strong> (yellow); 50&ndash;59 is <strong>Caution</strong> (orange); below 50 is <strong>Weak</strong> (red).</p>
+      </div>
+
+      <div class="di-bands" role="img" aria-label="The shared four-band register: seventy and above is the strong, compliant band; sixty to sixty-nine moderate; fifty to fifty-nine caution; below fifty weak."><span class="di-band" data-band="red"><i>&lt;50</i>Weak</span><span class="di-band" data-band="orange"><i>50–59</i>Caution</span><span class="di-band" data-band="yellow"><i>60–69</i>Moderate</span><span class="di-band" data-band="green"><i>70+</i>Strong</span></div>
+
+      <div class="measure prose">
+        <p>This register is shared: in the live engine, CIS and FIS read these same four bands, and 70 is the compliance line on both scores. That settles the position half of the kernel. The other half scores what the positions have been assembled into.</p>
       </div>
     </section>
 
@@ -280,63 +287,68 @@
         <h2 class="section-title" id="fis-title">FIS: good positions can create bad portfolios.</h2>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">A collection of high-CIS positions concentrated in a single sector, held in the wrong wrappers, with drifted <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button> allocation, is a poorly constructed portfolio regardless of individual quality. The Framework Integrity Score exists to catch exactly these failures. It answers: how well is the portfolio assembled relative to framework rules?</p>
-        <p><span class="key-term">Subtractive scoring.</span> FIS does not grade the portfolio up from zero on vague notions of quality; it starts every position of the ledger at 100 and deducts a named penalty for each violation it finds. The direction matters. A score built by addition rewards, and rewards invite argument about what deserves credit. A score built by subtraction indicts: every point below 100 is attributable to a specific, named departure from a specific rule, and fixing the violation recovers the points. The score is therefore not a verdict but a repair list &mdash; FIS never restates the rules it enforces, it measures compliance with rules defined in the referenced Parts. Financial-impact penalties are value-weighted so that they scale with position size, with a 0.2 percent floor and a 12 percent cap: larger positions generate proportionally larger penalties, but the cap prevents any single position from dominating the score.</p>
-        <p>The mechanism is easiest to see run once. The exhibit below walks an example portfolio down from 100 through each named deduction to the score it earns and the band that score lands in.</p>
+        <p class="prose-lead">A collection of high-CIS positions concentrated in a single sector, held in the wrong wrappers, carried without documented theses, is a poorly constructed portfolio regardless of individual quality. The Framework Integrity Score exists to catch exactly these failures. It answers: how well is the portfolio assembled relative to framework rules?</p>
+        <p><span class="key-term">Subtractive scoring.</span> FIS does not grade the portfolio up from zero on vague notions of quality; it starts every position of the ledger at 100 and deducts a named penalty for each violation it finds. The direction matters. A score built by addition rewards, and rewards invite argument about what deserves credit. A score built by subtraction indicts: every point below 100 is attributable to a specific, named departure from a specific rule, and fixing the violation recovers the points. The score is therefore not a verdict but a repair list &mdash; FIS never restates the rules it enforces, it measures compliance with rules defined in the referenced Parts. Value-weighting is scoped precisely: governance and dead-capital penalties scale with position size, with a 0.2 percent floor and a 12 percent cap &mdash; larger positions generate proportionally larger penalties, but the cap prevents any single position from dominating the score &mdash; while allocation, concentration, and complexity contributions are flat.</p>
+        <p>The penalties land in five named buckets. The mechanism is easiest to see run once: the exhibit below walks an example portfolio down from 100 through five deductions, one per bucket, to the score it earns &mdash; 83, in the Strong band.</p>
       </div>
 
       <!-- Chart island: p6-fis-waterfall "FIS Starts at 100" — the subtractive attribution walk.
-           Spec: components/framework-charts/chart-specs.mjs (idx P6-02 · group part-6 · waterfall: 100 through seven illustrative bucket deductions to FIS 78, Acceptable band).
+           Spec: components/framework-charts/chart-specs.mjs (idx P6-02 · group part-6 · waterfall: 100 through five illustrative bucket deductions to FIS 83, Strong band).
            Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
       <figure class="fc-mount" id="exhibit-p6-fis-waterfall" data-fc-chart="p6-fis-waterfall"></figure>
 
       <div class="measure prose">
-        <p>The deductions in the exhibit are illustrative; the buckets and their caps are canonical. Each bucket references the Part where its governing rule originates.</p>
+        <p>The deductions in the exhibit are illustrative; the buckets, their caps, and what each one detects are canonical &mdash; this is the live engine&rsquo;s register.</p>
       </div>
 
       <div class="compare">
         <table>
-          <caption>FIS penalty buckets, maximum penalties, and rule sources</caption>
+          <caption>The five FIS penalty buckets, their caps, and what the engine detects</caption>
           <thead>
             <tr>
               <th scope="col">Bucket</th>
               <th scope="col">Max penalty</th>
-              <th scope="col">Rule source</th>
+              <th scope="col">What the engine detects</th>
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">Allocation Drift</th><td data-label="Max penalty">25 pts</td><td data-label="Rule source">Part 5 posture targets</td></tr>
-            <tr><th scope="row">Tax Architecture</th><td data-label="Max penalty">20 pts</td><td data-label="Rule source">Part 4 wrapper rules</td></tr>
-            <tr><th scope="row">Governance Violations</th><td data-label="Max penalty">15 pts</td><td data-label="Rule source">Part 5 sizing / momentum rules</td></tr>
-            <tr><th scope="row">Dead Capital</th><td data-label="Max penalty">15 pts</td><td data-label="Rule source">Part 6 staleness protocol</td></tr>
-            <tr><th scope="row">Concentration</th><td data-label="Max penalty">15 pts</td><td data-label="Rule source">Part 5 concentration limits</td></tr>
-            <tr><th scope="row">Posture Drift</th><td data-label="Max penalty">10 pts</td><td data-label="Rule source">Part 5 Torque / Ballast / Hype bands</td></tr>
-            <tr><th scope="row">Complexity</th><td data-label="Max penalty">10 pts (hard cap)</td><td data-label="Rule source">Part 6 tidiness</td></tr>
+            <tr><th scope="row" class="col-primary">Allocation</th><td data-label="Max penalty">25 pts</td><td data-label="What the engine detects">Wrapper drift against the routing targets &mdash; Roth 45%, taxable 35%, pre-tax 20% &mdash; plus score-band compliance. Each contribution is individually capped, with a small dead-zone before drift registers. Wrapper placement is scored here.</td></tr>
+            <tr><th scope="row">Governance</th><td data-label="Max penalty">15 pts</td><td data-label="What the engine detects">One penalty per position, by strict precedence: critical score band (6) &middot; oversized position in the 60s above 8% of portfolio (6) &middot; the 60s band itself (4) &middot; momentum breakdown (4). Value-weighted.</td></tr>
+            <tr><th scope="row">Dead capital</th><td data-label="Max penalty">15 pts</td><td data-label="What the engine detects">No documented thesis (5) &middot; scores stale past 90 days (2). Value-weighted.</td></tr>
+            <tr><th scope="row">Concentration</th><td data-label="Max penalty">15 pts</td><td data-label="What the engine detects">Fires beyond the sizing caps: single position above 15% (8) &middot; top three above 40% (6) &middot; top five above 60% (4). Bitcoin is excluded by archetype. A documented override is acknowledged in the attribution, but the points still apply.</td></tr>
+            <tr><th scope="row">Complexity</th><td data-label="Max penalty">10 pts (hard cap)</td><td data-label="What the engine detects">Unclassifiable distributions (1 each) &middot; low-scoring positions carried without documented rationale beyond an allowance of three (0.5 each). A written thesis or remediation plan suppresses the charge.</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="compare-key">FIS does not restate rules &middot; it measures compliance &middot; see the referenced Parts for rule definitions</p>
+      <p class="compare-key">Five buckets &middot; caps sum to 80 &middot; FIS does not restate rules, it measures compliance with them</p>
+
+      <div class="measure prose">
+        <p>Because the caps sum to eighty, FIS cannot fall below twenty &mdash; even a portfolio that violates everything at once retains an attributable floor. Two accounting notes preserve continuity with earlier Parts. Tax architecture is no longer a standalone bucket: wrapper placement is scored inside Allocation as wrapper drift, so the Part 4 rules still bind &mdash; they simply bill through a different line. And <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button> drift is not a score bucket at all: the engine reports it as metadata alongside the score, and a separate live diagnostics surface warns when posture deviates more than 10 percent from target and fails beyond 20 percent.</p>
+      </div>
 
       <div class="compare">
         <table>
-          <caption>FIS interpretation bands and the action each prescribes</caption>
+          <caption>FIS reads the shared four-band register; the band prescribes the action</caption>
           <thead>
             <tr>
               <th scope="col">FIS range</th>
-              <th scope="col">Status</th>
+              <th scope="col">Band</th>
               <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">90&ndash;100</th><td data-label="Status">Excellent</td><td data-label="Action">Maintain</td></tr>
-            <tr><th scope="row">80&ndash;89</th><td data-label="Status">Good</td><td data-label="Action">Optimize when convenient</td></tr>
-            <tr><th scope="row">70&ndash;79</th><td data-label="Status">Acceptable</td><td data-label="Action">Review attribution, prioritize top penalty</td></tr>
-            <tr><th scope="row">60&ndash;69</th><td data-label="Status">Concerning</td><td data-label="Action">Active remediation, pause new positions</td></tr>
-            <tr><th scope="row">&lt;60</th><td data-label="Status">Critical</td><td data-label="Action">Comprehensive review per Part 5 tripwires</td></tr>
+            <tr><th scope="row" class="col-primary">70&ndash;100</th><td data-label="Band">Strong</td><td data-label="Action">Maintain; optimize when convenient</td></tr>
+            <tr><th scope="row">60&ndash;69</th><td data-label="Band">Moderate</td><td data-label="Action">Watch; review attribution, prioritize the top penalty</td></tr>
+            <tr><th scope="row">50&ndash;59</th><td data-label="Band">Caution</td><td data-label="Action">Active remediation; pause new positions</td></tr>
+            <tr><th scope="row">&lt;50</th><td data-label="Band">Weak</td><td data-label="Action">Comprehensive repair</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="compare-key">The band prescribes urgency &middot; the attribution prescribes the fix</p>
+      <p class="compare-key">The same register CIS reads &middot; 70 is the compliance line &middot; the band prescribes urgency, the attribution prescribes the fix</p>
+
+      <div class="measure prose">
+        <p>One score for the position, one for the assembly, both read against the same register. The diagnosis comes from reading them together.</p>
+      </div>
     </section>
 
     <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -348,7 +360,7 @@
         <h2 class="section-title" id="interaction-title">Neither score compensates for the other.</h2>
       </div>
       <div class="measure prose">
-        <p>CIS and FIS are intentionally independent. A 95 CIS position in the wrong wrapper still generates FIS penalties; a perfectly constructed portfolio of 65 CIS positions remains low-quality. Both scores must be healthy, and because each failure has a distinct cause, each has a distinct repair. Crossing the two scores yields four states, and the framework prescribes a specific response &mdash; and a specific repair order &mdash; for each.</p>
+        <p>CIS and FIS are intentionally independent. A 95 CIS position in the wrong wrapper still generates FIS penalties; a perfectly constructed portfolio of 65 CIS positions remains low-quality. Both scores must be healthy, and because each failure has a distinct cause, each has a distinct repair. The dividing line on both axes is the shared band line at 70 &mdash; a score at 70 or above is compliant, below it is not. Crossing the two scores at that line yields four states, and the framework prescribes a specific response &mdash; and a specific repair order &mdash; for each.</p>
       </div>
 
       <!-- Chart island: p6-cis-fis-matrix "Good Assets Can Still Form a Bad Portfolio" — the two-score diagnosis quadrant.
@@ -368,10 +380,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">High (&gt;80)</th><td data-label="FIS">High (&gt;80)</td><td data-label="Diagnosis">Healthy</td><td data-label="Action">Maintain</td></tr>
-            <tr><th scope="row">High (&gt;80)</th><td data-label="FIS">Low (&lt;70)</td><td data-label="Diagnosis">Construction issue</td><td data-label="Action">Fix wrappers / allocation &mdash; keep positions</td></tr>
-            <tr><th scope="row">Low (&lt;70)</th><td data-label="FIS">High (&gt;80)</td><td data-label="Diagnosis">Quality issue</td><td data-label="Action">Upgrade positions &mdash; construction is fine</td></tr>
-            <tr><th scope="row">Low (&lt;70)</th><td data-label="FIS">Low (&lt;70)</td><td data-label="Diagnosis">Comprehensive</td><td data-label="Action">Fix FIS first (compounds faster), then CIS</td></tr>
+            <tr><th scope="row" class="col-primary">Compliant (70+)</th><td data-label="FIS">Compliant (70+)</td><td data-label="Diagnosis">Healthy</td><td data-label="Action">Maintain</td></tr>
+            <tr><th scope="row">Compliant (70+)</th><td data-label="FIS">Below the line (&lt;70)</td><td data-label="Diagnosis">Construction issue</td><td data-label="Action">Fix wrappers / allocation &mdash; keep positions</td></tr>
+            <tr><th scope="row">Below the line (&lt;70)</th><td data-label="FIS">Compliant (70+)</td><td data-label="Diagnosis">Quality issue</td><td data-label="Action">Upgrade positions &mdash; construction is fine</td></tr>
+            <tr><th scope="row">Below the line (&lt;70)</th><td data-label="FIS">Below the line (&lt;70)</td><td data-label="Diagnosis">Comprehensive</td><td data-label="Action">Fix FIS first (compounds faster), then CIS</td></tr>
           </tbody>
         </table>
       </div>
@@ -383,10 +395,14 @@
 
       <div class="measure">
         <ol class="architecture-list" data-stepper>
-          <li><p class="step-title">Promotion: CIS rises 10 points</p><p class="step-body">The position may upsize toward its new target. Scale in over 2 to 4 weeks rather than at once; the delta clamp made the re-rating gradual, and the sizing response stays gradual to match.</p></li>
-          <li><p class="step-title">Demotion: CIS falls 10 points</p><p class="step-body">The position should downsize toward its reduced target. A CIS below 70 triggers exit evaluation regardless of posture.</p></li>
+          <li><p class="step-title">Promotion: CIS rises 10 points</p><p class="step-body">The 10-point drift trigger is the engine&rsquo;s: it flags the position for resizing toward its new target. The pacing is the practitioner&rsquo;s: scale in over 2 to 4 weeks rather than at once &mdash; the delta clamp made the re-rating gradual, and the sizing response stays gradual to match.</p></li>
+          <li><p class="step-title">Demotion: CIS falls 10 points</p><p class="step-body">The same trigger flags a downsize toward the reduced target, on the same practitioner pacing. A CIS below 70 triggers exit evaluation regardless of posture.</p></li>
           <li><p class="step-title">Posture reclassification: never by CIS alone</p><p class="step-body">A CIS change does not change posture. Torque to Ballast requires thesis maturation; Hype to Torque requires structural reality confirmation. Part 5 governs posture transitions.</p></li>
         </ol>
+      </div>
+
+      <div class="measure prose">
+        <p>Signals only matter if something runs them on schedule. The framework fixes the schedule.</p>
       </div>
     </section>
 
@@ -399,7 +415,7 @@
         <h2 class="section-title" id="weekly-title">The weekly workflow.</h2>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">The framework operates on a weekly cadence with event-triggered updates, executed Sunday evening or Monday pre-market. Each pass runs the same sequence: measure every position, measure the portfolio, run the governance gates, then act or deliberately hold, and record what was decided and why. The loop closes weekly whether or not anything traded.</p>
+        <p class="prose-lead">The framework operates on a weekly cadence with event-triggered updates, executed Sunday evening or Monday pre-market. The live governance engine runs exactly this sequence each pass: ingest current state &rarr; CIS updates &rarr; FIS calculation &rarr; governance checks &rarr; action determination &rarr; decision logging. The loop closes weekly whether or not anything traded.</p>
       </div>
 
       <!-- Chart island: p6-weekly-loop "The Weekly Evidence Loop" — the five-station operating cadence.
@@ -408,7 +424,7 @@
       <figure class="fc-mount" id="exhibit-p6-weekly-loop" data-fc-chart="p6-weekly-loop"></figure>
 
       <div class="measure prose">
-        <p>The CIS pass computes C, R, M, and E for each position, applies the archetype modifiers, clamps the delta, and logs the result. The FIS pass calculates penalties by bucket, value-weights them, and generates the attribution: FIS equals 100 minus the sum of penalties. The governance gates check earnings proximity (T-5, positions above 3 percent), the three momentum dimensions, <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwires</button>, and posture drift. Action determination follows fixed precedence: a tripwire demands immediate response; an earnings window trims to 3 percent; FIS below 70 fixes the top penalty; CIS drift beyond 10 resizes; no trigger means hold.</p>
+        <p>The CIS pass computes C, R, M, and E for each position under its archetype lens, clamps the delta, and logs the result. The FIS pass calculates penalties across the five buckets, value-weights the governance and dead-capital charges, and generates the attribution: FIS equals 100 minus the sum of penalties. The governance gates check earnings proximity (T-5, positions above 3 percent), the three momentum dimensions, <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwires</button>, and posture drift. Action determination follows fixed precedence: a tripwire demands immediate response; an earnings window trims to 3 percent; FIS below 70 fixes the top penalty; CIS drift beyond 10 resizes; no trigger means hold. Decision logging closes the pass, and the evidence surfaces are live: the decision log retains a rolling year of entries, and the TapeRead journal and the governance audit page carry the qualitative record.</p>
         <p><span class="key-term">Intra-week triggers.</span> Four events interrupt the cadence rather than wait for it: a position moving more than 5 percent in a single day &middot; material news &middot; an earnings announcement &middot; a tripwire condition met.</p>
         <p>Between triggers, frequency limits keep the practitioner from confusing activity with diligence.</p>
       </div>
@@ -437,6 +453,10 @@
         <p class="callout-label">The Restraint Principle</p>
         <p>Discipline includes restraint. A CIS change under 5 points: monitor. An FIS change under 5 points: monitor. A position within its band: no resize. All governance checks pass: hold. No trigger is also a result &mdash; a week in which the system measured everything and moved nothing is the system working.</p>
       </aside>
+
+      <div class="measure prose">
+        <p>The cadence earns its keep less in the weeks it acts than in what happens when it stops running at all.</p>
+      </div>
     </section>
 
     <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -457,21 +477,21 @@
       <figure class="fc-mount" id="exhibit-p6-decay-drift" data-fc-chart="p6-decay-drift"></figure>
 
       <div class="measure prose">
-        <p>Five patterns account for most of the erosion. Each has a canonical diagnostic &mdash; a threshold that turns a slow, invisible failure into an explicit flag.</p>
+        <p>Five patterns account for most of the erosion. Each has a canonical diagnostic &mdash; a threshold that turns a slow, invisible failure into an explicit flag &mdash; and all five diagnostics run live in the dashboard&rsquo;s longitudinal layer.</p>
       </div>
 
       <div class="measure-feature">
         <div class="failure-modes">
-          <div><span class="name">Slow CIS decay</span><p>A position that scored 82 eighteen months ago may now score 68 &mdash; thesis played out, TAM compressed, catalysts exhausted &mdash; but without recalculation, sizing remains unchanged. Diagnostic: flag positions more than 90 days stale.</p></div>
-          <div><span class="name">Silent posture drift</span><p>Market movements shift posture allocations without a single trade. Torque appreciates from 55 to 70 percent; Ballast becomes underweight. Diagnostic: alert when posture deviates more than 10 percent from target.</p></div>
-          <div><span class="name">Wrapper inefficiency accumulation</span><p>Positions land in the wrong wrappers opportunistically. Each misplacement seems minor, but systematic suboptimization costs 15 to 25 percent of terminal wealth over 20 years. Diagnostic: review any position contributing more than 1 point to the tax-architecture penalty.</p></div>
-          <div><span class="name">Correlation stacking</span><p>CIS evaluates positions individually, but regime stress correlates them. Five AI infrastructure positions may each score 85 and still move together during a liquidity withdrawal. Diagnostic: alert when average position correlation exceeds 0.7. The alert is a diagnostic signal; any resulting penalty applies through FIS per governance rules, never within CIS.</p></div>
-          <div><span class="name">Overconfidence via narrative reinforcement</span><p>Strong past performance reinforces thesis conviction, but the thesis may already be realized. Diagnostic: require CIS recalculation after any appreciation greater than 50 percent.</p></div>
+          <div><span class="name">Slow CIS decay</span><p>A position that scored 82 eighteen months ago may now score 68 &mdash; thesis played out, TAM compressed, catalysts exhausted &mdash; but without recalculation, sizing remains unchanged. Diagnostic: scores stale past 90 days are flagged, and the dead-capital bucket bills them.</p></div>
+          <div><span class="name">Silent posture drift</span><p>Market movements shift posture allocations without a single trade. Torque appreciates from 55 to 70 percent; Ballast becomes underweight. Diagnostic: posture drift warns beyond 10 percent from target and fails beyond 20.</p></div>
+          <div><span class="name">Wrapper inefficiency accumulation</span><p>Positions land in the wrong wrappers opportunistically. Each misplacement seems minor, but systematic suboptimization costs 15 to 25 percent of terminal wealth over 20 years. Diagnostic: wrapper leakage is scored inside the Allocation bucket as wrapper drift, so the attribution names each misplaced position.</p></div>
+          <div><span class="name">Correlation stacking</span><p>CIS evaluates positions individually, but regime stress correlates them. Five AI infrastructure positions may each score 85 and still move together during a liquidity withdrawal. Diagnostic: average position correlation above 0.7 is flagged. The flag is informational &mdash; any penalty routes through FIS per governance rules, never within CIS, and no action is forced.</p></div>
+          <div><span class="name">Overconfidence via narrative reinforcement</span><p>Strong past performance reinforces thesis conviction, but the thesis may already be realized. Diagnostic: a position up 50 percent on a stale score is flagged for recalculation.</p></div>
         </div>
       </div>
 
       <div class="measure prose">
-        <p>Without objective recalculation, narrative momentum substitutes for current analysis. That is why framework health is longitudinal, not episodic: every one of these failures still rounds to healthy at any single point in time, and becomes visible only through week-over-week tracking.</p>
+        <p>Without objective recalculation, narrative momentum substitutes for current analysis. That is why framework health is longitudinal, not episodic: every one of these failures still rounds to healthy at any single point in time, and becomes visible only through week-over-week tracking. What remains is the question of what carries that tracking in practice.</p>
       </div>
     </section>
 
@@ -485,12 +505,12 @@
       </div>
       <div class="measure prose">
         <p>Parts 1 through 6 form a complete system. The framework governs behavior; practitioners must execute. The weekly burden is concrete: CIS review for every position, FIS recalculation after portfolio changes, earnings calendar monitoring, momentum tracking, posture drift detection, tripwire evaluation, and longitudinal tracking. None of it is individually difficult; all of it must actually happen, every week, for the measurements to mean anything.</p>
-        <p>Three implementation paths carry that burden. Manual tracking &mdash; spreadsheets with weekly routines &mdash; is feasible for small portfolios under 10 positions but prone to drift as complexity increases. Custom tooling &mdash; self-built CIS and FIS calculations with alerts &mdash; works where development capability and ongoing maintenance exist. The ACF Dashboard is the native implementation layer, with delta clamping, FIS attribution, governance enforcement, and longitudinal diagnostics built in. Choose the implementation that makes systematic execution sustainable over the relevant horizon; the framework does not care which one, only that the loop actually runs.</p>
+        <p>Three implementation paths carry that burden. Manual tracking &mdash; spreadsheets with weekly routines &mdash; is feasible for small portfolios under 10 positions but prone to drift as complexity increases. Custom tooling &mdash; self-built CIS and FIS calculations with alerts &mdash; works where development capability and ongoing maintenance exist. The ACF Dashboard is the native implementation layer: the live build runs delta-clamped CIS updates, the five-bucket FIS with attribution, the weekly governance engine with decision logging, tripwire surfaces &mdash; a weekly three-level check and a cohort confluence tripwire &mdash; and the longitudinal diagnostics catalogued above. Choose the implementation that makes systematic execution sustainable over the relevant horizon; the framework does not care which one, only that the loop actually runs.</p>
       </div>
 
       <aside class="callout callout-info" aria-label="Product scoring extensions">
         <p class="callout-label">Product Scoring Extensions (Not Core Doctrine)</p>
-        <p>The ACF Dashboard product also surfaces additional, product-level scoring layers &mdash; the <strong>Framework Fit engine</strong> and the <strong>Doctrine Audit</strong> &mdash; that build on CIS/FIS to answer product-facing questions (for example, &ldquo;which doctrine does this portfolio express?&rdquo;). These are product scoring extensions, not part of the core CIS/FIS doctrine defined above. CIS (position quality) and FIS (construction integrity) remain the canonical two-score kernel; the product layers are evaluated and versioned separately.</p>
+        <p>The ACF Dashboard product also surfaces additional, product-level scoring layers &mdash; the <strong>Framework Fit engine</strong> and the <strong>Doctrine Audit</strong> &mdash; that build on CIS/FIS to answer product-facing questions (for example, &ldquo;which doctrine does this portfolio express?&rdquo;). These are product scoring extensions, not part of the core CIS/FIS doctrine defined above. Framework Fit runs on synthetic sample books, never on live portfolio data. CIS (position quality) and FIS (construction integrity) remain the canonical two-score kernel; the product layers are evaluated and versioned separately.</p>
       </aside>
 
       <aside class="callout callout-info" aria-label="Scope and disclaimer">
