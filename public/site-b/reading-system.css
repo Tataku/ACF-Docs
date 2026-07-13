@@ -92,24 +92,6 @@ body {
   margin: 0 0 var(--space-4);
 }
 
-/* Hamburger carve: an empty float the runtime sizes (--carve-w/--carve-h)
-   whenever a title scrolls into the fixed drawer-toggle's hitbox — the text
-   wraps around the button in real time instead of sliding beneath it.
-   Inert everywhere the vars are unset (desktop, and titles clear of the
-   button). Legibility, not decoration: active under reduced motion too. */
-.doc-title::before,
-.section-title::before,
-.sub-title::before {
-  content: '';
-  float: left;
-  width: var(--carve-w, 0px);
-  height: var(--carve-h, 0px);
-}
-/* while carved, drop balanced wrapping — balance fights the float intrusion */
-.doc-title[style*="--carve-h"],
-.section-title[style*="--carve-h"],
-.sub-title[style*="--carve-h"] { text-wrap: wrap; }
-
 .section-title {
   font-family: var(--font-serif);
   font-weight: var(--weight-normal);
