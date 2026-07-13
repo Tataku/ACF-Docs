@@ -15,6 +15,8 @@ const pages = [
   [2, '/part-2-lineage-macro-thesis', 'part-2-lineage-macro.html', 'Part 2 · Lineage & Macro Thesis'],
   [3, '/part-3-bitcoin-convexity-backbone', 'part-3-bitcoin-convexity.html', 'Part 3 · Bitcoin: Convexity Backbone'],
   [4, '/part-4-tax-architecture-roc-strategy', 'part-4-tax-architecture.html', 'Part 4 · Tax Architecture & ROC Strategy'],
+  [5, '/part-5-portfolio-construction-position-management', 'part-5-portfolio-construction.html', 'Part 5 · Portfolio Construction & Position Management'],
+  [6, '/part-6-convexity-framework-integrity-scoring', 'part-6-convexity-scoring.html', 'Part 6 · Convexity & Framework Integrity Scoring'],
 ].map(([part, route, file, title]) => ({ part, route, file, title }));
 
 const errors = [], warnings = [], byRoute = new Map(), aliases = {};

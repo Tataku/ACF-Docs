@@ -24,7 +24,9 @@ The new, canonical Framework Docs are **hand-authored static HTML** in
 | `/part-2-lineage-macro-thesis` | `public/site-b/part-2-lineage-macro.html` | ✅ authored |
 | `/part-3-bitcoin-convexity-backbone` | `public/site-b/part-3-bitcoin-convexity.html` | ✅ authored + routed (8 chart islands, design-final; chart placement repaired 2026-07-11; `p3-cold-storage-to-borrow` lifecycle flow + `p3-reserve-share-evolves` allocation curve wired into the TAM/borrow section 2026-07-12) |
 | `/part-4-tax-architecture-roc-strategy` | `public/site-b/part-4-tax-architecture.html` | ✅ authored + routed (3 chart islands, each a distinct visual relationship: `p4-tax-wedge` trend/single · `p4-gross-not-net` composition/**radial donut** · `p4-roc-yield` comparison/**laneBar** — see `CHART_ENGINE_UNIFICATION_PROPOSAL_v1.md` + the Chart Grammar matrix) |
-| `/part-5-…` · `/part-6-…` · `/part-7-…` | — | ⏳ **still MDX; need migration** |
+| `/part-5-portfolio-construction-position-management` | `public/site-b/part-5-portfolio-construction.html` | ✅ authored + routed (10 chart islands `p5-*`; doctrine reconciled against CIS v2.1 / FIS v1.1.1 2026-07-13 — see `chart-specs/PARTS_5-6_CHART_AUDIT_v1.md`) |
+| `/part-6-convexity-framework-integrity-scoring` | `public/site-b/part-6-convexity-scoring.html` | ✅ authored + routed (5 chart islands `p6-*`; same audit) |
+| `/part-7-…` | — | ⏳ **still MDX; need migration** |
 
 > **Chart status (2026-07-11):** every chart on a live reading page (Parts 1–4) is `status: implemented`
 > with an explicit `claimStack` and correct in-section placement. Remaining `needs-design-review` charts

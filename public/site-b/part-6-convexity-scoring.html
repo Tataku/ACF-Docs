@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="canonical" href="https://docs.acfdashboard.com/part-6-convexity-framework-integrity-scoring">
+  <title>Part 6 — Convexity and Framework Integrity Scoring · The Adaptive Convexity Framework</title>
+  <meta name="description" content="The two-score execution kernel of the framework: CIS quantifies position quality, FIS validates construction integrity, and a weekly workflow turns both measurements into disciplined action.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
+  <!-- Self-hosted webfonts (OFL 1.1 — licenses in fonts/). Inter v4.1 + JetBrains Mono v2.304; replaces the Google Fonts CDN load. -->
+  <link rel="preload" href="fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/InterVariable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/InterVariable-Italic.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('fonts/JetBrainsMono-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('fonts/JetBrainsMono-Medium.woff2') format('woff2');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('fonts/JetBrainsMono-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/site-b/tokens.css">
+  <link rel="stylesheet" href="/site-b/reading-system.css">
+</head>
+<body>
+  <a class="skip-link" href="#kernel">Skip to content</a>
+
+  <!-- Mobile: open the parts sidebar -->
+  <button type="button" class="drawer-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Open parts navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+  </button>
+  <div class="drawer-backdrop" hidden></div>
+
+  <div class="shell">
+    <!-- Sidebar: brand + theme + the six parts (this IS the Part-page nav) -->
+    <nav class="sidebar" id="sidebar" aria-label="Parts">
+      <div class="sidebar-bar">
+        <button type="button" class="sidebar-toggle" aria-pressed="false" aria-label="Collapse sidebar">
+          <svg class="icon-collapse" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 59.01 34.01 Q 49.65 39.65 44.01 49.01 A 1.4 1.4 0 0 1 45.99 50.99 Q 53.89 43.89 60.99 35.99 A 1.4 1.4 0 0 1 59.01 34.01 Z" fill-rule="evenodd"></path><path d="M 44.01 50.99 Q 49.65 60.35 59.01 65.99 A 1.4 1.4 0 0 1 60.99 64.01 Q 53.89 56.11 45.99 49.01 A 1.4 1.4 0 0 1 44.01 50.99 Z" fill-rule="evenodd"></path></svg>
+          <svg class="icon-expand" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 44.01 35.99 Q 49.65 45.35 59.01 50.99 A 1.4 1.4 0 0 1 60.99 49.01 Q 53.89 41.11 45.99 34.01 A 1.4 1.4 0 0 1 44.01 35.99 Z" fill-rule="evenodd"></path><path d="M 59.01 49.01 Q 49.65 54.65 44.01 64.01 A 1.4 1.4 0 0 1 45.99 65.99 Q 53.89 58.89 60.99 50.99 A 1.4 1.4 0 0 1 59.01 49.01 Z" fill-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <div class="sidebar-head">
+        <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
+          <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+            <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+            <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+          </svg>
+          <span class="brand-word">ACF</span>
+        </a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <p class="side-movement">Philosophy</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-1-foundation"><span class="spnum">01</span><span>Foundation &amp; Philosophy</span></a></li>
+          <li><a class="side-part" href="/part-2-lineage-macro-thesis"><span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span></a></li>
+        </ul>
+
+        <p class="side-movement">Architecture</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-3-bitcoin-convexity-backbone"><span class="spnum">03</span><span>Bitcoin &mdash; Convexity Backbone</span></a></li>
+          <li><a class="side-part" href="/part-4-tax-architecture-roc-strategy"><span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy</span></a></li>
+        </ul>
+
+        <p class="side-movement">Implementation</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-5-portfolio-construction-position-management"><span class="spnum">05</span><span>Portfolio Construction &amp; Position Management</span></a></li>
+        </ul>
+
+        <p class="side-movement">Governance</p>
+        <ul class="side-parts">
+          <li>
+            <a class="side-part current" href="/part-6-convexity-framework-integrity-scoring" aria-current="page">
+              <span class="spnum">06</span><span>Convexity &amp; Framework Integrity Scoring</span>
+            </a>
+            <ol class="on-this-page" data-spy aria-label="On this page">
+              <li><a href="#kernel">The Execution Kernel</a></li>
+              <li><a href="#cis">Position Quality</a></li>
+              <li><a href="#fis">Construction Integrity</a></li>
+              <li><a href="#interaction">Two Scores, One Diagnosis</a></li>
+              <li><a href="#weekly">The Operating Cadence</a></li>
+              <li><a href="#failure">Failure Modes</a></li>
+              <li><a href="#completion">Framework Completion</a></li>
+            </ol>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="shell-main">
+      <header class="doc-header">
+        <div class="measure">
+          <div class="doc-signal" data-glyph-text>Framework Documentation</div>
+          <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
+          <p class="doc-kicker">Part 6 of 6 &middot; &approx; 18 min read</p>
+          <h1 class="doc-title">Convexity and Framework Integrity Scoring</h1>
+
+          <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
+          <div class="part-actions" role="group" aria-label="Part actions">
+            <button type="button" class="part-action part-listen" data-listen aria-pressed="false">
+              <svg class="pa-icon icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z"></path></svg>
+              <svg class="pa-icon icon-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7" y="7" width="10" height="10" rx="1.5"></rect></svg>
+              <span class="part-action-label" data-listen-label>Listen</span>
+            </button>
+
+            <div class="part-share">
+              <a class="part-action" data-share="x" href="https://x.com/intent/post" target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4l16 16M20 4L4 20"></path></svg>
+              </a>
+              <a class="part-action" data-share="email" href="mailto:" aria-label="Share by email">
+                <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M4 7l8 6 8-6"></path></svg>
+              </a>
+              <button type="button" class="part-action" data-copy-link aria-label="Copy link to this part">
+                <svg class="pa-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 36.5 39.58 Q 60.5 43.27 84.5 39.58 A 1.58 1.58 0 0 1 84.5 36.42 Q 60.5 36.52 36.5 36.42 A 1.58 1.58 0 0 1 36.5 39.58 Z M 81.43 36.5 Q 77.74 60.5 81.43 84.5 A 1.58 1.58 0 0 1 84.58 84.5 Q 84.49 60.5 84.58 36.5 A 1.58 1.58 0 0 1 81.43 36.5 Z M 84.5 81.43 Q 60.5 77.74 36.5 81.43 A 1.58 1.58 0 0 1 36.5 84.58 Q 60.5 84.49 84.5 84.58 A 1.58 1.58 0 0 1 84.5 81.43 Z M 39.58 84.5 Q 43.27 60.5 39.58 36.5 A 1.58 1.58 0 0 1 36.42 36.5 Q 36.52 60.5 36.42 84.5 A 1.58 1.58 0 0 1 39.58 84.5 Z" fill-rule="evenodd"></path><path d="M 18 19.58 Q 40.5 23.18 63 19.58 A 1.58 1.58 0 0 1 63 16.43 Q 40.5 16.43 18 16.43 A 1.58 1.58 0 0 1 18 19.58 Z" fill-rule="evenodd"></path><path d="M 16.43 18 Q 12.83 40.5 16.43 63 A 1.58 1.58 0 0 1 19.58 63 Q 19.58 40.5 19.58 18 A 1.58 1.58 0 0 1 16.43 18 Z" fill-rule="evenodd"></path><path d="M 61.43 18 Q 58.88 23 61.43 28 A 1.58 1.58 0 0 1 64.58 28 Q 65.63 23 64.58 18 A 1.58 1.58 0 0 1 61.43 18 Z" fill-rule="evenodd"></path><path d="M 18 64.58 Q 23 67.13 28 64.58 A 1.58 1.58 0 0 1 28 61.43 Q 23 60.38 18 61.43 A 1.58 1.58 0 0 1 18 64.58 Z" fill-rule="evenodd"></path></svg>
+                <span class="part-action-label" data-copy-label>Copy link</span>
+              </button>
+              <button type="button" class="part-action part-share-native" data-share-native hidden aria-label="Share">
+                <svg class="pa-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 51.58 65 Q 55.18 42.5 51.58 20 A 1.58 1.58 0 0 1 48.43 20 Q 48.43 42.5 48.43 65 A 1.58 1.58 0 0 1 51.58 65 Z" fill-rule="evenodd"></path><path d="M 36.11 36.11 Q 45.65 30.65 51.11 21.11 A 1.58 1.58 0 0 1 48.89 18.89 Q 40.88 25.88 33.89 33.89 A 1.58 1.58 0 0 1 36.11 36.11 Z" fill-rule="evenodd"></path><path d="M 66.11 33.89 Q 60.65 24.35 51.11 18.89 A 1.58 1.58 0 0 1 48.89 21.11 Q 55.88 29.12 63.89 36.11 A 1.58 1.58 0 0 1 66.11 33.89 Z" fill-rule="evenodd"></path><path d="M 25 81.58 Q 50 85.33 75 81.58 A 1.58 1.58 0 0 1 75 78.43 Q 50 78.58 25 78.43 A 1.58 1.58 0 0 1 25 81.58 Z" fill-rule="evenodd"></path><path d="M 26.58 80 Q 29.13 75 26.58 70 A 1.58 1.58 0 0 1 23.43 70 Q 22.38 75 23.43 80 A 1.58 1.58 0 0 1 26.58 80 Z" fill-rule="evenodd"></path><path d="M 76.58 80 Q 79.13 75 76.58 70 A 1.58 1.58 0 0 1 73.43 70 Q 72.38 75 73.43 80 A 1.58 1.58 0 0 1 76.58 80 Z" fill-rule="evenodd"></path></svg>
+              </button>
+            </div>
+
+            <span class="part-actions-status visually-hidden" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </header>
+
+    <!-- ===== SECTION · THE EXECUTION KERNEL ============================== -->
+    <section class="section" id="kernel" aria-labelledby="kernel-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Execution Kernel</p>
+        <h2 class="section-title" id="kernel-title">The framework, measured.</h2>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">Parts 1 through 5 defined what the framework believes and why: regime framing, intellectual lineage, macro thesis formation, tax architecture, and portfolio construction with its governance protocols. Part 6 is the execution kernel. It quantifies, monitors, and enforces the system defined earlier &mdash; and it introduces no new rules. Everything here operationalizes rules that already exist, through two scoring mechanisms and a weekly workflow.</p>
+        <p>The two mechanisms divide the work cleanly. The <button type="button" class="gloss" data-gloss="cis" aria-expanded="false">Convexity Integrity Score</button> quantifies the quality of each position taken on its own. The Framework Integrity Score validates how those positions have been assembled into a portfolio. Every question the framework can ask about implementation resolves to one score or the other, and never to both.</p>
+      </div>
+
+      <aside class="callout callout-insight" aria-label="Key insight">
+        <div class="ci-head">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M9 18h6"></path>
+            <path d="M10 21h4"></path>
+            <path d="M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.2 1 2V16h6v-.5c0-.8.5-1.5 1-2A6 6 0 0 0 12 3z"></path>
+          </svg>
+          <p class="callout-label">Key Insight</p>
+        </div>
+        <p><strong>Responsibility boundaries.</strong> CIS quantifies position quality. FIS validates portfolio assembly. Part 6 does not decide &mdash; it measures and flags. The decisions its measurements inform are governed by the rules of Parts 4 and 5, which this part enforces but never rewrites.</p>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · POSITION QUALITY (CIS) ============================ -->
+    <section class="section" id="cis" aria-labelledby="cis-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Position Quality</p>
+        <h2 class="section-title" id="cis-title">CIS: scoring the position, not the portfolio.</h2>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">The Convexity Integrity Score is a 0&ndash;100 asset-level score answering one question.</p>
+      </div>
+
+      <blockquote class="pull-quote">
+        How attractive is this position, right now, <span class="hl">as a convex opportunity under radical uncertainty?</span>
+      </blockquote>
+
+      <div class="measure prose">
+        <p>CIS is strictly position-level and portfolio-context-free. The same position scores identically regardless of what else is held, which wrapper contains it, or how concentrated the portfolio has become. CIS does not evaluate diversification, correlation, concentration, or tax efficiency. Any portfolio-aware logic belongs to FIS or governance &mdash; never to CIS.</p>
+        <p>The score is built from four components. <span class="key-term">Convexity &amp; Optionality (C), weighted 40 percent</span>, measures <button type="button" class="gloss" data-gloss="tam" aria-expanded="false">TAM</button> headroom, the optionality surface, catalyst density, and scarcity; it dominates the weighting because convexity is the framework&rsquo;s objective function. <span class="key-term">Risk &amp; Fragility (R), weighted 25 percent</span>, measures survivability under stress rather than price volatility &mdash; balance sheet, business-model fragility, factor correlation, tail exposure &mdash; and a higher score means lower fragility. <span class="key-term">Macro Alignment (M), weighted 25 percent</span>, measures fit to current regime forces: regime sensitivity, carry direction, and policy alignment against the Part 2 thesis. <span class="key-term">Execution &amp; Sentiment (E), weighted 10 percent</span>, measures momentum, relative strength, and technical positioning; it carries the least weight because execution follows quality. The weights are Parameters under Part 5&rsquo;s Doctrine, Parameters, and Overrides framework, tunable within reason &mdash; C between 35 and 45 percent, R between 20 and 30 percent &mdash; with documented rationale. The four-component structure itself is Doctrine.</p>
+      </div>
+
+      <!-- Chart island: p6-cis-composition "CIS Measures the Position, Not the Portfolio" — the four-component weighting.
+           Spec: components/framework-charts/chart-specs.mjs (idx P6-01 · group part-6 · radial composition donut: C 40 · R 25 · M 25 · E 10).
+           Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
+      <figure class="fc-mount" id="exhibit-p6-cis-composition" data-fc-chart="p6-cis-composition"></figure>
+
+      <div class="measure prose">
+        <p>What the score deliberately leaves out matters as much as what it includes. Each exclusion has a home elsewhere in the system, and the table below names it.</p>
+      </div>
+
+      <div class="compare">
+        <table>
+          <caption>What CIS excludes, and where each concern belongs</caption>
+          <thead>
+            <tr>
+              <th scope="col">Excluded from CIS</th>
+              <th scope="col">Belongs to</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">Portfolio diversification</th><td>FIS</td></tr>
+            <tr><th scope="row">Position sizing</th><td>Governance (Part 5)</td></tr>
+            <tr><th scope="row">Thematic overlap / crowding</th><td>FIS</td></tr>
+            <tr><th scope="row">Internal correlation</th><td>FIS</td></tr>
+            <tr><th scope="row">Tax efficiency / wrapper placement</th><td>Governance (Part 4)</td></tr>
+            <tr><th scope="row">Concentration limits</th><td>FIS</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">CIS answers one question about one asset &middot; everything portfolio-aware is scored by FIS or governed by Parts 4 and 5</p>
+
+      <div class="measure prose">
+        <p><span class="key-term">Continuous scoring.</span> All subscores are floats, not bucketed tiers. A position scores 78.3, not 75 or 80. Continuity preserves information: a score that can only land on round tiers hides small week-over-week movement, and small movement is precisely what longitudinal tracking exists to see.</p>
+        <p><span class="key-term">Delta clamping.</span> Score updates are confidence-weighted, and each update is clamped to a bounded move: low confidence permits &plusmn;3 points, medium &plusmn;5, high &plusmn;8 per update. Two situations warrant wider bounds, because a baseline is being established rather than adjusted &mdash; initial scoring permits &plusmn;20, and a material thesis change permits &plusmn;15. The reason for the clamp is behavioral as much as mathematical. Unclamped scores oscillate with mood and headline flow, and a single enthusiastic week could otherwise rewrite months of accumulated conviction in one sitting. The clamp forces large re-ratings to be earned across successive updates, each requiring fresh evidence. Confidence levels are asserted by the practitioner, with system assistance &mdash; a design choice that keeps CIS decision-support rather than autonomous judgment. The system helps calibrate; the practitioner remains the one asserting how sure they are.</p>
+        <p><span class="key-term">Archetype awareness.</span> Structurally different assets cannot be scored honestly through a single lens, so CIS applies an archetype before it applies the rubric. Bitcoin evaluates against monetary TAM with maximum survivability, because that is what the asset is: a scarcity claim on a monetary market, not a business with a balance sheet. ETFs score the exposure thesis with reduced optionality, since a diversified wrapper inherits its theme&rsquo;s upside but dilutes any single holder&rsquo;s right tail. Cash-like <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">Ballast</button> scores role utility rather than convexity, because demanding convexity from an asset held for stability would misgrade it on a job it was never given. The archetype defines the scoring lens for a position&rsquo;s intrinsic characteristics &mdash; never for portfolio context or relative allocation, which remain out of scope for CIS entirely.</p>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · CONSTRUCTION INTEGRITY (FIS) ====================== -->
+    <section class="section" id="fis" aria-labelledby="fis-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Construction Integrity</p>
+        <h2 class="section-title" id="fis-title">FIS: good positions can create bad portfolios.</h2>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">A collection of high-CIS positions concentrated in a single sector, held in the wrong wrappers, with drifted <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button> allocation, is a poorly constructed portfolio regardless of individual quality. The Framework Integrity Score exists to catch exactly these failures. It answers: how well is the portfolio assembled relative to framework rules?</p>
+        <p><span class="key-term">Subtractive scoring.</span> FIS does not grade the portfolio up from zero on vague notions of quality; it starts every position of the ledger at 100 and deducts a named penalty for each violation it finds. The direction matters. A score built by addition rewards, and rewards invite argument about what deserves credit. A score built by subtraction indicts: every point below 100 is attributable to a specific, named departure from a specific rule, and fixing the violation recovers the points. The score is therefore not a verdict but a repair list &mdash; FIS never restates the rules it enforces, it measures compliance with rules defined in the referenced Parts. Financial-impact penalties are value-weighted so that they scale with position size, with a 0.2 percent floor and a 12 percent cap: larger positions generate proportionally larger penalties, but the cap prevents any single position from dominating the score.</p>
+        <p>The mechanism is easiest to see run once. The exhibit below walks an example portfolio down from 100 through each named deduction to the score it earns and the band that score lands in.</p>
+      </div>
+
+      <!-- Chart island: p6-fis-waterfall "FIS Starts at 100" — the subtractive attribution walk.
+           Spec: components/framework-charts/chart-specs.mjs (idx P6-02 · group part-6 · waterfall: 100 through seven illustrative bucket deductions to FIS 78, Acceptable band).
+           Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
+      <figure class="fc-mount" id="exhibit-p6-fis-waterfall" data-fc-chart="p6-fis-waterfall"></figure>
+
+      <div class="measure prose">
+        <p>The deductions in the exhibit are illustrative; the buckets and their caps are canonical. Each bucket references the Part where its governing rule originates.</p>
+      </div>
+
+      <div class="compare">
+        <table>
+          <caption>FIS penalty buckets, maximum penalties, and rule sources</caption>
+          <thead>
+            <tr>
+              <th scope="col">Bucket</th>
+              <th scope="col">Max penalty</th>
+              <th scope="col">Rule source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">Allocation Drift</th><td>25 pts</td><td>Part 5 posture targets</td></tr>
+            <tr><th scope="row">Tax Architecture</th><td>20 pts</td><td>Part 4 wrapper rules</td></tr>
+            <tr><th scope="row">Governance Violations</th><td>15 pts</td><td>Part 5 sizing / momentum rules</td></tr>
+            <tr><th scope="row">Dead Capital</th><td>15 pts</td><td>Part 6 staleness protocol</td></tr>
+            <tr><th scope="row">Concentration</th><td>15 pts</td><td>Part 5 concentration limits</td></tr>
+            <tr><th scope="row">Posture Drift</th><td>10 pts</td><td>Part 5 Torque / Ballast / Hype bands</td></tr>
+            <tr><th scope="row">Complexity</th><td>10 pts (hard cap)</td><td>Part 6 tidiness</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">FIS does not restate rules &middot; it measures compliance &middot; see the referenced Parts for rule definitions</p>
+
+      <div class="compare">
+        <table>
+          <caption>FIS interpretation bands and the action each prescribes</caption>
+          <thead>
+            <tr>
+              <th scope="col">FIS range</th>
+              <th scope="col">Status</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">90&ndash;100</th><td>Excellent</td><td>Maintain</td></tr>
+            <tr><th scope="row">80&ndash;89</th><td>Good</td><td>Optimize when convenient</td></tr>
+            <tr><th scope="row">70&ndash;79</th><td>Acceptable</td><td>Review attribution, prioritize top penalty</td></tr>
+            <tr><th scope="row">60&ndash;69</th><td>Concerning</td><td>Active remediation, pause new positions</td></tr>
+            <tr><th scope="row">&lt;60</th><td>Critical</td><td>Comprehensive review per Part 5 tripwires</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">The band prescribes urgency &middot; the attribution prescribes the fix</p>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · CIS × FIS INTERACTION ============================= -->
+    <section class="section" id="interaction" aria-labelledby="interaction-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Two Scores, One Diagnosis</p>
+        <h2 class="section-title" id="interaction-title">Neither score compensates for the other.</h2>
+      </div>
+      <div class="measure prose">
+        <p>CIS and FIS are intentionally independent. A 95 CIS position in the wrong wrapper still generates FIS penalties; a perfectly constructed portfolio of 65 CIS positions remains low-quality. Both scores must be healthy, and because each failure has a distinct cause, each has a distinct repair. Crossing the two scores yields four states, and the framework prescribes a specific response &mdash; and a specific repair order &mdash; for each.</p>
+      </div>
+
+      <!-- Chart island: p6-cis-fis-matrix "Good Assets Can Still Form a Bad Portfolio" — the two-score diagnosis quadrant.
+           Spec: components/framework-charts/chart-specs.mjs (idx P6-03 · group part-6 · quadrant: CIS × FIS with the canonical repair path, construction first).
+           Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
+      <figure class="fc-mount" id="exhibit-p6-cis-fis-matrix" data-fc-chart="p6-cis-fis-matrix"></figure>
+
+      <div class="compare">
+        <table>
+          <caption>CIS &times; FIS diagnosis and the prescribed action for each state</caption>
+          <thead>
+            <tr>
+              <th scope="col">CIS</th>
+              <th scope="col">FIS</th>
+              <th scope="col">Diagnosis</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">High (&gt;80)</th><td>High (&gt;80)</td><td>Healthy</td><td>Maintain</td></tr>
+            <tr><th scope="row">High (&gt;80)</th><td>Low (&lt;70)</td><td>Construction issue</td><td>Fix wrappers / allocation &mdash; keep positions</td></tr>
+            <tr><th scope="row">Low (&lt;70)</th><td>High (&gt;80)</td><td>Quality issue</td><td>Upgrade positions &mdash; construction is fine</td></tr>
+            <tr><th scope="row">Low (&lt;70)</th><td>Low (&lt;70)</td><td>Comprehensive</td><td>Fix FIS first (compounds faster), then CIS</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">Construction failures compound faster than quality failures &middot; when both are broken, repair construction first</p>
+
+      <div class="measure prose">
+        <p><span class="key-term">How CIS feeds decisions.</span> CIS determines position sizing within the bands established by Part 5. It does not determine those bands &mdash; Part 5 governance does. Part 5&rsquo;s <button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button>, Ballast, and Hype sizing tables carry the full CIS-to-allocation mappings by posture. The relationship: higher CIS earns a larger allocation within posture limits, and CIS below 70 means trim or exit depending on posture. Three signals govern the response to score movement.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li><p class="step-title">Promotion: CIS rises 10 points</p><p class="step-body">The position may upsize toward its new target. Scale in over 2 to 4 weeks rather than at once; the delta clamp made the re-rating gradual, and the sizing response stays gradual to match.</p></li>
+          <li><p class="step-title">Demotion: CIS falls 10 points</p><p class="step-body">The position should downsize toward its reduced target. A CIS below 70 triggers exit evaluation regardless of posture.</p></li>
+          <li><p class="step-title">Posture reclassification: never by CIS alone</p><p class="step-body">A CIS change does not change posture. Torque to Ballast requires thesis maturation; Hype to Torque requires structural reality confirmation. Part 5 governs posture transitions.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · THE OPERATING CADENCE ============================= -->
+    <section class="section" id="weekly" aria-labelledby="weekly-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Operating Cadence</p>
+        <h2 class="section-title" id="weekly-title">The weekly workflow.</h2>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">The framework operates on a weekly cadence with event-triggered updates, executed Sunday evening or Monday pre-market. Each pass runs the same sequence: measure every position, measure the portfolio, run the governance gates, then act or deliberately hold, and record what was decided and why. The loop closes weekly whether or not anything traded.</p>
+      </div>
+
+      <!-- Chart island: p6-weekly-loop "The Weekly Evidence Loop" — the five-station operating cadence.
+           Spec: components/framework-charts/chart-specs.mjs (idx P6-04 · group part-6 · governanceLoop: CIS → FIS → gates → act-or-hold → log, weekly return).
+           Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
+      <figure class="fc-mount" id="exhibit-p6-weekly-loop" data-fc-chart="p6-weekly-loop"></figure>
+
+      <div class="measure prose">
+        <p>The CIS pass computes C, R, M, and E for each position, applies the archetype modifiers, clamps the delta, and logs the result. The FIS pass calculates penalties by bucket, value-weights them, and generates the attribution: FIS equals 100 minus the sum of penalties. The governance gates check earnings proximity (T-5, positions above 3 percent), the three momentum dimensions, <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwires</button>, and posture drift. Action determination follows fixed precedence: a tripwire demands immediate response; an earnings window trims to 3 percent; FIS below 70 fixes the top penalty; CIS drift beyond 10 resizes; no trigger means hold.</p>
+        <p><span class="key-term">Intra-week triggers.</span> Four events interrupt the cadence rather than wait for it: a position moving more than 5 percent in a single day &middot; material news &middot; an earnings announcement &middot; a tripwire condition met.</p>
+        <p>Between triggers, frequency limits keep the practitioner from confusing activity with diligence.</p>
+      </div>
+
+      <div class="compare">
+        <table>
+          <caption>Action-frequency limits and their exceptions</caption>
+          <thead>
+            <tr>
+              <th scope="col">Action type</th>
+              <th scope="col">Minimum interval</th>
+              <th scope="col">Exception</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">CIS recalculation</th><td>7 days per position</td><td>Material news event</td></tr>
+            <tr><th scope="row">Position addition</th><td>3 days between adds</td><td>Earnings rebuild</td></tr>
+            <tr><th scope="row">Full exit</th><td>No limit</td><td>Tripwire triggered</td></tr>
+            <tr><th scope="row">Partial trim</th><td>5 days between trims</td><td>Earnings proximity</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">Exits are never rate-limited when a tripwire fires &middot; everything else waits its interval</p>
+
+      <aside class="callout callout-info" aria-label="The restraint principle">
+        <p class="callout-label">The Restraint Principle</p>
+        <p>Discipline includes restraint. A CIS change under 5 points: monitor. An FIS change under 5 points: monitor. A position within its band: no resize. All governance checks pass: hold. No trigger is also a result &mdash; a week in which the system measured everything and moved nothing is the system working.</p>
+      </aside>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · FAILURE MODES ===================================== -->
+    <section class="section" id="failure" aria-labelledby="failure-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Failure Modes</p>
+        <h2 class="section-title" id="failure-title">How implementations quietly degrade.</h2>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">Implementation quality rarely fails loudly. It degrades through patterns that produce no obvious signal &mdash; a score nobody re-ran, an allocation the market moved without a single trade, a tax inefficiency too small to notice in any given month. The exhibit below shows what those patterns do to a healthy portfolio in the year after reviews stop.</p>
+      </div>
+
+      <!-- Chart island: p6-decay-drift "Failure Rarely Arrives All at Once" — longitudinal decay after reviews stop.
+           Spec: components/framework-charts/chart-specs.mjs (idx P6-05 · group part-6 · single: five normalized decay indicators over twelve unmeasured months vs flat assumed-health guide).
+           Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
+      <figure class="fc-mount" id="exhibit-p6-decay-drift" data-fc-chart="p6-decay-drift"></figure>
+
+      <div class="measure prose">
+        <p>Five patterns account for most of the erosion. Each has a canonical diagnostic &mdash; a threshold that turns a slow, invisible failure into an explicit flag.</p>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+          <div><span class="name">Slow CIS decay</span><p>A position that scored 82 eighteen months ago may now score 68 &mdash; thesis played out, TAM compressed, catalysts exhausted &mdash; but without recalculation, sizing remains unchanged. Diagnostic: flag positions more than 90 days stale.</p></div>
+          <div><span class="name">Silent posture drift</span><p>Market movements shift posture allocations without a single trade. Torque appreciates from 55 to 70 percent; Ballast becomes underweight. Diagnostic: alert when posture deviates more than 10 percent from target.</p></div>
+          <div><span class="name">Wrapper inefficiency accumulation</span><p>Positions land in the wrong wrappers opportunistically. Each misplacement seems minor, but systematic suboptimization costs 15 to 25 percent of terminal wealth over 20 years. Diagnostic: review any position contributing more than 1 point to the tax-architecture penalty.</p></div>
+          <div><span class="name">Correlation stacking</span><p>CIS evaluates positions individually, but regime stress correlates them. Five AI infrastructure positions may each score 85 and still move together during a liquidity withdrawal. Diagnostic: alert when average position correlation exceeds 0.7. The alert is a diagnostic signal; any resulting penalty applies through FIS per governance rules, never within CIS.</p></div>
+          <div><span class="name">Overconfidence via narrative reinforcement</span><p>Strong past performance reinforces thesis conviction, but the thesis may already be realized. Diagnostic: require CIS recalculation after any appreciation greater than 50 percent.</p></div>
+        </div>
+      </div>
+
+      <div class="measure prose">
+        <p>Without objective recalculation, narrative momentum substitutes for current analysis. That is why framework health is longitudinal, not episodic: every one of these failures still rounds to healthy at any single point in time, and becomes visible only through week-over-week tracking.</p>
+      </div>
+    </section>
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- ===== SECTION · FRAMEWORK COMPLETION ============================== -->
+    <section class="section" id="completion" aria-labelledby="completion-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Framework Completion</p>
+        <h2 class="section-title" id="completion-title">A complete system, executed weekly.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Parts 1 through 6 form a complete system. The framework governs behavior; practitioners must execute. The weekly burden is concrete: CIS review for every position, FIS recalculation after portfolio changes, earnings calendar monitoring, momentum tracking, posture drift detection, tripwire evaluation, and longitudinal tracking. None of it is individually difficult; all of it must actually happen, every week, for the measurements to mean anything.</p>
+        <p>Three implementation paths carry that burden. Manual tracking &mdash; spreadsheets with weekly routines &mdash; is feasible for small portfolios under 10 positions but prone to drift as complexity increases. Custom tooling &mdash; self-built CIS and FIS calculations with alerts &mdash; works where development capability and ongoing maintenance exist. The ACF Dashboard is the native implementation layer, with delta clamping, FIS attribution, governance enforcement, and longitudinal diagnostics built in. Choose the implementation that makes systematic execution sustainable over the relevant horizon; the framework does not care which one, only that the loop actually runs.</p>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Product scoring extensions">
+        <p class="callout-label">Product Scoring Extensions (Not Core Doctrine)</p>
+        <p>The ACF Dashboard product also surfaces additional, product-level scoring layers &mdash; the <strong>Framework Fit engine</strong> and the <strong>Doctrine Audit</strong> &mdash; that build on CIS/FIS to answer product-facing questions (for example, &ldquo;which doctrine does this portfolio express?&rdquo;). These are product scoring extensions, not part of the core CIS/FIS doctrine defined above. CIS (position quality) and FIS (construction integrity) remain the canonical two-score kernel; the product layers are evaluated and versioned separately.</p>
+      </aside>
+
+      <aside class="callout callout-info" aria-label="Scope and disclaimer">
+        <p class="callout-label">Scope</p>
+        <p>This framework does not constitute investment, tax, or legal advice. Consult qualified professionals for your specific situation.</p>
+      </aside>
+
+      <!-- Chapter-end transition -->
+      <aside class="callout callout-transition" aria-label="End of part">
+        <p class="callout-label">End of Part 6</p>
+        <p>Part 6 operationalized the framework: CIS for position quality, FIS for construction integrity, a weekly workflow, and failure diagnostics. What CIS does: quantifies position quality on a 0&ndash;100 scale, portfolio-context-free. What FIS does: validates portfolio assembly via penalty deduction from 100. What to do weekly: CIS, then FIS, then governance checks &mdash; act on triggers or hold. The Adaptive Convexity Framework is now complete.</p>
+      </aside>
+    </section>
+
+      <!-- Forward pointer: series complete — return to the cover -->
+      <aside class="next-up" aria-label="Next in the series">
+        <div class="measure">
+          <p class="next-up-label">Next up</p>
+          <a class="next-up-card" href="/">
+            <span class="next-up-num">01&ndash;06</span>
+            <span class="next-up-body">
+              <span class="next-up-title">The Adaptive Convexity Framework</span>
+              <span class="next-up-teaser">The framework is complete. Return to the cover to revisit any part.</span>
+            </span>
+            <span class="next-up-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Marks Part 6 read once it scrolls into view (drives cover completion) -->
+      <div data-progress-sentinel data-part="6" aria-hidden="true"></div>
+
+      <footer class="site-footer">
+        <div class="measure foot-base">
+          <span>&copy; 2026 Adaptive Convexity Framework</span>
+          <span>Part 6 &middot; Convexity and Framework Integrity Scoring</span>
+        </div>
+      </footer>
+
+</main>
+  </div>
+
+  <!-- Floating reading nav — home + prev/next part, surfaces while scrolling -->
+  <nav class="floatnav" aria-label="Reading navigation" hidden>
+    <div class="floatnav-inner">
+      <button type="button" class="floatnav-top" aria-label="Back to top">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 35.99 60.99 Q 45.35 55.35 50.99 45.99 A 1.4 1.4 0 0 1 49.01 44.01 Q 41.11 51.11 34.01 59.01 A 1.4 1.4 0 0 1 35.99 60.99 Z" fill-rule="evenodd"></path><path d="M 49.01 45.99 Q 54.65 55.35 64.01 60.99 A 1.4 1.4 0 0 1 65.99 59.01 Q 58.89 51.11 50.99 44.01 A 1.4 1.4 0 0 1 49.01 45.99 Z" fill-rule="evenodd"></path></svg>
+      </button>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-home" href="/">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 23.5 21.23 Q 47.5 24.42 71.5 21.23 A 1.22 1.22 0 0 1 71.5 18.77 Q 47.5 19.17 23.5 18.77 A 1.22 1.22 0 0 1 23.5 21.23 Z M 68.78 18.5 Q 65.14 50 68.78 81.5 A 1.22 1.22 0 0 1 71.22 81.5 Q 70.39 50 71.22 18.5 A 1.22 1.22 0 0 1 68.78 18.5 Z M 71.5 78.78 Q 47.5 75.59 23.5 78.78 A 1.22 1.22 0 0 1 23.5 81.22 Q 47.5 80.84 71.5 81.22 A 1.22 1.22 0 0 1 71.5 78.78 Z M 26.23 81.5 Q 29.87 50 26.23 18.5 A 1.22 1.22 0 0 1 23.78 18.5 Q 24.62 50 23.78 81.5 A 1.22 1.22 0 0 1 26.23 81.5 Z" fill-rule="evenodd"></path><path d="M 35 21.23 Q 55 22.98 75 21.23 A 1.22 1.22 0 0 1 75 18.77 Q 55 17.73 35 18.77 A 1.22 1.22 0 0 1 35 21.23 Z" fill-rule="evenodd"></path><path d="M 73.78 20 Q 72.03 40 73.78 60 A 1.22 1.22 0 0 1 76.22 60 Q 77.28 40 76.22 20 A 1.22 1.22 0 0 1 73.78 20 Z" fill-rule="evenodd"></path><path d="M 33.5 35.88 Q 47.5 37.97 61.5 35.88 A 0.88 0.88 0 0 1 61.5 34.13 Q 47.5 34.22 33.5 34.13 A 0.88 0.88 0 0 1 33.5 35.88 Z M 59.13 33.5 Q 57.34 42.5 59.13 51.5 A 0.88 0.88 0 0 1 60.88 51.5 Q 61.09 42.5 60.88 33.5 A 0.88 0.88 0 0 1 59.13 33.5 Z M 61.5 49.13 Q 47.5 47.04 33.5 49.13 A 0.88 0.88 0 0 1 33.5 50.88 Q 47.5 50.79 61.5 50.88 A 0.88 0.88 0 0 1 61.5 49.13 Z M 35.88 51.5 Q 37.67 42.5 35.88 33.5 A 0.88 0.88 0 0 1 34.13 33.5 Q 33.92 42.5 34.13 51.5 A 0.88 0.88 0 0 1 35.88 51.5 Z" fill-rule="evenodd"></path><path d="M 46.13 50 Q 44.43 57.5 46.13 65 A 0.88 0.88 0 0 1 47.88 65 Q 48.18 57.5 47.88 50 A 0.88 0.88 0 0 1 46.13 50 Z" fill-rule="evenodd"></path></svg>
+        <span class="fn-home-label">Framework</span>
+      </a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-prev" href="/part-5-portfolio-construction-position-management">&larr; Part 5</a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <span class="floatnav-next" aria-disabled="true">Series complete</span>
+    </div>
+  </nav>
+
+  <!-- Progressive enhancement: theme, scroll-spy, drawer, completion, floatnav -->
+  <script src="/site-b/site-b-charts.js" defer></script>
+  <script src="/site-b/reading.js" defer></script>
+  <script src="/site-b/glyph-text.js" defer></script>
+</body>
+</html>
