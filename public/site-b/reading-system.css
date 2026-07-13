@@ -1325,26 +1325,6 @@ body {
   }
   html.js [data-reveal].is-in { opacity: 1; transform: none; }
 
-  /* Title motion (JS adds .title-in): a soft left-to-right swipe that settles
-     with a small overshoot — the "click into place". Titles ONLY; body copy
-     never animates, so the page stays calm. Same js+motion gating as above. */
-  html.js .doc-title,
-  html.js .section-title,
-  html.js .sub-title { opacity: 0; }
-  html.js .doc-title.title-in,
-  html.js .section-title.title-in,
-  html.js .sub-title.title-in {
-    opacity: 1;
-    animation: acf-title-swipe 760ms var(--ease-emphasis) both;
-  }
-}
-@keyframes acf-title-swipe {
-  0%   { opacity: 0; transform: translateX(-14px); clip-path: inset(-4% 101% -8% -2%); }
-  62%  { opacity: 1; transform: translateX(3px);   clip-path: inset(-4% -2% -8% -2%); }
-  100% { opacity: 1; transform: translateX(0);     clip-path: inset(-4% -2% -8% -2%); }
-}
-@media (prefers-reduced-motion: no-preference) {
-
   /* Convexity chart — the curve draws in (rising left→right as it increases),
      the area/conventional/dots fade up beneath it, then the labels fade in. */
   html.js .signature .cvx-curve { stroke-dasharray: 1; stroke-dashoffset: 1; }
@@ -2394,6 +2374,27 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
     cursor: pointer;
   }
   .drawer-toggle svg { width: 1.2rem; height: 1.2rem; }
+  /* Fade-on-scroll (JS toggles .is-faded — ports the dashboard AppShell
+     mobile pattern): while the reader is actively scrolling, the floating
+     button ghosts out of the way and stops eating taps; ~600ms after the
+     last scroll tick it softly re-enters. Asymmetric timing: quick exit,
+     slow soft return. The button never unmounts; keyboard focus and hover
+     always re-assert full opacity, so it is never invisible to someone
+     actively trying to use it. Opacity-only — safe under reduced motion. */
+  .drawer-toggle {
+    transition: opacity 520ms var(--ease-standard);   /* the soft re-entry */
+  }
+  .drawer-toggle.is-faded {
+    opacity: 0.15;
+    pointer-events: none;
+    transition: opacity 160ms var(--ease-standard);   /* the quick exit */
+  }
+  .drawer-toggle.is-faded:focus,
+  .drawer-toggle.is-faded:focus-visible,
+  .drawer-toggle.is-faded:hover {
+    opacity: 1;
+    pointer-events: auto;
+  }
   .sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
