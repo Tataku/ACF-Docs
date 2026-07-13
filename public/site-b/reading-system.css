@@ -2784,6 +2784,7 @@ html[data-narrating] .shell-main { padding-bottom: var(--dock-clear); }
 /* New chart slots inserted into Part 2/3 (no static fallback): layout only, the
    React engine renders its own card. Same wide exhibit lane as live exhibits. */
 .fc-mount { max-width: min(var(--measure-feature), calc(100% - 2 * var(--feature-gutter))); margin: var(--space-8) auto; overflow-x: clip; }   /* unified feature width */
+.fc-mount:empty { min-height: 44rem; }   /* pre-hydration placeholder ≈ one exhibit card, so deep links do not land thousands of px short while islands mount */
 
 .ex-head { margin-bottom: var(--space-3); }
 .ex-eyebrow {
@@ -3352,3 +3353,106 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 .side-part.pending .spnum,
 .part.pending .ptitle,
 .part.pending .pdesc { color: var(--ink-disabled); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DATA-INK REGISTER (Parts 5–6) — inline score, posture, and band elements.
+   The middle register between prose and chart exhibits: JetBrains Mono
+   numerals, hairline geometry, existing semantic tokens only. Meaning is
+   always carried by the numeral + label; tint is quiet support, never the
+   sole channel. Namespaced .di-* to stay disjoint from every other family.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* Score chip — an inline CIS/FIS value with a band-tinted meter underline.
+   Markup: <span class="di-score" data-band="green" style="--di-fill:75%">
+             <span class="di-score-kind">CIS</span>75</span>             */
+.di-score {
+  display: inline; vertical-align: baseline;
+  font-family: var(--font-mono); font-size: 0.82em; font-weight: 600;
+  color: var(--ink-body); white-space: nowrap;
+  padding: 0 0.12em 0.16em;
+  /* the band meter is a background underline, so the chip stays a true
+     inline element and never disturbs the prose baseline */
+  background: linear-gradient(to right, var(--di-band, var(--confidence-low)) var(--di-fill, 50%), var(--rule-faint) var(--di-fill, 50%)) no-repeat left bottom / 100% 2px;
+}
+.di-score-kind { display: inline; font-weight: 500; font-size: 0.82em; color: var(--ink-micro); letter-spacing: 0.06em; margin-right: 0.4em; }
+.di-score[data-band="green"]  { --di-band: var(--confidence-high); }
+.di-score[data-band="yellow"] { --di-band: var(--chart-warn); }      /* 60–69 · monitor-gray (live register) */
+.di-score[data-band="orange"] { --di-band: var(--confidence-med); }  /* 50–59 · amber caution */
+.di-score[data-band="red"]    { --di-band: var(--ink-muted); }       /* <50 · heaviest ink */
+
+/* Posture badge — a small mark + small-caps label on the posture tokens.
+   Markup: <span class="di-posture" data-posture="torque">Torque</span>   */
+.di-posture {
+  display: inline-flex; align-items: center; gap: 0.38em;
+  font-family: var(--font-mono); font-size: 0.72em; font-weight: 600;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-muted); white-space: nowrap;
+}
+.di-posture::before {
+  content: ''; width: 0.62em; height: 0.62em; border-radius: 2px;
+  background: var(--di-posture-c, var(--posture-unclassified-fg));
+  flex: none;
+}
+.di-posture[data-posture="torque"]  { --di-posture-c: var(--posture-torque-fg); }
+.di-posture[data-posture="ballast"] { --di-posture-c: var(--posture-ballast-fg); }
+.di-posture[data-posture="hype"]    { --di-posture-c: var(--posture-hype-fg); }
+.di-posture[data-posture="bitcoin"] { --di-posture-c: var(--posture-bitcoin-fg); }
+.di-posture[data-posture="cash"]    { --di-posture-c: var(--posture-cash-fg); }
+
+/* Band register — the shared four-band strip (CIS and FIS read the same
+   register in the live engine). Boundary numerals carry the meaning.
+   Markup: <div class="di-bands" role="img" aria-label="...">
+             <span class="di-band" data-band="red"><i>&lt;50</i>Weak</span> …
+           </div>                                                          */
+.di-bands {
+  display: flex; gap: 3px; max-width: 34rem;
+  margin: calc(var(--space-4, 1.4rem)) auto;
+  font-family: var(--font-mono);
+}
+.di-band {
+  flex: 1; display: flex; flex-direction: column; gap: 0.3rem;
+  font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--ink-micro); text-align: left; min-width: 0;
+}
+.di-band::before {
+  content: ''; display: block; height: 3px; border-radius: 1.5px;
+  background: var(--di-band-c, var(--rule));
+}
+.di-band i { font-style: normal; font-weight: 700; font-size: 0.72rem; color: var(--ink-muted); display: block; }
+.di-band[data-band="green"]  { --di-band-c: var(--confidence-high); flex: 1.5; }
+.di-band[data-band="yellow"] { --di-band-c: var(--chart-warn); }      /* 60–69 · monitor-gray (live register) */
+.di-band[data-band="orange"] { --di-band-c: var(--confidence-med); }  /* 50–59 · amber caution */
+.di-band[data-band="red"]    { --di-band-c: var(--ink-muted); }       /* <50 · heaviest ink */
+
+/* Allocation bar — a CSS stacked composition strip on the posture tokens
+   (the case study's honest treemap). The bar is strictly proportional and
+   unlabeled; every label lives in the aria-hidden .di-alloc-key row that
+   follows it (the container's aria-label carries the same numbers).
+   Markup: <div class="di-alloc" role="img" aria-label="...">
+             <span class="di-alloc-seg" data-posture="torque" style="--w:45%"></span> …
+           </div>
+           <p class="di-alloc-key" aria-hidden="true">
+             <span class="di-posture" data-posture="torque">Torque<em>45%</em></span> …
+           </p>                                                            */
+.di-alloc { display: flex; gap: 2px; margin: var(--space-4, 1.4rem) 0 0.4rem; border-radius: 3px; overflow: hidden; }
+.di-alloc-seg {
+  flex-basis: var(--w, 25%); flex-grow: 0; flex-shrink: 0; min-width: 0;
+  height: 1.15rem;
+  background: color-mix(in srgb, var(--di-posture-c, var(--posture-unclassified-fg)) 16%, transparent);
+  box-shadow: inset 0 2.5px 0 var(--di-posture-c, var(--posture-unclassified-fg));
+}
+.di-alloc-seg[data-posture="torque"]  { --di-posture-c: var(--posture-torque-fg); }
+.di-alloc-seg[data-posture="ballast"] { --di-posture-c: var(--posture-ballast-fg); }
+.di-alloc-seg[data-posture="hype"]    { --di-posture-c: var(--posture-hype-fg); }
+.di-alloc-seg[data-posture="bitcoin"] { --di-posture-c: var(--posture-bitcoin-fg); }
+/* the key row carries every label — the bar itself stays strictly proportional */
+.di-alloc-key { display: flex; flex-wrap: wrap; gap: 0.35rem 1.3rem; margin: 0 0 var(--space-4, 1.4rem); }
+.di-alloc-key .di-posture { font-size: 0.68rem; }
+.di-alloc-key .di-posture em { font-style: normal; font-weight: 700; color: var(--ink-body); margin-left: 0.15em; }
+
+/* Calm by default; the register participates in the page's motion doctrine
+   only through opacity — and not at all under reduced motion. */
+.di-score::after, .di-band::before, .di-alloc-seg { transition: opacity 200ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .di-score::after, .di-band::before, .di-alloc-seg { transition: none; }
+}

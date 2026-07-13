@@ -52,7 +52,7 @@
       "hierarchy"
     ]
   },
-  "count": 30,
+  "count": 45,
   "charts": [
     {
       "chartId": "sig-payoff",
@@ -2474,6 +2474,1146 @@
         }
       ],
       "agencyNotes": "Conceptual Part 4 exhibit for the taxable/ROC section, authored as a laneBar COMPARISON (multi-lane family seed — distinct from p4-tax-wedge single fan and p4-gross-not-net radial donut): two aligned 100-unit bars over one shared scale. ROC redeploys the full 100 now (accent), with the ~24 of deferred tax shown as a hatched strip BELOW the bar (exists, not taken now — honest, not eliminated). Taxed dividend redeploys 76 (secondary) + 24 taxed now (stress). A dashed reference line at 76 + the surplus callout make the +24 \"still working\" the visual claim. ROC ~11% distribution; dividend after ~23.8% LTCG+NIIT on receipt. Conceptual — deferral not elimination; caution + explainer state basis exhaustion + tax-at-sale; under current law."
+    },
+    {
+      "chartId": "p5-operating-system",
+      "idx": "P5-01",
+      "title": "One Portfolio. Three Behaviors. One Backbone.",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "postureSystem",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · OPERATING SYSTEM",
+      "primaryClaim": "The three postures form one capital-allocation system, not three static buckets",
+      "visualProof": "Torque and Ballast joined by two opposing rotation arcs — harvest strength one way, deploy into dislocation the other — with Hype held in a capped side cell and Bitcoin as a separate full-width backbone band beneath the system",
+      "readerAction": "Follow the two rotation arcs between Torque and Ballast, then note what sits outside them",
+      "readerTakeaway": "The postures are not static buckets — they form a capital-allocation system.",
+      "experienceRole": "diagram",
+      "visualRelationship": "flow",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Blocks keep their roles legible; tap a posture or flow to read its job. The backbone band stays full-width."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 5",
+          "label": "Three-posture classification and rotation governance",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        },
+        {
+          "provider": "ACF · Part 3",
+          "label": "Bitcoin as the separately governed convexity backbone",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        }
+      ],
+      "agencyNotes": "Signature Part 5 exhibit on the NEW postureSystem layout: Torque and Ballast as peer blocks joined by two opposing brush rotation arcs (the mechanism), Hype in a smaller capped side cell with a bracket, Bitcoin as a low-contrast full-width band beneath. Posture identity is carried by position and label, never by color alone (engine tier palette; accent marks Torque as the thesis block)."
+    },
+    {
+      "chartId": "p5-earned-size",
+      "idx": "P5-02",
+      "title": "Position Size Must Be Earned",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "rangeSteps",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · EARNED CONVICTION",
+      "primaryClaim": "Position size must be earned through evidence — maximum justified size is not currently earned size",
+      "visualProof": "Six evidence stages step upward — thesis exposure, commercial validation, initial execution, scale execution, economic proof, exceptional platform quality — an ascending progression that deliberately carries no percentages and no score bands",
+      "readerAction": "Climb the ladder stage by stage and name where your position actually sits",
+      "readerTakeaway": "Conviction is built through evidence. It is not declared through enthusiasm.",
+      "experienceRole": "diagram",
+      "visualRelationship": "comparison",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Range columns stack tight on touch; tap a band to read its rule. Guardrail labels stay outside the columns."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual doctrine exhibit · Owner-defined evidence progression awaiting repository canonicalization; carries no sizing numbers",
+      "sources": [
+        {
+          "provider": "ACF · Owner doctrine",
+          "label": "The Earned Conviction Ladder — six-stage evidence progression (2026-07, awaiting canonical spec)",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": null
+        },
+        {
+          "provider": "ACF · Part 5",
+          "label": "Position sizing governance and add-cadence discipline",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        }
+      ],
+      "agencyNotes": "rangeSteps stair variant in hideScale mode: six ascending evidence rungs, no y-axis, no value labels, no cap rules. The Earned Conviction Ladder is OWNER-DEFINED DOCTRINE awaiting repository canonicalization (review decision on PR #137, 2026-07-13): the stages are doctrine, the exhibit deliberately asserts no stage-to-percentage or stage-to-CIS-band mapping, and all numeric sizing lives in p5-posture-sizing and the adjacent canonical tables."
+    },
+    {
+      "chartId": "p5-posture-sizing",
+      "idx": "P5-03",
+      "title": "The Same Score Does Not Create the Same Position",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "rangeSteps",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · POSTURE SIZING",
+      "primaryClaim": "The same CIS score earns a different position size in each posture",
+      "visualProof": "Three aligned columns on one percent scale — Torque ranges reaching eight-to-fifteen under its fifteen percent ceiling, Ballast reserve ranges topping at five-to-eight with an exceptional single-position maximum of ten, Hype a single two-to-five band under its hard five percent cap — with the eighteen percent portfolio outer bound drawn quietly above all three",
+      "readerAction": "Compare the 70+ band across the three columns — same score, three different ceilings",
+      "readerTakeaway": "Score the asset first. Size the behavior second.",
+      "experienceRole": "comparison",
+      "visualRelationship": "comparison",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Range columns stack tight on touch; tap a band to read its rule. Guardrail labels stay outside the columns."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual comparison · All ranges and caps are canonical CIS v2.1 sizing parameters",
+      "sources": [
+        {
+          "provider": "ACF · CIS Specification v2.1",
+          "label": "Posture sizing bands and concentration limits (§10.2–10.3)",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": null
+        },
+        {
+          "provider": "ACF · Part 5",
+          "label": "Torque, Ballast, and Hype sizing governance",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        }
+      ],
+      "agencyNotes": "rangeSteps columns mode, revised per owner review of PR #137: each posture carries its OWN ceiling mark (Torque 15 w/ override note · Ballast exceptional 10 · Hype hard 5) drawn at the column so posture ceilings visibly bind first; the 18% absolute is a single quiet full-width rule labelled as the portfolio outer bound. Hype band corrected to the coded 2–5% (CIS ≥50 eligibility). The visual claim remains the 70+ row asymmetry."
+    },
+    {
+      "chartId": "p5-ballast-rotation",
+      "idx": "P5-04",
+      "title": "Ballast Preserves the Right to Buy",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "governanceLoop",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · ROTATION",
+      "primaryClaim": "Ballast is rotation capital — the reserve that converts drawdowns into allocation decisions",
+      "visualProof": "A five-station governed cycle — harvest strength, rebuild reserves, wait without urgency, deploy into validated weakness, participate in recovery — closed by a return arc, with the deploy station as the governed checkpoint",
+      "readerAction": "Follow the cycle to the deploy gate, then trace the recovery back to harvest",
+      "readerTakeaway": "Without Ballast, every drawdown is a test of endurance. With Ballast, it is a capital-allocation decision.",
+      "experienceRole": "diagram",
+      "visualRelationship": "flow",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 5",
+          "label": "Ballast rotation triggers and minimum-reserve governance",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        },
+        {
+          "provider": "ACF · Part 3",
+          "label": "Bitcoin excluded from rotation — separate governance",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-3-bitcoin-convexity-backbone"
+        }
+      ],
+      "agencyNotes": "governanceLoop reuse (dl-tripwire-loop pattern) with the deploy station as the governed checkpoint. Bitcoin deliberately absent from the loop — stated in caution + explainer, mirroring Part 3 doctrine."
+    },
+    {
+      "chartId": "p5-earnings-window",
+      "idx": "P5-05",
+      "title": "Conviction Does Not Eliminate Binary Risk",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "single",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · EARNINGS WINDOW",
+      "primaryClaim": "The framework compresses exposure before a binary event and re-earns it afterward",
+      "visualProof": "A position path holding ten percent, compressing to the three percent cap through the T-minus-five window, holding flat through the event and assessment days, then splitting into three governed branches — rebuild, stay reduced, or exit",
+      "readerAction": "Follow the compression into T+0, then compare the three exits from the assessment window",
+      "readerTakeaway": "Trim the event risk. Re-underwrite the thesis. Then earn the size again.",
+      "experienceRole": "mechanism",
+      "visualRelationship": "trend",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
+      "backgroundRoles": [
+        "regime",
+        "pressure"
+      ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual protocol path · The 3% cap, window boundaries, and branch rules are canonical; the 10% starting position is illustrative",
+      "sources": [
+        {
+          "provider": "ACF · Part 5",
+          "label": "Earnings proximity protocol and post-earnings decision tree",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        },
+        {
+          "provider": "ACF · Governance Protocol v1",
+          "label": "Earnings risk windows (§3)",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": null
+        }
+      ],
+      "agencyNotes": "single-layout reuse: a step path with regime/pressure window bands and three post-assessment branch series. The 3% cap guide + T window boundaries are canonical (Part 5 protocol table stays adjacent as the exact-value companion)."
+    },
+    {
+      "chartId": "p5-momentum-gate",
+      "idx": "P5-06",
+      "title": "Conviction Requires Market Confirmation",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "gate",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · MOMENTUM GATE",
+      "primaryClaim": "Full sizing must survive three momentum confirmations — and losing all three is an exit, not an opinion",
+      "visualProof": "A high-conviction position enters a gauntlet of three gates — absolute trend, relative performance, breadth — with the surviving band thinning at each break until only fully confirmed positions reach full sizing",
+      "readerAction": "Trace the band through the three gates and read the action ladder gate by gate",
+      "readerTakeaway": "Re-entry is allowed. Unbounded opportunity cost is not.",
+      "experienceRole": "diagram",
+      "visualRelationship": "flow",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 5",
+          "label": "Momentum dimensions and the alignment action ladder",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        }
+      ],
+      "agencyNotes": "gate-layout reuse with three gates (renderer generalized from the fixed four-gate death map; the p2 six-node chart is byte-preserved via the legacy branch). The four-state action ladder rides the gate hover copy; the Part 5 alignment table remains adjacent as the exact-value companion."
+    },
+    {
+      "chartId": "p5-force-channels",
+      "idx": "P5-07",
+      "title": "One Regime Force. Multiple Economic Expressions.",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "flow",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · REGIME CHANNELS",
+      "primaryClaim": "High conviction in one regime force still diversifies — across the force’s distinct economic channels",
+      "visualProof": "One structural force fanning into seven channels — compute, memory and networking, power generation, grid equipment, cooling, datacenter construction, physical security — each a different bottleneck with different customers, revenue models, and failure modes",
+      "readerAction": "Compare any two channels and name what fails in one but not the other",
+      "readerTakeaway": "Diversify the pathway. Preserve the thesis.",
+      "experienceRole": "diagram",
+      "visualRelationship": "flow",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual methodology illustration · AI infrastructure is the example force, not a recommendation",
+      "sources": [
+        {
+          "provider": "ACF · Part 5",
+          "label": "Sector allocation through regime forces",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        },
+        {
+          "provider": "ACF · Part 2",
+          "label": "Regime-force identification methodology",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-2-lineage-macro-thesis"
+        }
+      ],
+      "agencyNotes": "flow-layout reuse (1→7 fan) with a spec-driven flowHeight (560) so seven channel nodes breathe. Explicitly framed as methodology illustration; sector caps stay in the adjacent table."
+    },
+    {
+      "chartId": "p5-wrapper-compounding",
+      "idx": "P5-08",
+      "title": "Tax Drag Compounds Too",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "single",
+      "dataMode": "representative",
+      "claimLabel": "PART 5 · WRAPPER FRICTION",
+      "primaryClaim": "The same asset and the same trades end roughly 2× apart after 30 years of wrapper friction",
+      "visualProof": "Two compounding curves from the same $100,000 origin — 10% tax-free against roughly 7.5% after annual realization at a 25% blended rate — separating slowly at first, then structurally: about $875,000 versus about $1,745,000 at year 30",
+      "readerAction": "Watch how small the gap is at year 10 and how structural it is by year 30",
+      "readerTakeaway": "Wrapper placement is not administrative housekeeping. It is portfolio construction.",
+      "experienceRole": "comparison",
+      "visualRelationship": "trend",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
+      "backgroundRoles": [
+        "regime"
+      ],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "representative",
+      "disclosure": "Representative arithmetic · Constant-return illustration from stated assumptions; not a market outcome",
+      "sources": [
+        {
+          "provider": "Author calculation",
+          "label": "$100,000 × 1.10^t (tax-free) vs × 1.075^t (10% pre-tax, 25% blended annual realization); 10y $259k vs $206k · 20y $673k vs $425k · 30y ≈$1,745k vs ≈$875k",
+          "seriesId": null,
+          "role": "methodology",
+          "url": null
+        },
+        {
+          "provider": "ACF · Part 4",
+          "label": "The Tax Wedge — the canonical wrapper-retention exhibit this example applies over time",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-4-tax-architecture-roc-strategy"
+        }
+      ],
+      "agencyNotes": "single-layout reuse; deterministic generator (no noise). The verified Part 5 arithmetic; honest linear axis from $0; the terminal wedge is the gap area label. Cross-referenced to Part 4’s canonical retention exhibit (p4-tax-wedge) rather than duplicating its argument."
+    },
+    {
+      "chartId": "p5-liquidity-throttle",
+      "idx": "P5-09",
+      "title": "When Correlation Rises, Diversification Shrinks",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "governanceLoop",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · REGIME THROTTLE",
+      "primaryClaim": "When correlation rises, the framework reduces exposure to the shared failure mode — it does not predict direction",
+      "visualProof": "A four-station governed cycle — normal rules, stress recognized, throttle applied, repair confirmed — with the throttle as the governed checkpoint and a return arc that resumes standard positioning only after two-plus stable weeks",
+      "readerAction": "Follow the cycle from the stress signals through the throttle to the confirmation-gated return",
+      "readerTakeaway": "This is regime-aware throttling. It is not market timing.",
+      "experienceRole": "diagram",
+      "visualRelationship": "flow",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 5",
+          "label": "Liquidity & correlation regime monitoring protocol",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        }
+      ],
+      "agencyNotes": "governanceLoop reuse with the throttle station as checkpoint and the 2+-week confirmation carried on the return arc label. All thresholds canonical (Part 5 monitoring protocol)."
+    },
+    {
+      "chartId": "p5-change-hierarchy",
+      "idx": "P5-10",
+      "title": "Know What You Are Changing",
+      "group": "part-5",
+      "part": "part-5",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "flow",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 5 · CHANGE GOVERNANCE",
+      "primaryClaim": "Not every adjustment has the same meaning: calibrating a parameter, documenting an override, and touching doctrine are different acts",
+      "visualProof": "A proposed change routing to exactly one of three levels — doctrine, whose change means the framework is abandoned; parameters, tunable within documented ranges; overrides, temporary and time-bounded with reversion conditions",
+      "readerAction": "Route a change you are considering to its level before making it",
+      "readerTakeaway": "Silent drift is not an override.",
+      "experienceRole": "diagram",
+      "visualRelationship": "flow",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 5",
+          "label": "Doctrine, parameters, and overrides register",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-5-portfolio-construction-position-management"
+        }
+      ],
+      "agencyNotes": "flow-layout reuse (1→3 routing). The three levels are peers on the routing stage; meaning is carried in the sub-labels so the distinction survives without hover."
+    },
+    {
+      "chartId": "p6-cis-composition",
+      "idx": "P6-01",
+      "title": "CIS Measures the Position, Not the Portfolio",
+      "group": "part-6",
+      "part": "part-6",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "radial",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 6 · CIS COMPOSITION",
+      "primaryClaim": "CIS weighs four components, and convexity carries the most weight because it is the objective function",
+      "visualProof": "A weighted donut: Convexity & Optionality at forty percent dominates; Risk & Fragility and Macro Alignment at twenty-five each; Execution & Sentiment at ten — the composition of a 0–100 position score",
+      "readerAction": "Note that the largest slice is upside structure, and that a higher Risk score means lower fragility",
+      "readerTakeaway": "Quality first. Portfolio construction later.",
+      "experienceRole": "evidence",
+      "visualRelationship": "composition",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Keep the donut substantial on touch; tap a segment to inspect its share. Do not shrink the ring into a token."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual composition · Component weights are the live engine defaults (thesis-adaptive Parameters, bounded ±0.10; the structure is Doctrine)",
+      "sources": [
+        {
+          "provider": "ACF Dashboard · frameworkDocService.js",
+          "label": "Live component weights C40/R25/M25/E10 with thesis-adaptive bounds (±0.10, renormalized)",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": null
+        },
+        {
+          "provider": "ACF · Part 6",
+          "label": "CIS scope: position-level, portfolio-context-free",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-6-convexity-framework-integrity-scoring"
+        }
+      ],
+      "agencyNotes": "radial donut reuse (p4-gross-not-net pattern). Weights canonical CIS v2.1; the R-direction clarification (higher = safer) rides the segment sub + hover. Delta clamps and archetype awareness stay in the page prose."
+    },
+    {
+      "chartId": "p6-fis-waterfall",
+      "idx": "P6-02",
+      "title": "FIS Starts at 100",
+      "group": "part-6",
+      "part": "part-6",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "waterfall",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 6 · FIS ATTRIBUTION",
+      "primaryClaim": "FIS is subtractive: every point below 100 is a named, repairable violation scored by the live engine",
+      "visualProof": "A waterfall starting at one hundred and stepping down through the live engine’s five bucket deductions — allocation the largest cap, complexity the smallest — landing on an 83, in the Strong band above the 70 line",
+      "readerAction": "Follow the score down step by step, then read the band it lands in",
+      "readerTakeaway": "Fix the violation. Recover the points.",
+      "experienceRole": "mechanism",
+      "visualRelationship": "composition",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Deduction steps need vertical room; tap a step to inspect its bucket and cap."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative example portfolio; bucket caps, thresholds, and bands are the live FIS v2.1 engine values, penalty sizes are not",
+      "sources": [
+        {
+          "provider": "ACF Dashboard · fisCalculator.js",
+          "label": "Live FIS v2.1 kernel — five buckets (25/15/15/15/10), severity clamp 0.2–12%, shared four-band register",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": null
+        },
+        {
+          "provider": "ACF · Part 6",
+          "label": "Subtractive scoring and attribution doctrine",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-6-convexity-framework-integrity-scoring"
+        }
+      ],
+      "agencyNotes": "waterfall layout aligned to the LIVE FIS v2.1 kernel (continuity pass 2026-07-13, live math trumps spec v1.1.1): five buckets 25/15/15/15/10, shared four-band guides at 70/60/50, concentration fires beyond-cap at 15/40/60 with Bitcoin excluded by archetype, governance + dead-capital value-weighted 0.2–12%, max total penalty 80 (floor 20). Explicitly illustrative penalties inside live caps; the bucket table remains adjacent as the exact-value companion."
+    },
+    {
+      "chartId": "p6-cis-fis-matrix",
+      "idx": "P6-03",
+      "title": "Good Assets Can Still Form a Bad Portfolio",
+      "group": "part-6",
+      "part": "part-6",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "quadrant",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 6 · TWO-SCORE DIAGNOSIS",
+      "primaryClaim": "Position quality and construction integrity are independent — neither score can rescue the other",
+      "visualProof": "A two-by-two of CIS against FIS with a named action in every cell, and a repair path that moves a weak-weak portfolio right — construction first — before it moves up to quality",
+      "readerAction": "Find your quadrant, read its action, and note the order of the repair path",
+      "readerTakeaway": "A portfolio is healthy only when both dimensions are healthy.",
+      "experienceRole": "matrix",
+      "visualRelationship": "matrix",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 6",
+          "label": "CIS × FIS interaction and repair order",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-6-convexity-framework-integrity-scoring"
+        },
+        {
+          "provider": "ACF Dashboard · cisBands.js",
+          "label": "The shared four-band register — 70 is the compliance line on both scores",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": null
+        }
+      ],
+      "agencyNotes": "quadrant reuse with two small engine extensions: off-path waypoints render as hoverable dots (the High-CIS/Low-FIS cell), and the path carries the canonical repair order (construction first, then quality). The interaction table remains adjacent as the exact-wording companion."
+    },
+    {
+      "chartId": "p6-weekly-loop",
+      "idx": "P6-04",
+      "title": "The Weekly Evidence Loop",
+      "group": "part-6",
+      "part": "part-6",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "governanceLoop",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 6 · OPERATING CADENCE",
+      "primaryClaim": "The framework runs on a weekly evidence loop: measure, gate, act or hold, record — repeat",
+      "visualProof": "Five stations on a governed path — update CIS, calculate FIS, run the governance gates, act or deliberately hold, log the evidence — closed by a weekly return arc, with the gates as the checkpoint",
+      "readerAction": "Walk the five stations, then note that the loop closes weekly whether or not anything traded",
+      "readerTakeaway": "No trigger is also a result. When the system remains healthy, hold.",
+      "experienceRole": "diagram",
+      "visualRelationship": "flow",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "diagramBuild",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1400,
+        "fastMs": 520,
+        "mediumMs": 1000,
+        "staggerMs": 160
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "standard",
+        "note": "Diagram scales; tap nodes to cycle detail."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagram · Illustrative framework exhibit, not historical data",
+      "sources": [
+        {
+          "provider": "ACF · Part 6",
+          "label": "Weekly execution sequence and action-frequency limits",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-6-convexity-framework-integrity-scoring"
+        }
+      ],
+      "agencyNotes": "governanceLoop reuse per the approved P6-04 signature spec, extended to five stations with the evidence log as the closing operational step (supported by the canonical step 01 “→ log” and the record-keeping doctrine). The gates station is the checkpoint."
+    },
+    {
+      "chartId": "p6-decay-drift",
+      "idx": "P6-05",
+      "title": "Failure Rarely Arrives All at Once",
+      "group": "part-6",
+      "part": "part-6",
+      "status": "implemented",
+      "wiredPublic": true,
+      "layout": "single",
+      "dataMode": "conceptual",
+      "claimLabel": "PART 6 · LONGITUDINAL DECAY",
+      "primaryClaim": "Framework failure is usually slow: small tolerable deviations compound while they go unmeasured",
+      "visualProof": "Five normalized health indicators eroding at different tempos across twelve unmeasured months — stale conviction fastest, wrapper leakage slowest — while the dashed line of assumed health holds flat at one hundred",
+      "readerAction": "Compare the flat assumed-health line against every eroding indicator beneath it",
+      "readerTakeaway": "Framework health is longitudinal. What is not remeasured eventually becomes assumed.",
+      "experienceRole": "mechanism",
+      "visualRelationship": "trend",
+      "storyBeats": [
+        {
+          "kind": "context",
+          "label": "Establish the backdrop",
+          "timing": "early"
+        },
+        {
+          "kind": "mechanism",
+          "label": "Reveal the mechanism",
+          "timing": "middle"
+        },
+        {
+          "kind": "consequence",
+          "label": "Resolve the takeaway",
+          "timing": "late"
+        }
+      ],
+      "interaction": {
+        "type": "hover",
+        "gesture": "hover",
+        "conceptMatch": null
+      },
+      "motionProfile": {
+        "type": "timeSweep",
+        "duration": "calm"
+      },
+      "motionTiming": {
+        "sweepMs": 1900,
+        "fastMs": 560,
+        "mediumMs": 1100,
+        "staggerMs": 140
+      },
+      "backgroundRoles": [],
+      "mobileBehavior": {
+        "interaction": "tap-cycle",
+        "chartHeight": "tall",
+        "note": "Tap to cycle elements; keep the thesis line and labels legible."
+      },
+      "tryThis": null,
+      "tryThisMobile": null,
+      "readerContext": null,
+      "disclosureMode": "conceptual",
+      "disclosure": "Conceptual diagnostic · Normalized values, no market data; erosion tempos illustrative, the diagnostics canonical",
+      "sources": [
+        {
+          "provider": "ACF · Part 6",
+          "label": "Failure modes and longitudinal diagnostics",
+          "seriesId": null,
+          "role": "verifies-concept",
+          "url": "/part-6-convexity-framework-integrity-scoring"
+        }
+      ],
+      "agencyNotes": "single-layout reuse; five deterministic normalized decay curves (smoothstep tempos, seeded ±0.6 texture) against a dashed assumed-health guide at 100. Explicitly conceptual — no market data; each hover carries its canonical diagnostic threshold. End labels spaced via labelDy to avoid collision at narrow widths."
     }
   ]
 }

@@ -37,6 +37,9 @@ export const LAYOUT_RELATIONSHIPS = {
   heartbeat: ['trend', 'comparison'],
   flow: ['flow'], bridge: ['flow'], gate: ['flow'], loop: ['flow'],
   systemLoop: ['flow'], governanceLoop: ['flow'], feedbackLoop: ['flow'],
+  waterfall: ['composition', 'sequence'],
+  rangeSteps: ['comparison', 'threshold'],
+  postureSystem: ['flow', 'matrix'],
 };
 
 /**
@@ -48,7 +51,9 @@ export const LAYOUT_RELATIONSHIPS = {
 export function resolveVisualRelationship(spec) {
   if (spec.visualRelationship) return spec.visualRelationship;
   const L = spec.layout;
-  if (L === 'radial') return 'composition';
+  if (L === 'radial' || L === 'waterfall') return 'composition';
+  if (L === 'rangeSteps') return 'comparison';
+  if (L === 'postureSystem') return 'flow';
   if (L === 'laneBar') return 'comparison';
   if (L === 'quadrant' || L === 'scorecard') return 'matrix';
   if (L === 'scenario') return 'comparison';

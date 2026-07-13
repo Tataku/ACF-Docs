@@ -29,8 +29,8 @@ import { validateMultiLaneSpec } from '../components/framework-charts/chart-core
 
 const relationshipAdvisories = [];   // soft warnings (relationship ↔ layout fit); never fail the build
 
-const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'part-4', 'both']);
-const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2', 'part-3', 'part-4']);
+const PLACEMENTS = new Set(['docs-landing', 'part-1', 'part-2', 'part-3', 'part-4', 'part-5', 'part-6', 'both']);
+const GROUPS = new Set(['signature', 'docs-landing', 'part-1', 'part-2', 'part-3', 'part-4', 'part-5', 'part-6']);
 const STATUSES = new Set(['implemented', 'needs-design-review', 'spec-only', 'deferred']);
 const MODES = new Set(DATA_MODES);
 const ROLES = new Set(SOURCE_ROLES);
@@ -133,6 +133,64 @@ for (const s of FRAMEWORK_CHART_SPECS) {
       ok(s.scenario.defaultPreset && nodeIds.includes(s.scenario.defaultPreset), `${w} scenario defaultPreset invalid`);
       ok(s.scenario.variants && Object.keys(s.scenario.variants).length >= 2, `${w} scenario needs variants`);
     }
+  } else if (s.layout === 'waterfall') {
+    // subtractive attribution: start − Σ(steps) must land exactly on the result
+    const wf = s.waterfall;
+    ok(wf && typeof wf.start === 'number' && wf.start > 0, `${w} waterfall needs a positive start`);
+    ok(Array.isArray(wf.steps) && wf.steps.length >= 3, `${w} waterfall needs >= 3 steps`);
+    const stepIds = wf.steps.map((st) => st.id);
+    ok(new Set(stepIds).size === stepIds.length, `${w} waterfall has duplicate step ids`);
+    wf.steps.forEach((st) => {
+      ok(typeof st.value === 'number' && st.value < 0, `${w} waterfall step ${st.id} must carry a negative deduction`);
+      if (st.cap != null) ok(typeof st.cap === 'number' && Math.abs(st.value) <= st.cap, `${w} waterfall step ${st.id} exceeds its declared cap`);
+    });
+    ok(wf.result && wf.result.id && wf.result.label, `${w} waterfall needs a result`);
+    const landed = wf.start + wf.steps.reduce((a, st) => a + st.value, 0);
+    const claimed = parseFloat(String(wf.result.label).replace(/[^0-9.]/g, ''));
+    ok(!isFinite(claimed) || Math.abs(landed - claimed) < 0.51, `${w} waterfall result label (${claimed}) does not match the arithmetic (${landed})`);
+    (wf.bandGuides || []).forEach((g) => ok(typeof g.v === 'number' && g.label, `${w} waterfall bandGuide needs v + label`));
+    const allIds = [...stepIds, wf.result.id];
+    ok(allIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a waterfall step/result`);
+    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
+  } else if (s.layout === 'rangeSteps') {
+    // range-band columns on one shared scale (+ optional stair connector + cap rules)
+    const rs = s.rangeSteps;
+    ok(rs && Array.isArray(rs.columns) && rs.columns.length >= 1, `${w} rangeSteps needs columns`);
+    ok(typeof rs.yMax === 'number' && rs.yMax > (rs.yMin || 0), `${w} rangeSteps needs a numeric y scale`);
+    const stepIds = rs.columns.flatMap((c) => (c.steps || []).map((st) => st.id));
+    ok(stepIds.length >= 1 && new Set(stepIds).size === stepIds.length, `${w} rangeSteps has missing/duplicate step ids`);
+    rs.columns.forEach((c) => {
+      ok(c.id && c.label, `${w} rangeSteps column needs id + label`);
+      (c.steps || []).forEach((st) => {
+        ok(typeof st.from === 'number' && typeof st.to === 'number' && st.to >= st.from, `${w} rangeSteps step ${st.id} needs from <= to`);
+        ok(st.to <= rs.yMax, `${w} rangeSteps step ${st.id} exceeds the y scale`);
+      });
+      if (c.cap != null) {
+        ok(c.cap.id && c.cap.label && typeof c.cap.v === 'number' && c.cap.v <= rs.yMax, `${w} rangeSteps column ${c.id} cap needs id + label + v (in scale)`);
+        (c.steps || []).forEach((st) => ok(st.to <= c.cap.v, `${w} rangeSteps step ${st.id} exceeds its posture ceiling`));
+      }
+    });
+    (rs.rules || []).forEach((r) => ok(typeof r.v === 'number' && r.label && r.v <= rs.yMax, `${w} rangeSteps rule needs v (in scale) + label`));
+    if (rs.footRail) ok(Array.isArray(rs.footRail.items) && rs.footRail.items.length >= 2, `${w} rangeSteps footRail needs items`);
+    ok(stepIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a rangeSteps step`);
+    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
+  } else if (s.layout === 'postureSystem') {
+    // posture operating system: blocks + rotation flows + a separate backbone band
+    const ps = s.postureSystem;
+    ok(ps && Array.isArray(ps.blocks) && ps.blocks.length === 3, `${w} postureSystem needs exactly 3 posture blocks`);
+    const blockIds = ps.blocks.map((b) => b.id);
+    ok(new Set(blockIds).size === blockIds.length, `${w} postureSystem has duplicate block ids`);
+    ps.blocks.forEach((b) => ok(b.label && b.role, `${w} postureSystem block ${b.id} needs label + role`));
+    ok(Array.isArray(ps.flows) && ps.flows.length === 2, `${w} postureSystem needs the two rotation flows`);
+    ps.flows.forEach((f) => {
+      ok(blockIds.includes(f.from) && blockIds.includes(f.to), `${w} postureSystem flow ${f.id} references missing blocks`);
+      ok(f.label, `${w} postureSystem flow ${f.id} needs a label`);
+    });
+    ok(ps.backbone && ps.backbone.id && ps.backbone.label, `${w} postureSystem needs the backbone band`);
+    const allIds = [...blockIds, ...ps.flows.map((f) => f.id), ps.backbone.id];
+    ok(new Set(allIds).size === allIds.length, `${w} postureSystem has colliding ids`);
+    ok(allIds.includes(s.primaryKey), `${w} primaryKey ${s.primaryKey} not a postureSystem element`);
+    ok(s.hoverTargets.some((t) => t.id === s.primaryKey), `${w} primaryKey ${s.primaryKey} not a hover target`);
   } else if (s.layout === 'heartbeat') {
     // representative valuation heartbeat + DCA unit pulses
     ok(s.heartbeat && Array.isArray(s.heartbeat.price) && s.heartbeat.price.length > 2, `${w} heartbeat needs a price path`);
