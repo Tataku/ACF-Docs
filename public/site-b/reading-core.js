@@ -220,26 +220,32 @@
     els.forEach(function (el) { obs.observe(el); });
   }
 
-  /* ---- Title motion: soft swipe + settle for title text ONLY ------------- *
-   * Adds `.title-in` to .doc-title / .section-title / .sub-title as each enters
-   * view. The CSS hides titles only under <html class="js"> + motion-allowed
-   * (same doctrine as [data-reveal]), so JS-off and reduced-motion readers see
-   * finished titles immediately. Scope is deliberately titles-only — body copy
-   * never animates, so the page stays calm.                                    */
-  function titleMotion() {
-    var els = document.querySelectorAll('.doc-title, .section-title, .sub-title');
-    if (!els.length) return;
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce || !('IntersectionObserver' in window)) {
-      els.forEach(function (el) { el.classList.add('title-in'); });
-      return;
+  /* ---- Hamburger fade-on-scroll: the floating toggle yields while reading - *
+   * Ports the ACF Dashboard AppShell mobile pattern: while the page is
+   * actually scrolling the fixed toggle fades to a ghost (and stops eating
+   * taps); ~600ms after the last scroll tick it softly re-enters. The button
+   * never unmounts and keyboard focus always restores it, so accessibility
+   * is untouched. Never fades while the drawer is open.                       */
+  function hamburgerFade() {
+    var toggle = document.querySelector('.drawer-toggle');
+    if (!toggle) return;
+    var restoreTimer = null;
+    var lastY = window.pageYOffset;
+    function onScroll() {
+      var y = window.pageYOffset;
+      var dy = y - lastY;
+      lastY = y;
+      if (toggle.getAttribute('aria-expanded') === 'true') return;   // drawer open — stay solid
+      if (Math.abs(dy) > 1) toggle.classList.add('is-faded');        // filter spurious ticks
+      if (restoreTimer) clearTimeout(restoreTimer);
+      restoreTimer = setTimeout(function () {
+        toggle.classList.remove('is-faded');
+        restoreTimer = null;
+      }, 600);
     }
-    var obs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add('title-in'); obs.unobserve(en.target); }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.2 });
-    els.forEach(function (el) { obs.observe(el); });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // opening the drawer always restores the button immediately
+    toggle.addEventListener('click', function () { toggle.classList.remove('is-faded'); });
   }
 
   /* ---- Hamburger carve: title text wraps around the fixed drawer toggle --- *
@@ -1021,7 +1027,7 @@
   progressWrite();
   progressPaint();
   sectionReveal();
-  titleMotion();
+  hamburgerFade();
   hamburgerCarve();
   highlights();
   stepperProgress();
