@@ -2863,7 +2863,7 @@ function RangeStepsSvg({ spec, width, height, pal, accent, reduce, entered, coar
   const stair = rs.variant === 'stair';
   const rail = rs.footRail;
   const yMin = rs.yMin || 0, yMax = rs.yMax;
-  const pad = { l: 52, r: 132, t: 24, b: rail ? 108 : 74 };
+  const pad = { l: rs.hideScale ? 30 : 52, r: (rules.length || cols.some((c) => c.cap)) ? 132 : 48, t: 24, b: rail ? 108 : 74 };
   const innerW = width - pad.l - pad.r, innerH = height - pad.t - pad.b;
   const y = (v) => pad.t + (1 - (v - yMin) / (yMax - yMin)) * innerH;
   const colW = innerW / cols.length;
@@ -2877,6 +2877,7 @@ function RangeStepsSvg({ spec, width, height, pal, accent, reduce, entered, coar
   const anchors = {};
   stepPos.forEach((st) => { anchors[st.id] = { x: st.x, y: (y(st.from) + y(st.to)) / 2 }; });
   rules.forEach((r) => { anchors[r.id] = { x: width - pad.r - 14, y: y(r.v) }; });
+  cols.forEach((c, i) => { if (c.cap) anchors[c.cap.id] = { x: colX(i), y: y(c.cap.v) }; });
   if (rail) anchors.evidence = { x: pad.l + innerW / 2, y: height - 34 };
 
   const anchorOf = (a) => anchors[a.id] || null;
@@ -2893,7 +2894,7 @@ function RangeStepsSvg({ spec, width, height, pal, accent, reduce, entered, coar
   let tooltip = null;
   if (!coarse && isActiveHere && anchor) {
     const meta = targets.find((t) => t.id === active.id);
-    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={rules.some((r) => r.id === active.id) ? 'GUARDRAIL' : active.id === 'evidence' ? 'PROGRESSION' : 'RANGE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
+    if (meta) tooltip = <TargetTooltip meta={meta} kindLabel={rules.some((r) => r.id === active.id) || cols.some((c) => c.cap && c.cap.id === active.id) ? 'GUARDRAIL' : active.id === 'evidence' ? 'PROGRESSION' : 'RANGE'} accentTitle={active.id === spec.primaryKey} xPct={(anchor.x / width) * 100} yPct={(anchor.y / height) * 100} isPin={!!pinned && active.id === pinned.id} pal={pal} accent={accent} reduce={reduce} entered={entered} onUnpin={() => onPin(null)} valueText={null} />;
   }
 
   // stair connector through the band tops (ascent = the claim)
@@ -2902,8 +2903,8 @@ function RangeStepsSvg({ spec, width, height, pal, accent, reduce, entered, coar
   return (
     <div style={{ position: 'relative' }}>
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Range-band columns on one shared percent scale with cap guardrails" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
-        {/* y axis */}
-        {axisTicks.map((v) => (
+        {/* y axis (suppressed for pure-progression exhibits) */}
+        {!rs.hideScale && axisTicks.map((v) => (
           <g key={`t${v}`}>
             <line x1={pad.l} x2={pad.l + innerW} y1={y(v)} y2={y(v)} stroke={pal.grid} strokeWidth="1" opacity={v === yMin ? 1 : 0.55} />
             <text x={pad.l - 8} y={y(v) + 3} textAnchor="end" style={halo(pal, 8.5, pal.text4)}>{v}{rs.yUnit || ''}</text>
@@ -2948,6 +2949,13 @@ function RangeStepsSvg({ spec, width, height, pal, accent, reduce, entered, coar
                   </g>
                 );
               })}
+              {c.cap && (
+                <g style={{ opacity: focusId && focusId !== c.cap.id ? 0.55 : 1, transition: trans('opacity') }}>
+                  <path d={Brush.brushSegment(cxp - barW / 2 - 8, y(c.cap.v), cxp + barW / 2 + 8, y(c.cap.v), { seed: 330 + i * 7, weight: 1.15, intensity: 0.85, waver: 0.25 })} fill={pal.invalidCharcoal} opacity="0.95" />
+                  {[-1, 1].map((s) => <line key={s} x1={cxp + s * (barW / 2 + 8)} x2={cxp + s * (barW / 2 + 8)} y1={y(c.cap.v)} y2={y(c.cap.v) + 5} stroke={pal.invalidCharcoal} strokeWidth="1.1" opacity="0.9" />)}
+                  <text x={cxp} y={y(c.cap.v) - 6} textAnchor="middle" style={halo(pal, 8, focusId === c.cap.id ? accent : pal.text2)}>{c.cap.label}</text>
+                </g>
+              )}
               <text x={cxp} y={pad.t + innerH + 20} textAnchor="middle" style={haloSans(pal, 12, colOn ? accent : pal.text1, 600)}>{c.label}</text>
               {c.sub && <text x={cxp} y={pad.t + innerH + 34} textAnchor="middle" style={halo(pal, 7.5, pal.text4)}>{c.sub}</text>}
               {c.capNote && <text x={cxp} y={pad.t + innerH + 47} textAnchor="middle" style={halo(pal, 7.5, pal.text3)}>{c.capNote}</text>}

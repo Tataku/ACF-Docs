@@ -2563,12 +2563,12 @@
       "wiredPublic": true,
       "layout": "rangeSteps",
       "dataMode": "conceptual",
-      "claimLabel": "PART 5 · SIZING",
-      "primaryClaim": "Capital advances only as evidence advances — size is earned, not declared",
-      "visualProof": "Four allocation bands step upward with the CIS score — zero below fifty, then two-to-four, four-to-eight, eight-to-fifteen percent — under two fixed cap rules at fifteen and eighteen percent, with the evidence stages that move the score running beneath the axis",
-      "readerAction": "Climb the staircase left to right, then note the two caps that hold regardless of score",
+      "claimLabel": "PART 5 · EARNED CONVICTION",
+      "primaryClaim": "Position size must be earned through evidence — maximum justified size is not currently earned size",
+      "visualProof": "Six evidence stages step upward — thesis exposure, commercial validation, initial execution, scale execution, economic proof, exceptional platform quality — an ascending progression that deliberately carries no percentages and no score bands",
+      "readerAction": "Climb the ladder stage by stage and name where your position actually sits",
       "readerTakeaway": "Conviction is built through evidence. It is not declared through enthusiasm.",
-      "experienceRole": "comparison",
+      "experienceRole": "diagram",
       "visualRelationship": "comparison",
       "storyBeats": [
         {
@@ -2612,24 +2612,24 @@
       "tryThisMobile": null,
       "readerContext": null,
       "disclosureMode": "conceptual",
-      "disclosure": "Conceptual staircase · Band and cap values are canonical CIS v2.1 parameters; the evidence stages are an illustrative progression",
+      "disclosure": "Conceptual doctrine exhibit · Owner-defined evidence progression awaiting repository canonicalization; carries no sizing numbers",
       "sources": [
         {
-          "provider": "ACF · CIS Specification v2.1",
-          "label": "Four-band Torque sizing (§10.2) and concentration caps (§10.3)",
+          "provider": "ACF · Owner doctrine",
+          "label": "The Earned Conviction Ladder — six-stage evidence progression (2026-07, awaiting canonical spec)",
           "seriesId": null,
           "role": "verifies-concept",
           "url": null
         },
         {
           "provider": "ACF · Part 5",
-          "label": "Torque position sizing and add-cadence governance",
+          "label": "Position sizing governance and add-cadence discipline",
           "seriesId": null,
           "role": "verifies-concept",
           "url": "/part-5-portfolio-construction-position-management"
         }
       ],
-      "agencyNotes": "NEW rangeSteps layout in stair mode. No named \"Earned Conviction Ladder\" exists in framework doctrine (reconciliation 2026-07-13): the six stages ship as conceptual narrative; every number on the exhibit is the canonical four-band CIS v2.1 parameter set (0 / 2–4 / 4–8 / 8–15, caps 15/18). No invented stage→percentage mapping is asserted."
+      "agencyNotes": "rangeSteps stair variant in hideScale mode: six ascending evidence rungs, no y-axis, no value labels, no cap rules. The Earned Conviction Ladder is OWNER-DEFINED DOCTRINE awaiting repository canonicalization (review decision on PR #137, 2026-07-13): the stages are doctrine, the exhibit deliberately asserts no stage-to-percentage or stage-to-CIS-band mapping, and all numeric sizing lives in p5-posture-sizing and the adjacent canonical tables."
     },
     {
       "chartId": "p5-posture-sizing",
@@ -2643,7 +2643,7 @@
       "dataMode": "conceptual",
       "claimLabel": "PART 5 · POSTURE SIZING",
       "primaryClaim": "The same CIS score earns a different position size in each posture",
-      "visualProof": "Three aligned columns on one percent scale — Torque ranges reaching eight-to-fifteen, Ballast reserve ranges topping at five-to-eight, Hype a single capped one-to-five band — under the shared single-position cap rules at fifteen and eighteen percent",
+      "visualProof": "Three aligned columns on one percent scale — Torque ranges reaching eight-to-fifteen under its fifteen percent ceiling, Ballast reserve ranges topping at five-to-eight with an exceptional single-position maximum of ten, Hype a single two-to-five band under its hard five percent cap — with the eighteen percent portfolio outer bound drawn quietly above all three",
       "readerAction": "Compare the 70+ band across the three columns — same score, three different ceilings",
       "readerTakeaway": "Score the asset first. Size the behavior second.",
       "experienceRole": "comparison",
@@ -2707,7 +2707,7 @@
           "url": "/part-5-portfolio-construction-position-management"
         }
       ],
-      "agencyNotes": "NEW rangeSteps layout in columns mode: three posture columns of stacked CIS-band ranges on one shared 0–20% scale, cap rules as horizontal brush guides, per-column aggregate guardrails as quiet capNote chips. The visual claim is the 70+ row asymmetry (8–15 vs 5–8 vs a hard 5)."
+      "agencyNotes": "rangeSteps columns mode, revised per owner review of PR #137: each posture carries its OWN ceiling mark (Torque 15 w/ override note · Ballast exceptional 10 · Hype hard 5) drawn at the column so posture ceilings visibly bind first; the 18% absolute is a single quiet full-width rule labelled as the portfolio outer bound. Hype band corrected to the coded 2–5% (CIS ≥50 eligibility). The visual claim remains the 70+ row asymmetry."
     },
     {
       "chartId": "p5-ballast-rotation",

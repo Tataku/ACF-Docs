@@ -165,6 +165,10 @@ for (const s of FRAMEWORK_CHART_SPECS) {
         ok(typeof st.from === 'number' && typeof st.to === 'number' && st.to >= st.from, `${w} rangeSteps step ${st.id} needs from <= to`);
         ok(st.to <= rs.yMax, `${w} rangeSteps step ${st.id} exceeds the y scale`);
       });
+      if (c.cap != null) {
+        ok(c.cap.id && c.cap.label && typeof c.cap.v === 'number' && c.cap.v <= rs.yMax, `${w} rangeSteps column ${c.id} cap needs id + label + v (in scale)`);
+        (c.steps || []).forEach((st) => ok(st.to <= c.cap.v, `${w} rangeSteps step ${st.id} exceeds its posture ceiling`));
+      }
     });
     (rs.rules || []).forEach((r) => ok(typeof r.v === 'number' && r.label && r.v <= rs.yMax, `${w} rangeSteps rule needs v (in scale) + label`));
     if (rs.footRail) ok(Array.isArray(rs.footRail.items) && rs.footRail.items.length >= 2, `${w} rangeSteps footRail needs items`);
