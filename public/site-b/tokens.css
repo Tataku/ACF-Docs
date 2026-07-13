@@ -21,6 +21,9 @@
    ============================================================================ */
 
 :root {
+  /* Native UI (scrollbars, form controls, the narration range input) follows
+     the surface — without this the browser paints them for the wrong scheme. */
+  color-scheme: light;
   /* ---- Surface: paper & ink (light, editorial) ---------------------------- */
   --paper:          #f7f4ec;   /* page background — warm paper, harmonized with the chart paper */
   --paper-warm:     #efe9dc;   /* warm tint band (CTA) */
@@ -240,6 +243,7 @@
    foregrounds switch to the dashboard's dark-fill-tuned values.
    ============================================================================ */
 [data-theme="dark"] {
+  color-scheme: dark;          /* native UI follows the night surface */
   /* ---- Surface: warm night paper & ink ---------------------------------- */
   --paper:          #14171a;   /* page background */
   --paper-warm:     #191d21;   /* whisper-light tint — full measure only */

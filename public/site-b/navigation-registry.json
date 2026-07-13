@@ -1,0 +1,954 @@
+{
+  "version": 2,
+  "canonicalOrigin": "https://docs.acfdashboard.com",
+  "pages": [
+    {
+      "part": 0,
+      "route": "/",
+      "file": "cover-docs.html",
+      "title": "The Adaptive Convexity Framework"
+    },
+    {
+      "part": 1,
+      "route": "/part-1-foundation",
+      "file": "part-1-foundation.html",
+      "title": "Part 1 · Foundation & Philosophy"
+    },
+    {
+      "part": 1,
+      "route": "/part-1-pictures",
+      "file": "part-1-pictures.html",
+      "title": "Part 1 · In Pictures"
+    },
+    {
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "file": "part-2-lineage-macro.html",
+      "title": "Part 2 · Lineage & Macro Thesis"
+    },
+    {
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "file": "part-3-bitcoin-convexity.html",
+      "title": "Part 3 · Bitcoin: Convexity Backbone"
+    },
+    {
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "file": "part-4-tax-architecture.html",
+      "title": "Part 4 · Tax Architecture & ROC Strategy"
+    }
+  ],
+  "aliases": {
+    "/": "/",
+    "/site-b/cover-docs.html": "/",
+    "cover-docs.html": "/",
+    "/cover-docs.html": "/",
+    "https://docs.acfdashboard.com/": "/",
+    "https://docs.acfdashboard.com/site-b/cover-docs.html": "/",
+    "/part-1-foundation": "/part-1-foundation",
+    "/site-b/part-1-foundation.html": "/part-1-foundation",
+    "part-1-foundation.html": "/part-1-foundation",
+    "/part-1-foundation.html": "/part-1-foundation",
+    "https://docs.acfdashboard.com/part-1-foundation": "/part-1-foundation",
+    "https://docs.acfdashboard.com/site-b/part-1-foundation.html": "/part-1-foundation",
+    "/part-1-pictures": "/part-1-pictures",
+    "/site-b/part-1-pictures.html": "/part-1-pictures",
+    "part-1-pictures.html": "/part-1-pictures",
+    "/part-1-pictures.html": "/part-1-pictures",
+    "https://docs.acfdashboard.com/part-1-pictures": "/part-1-pictures",
+    "https://docs.acfdashboard.com/site-b/part-1-pictures.html": "/part-1-pictures",
+    "/part-2-lineage-macro-thesis": "/part-2-lineage-macro-thesis",
+    "/site-b/part-2-lineage-macro.html": "/part-2-lineage-macro-thesis",
+    "part-2-lineage-macro.html": "/part-2-lineage-macro-thesis",
+    "/part-2-lineage-macro.html": "/part-2-lineage-macro-thesis",
+    "https://docs.acfdashboard.com/part-2-lineage-macro-thesis": "/part-2-lineage-macro-thesis",
+    "https://docs.acfdashboard.com/site-b/part-2-lineage-macro.html": "/part-2-lineage-macro-thesis",
+    "/part-3-bitcoin-convexity-backbone": "/part-3-bitcoin-convexity-backbone",
+    "/site-b/part-3-bitcoin-convexity.html": "/part-3-bitcoin-convexity-backbone",
+    "part-3-bitcoin-convexity.html": "/part-3-bitcoin-convexity-backbone",
+    "/part-3-bitcoin-convexity.html": "/part-3-bitcoin-convexity-backbone",
+    "https://docs.acfdashboard.com/part-3-bitcoin-convexity-backbone": "/part-3-bitcoin-convexity-backbone",
+    "https://docs.acfdashboard.com/site-b/part-3-bitcoin-convexity.html": "/part-3-bitcoin-convexity-backbone",
+    "/part-4-tax-architecture-roc-strategy": "/part-4-tax-architecture-roc-strategy",
+    "/site-b/part-4-tax-architecture.html": "/part-4-tax-architecture-roc-strategy",
+    "part-4-tax-architecture.html": "/part-4-tax-architecture-roc-strategy",
+    "/part-4-tax-architecture.html": "/part-4-tax-architecture-roc-strategy",
+    "https://docs.acfdashboard.com/part-4-tax-architecture-roc-strategy": "/part-4-tax-architecture-roc-strategy",
+    "https://docs.acfdashboard.com/site-b/part-4-tax-architecture.html": "/part-4-tax-architecture-roc-strategy"
+  },
+  "sections": {
+    "/": [
+      "acf-reference-integrity-fallback",
+      "cta-band-title",
+      "dc-lens-title",
+      "dc-parts-title",
+      "dc-title",
+      "exhibit-dl-convexity-window",
+      "exhibit-dl-regime-map",
+      "exhibit-sig-shape",
+      "faq",
+      "faq-title",
+      "lens",
+      "parts",
+      "theme-toggle"
+    ],
+    "/part-1-foundation": [
+      "abstract",
+      "abstract-title",
+      "acf-reference-integrity-fallback",
+      "ex01-d",
+      "ex01-t",
+      "ex02-d",
+      "ex02-t",
+      "ex03-d",
+      "ex03-t",
+      "ex04-d",
+      "ex04-t",
+      "ex05-d",
+      "ex05-t",
+      "ex06-d",
+      "ex06-t",
+      "exhibit-01",
+      "exhibit-02",
+      "exhibit-03",
+      "exhibit-04",
+      "exhibit-05",
+      "exhibit-06",
+      "exhibit-dl-tripwire-loop",
+      "exhibit-s1",
+      "exs1-d",
+      "exs1-t",
+      "manifesto",
+      "manifesto-title",
+      "ooo-title",
+      "order-of-operations",
+      "sidebar",
+      "theme-toggle"
+    ],
+    "/part-1-pictures": [
+      "acf-reference-integrity-fallback",
+      "ex01-d",
+      "ex01-t",
+      "ex02-d",
+      "ex02-t",
+      "ex03-d",
+      "ex03-t",
+      "ex04-d",
+      "ex04-t",
+      "ex05-d",
+      "ex05-t",
+      "ex06-d",
+      "ex06-t",
+      "exhibit-01",
+      "exhibit-02",
+      "exhibit-03",
+      "exhibit-04",
+      "exhibit-05",
+      "exhibit-06",
+      "exhibit-s1",
+      "exs1-d",
+      "exs1-t",
+      "theme-toggle"
+    ],
+    "/part-2-lineage-macro-thesis": [
+      "acf-reference-integrity-fallback",
+      "excludes",
+      "excludes-title",
+      "exhibit-p2-capital-finds-bottleneck",
+      "exhibit-p2-conviction-needs-exit",
+      "exhibit-p2-liquidity-sets-tide",
+      "exhibit-p2-markets-feed-back",
+      "exhibit-p2-method-before-macro",
+      "exhibit-p2-narrative-not-thesis",
+      "exhibit-p2-phase-changes-sizing",
+      "exhibit-p2-ruin-comes-first",
+      "exhibit-p2-time-changes-prudence",
+      "lineage",
+      "lineage-title",
+      "macro-thesis",
+      "mt-title",
+      "sidebar",
+      "tax",
+      "tax-title",
+      "theme-toggle",
+      "thought-leaders",
+      "tl-title"
+    ],
+    "/part-3-bitcoin-convexity-backbone": [
+      "accum-title",
+      "accumulate",
+      "acf-reference-integrity-fallback",
+      "backbone",
+      "backbone-title",
+      "exhibit-p3-accumulate-dont-trade",
+      "exhibit-p3-cold-storage-to-borrow",
+      "exhibit-p3-exposure-not-control",
+      "exhibit-p3-models-must-converge",
+      "exhibit-p3-power-law-holds",
+      "exhibit-p3-reserve-share-evolves",
+      "exhibit-p3-volatility-is-the-toll",
+      "irr-title",
+      "irreplaceability",
+      "risk-title",
+      "risks",
+      "sidebar",
+      "surv-title",
+      "survivability",
+      "tam",
+      "tam-title",
+      "theme-toggle",
+      "val-title",
+      "valuation"
+    ],
+    "/part-4-tax-architecture-roc-strategy": [
+      "acf-reference-integrity-fallback",
+      "edge",
+      "edge-title",
+      "exhibit-p4-gross-not-net",
+      "exhibit-p4-roc-yield",
+      "exhibit-p4-tax-wedge",
+      "pretax",
+      "pretax-title",
+      "resilience",
+      "resilience-title",
+      "roth",
+      "roth-title",
+      "sidebar",
+      "taxable",
+      "taxable-title",
+      "theme-toggle",
+      "wrappers",
+      "wrappers-title"
+    ]
+  },
+  "charts": {
+    "dl-regime-map": {
+      "chartId": "dl-regime-map",
+      "idx": "L2",
+      "title": "Capital Has Weather",
+      "part": 0,
+      "route": "/",
+      "hash": "#exhibit-dl-regime-map",
+      "href": "/#exhibit-dl-regime-map"
+    },
+    "L2": {
+      "chartId": "dl-regime-map",
+      "idx": "L2",
+      "title": "Capital Has Weather",
+      "part": 0,
+      "route": "/",
+      "hash": "#exhibit-dl-regime-map",
+      "href": "/#exhibit-dl-regime-map"
+    },
+    "dl-convexity-window": {
+      "chartId": "dl-convexity-window",
+      "idx": "L1",
+      "title": "The Window Opens",
+      "part": 0,
+      "route": "/",
+      "hash": "#exhibit-dl-convexity-window",
+      "href": "/#exhibit-dl-convexity-window"
+    },
+    "L1": {
+      "chartId": "dl-convexity-window",
+      "idx": "L1",
+      "title": "The Window Opens",
+      "part": 0,
+      "route": "/",
+      "hash": "#exhibit-dl-convexity-window",
+      "href": "/#exhibit-dl-convexity-window"
+    },
+    "sig-shape": {
+      "chartId": "sig-shape",
+      "idx": "S2",
+      "title": "Bend the Tail",
+      "part": 0,
+      "route": "/",
+      "hash": "#exhibit-sig-shape",
+      "href": "/#exhibit-sig-shape"
+    },
+    "S2": {
+      "chartId": "sig-shape",
+      "idx": "S2",
+      "title": "Bend the Tail",
+      "part": 0,
+      "route": "/",
+      "hash": "#exhibit-sig-shape",
+      "href": "/#exhibit-sig-shape"
+    },
+    "p1-cpi-assets": {
+      "chartId": "p1-cpi-assets",
+      "idx": "03",
+      "title": "Inflation Was Bigger",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-03",
+      "href": "/part-1-foundation#exhibit-03"
+    },
+    "03": {
+      "chartId": "p1-cpi-assets",
+      "idx": "03",
+      "title": "Inflation Was Bigger",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-03",
+      "href": "/part-1-foundation#exhibit-03"
+    },
+    "p1-policy-constraint": {
+      "chartId": "p1-policy-constraint",
+      "idx": "04",
+      "title": "The Bill Came Due",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-04",
+      "href": "/part-1-foundation#exhibit-04"
+    },
+    "04": {
+      "chartId": "p1-policy-constraint",
+      "idx": "04",
+      "title": "The Bill Came Due",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-04",
+      "href": "/part-1-foundation#exhibit-04"
+    },
+    "p1-correlation": {
+      "chartId": "p1-correlation",
+      "idx": "02",
+      "title": "Correlation Turns",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-02",
+      "href": "/part-1-foundation#exhibit-02"
+    },
+    "02": {
+      "chartId": "p1-correlation",
+      "idx": "02",
+      "title": "Correlation Turns",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-02",
+      "href": "/part-1-foundation#exhibit-02"
+    },
+    "p1-hedge-broke": {
+      "chartId": "p1-hedge-broke",
+      "idx": "01",
+      "title": "The Hedge Broke",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-01",
+      "href": "/part-1-foundation#exhibit-01"
+    },
+    "01": {
+      "chartId": "p1-hedge-broke",
+      "idx": "01",
+      "title": "The Hedge Broke",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-01",
+      "href": "/part-1-foundation#exhibit-01"
+    },
+    "p1-sequence-risk": {
+      "chartId": "p1-sequence-risk",
+      "idx": "05",
+      "title": "Path Changes Everything",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-05",
+      "href": "/part-1-foundation#exhibit-05"
+    },
+    "05": {
+      "chartId": "p1-sequence-risk",
+      "idx": "05",
+      "title": "Path Changes Everything",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-05",
+      "href": "/part-1-foundation#exhibit-05"
+    },
+    "sig-payoff": {
+      "chartId": "sig-payoff",
+      "idx": "S1",
+      "title": "Shape the Payoff",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-s1",
+      "href": "/part-1-foundation#exhibit-s1"
+    },
+    "S1": {
+      "chartId": "sig-payoff",
+      "idx": "S1",
+      "title": "Shape the Payoff",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-s1",
+      "href": "/part-1-foundation#exhibit-s1"
+    },
+    "dl-tripwire-loop": {
+      "chartId": "dl-tripwire-loop",
+      "idx": "L3",
+      "title": "Govern the Thesis",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-dl-tripwire-loop",
+      "href": "/part-1-foundation#exhibit-dl-tripwire-loop"
+    },
+    "L3": {
+      "chartId": "dl-tripwire-loop",
+      "idx": "L3",
+      "title": "Govern the Thesis",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-dl-tripwire-loop",
+      "href": "/part-1-foundation#exhibit-dl-tripwire-loop"
+    },
+    "p1-convexity-survival": {
+      "chartId": "p1-convexity-survival",
+      "idx": "06",
+      "title": "Survive the Path",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-06",
+      "href": "/part-1-foundation#exhibit-06"
+    },
+    "06": {
+      "chartId": "p1-convexity-survival",
+      "idx": "06",
+      "title": "Survive the Path",
+      "part": 1,
+      "route": "/part-1-foundation",
+      "hash": "#exhibit-06",
+      "href": "/part-1-foundation#exhibit-06"
+    },
+    "p2-method-before-macro": {
+      "chartId": "p2-method-before-macro",
+      "idx": "P2-01",
+      "title": "Method Before Macro",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-method-before-macro",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-method-before-macro"
+    },
+    "P2-01": {
+      "chartId": "p2-method-before-macro",
+      "idx": "P2-01",
+      "title": "Method Before Macro",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-method-before-macro",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-method-before-macro"
+    },
+    "p2-ruin-comes-first": {
+      "chartId": "p2-ruin-comes-first",
+      "idx": "P2-02",
+      "title": "Ruin Comes First",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-ruin-comes-first",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-ruin-comes-first"
+    },
+    "P2-02": {
+      "chartId": "p2-ruin-comes-first",
+      "idx": "P2-02",
+      "title": "Ruin Comes First",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-ruin-comes-first",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-ruin-comes-first"
+    },
+    "p2-conviction-needs-exit": {
+      "chartId": "p2-conviction-needs-exit",
+      "idx": "P2-03",
+      "title": "Conviction Needs an Exit",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-conviction-needs-exit",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-conviction-needs-exit"
+    },
+    "P2-03": {
+      "chartId": "p2-conviction-needs-exit",
+      "idx": "P2-03",
+      "title": "Conviction Needs an Exit",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-conviction-needs-exit",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-conviction-needs-exit"
+    },
+    "p2-markets-feed-back": {
+      "chartId": "p2-markets-feed-back",
+      "idx": "P2-04",
+      "title": "Markets Feed Back",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-markets-feed-back",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-markets-feed-back"
+    },
+    "P2-04": {
+      "chartId": "p2-markets-feed-back",
+      "idx": "P2-04",
+      "title": "Markets Feed Back",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-markets-feed-back",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-markets-feed-back"
+    },
+    "p2-time-changes-prudence": {
+      "chartId": "p2-time-changes-prudence",
+      "idx": "P2-05",
+      "title": "Time Changes Prudence",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-time-changes-prudence",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-time-changes-prudence"
+    },
+    "P2-05": {
+      "chartId": "p2-time-changes-prudence",
+      "idx": "P2-05",
+      "title": "Time Changes Prudence",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-time-changes-prudence",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-time-changes-prudence"
+    },
+    "p2-liquidity-sets-tide": {
+      "chartId": "p2-liquidity-sets-tide",
+      "idx": "P2-09",
+      "title": "Liquidity Sets the Tide",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-liquidity-sets-tide",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-liquidity-sets-tide"
+    },
+    "P2-09": {
+      "chartId": "p2-liquidity-sets-tide",
+      "idx": "P2-09",
+      "title": "Liquidity Sets the Tide",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-liquidity-sets-tide",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-liquidity-sets-tide"
+    },
+    "p2-narrative-not-thesis": {
+      "chartId": "p2-narrative-not-thesis",
+      "idx": "P2-07",
+      "title": "Narrative Is Not Thesis",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-narrative-not-thesis",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-narrative-not-thesis"
+    },
+    "P2-07": {
+      "chartId": "p2-narrative-not-thesis",
+      "idx": "P2-07",
+      "title": "Narrative Is Not Thesis",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-narrative-not-thesis",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-narrative-not-thesis"
+    },
+    "p2-capital-finds-bottleneck": {
+      "chartId": "p2-capital-finds-bottleneck",
+      "idx": "P2-06",
+      "title": "Capital Finds the Bottleneck",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-capital-finds-bottleneck",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-capital-finds-bottleneck"
+    },
+    "P2-06": {
+      "chartId": "p2-capital-finds-bottleneck",
+      "idx": "P2-06",
+      "title": "Capital Finds the Bottleneck",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-capital-finds-bottleneck",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-capital-finds-bottleneck"
+    },
+    "p2-phase-changes-sizing": {
+      "chartId": "p2-phase-changes-sizing",
+      "idx": "P2-08",
+      "title": "Phase Changes Sizing",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-phase-changes-sizing",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-phase-changes-sizing"
+    },
+    "P2-08": {
+      "chartId": "p2-phase-changes-sizing",
+      "idx": "P2-08",
+      "title": "Phase Changes Sizing",
+      "part": 2,
+      "route": "/part-2-lineage-macro-thesis",
+      "hash": "#exhibit-p2-phase-changes-sizing",
+      "href": "/part-2-lineage-macro-thesis#exhibit-p2-phase-changes-sizing"
+    },
+    "p3-exposure-not-control": {
+      "chartId": "p3-exposure-not-control",
+      "idx": "P3-04",
+      "title": "Exposure Is Not Control",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-exposure-not-control",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-exposure-not-control"
+    },
+    "P3-04": {
+      "chartId": "p3-exposure-not-control",
+      "idx": "P3-04",
+      "title": "Exposure Is Not Control",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-exposure-not-control",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-exposure-not-control"
+    },
+    "p3-accumulate-dont-trade": {
+      "chartId": "p3-accumulate-dont-trade",
+      "idx": "P3-06",
+      "title": "Accumulate, Don’t Trade",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-accumulate-dont-trade",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-accumulate-dont-trade"
+    },
+    "P3-06": {
+      "chartId": "p3-accumulate-dont-trade",
+      "idx": "P3-06",
+      "title": "Accumulate, Don’t Trade",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-accumulate-dont-trade",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-accumulate-dont-trade"
+    },
+    "p3-volatility-is-the-toll": {
+      "chartId": "p3-volatility-is-the-toll",
+      "idx": "P3-03",
+      "title": "Volatility Is the Toll",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-volatility-is-the-toll",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-volatility-is-the-toll"
+    },
+    "P3-03": {
+      "chartId": "p3-volatility-is-the-toll",
+      "idx": "P3-03",
+      "title": "Volatility Is the Toll",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-volatility-is-the-toll",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-volatility-is-the-toll"
+    },
+    "p3-power-law-holds": {
+      "chartId": "p3-power-law-holds",
+      "idx": "P3-01",
+      "title": "Power Law Holds",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-power-law-holds",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-power-law-holds"
+    },
+    "P3-01": {
+      "chartId": "p3-power-law-holds",
+      "idx": "P3-01",
+      "title": "Power Law Holds",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-power-law-holds",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-power-law-holds"
+    },
+    "p3-models-must-converge": {
+      "chartId": "p3-models-must-converge",
+      "idx": "P3-05",
+      "title": "Models Must Converge",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-models-must-converge",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-models-must-converge"
+    },
+    "P3-05": {
+      "chartId": "p3-models-must-converge",
+      "idx": "P3-05",
+      "title": "Models Must Converge",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-models-must-converge",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-models-must-converge"
+    },
+    "p3-cold-storage-to-borrow": {
+      "chartId": "p3-cold-storage-to-borrow",
+      "idx": "P3-07",
+      "title": "Cold Storage to Borrow",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-cold-storage-to-borrow",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-cold-storage-to-borrow"
+    },
+    "P3-07": {
+      "chartId": "p3-cold-storage-to-borrow",
+      "idx": "P3-07",
+      "title": "Cold Storage to Borrow",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-cold-storage-to-borrow",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-cold-storage-to-borrow"
+    },
+    "p3-reserve-share-evolves": {
+      "chartId": "p3-reserve-share-evolves",
+      "idx": "P3-08",
+      "title": "Reserve Share Evolves",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-reserve-share-evolves",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-reserve-share-evolves"
+    },
+    "P3-08": {
+      "chartId": "p3-reserve-share-evolves",
+      "idx": "P3-08",
+      "title": "Reserve Share Evolves",
+      "part": 3,
+      "route": "/part-3-bitcoin-convexity-backbone",
+      "hash": "#exhibit-p3-reserve-share-evolves",
+      "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-reserve-share-evolves"
+    },
+    "p4-tax-wedge": {
+      "chartId": "p4-tax-wedge",
+      "idx": "P4-01",
+      "title": "The Tax Wedge",
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "hash": "#exhibit-p4-tax-wedge",
+      "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge"
+    },
+    "P4-01": {
+      "chartId": "p4-tax-wedge",
+      "idx": "P4-01",
+      "title": "The Tax Wedge",
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "hash": "#exhibit-p4-tax-wedge",
+      "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge"
+    },
+    "p4-roc-yield": {
+      "chartId": "p4-roc-yield",
+      "idx": "P4-03",
+      "title": "ROC Changes the Yield",
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "hash": "#exhibit-p4-roc-yield",
+      "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-roc-yield"
+    },
+    "P4-03": {
+      "chartId": "p4-roc-yield",
+      "idx": "P4-03",
+      "title": "ROC Changes the Yield",
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "hash": "#exhibit-p4-roc-yield",
+      "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-roc-yield"
+    },
+    "p4-gross-not-net": {
+      "chartId": "p4-gross-not-net",
+      "idx": "P4-02",
+      "title": "Gross Is Not Net",
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "hash": "#exhibit-p4-gross-not-net",
+      "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-gross-not-net"
+    },
+    "P4-02": {
+      "chartId": "p4-gross-not-net",
+      "idx": "P4-02",
+      "title": "Gross Is Not Net",
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "hash": "#exhibit-p4-gross-not-net",
+      "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-gross-not-net"
+    }
+  },
+  "glossary": {
+    "convexity": {
+      "later": null,
+      "chart": {
+        "href": "/part-1-foundation#exhibit-s1",
+        "label": "View the chart → S1 · Shape the Payoff"
+      }
+    },
+    "cis": {
+      "later": null,
+      "chart": {
+        "href": "/part-1-foundation#exhibit-dl-tripwire-loop",
+        "label": "View the chart → L3 · Govern the Thesis"
+      }
+    },
+    "macro-thesis": {
+      "later": {
+        "href": "/part-2-lineage-macro-thesis",
+        "label": "Appears in Part 2 · The lineage and the full regime thesis"
+      },
+      "chart": {
+        "href": "/#exhibit-dl-regime-map",
+        "label": "View the chart → L2 · Capital Has Weather"
+      }
+    },
+    "tripwire": {
+      "later": null,
+      "chart": {
+        "href": "/part-1-foundation#exhibit-dl-tripwire-loop",
+        "label": "View the chart → L3 · Govern the Thesis"
+      }
+    },
+    "momentum-filter": {
+      "later": null,
+      "chart": null
+    },
+    "tax-wrapper": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Wrapper engineering as structural edge"
+      },
+      "chart": null
+    },
+    "torque": {
+      "later": null,
+      "chart": null
+    },
+    "ballast": {
+      "later": null,
+      "chart": null
+    },
+    "hype": {
+      "later": null,
+      "chart": null
+    },
+    "fiscal-dominance": {
+      "later": {
+        "href": "/part-2-lineage-macro-thesis",
+        "label": "Appears in Part 2 · The macro thesis and policy backdrop"
+      },
+      "chart": {
+        "href": "/part-1-foundation#exhibit-04",
+        "label": "View the chart → 04 · The Bill Came Due"
+      }
+    },
+    "buy-borrow-die": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Realization deferral mechanics"
+      },
+      "chart": null
+    },
+    "fragility": {
+      "later": null,
+      "chart": {
+        "href": "/part-1-foundation#exhibit-01",
+        "label": "View the chart → 01 · The Hedge Broke"
+      }
+    },
+    "posture": {
+      "later": null,
+      "chart": {
+        "href": "/#exhibit-dl-regime-map",
+        "label": "View the chart → L2 · Capital Has Weather"
+      }
+    },
+    "policy-reflexivity": {
+      "later": {
+        "href": "/part-2-lineage-macro-thesis",
+        "label": "Appears in Part 2 · The intellectual lineage"
+      },
+      "chart": null
+    },
+    "volatility-clustering": {
+      "later": null,
+      "chart": null
+    },
+    "correlation-instability": {
+      "later": {
+        "href": "/part-2-lineage-macro-thesis",
+        "label": "Appears in Part 2 · Why the diversification regime changed"
+      },
+      "chart": {
+        "href": "/part-1-foundation#exhibit-02",
+        "label": "View the chart → 02 · Correlation Turns"
+      }
+    },
+    "survivable-compounding": {
+      "later": null,
+      "chart": {
+        "href": "/part-1-foundation#exhibit-06",
+        "label": "View the chart → 06 · Survive the Path"
+      }
+    },
+    "right-tail-outcomes": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Taxing the right tail"
+      },
+      "chart": null
+    },
+    "agentic-verification": {
+      "later": null,
+      "chart": null
+    },
+    "tam": {
+      "later": {
+        "href": "/part-3-bitcoin-convexity-backbone",
+        "label": "Appears in Part 3 · The conservative addressable-market estimate for the Bitcoin reserve"
+      },
+      "chart": null
+    },
+    "power-law-corridor": {
+      "later": {
+        "href": "/part-3-bitcoin-convexity-backbone",
+        "label": "Appears in Part 3 · Power-law bands and model convergence"
+      },
+      "chart": null
+    },
+    "sequence-of-returns-risk": {
+      "later": null,
+      "chart": {
+        "href": "/part-1-foundation#exhibit-05",
+        "label": "View the chart → 05 · Path Changes Everything"
+      }
+    },
+    "barbell": {
+      "later": null,
+      "chart": null
+    },
+    "dca": {
+      "later": null,
+      "chart": {
+        "href": "/part-1-foundation#exhibit-06",
+        "label": "View the chart → 06 · Survive the Path"
+      }
+    },
+    "dry-powder": {
+      "later": null,
+      "chart": null
+    },
+    "return-of-capital": {
+      "later": null,
+      "chart": null
+    }
+  },
+  "audit": {
+    "pages": 6,
+    "anchors": 110,
+    "chartSpecs": 30,
+    "liveChartMounts": 37,
+    "glossaryTerms": 26,
+    "glossaryTermsAlreadyTagged": 26,
+    "glossaryTermsAutoTagEligible": 0,
+    "unresolvedGlossaryCharts": [],
+    "warnings": [
+      "/part-1-foundation: runtime-upgraded .part-ref found as <span>",
+      "/part-1-foundation: runtime-upgraded .part-ref found as <span>",
+      "/part-1-foundation: runtime-upgraded .part-ref found as <span>",
+      "/part-1-foundation: runtime-upgraded .lineage-ref found as <span>",
+      "/part-2-lineage-macro-thesis: runtime-upgraded .part-ref found as <span>",
+      "/part-2-lineage-macro-thesis: runtime-upgraded .part-ref found as <span>",
+      "/part-3-bitcoin-convexity-backbone: runtime-upgraded .part-ref found as <span>",
+      "/part-3-bitcoin-convexity-backbone: runtime-upgraded .part-ref found as <span>",
+      "/part-3-bitcoin-convexity-backbone: runtime-upgraded .part-ref found as <span>"
+    ]
+  }
+}

@@ -78,8 +78,10 @@
 
   <!-- GSAP (this page only) — motion start-states applied at runtime, so the
        static page is always complete without it. -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- vendored locally (self-contained page; no third-party CDN in the read path) -->
+  <script defer src="/site-b/vendor/gsap.min.js"></script>
+  <script defer src="/site-b/vendor/ScrollTrigger.min.js"></script>
+  <style id="acf-reference-integrity-fallback">.part-ref.is-pending-reference,.lineage-ref.is-pending-reference{color:inherit!important;border:0!important;background:none!important;text-decoration:none!important;cursor:default!important}.part-ref.is-pending-reference::before,.part-ref.is-pending-reference::after,.lineage-ref.is-pending-reference::before,.lineage-ref.is-pending-reference::after{content:none!important}</style>
 </head>
 <body>
   <div class="cover">
