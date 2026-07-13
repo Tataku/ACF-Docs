@@ -65,7 +65,7 @@
   --posture-ballast-fg:   #4c5a6e;
   --posture-cash-fg:      #566273;
   --posture-torque-fg:    #2f5e96;
-  --posture-hype-fg:      #5b46b0;
+  --posture-hype-fg:      #be185d;   /* pink — owner-canonical Hype hue (2026-07-13); paper-retuned */
   --posture-bitcoin-fg:   #b56a09;
   --posture-unclassified-fg: #5b6578;
 
@@ -280,7 +280,7 @@
   --posture-ballast-fg:      #8D9BB0;
   --posture-cash-fg:         #94A3B8;
   --posture-torque-fg:       #6B9AD4;
-  --posture-hype-fg:         #9D8FE6;
+  --posture-hype-fg:         #f472b6;  /* pink — owner-canonical Hype hue (2026-07-13) */
   --posture-bitcoin-fg:      #f7931a;
   --posture-unclassified-fg: #6b7280;
 

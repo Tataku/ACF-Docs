@@ -226,3 +226,31 @@ Torque 3–15% · 40–60% · 50–70% dd; Ballast 2–8% · 20–35% · 15% min
 declaratives, explain-then-name, narrative connective tissue) with every numeric value and
 every live-vs-doctrine attribution from §6.1 preserved verbatim. Tables, steppers,
 callouts, gloss ids, di-* elements, anchors, and the chart set (10 islands) unchanged.
+
+## 8. Round 3: structural variety + posture-color canonicalization (2026-07-13)
+
+Owner findings: Part 5 still read as one wall of text (paragraph/subsection variety below the
+Parts 1–4 register), and Hype's hue should be pink.
+
+**Structural pass — existing design-system vocabulary ONLY** (no new CSS): the seven inline
+`key-term` chains were converted to the house `.sub-meta` + `.sub-title` h3 idiom (Parts 1–2 use
+7–8 h3s; Part 5 had 0 → now 12, incl. six numbered Protocol subsections in §management with
+enforcement-register sub-metas); the momentum action ladder became a `.compare` table
+(dimensions-broken → action → register); the three Newtonian heuristics became an
+`architecture-list`; Torque wrapper routing became a `.compare` table + compare-key (live
+wrapper-fit sentence); the Hype misclassification line was promoted to a `.pull-quote`; the
+Forces sector-mapping monster paragraph split into aligned/challenged paragraphs under an h3;
+Rebalancing gained "The tax dimension" h3; Governance gained "The portfolio boundary" h3.
+All values + live-vs-doctrine attributions re-verified by sweep after the restructuring.
+
+**Posture color audit (repo truth, per owner directive "hype should be pink"):** the dashboard
+holds THREE hype registers — visual-schema SSOT `POSTURE_DEFAULTS.Hype #3F9FAB` (teal),
+tag register `--tag-fg-hype #a78bfa/#4a2d8e` (purple), and no pink anywhere. Docs tokens had
+mirrored the tag register (purple). Per owner declaration, docs `--posture-hype-fg` is now
+**pink** — light (paper-retuned) `#be185d`, dark `#f472b6` — flowing to `.di-posture`,
+`.di-alloc`, `.posture-card`, `.posture-hero`. Torque (blue family), Ballast (slate family),
+Bitcoin (`#f7931a`, paper-darkened `#b56a09` in light) verified against app registers; the
+docs four-band register (green / monitor-silver / orange / heaviest-ink) matches
+`CIS_BAND_DEFAULTS` semantics (`#10b981 / #b6c2cf / #f97316 / #ef4444`) in the docs' paper
+adaptation. **App-side note (owner decision, not taken here):** the dashboard's own
+schema-teal + tag-purple hype registers now diverge from the declared pink canonical.
