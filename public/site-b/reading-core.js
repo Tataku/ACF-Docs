@@ -76,10 +76,18 @@
     var backdrop = document.querySelector('.drawer-backdrop');
 
     function onKey(e) { if (e.key === 'Escape') close(); }
+    var hideTimer = 0;
     function open() {
       sidebar.setAttribute('data-open', '');
       toggle.setAttribute('aria-expanded', 'true');
-      if (backdrop) backdrop.hidden = false;
+      document.documentElement.classList.add('drawer-lock');   // page holds still behind the drawer
+      if (backdrop) {
+        clearTimeout(hideTimer);
+        backdrop.hidden = false;
+        // arm the fade a frame AFTER unhiding so the opacity transition runs
+        // (the late-mount lesson: state must change on a painted element)
+        requestAnimationFrame(function () { requestAnimationFrame(function () { backdrop.setAttribute('data-show', ''); }); });
+      }
       var first = sidebar.querySelector('a, button');
       if (first) first.focus();
       document.addEventListener('keydown', onKey);
@@ -87,7 +95,12 @@
     function close() {
       sidebar.removeAttribute('data-open');
       toggle.setAttribute('aria-expanded', 'false');
-      if (backdrop) backdrop.hidden = true;
+      document.documentElement.classList.remove('drawer-lock');
+      if (backdrop) {
+        backdrop.removeAttribute('data-show');                 // fade out with the slide…
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(function () { backdrop.hidden = true; }, 360);  // …then release the layer
+      }
       document.removeEventListener('keydown', onKey);
       toggle.focus();
     }

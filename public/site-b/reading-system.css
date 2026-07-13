@@ -2290,7 +2290,14 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
 
 /* ---- Mobile: sidebar → off-canvas drawer --------------------------------- */
 .drawer-toggle { display: none; }
-.drawer-backdrop { position: fixed; inset: 0; z-index: 35; background: rgba(0, 0, 0, .45); }
+/* The scrim fades with the panel slide (JS arms [data-show] a frame after
+   unhiding, and unhides→hides around the transition) — never a hard pop. */
+.drawer-backdrop {
+  position: fixed; inset: 0; z-index: 35; background: rgba(0, 0, 0, .45);
+  opacity: 0;
+  transition: opacity var(--motion-slow) var(--ease-standard);
+}
+.drawer-backdrop[data-show] { opacity: 1; }
 
 @media (max-width: 1024px) {
   .shell { grid-template-columns: 1fr; }
@@ -2313,12 +2320,32 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   .sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
+    /* the desktop sticky column's height:100svh would win over bottom:0 here —
+       and svh goes stale the moment mobile browser chrome collapses, leaving a
+       bare strip under the drawer. dvh tracks the REAL viewport edge. */
+    height: 100vh;
+    height: 100dvh;
     width: min(20rem, 82vw);
     z-index: 40;
+    padding-top: calc(var(--space-6) + env(safe-area-inset-top));
+    padding-bottom: calc(var(--space-12) + env(safe-area-inset-bottom));
     transform: translateX(-100%);
-    transition: transform var(--motion-base) var(--ease-standard);
+    /* closing: quick, quiet exit */
+    transition: transform var(--motion-base) var(--ease-standard),
+                box-shadow var(--motion-base) var(--ease-standard);
+    overscroll-behavior: contain;      /* nav scroll never chain-scrolls the page */
   }
-  .sidebar[data-open] { transform: translateX(0); }
+  .sidebar[data-open] {
+    transform: translateX(0);
+    /* opening: the site's emphasized settle, a touch more time, and the panel
+       lifts over the scrim as a floating layer (same elevation family as the
+       reading dock) rather than a flat sheet */
+    transition: transform var(--motion-slow) var(--ease-emphasis),
+                box-shadow var(--motion-slow) var(--ease-standard);
+    box-shadow: 0 12px 28px -6px rgba(10, 14, 18, .35), 0 28px 64px -16px rgba(10, 14, 18, .30);
+  }
+  /* the page holds still while the drawer is up */
+  html.drawer-lock, html.drawer-lock body { overflow: hidden; }
   .shell-main { padding-top: var(--space-16); }
 
   /* No-JS fallback: the drawer can't open, so show the sidebar stacked instead */
@@ -2327,7 +2354,7 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
   .no-js .shell-main { padding-top: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sidebar { transition: none; }
+  .sidebar, .sidebar[data-open], .drawer-backdrop { transition: none; }
 }
 
 /* ============================================================================
