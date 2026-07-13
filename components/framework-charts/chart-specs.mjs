@@ -856,6 +856,13 @@ export const FRAMEWORK_CHART_SPECS = [
 
   {
     chartId: 'dl-regime-map', idx: 'L2', group: 'docs-landing', intendedPlacement: 'docs-landing',
+    claimStack: {
+      primaryClaim: 'The same portfolio behaves differently in different macro regimes',
+      visualProof: 'A growth × inflation quadrant — stagflation, reflation, deflation, goldilocks, each labelled with its own leadership — crossed by one representative path of capital moving disinflation boom → deflation scare → reflation → inflation shock → a live "Now" reading near the centre',
+      interactionRole: 'Hover or tap a waypoint to read that regime\'s weather and which assets led there',
+      readerAction: 'Trace the path quadrant to quadrant and end on the Now marker',
+      caution: 'Representative regime path, not measured macro history; waypoint positions are illustrative',
+    },
     status: 'needs-design-review', wiredPublic: false,
     title: 'Capital Has Weather', setupLine:'Same assets, different regime, different behaviour',
     claimLabel: 'REGIME MAP · CAPITAL WEATHER',
