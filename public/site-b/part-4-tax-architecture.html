@@ -157,7 +157,7 @@
         <div class="measure">
           <div class="doc-signal" data-glyph-text>Framework Documentation</div>
           <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
-          <p class="doc-kicker">Part 4 of 6 &middot; &approx; 12 min read</p>
+          <p class="doc-kicker">Part 4 of 6 &middot; &approx; 13 min read</p>
           <h1 class="doc-title">Tax Architecture and ROC Strategy</h1>
 
           <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
@@ -196,8 +196,8 @@
         <h2 class="section-title" id="edge-title">Wrapper engineering as a structural edge.</h2>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">Tax friction compounds over time. Over multi-decade horizons, the choice of account structure determines whether extreme appreciation becomes durable wealth or leaks a material share of terminal value to taxes, often on the order of 15 to 35 percent or more depending on income, the net investment income tax, state taxes, and the withdrawal profile. Wrapper engineering treats that choice as a design variable rather than a compliance afterthought: the systematic routing of capital to the <button type="button" class="gloss" data-gloss="tax-wrapper" aria-expanded="false">wrappers</button> that minimize lifetime friction and preserve <button type="button" class="gloss" data-gloss="right-tail-outcomes" aria-expanded="false">right-tail outcomes</button>.</p>
-        <p>Conventional guidance defaults to pre-tax contributions for the current-year deduction, treats Roth accounts as supplementary vehicles for younger investors, and uses taxable accounts as overflow once contribution limits are reached. That sequence optimizes for current-year tax savings rather than terminal wealth. Wrapper engineering starts from a different arithmetic: over multi-decade horizons, the differential compounding produced by tax treatment can rival, and in some cases exceed, the return contribution of asset selection itself. The framework treats wrapper placement as a dominant structural return multiplier and applies to it the same rigor it applies to asset selection and position sizing.</p>
+        <p class="prose-lead">Part 3 selected the convexity backbone. Part 4 addresses the next engineering question: once convexity is selected, how do you preserve it? Tax friction compounds over time. Over multi-decade horizons, the choice of account structure determines whether extreme appreciation becomes generational wealth or leaks a material share of terminal value to taxes, often 15 to 35 percent or more depending on income, the net investment income tax (NIIT), state taxes, and the withdrawal profile. Wrapper engineering treats that choice as a design variable rather than a compliance afterthought: the systematic routing of capital to the <button type="button" class="gloss" data-gloss="tax-wrapper" aria-expanded="false">wrappers</button> that minimize lifetime friction and preserve <button type="button" class="gloss" data-gloss="right-tail-outcomes" aria-expanded="false">right-tail outcomes</button>.</p>
+        <p>Conventional guidance defaults to pre-tax contributions for the current-year deduction, treats Roth accounts as supplementary vehicles for younger investors, and uses taxable accounts as overflow once contribution limits are reached. That sequence optimizes for current-year tax savings rather than terminal wealth. This is not traditional tax optimization, which means minimizing the current year&rsquo;s liability. Wrapper engineering starts from a different arithmetic: over multi-decade horizons, the differential compounding produced by tax treatment can rival, and in some cases exceed, the return contribution of asset selection itself. The framework treats wrapper placement as a dominant structural return multiplier and applies to it the same rigor it applies to asset selection and position sizing.</p>
         <p><strong>Jurisdiction scope.</strong> This part uses United States tax wrappers, the Roth IRA, the taxable brokerage account, and pre-tax retirement accounts, as the reference implementation. The underlying logic, routing convexity to the lowest-friction wrapper and preserving tax-advantaged capacity for the positions that benefit most, is portable to other jurisdictions by substituting local tax-advantaged structures.</p>
       </div>
 
@@ -213,7 +213,7 @@
         <p class="callout-label">Wrapper Engineering North Star</p>
         <ul>
           <li><strong>Maximize Roth capacity for frictionless, deployable convexity.</strong> Tax-free compounding over horizons of thirty to sixty years tends to dominate most other portfolio decisions for positions that may be rotated or rebalanced.</li>
-          <li><strong>Convert strategically, not blindly.</strong> Early Roth accumulation also reduces future pre-tax balances subject to required minimum distributions and to income-related Medicare surcharges. The point is not to fill Roth with never-sold positions, but to reserve it for exposures where tax-free trading provides a structural advantage.</li>
+          <li><strong>Convert strategically, not blindly.</strong> Early Roth accumulation also reduces future pre-tax balances subject to required minimum distributions (RMDs) and to income-related Medicare surcharges. The point is not to fill Roth with never-sold positions, but to reserve it for exposures where tax-free trading provides a structural advantage.</li>
         </ul>
       </aside>
     </section>
@@ -276,6 +276,7 @@
       </div>
       <div class="measure prose">
         <p class="prose-lead">Roth capacity is scarce. The annual Roth IRA contribution limit for 2026 is $7,500 per person, which bounds the tax-free space available each year. The framework therefore reserves Roth for its highest-value use: high-conviction positions that may be rotated, where tax-free compounding and friction-free trading generate the most value over time.</p>
+        <p>Compound interest has been called the eighth wonder of the world. Tax-free compound interest is the ninth. The framework&rsquo;s cornerstone allocation principle follows: prioritize Roth accounts for the highest-conviction convex positions. Consider the mathematics.</p>
         <p>The gap between what each wrapper lets you keep is minor on an ordinary gain and wide on a right-tail one &mdash; so where a position is held matters most exactly where convexity is largest. The comparison below is the canonical version; later parts reference it rather than restate it.</p>
       </div>
 
@@ -285,7 +286,8 @@
       <figure class="fc-mount" id="exhibit-p4-tax-wedge" data-fc-chart="p4-tax-wedge"></figure>
 
       <div class="measure prose">
-        <p>The pattern the exhibit makes visible is consistent. In a Roth, essentially all of a gain is retained, since qualified withdrawals are not taxed. In a taxable account, roughly 75 to 85 percent is retained after long-term capital gains and the net investment income tax, depending on income. In a pre-tax account, roughly 60 to 80 percent is retained after ordinary-income tax on withdrawal. The wedge between these widens as returns grow, so tax-free compounding matters most precisely where convexity is largest. These ranges are illustrative and depend on income, filing status, state taxes, and the rules in force at the time.</p>
+        <p>The pattern the exhibit makes visible is consistent. In a Roth, essentially all of a gain is retained, since qualified withdrawals are not taxed. In a taxable account, roughly 75 to 85 percent is retained after long-term capital gains and NIIT, depending on income. In a pre-tax account, roughly 60 to 80 percent is retained after ordinary-income tax on withdrawal. The wedge between these widens as returns grow, so tax-free compounding matters most precisely where convexity is largest. These ranges are illustrative and depend on income, filing status, state taxes, and the rules in force at the time.</p>
+        <p>Beyond the wedge, Roth carries structural optionality the other wrappers cannot match: no required minimum distributions for the original owner, and tax-free withdrawals in any income environment. That structure reduces timing risk (when will capital be needed?), tax-regime risk (what rates will apply decades hence?), and forced-distribution risk (compelled sales during market downturns).</p>
       </div>
 
       <aside class="callout callout-info" aria-label="Roth allocation discipline">
@@ -296,6 +298,18 @@
           <li><strong>Conviction with restraint.</strong> Friction-free trading enables rotation; it does not require it. Roth&rsquo;s advantage compounds through sustained conviction, not frequent turnover. Rotation discipline is governed by <button type="button" class="gloss" data-gloss="cis" aria-expanded="false">CIS</button> scoring, developed in Part 6.</li>
           <li><strong>Access at any income.</strong> Earners above the direct Roth IRA thresholds can reach Roth through a backdoor conversion under current law. Confirm eligibility and the pro-rata treatment with a qualified professional.</li>
         </ul>
+      </aside>
+
+      <aside class="callout callout-insight" aria-label="Case study">
+        <div class="ci-head">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M9 18h6"></path>
+            <path d="M10 21h4"></path>
+            <path d="M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.2 1 2V16h6v-.5c0-.8.5-1.5 1-2A6 6 0 0 0 12 3z"></path>
+          </svg>
+          <p class="callout-label">Case Study: Roth Prioritization (Illustrative)</p>
+        </div>
+        <p>A 35-year-old with $140,000 of income maxes the $7,500 Roth IRA every year into high-conviction Torque and rotates as theses evolve &mdash; tax-free, so every exit redeploys at full value. On a hypothetical high-growth return path, held here for illustration only, the Roth reaches roughly $4.2 million over 30 years with nothing owed on gains or withdrawals. The counterfactual &mdash; the same positions, the same path, in a taxable account &mdash; surrenders $400,000 to $600,000 or more to rotation-triggered capital gains along the way: 10 to 15 percent of terminal wealth, forfeited to placement alone. Bitcoin compounds separately in taxable per Part 3 and never consumes Roth capacity. Actual returns depend on position selection and market conditions.</p>
       </aside>
 
       <div class="measure prose">
@@ -392,7 +406,7 @@
         <h2 class="section-title" id="pretax-title">Pre-tax accounts: inferior, occasionally useful.</h2>
       </div>
       <div class="measure prose">
-        <p>Pre-tax accounts face structural disadvantages for long-duration convex strategies. Ordinary-income taxation on withdrawal, compared with preferential long-term capital gains treatment, imposes a differential that compounds over multi-decade horizons. Required minimum distributions begin at age 73, rising to 75 in 2033 under current law, and force taxable withdrawals regardless of need. Heirs generally inherit the full income-tax liability, without the basis step-up a taxable account receives. And withdrawals before age 59 and a half generally incur a penalty in addition to income tax.</p>
+        <p>Pre-tax accounts face structural disadvantages for long-duration convex strategies. Ordinary-income taxation on withdrawal, compared with preferential long-term capital gains treatment, imposes a differential that compounds over multi-decade horizons. RMDs begin at age 73, rising to 75 in 2033 under current law, and force taxable withdrawals regardless of need. Heirs generally inherit the full income-tax liability, without the basis step-up a taxable account receives. And withdrawals before age 59 and a half generally incur a penalty in addition to income tax.</p>
       </div>
 
       <aside class="callout callout-info" aria-label="Gross is not net">
@@ -433,7 +447,7 @@
       <div class="measure prose">
         <p>Tax rules can change. Contribution limits, income thresholds, distribution requirements, step-up treatment, and the tax-free status of Roth withdrawals are all subject to legislative modification, as are pre-tax deduction rules, distribution ages, and rates. The framework does not assume any of these are permanent. It prioritizes multi-wrapper diversification and tactical flexibility to limit worst-case outcomes across plausible policy scenarios.</p>
         <p>Roth accounts have paid tax at a known rate; an adverse change would represent incremental taxation on already-taxed capital. Pre-tax accounts have deferred all taxation, so an adverse change accelerates or increases a liability that was always present. The framework favors Roth not because its rules are guaranteed, but because Roth structures exhibit a more favorable risk asymmetry under legislative uncertainty. The capacity to convert pre-tax balances to Roth in low-income years, together with multi-wrapper allocation, preserves the optionality to adapt as rules evolve.</p>
-        <p>Wrapper engineering compounds quietly and permanently. Asset selection drives returns; wrapper selection determines how much of those returns are kept. That distinction, between generating gains and preserving them, separates ordinary long-term outcomes from durable wealth. Wrapper decisions define architecture, not allocation; position construction, sizing, and rotation discipline are developed in Parts 5 and 6.</p>
+        <p>Wrapper engineering compounds quietly and permanently. Asset selection drives returns; wrapper selection determines how much of those returns are kept. That distinction, between generating gains and preserving them, separates mediocre long-term outcomes from generational wealth. Wrapper decisions define architecture, not allocation; position construction, sizing, and rotation discipline are developed in Parts 5 and 6.</p>
       </div>
 
       <aside class="callout callout-info" aria-label="Scope and disclaimer">

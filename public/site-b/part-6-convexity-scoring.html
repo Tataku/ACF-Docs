@@ -158,7 +158,7 @@
         <div class="measure">
           <div class="doc-signal" data-glyph-text>Framework Documentation</div>
           <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
-          <p class="doc-kicker">Part 6 of 6 &middot; &approx; 14 min read</p>
+          <p class="doc-kicker">Part 6 of 6 &middot; &approx; 15 min read</p>
           <h1 class="doc-title">Convexity and Framework Integrity Scoring</h1>
 
           <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
@@ -245,7 +245,7 @@
       </div>
 
       <div class="measure prose">
-        <p>The weights are engine parameters, read from the framework&rsquo;s source of truth rather than asserted per session. A thesis profile may shift them, but only within a bound of &plusmn;0.10 per component, and every shift is floored, ceilinged, and renormalized so the four weights always sum to 1.0. The four-component structure itself is Doctrine.</p>
+        <p>Weights are engine parameters, read from the framework&rsquo;s source of truth rather than asserted per session. A thesis profile may shift them, but only within a bound of &plusmn;0.10 per component, and every shift is floored, ceilinged, and renormalized so the four weights always sum to 1.0. The four-component structure itself is Doctrine.</p>
       </div>
 
       <!-- Chart island: p6-cis-composition "CIS Measures the Position, Not the Portfolio" — the four-component weighting.
@@ -283,7 +283,7 @@
         <h3 class="sub-title">Continuous scoring.</h3>
       </div>
       <div class="measure prose">
-        <p>All subscores are floats, not bucketed tiers. A position scores 78.3, not 75 or 80. Continuity preserves information: a score that can only land on round tiers hides small week-over-week movement, and small movement is precisely what longitudinal tracking exists to see.</p>
+        <p>All subscores are floats, not bucketed tiers. A position scores 78.3, not 75 or 80. Continuity preserves information: a score that can only land on round tiers hides small week-over-week movement, and small movement is what longitudinal tracking exists to see.</p>
       </div>
 
       <div class="measure">
@@ -292,7 +292,7 @@
       </div>
       <div class="measure prose">
         <p>Score updates are confidence-weighted, and each update is clamped to a bounded move: low confidence permits &plusmn;3 points, medium &plusmn;5, high &plusmn;8 per update, and evidence derived through a proxy rather than observed directly permits &plusmn;6. Two situations warrant wider bounds, because a baseline is being established rather than adjusted &mdash; initial scoring permits &plusmn;20, and a material thesis change permits &plusmn;15. Structural rescores &mdash; a change in the scoring model&rsquo;s version &mdash; and large corrections of model divergence may legally bypass the clamp altogether, so that a genuine re-basing is never suppressed by machinery built to resist mood.</p>
-        <p>The reason for the clamp is behavioral as much as mathematical. Unclamped scores oscillate with mood and headline flow, and a single enthusiastic week could otherwise rewrite months of accumulated conviction in one sitting. The clamp forces large re-ratings to be earned across successive updates, each requiring fresh evidence.</p>
+        <p>Why clamp at all? The reason is behavioral as much as mathematical. Unclamped scores oscillate with mood and headline flow, and a single enthusiastic week could otherwise rewrite months of accumulated conviction in one sitting. The clamp forces large re-ratings to be earned across successive updates, each requiring fresh evidence.</p>
         <p>Confidence is not asserted by hand: the engine derives it from the quality of the evidence source behind each component and aggregates the result, with structural caps by venue and size &mdash; over-the-counter listings cap at low confidence, microcaps at medium. The derivation keeps CIS decision-support rather than autonomous judgment: the score declares how sure the evidence permits it to be, and the practitioner decides what to do about it.</p>
       </div>
 
@@ -311,7 +311,7 @@
         <h3 class="sub-title">Reading the number.</h3>
       </div>
       <div class="measure prose">
-        <p>The score resolves into four bands, labeled numerically by the engine and named here for reading. Seventy and above is <strong>Strong</strong> &mdash; the band carrying the accent; 60&ndash;69 is <strong>Moderate</strong>, rendered as monitor-gray in the live register; 50&ndash;59 is <strong>Caution</strong>; below 50 is <strong>Weak</strong>.</p>
+        <p>Scores resolve into four bands, labeled numerically by the engine and named here for reading. Seventy and above is <strong>Strong</strong> &mdash; the band carrying the accent; 60&ndash;69 is <strong>Moderate</strong>, rendered as monitor-gray in the live register; 50&ndash;59 is <strong>Caution</strong>; below 50 is <strong>Weak</strong>.</p>
       </div>
 
       <div class="measure">
@@ -319,7 +319,7 @@
       </div>
 
       <div class="measure prose">
-        <p>This register is shared: in the live engine, CIS and FIS read these same four bands. On FIS, 70 is the action line; on CIS, it is the Strong band&rsquo;s floor &mdash; a band boundary, not an action trigger. That settles the position half of the kernel. The other half scores what the positions have been assembled into.</p>
+        <p>This register is shared: in the live engine, CIS and FIS read these same four bands. On FIS, 70 is the action line; on CIS, it is the Strong band&rsquo;s floor &mdash; a band boundary, not an action trigger. That is the position half of the kernel. The other half scores the assembly.</p>
       </div>
     </section>
 
@@ -340,9 +340,9 @@
         <h3 class="sub-title">Subtractive scoring: every lost point has an owner.</h3>
       </div>
       <div class="measure prose">
-        <p>FIS does not grade the portfolio up from zero on vague notions of quality; it starts the assembled portfolio at 100 and deducts a named penalty for each violation it finds. The direction matters. A score built by addition rewards, and rewards invite argument about what deserves credit. A score built by subtraction indicts: every point below 100 is attributable to a specific, named departure from a specific rule, and fixing the violation recovers the points. The score is therefore not a verdict but a repair list &mdash; FIS never restates the rules it enforces, it measures compliance with rules defined in the referenced Parts.</p>
+        <p>FIS does not grade the portfolio up from zero on vague notions of quality; it starts the assembled portfolio at 100 and deducts a named penalty for each violation it finds. The direction matters. A score built by addition invites argument about what deserves credit. A score built by subtraction indicts: every point below 100 is attributable to a specific, named departure from a specific rule. Fix the penalty &rarr; recover the points. The score is therefore not a verdict but a repair list &mdash; FIS never restates the rules it enforces, it measures compliance with rules defined in the referenced Parts.</p>
         <p>Value-weighting is scoped precisely: governance and dead-capital penalties scale with position size, with a 0.2 percent floor and a 12 percent cap &mdash; larger positions generate proportionally larger penalties, but the cap prevents any single position from dominating the score &mdash; while allocation, concentration, and complexity contributions are flat.</p>
-        <p>The penalties land in five named buckets. The mechanism is easiest to see run once: the exhibit below walks an example portfolio down from 100 through five deductions, one per bucket, to the score it earns &mdash; 83, in the Strong band.</p>
+        <p>Penalties land in five named buckets. The mechanism is easiest to see run once: the exhibit below walks an example portfolio down from 100 through five deductions, one per bucket, to the score it earns &mdash; 83, in the Strong band.</p>
       </div>
 
       <!-- Chart island: p6-fis-waterfall "FIS Starts at 100" — the subtractive attribution walk.
@@ -351,7 +351,7 @@
       <figure class="fc-mount" id="exhibit-p6-fis-waterfall" data-fc-chart="p6-fis-waterfall"></figure>
 
       <div class="measure prose">
-        <p>The deductions in the exhibit are illustrative; the buckets, their caps, and what each one detects are canonical &mdash; this is the live engine&rsquo;s register.</p>
+        <p>Deductions in the exhibit are illustrative; the buckets, their caps, and what each one detects are canonical &mdash; this is the live engine&rsquo;s register.</p>
       </div>
 
       <div class="compare compare-wrap">
@@ -538,7 +538,7 @@
         <h2 class="section-title" id="failure-title">How implementations quietly degrade.</h2>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">Implementation quality rarely fails loudly. It degrades through patterns that produce no obvious signal &mdash; a score nobody re-ran, an allocation the market moved without a single trade, a tax inefficiency too small to notice in any given month. The exhibit below shows what those patterns do to a healthy portfolio in the year after reviews stop.</p>
+        <p class="prose-lead">Implementation quality rarely fails loudly. It degrades through patterns that produce no obvious signal &mdash; a score nobody re-ran, an allocation the market moved without a single trade, a tax inefficiency too small to notice in any given month. Watch what those patterns do to a healthy portfolio in the year after reviews stop.</p>
       </div>
 
       <!-- Chart island: p6-decay-drift "Failure Rarely Arrives All at Once" — longitudinal decay after reviews stop.
@@ -603,7 +603,7 @@
       <!-- Chapter-end transition -->
       <aside class="callout callout-transition" aria-label="End of part">
         <p class="callout-label">End of Part 6</p>
-        <p>Part 6 operationalized the framework: CIS quantifies each position&rsquo;s quality on a portfolio-context-free 0&ndash;100 scale, FIS validates the assembly by deducting named penalties from 100, and the weekly loop runs both scores through the governance gates &mdash; acting on triggers, holding when nothing fires, and logging either way. With measurement, enforcement, and cadence in place, the doctrine of Parts 1 through 5 becomes an operating system. The Adaptive Convexity Framework is complete.</p>
+        <p>Part 6 operationalized the framework. What CIS does: quantifies position quality, 0&ndash;100, portfolio-context-free. What FIS does: validates the assembly by deducting named penalties from 100. What to do weekly: run CIS, then FIS, then the gates &mdash; act on triggers or hold, and log either way. With measurement, enforcement, and cadence in place, the doctrine of Parts 1 through 5 becomes an operating system. The Adaptive Convexity Framework is complete.</p>
       </aside>
     </section>
 
