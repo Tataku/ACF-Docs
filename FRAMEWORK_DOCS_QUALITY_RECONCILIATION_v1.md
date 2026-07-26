@@ -189,3 +189,33 @@ The initial pass shipped two material doctrine errors of its own; both corrected
 
 CI note: this repo has no GitHub Actions workflows, so the validation record in §9 is
 local-only by design (Vercel deploy is the only external check).
+
+---
+
+## 12. Review round 2 (2026-07-26) — the matrix cluster
+
+Round 1 corrected the prose but left the CIS × FIS matrix itself encoding the old binary
+interpretation — in the companion table ("Compliant (70+)" / "Below the line" / "Quality
+issue → Upgrade positions") and, more extensively, in the `p6-cis-fis-matrix` chart spec
+("70 and above is the compliant band on both scores", "weak positions", "upgrade the
+holdings", "Tidy mediocrity is still mediocrity"), which the rebuilt bundle renders
+interactively. Corrected to band semantics while keeping the 70 split:
+
+- **Axes:** CIS `Strong (70+)` / `Below Strong` (a band boundary); FIS `Action line met
+  (70+)` / `Remediation required (<70)` (the action threshold).
+- **Sub-70-CIS × healthy-FIS cell:** diagnosis "Sub-core conviction"; action "honor the
+  posture-specific band; strengthen evidence, resize, or replace only as warranted."
+- **Both-below-70 cell:** "repair FIS first (compounds faster), then reassess and size
+  each position by its CIS band."
+- "Not allocation-worthy" / exit / replace language is reserved for CIS below 50 or
+  separately triggered governance, in the table key, the explainer, and the hover copy.
+- 13 spec strings rewritten (caution, source label, explainer, aria summary, y-axis,
+  three cells, four hover targets, visual proof); bundle rebuilt; validators green.
+- Nearby remnants: the band-strip accessibility label no longer calls 70+ "compliant";
+  the FIS interpretation-table key now says "on FIS, 70 is the action line"; Part 1's
+  "Low CIS at any momentum reading triggers exit" is now "CIS below 50 removes allocation
+  eligibility at any momentum reading; otherwise momentum shapes sizing and review
+  urgency, while exits remain governed by posture rules, tripwires, and thesis evidence."
+- Rendered verification: the hydrated exhibit's cells and hovers carry the new language;
+  a full-surface sweep finds zero instances of the binary vocabulary outside the engine's
+  own "score-band compliance" Allocation term (which is live vocabulary and kept).
