@@ -219,3 +219,13 @@ interactively. Corrected to band semantics while keeping the 70 split:
 - Rendered verification: the hydrated exhibit's cells and hovers carry the new language;
   a full-surface sweep finds zero instances of the binary vocabulary outside the engine's
   own "score-band compliance" Allocation term (which is live vocabulary and kept).
+
+## 13. Review round 3 (2026-07-26) — one sentence
+
+The interaction section's intro still carried the binary framing round 2 removed from the
+matrix below it ("a perfectly constructed portfolio of 65 CIS positions remains
+low-quality. Both scores must be healthy…"). Replaced with the owner's wording: a 65-CIS
+portfolio "may be soundly assembled but remains sub-core in conviction. FIS cannot
+increase position quality, and CIS cannot repair construction. Each score identifies a
+different dimension, and each requires its own response." Page prose only — the chart
+bundle and specs were verified to contain no instance, so no rebuild was required.
