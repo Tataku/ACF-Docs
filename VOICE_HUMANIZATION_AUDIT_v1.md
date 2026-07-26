@@ -117,4 +117,30 @@ first:
    conditions, not rebalanced targets." appended to the reserve-sizing paragraph.
 
 Recommendation: 1 + 2 (highest voice-and-continuity yield), 3 as a tightening, 4
-optional. Awaiting selection before any P3 edit.
+optional.
+
+**Decision (owner, 2026-07-26): options 1 + 2 + 4 approved; option 3 skipped as
+duplicative (the pacing-not-exits point is already established twice on the page).
+Applied:**
+
+- **1 — the "wins" pair** replaced the hedged 33-word explanation outright (the owner's
+  two sentences now land the survivability section and set up the
+  `p3-exposure-not-control` exhibit directly).
+- **2 — the regime-shift paragraph** restored at the top of the risk register, built to
+  the owner's three-beat spec: what changed (spot-ETF approval January 2024, regulated
+  wrappers, the policy question moving from *is it legitimate* to *how should it be
+  held* — each grounded in the pre-calibration original), what the cycle demonstrated
+  for the framework (the implementation rails — regulated wrappers, institutional
+  custody, collateralized access — operating at scale for the first time), and what
+  remains unproven (volatility not eliminated, trajectory uncertain, one cycle is
+  access validation, not shrinkage of the risk register). The End-of-Part transition's
+  "regime-shift validation from the 2024–2025 cycle" citation now has its referent —
+  the dangling promise is closed.
+- **4 — the conditions caution** appended to the reserve-sizing passage verbatim.
+
+**Post-edit verification:** doctrine-guard and stale-claim sweeps green (review-round
+strings byte-identical; no six-band ladder, no 90/80/70 FIS bands, no retired posture
+buckets reintroduced); transition referent resolved; P3 reading time re-synced (13
+min); navigation audit green. P3 delta: +2 owner-verbatim lines, +1 calibrated
+paragraph, net +160 words against an 8,200-word original — the compression decision
+stands untouched.
