@@ -62,7 +62,7 @@ Abbreviations: **F** fixed in this PR · **K** kept deliberately (reason given) 
 | G5 | reading.js | Glossary auto-tagger eligibility included `.doc-header` and headings → P6's H1 rendered "Convexity" as an accent glossary button (screenshot-confirmed) | **F** doc-header + h1–h4 excluded; pattern-hunted: P3/P4 titles were one hand-tag removal away from the same defect — fix is structural, not per-page |
 | G6 | reading-core.js | Fallback maps frozen pre-migration: `BUILT_PARTS={1,2,3}` (Parts 4–6 "appears later" links rendered dead pending spans in the no-registry path), `BUILT_CHARTS` covered 8 of 45 charts | **F** all six parts true; complete dual-keyed (idx + chartId) 45-chart map generated from the registry |
 | P1-1 | order-of-ops step 3 | "sized in the 15 to 20 percent range [Roth] … 8 to 10 percent [taxable]" contradicts canonical sizing (15% default / 18% absolute cap; bands by CIS × posture; caps bind at the household aggregate — CIS v2.1 §10.3, `part5AllocationBands.js:48-53,121`) | **F** rewritten: bands by conviction+posture, caps at the aggregate, wrapper decides what a size is worth |
-| P1-2 | order-of-ops step 4 | "Scores below 50 trigger trim protocols" understates doctrine (below 70 = trim/exit; below 50 = not allocation-worthy) | **F** aligned; 80+ tied to the documented override path |
+| P1-2 | order-of-ops step 4 | "Scores below 50 trigger trim protocols" misstated the band structure | **F** (corrected twice — the first rewrite introduced a "below 70 trim-or-exit" claim that itself contradicted the bands; see §11.1) now: the score selects the posture-specific sizing band (70+/60–69/50–59/<50), material change triggers resizing review, exits governed by posture rules + tripwires + thesis evidence |
 | P1-3 | order-of-ops step 5 | "broken momentum" parenthetical mixed live gates with doctrine dimensions | **F** aligned to the three doctrine dimensions |
 | P1-4 | abstract | CIS four dimensions paraphrased ("convexity potential, fragility exposure…") vs the canonical component names | **F** canonical names in both abstract and step 4 |
 | P1-5 | abstract | "carry vectors (long carry, short carry, barbell)" promised, never defined in any part — the glossary's own `harmonizeBeforeLocking` flag, unresolved since v1.0.0 | **F** glossary entry + hand-tag at first use + auto-link at P6's "carry direction" (see §6) |
@@ -73,7 +73,7 @@ Abbreviations: **F** fixed in this PR · **K** kept deliberately (reason given) 
 | P4-5 | wrappers | Planned routing exhibit [P4-02] never shipped | **K** deliberate: the proc-steps stepper already renders the cascade; a gate chart would restate adjacent structure (legibility standard §15). Documented, not silently dropped |
 | P4-6 | wrappers | Planned Part 3 borrow-lifecycle cross-reference missing | **F** part-ref to `#exhibit-p3-cold-storage-to-borrow` |
 | P4-7 | taxable | Ballast instrument anonymous in P4, named (STRC) with caveats in P5 | **F** named once in P4 with the same as-of + verification caveats |
-| P5-1 | torque/hype/mgmt | 15/18/CIS-80 override rule stated 4× | **F** canonical at the sizing-table footnote; other three compressed to references |
+| P5-1 | torque/hype/mgmt | 15/18 override rule stated 4× | **F** canonical at the sizing-table footnote; other three compressed to references. §11.2: the CIS-80 condition was removed from the book entirely — it exists only in the ETF-route validator and is not general doctrine |
 | P5-2 | torque | "The dashboard operationalizes the routing" — **refuted**: `wrapperFitScoring.js` has zero production consumers; module header says informational/ranking-only, not displayed | **F** reframed as an informational ranking lane |
 | P5-3 | torque/forces | "4th Turning" ×2 vs "Fourth Turning" (P1/P2) | **F** |
 | P5-4 | four sections | "dollars"-prose register ×5 | **F** `$` register |
@@ -103,13 +103,13 @@ Abbreviations: **F** fixed in this PR · **K** kept deliberately (reason given) 
 
 Verified-correct claims retained (evidence): FIS five buckets 25/15/15/15/10, caps sum 80, floor 20 (`frameworkDocService.js:131-137`, `fisCalculator.js:794-795`); wrapper targets .45/.35/.20 (`frameworkDocService.js:161-165`); governance precedence 6/6/4/4 (`fisCalculator.js:346-372`); dead capital 5/2 at >90d; concentration 8/6/4 beyond 15/40/60 with Bitcoin archetype-excluded and override billed; complexity 1 / 0.5-beyond-3, hard cap 10; value-weighting scope + 0.2%/12% clamp; CIS weights 40/25/25/10 ±0.10 renormalized; clamps ±3/5/8, derived ±6, init ±20, thesis ±15, two legal bypasses; derived confidence with OTC-low / microcap-medium caps; four archetypes, six lanes, no floors, no cash archetype; four-band register at 70 with the exact band colors; weekly sequence + trigger precedence + 52-entry (~1yr) decision log; frequency limits 7/3/5/unlimited; >5%-single-day interrupt; T-5→3% live, T-21→T-6 blackout doctrine-only; posture drift warn 10 / fail 20 as diagnostics-not-FIS; correlation 0.7 informational; +50%-on-stale recalc flag.
 
-Corrections applied to the docs: P6 weekly momentum gates (P6-6), Framework Fit scoping (P6-8), wrapper-fit live status (P5-2), P1 sizing/threshold claims (P1-1/2).
+Corrections applied to the docs: P6 weekly momentum gates (P6-6), Framework Fit scoping (P6-8), wrapper-fit live status (P5-2), P1 sizing/threshold claims (P1-1/2), and — in review round 1 (§11) — the CIS action-language and CIS-80 override corrections.
 
 ## 6. Glossary reconciliation
 
 - **SSOT:** `acf-glossary.json` v1.0.0 → **v1.1.0**, 26 → **28 terms**. No orphans (every term used or auto-taggable on ≥1 page); every `data-gloss` in HTML resolves; registry `unresolvedGlossaryCharts: []`.
 - **Added:** `fis` (wave 1, chart → `p6-fis-waterfall`), `carry-vector` (wave 2, appears-later → Part 6 carry direction). The meta's `harmonizeBeforeLocking: ["carry vectors"]` debt is resolved and recorded in `harmonizeNote`.
-- **Corrected definitions:** `posture` (was "the portfolio's stance toward risk" — off-doctrine; now the per-position behavioral classification; stale "Posture pairs" label fixed), `cis` (canonical component names), `convexity` source (defined in Part 1, scored in Part 6).
+- **Corrected definitions:** `posture` (was "the portfolio's stance toward risk" — off-doctrine; now the per-position behavioral classification of every **non-Bitcoin** position, Bitcoin explicitly outside the three per Part 5 and the product contract — §11.3), `cis` (canonical component names), `convexity` source (defined in Part 1, scored in Part 6). `carry-vector`'s definition was re-scoped in §11.4 to what its sources establish (closed enum + CIS §5.2 regime-benefit meaning).
 - **Chart cross-graph re-pointed** now that Parts 2–6 have exhibits (13 entries): cis→`p6-cis-composition`, posture/torque→`p5-operating-system`, ballast→`p5-ballast-rotation`, hype→`p5-posture-sizing`, momentum-filter→`p5-momentum-gate`, tax-wrapper + right-tail-outcomes→`p4-tax-wedge`, return-of-capital→`p4-roc-yield`, buy-borrow-die→`p3-cold-storage-to-borrow`, dca→`p3-accumulate-dont-trade` (was P1 "Survive the Path"), power-law-corridor→`p3-power-law-holds`, policy-reflexivity→`p2-markets-feed-back`. P1-era refs that were already the best exhibit kept (fragility→01, sequence→05, etc.).
 - **Placement rule (documented + mechanically enforced):** hand-tags control placement at first meaningful use; the runtime auto-tagger wraps at most one occurrence per page for untagged terms; titles/headings are now ineligible (G5). No separate glossary page — the inline system stays.
 
@@ -126,7 +126,7 @@ Corrections applied to the docs: P6 weekly momentum gates (P6-6), Framework Fit 
 2. **Defined-but-unwired FIS inputs:** `momentumBreakdown` (4 pts) and `hasGovernanceOverride` are adapter-defaulted to `false` (`fisCanonical.js:106-107`) — the penalties can't fire from live data. Docs describe the kernel's register (correct); wiring is an app decision.
 3. **Dead diagnostic:** `failureDiagnostics.detectWrapperInefficiency` filters on the retired `taxArchitecture` category and can never emit (`failureDiagnostics.js:194-196`). Docs already describe wrapper leakage correctly (bills through Allocation).
 4. **15% minimum Ballast reserve + single-Ballast 10%:** spec/doctrine values with no engine enforcement (reserve is conviction-density-driven, `convictionDensityEngine.js:390-437`). The docs state them as doctrine, not as live behavior — decide whether the engine should enforce them or the spec should note they are practitioner-executed.
-5. **18% override path** is live only in the ETF portfolio-level validator (`part5AllocationBands.js:303-310,346`); the general validator flags >15% CRITICAL with no override lane. Docs now phrase the gate without overclaiming; app-side unification is an owner call.
+5. **18% override path** is live only in the ETF portfolio-level validator (`part5AllocationBands.js:303-310,346`); the general validator flags >15% CRITICAL with no override lane. Per review round 1 the book now states only the spec rule (15% default · documented override · 18% absolute) with no CIS-80 condition anywhere; whether to adopt CIS-80 as universal governance and wire it beyond the ETF route is an owner call.
 6. **App-side hype color registers** still diverge from the docs' declared pink (pre-existing note from the July audit; unchanged).
 
 ## 9. Verification record
@@ -154,3 +154,38 @@ Corrections applied to the docs: P6 weekly momentum gates (P6-6), Framework Fit 
 - `components/framework-charts/chart-specs.mjs` — `p6-weekly-loop` copy (§7)
 - `public/site-b/site-b-charts.js`, `public/site-b/navigation-registry.json` — rebuilt artifacts
 - `chart-specs/PARTS_5-6_CHART_AUDIT_v1.md` — addendum correcting its stale "6 of 9" signal count
+
+---
+
+## 11. Review round 1 (2026-07-26, owner review of PR #150) — doctrine corrections
+
+The initial pass shipped two material doctrine errors of its own; both corrected in this round.
+
+1. **"Below 70 means trim or exit" was wrong — including in my own P1 rewrite.** The canonical
+   structure keeps 50–69 allocation-worthy (Torque 60–69 → 4–8%, 50–59 → 2–4%; Ballast likewise),
+   the CIS spec separates scoring from downstream governance, and the live engine acts on a
+   10-point CIS change — not on crossing 70 (absolute triggers: tripwires, earnings proximity,
+   FIS < 70). The initial pass replaced P1's stale "below 50 trigger trim" with "below 70
+   trigger trim-or-exit review", generalizing Part 6's pre-existing "below 70 means trim or
+   exit" drift instead of catching it. Corrected across P1 step 4, P6 §interaction (the
+   feeds-decisions paragraph and the Demotion signal), and the P6 shared-register sentences
+   ("70 is the compliance line on both scores" → on FIS the action line, on CIS the Strong
+   band's floor — a band boundary, not an action trigger). Canonical language now: CIS selects
+   the posture-specific sizing band; a material score change triggers resizing review; exits
+   are governed by posture rules, tripwires, and thesis evidence rather than the score band alone.
+2. **The CIS-80 condition on the 18% override was overgeneralized.** The general spec states
+   only 15% default · documented override · 18% absolute; CIS-80 exists in code solely inside
+   the ETF-route validator. Removed from the book everywhere (P5 canonical footnote, P1 step 4,
+   and the two `p5-posture-sizing` hover targets), leaving the spec rule only, until a universal
+   governance rule is formally adopted (§8.5).
+3. **`posture` glossary:** scoped to every **non-Bitcoin** position (Part 5 places Bitcoin
+   outside all three; the product contract carries Bitcoin as a separate posture value).
+4. **`carry-vector` glossary:** the economic gloss ("earns steadily / pays a running cost") was
+   not substantiated by the cited registry, which proves only the closed enum. Re-worded to what
+   the sources establish — the closed enum plus CIS Spec v2.1 §5.2's carry-direction meaning
+   (benefits from or suffers under the current rate/inflation regime) — and re-sourced
+   accordingly (Part 1 abstract, after Park's carry framework · CIS §5.2 · structure registry).
+5. Chart bundle rebuilt; `validate:charts` and chart-core tests green after the spec-hover edits.
+
+CI note: this repo has no GitHub Actions workflows, so the validation record in §9 is
+local-only by design (Vercel deploy is the only external check).

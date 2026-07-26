@@ -311,7 +311,7 @@
         <h3 class="sub-title">Reading the number.</h3>
       </div>
       <div class="measure prose">
-        <p>The score resolves into four bands, labeled numerically by the engine and named here for reading. Seventy and above is <strong>Strong</strong> &mdash; the compliant band, carrying the accent; 60&ndash;69 is <strong>Moderate</strong>, rendered as monitor-gray in the live register; 50&ndash;59 is <strong>Caution</strong>; below 50 is <strong>Weak</strong>.</p>
+        <p>The score resolves into four bands, labeled numerically by the engine and named here for reading. Seventy and above is <strong>Strong</strong> &mdash; the band carrying the accent; 60&ndash;69 is <strong>Moderate</strong>, rendered as monitor-gray in the live register; 50&ndash;59 is <strong>Caution</strong>; below 50 is <strong>Weak</strong>.</p>
       </div>
 
       <div class="measure">
@@ -319,7 +319,7 @@
       </div>
 
       <div class="measure prose">
-        <p>This register is shared: in the live engine, CIS and FIS read these same four bands, and 70 is the compliance line on both scores. That settles the position half of the kernel. The other half scores what the positions have been assembled into.</p>
+        <p>This register is shared: in the live engine, CIS and FIS read these same four bands. On FIS, 70 is the action line; on CIS, it is the Strong band&rsquo;s floor &mdash; a band boundary, not an action trigger. That settles the position half of the kernel. The other half scores what the positions have been assembled into.</p>
       </div>
     </section>
 
@@ -414,7 +414,7 @@
         <h2 class="section-title" id="interaction-title">Neither score compensates for the other.</h2>
       </div>
       <div class="measure prose">
-        <p>CIS and FIS are intentionally independent. A 95 CIS position in the wrong wrapper still generates FIS penalties; a perfectly constructed portfolio of 65 CIS positions remains low-quality. Both scores must be healthy, and because each failure has a distinct cause, each has a distinct repair. The dividing line on both axes is the shared band line at 70 &mdash; a score at 70 or above is compliant, below it is not. Crossing the two scores at that line yields four states, and the framework prescribes a specific response &mdash; and a specific repair order &mdash; for each.</p>
+        <p>CIS and FIS are intentionally independent. A 95 CIS position in the wrong wrapper still generates FIS penalties; a perfectly constructed portfolio of 65 CIS positions remains low-quality. Both scores must be healthy, and because each failure has a distinct cause, each has a distinct repair. The dividing line on both axes is the shared band line at 70 &mdash; the Strong band&rsquo;s floor on each score, and on FIS also the action threshold. Crossing the two scores at that line yields four states, and the framework prescribes a specific response &mdash; and a specific repair order &mdash; for each.</p>
       </div>
 
       <!-- Chart island: p6-cis-fis-matrix "Good Assets Can Still Form a Bad Portfolio" — the two-score diagnosis quadrant.
@@ -448,13 +448,13 @@
         <h3 class="sub-title">How CIS feeds decisions.</h3>
       </div>
       <div class="measure prose">
-        <p>CIS determines position sizing within the bands established by Part 5. It does not determine those bands &mdash; Part 5 governance does. Part 5&rsquo;s <button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button>, Ballast, and Hype sizing tables carry the full CIS-to-allocation mappings by posture. The relationship: higher CIS earns a larger allocation within posture limits, and CIS below 70 means trim or exit depending on posture. Three signals govern the response to score movement.</p>
+        <p>CIS determines position sizing within the bands established by Part 5. It does not determine those bands &mdash; Part 5 governance does. Part 5&rsquo;s <button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button>, Ballast, and Hype sizing tables carry the full CIS-to-allocation mappings by posture. The relationship: higher CIS earns a larger allocation within posture limits &mdash; 70 or above core sizing, 60 to 69 constrained, 50 to 59 starter, below 50 none. Exits are governed by posture rules, tripwires, and thesis evidence, not by the score band alone. Three signals govern the response to score movement.</p>
       </div>
 
       <div class="measure">
         <ol class="architecture-list" data-stepper>
           <li><p class="step-title">Promotion: CIS rises 10 points</p><p class="step-body">The 10-point drift trigger is the engine&rsquo;s: it flags the position for resizing toward its new target. The pacing is the practitioner&rsquo;s: scale in over 2 to 4 weeks rather than at once &mdash; the delta clamp made the re-rating gradual, and the sizing response stays gradual to match.</p></li>
-          <li><p class="step-title">Demotion: CIS falls 10 points</p><p class="step-body">The same trigger flags a downsize toward the reduced target, on the same practitioner pacing. A CIS below 70 triggers exit evaluation regardless of posture.</p></li>
+          <li><p class="step-title">Demotion: CIS falls 10 points</p><p class="step-body">The same trigger flags a downsize toward the reduced target, on the same practitioner pacing. A falling score narrows the band; whether the position exits is decided by posture governance, tripwires, and thesis evidence, not by the score alone.</p></li>
           <li><p class="step-title">Posture reclassification: never by CIS alone</p><p class="step-body">A CIS change does not change posture. Torque to Ballast requires thesis maturation; Hype to Torque requires structural reality confirmation. Part 5 governs posture transitions.</p></li>
         </ol>
       </div>
