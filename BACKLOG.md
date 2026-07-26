@@ -159,3 +159,68 @@ A **scoped implementation plan** (not code on first pass) that identifies:
   rework; gated by the prerequisite above.
 - **Content coupling** — chart placement depends on the rewritten Parts 4–6 and
   completed citations; building against draft content invites churn.
+
+---
+
+## 2. Framework in Math (companion derivation surface)
+
+**Status:** `captured (2026-07-26)` — food-for-thought from the owner during the Parts 1–6
+quality reconciliation (PR #150). Not authorized to build; this entry scopes it.
+**Added:** 2026-07-26
+**Type:** Reading-experience feature (docs), third teaching register alongside prose and charts.
+
+### Context
+
+The book currently teaches in three registers: calibrated prose (Parts 1–6), teaching
+exhibits (45 chart islands plus the Part 1 visual essay at `/part-1-pictures`), and the
+inline glossary. The mathematics underneath the framework — the CIS weighted sum with
+delta clamps and confidence weighting, FIS subtraction with value-weighted severity, the
+band arithmetic, the tax-wedge and wrapper-compounding arithmetic (1.10^t vs 1.075^t),
+the power-law regression form Price = A × Days^B, and the sizing-band structure — exists
+only embedded in prose, specs, and chart methodology notes. A "Framework in Math"
+companion (the analogue of "Part 1 in Pictures" for equations) would present each
+canonical formula with a worked derivation, cross-linked to its Part, its exhibit, and
+its glossary terms.
+
+### Future requirements (first cut)
+
+1. One page (or per-part appendix blocks) on the Site B template: each formula gets a
+   derivation card — statement, variables, worked example, and a "where this lives"
+   line (Part + chart + engine location).
+2. **Doctrine sourcing discipline:** math comes only from the live engine and the specs
+   (the live-code > specs > prose hierarchy), with the same live-vs-doctrine attribution
+   register the prose now carries. No invented formulas; anything illustrative is marked
+   the way `dataMode` marks charts (definitional ▪ vs illustrative ◇).
+3. Self-hosted math rendering decision (KaTeX vendored like the fonts, or CSS/HTML-native
+   layout for the mostly-simple forms — no CDN loads on the canonical routes).
+4. Glossary integration: formula variables link to existing terms (cis, fis,
+   carry-vector, power-law-corridor…) through the same `.gloss` layer; the navigation
+   registry gains the new anchors automatically via `build:navigation`.
+5. Mobile typography for equations (wrap/scroll rules mirroring `compare-wrap`).
+
+### Activation prerequisites
+
+- [ ] **Refresh the chart-side collateral to current first** (owner note: "the framework
+      in charts needs updated to current"): re-audit `public/agency-chart-handoff/` and the
+      chart-handoff pages against the current 45-spec registry, and regenerate
+      `chart-inventory.json` at activation (`npm run build:inventory` — clean as of
+      2026-07-26). A third register should not be added on top of a stale second one.
+- [ ] Owner picks the surface shape: standalone `/framework-in-math` companion page vs
+      per-part math appendices vs both (recommendation at activation time).
+- [ ] Owner confirms which formulas are in scope for publication (CIS/FIS internals are
+      published in the specs already; anything engine-only needs an explicit include call).
+
+### Deliverable when activated
+
+A scoped implementation plan first (formula inventory with per-formula source of truth
+file:line, page structure, rendering approach, cross-link map), then the build.
+
+### Risks & guardrails
+
+- **Doctrine drift risk** — every published formula is a future reconciliation liability;
+  each card must carry its source pointer so the quality-reconciliation loop can verify it
+  the way chart specs are verified today.
+- **Precision theater** — do not publish more decimal places or tighter bounds than the
+  engine actually computes; clamp/weight values quote the engine constants verbatim.
+- **Advisory calibration** — worked examples follow the same representative/illustrative
+  hedging the prose uses (no promissory arithmetic).
