@@ -49,7 +49,10 @@
     var parent = node.parentElement;
     if (!parent || !node.nodeValue || !node.nodeValue.trim()) return false;
     if (parent.closest('a, button, code, pre, script, style, svg, .fc-mount, .part-actions, nav, footer')) return false;
-    return Boolean(parent.closest('.prose, .callout, .compare, .failure-modes, .architecture-list, .proc-steps, .doc-header, .next-up'));
+    // Titles are furniture, not prose: never auto-wrap a glossary button inside
+    // the doc header or a heading (a term in an h1 must stay plain text).
+    if (parent.closest('.doc-header, h1, h2, h3, h4')) return false;
+    return Boolean(parent.closest('.prose, .callout, .compare, .failure-modes, .architecture-list, .proc-steps, .next-up'));
   }
 
   function termCandidates(entry) {

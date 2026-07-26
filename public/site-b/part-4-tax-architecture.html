@@ -25,47 +25,47 @@
 
   <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
   <!-- Self-hosted webfonts (OFL 1.1 — licenses in fonts/). Inter v4.1 + JetBrains Mono v2.304; replaces the Google Fonts CDN load. -->
-  <link rel="preload" href="fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/site-b/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/site-b/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <style>
     @font-face {
       font-family: 'Inter';
-      src: url('fonts/InterVariable.woff2') format('woff2');
+      src: url('/site-b/fonts/InterVariable.woff2') format('woff2');
       font-weight: 100 900;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'Inter';
-      src: url('fonts/InterVariable-Italic.woff2') format('woff2');
+      src: url('/site-b/fonts/InterVariable-Italic.woff2') format('woff2');
       font-weight: 100 900;
       font-style: italic;
       font-display: swap;
     }
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('fonts/JetBrainsMono-Regular.woff2') format('woff2');
+      src: url('/site-b/fonts/JetBrainsMono-Regular.woff2') format('woff2');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('fonts/JetBrainsMono-Medium.woff2') format('woff2');
+      src: url('/site-b/fonts/JetBrainsMono-Medium.woff2') format('woff2');
       font-weight: 500;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+      src: url('/site-b/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
       font-weight: 600;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('fonts/JetBrainsMono-Bold.woff2') format('woff2');
+      src: url('/site-b/fonts/JetBrainsMono-Bold.woff2') format('woff2');
       font-weight: 700;
       font-style: normal;
       font-display: swap;
@@ -157,7 +157,7 @@
         <div class="measure">
           <div class="doc-signal" data-glyph-text>Framework Documentation</div>
           <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
-          <p class="doc-kicker">Part 4 of 6 &middot; &approx; 20 min read</p>
+          <p class="doc-kicker">Part 4 of 6 &middot; &approx; 12 min read</p>
           <h1 class="doc-title">Tax Architecture and ROC Strategy</h1>
 
           <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
@@ -201,17 +201,9 @@
         <p><strong>Jurisdiction scope.</strong> This part uses United States tax wrappers, the Roth IRA, the taxable brokerage account, and pre-tax retirement accounts, as the reference implementation. The underlying logic, routing convexity to the lowest-friction wrapper and preserving tax-advantaged capacity for the positions that benefit most, is portable to other jurisdictions by substituting local tax-advantaged structures.</p>
       </div>
 
-      <aside class="callout callout-insight" aria-label="Key insight">
-        <div class="ci-head">
-          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-            <path d="M9 18h6"></path>
-            <path d="M10 21h4"></path>
-            <path d="M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.2 1 2V16h6v-.5c0-.8.5-1.5 1-2A6 6 0 0 0 12 3z"></path>
-          </svg>
-          <p class="callout-label">Key Insight</p>
-        </div>
-        <p>A mediocre asset in an optimal wrapper can produce superior terminal wealth compared with an exceptional asset in a suboptimal one. The distinction the framework draws is between generating gains and keeping them; over long horizons the second determines as much of the outcome as the first.</p>
-      </aside>
+      <blockquote class="pull-quote">
+        A mediocre asset in an optimal wrapper can produce <span class="hl">superior terminal wealth</span> compared with an exceptional asset in a suboptimal one.
+      </blockquote>
 
       <div class="measure prose">
         <p>The intellectual lineage the framework draws on largely leaves this gap open. Taleb addresses payoff asymmetry and antifragility but not wrapper routing; Druckenmiller&rsquo;s concentration doctrine operates chiefly in institutional vehicles where personal tax wrappers are not the binding constraint; Soros treats tax architecture as exogenous to reflexivity and timing; and Edelman advocates for investor education and disciplined crypto inclusion without formalizing wrapper optimization as a structural multiplier. The framework fills that gap deliberately, elevating wrapper selection from a compliance exercise to an engineering discipline.</p>
@@ -238,7 +230,7 @@
         <p>The framework deploys capital across three wrapper types, each matched to a payoff profile and a portfolio function. The organizing principle is to match a position&rsquo;s expected payoff distribution and trading behavior to a wrapper&rsquo;s tax treatment.</p>
       </div>
 
-      <div class="compare">
+      <div class="compare compare-wrap">
         <table>
           <caption>Wrapper treatment and the payoff profile each is matched to</caption>
           <thead>
@@ -258,7 +250,7 @@
       <p class="compare-key">Roth suits positions that may be rotated tax-free &middot; taxable suits never-sold or income-producing holdings &middot; pre-tax is tactical, not structural</p>
 
       <div class="measure prose">
-        <p>Positions with right-tail potential that may be rotated belong in Roth, where tax-free compounding and frictionless trading turn appreciation into durable wealth. Bitcoin, held under a never-sell discipline, belongs in taxable, where a step-up in basis under current law and borrow-against strategies preserve optionality without consuming scarce Roth capacity. New capital follows a hierarchical sequence rather than a fixed split.</p>
+        <p>Positions with right-tail potential that may be rotated belong in Roth, where tax-free compounding and frictionless trading turn appreciation into durable wealth. Bitcoin, held under a never-sell discipline, belongs in taxable, where a step-up in basis under current law and borrow-against strategies preserve optionality without consuming scarce Roth capacity. <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-cold-storage-to-borrow">The accumulate-to-borrow lifecycle is charted in Part 3.</a> New capital follows a hierarchical sequence rather than a fixed split.</p>
       </div>
 
       <div class="measure">
@@ -283,8 +275,8 @@
         <h2 class="section-title" id="roth-title">Reserving Roth for Torque.</h2>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">Roth capacity is scarce. The annual Roth IRA contribution limit for 2026 is 7,500 dollars per person, which bounds the tax-free space available each year. The framework therefore reserves Roth for its highest-value use: high-conviction positions that may be rotated, where tax-free compounding and friction-free trading generate the most value over time.</p>
-        <p>The gap between what each wrapper lets you keep is minor on an ordinary gain and wide on a right-tail one &mdash; so where you hold a position decides the most exactly where convexity is largest. The comparison below is the canonical version; later parts reference it rather than restate it.</p>
+        <p class="prose-lead">Roth capacity is scarce. The annual Roth IRA contribution limit for 2026 is $7,500 per person, which bounds the tax-free space available each year. The framework therefore reserves Roth for its highest-value use: high-conviction positions that may be rotated, where tax-free compounding and friction-free trading generate the most value over time.</p>
+        <p>The gap between what each wrapper lets you keep is minor on an ordinary gain and wide on a right-tail one &mdash; so where a position is held matters most exactly where convexity is largest. The comparison below is the canonical version; later parts reference it rather than restate it.</p>
       </div>
 
       <!-- Chart island: p4-tax-wedge "The Tax Wedge" — canonical wrapper/tax comparison.
@@ -311,14 +303,19 @@
       </div>
 
       <!-- Moved from the taxable discussion: options are a Roth-account topic. -->
+      <div class="measure">
+        <p class="sub-meta">Roth overlay &middot; Doctrine &middot; defined-risk only</p>
+        <h3 class="sub-title">Options within the Roth: purchased convexity only.</h3>
+      </div>
+
       <div class="measure prose">
-        <p><span class="key-term">Options within the Roth: purchased convexity only.</span> Roth accounts permit options under a strict limitation: purchased convexity only, meaning long calls, long puts, and defined-risk spreads, never undefined-risk strategies such as naked options or short volatility. Purchased options are tactical overlays for expressing a high-conviction thesis with capped downside, not core holdings or income generators. They carry negative expected value much of the time, since premium decay usually exceeds realized gains, and are justified only when conviction warrants defined-risk, asymmetric exposure. A representative use is a long-dated call on an infrastructure theme during an early adoption phase, or a long put as portfolio insurance during periods of systemic stress.</p>
+        <p>Roth accounts permit options under a strict limitation: purchased convexity only, meaning long calls, long puts, and defined-risk spreads, never undefined-risk strategies such as naked options or short volatility. Purchased options are tactical overlays for expressing a high-conviction thesis with capped downside, not core holdings or income generators. They carry negative expected value much of the time, since premium decay usually exceeds realized gains, and are justified only when conviction warrants defined-risk, asymmetric exposure. A representative use is a long-dated call on an infrastructure theme during an early adoption phase, or a long put as portfolio insurance during periods of systemic stress.</p>
       </div>
 
       <aside class="callout callout-info" aria-label="Options sizing">
         <p class="callout-label">Sizing And Survivability</p>
         <ul>
-          <li><strong>Hard cap of 3 to 5 percent</strong> of Roth account value, measured as maximum loss at entry, the premium paid. In a 75,000 dollar Roth, that is roughly 3,750 dollars of at-risk capital.</li>
+          <li><strong>Hard cap of 3 to 5 percent</strong> of Roth account value, measured as maximum loss at entry, the premium paid. In a $75,000 Roth, that is roughly $3,750 of at-risk capital.</li>
           <li><strong>Survivability before profitability.</strong> Purchased options can lose their full premium; that is acceptable when sized appropriately and damaging when it is not. The framework prohibits naked or undefined-risk positions that could impair account survivability regardless of any probabilistic edge.</li>
         </ul>
       </aside>
@@ -334,7 +331,7 @@
       </div>
       <div class="measure prose">
         <p>Taxable accounts carry the positions that do not need Roth&rsquo;s tax-free trading: the Bitcoin backbone, income-producing <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">ballast</button>, and tactical satellites suited to tax-loss harvesting. The framework prioritizes ballast that generates stable, high-percentage <button type="button" class="gloss" data-gloss="return-of-capital" aria-expanded="false">return-of-capital</button> distributions, ideally paid monthly. A return-of-capital distribution reduces cost basis rather than triggering immediate tax, which defers the liability and supplies regular liquidity for deployment into Bitcoin accumulation or tactical rotation without forced sales.</p>
-        <p>The current best-in-class implementation is a perpetual preferred instrument that pays a monthly distribution adjusting to roughly 11 percent annually, historically characterized as return of capital. Tax treatment should be verified each year through issuer 1099-DIV reporting, since classification can change with company operations. This position is best-in-class rather than structurally irreplaceable; it should be evaluated against Part 5&rsquo;s ballast criteria, and replaced if a superior candidate emerges or its risk profile changes.</p>
+        <p>The current best-in-class implementation, STRC, is a perpetual preferred instrument that pays a monthly distribution adjusting to roughly 11 percent annually as of January 2026, historically characterized as return of capital. Tax treatment should be verified each year through issuer 1099-DIV reporting, since classification can change with company operations. This position is best-in-class rather than structurally irreplaceable; it should be evaluated against Part 5&rsquo;s ballast criteria, and replaced if a superior candidate emerges or its risk profile changes.</p>
       </div>
 
       <div class="measure prose">
@@ -360,8 +357,13 @@
         </div>
       </div>
 
+      <div class="measure">
+        <p class="sub-meta">Taxable mechanics &middot; Losses become durable tax assets</p>
+        <h3 class="sub-title">Tax-loss harvesting.</h3>
+      </div>
+
       <div class="measure prose">
-        <p><span class="key-term">Tax-loss harvesting.</span> Realizing losses to offset gains, or up to 3,000 dollars of ordinary income annually with unlimited carryforward, creates durable tax assets. Not every position is a suitable candidate. When distributions are characterized as return of capital, they steadily reduce basis, which makes realized losses unlikely; such a position is held for basis step-up, not harvesting. The framework&rsquo;s harvesting candidates are tactical satellites, held at satellite size rather than ballast concentration, and directly held Bitcoin, which under current rules is not subject to the wash-sale restriction that applies to securities, though that treatment may change as guidance evolves.</p>
+        <p>Realizing losses to offset gains, or up to $3,000 of ordinary income annually with unlimited carryforward, creates durable tax assets. Not every position is a suitable candidate. When distributions are characterized as return of capital, they steadily reduce basis, which makes realized losses unlikely; such a position is held for basis step-up, not harvesting. The framework&rsquo;s harvesting candidates are tactical satellites, held at satellite size rather than ballast concentration, and directly held Bitcoin, which under current rules is not subject to the wash-sale restriction that applies to securities, though that treatment may change as guidance evolves.</p>
       </div>
 
       <div class="measure">

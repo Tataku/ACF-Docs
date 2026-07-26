@@ -25,47 +25,47 @@
 
   <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
   <!-- Self-hosted webfonts (OFL 1.1 — licenses in fonts/). Inter v4.1 + JetBrains Mono v2.304; replaces the Google Fonts CDN load. -->
-  <link rel="preload" href="fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/site-b/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/site-b/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <style>
     @font-face {
       font-family: 'Inter';
-      src: url('fonts/InterVariable.woff2') format('woff2');
+      src: url('/site-b/fonts/InterVariable.woff2') format('woff2');
       font-weight: 100 900;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'Inter';
-      src: url('fonts/InterVariable-Italic.woff2') format('woff2');
+      src: url('/site-b/fonts/InterVariable-Italic.woff2') format('woff2');
       font-weight: 100 900;
       font-style: italic;
       font-display: swap;
     }
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('fonts/JetBrainsMono-Regular.woff2') format('woff2');
+      src: url('/site-b/fonts/JetBrainsMono-Regular.woff2') format('woff2');
       font-weight: 400;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('fonts/JetBrainsMono-Medium.woff2') format('woff2');
+      src: url('/site-b/fonts/JetBrainsMono-Medium.woff2') format('woff2');
       font-weight: 500;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+      src: url('/site-b/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
       font-weight: 600;
       font-style: normal;
       font-display: swap;
     }
     @font-face {
       font-family: 'JetBrains Mono';
-      src: url('fonts/JetBrainsMono-Bold.woff2') format('woff2');
+      src: url('/site-b/fonts/JetBrainsMono-Bold.woff2') format('woff2');
       font-weight: 700;
       font-style: normal;
       font-display: swap;
@@ -157,7 +157,7 @@
         <div class="measure">
           <div class="doc-signal" data-glyph-text>Framework Documentation</div>
           <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
-          <p class="doc-kicker">Part 3 of 6 &middot; &approx; 22 min read</p>
+          <p class="doc-kicker">Part 3 of 6 &middot; &approx; 12 min read</p>
           <h1 class="doc-title">Bitcoin: Convexity Backbone</h1>
 
           <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
@@ -397,7 +397,7 @@
       <figure class="fc-mount" id="exhibit-p3-power-law-holds" data-fc-chart="p3-power-law-holds"></figure>
 
       <div class="measure prose">
-        <p>No single model is enough on its own, so the framework synthesizes several independent ones; their convergence is a confidence signal, their divergence a caution. <span class="part-ref">CIS scoring is developed in Part 6</span>.</p>
+        <p>No single model is enough on its own, so the framework synthesizes several independent ones; their convergence is a confidence signal, their divergence a caution. <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">CIS scoring is developed in Part 6</a>.</p>
       </div>
 
       <div class="measure">
@@ -457,7 +457,7 @@
 
       <div class="measure prose">
         <p>Summed conservatively, ~$23 trillion of addressable monetary premium &mdash; excluding new use cases such as settlement-layer or DeFi applications. As a single isolated scenario: capturing 40 percent of gold&rsquo;s premium over 15 years implies a $12 trillion market cap, ~$600,000 per coin against ~$100,000 today &mdash; roughly 6x. In a $100,000 portfolio a 15 percent allocation would grow from $15,000 to $90,000, lifting total value ~75 percent. This is conditional, not a forecast.</p>
-        <p><button type="button" class="gloss" data-gloss="buy-borrow-die" aria-expanded="false">Buy-borrow-die</button>. Bitcoin is held in taxable cold storage rather than a Roth. A long-held reserve can defer capital gains by being borrowed against rather than sold, and under current law heirs may receive a step-up in basis &mdash; treatment that depends on tax policy and is not guaranteed. Holding Bitcoin in taxable accounts keeps Roth capacity available for higher-turnover positions, where avoiding taxable rebalancing events can add roughly 5&ndash;8 percent in annual tax alpha. <span class="part-ref">Wrapper optimization is developed in Part 4</span>.</p>
+        <p><button type="button" class="gloss" data-gloss="buy-borrow-die" aria-expanded="false">Buy-borrow-die</button>. Bitcoin is held in taxable cold storage rather than a Roth. A long-held reserve can defer capital gains by being borrowed against rather than sold, and under current law heirs may receive a step-up in basis &mdash; treatment that depends on tax policy and is not guaranteed. Holding Bitcoin in taxable accounts keeps Roth capacity available for higher-turnover positions, where avoiding taxable rebalancing events can add roughly 5&ndash;8 percent in annual tax alpha. <a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Wrapper optimization is developed in Part 4</a>.</p>
         <p><span class="key-term">Cold-storage architecture.</span> The full reserve is held in hardware wallets under the holder&rsquo;s own keys, accumulated through payroll DCA over 15&ndash;20 years and held rather than trimmed on valuation. A custodian is introduced only if and when collateralized borrowing begins. The Borrow phase is optional and scale-dependent: once the reserve becomes a large share of net worth, borrowing against it is one alternative to a taxable sale, conditional on scale and objectives. It introduces leverage, counterparty, and liquidation risk and is not mandatory.</p>
       </div>
 
@@ -476,7 +476,7 @@
       </div>
 
       <div class="measure prose">
-        <p>Reserve sizing scales with horizon and risk capacity. A <span class="key-term">10&ndash;15% target</span> suits horizons of ten years or more and moderate risk capacity &mdash; a 50% Bitcoin drawdown is only ~7.5% of the portfolio. A <span class="key-term">20&ndash;30% elevated range</span> suits higher conviction and longer horizons, still requiring valuation discipline. A <span class="key-term">30&ndash;50% mature share</span> may emerge after 15&ndash;20 years through accumulation and appreciation rather than active rebalancing, at which point the framework can transition from Accumulate to Borrow. <span class="part-ref">Position management is developed in Part 5</span>.</p>
+        <p>Reserve sizing scales with horizon and risk capacity. A <span class="key-term">10&ndash;15% target</span> suits horizons of ten years or more and moderate risk capacity &mdash; a 50% Bitcoin drawdown is only ~7.5% of the portfolio. A <span class="key-term">20&ndash;30% elevated range</span> suits higher conviction and longer horizons, still requiring valuation discipline. A <span class="key-term">30&ndash;50% mature share</span> may emerge after 15&ndash;20 years through accumulation and appreciation rather than active rebalancing, at which point the framework can transition from Accumulate to Borrow. <a class="part-ref" href="/part-5-portfolio-construction-position-management">Position management is developed in Part 5</a>.</p>
       </div>
 
       <!-- Chart island: p3-reserve-share-evolves "Reserve Share Evolves" — allocation share rising through the target band and mature threshold into the borrow-phase governance zone. -->

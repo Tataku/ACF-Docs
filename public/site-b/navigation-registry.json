@@ -1130,8 +1130,8 @@
         "label": "Appears in Part 6 · The formal scoring definition"
       },
       "chart": {
-        "href": "/part-1-foundation#exhibit-dl-tripwire-loop",
-        "label": "View the chart → L3 · Govern the Thesis"
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition",
+        "label": "View the chart → P6-01 · CIS Measures the Position, Not the Portfolio"
       }
     },
     "macro-thesis": {
@@ -1159,35 +1159,50 @@
         "href": "/part-5-portfolio-construction-position-management",
         "label": "Appears in Part 5 · Momentum as the sizing gate"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate",
+        "label": "View the chart → P5-06 · Conviction Requires Market Confirmation"
+      }
     },
     "tax-wrapper": {
       "later": {
         "href": "/part-4-tax-architecture-roc-strategy",
         "label": "Appears in Part 4 · Wrapper engineering as structural edge"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge",
+        "label": "View the chart → P4-01 · The Tax Wedge"
+      }
     },
     "torque": {
       "later": {
         "href": "/part-5-portfolio-construction-position-management",
         "label": "Appears in Part 5 · The Torque posture"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-operating-system",
+        "label": "View the chart → P5-01 · Three Jobs. One Cycle."
+      }
     },
     "ballast": {
       "later": {
         "href": "/part-5-portfolio-construction-position-management",
         "label": "Appears in Part 5 · The Ballast posture"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-ballast-rotation",
+        "label": "View the chart → P5-04 · Ballast Preserves the Right to Buy"
+      }
     },
     "hype": {
       "later": {
         "href": "/part-5-portfolio-construction-position-management",
         "label": "Appears in Part 5 · The Hype posture and its limits"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing",
+        "label": "View the chart → P5-03 · The Same Score Does Not Create the Same Position"
+      }
     },
     "fiscal-dominance": {
       "later": {
@@ -1204,7 +1219,10 @@
         "href": "/part-4-tax-architecture-roc-strategy",
         "label": "Appears in Part 4 · Realization deferral mechanics"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-cold-storage-to-borrow",
+        "label": "View the chart → P3-07 · Cold Storage to Borrow"
+      }
     },
     "fragility": {
       "later": {
@@ -1219,11 +1237,11 @@
     "posture": {
       "later": {
         "href": "/part-5-portfolio-construction-position-management",
-        "label": "Appears in Part 5 · The Posture pairs in full"
+        "label": "Appears in Part 5 · The three postures in full"
       },
       "chart": {
-        "href": "/#exhibit-dl-regime-map",
-        "label": "View the chart → L2 · Capital Has Weather"
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-operating-system",
+        "label": "View the chart → P5-01 · Three Jobs. One Cycle."
       }
     },
     "policy-reflexivity": {
@@ -1231,7 +1249,10 @@
         "href": "/part-2-lineage-macro-thesis",
         "label": "Appears in Part 2 · The intellectual lineage"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-2-lineage-macro-thesis#exhibit-p2-markets-feed-back",
+        "label": "View the chart → P2-04 · Markets Feed Back"
+      }
     },
     "volatility-clustering": {
       "later": null,
@@ -1259,7 +1280,10 @@
         "href": "/part-4-tax-architecture-roc-strategy",
         "label": "Appears in Part 4 · Taxing the right tail"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge",
+        "label": "View the chart → P4-01 · The Tax Wedge"
+      }
     },
     "agentic-verification": {
       "later": {
@@ -1280,7 +1304,10 @@
         "href": "/part-3-bitcoin-convexity-backbone",
         "label": "Appears in Part 3 · Power-law bands and model convergence"
       },
-      "chart": null
+      "chart": {
+        "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-power-law-holds",
+        "label": "View the chart → P3-01 · Power Law Holds"
+      }
     },
     "sequence-of-returns-risk": {
       "later": {
@@ -1305,8 +1332,8 @@
         "label": "Appears in Part 5 · Accumulation discipline and position management"
       },
       "chart": {
-        "href": "/part-1-foundation#exhibit-06",
-        "label": "View the chart → 06 · Survive the Path"
+        "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-accumulate-dont-trade",
+        "label": "View the chart → P3-06 · Accumulate, Don’t Trade"
       }
     },
     "dry-powder": {
@@ -1321,28 +1348,38 @@
         "href": "/part-5-portfolio-construction-position-management",
         "label": "Appears in Part 5 · The Ballast posture"
       },
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-roc-yield",
+        "label": "View the chart → P4-03 · ROC Changes the Yield"
+      }
+    },
+    "fis": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · The subtractive construction score"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall",
+        "label": "View the chart → P6-02 · FIS Starts at 100"
+      }
+    },
+    "carry-vector": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Carry direction inside the CIS macro component"
+      },
       "chart": null
     }
   },
   "audit": {
     "pages": 8,
-    "anchors": 172,
+    "anchors": 182,
     "chartSpecs": 45,
     "liveChartMounts": 52,
-    "glossaryTerms": 26,
-    "glossaryTermsAlreadyTagged": 26,
+    "glossaryTerms": 28,
+    "glossaryTermsAlreadyTagged": 28,
     "glossaryTermsAutoTagEligible": 0,
     "unresolvedGlossaryCharts": [],
-    "warnings": [
-      "/part-1-foundation: runtime-upgraded .part-ref found as <span>",
-      "/part-1-foundation: runtime-upgraded .part-ref found as <span>",
-      "/part-1-foundation: runtime-upgraded .part-ref found as <span>",
-      "/part-1-foundation: runtime-upgraded .lineage-ref found as <span>",
-      "/part-2-lineage-macro-thesis: runtime-upgraded .part-ref found as <span>",
-      "/part-2-lineage-macro-thesis: runtime-upgraded .part-ref found as <span>",
-      "/part-3-bitcoin-convexity-backbone: runtime-upgraded .part-ref found as <span>",
-      "/part-3-bitcoin-convexity-backbone: runtime-upgraded .part-ref found as <span>",
-      "/part-3-bitcoin-convexity-backbone: runtime-upgraded .part-ref found as <span>"
-    ]
+    "warnings": []
   }
 }

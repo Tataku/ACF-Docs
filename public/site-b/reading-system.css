@@ -417,6 +417,15 @@ body {
   font-size: var(--text-sm);
   white-space: nowrap;
 }
+/* Prose-cell variant: tables whose cells carry sentences (sizing rationale,
+   protocol rules) wrap instead of forcing a horizontal scroll on desktop.
+   The base nowrap register stays for short-cell matrices; the 560px stacked
+   mobile mode below is untouched. Tokens only. */
+@media (min-width: 561px) {
+  .compare-wrap th, .compare-wrap td { white-space: normal; }
+  .compare-wrap tbody td:last-child, .compare-wrap thead th:last-child { text-align: left; }
+  .compare-wrap tbody th, .compare-wrap tbody td:first-child { white-space: nowrap; }
+}
 .compare thead th {
   font-family: var(--font-mono);
   font-size: var(--text-xs);

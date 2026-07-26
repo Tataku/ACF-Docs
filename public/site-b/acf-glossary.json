@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "ACF Glossary",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "purpose": "Single source of truth for inline tooltip content across all six framework parts. Tooltips are populated from this file; do not create a separate dead glossary page.",
     "schema": {
       "id": "stable slug, used as the data key and tooltip anchor (kebab-case)",
@@ -17,11 +17,11 @@
     },
     "usage": "Tooltip layer one shows 'definition'. Layer two ('see where this appears later') is built from 'appearsLater' + 'related'. The 'related' and 'chart' ids share vocabulary with the chart-handoff CONNECTS-TO network so the glossary and the charts form one cross-reference graph. Internal sources cite the framework's own Parts; external sources cite primary/academic references.",
     "rollout": {
-      "wave1": ["cis", "convexity", "macro-thesis", "tripwire", "momentum-filter", "tax-wrapper", "torque", "ballast", "hype", "fiscal-dominance", "buy-borrow-die", "fragility", "posture", "tam", "power-law-corridor", "sequence-of-returns-risk", "barbell", "dca", "dry-powder"],
-      "wave2": ["policy-reflexivity", "volatility-clustering", "correlation-instability", "survivable-compounding", "right-tail-outcomes", "agentic-verification"]
+      "wave1": ["cis", "convexity", "macro-thesis", "tripwire", "momentum-filter", "tax-wrapper", "torque", "ballast", "hype", "fiscal-dominance", "buy-borrow-die", "fragility", "posture", "tam", "power-law-corridor", "sequence-of-returns-risk", "barbell", "dca", "dry-powder", "fis"],
+      "wave2": ["policy-reflexivity", "volatility-clustering", "correlation-instability", "survivable-compounding", "right-tail-outcomes", "agentic-verification", "carry-vector"]
     },
-    "harmonizeBeforeLocking": ["carry vectors"],
-    "harmonizeNote": "Carry vectors are still gestured at more than defined in Part 1. Reconcile against Part 5 copy before writing the tooltip text, or it will read shallower than the later parts. The power-law corridor was harmonized against Part 3 and added to the glossary."
+    "harmonizeBeforeLocking": [],
+    "harmonizeNote": "Carry vectors harmonized 2026-07-26: defined at first use in the Part 1 abstract, sourced to the product's closed structure enum (Long Carry | Short Carry | Barbell), and cross-linked to carry direction inside the CIS macro component (Part 6). Power-law corridor was harmonized against Part 3 earlier."
   },
   "terms": [
     {
@@ -31,7 +31,7 @@
       "wave": 1,
       "definition": "Exposure where the upside can compound far faster than the downside, so being right pays off disproportionately more than being wrong costs.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 6 — Convexity & Framework Integrity Scoring" },
+      "source": { "kind": "internal", "ref": "Part 1 — Foundation & Philosophy; scored in Part 6" },
       "related": ["cis", "posture", "torque", "fragility", "power-law-corridor"],
       "appearsLater": { "part": 5, "topic": "How convexity is expressed through Posture" },
       "chart": "S1"
@@ -41,12 +41,12 @@
       "term": "CIS",
       "aliases": ["Convexity Integrity Score"],
       "wave": 1,
-      "definition": "Convexity Integrity Score: a 0 to 100 score that rates a position on convexity, fragility, macro fit, and execution quality in real time.",
+      "definition": "Convexity Integrity Score: a 0 to 100 score rating one position at a time on convexity and optionality, risk and fragility, macro alignment, and execution and sentiment.",
       "length": "medium",
       "source": { "kind": "internal", "ref": "Part 6 — Convexity & Framework Integrity Scoring" },
       "related": ["convexity", "fragility", "momentum-filter", "macro-thesis"],
       "appearsLater": { "part": 6, "topic": "The formal scoring definition" },
-      "chart": "L3"
+      "chart": "p6-cis-composition"
     },
     {
       "id": "macro-thesis",
@@ -82,7 +82,7 @@
       "source": { "kind": "external", "ref": "Moskowitz, Ooi & Pedersen (2012); Hurst, Ooi & Pedersen (2017), trend-following evidence" },
       "related": ["tripwire", "cis", "macro-thesis"],
       "appearsLater": { "part": 5, "topic": "Momentum as the sizing gate" },
-      "chart": null
+      "chart": "p5-momentum-gate"
     },
     {
       "id": "tax-wrapper",
@@ -94,7 +94,7 @@
       "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy; external IRS Pubs 590-A / 590-B" },
       "related": ["buy-borrow-die", "right-tail-outcomes", "survivable-compounding"],
       "appearsLater": { "part": 4, "topic": "Wrapper engineering as structural edge" },
-      "chart": null
+      "chart": "p4-tax-wedge"
     },
     {
       "id": "torque",
@@ -106,7 +106,7 @@
       "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
       "related": ["ballast", "hype", "posture", "convexity"],
       "appearsLater": { "part": 5, "topic": "The Torque posture" },
-      "chart": null
+      "chart": "p5-operating-system"
     },
     {
       "id": "ballast",
@@ -118,7 +118,7 @@
       "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
       "related": ["torque", "hype", "posture"],
       "appearsLater": { "part": 5, "topic": "The Ballast posture" },
-      "chart": null
+      "chart": "p5-ballast-rotation"
     },
     {
       "id": "hype",
@@ -130,7 +130,7 @@
       "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
       "related": ["torque", "ballast", "posture", "convexity"],
       "appearsLater": { "part": 5, "topic": "The Hype posture and its limits" },
-      "chart": null
+      "chart": "p5-posture-sizing"
     },
     {
       "id": "fiscal-dominance",
@@ -154,7 +154,7 @@
       "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
       "related": ["tax-wrapper", "right-tail-outcomes"],
       "appearsLater": { "part": 4, "topic": "Realization deferral mechanics" },
-      "chart": null
+      "chart": "p3-cold-storage-to-borrow"
     },
     {
       "id": "fragility",
@@ -173,12 +173,12 @@
       "term": "Posture",
       "aliases": ["postures"],
       "wave": 1,
-      "definition": "The portfolio's stance toward risk in a given regime, expressed through named modes rather than ad hoc allocation.",
+      "definition": "The behavioral classification every position carries: Torque, Ballast, or Hype. It sets the position's sizing bands and governance rules; behavior, not asset type, is what the framework classifies.",
       "length": "short",
       "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
       "related": ["torque", "ballast", "hype", "macro-thesis"],
-      "appearsLater": { "part": 5, "topic": "The Posture pairs in full" },
-      "chart": "L2"
+      "appearsLater": { "part": 5, "topic": "The three postures in full" },
+      "chart": "p5-operating-system"
     },
     {
       "id": "policy-reflexivity",
@@ -190,7 +190,7 @@
       "source": { "kind": "internal", "ref": "Part 1 abstract; literary lineage (Soros reflexivity)" },
       "related": ["macro-thesis", "fiscal-dominance"],
       "appearsLater": { "part": 2, "topic": "The intellectual lineage" },
-      "chart": null
+      "chart": "p2-markets-feed-back"
     },
     {
       "id": "volatility-clustering",
@@ -238,7 +238,7 @@
       "source": { "kind": "internal", "ref": "Part 1 abstract; Part 4 examples" },
       "related": ["convexity", "tax-wrapper", "buy-borrow-die"],
       "appearsLater": { "part": 4, "topic": "Taxing the right tail" },
-      "chart": null
+      "chart": "p4-tax-wedge"
     },
     {
       "id": "agentic-verification",
@@ -274,7 +274,7 @@
       "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone; external power-law model (Santostasi)" },
       "related": ["convexity", "cis", "macro-thesis"],
       "appearsLater": { "part": 3, "topic": "Power-law bands and model convergence" },
-      "chart": null
+      "chart": "p3-power-law-holds"
     },
     {
       "id": "sequence-of-returns-risk",
@@ -310,7 +310,7 @@
       "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone" },
       "related": ["survivable-compounding", "ballast", "sequence-of-returns-risk"],
       "appearsLater": { "part": 5, "topic": "Accumulation discipline and position management" },
-      "chart": "06"
+      "chart": "p3-accumulate-dont-trade"
     },
     {
       "id": "dry-powder",
@@ -334,6 +334,30 @@
       "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
       "related": ["tax-wrapper", "ballast"],
       "appearsLater": { "part": 5, "topic": "The Ballast posture" },
+      "chart": "p4-roc-yield"
+    },
+    {
+      "id": "fis",
+      "term": "FIS",
+      "aliases": ["Framework Integrity Score"],
+      "wave": 1,
+      "definition": "Framework Integrity Score: a 0 to 100 portfolio-construction score that starts the assembled portfolio at 100 and deducts a named penalty for each rule violation, so every lost point is attributable and repairable.",
+      "length": "medium",
+      "source": { "kind": "internal", "ref": "Part 6 — Convexity & Framework Integrity Scoring" },
+      "related": ["cis", "posture", "tax-wrapper"],
+      "appearsLater": { "part": 6, "topic": "The subtractive construction score" },
+      "chart": "p6-fis-waterfall"
+    },
+    {
+      "id": "carry-vector",
+      "term": "Carry vectors",
+      "aliases": ["carry vector", "carry direction", "long carry", "short carry"],
+      "wave": 2,
+      "definition": "The direction a position's payoff leans relative to stress. Long carry earns steadily while conditions hold; short carry pays a running cost for a convex payoff in disorder; a barbell pairs the two. The framework classifies every position's structure on this closed set.",
+      "length": "medium",
+      "source": { "kind": "internal", "ref": "Part 1 abstract; product structure registry (Long Carry | Short Carry | Barbell)" },
+      "related": ["barbell", "posture", "convexity", "cis"],
+      "appearsLater": { "part": 6, "topic": "Carry direction inside the CIS macro component" },
       "chart": null
     }
   ]
