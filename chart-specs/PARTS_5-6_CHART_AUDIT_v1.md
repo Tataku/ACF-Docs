@@ -254,3 +254,15 @@ docs four-band register (green / monitor-silver / orange / heaviest-ink) matches
 `CIS_BAND_DEFAULTS` semantics (`#10b981 / #b6c2cf / #f97316 / #ef4444`) in the docs' paper
 adaptation. **App-side note (owner decision, not taken here):** the dashboard's own
 schema-teal + tag-purple hype registers now diverge from the declared pink canonical.
+
+---
+
+## 9. Addendum (2026-07-26, quality reconciliation): signal-count correction
+
+§6.1's momentum row ("6 of 9 signals live") was stale at the time of the reconciliation
+audit. The live cohort confluence tripwire defines **10 signals, 7 implemented**
+(`ACFDashboard/src/core/domain/tripwireLibrary/cohortTripwireConfig.js:198-352`; pinned by
+`tests/gate/cohort-tripwire-engine.test.js`), with the flag → hedge → trim ladder and the
+25% Torque-cohort trim at level 3 confirmed. The shipped Part 5 page ("ten signals, seven
+of them live today") was already correct and is unchanged. Full record:
+`FRAMEWORK_DOCS_QUALITY_RECONCILIATION_v1.md` §5.
