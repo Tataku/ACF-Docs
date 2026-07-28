@@ -164,10 +164,23 @@ A **scoped implementation plan** (not code on first pass) that identifies:
 
 ## 2. Framework in Math (companion derivation surface)
 
-**Status:** `captured (2026-07-26)` — food-for-thought from the owner during the Parts 1–6
-quality reconciliation (PR #150). Not authorized to build; this entry scopes it.
+**Status:** `captured (2026-07-26)` · **corrected 2026-07-28 — this is a DOCS-SIDE PRESENTATION
+item that depends on an existing, already-shipping extraction track.** Not authorized to build.
 **Added:** 2026-07-26
 **Type:** Reading-experience feature (docs), third teaching register alongside prose and charts.
+
+> **Correction (2026-07-28).** The v1 wording framed this as a net-new idea. It is not.
+> **THE FRAMEWORK: In Math** is an owner-chartered track in `ACFDashboard`, running since
+> 2026-07-19, with `docs/FRAMEWORK_IN_MATH_MASTER_PLAN_v1.md` (Phase 0 complete: feasibility,
+> authority ladder — live V30 engine > specs v2.1 > Parts > synthesis, 3-repo math source map,
+> 12-domain wave breakdown, errors/conflicts register) and `docs/FRAMEWORK_IN_MATH_v1.md` with
+> **four waves already shipped** — Ch.1 CIS core, Ch.2 FIS, Ch.3 allocation & sizing, Ch.4
+> governance quantities — carrying 63+ register rows of spec↔engine forks, all read-only
+> against the math. That track is the **source of truth for the mathematics**. This backlog
+> item is only the **docs-side publication surface**: how the extracted math is presented to a
+> reader on Site B. It must consume that track's output; it must never re-derive or restate the
+> math independently, and it cannot start before the owner decides what is publishable
+> (the extraction is RIA/PM-defensible internal reference, not automatically public copy).
 
 ### Context
 
@@ -187,10 +200,12 @@ its glossary terms.
 1. One page (or per-part appendix blocks) on the Site B template: each formula gets a
    derivation card — statement, variables, worked example, and a "where this lives"
    line (Part + chart + engine location).
-2. **Doctrine sourcing discipline:** math comes only from the live engine and the specs
-   (the live-code > specs > prose hierarchy), with the same live-vs-doctrine attribution
-   register the prose now carries. No invented formulas; anything illustrative is marked
-   the way `dataMode` marks charts (definitional ▪ vs illustrative ◇).
+2. **Doctrine sourcing discipline:** every formula is sourced from `FRAMEWORK_IN_MATH_v1.md`
+   (which already carries file:line citations against the live engines) — never re-derived
+   here. Same live-vs-doctrine attribution register the prose now carries. No invented
+   formulas; anything illustrative is marked the way `dataMode` marks charts (definitional ▪
+   vs illustrative ◇). Where that track's register flags a spec↔engine fork, the docs surface
+   either omits the value or states the fork — it never silently picks a side.
 3. Self-hosted math rendering decision (KaTeX vendored like the fonts, or CSS/HTML-native
    layout for the mostly-simple forms — no CDN loads on the canonical routes).
 4. Glossary integration: formula variables link to existing terms (cis, fis,
@@ -205,10 +220,14 @@ its glossary terms.
       chart-handoff pages against the current 45-spec registry, and regenerate
       `chart-inventory.json` at activation (`npm run build:inventory` — clean as of
       2026-07-26). A third register should not be added on top of a stale second one.
+- [ ] **The extraction track reaches a publishable state** and the owner says which chapters
+      are publishable — it is an internal RIA/PM-defensible reference by charter, not public
+      copy by default. Remaining waves + the Phase 2 reports-math parking lot are that track's
+      scope, not this one's.
 - [ ] Owner picks the surface shape: standalone `/framework-in-math` companion page vs
       per-part math appendices vs both (recommendation at activation time).
-- [ ] Owner confirms which formulas are in scope for publication (CIS/FIS internals are
-      published in the specs already; anything engine-only needs an explicit include call).
+- [ ] The register's open spec↔engine forks are resolved or explicitly dispositioned, so the
+      docs surface is not publishing a contested number.
 
 ### Deliverable when activated
 
