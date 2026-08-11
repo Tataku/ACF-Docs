@@ -164,6 +164,7 @@ html = html.replace(/\s*aria-current="page"/g, '');
 const sidebarInsert = `
         <p class="side-movement">Reference</p>
         <ul class="side-parts">
+          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&mdash;</span><span>In Pictures</span></a></li>
           <li>
             <a class="side-part current" href="/glossary" aria-current="page">
               <span class="spnum">&mdash;</span><span>Glossary</span>
