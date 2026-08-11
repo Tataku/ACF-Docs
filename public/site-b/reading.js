@@ -45,14 +45,30 @@
     return main ? [main] : [document.body];
   }
 
+  // The glossary is a reading aid, not a highlighter. A block that already
+  // carries this many glossary buttons is dense enough; further terms in it stay
+  // plain text and remain reachable from the glossary index.
+  var MAX_GLOSS_PER_BLOCK = 3;
+
   function isEligibleTextNode(node) {
     var parent = node.parentElement;
     if (!parent || !node.nodeValue || !node.nodeValue.trim()) return false;
     if (parent.closest('a, button, code, pre, script, style, svg, .fc-mount, .part-actions, nav, footer')) return false;
-    // Titles are furniture, not prose: never auto-wrap a glossary button inside
-    // the doc header or a heading (a term in an h1 must stay plain text).
-    if (parent.closest('.doc-header, h1, h2, h3, h4')) return false;
-    return Boolean(parent.closest('.prose, .callout, .compare, .failure-modes, .architecture-list, .proc-steps, .next-up'));
+    // Titles are furniture, not prose. A term that first appears as a title or a
+    // label is never highlighted there; the highlight moves to its first
+    // appearance in running prose. This covers every heading-like element in the
+    // system, not just h1-h4: callout labels, stepper step titles, table
+    // captions, failure-mode card names, eyebrows, and sub-metas.
+    if (parent.closest(
+      '.doc-header, h1, h2, h3, h4, h5, h6, caption, ' +
+      '.section-eyebrow, .sub-meta, .callout-label, .step-title, ' +
+      '.doc-kicker, .dc-tile-title, .failure-modes .name, .compare-key'
+    )) return false;
+    if (!parent.closest('.prose, .callout, .compare, .failure-modes, .architecture-list, .proc-steps, .next-up')) return false;
+    // Density guard: hand-authored tags count, so a deliberately tagged passage
+    // is never overrun by auto-tagging.
+    var block = parent.closest('p, li, td, th, blockquote') || parent;
+    return block.querySelectorAll('.gloss').length < MAX_GLOSS_PER_BLOCK;
   }
 
   function termCandidates(entry) {
