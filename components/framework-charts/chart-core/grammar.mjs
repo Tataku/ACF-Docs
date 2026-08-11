@@ -14,8 +14,9 @@
  * `layout` says which RENDERER draws a chart; `visualRelationship` says which
  * RELATIONSHIP it teaches. Encoding the relationship explicitly stops an agent
  * from picking a technically-valid-but-semantically-weak form (a line for a
- * composition claim, a flowchart for a magnitude comparison). See the "Chart
- * Grammar" matrix in public/agency-chart-handoff/README-agency-chart-handoff.md.
+ * composition claim, a flowchart for a magnitude comparison). The relationship
+ * enum below IS the grammar; the former "Chart Grammar" matrix lived in the
+ * agency chart-handoff README, retired with that surface.
  * ─────────────────────────────────────────────────────────────────────────── */
 
 export const VISUAL_RELATIONSHIPS = ['trend', 'comparison', 'composition', 'flow', 'threshold', 'distribution', 'sequence', 'matrix', 'reveal', 'hierarchy'];

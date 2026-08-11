@@ -8,8 +8,9 @@ const withNextra = nextra({
 /* Canonical routing — the Framework Docs are hand-authored Site B HTML in
  * public/site-b/, served on the clean production slugs via `beforeFiles`
  * rewrites. The legacy MDX part pages are fully retired (deleted 2026-07-13);
- * these rewrites ARE the site's routing, not a temporary shadow. Nextra still
- * builds the internal chart-handoff pages and /api only.
+ * these rewrites ARE the site's routing, not a temporary shadow. The internal
+ * agency chart-handoff pages were retired (2026-08-11), so Nextra now builds
+ * only the shadowed index page; /api/narration serves Site B's narration.
  *
  *   /                                  -> /site-b/cover-docs.html
  *   /part-1-foundation                 -> /site-b/part-1-foundation.html
