@@ -5,6 +5,10 @@ Each item records context, requirements, activation prerequisites, and the
 deliverable expected when it is picked up. Adding an item here is a tracking
 action only — it is **not** authorization to implement.
 
+Entries that have since shipped or been superseded are kept rather than deleted,
+marked as such in their Status line: the constraints they record usually outlive
+the build and become the rules for maintaining what shipped.
+
 > Publishing note: this file lives at the repo root, outside `pages/`, so it is
 > never served as a Nextra docs page.
 
@@ -164,62 +168,70 @@ A **scoped implementation plan** (not code on first pass) that identifies:
 
 ## 2. Framework in Math (companion derivation surface)
 
-**Status:** `captured (2026-07-26)` — food-for-thought from the owner during the Parts 1–6
-quality reconciliation (PR #150). Not authorized to build; this entry scopes it.
-**Added:** 2026-07-26
-**Type:** Reading-experience feature (docs), third teaching register alongside prose and charts.
+**Status:** `SHIPPED 2026-08-11` — `/framework-in-math` is live (PR #155). This entry is kept
+as the **standing discipline** for maintaining that page, plus the follow-ups it did not close.
+**Captured:** 2026-07-26 · **Corrected:** 2026-07-28 · **Shipped:** 2026-08-11
 
-### Context
+> **Correction (2026-07-28), still binding.** The v1 wording framed this as a net-new idea. It
+> is not. **THE FRAMEWORK: In Math** is an owner-chartered track in `ACFDashboard`, running
+> since 2026-07-19, with `docs/FRAMEWORK_IN_MATH_MASTER_PLAN_v1.md` (Phase 0 complete:
+> feasibility, authority ladder — live V30 engine > specs v2.1 > Parts > synthesis, 3-repo math
+> source map, 12-domain wave breakdown, errors/conflicts register) and
+> `docs/FRAMEWORK_IN_MATH_v1.md` with **four waves shipped** — Ch.1 CIS core, Ch.2 FIS, Ch.3
+> allocation & sizing, Ch.4 governance quantities — carrying 63+ register rows of spec↔engine
+> forks, all read-only against the math. **That track remains the source of truth for the
+> mathematics.** The docs page is only the **publication surface**. It consumes that track's
+> output; it must never re-derive or restate the math independently.
 
-The book currently teaches in three registers: calibrated prose (Parts 1–6), teaching
-exhibits (45 chart islands plus the Part 1 visual essay at `/part-1-pictures`), and the
-inline glossary. The mathematics underneath the framework — the CIS weighted sum with
-delta clamps and confidence weighting, FIS subtraction with value-weighted severity, the
-band arithmetic, the tax-wedge and wrapper-compounding arithmetic (1.10^t vs 1.075^t),
-the power-law regression form Price = A × Days^B, and the sizing-band structure — exists
-only embedded in prose, specs, and chart methodology notes. A "Framework in Math"
-companion (the analogue of "Part 1 in Pictures" for equations) would present each
-canonical formula with a worked derivation, cross-linked to its Part, its exhibit, and
-its glossary terms.
+### What shipped (2026-08-11, PR #155)
 
-### Future requirements (first cut)
+`/framework-in-math`, rewritten from the earlier stub, covering the scoring kernel in four
+sections: **How to read this page** (authority ladder + label legend), **CIS: the position
+score** (master formula, thesis-weight table against the 40/25/25/10 reference, the ±0.10
+envelope with floor/ceiling and renormalisation, macro-confidence downweighting, the delta
+clamp ladder, the four-band register), **FIS: the construction score** (the subtractive
+identity, the five-bucket table, the severity formula), and **From score to size**.
 
-1. One page (or per-part appendix blocks) on the Site B template: each formula gets a
-   derivation card — statement, variables, worked example, and a "where this lives"
-   line (Part + chart + engine location).
-2. **Doctrine sourcing discipline:** math comes only from the live engine and the specs
-   (the live-code > specs > prose hierarchy), with the same live-vs-doctrine attribution
-   register the prose now carries. No invented formulas; anything illustrative is marked
-   the way `dataMode` marks charts (definitional ▪ vs illustrative ◇).
-3. Self-hosted math rendering decision (KaTeX vendored like the fonts, or CSS/HTML-native
-   layout for the mostly-simple forms — no CDN loads on the canonical routes).
-4. Glossary integration: formula variables link to existing terms (cis, fis,
-   carry-vector, power-law-corridor…) through the same `.gloss` layer; the navigation
-   registry gains the new anchors automatically via `build:navigation`.
-5. Mobile typography for equations (wrap/scroll rules mirroring `compare-wrap`).
+Decisions taken at build time, now contract:
 
-### Activation prerequisites
+- **Authored, not generated.** Unlike `/glossary` and `/framework-in-pictures`, this page has
+  no machine source to derive from — the extraction lives in another repo's prose documents.
+  It is hand-authored against them and must be re-verified by hand when they move.
+- **Every quantity is labelled** `Doctrine · Parameter · Derived · Illustrative`, with the
+  authority ladder stated on the page rather than assumed.
+- **Publishability scoping — the rule that governs edits.** The page omits engine file paths
+  and line numbers, branch names and commit context, verification command logs, and the
+  spec↔engine divergence registers. Those belong in the audit artifact and the work queue.
+  *Publish the mathematics, not the audit apparatus.*
+- **Rendering:** CSS/HTML-native, no KaTeX and no MathML. The forms are simple enough that a
+  vendored math renderer was not worth the weight, and the no-CDN rule held without one.
+- **Glossary integration** happens through the existing runtime `.gloss` auto-tagger — the
+  page needs no bespoke wiring, and inherits the title-exclusion and density rules.
 
-- [ ] **Refresh the chart-side collateral to current first** (owner note: "the framework
-      in charts needs updated to current"): re-audit `public/agency-chart-handoff/` and the
-      chart-handoff pages against the current 45-spec registry, and regenerate
-      `chart-inventory.json` at activation (`npm run build:inventory` — clean as of
-      2026-07-26). A third register should not be added on top of a stale second one.
-- [ ] Owner picks the surface shape: standalone `/framework-in-math` companion page vs
-      per-part math appendices vs both (recommendation at activation time).
-- [ ] Owner confirms which formulas are in scope for publication (CIS/FIS internals are
-      published in the specs already; anything engine-only needs an explicit include call).
+### Still open (not closed by the ship)
 
-### Deliverable when activated
+- [ ] **Chart-side collateral refresh** (owner note: "the framework in charts needs updated to
+      current"): re-audit `public/agency-chart-handoff/` and the chart-handoff pages against
+      the current 45-spec registry, and regenerate `chart-inventory.json`
+      (`npm run build:inventory`). Independent of this page, still outstanding.
+- [ ] **Remaining extraction waves.** The ACFDashboard track's later waves and its Phase 2
+      reports-math parking lot are that track's scope. As they land, this page is a
+      candidate for extension — each extension is its own owner-authorised slice.
+- [ ] **Open spec↔engine forks.** Where the register flags a fork, this page must either omit
+      the value or state the fork. It never silently picks a side. Forks resolved upstream
+      should be reflected here deliberately, not absorbed by drift.
+- [ ] **Per-part math appendices** were considered and not built. The standalone companion
+      page was the chosen shape; appendices remain available as a later decision.
 
-A scoped implementation plan first (formula inventory with per-formula source of truth
-file:line, page structure, rendering approach, cross-link map), then the build.
+### Risks & guardrails (ongoing)
 
-### Risks & guardrails
-
-- **Doctrine drift risk** — every published formula is a future reconciliation liability;
-  each card must carry its source pointer so the quality-reconciliation loop can verify it
-  the way chart specs are verified today.
+- **Doctrine drift risk** — every published formula is a reconciliation liability. The page
+  carries no file:line pointers by publishability rule, so the audit trail lives in
+  `FRAMEWORK_IN_MATH_v1.md` and the reconciliation artifact. Verify against those, not
+  against the page.
+- **Hand-authored means hand-verified.** There is no generator to catch drift here, unlike
+  the glossary and pictures pages. Any change to a clamp, weight, cap, or band upstream
+  requires an explicit pass over this page.
 - **Precision theater** — do not publish more decimal places or tighter bounds than the
   engine actually computes; clamp/weight values quote the engine constants verbatim.
 - **Advisory calibration** — worked examples follow the same representative/illustrative
