@@ -91,7 +91,13 @@
     for (var r = 0; r < rootList.length; r += 1) {
       var walker = document.createTreeWalker(rootList[r], NodeFilter.SHOW_TEXT, {
         acceptNode: function (node) {
-          return isEligibleTextNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+          if (!isEligibleTextNode(node)) return NodeFilter.FILTER_REJECT;
+          // On the glossary page a term must never link to itself: the entry for
+          // "drawdown" does not get a drawdown tooltip inside its own definition.
+          // Links to OTHER terms are the point, so only self-reference is refused.
+          var own = node.parentElement && node.parentElement.closest('[id^="g-"]');
+          if (own && own.id === 'g-' + entry.id) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
         }
       });
       var node;

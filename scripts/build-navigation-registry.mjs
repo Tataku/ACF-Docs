@@ -17,6 +17,7 @@ const pages = [
   [4, '/part-4-tax-architecture-roc-strategy', 'part-4-tax-architecture.html', 'Part 4 · Tax Architecture & ROC Strategy'],
   [5, '/part-5-portfolio-construction-position-management', 'part-5-portfolio-construction.html', 'Part 5 · Portfolio Construction & Position Management'],
   [6, '/part-6-convexity-framework-integrity-scoring', 'part-6-convexity-scoring.html', 'Part 6 · Convexity & Framework Integrity Scoring'],
+  [7, '/glossary', 'glossary.html', 'Glossary'],
 ].map(([part, route, file, title]) => ({ part, route, file, title }));
 
 const errors = [], warnings = [], byRoute = new Map(), aliases = {};
