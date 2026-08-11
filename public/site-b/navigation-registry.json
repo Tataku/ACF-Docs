@@ -49,6 +49,24 @@
       "route": "/part-6-convexity-framework-integrity-scoring",
       "file": "part-6-convexity-scoring.html",
       "title": "Part 6 · Convexity & Framework Integrity Scoring"
+    },
+    {
+      "part": 7,
+      "route": "/glossary",
+      "file": "glossary.html",
+      "title": "Glossary"
+    },
+    {
+      "part": 7,
+      "route": "/framework-in-pictures",
+      "file": "framework-in-pictures.html",
+      "title": "The Framework in Pictures"
+    },
+    {
+      "part": 7,
+      "route": "/framework-in-math",
+      "file": "framework-in-math.html",
+      "title": "The Framework in Math"
     }
   ],
   "aliases": {
@@ -99,7 +117,25 @@
     "part-6-convexity-scoring.html": "/part-6-convexity-framework-integrity-scoring",
     "/part-6-convexity-scoring.html": "/part-6-convexity-framework-integrity-scoring",
     "https://docs.acfdashboard.com/part-6-convexity-framework-integrity-scoring": "/part-6-convexity-framework-integrity-scoring",
-    "https://docs.acfdashboard.com/site-b/part-6-convexity-scoring.html": "/part-6-convexity-framework-integrity-scoring"
+    "https://docs.acfdashboard.com/site-b/part-6-convexity-scoring.html": "/part-6-convexity-framework-integrity-scoring",
+    "/glossary": "/glossary",
+    "/site-b/glossary.html": "/glossary",
+    "glossary.html": "/glossary",
+    "/glossary.html": "/glossary",
+    "https://docs.acfdashboard.com/glossary": "/glossary",
+    "https://docs.acfdashboard.com/site-b/glossary.html": "/glossary",
+    "/framework-in-pictures": "/framework-in-pictures",
+    "/site-b/framework-in-pictures.html": "/framework-in-pictures",
+    "framework-in-pictures.html": "/framework-in-pictures",
+    "/framework-in-pictures.html": "/framework-in-pictures",
+    "https://docs.acfdashboard.com/framework-in-pictures": "/framework-in-pictures",
+    "https://docs.acfdashboard.com/site-b/framework-in-pictures.html": "/framework-in-pictures",
+    "/framework-in-math": "/framework-in-math",
+    "/site-b/framework-in-math.html": "/framework-in-math",
+    "framework-in-math.html": "/framework-in-math",
+    "/framework-in-math.html": "/framework-in-math",
+    "https://docs.acfdashboard.com/framework-in-math": "/framework-in-math",
+    "https://docs.acfdashboard.com/site-b/framework-in-math.html": "/framework-in-math"
   },
   "sections": {
     "/": [
@@ -299,6 +335,170 @@
       "theme-toggle",
       "weekly",
       "weekly-title"
+    ],
+    "/glossary": [
+      "acf-reference-integrity-fallback",
+      "bitcoin",
+      "bitcoin-title",
+      "construction",
+      "construction-title",
+      "foundations",
+      "foundations-title",
+      "g-52-week-high",
+      "g-agentic-verification",
+      "g-allocation-band",
+      "g-archetype",
+      "g-asymmetry",
+      "g-attribution",
+      "g-backdoor-roth",
+      "g-ballast",
+      "g-barbell",
+      "g-bracket-arbitrage",
+      "g-breadth",
+      "g-buy-borrow-die",
+      "g-capital-gains",
+      "g-carry-vector",
+      "g-cis",
+      "g-concentration-limit",
+      "g-confidence",
+      "g-convexity",
+      "g-conviction",
+      "g-correlation-instability",
+      "g-cost-basis",
+      "g-dca",
+      "g-dead-capital",
+      "g-decision-log",
+      "g-delta-clamp",
+      "g-doctrine",
+      "g-drawdown",
+      "g-dry-powder",
+      "g-earnings-proximity",
+      "g-fis",
+      "g-fiscal-dominance",
+      "g-fragility",
+      "g-hype",
+      "g-macro-thesis",
+      "g-margin",
+      "g-momentum-filter",
+      "g-niit",
+      "g-optionality",
+      "g-override",
+      "g-policy-reflexivity",
+      "g-position-sizing",
+      "g-posture",
+      "g-posture-drift",
+      "g-power-law-corridor",
+      "g-pretax-account",
+      "g-regime",
+      "g-regime-force",
+      "g-return-of-capital",
+      "g-right-tail-outcomes",
+      "g-rmd",
+      "g-rotation",
+      "g-roth",
+      "g-score-band",
+      "g-sequence-of-returns-risk",
+      "g-step-up-in-basis",
+      "g-stop-loss",
+      "g-subtractive-scoring",
+      "g-survivability",
+      "g-survivable-compounding",
+      "g-tam",
+      "g-tax-loss-harvesting",
+      "g-tax-wrapper",
+      "g-taxable-account",
+      "g-terminal-wealth",
+      "g-torque",
+      "g-tripwire",
+      "g-value-weighted",
+      "g-volatility",
+      "g-volatility-clustering",
+      "g-wash-sale",
+      "macro",
+      "macro-title",
+      "scoring",
+      "scoring-title",
+      "sidebar",
+      "tax",
+      "tax-title",
+      "theme-toggle"
+    ],
+    "/framework-in-pictures": [
+      "acf-reference-integrity-fallback",
+      "backbone",
+      "backbone-title",
+      "construction",
+      "construction-title",
+      "foundation",
+      "foundation-title",
+      "lineage",
+      "lineage-title",
+      "opening",
+      "opening-title",
+      "pic-dl-convexity-window",
+      "pic-dl-regime-map",
+      "pic-dl-tripwire-loop",
+      "pic-p1-convexity-survival",
+      "pic-p1-correlation",
+      "pic-p1-cpi-assets",
+      "pic-p1-hedge-broke",
+      "pic-p1-policy-constraint",
+      "pic-p1-sequence-risk",
+      "pic-p2-capital-finds-bottleneck",
+      "pic-p2-conviction-needs-exit",
+      "pic-p2-liquidity-sets-tide",
+      "pic-p2-markets-feed-back",
+      "pic-p2-method-before-macro",
+      "pic-p2-narrative-not-thesis",
+      "pic-p2-phase-changes-sizing",
+      "pic-p2-ruin-comes-first",
+      "pic-p2-time-changes-prudence",
+      "pic-p3-accumulate-dont-trade",
+      "pic-p3-cold-storage-to-borrow",
+      "pic-p3-exposure-not-control",
+      "pic-p3-models-must-converge",
+      "pic-p3-power-law-holds",
+      "pic-p3-reserve-share-evolves",
+      "pic-p3-volatility-is-the-toll",
+      "pic-p4-gross-not-net",
+      "pic-p4-roc-yield",
+      "pic-p4-tax-wedge",
+      "pic-p5-ballast-rotation",
+      "pic-p5-change-hierarchy",
+      "pic-p5-earned-size",
+      "pic-p5-earnings-window",
+      "pic-p5-force-channels",
+      "pic-p5-liquidity-throttle",
+      "pic-p5-momentum-gate",
+      "pic-p5-operating-system",
+      "pic-p5-posture-sizing",
+      "pic-p5-wrapper-compounding",
+      "pic-p6-cis-composition",
+      "pic-p6-cis-fis-matrix",
+      "pic-p6-decay-drift",
+      "pic-p6-fis-waterfall",
+      "pic-p6-weekly-loop",
+      "pic-sig-payoff",
+      "pic-sig-shape",
+      "scoring",
+      "scoring-title",
+      "sidebar",
+      "tax",
+      "tax-title",
+      "theme-toggle"
+    ],
+    "/framework-in-math": [
+      "acf-reference-integrity-fallback",
+      "cis-math",
+      "cis-math-title",
+      "fis-math",
+      "fis-math-title",
+      "reading",
+      "reading-title",
+      "sidebar",
+      "sizing-math",
+      "sizing-math-title",
+      "theme-toggle"
     ]
   },
   "charts": {
@@ -1369,16 +1569,400 @@
         "label": "Appears in Part 6 · Carry direction inside the CIS macro component"
       },
       "chart": null
+    },
+    "roth": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Reserving Roth for Torque"
+      },
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge",
+        "label": "View the chart → P4-01 · The Tax Wedge"
+      }
+    },
+    "taxable-account": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · The work taxable accounts do"
+      },
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-roc-yield",
+        "label": "View the chart → P4-03 · ROC Changes the Yield"
+      }
+    },
+    "pretax-account": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Pre-tax accounts: inferior, occasionally useful"
+      },
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-gross-not-net",
+        "label": "View the chart → P4-02 · Gross Is Not Net"
+      }
+    },
+    "backdoor-roth": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Roth allocation discipline"
+      },
+      "chart": null
+    },
+    "rmd": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Pre-tax accounts: inferior, occasionally useful"
+      },
+      "chart": null
+    },
+    "niit": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · The tax wedge"
+      },
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge",
+        "label": "View the chart → P4-01 · The Tax Wedge"
+      }
+    },
+    "capital-gains": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · The tax wedge"
+      },
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge",
+        "label": "View the chart → P4-01 · The Tax Wedge"
+      }
+    },
+    "cost-basis": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Return of capital and basis"
+      },
+      "chart": null
+    },
+    "step-up-in-basis": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Why Bitcoin sits in taxable"
+      },
+      "chart": null
+    },
+    "tax-loss-harvesting": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Tax-loss harvesting"
+      },
+      "chart": null
+    },
+    "wash-sale": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Tax-loss harvesting"
+      },
+      "chart": null
+    },
+    "bracket-arbitrage": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Pre-tax accounts: inferior, occasionally useful"
+      },
+      "chart": null
+    },
+    "terminal-wealth": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Wrapper engineering as a structural edge"
+      },
+      "chart": {
+        "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge",
+        "label": "View the chart → P4-01 · The Tax Wedge"
+      }
+    },
+    "position-sizing": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Sizing by posture"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing",
+        "label": "View the chart → P5-03 · The Same Score Does Not Create the Same Position"
+      }
+    },
+    "allocation-band": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · The sizing tables"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing",
+        "label": "View the chart → P5-03 · The Same Score Does Not Create the Same Position"
+      }
+    },
+    "concentration-limit": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Concentration limits"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing",
+        "label": "View the chart → P5-03 · The Same Score Does Not Create the Same Position"
+      }
+    },
+    "drawdown": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Drawdown tolerance"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-operating-system",
+        "label": "View the chart → P5-01 · Three Jobs. One Cycle."
+      }
+    },
+    "volatility": {
+      "later": {
+        "href": "/part-1-foundation",
+        "label": "Appears in Part 1 · Fragility is not volatility"
+      },
+      "chart": {
+        "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-volatility-is-the-toll",
+        "label": "View the chart → P3-03 · Volatility Is the Toll"
+      }
+    },
+    "survivability": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Risk and Fragility inside CIS"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition",
+        "label": "View the chart → P6-01 · CIS Measures the Position, Not the Portfolio"
+      }
+    },
+    "rotation": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · The rotation function"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-ballast-rotation",
+        "label": "View the chart → P5-04 · Ballast Preserves the Right to Buy"
+      }
+    },
+    "stop-loss": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Hype governance"
+      },
+      "chart": null
+    },
+    "earnings-proximity": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Earnings proximity: cap the binary event"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-earnings-window",
+        "label": "View the chart → P5-05 · Conviction Does Not Eliminate Binary Risk"
+      }
+    },
+    "regime-force": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Allocate by force, not by sector"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-force-channels",
+        "label": "View the chart → P5-07 · One Regime Force. Multiple Economic Expressions."
+      }
+    },
+    "52-week-high": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Momentum: conviction requires confirmation"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate",
+        "label": "View the chart → P5-06 · Conviction Requires Market Confirmation"
+      }
+    },
+    "breadth": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Momentum: conviction requires confirmation"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate",
+        "label": "View the chart → P5-06 · Conviction Requires Market Confirmation"
+      }
+    },
+    "margin": {
+      "later": {
+        "href": "/part-4-tax-architecture-roc-strategy",
+        "label": "Appears in Part 4 · Margin as an optional overlay"
+      },
+      "chart": null
+    },
+    "override": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Doctrine, parameters, overrides"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-change-hierarchy",
+        "label": "View the chart → P5-10 · Know What You Are Changing"
+      }
+    },
+    "doctrine": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Doctrine, parameters, overrides"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-change-hierarchy",
+        "label": "View the chart → P5-10 · Know What You Are Changing"
+      }
+    },
+    "conviction": {
+      "later": {
+        "href": "/part-5-portfolio-construction-position-management",
+        "label": "Appears in Part 5 · Earned size"
+      },
+      "chart": {
+        "href": "/part-5-portfolio-construction-position-management#exhibit-p5-earned-size",
+        "label": "View the chart → P5-02 · Position Size Must Be Earned"
+      }
+    },
+    "regime": {
+      "later": {
+        "href": "/part-2-lineage-macro-thesis",
+        "label": "Appears in Part 2 · Identifying the macro thesis"
+      },
+      "chart": {
+        "href": "/part-2-lineage-macro-thesis#exhibit-p2-phase-changes-sizing",
+        "label": "View the chart → P2-08 · Phase Changes Sizing"
+      }
+    },
+    "optionality": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Convexity and Optionality inside CIS"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition",
+        "label": "View the chart → P6-01 · CIS Measures the Position, Not the Portfolio"
+      }
+    },
+    "asymmetry": {
+      "later": {
+        "href": "/part-1-foundation",
+        "label": "Appears in Part 1 · Shape the payoff"
+      },
+      "chart": {
+        "href": "/part-1-foundation#exhibit-s1",
+        "label": "View the chart → S1 · Shape the Payoff"
+      }
+    },
+    "score-band": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Reading the number"
+      },
+      "chart": null
+    },
+    "delta-clamp": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Delta clamping"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-weekly-loop",
+        "label": "View the chart → P6-04 · The Weekly Evidence Loop"
+      }
+    },
+    "confidence": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Confidence is derived, not asserted"
+      },
+      "chart": null
+    },
+    "archetype": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Archetype awareness"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition",
+        "label": "View the chart → P6-01 · CIS Measures the Position, Not the Portfolio"
+      }
+    },
+    "subtractive-scoring": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Subtractive scoring"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall",
+        "label": "View the chart → P6-02 · FIS Starts at 100"
+      }
+    },
+    "attribution": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · The five penalty buckets"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall",
+        "label": "View the chart → P6-02 · FIS Starts at 100"
+      }
+    },
+    "dead-capital": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · The five penalty buckets"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall",
+        "label": "View the chart → P6-02 · FIS Starts at 100"
+      }
+    },
+    "value-weighted": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · Value-weighting is scoped precisely"
+      },
+      "chart": null
+    },
+    "posture-drift": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · How implementations quietly degrade"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-decay-drift",
+        "label": "View the chart → P6-05 · Failure Rarely Arrives All at Once"
+      }
+    },
+    "decision-log": {
+      "later": {
+        "href": "/part-6-convexity-framework-integrity-scoring",
+        "label": "Appears in Part 6 · The weekly workflow"
+      },
+      "chart": {
+        "href": "/part-6-convexity-framework-integrity-scoring#exhibit-p6-weekly-loop",
+        "label": "View the chart → P6-04 · The Weekly Evidence Loop"
+      }
     }
   },
   "audit": {
-    "pages": 8,
-    "anchors": 182,
+    "pages": 11,
+    "anchors": 425,
     "chartSpecs": 45,
-    "liveChartMounts": 52,
-    "glossaryTerms": 28,
+    "liveChartMounts": 97,
+    "glossaryTerms": 70,
     "glossaryTermsAlreadyTagged": 28,
-    "glossaryTermsAutoTagEligible": 0,
+    "glossaryTermsAutoTagEligible": 42,
     "unresolvedGlossaryCharts": [],
     "warnings": []
   }

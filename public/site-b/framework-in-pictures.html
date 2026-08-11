@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="canonical" href="https://docs.acfdashboard.com/framework-in-pictures">
+  <title>The Framework in Pictures &middot; The Adaptive Convexity Framework</title>
+  <meta name="description" content="All 45 exhibits of the Adaptive Convexity Framework in one gallery, grouped by the part of the book each belongs to. Every chart makes one claim and shows its mechanism.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
+  <!-- Self-hosted webfonts (OFL 1.1 — licenses in fonts/). Inter v4.1 + JetBrains Mono v2.304; replaces the Google Fonts CDN load. -->
+  <link rel="preload" href="/site-b/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/site-b/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('/site-b/fonts/InterVariable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/site-b/fonts/InterVariable-Italic.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/site-b/tokens.css">
+  <link rel="stylesheet" href="/site-b/reading-system.css">
+  <style id="acf-reference-integrity-fallback">.part-ref.is-pending-reference,.lineage-ref.is-pending-reference{color:inherit!important;border:0!important;background:none!important;text-decoration:none!important;cursor:default!important}.part-ref.is-pending-reference::before,.part-ref.is-pending-reference::after,.lineage-ref.is-pending-reference::before,.lineage-ref.is-pending-reference::after{content:none!important}</style>
+</head>
+<body>
+  <a class="skip-link" href="#opening">Skip to content</a>
+
+  <!-- Mobile: open the parts sidebar -->
+  <button type="button" class="drawer-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Open parts navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+  </button>
+  <div class="drawer-backdrop" hidden></div>
+
+  <div class="shell">
+    <!-- Sidebar: brand + theme + the six parts (this IS the Part-page nav) -->
+    <nav class="sidebar" id="sidebar" aria-label="Parts">
+      <div class="sidebar-bar">
+        <button type="button" class="sidebar-toggle" aria-pressed="false" aria-label="Collapse sidebar">
+          <svg class="icon-collapse" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 59.01 34.01 Q 49.65 39.65 44.01 49.01 A 1.4 1.4 0 0 1 45.99 50.99 Q 53.89 43.89 60.99 35.99 A 1.4 1.4 0 0 1 59.01 34.01 Z" fill-rule="evenodd"></path><path d="M 44.01 50.99 Q 49.65 60.35 59.01 65.99 A 1.4 1.4 0 0 1 60.99 64.01 Q 53.89 56.11 45.99 49.01 A 1.4 1.4 0 0 1 44.01 50.99 Z" fill-rule="evenodd"></path></svg>
+          <svg class="icon-expand" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 44.01 35.99 Q 49.65 45.35 59.01 50.99 A 1.4 1.4 0 0 1 60.99 49.01 Q 53.89 41.11 45.99 34.01 A 1.4 1.4 0 0 1 44.01 35.99 Z" fill-rule="evenodd"></path><path d="M 59.01 49.01 Q 49.65 54.65 44.01 64.01 A 1.4 1.4 0 0 1 45.99 65.99 Q 53.89 58.89 60.99 50.99 A 1.4 1.4 0 0 1 59.01 49.01 Z" fill-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <div class="sidebar-head">
+        <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
+          <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+            <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+            <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+          </svg>
+          <span class="brand-word">ACF</span>
+        </a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <p class="side-movement">Philosophy</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-1-foundation"><span class="spnum">01</span><span>Foundation &amp; Philosophy</span></a></li>
+          <li><a class="side-part" href="/part-2-lineage-macro-thesis"><span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span></a></li>
+        </ul>
+
+        <p class="side-movement">Architecture</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-3-bitcoin-convexity-backbone"><span class="spnum">03</span><span>Bitcoin &mdash; Convexity Backbone</span></a></li>
+          <li><a class="side-part" href="/part-4-tax-architecture-roc-strategy"><span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy</span></a></li>
+        </ul>
+
+        <p class="side-movement">Implementation</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-5-portfolio-construction-position-management"><span class="spnum">05</span><span>Portfolio Construction &amp; Position Management</span></a></li>
+        </ul>
+
+        <p class="side-movement">Governance</p>
+        <ul class="side-parts">
+          <li>
+            <a class="side-part" href="/part-6-convexity-framework-integrity-scoring">
+              <span class="spnum">06</span><span>Convexity &amp; Framework Integrity Scoring</span>
+            </a>
+          </li>
+        </ul>
+
+        <p class="side-movement">Reference</p>
+        <ul class="side-parts">
+          <li>
+            <a class="side-part current" href="/framework-in-pictures" aria-current="page">
+              <span class="spnum">&mdash;</span><span>In Pictures</span>
+            </a>
+          </li>
+          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&mdash;</span><span>In Math</span></a></li>
+          <li><a class="side-part" href="/glossary"><span class="spnum">&mdash;</span><span>Glossary</span></a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="shell-main">
+
+    <header class="doc-header">
+      <div class="measure">
+        <p class="doc-eyebrow" data-glyph-text>Framework Documentation</p>
+        <p class="doc-kicker">45 exhibits &middot; every chart in the framework</p>
+        <h1 class="doc-title">The Framework in Pictures</h1>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">Every exhibit the framework uses, in the order the book presents them. Each chart makes one claim and shows the mechanism behind it. Hover, tap, or pin any exhibit for the deeper explanation; sources and methodology sit behind its Details toggle.</p>
+        <p><a class="part-ref" href="#opening">Opening</a> <a class="part-ref" href="#foundation">Part 1 · Foundation</a> <a class="part-ref" href="#lineage">Part 2 · Lineage &amp; Macro</a> <a class="part-ref" href="#backbone">Part 3 · The Backbone</a> <a class="part-ref" href="#tax">Part 4 · Tax Architecture</a> <a class="part-ref" href="#construction">Part 5 · Construction</a> <a class="part-ref" href="#scoring">Part 6 · Scoring</a></p>
+      </div>
+    </header>
+
+    <section class="section" id="opening" aria-labelledby="opening-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Opening</p>
+        <h2 class="section-title" id="opening-title">The shape of the whole system.</h2>
+        <p class="compare-key">3 exhibits</p>
+      </div>
+
+        <figure class="fc-mount" id="pic-dl-convexity-window" data-fc-chart="dl-convexity-window"></figure>
+        <p class="compare-key"><a class="part-ref" href="/#exhibit-dl-convexity-window">L1 &middot; The Window Opens &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-dl-regime-map" data-fc-chart="dl-regime-map"></figure>
+        <p class="compare-key"><a class="part-ref" href="/#exhibit-dl-regime-map">L2 &middot; Capital Has Weather &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-sig-shape" data-fc-chart="sig-shape"></figure>
+        <p class="compare-key"><a class="part-ref" href="/#exhibit-sig-shape">S2 &middot; Bend the Tail &mdash; read it in context</a></p>
+    </section>
+
+    <section class="section" id="foundation" aria-labelledby="foundation-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Part 1 · Foundation</p>
+        <h2 class="section-title" id="foundation-title">Why the traditional playbook fails.</h2>
+        <p class="compare-key">8 exhibits</p>
+      </div>
+
+        <figure class="fc-mount" id="pic-p1-hedge-broke" data-fc-chart="p1-hedge-broke"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-1-foundation#exhibit-01">01 &middot; The Hedge Broke &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p1-correlation" data-fc-chart="p1-correlation"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-1-foundation#exhibit-02">02 &middot; Correlation Turns &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p1-cpi-assets" data-fc-chart="p1-cpi-assets"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-1-foundation#exhibit-03">03 &middot; Inflation Was Bigger &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p1-policy-constraint" data-fc-chart="p1-policy-constraint"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-1-foundation#exhibit-04">04 &middot; The Bill Came Due &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p1-sequence-risk" data-fc-chart="p1-sequence-risk"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-1-foundation#exhibit-05">05 &middot; Path Changes Everything &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p1-convexity-survival" data-fc-chart="p1-convexity-survival"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-1-foundation#exhibit-06">06 &middot; Survive the Path &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-dl-tripwire-loop" data-fc-chart="dl-tripwire-loop"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-1-foundation#exhibit-dl-tripwire-loop">L3 &middot; Govern the Thesis &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-sig-payoff" data-fc-chart="sig-payoff"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-1-foundation#exhibit-s1">S1 &middot; Shape the Payoff &mdash; read it in context</a></p>
+    </section>
+
+    <section class="section" id="lineage" aria-labelledby="lineage-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Part 2 · Lineage &amp; Macro</p>
+        <h2 class="section-title" id="lineage-title">Method before macro.</h2>
+        <p class="compare-key">9 exhibits</p>
+      </div>
+
+        <figure class="fc-mount" id="pic-p2-method-before-macro" data-fc-chart="p2-method-before-macro"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-method-before-macro">P2-01 &middot; Method Before Macro &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p2-ruin-comes-first" data-fc-chart="p2-ruin-comes-first"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-ruin-comes-first">P2-02 &middot; Ruin Comes First &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p2-conviction-needs-exit" data-fc-chart="p2-conviction-needs-exit"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-conviction-needs-exit">P2-03 &middot; Conviction Needs an Exit &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p2-markets-feed-back" data-fc-chart="p2-markets-feed-back"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-markets-feed-back">P2-04 &middot; Markets Feed Back &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p2-time-changes-prudence" data-fc-chart="p2-time-changes-prudence"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-time-changes-prudence">P2-05 &middot; Time Changes Prudence &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p2-capital-finds-bottleneck" data-fc-chart="p2-capital-finds-bottleneck"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-capital-finds-bottleneck">P2-06 &middot; Capital Finds the Bottleneck &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p2-narrative-not-thesis" data-fc-chart="p2-narrative-not-thesis"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-narrative-not-thesis">P2-07 &middot; Narrative Is Not Thesis &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p2-phase-changes-sizing" data-fc-chart="p2-phase-changes-sizing"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-phase-changes-sizing">P2-08 &middot; Phase Changes Sizing &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p2-liquidity-sets-tide" data-fc-chart="p2-liquidity-sets-tide"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-liquidity-sets-tide">P2-09 &middot; Liquidity Sets the Tide &mdash; read it in context</a></p>
+    </section>
+
+    <section class="section" id="backbone" aria-labelledby="backbone-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Part 3 · The Backbone</p>
+        <h2 class="section-title" id="backbone-title">Bitcoin as the convexity reserve.</h2>
+        <p class="compare-key">7 exhibits</p>
+      </div>
+
+        <figure class="fc-mount" id="pic-p3-power-law-holds" data-fc-chart="p3-power-law-holds"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-power-law-holds">P3-01 &middot; Power Law Holds &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p3-volatility-is-the-toll" data-fc-chart="p3-volatility-is-the-toll"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-volatility-is-the-toll">P3-03 &middot; Volatility Is the Toll &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p3-exposure-not-control" data-fc-chart="p3-exposure-not-control"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-exposure-not-control">P3-04 &middot; Exposure Is Not Control &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p3-models-must-converge" data-fc-chart="p3-models-must-converge"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-models-must-converge">P3-05 &middot; Models Must Converge &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p3-accumulate-dont-trade" data-fc-chart="p3-accumulate-dont-trade"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-accumulate-dont-trade">P3-06 &middot; Accumulate, Don’t Trade &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p3-cold-storage-to-borrow" data-fc-chart="p3-cold-storage-to-borrow"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-cold-storage-to-borrow">P3-07 &middot; Cold Storage to Borrow &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p3-reserve-share-evolves" data-fc-chart="p3-reserve-share-evolves"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-reserve-share-evolves">P3-08 &middot; Reserve Share Evolves &mdash; read it in context</a></p>
+    </section>
+
+    <section class="section" id="tax" aria-labelledby="tax-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Part 4 · Tax Architecture</p>
+        <h2 class="section-title" id="tax-title">What the wrapper decides.</h2>
+        <p class="compare-key">3 exhibits</p>
+      </div>
+
+        <figure class="fc-mount" id="pic-p4-tax-wedge" data-fc-chart="p4-tax-wedge"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge">P4-01 &middot; The Tax Wedge &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p4-gross-not-net" data-fc-chart="p4-gross-not-net"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-gross-not-net">P4-02 &middot; Gross Is Not Net &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p4-roc-yield" data-fc-chart="p4-roc-yield"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-roc-yield">P4-03 &middot; ROC Changes the Yield &mdash; read it in context</a></p>
+    </section>
+
+    <section class="section" id="construction" aria-labelledby="construction-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Part 5 · Construction</p>
+        <h2 class="section-title" id="construction-title">Postures, sizing, and governance.</h2>
+        <p class="compare-key">10 exhibits</p>
+      </div>
+
+        <figure class="fc-mount" id="pic-p5-operating-system" data-fc-chart="p5-operating-system"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-operating-system">P5-01 &middot; Three Jobs. One Cycle. &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-earned-size" data-fc-chart="p5-earned-size"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-earned-size">P5-02 &middot; Position Size Must Be Earned &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-posture-sizing" data-fc-chart="p5-posture-sizing"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing">P5-03 &middot; The Same Score Does Not Create the Same Position &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-ballast-rotation" data-fc-chart="p5-ballast-rotation"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-ballast-rotation">P5-04 &middot; Ballast Preserves the Right to Buy &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-earnings-window" data-fc-chart="p5-earnings-window"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-earnings-window">P5-05 &middot; Conviction Does Not Eliminate Binary Risk &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-momentum-gate" data-fc-chart="p5-momentum-gate"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate">P5-06 &middot; Conviction Requires Market Confirmation &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-force-channels" data-fc-chart="p5-force-channels"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-force-channels">P5-07 &middot; One Regime Force. Multiple Economic Expressions. &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-wrapper-compounding" data-fc-chart="p5-wrapper-compounding"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-wrapper-compounding">P5-08 &middot; Tax Drag Compounds Too &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-liquidity-throttle" data-fc-chart="p5-liquidity-throttle"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-liquidity-throttle">P5-09 &middot; When Correlation Rises, Diversification Shrinks &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p5-change-hierarchy" data-fc-chart="p5-change-hierarchy"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-change-hierarchy">P5-10 &middot; Know What You Are Changing &mdash; read it in context</a></p>
+    </section>
+
+    <section class="section" id="scoring" aria-labelledby="scoring-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Part 6 · Scoring</p>
+        <h2 class="section-title" id="scoring-title">The two-score execution kernel.</h2>
+        <p class="compare-key">5 exhibits</p>
+      </div>
+
+        <figure class="fc-mount" id="pic-p6-cis-composition" data-fc-chart="p6-cis-composition"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition">P6-01 &middot; CIS Measures the Position, Not the Portfolio &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p6-fis-waterfall" data-fc-chart="p6-fis-waterfall"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall">P6-02 &middot; FIS Starts at 100 &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p6-cis-fis-matrix" data-fc-chart="p6-cis-fis-matrix"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-fis-matrix">P6-03 &middot; Good Assets Can Still Form a Bad Portfolio &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p6-weekly-loop" data-fc-chart="p6-weekly-loop"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-weekly-loop">P6-04 &middot; The Weekly Evidence Loop &mdash; read it in context</a></p>
+
+        <figure class="fc-mount" id="pic-p6-decay-drift" data-fc-chart="p6-decay-drift"></figure>
+        <p class="compare-key"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-decay-drift">P6-05 &middot; Failure Rarely Arrives All at Once &mdash; read it in context</a></p>
+    </section>
+
+    <footer class="site-footer">
+      <div class="measure">
+        <p>&copy; 2026 Adaptive Convexity Framework</p>
+        <p>Reference &middot; The Framework in Pictures</p>
+      </div>
+    </footer>
+  </main>
+  </div>
+
+  <!-- Floating reading nav — home + prev/next part, surfaces while scrolling -->
+  <nav class="floatnav" aria-label="Reading navigation" hidden>
+    <div class="floatnav-inner">
+      <button type="button" class="floatnav-top" aria-label="Back to top">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 35.99 60.99 Q 45.35 55.35 50.99 45.99 A 1.4 1.4 0 0 1 49.01 44.01 Q 41.11 51.11 34.01 59.01 A 1.4 1.4 0 0 1 35.99 60.99 Z" fill-rule="evenodd"></path><path d="M 49.01 45.99 Q 54.65 55.35 64.01 60.99 A 1.4 1.4 0 0 1 65.99 59.01 Q 58.89 51.11 50.99 44.01 A 1.4 1.4 0 0 1 49.01 45.99 Z" fill-rule="evenodd"></path></svg>
+      </button>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-home" href="/">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 23.5 21.23 Q 47.5 24.42 71.5 21.23 A 1.22 1.22 0 0 1 71.5 18.77 Q 47.5 19.17 23.5 18.77 A 1.22 1.22 0 0 1 23.5 21.23 Z M 68.78 18.5 Q 65.14 50 68.78 81.5 A 1.22 1.22 0 0 1 71.22 81.5 Q 70.39 50 71.22 18.5 A 1.22 1.22 0 0 1 68.78 18.5 Z M 71.5 78.78 Q 47.5 75.59 23.5 78.78 A 1.22 1.22 0 0 1 23.5 81.22 Q 47.5 80.84 71.5 81.22 A 1.22 1.22 0 0 1 71.5 78.78 Z M 26.23 81.5 Q 29.87 50 26.23 18.5 A 1.22 1.22 0 0 1 23.78 18.5 Q 24.62 50 23.78 81.5 A 1.22 1.22 0 0 1 26.23 81.5 Z" fill-rule="evenodd"></path><path d="M 35 21.23 Q 55 22.98 75 21.23 A 1.22 1.22 0 0 1 75 18.77 Q 55 17.73 35 18.77 A 1.22 1.22 0 0 1 35 21.23 Z" fill-rule="evenodd"></path><path d="M 73.78 20 Q 72.03 40 73.78 60 A 1.22 1.22 0 0 1 76.22 60 Q 77.28 40 76.22 20 A 1.22 1.22 0 0 1 73.78 20 Z" fill-rule="evenodd"></path><path d="M 33.5 35.88 Q 47.5 37.97 61.5 35.88 A 0.88 0.88 0 0 1 61.5 34.13 Q 47.5 34.22 33.5 34.13 A 0.88 0.88 0 0 1 33.5 35.88 Z M 59.13 33.5 Q 57.34 42.5 59.13 51.5 A 0.88 0.88 0 0 1 60.88 51.5 Q 61.09 42.5 60.88 33.5 A 0.88 0.88 0 0 1 59.13 33.5 Z M 61.5 49.13 Q 47.5 47.04 33.5 49.13 A 0.88 0.88 0 0 1 33.5 50.88 Q 47.5 50.79 61.5 50.88 A 0.88 0.88 0 0 1 61.5 49.13 Z M 35.88 51.5 Q 37.67 42.5 35.88 33.5 A 0.88 0.88 0 0 1 34.13 33.5 Q 33.92 42.5 34.13 51.5 A 0.88 0.88 0 0 1 35.88 51.5 Z" fill-rule="evenodd"></path><path d="M 46.13 50 Q 44.43 57.5 46.13 65 A 0.88 0.88 0 0 1 47.88 65 Q 48.18 57.5 47.88 50 A 0.88 0.88 0 0 1 46.13 50 Z" fill-rule="evenodd"></path></svg>
+        <span class="fn-home-label">Framework</span>
+      </a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-prev" href="/part-5-portfolio-construction-position-management">&larr; Part 5</a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <span class="floatnav-next" aria-disabled="true">Series complete</span>
+    </div>
+  </nav>
+
+  <!-- Progressive enhancement: theme, scroll-spy, drawer, completion, floatnav -->
+  <script src="/site-b/site-b-charts.js" defer></script>
+  <script src="/site-b/reading.js" defer></script>
+  <script src="/site-b/glyph-text.js" defer></script>
+  <!-- Deep links land exactly: islands hydrate after the initial anchor jump,
+       so re-anchor once mounting settles — unless the reader has scrolled. -->
+  <script defer>
+    (function () {
+      if (!location.hash) return;
+      var moved = false;
+      addEventListener('wheel', function () { moved = true; }, { once: true, passive: true });
+      addEventListener('touchmove', function () { moved = true; }, { once: true, passive: true });
+      function re() { if (moved) return; var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView(); }
+      addEventListener('load', function () { setTimeout(re, 700); setTimeout(re, 1800); });
+    })();
+  </script>
+
+</body>
+</html>

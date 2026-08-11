@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="canonical" href="https://docs.acfdashboard.com/glossary">
+  <title>Glossary &middot; The Adaptive Convexity Framework</title>
+  <meta name="description" content="The Adaptive Convexity Framework glossary: 70 terms defined where they are taught, each linked to the Part that develops it and the exhibit that shows it.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
+  <!-- Self-hosted webfonts (OFL 1.1 — licenses in fonts/). Inter v4.1 + JetBrains Mono v2.304; replaces the Google Fonts CDN load. -->
+  <link rel="preload" href="/site-b/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/site-b/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('/site-b/fonts/InterVariable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/site-b/fonts/InterVariable-Italic.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/site-b/tokens.css">
+  <link rel="stylesheet" href="/site-b/reading-system.css">
+  <style id="acf-reference-integrity-fallback">.part-ref.is-pending-reference,.lineage-ref.is-pending-reference{color:inherit!important;border:0!important;background:none!important;text-decoration:none!important;cursor:default!important}.part-ref.is-pending-reference::before,.part-ref.is-pending-reference::after,.lineage-ref.is-pending-reference::before,.lineage-ref.is-pending-reference::after{content:none!important}</style>
+</head>
+<body>
+  <a class="skip-link" href="#foundations">Skip to content</a>
+
+  <!-- Mobile: open the parts sidebar -->
+  <button type="button" class="drawer-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Open parts navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+  </button>
+  <div class="drawer-backdrop" hidden></div>
+
+  <div class="shell">
+    <!-- Sidebar: brand + theme + the six parts (this IS the Part-page nav) -->
+    <nav class="sidebar" id="sidebar" aria-label="Parts">
+      <div class="sidebar-bar">
+        <button type="button" class="sidebar-toggle" aria-pressed="false" aria-label="Collapse sidebar">
+          <svg class="icon-collapse" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 59.01 34.01 Q 49.65 39.65 44.01 49.01 A 1.4 1.4 0 0 1 45.99 50.99 Q 53.89 43.89 60.99 35.99 A 1.4 1.4 0 0 1 59.01 34.01 Z" fill-rule="evenodd"></path><path d="M 44.01 50.99 Q 49.65 60.35 59.01 65.99 A 1.4 1.4 0 0 1 60.99 64.01 Q 53.89 56.11 45.99 49.01 A 1.4 1.4 0 0 1 44.01 50.99 Z" fill-rule="evenodd"></path></svg>
+          <svg class="icon-expand" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 44.01 35.99 Q 49.65 45.35 59.01 50.99 A 1.4 1.4 0 0 1 60.99 49.01 Q 53.89 41.11 45.99 34.01 A 1.4 1.4 0 0 1 44.01 35.99 Z" fill-rule="evenodd"></path><path d="M 59.01 49.01 Q 49.65 54.65 44.01 64.01 A 1.4 1.4 0 0 1 45.99 65.99 Q 53.89 58.89 60.99 50.99 A 1.4 1.4 0 0 1 59.01 49.01 Z" fill-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <div class="sidebar-head">
+        <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
+          <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+            <rect width="22" height="22" rx="3" fill="#10b981"></rect>
+            <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+          </svg>
+          <span class="brand-word">ACF</span>
+        </a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <p class="side-movement">Philosophy</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-1-foundation"><span class="spnum">01</span><span>Foundation &amp; Philosophy</span></a></li>
+          <li><a class="side-part" href="/part-2-lineage-macro-thesis"><span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span></a></li>
+        </ul>
+
+        <p class="side-movement">Architecture</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-3-bitcoin-convexity-backbone"><span class="spnum">03</span><span>Bitcoin &mdash; Convexity Backbone</span></a></li>
+          <li><a class="side-part" href="/part-4-tax-architecture-roc-strategy"><span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy</span></a></li>
+        </ul>
+
+        <p class="side-movement">Implementation</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-5-portfolio-construction-position-management"><span class="spnum">05</span><span>Portfolio Construction &amp; Position Management</span></a></li>
+        </ul>
+
+        <p class="side-movement">Governance</p>
+        <ul class="side-parts">
+          <li>
+            <a class="side-part" href="/part-6-convexity-framework-integrity-scoring">
+              <span class="spnum">06</span><span>Convexity &amp; Framework Integrity Scoring</span>
+            </a>
+          </li>
+        </ul>
+
+        <p class="side-movement">Reference</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&mdash;</span><span>In Pictures</span></a></li>
+          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&mdash;</span><span>In Math</span></a></li>
+          <li>
+            <a class="side-part current" href="/glossary" aria-current="page">
+              <span class="spnum">&mdash;</span><span>Glossary</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="shell-main">
+
+    <header class="doc-header">
+      <div class="measure">
+        <p class="doc-eyebrow" data-glyph-text>Framework Reference</p>
+        <p class="doc-kicker">70 terms &middot; defined where they are taught</p>
+        <h1 class="doc-title">Glossary</h1>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">Every term the framework defines for itself, in the order the book teaches them. Each entry links back to the Part where the idea is developed and, where one exists, to the exhibit that shows it.</p>
+        <p><a class="part-ref" href="#foundations">Foundations</a> <a class="part-ref" href="#macro">Lineage &amp; Macro</a> <a class="part-ref" href="#bitcoin">The Backbone</a> <a class="part-ref" href="#tax">Tax Architecture</a> <a class="part-ref" href="#construction">Construction</a> <a class="part-ref" href="#scoring">Scoring</a></p>
+      </div>
+    </header>
+
+    <section class="section" id="foundations" aria-labelledby="foundations-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Foundations</p>
+        <h2 class="section-title" id="foundations-title">The vocabulary of the thesis.</h2>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+            <div id="g-asymmetry">
+              <span class="name">Asymmetry</span>
+              <p>A payoff where the upside and downside are unequal in size or probability. The framework seeks it deliberately and treats symmetric risk measures as an incomplete description of survival.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-1-foundation">Part 1 &middot; Shape the payoff</a> <a class="part-ref" href="/part-1-foundation#exhibit-s1">Exhibit S1 &middot; Shape the Payoff</a></p>
+            </div>
+            <div id="g-survivable-compounding">
+              <span class="name">Survivable compounding</span>
+              <p>Building a portfolio that can stay alive through timing errors, volatility, and thesis delays while keeping exposure to large upside.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-1-foundation#exhibit-06">Exhibit 06 &middot; Survive the Path</a></p>
+            </div>
+            <div id="g-volatility">
+              <span class="name">Volatility</span>
+              <p>How much a price moves. The framework separates it from fragility: a position can be highly volatile and still robust, and the difference is whether the move threatens survival.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-1-foundation">Part 1 &middot; Fragility is not volatility</a> <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-volatility-is-the-toll">Exhibit P3-03 &middot; Volatility Is the Toll</a></p>
+            </div>
+            <div id="g-volatility-clustering">
+              <span class="name">Volatility clustering</span>
+              <p>High-volatility periods tend to arrive in clusters rather than as isolated events, which changes how risk should be managed.</p>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="macro" aria-labelledby="macro-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Lineage &amp; Macro</p>
+        <h2 class="section-title" id="macro-title">Method, regime, and the macro thesis.</h2>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+            <div id="g-correlation-instability">
+              <span class="name">Correlation instability</span>
+              <p>Correlations between assets are regime-dependent and can flip when inflation or liquidity stress dominates.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-2-lineage-macro-thesis">Part 2 &middot; Why the diversification regime changed</a> <a class="part-ref" href="/part-1-foundation#exhibit-02">Exhibit 02 &middot; Correlation Turns</a></p>
+            </div>
+            <div id="g-fiscal-dominance">
+              <span class="name">Fiscal dominance</span>
+              <p>A condition where public debt and financing constraints begin to dictate what monetary policy can realistically do.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-2-lineage-macro-thesis">Part 2 &middot; The macro thesis and policy backdrop</a> <a class="part-ref" href="/part-1-foundation#exhibit-04">Exhibit 04 &middot; The Bill Came Due</a></p>
+            </div>
+            <div id="g-macro-thesis">
+              <span class="name">Macro thesis</span>
+              <p>A probabilistic read of the current regime that sets the portfolio&rsquo;s structure. It is a framing device, not a point forecast.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-2-lineage-macro-thesis">Part 2 &middot; The lineage and the full regime thesis</a> <a class="part-ref" href="/#exhibit-dl-regime-map">Exhibit L2 &middot; Capital Has Weather</a></p>
+            </div>
+            <div id="g-policy-reflexivity">
+              <span class="name">Policy reflexivity</span>
+              <p>Markets react to policy and policymakers react back to markets, creating feedback loops that can amplify instability.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-2-lineage-macro-thesis">Part 2 &middot; The intellectual lineage</a> <a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-markets-feed-back">Exhibit P2-04 &middot; Markets Feed Back</a></p>
+            </div>
+            <div id="g-regime">
+              <span class="name">Regime</span>
+              <p>The prevailing structural conditions that determine how assets behave and correlate. The framework is built to adapt when the regime changes rather than to optimize for the average of all regimes.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-2-lineage-macro-thesis">Part 2 &middot; Identifying the macro thesis</a> <a class="part-ref" href="/part-2-lineage-macro-thesis#exhibit-p2-phase-changes-sizing">Exhibit P2-08 &middot; Phase Changes Sizing</a></p>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="bitcoin" aria-labelledby="bitcoin-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Backbone</p>
+        <h2 class="section-title" id="bitcoin-title">Bitcoin, valuation, and accumulation.</h2>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+            <div id="g-power-law-corridor">
+              <span class="name">Power-law corridor</span>
+              <p>A long-run regression channel, on a log scale, that Bitcoin&rsquo;s price has historically tracked. The framework reads it as a context band for accumulation pace, not a deterministic price prediction.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone">Part 3 &middot; Power-law bands and model convergence</a> <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-power-law-holds">Exhibit P3-01 &middot; Power Law Holds</a></p>
+            </div>
+            <div id="g-tam">
+              <span class="name">TAM</span>
+              <p>Total Addressable Market: a deliberately conservative estimate of the capital a market could absorb over time, used to size an asset&rsquo;s potential rather than to forecast a price.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-3-bitcoin-convexity-backbone">Part 3 &middot; The conservative addressable-market estimate for the Bitcoin reserve</a></p>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tax" aria-labelledby="tax-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Tax Architecture</p>
+        <h2 class="section-title" id="tax-title">Wrappers, basis, and what you keep.</h2>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+            <div id="g-backdoor-roth">
+              <span class="name">Backdoor Roth</span>
+              <p>Reaching Roth treatment above the direct income limits by contributing to a traditional IRA and converting. It preserves access under current law and is subject to the pro-rata rule when other pre-tax balances exist.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Roth allocation discipline</a></p>
+            </div>
+            <div id="g-bracket-arbitrage">
+              <span class="name">Bracket arbitrage</span>
+              <p>Taking a deduction at a high marginal rate in one year and converting the balance to Roth in a later, lower-rate year. The captured value is the spread between the two rates.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Pre-tax accounts: inferior, occasionally useful</a></p>
+            </div>
+            <div id="g-buy-borrow-die">
+              <span class="name">Buy, borrow, die</span>
+              <p>Borrowing against appreciated assets instead of selling them, potentially deferring realization. It depends on current law and financing availability.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Realization deferral mechanics</a> <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-cold-storage-to-borrow">Exhibit P3-07 &middot; Cold Storage to Borrow</a></p>
+            </div>
+            <div id="g-capital-gains">
+              <span class="name">Capital gains</span>
+              <p>The taxable profit realized when an appreciated position is sold. Long-held positions generally receive preferential rates, which is why holding period and wrapper placement change what a gain is worth.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; The tax wedge</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge">Exhibit P4-01 &middot; The Tax Wedge</a></p>
+            </div>
+            <div id="g-cost-basis">
+              <span class="name">Cost basis</span>
+              <p>What a position is treated as having cost for tax purposes. Gains are measured against it, return-of-capital distributions reduce it, and under current law it may reset at death.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Return of capital and basis</a></p>
+            </div>
+            <div id="g-margin">
+              <span class="name">Margin</span>
+              <p>Borrowing against portfolio assets rather than selling them. The framework treats it as an optional overlay, revocable by the broker and repriceable under stress, never as a structural requirement.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Margin as an optional overlay</a></p>
+            </div>
+            <div id="g-niit">
+              <span class="name">Net investment income tax</span>
+              <p>An additional 3.8 percent federal tax on investment income above certain income thresholds. It is part of why a taxable account retains materially less of a large gain than a Roth.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; The tax wedge</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge">Exhibit P4-01 &middot; The Tax Wedge</a></p>
+            </div>
+            <div id="g-pretax-account">
+              <span class="name">Pre-tax account</span>
+              <p>An account funded before tax where contributions reduce current income and withdrawals are taxed as ordinary income. The framework treats it as tactical rather than structural, because the deferred tax obligation compounds alongside the balance.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Pre-tax accounts: inferior, occasionally useful</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-gross-not-net">Exhibit P4-02 &middot; Gross Is Not Net</a></p>
+            </div>
+            <div id="g-rmd">
+              <span class="name">Required minimum distribution</span>
+              <p>A withdrawal the law compels from pre-tax accounts starting at age 73, rising to 75 in 2033 under current rules. It forces taxable income regardless of need, which is one reason the framework prefers Roth for long-horizon convexity.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Pre-tax accounts: inferior, occasionally useful</a></p>
+            </div>
+            <div id="g-right-tail-outcomes">
+              <span class="name">Right-tail outcomes</span>
+              <p>Rare but very large gains that dominate total portfolio outcomes, which is why their tax treatment matters so much.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Taxing the right tail</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge">Exhibit P4-01 &middot; The Tax Wedge</a></p>
+            </div>
+            <div id="g-roth">
+              <span class="name">Roth account</span>
+              <p>An account funded with after-tax dollars where qualified withdrawals are not taxed, so appreciation compounds and trades without tax friction. The framework treats its annual capacity as scarce and reserves it for positions that may be rotated.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Reserving Roth for Torque</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge">Exhibit P4-01 &middot; The Tax Wedge</a></p>
+            </div>
+            <div id="g-step-up-in-basis">
+              <span class="name">Step-up in basis</span>
+              <p>The reset of an inherited asset&rsquo;s cost basis to its value at death under current law, which can erase the embedded gain. It is policy-dependent and not guaranteed, and it underpins the never-sell treatment of the Bitcoin backbone.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Why Bitcoin sits in taxable</a></p>
+            </div>
+            <div id="g-tax-wrapper">
+              <span class="name">Tax wrapper</span>
+              <p>The legal account container (Roth, taxable, or pre-tax) whose tax rules materially change long-run compounding outcomes.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Wrapper engineering as structural edge</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge">Exhibit P4-01 &middot; The Tax Wedge</a></p>
+            </div>
+            <div id="g-tax-loss-harvesting">
+              <span class="name">Tax-loss harvesting</span>
+              <p>Realizing a loss deliberately to offset gains, or a limited amount of ordinary income, while keeping the exposure through a non-identical position. The harvested loss carries forward as a durable tax asset.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Tax-loss harvesting</a></p>
+            </div>
+            <div id="g-taxable-account">
+              <span class="name">Taxable account</span>
+              <p>An ordinary investment account with no contribution limit, where realized gains and distributions are taxed in the year they occur. The framework routes never-sold and income-producing holdings here, including the Bitcoin backbone.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; The work taxable accounts do</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-roc-yield">Exhibit P4-03 &middot; ROC Changes the Yield</a></p>
+            </div>
+            <div id="g-terminal-wealth">
+              <span class="name">Terminal wealth</span>
+              <p>What the portfolio is actually worth at the end of the horizon, after every tax, fee, and friction has been paid. The framework optimizes for it rather than for any single year&rsquo;s return.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Wrapper engineering as a structural edge</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-tax-wedge">Exhibit P4-01 &middot; The Tax Wedge</a></p>
+            </div>
+            <div id="g-wash-sale">
+              <span class="name">Wash sale</span>
+              <p>A rule that disallows a realized loss when a substantially identical position is repurchased inside a set window. It is why harvesting redeploys into a similar but not identical holding.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-4-tax-architecture-roc-strategy">Part 4 &middot; Tax-loss harvesting</a></p>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="construction" aria-labelledby="construction-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Construction</p>
+        <h2 class="section-title" id="construction-title">Postures, sizing, and governance.</h2>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+            <div id="g-52-week-high">
+              <span class="name">52-week high</span>
+              <p>The highest price of the past year, used as the reference for absolute momentum. Distance below it grades a position from healthy, through correction, to severe distress.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Momentum: conviction requires confirmation</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate">Exhibit P5-06 &middot; Conviction Requires Market Confirmation</a></p>
+            </div>
+            <div id="g-agentic-verification">
+              <span class="name">Agentic verification</span>
+              <p>An AI-assisted research loop that speeds evidence-gathering once a tripwire fires, without handing final judgment to the machine.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Verification inside position management</a></p>
+            </div>
+            <div id="g-allocation-band">
+              <span class="name">Allocation band</span>
+              <p>The target size range a score maps into for a given posture. Seventy and above supports core sizing, sixty to sixty-nine constrained, fifty to fifty-nine starter, and below fifty is not allocation-worthy.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; The sizing tables</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing">Exhibit P5-03 &middot; The Same Score Does Not Create the Same Position</a></p>
+            </div>
+            <div id="g-ballast">
+              <span class="name">Ballast</span>
+              <p>Capital-preserving reserve and rotation capital that helps the portfolio survive stress and buy into dislocations.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; The Ballast posture</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-ballast-rotation">Exhibit P5-04 &middot; Ballast Preserves the Right to Buy</a></p>
+            </div>
+            <div id="g-barbell">
+              <span class="name">Barbell</span>
+              <p>A structure that pairs very safe holdings with a small, highly convex allocation and skips the fragile middle. It targets payoff asymmetry, not low volatility.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Portfolio construction and posture expression</a></p>
+            </div>
+            <div id="g-breadth">
+              <span class="name">Breadth</span>
+              <p>How widely a move is shared across related names. Broad participation supports a thesis; narrowing leadership warns that a move is thinning even while the index holds.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Momentum: conviction requires confirmation</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate">Exhibit P5-06 &middot; Conviction Requires Market Confirmation</a></p>
+            </div>
+            <div id="g-concentration-limit">
+              <span class="name">Concentration limit</span>
+              <p>A ceiling on how much any single name or small group may represent, applied to the household aggregate across every account. Fifteen percent is the default single-position cap, eighteen percent the absolute with a documented override.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Concentration limits</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing">Exhibit P5-03 &middot; The Same Score Does Not Create the Same Position</a></p>
+            </div>
+            <div id="g-convexity">
+              <span class="name">Convexity</span>
+              <p>Exposure where the upside can compound far faster than the downside, so being right pays off disproportionately more than being wrong costs.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; How convexity is expressed through Posture</a> <a class="part-ref" href="/part-1-foundation#exhibit-s1">Exhibit S1 &middot; Shape the Payoff</a></p>
+            </div>
+            <div id="g-conviction">
+              <span class="name">Conviction</span>
+              <p>The strength of the evidence behind a position, as opposed to enthusiasm for it. The framework quantifies it through CIS so that size follows demonstrated evidence rather than feeling.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Earned size</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-earned-size">Exhibit P5-02 &middot; Position Size Must Be Earned</a></p>
+            </div>
+            <div id="g-doctrine">
+              <span class="name">Doctrine</span>
+              <p>The non-negotiable layer of the framework: the principles that define what it is. Changing one means no longer implementing the framework, as distinct from tuning a parameter or logging an override.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Doctrine, parameters, overrides</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-change-hierarchy">Exhibit P5-10 &middot; Know What You Are Changing</a></p>
+            </div>
+            <div id="g-dca">
+              <span class="name">Dollar-cost averaging</span>
+              <p>Buying a fixed amount on a set schedule regardless of price, which spreads entry risk across time. The framework funds it from income and accelerates it into deep drawdowns.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Accumulation discipline and position management</a> <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#exhibit-p3-accumulate-dont-trade">Exhibit P3-06 &middot; Accumulate, Don’t Trade</a></p>
+            </div>
+            <div id="g-drawdown">
+              <span class="name">Drawdown</span>
+              <p>A decline from a position&rsquo;s or portfolio&rsquo;s recent peak. The framework treats a survivable drawdown as the price of convexity rather than as a malfunction, provided reserves make it holdable.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Drawdown tolerance</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-operating-system">Exhibit P5-01 &middot; Three Jobs. One Cycle.</a></p>
+            </div>
+            <div id="g-dry-powder">
+              <span class="name">Dry powder</span>
+              <p>Reserve cash kept ready to deploy into dislocations. The framework builds it during extensions and spends it when valuations converge on undervaluation.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Reserve capital and redeployment rules</a></p>
+            </div>
+            <div id="g-earnings-proximity">
+              <span class="name">Earnings proximity</span>
+              <p>The protocol governing exposure around a scheduled earnings date. A position entering the final five trading days is capped at three percent of portfolio value, because the event is binary and conviction does not predict it.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Earnings proximity: cap the binary event</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-earnings-window">Exhibit P5-05 &middot; Conviction Does Not Eliminate Binary Risk</a></p>
+            </div>
+            <div id="g-hype">
+              <span class="name">Hype</span>
+              <p>Narrative-driven convexity with weak structural backing. Useful only with strict limits and automatic exits.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; The Hype posture and its limits</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing">Exhibit P5-03 &middot; The Same Score Does Not Create the Same Position</a></p>
+            </div>
+            <div id="g-momentum-filter">
+              <span class="name">Momentum filter</span>
+              <p>A trend-validation rule: the framework checks that the market is confirming the thesis before it allows a full position size.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Momentum as the sizing gate</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-momentum-gate">Exhibit P5-06 &middot; Conviction Requires Market Confirmation</a></p>
+            </div>
+            <div id="g-override">
+              <span class="name">Override</span>
+              <p>A conscious, documented, time-bounded deviation from a default parameter, carrying the reasoning and the conditions under which it reverts. An unexamined drift is not an override; it is the framework being abandoned quietly.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Doctrine, parameters, overrides</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-change-hierarchy">Exhibit P5-10 &middot; Know What You Are Changing</a></p>
+            </div>
+            <div id="g-position-sizing">
+              <span class="name">Position sizing</span>
+              <p>How much capital a single position is allowed to carry. In this framework size is earned: the score selects a band, the posture scales it, and concentration limits cap it at the household level.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Sizing by posture</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-posture-sizing">Exhibit P5-03 &middot; The Same Score Does Not Create the Same Position</a></p>
+            </div>
+            <div id="g-posture">
+              <span class="name">Posture</span>
+              <p>The behavioral classification every non-Bitcoin position carries: Torque, Ballast, or Hype. It sets the position&rsquo;s sizing bands and governance rules; behavior, not asset type, is what the framework classifies. Bitcoin sits outside all three, governed by Part 3.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; The three postures in full</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-operating-system">Exhibit P5-01 &middot; Three Jobs. One Cycle.</a></p>
+            </div>
+            <div id="g-regime-force">
+              <span class="name">Regime force</span>
+              <p>A durable structural driver that capital must flow toward, identified in the macro thesis. The framework allocates by force rather than by sector, and diversifies across several expressions of the same force.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Allocate by force, not by sector</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-force-channels">Exhibit P5-07 &middot; One Regime Force. Multiple Economic Expressions.</a></p>
+            </div>
+            <div id="g-return-of-capital">
+              <span class="name">Return of capital</span>
+              <p>A distribution treated as a return of your own invested capital rather than taxable income. It reduces cost basis and defers tax rather than eliminating it; classification can change and depends on current law.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; The Ballast posture</a> <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#exhibit-p4-roc-yield">Exhibit P4-03 &middot; ROC Changes the Yield</a></p>
+            </div>
+            <div id="g-rotation">
+              <span class="name">Rotation</span>
+              <p>Moving capital between postures as conditions change, most often trimming Ballast after Torque runs and redeploying into Torque during dislocations. It is the framework&rsquo;s primary way of buying low without raising outside cash.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; The rotation function</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-ballast-rotation">Exhibit P5-04 &middot; Ballast Preserves the Right to Buy</a></p>
+            </div>
+            <div id="g-sequence-of-returns-risk">
+              <span class="name">Sequence-of-returns risk</span>
+              <p>The risk that the order of gains and losses, not just their average, determines whether a portfolio survives. A large drawdown at the wrong time can permanently impair compounding.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Position sizing against sequence risk</a> <a class="part-ref" href="/part-1-foundation#exhibit-05">Exhibit 05 &middot; Path Changes Everything</a></p>
+            </div>
+            <div id="g-stop-loss">
+              <span class="name">Stop-loss</span>
+              <p>An exit level committed to before entry. Hype positions carry them by doctrine, and the framework forbids widening a stop or reclassifying a position to avoid honoring one.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Hype governance</a></p>
+            </div>
+            <div id="g-torque">
+              <span class="name">Torque</span>
+              <p>Controlled convexity: high-upside exposure to durable, real regime forces that can tolerate serious drawdowns.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; The Torque posture</a> <a class="part-ref" href="/part-5-portfolio-construction-position-management#exhibit-p5-operating-system">Exhibit P5-01 &middot; Three Jobs. One Cycle.</a></p>
+            </div>
+            <div id="g-tripwire">
+              <span class="name">Tripwire</span>
+              <p>A predefined threshold that forces review or action before denial, emotion, or information overload can take over.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-5-portfolio-construction-position-management">Part 5 &middot; Tripwires as position-management gates</a> <a class="part-ref" href="/part-1-foundation#exhibit-dl-tripwire-loop">Exhibit L3 &middot; Govern the Thesis</a></p>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="scoring" aria-labelledby="scoring-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Scoring</p>
+        <h2 class="section-title" id="scoring-title">The two-score execution kernel.</h2>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+            <div id="g-archetype">
+              <span class="name">Archetype</span>
+              <p>The structural class a position belongs to, which selects the lens CIS scores it through. It changes how the rubric is applied, never what the final number is floored at.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Archetype awareness</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition">Exhibit P6-01 &middot; CIS Measures the Position, Not the Portfolio</a></p>
+            </div>
+            <div id="g-attribution">
+              <span class="name">Attribution</span>
+              <p>The itemized account of which rule cost how many points. It is what makes a construction score actionable, because the fix is named alongside the deduction.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; The five penalty buckets</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall">Exhibit P6-02 &middot; FIS Starts at 100</a></p>
+            </div>
+            <div id="g-carry-vector">
+              <span class="name">Carry vectors</span>
+              <p>The framework&rsquo;s closed structure classification for a position: Long Carry, Short Carry, or Barbell. In CIS scoring, carry direction measures whether a position benefits from or suffers under the current rate and inflation regime; a barbell pairs the two exposures.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Carry direction inside the CIS macro component</a></p>
+            </div>
+            <div id="g-cis">
+              <span class="name">CIS</span>
+              <p>Convexity Integrity Score: a 0 to 100 score rating one position at a time on convexity and optionality, risk and fragility, macro alignment, and execution and sentiment.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; The formal scoring definition</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition">Exhibit P6-01 &middot; CIS Measures the Position, Not the Portfolio</a></p>
+            </div>
+            <div id="g-confidence">
+              <span class="name">Confidence</span>
+              <p>How much the evidence behind a score can support, derived by the engine from the quality of each source rather than asserted by hand. It sets how far a single update is allowed to move the score.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Confidence is derived, not asserted</a></p>
+            </div>
+            <div id="g-dead-capital">
+              <span class="name">Dead capital</span>
+              <p>Capital held without a documented thesis or on a score nobody has refreshed. It is one of the five FIS penalty buckets, and it scales with position size.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; The five penalty buckets</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall">Exhibit P6-02 &middot; FIS Starts at 100</a></p>
+            </div>
+            <div id="g-decision-log">
+              <span class="name">Decision log</span>
+              <p>The record of what changed, why, and what would reverse it, written as the weekly loop closes. It is what makes the next week&rsquo;s pass a measurement rather than a memory.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; The weekly workflow</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-weekly-loop">Exhibit P6-04 &middot; The Weekly Evidence Loop</a></p>
+            </div>
+            <div id="g-delta-clamp">
+              <span class="name">Delta clamp</span>
+              <p>A cap on how far a score may move in a single update, scaled by how good the underlying evidence is. It forces a large re-rating to be earned across successive updates rather than granted in one enthusiastic week.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Delta clamping</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-weekly-loop">Exhibit P6-04 &middot; The Weekly Evidence Loop</a></p>
+            </div>
+            <div id="g-fis">
+              <span class="name">FIS</span>
+              <p>Framework Integrity Score: a 0 to 100 portfolio-construction score that starts the assembled portfolio at 100 and deducts a named penalty for each rule violation, so every lost point is attributable and repairable.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; The subtractive construction score</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall">Exhibit P6-02 &middot; FIS Starts at 100</a></p>
+            </div>
+            <div id="g-fragility">
+              <span class="name">Fragility</span>
+              <p>Vulnerability to disorder and nonlinear shocks, not just price movement. A fragile position breaks when stress rises.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Fragility inside the CIS score</a> <a class="part-ref" href="/part-1-foundation#exhibit-01">Exhibit 01 &middot; The Hedge Broke</a></p>
+            </div>
+            <div id="g-optionality">
+              <span class="name">Optionality</span>
+              <p>Holding a position whose future paths include large upside without committing to which one occurs. It is the property CIS scores first, because it is what convexity is made of.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Convexity and Optionality inside CIS</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition">Exhibit P6-01 &middot; CIS Measures the Position, Not the Portfolio</a></p>
+            </div>
+            <div id="g-posture-drift">
+              <span class="name">Posture drift</span>
+              <p>The gap between the portfolio&rsquo;s actual posture mix and its target, which the market can open without a single trade. It is reported as a diagnostic alongside the score rather than billed as a penalty.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; How implementations quietly degrade</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-decay-drift">Exhibit P6-05 &middot; Failure Rarely Arrives All at Once</a></p>
+            </div>
+            <div id="g-score-band">
+              <span class="name">Score band</span>
+              <p>The shared four-level register both scores read: seventy and above Strong, sixty to sixty-nine Moderate, fifty to fifty-nine Caution, below fifty Weak. On FIS seventy is also the action line; on CIS it is a band boundary, not an action trigger.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Reading the number</a></p>
+            </div>
+            <div id="g-subtractive-scoring">
+              <span class="name">Subtractive scoring</span>
+              <p>Starting a portfolio at one hundred and deducting a named penalty for each rule violation. Every point below one hundred is attributable to a specific departure, so the score reads as a repair list rather than a verdict.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Subtractive scoring</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-fis-waterfall">Exhibit P6-02 &middot; FIS Starts at 100</a></p>
+            </div>
+            <div id="g-survivability">
+              <span class="name">Survivability</span>
+              <p>Whether a position or portfolio can withstand stress without being forced into a decision that ends the compounding. It is scored inside CIS as Risk and Fragility, where a higher score means lower fragility.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Risk and Fragility inside CIS</a> <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#exhibit-p6-cis-composition">Exhibit P6-01 &middot; CIS Measures the Position, Not the Portfolio</a></p>
+            </div>
+            <div id="g-value-weighted">
+              <span class="name">Value-weighted</span>
+              <p>Scaling a penalty by how large the offending position is, within a floor and a cap. A bigger position generates a proportionally bigger charge, but no single position is allowed to dominate the score.</p>
+              <p class="gloss-page-links"><a class="part-ref" href="/part-6-convexity-framework-integrity-scoring">Part 6 &middot; Value-weighting is scoped precisely</a></p>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="measure">
+        <p>&copy; 2026 Adaptive Convexity Framework</p>
+        <p>Reference &middot; Glossary</p>
+      </div>
+    </footer>
+  </main>
+  </div>
+
+  <!-- Floating reading nav — home + prev/next part, surfaces while scrolling -->
+  <nav class="floatnav" aria-label="Reading navigation" hidden>
+    <div class="floatnav-inner">
+      <button type="button" class="floatnav-top" aria-label="Back to top">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 35.99 60.99 Q 45.35 55.35 50.99 45.99 A 1.4 1.4 0 0 1 49.01 44.01 Q 41.11 51.11 34.01 59.01 A 1.4 1.4 0 0 1 35.99 60.99 Z" fill-rule="evenodd"></path><path d="M 49.01 45.99 Q 54.65 55.35 64.01 60.99 A 1.4 1.4 0 0 1 65.99 59.01 Q 58.89 51.11 50.99 44.01 A 1.4 1.4 0 0 1 49.01 45.99 Z" fill-rule="evenodd"></path></svg>
+      </button>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-home" href="/">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 23.5 21.23 Q 47.5 24.42 71.5 21.23 A 1.22 1.22 0 0 1 71.5 18.77 Q 47.5 19.17 23.5 18.77 A 1.22 1.22 0 0 1 23.5 21.23 Z M 68.78 18.5 Q 65.14 50 68.78 81.5 A 1.22 1.22 0 0 1 71.22 81.5 Q 70.39 50 71.22 18.5 A 1.22 1.22 0 0 1 68.78 18.5 Z M 71.5 78.78 Q 47.5 75.59 23.5 78.78 A 1.22 1.22 0 0 1 23.5 81.22 Q 47.5 80.84 71.5 81.22 A 1.22 1.22 0 0 1 71.5 78.78 Z M 26.23 81.5 Q 29.87 50 26.23 18.5 A 1.22 1.22 0 0 1 23.78 18.5 Q 24.62 50 23.78 81.5 A 1.22 1.22 0 0 1 26.23 81.5 Z" fill-rule="evenodd"></path><path d="M 35 21.23 Q 55 22.98 75 21.23 A 1.22 1.22 0 0 1 75 18.77 Q 55 17.73 35 18.77 A 1.22 1.22 0 0 1 35 21.23 Z" fill-rule="evenodd"></path><path d="M 73.78 20 Q 72.03 40 73.78 60 A 1.22 1.22 0 0 1 76.22 60 Q 77.28 40 76.22 20 A 1.22 1.22 0 0 1 73.78 20 Z" fill-rule="evenodd"></path><path d="M 33.5 35.88 Q 47.5 37.97 61.5 35.88 A 0.88 0.88 0 0 1 61.5 34.13 Q 47.5 34.22 33.5 34.13 A 0.88 0.88 0 0 1 33.5 35.88 Z M 59.13 33.5 Q 57.34 42.5 59.13 51.5 A 0.88 0.88 0 0 1 60.88 51.5 Q 61.09 42.5 60.88 33.5 A 0.88 0.88 0 0 1 59.13 33.5 Z M 61.5 49.13 Q 47.5 47.04 33.5 49.13 A 0.88 0.88 0 0 1 33.5 50.88 Q 47.5 50.79 61.5 50.88 A 0.88 0.88 0 0 1 61.5 49.13 Z M 35.88 51.5 Q 37.67 42.5 35.88 33.5 A 0.88 0.88 0 0 1 34.13 33.5 Q 33.92 42.5 34.13 51.5 A 0.88 0.88 0 0 1 35.88 51.5 Z" fill-rule="evenodd"></path><path d="M 46.13 50 Q 44.43 57.5 46.13 65 A 0.88 0.88 0 0 1 47.88 65 Q 48.18 57.5 47.88 50 A 0.88 0.88 0 0 1 46.13 50 Z" fill-rule="evenodd"></path></svg>
+        <span class="fn-home-label">Framework</span>
+      </a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-prev" href="/part-5-portfolio-construction-position-management">&larr; Part 5</a>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <span class="floatnav-next" aria-disabled="true">Series complete</span>
+    </div>
+  </nav>
+
+  <!-- Progressive enhancement: theme, scroll-spy, drawer, completion, floatnav -->
+  <script src="/site-b/site-b-charts.js" defer></script>
+  <script src="/site-b/reading.js" defer></script>
+  <script src="/site-b/glyph-text.js" defer></script>
+  <!-- Deep links land exactly: islands hydrate after the initial anchor jump,
+       so re-anchor once mounting settles — unless the reader has scrolled. -->
+  <script defer>
+    (function () {
+      if (!location.hash) return;
+      var moved = false;
+      addEventListener('wheel', function () { moved = true; }, { once: true, passive: true });
+      addEventListener('touchmove', function () { moved = true; }, { once: true, passive: true });
+      function re() { if (moved) return; var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView(); }
+      addEventListener('load', function () { setTimeout(re, 700); setTimeout(re, 1800); });
+    })();
+  </script>
+
+</body>
+</html>

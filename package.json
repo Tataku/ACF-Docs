@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run build:navigation",
+    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:navigation",
     "build": "next build",
     "start": "next start",
     "test:chart-core": "node --test components/framework-charts/chart-core/tests/*.test.mjs",
@@ -11,6 +11,9 @@
     "validate:charts": "node scripts/validate-chart-specs.mjs",
     "audit:chart-experience": "node scripts/audit-chart-experience.mjs",
     "build:site-b-charts": "node scripts/build-site-b-charts.mjs",
+    "build:glossary": "node scripts/build-glossary-page.mjs",
+    "build:pictures": "node scripts/build-pictures-page.mjs",
+    "build:math": "node scripts/build-math-page.mjs",
     "build:navigation": "node scripts/build-navigation-registry.mjs",
     "audit:navigation": "node scripts/build-navigation-registry.mjs --check"
   },
