@@ -1,16 +1,12 @@
-import nextra from "nextra";
-
-const withNextra = nextra({
-  theme: "nextra-theme-docs",
-  themeConfig: "./theme.config.jsx"
-});
-
 /* Canonical routing — the Framework Docs are hand-authored Site B HTML in
  * public/site-b/, served on the clean production slugs via `beforeFiles`
  * rewrites. The legacy MDX part pages are fully retired (deleted 2026-07-13);
- * these rewrites ARE the site's routing, not a temporary shadow. The internal
- * agency chart-handoff pages were retired (2026-08-11), so Nextra now builds
- * only the shadowed index page; /api/narration serves Site B's narration.
+ * these rewrites ARE the site's routing, not a temporary shadow. Nextra was
+ * removed (2026-08-11) once the agency chart-handoff pages it existed to serve
+ * were retired: it rendered exactly one page, and that page was itself shadowed
+ * by the `/` rewrite below. Next.js stays because it owns these rewrites and
+ * /api/narration (Site B's text-to-speech endpoint) — this is a Next app with
+ * no page routes, only an API route and static HTML.
  *
  *   /                                  -> /site-b/cover-docs.html
  *   /part-1-foundation                 -> /site-b/part-1-foundation.html
@@ -36,7 +32,7 @@ const siteBRewrites = [
   { source: "/part-1-pictures", destination: "/site-b/part-1-pictures.html" }
 ];
 
-export default withNextra({
+export default {
   reactStrictMode: true,
   async rewrites() {
     return { beforeFiles: siteBRewrites };
@@ -49,4 +45,4 @@ export default withNextra({
       }
     ];
   }
-});
+};
