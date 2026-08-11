@@ -9,7 +9,6 @@
     "test:chart-core": "node --test components/framework-charts/chart-core/tests/*.test.mjs",
     "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
     "validate:charts": "node scripts/validate-chart-specs.mjs",
-    "build:inventory": "node scripts/build-chart-inventory.mjs",
     "audit:chart-experience": "node scripts/audit-chart-experience.mjs",
     "build:site-b-charts": "node scripts/build-site-b-charts.mjs",
     "build:navigation": "node scripts/build-navigation-registry.mjs",
