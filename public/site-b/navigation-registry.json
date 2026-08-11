@@ -61,6 +61,12 @@
       "route": "/framework-in-pictures",
       "file": "framework-in-pictures.html",
       "title": "The Framework in Pictures"
+    },
+    {
+      "part": 7,
+      "route": "/framework-in-math",
+      "file": "framework-in-math.html",
+      "title": "The Framework in Math"
     }
   ],
   "aliases": {
@@ -123,7 +129,13 @@
     "framework-in-pictures.html": "/framework-in-pictures",
     "/framework-in-pictures.html": "/framework-in-pictures",
     "https://docs.acfdashboard.com/framework-in-pictures": "/framework-in-pictures",
-    "https://docs.acfdashboard.com/site-b/framework-in-pictures.html": "/framework-in-pictures"
+    "https://docs.acfdashboard.com/site-b/framework-in-pictures.html": "/framework-in-pictures",
+    "/framework-in-math": "/framework-in-math",
+    "/site-b/framework-in-math.html": "/framework-in-math",
+    "framework-in-math.html": "/framework-in-math",
+    "/framework-in-math.html": "/framework-in-math",
+    "https://docs.acfdashboard.com/framework-in-math": "/framework-in-math",
+    "https://docs.acfdashboard.com/site-b/framework-in-math.html": "/framework-in-math"
   },
   "sections": {
     "/": [
@@ -473,6 +485,19 @@
       "sidebar",
       "tax",
       "tax-title",
+      "theme-toggle"
+    ],
+    "/framework-in-math": [
+      "acf-reference-integrity-fallback",
+      "cis-math",
+      "cis-math-title",
+      "fis-math",
+      "fis-math-title",
+      "reading",
+      "reading-title",
+      "sidebar",
+      "sizing-math",
+      "sizing-math-title",
       "theme-toggle"
     ]
   },
@@ -1931,8 +1956,8 @@
     }
   },
   "audit": {
-    "pages": 10,
-    "anchors": 397,
+    "pages": 11,
+    "anchors": 425,
     "chartSpecs": 45,
     "liveChartMounts": 97,
     "glossaryTerms": 70,

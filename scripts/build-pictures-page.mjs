@@ -123,6 +123,7 @@ const sidebarInsert = `
               <span class="spnum">&mdash;</span><span>In Pictures</span>
             </a>
           </li>
+          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&mdash;</span><span>In Math</span></a></li>
           <li><a class="side-part" href="/glossary"><span class="spnum">&mdash;</span><span>Glossary</span></a></li>
         </ul>
       </div>`;

@@ -31,7 +31,8 @@ const siteBRewrites = [
   { source: "/part-6-convexity-framework-integrity-scoring", destination: "/site-b/part-6-convexity-scoring.html" },
   { source: "/part-1-pictures", destination: "/site-b/part-1-pictures.html" },
   { source: "/glossary", destination: "/site-b/glossary.html" },
-  { source: "/framework-in-pictures", destination: "/site-b/framework-in-pictures.html" }
+  { source: "/framework-in-pictures", destination: "/site-b/framework-in-pictures.html" },
+  { source: "/framework-in-math", destination: "/site-b/framework-in-math.html" }
 ];
 
 export default {
