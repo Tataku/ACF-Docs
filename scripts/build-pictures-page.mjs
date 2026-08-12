@@ -52,16 +52,26 @@ function exhibit(c) {
         <p class="compare-key"><a class="part-ref" href="${esc(c.href)}">${esc(c.idx)} &middot; ${typo(c.title)} &mdash; read it in context</a></p>`;
 }
 
+// Part 1 additionally has a hand-drawn visual essay at /part-1-pictures — bespoke
+// inline-SVG figures with no-JS fallbacks that exist for those seven charts alone
+// and cannot be synthesised for the rest. It is a different kind of object from
+// this index, so it is surfaced inside Part 1's movement rather than competing
+// with the gallery for the "In Pictures" name.
+const ESSAY_NOTE = {
+  foundation: '<p class="compare-key"><a class="part-ref" href="/part-1-pictures">Part 1 also has a hand-drawn visual essay &mdash; seven exhibits, one claim each</a></p>',
+};
+
 function section(m) {
   const members = [...charts.values()].filter((c) => m.parts.includes(c.part)).sort(byIdx);
   if (!members.length) return '';
   const count = members.length;
+  const note = ESSAY_NOTE[m.key] ? `\n        ${ESSAY_NOTE[m.key]}` : '';
   return `
     <section class="section" id="${m.key}" aria-labelledby="${m.key}-title">
       <div class="measure">
         <p class="section-eyebrow section-signal" data-glyph-text>${esc(m.eyebrow)}</p>
         <h2 class="section-title" id="${m.key}-title">${typo(m.title)}</h2>
-        <p class="compare-key">${count} exhibit${count === 1 ? '' : 's'}</p>
+        <p class="compare-key">${count} exhibit${count === 1 ? '' : 's'}</p>${note}
       </div>
 
 ${members.map(exhibit).join('\n\n')}
