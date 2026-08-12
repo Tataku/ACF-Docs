@@ -489,12 +489,18 @@
     ],
     "/framework-in-math": [
       "acf-reference-integrity-fallback",
+      "bitcoin-math",
+      "bitcoin-math-title",
       "cis-math",
       "cis-math-title",
+      "evidence-math",
+      "evidence-math-title",
       "fis-math",
       "fis-math-title",
       "governance-math",
       "governance-math-title",
+      "nds-math",
+      "nds-math-title",
       "reading",
       "reading-title",
       "scope",
@@ -502,6 +508,8 @@
       "sidebar",
       "sizing-math",
       "sizing-math-title",
+      "tax-math",
+      "tax-math-title",
       "theme-toggle"
     ]
   },
@@ -1961,7 +1969,7 @@
   },
   "audit": {
     "pages": 11,
-    "anchors": 433,
+    "anchors": 437,
     "chartSpecs": 45,
     "liveChartMounts": 97,
     "glossaryTerms": 70,

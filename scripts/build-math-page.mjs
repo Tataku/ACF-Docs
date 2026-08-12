@@ -52,7 +52,7 @@ const main = `<main class="shell-main">
       </div>
       <div class="measure prose">
         <p class="prose-lead">The Parts explain what the framework believes and why. This page states what it computes. Every quantity below is the value the live engine actually uses, expressed as a formula rather than a paragraph, so that a practitioner, an advisor, or a sceptic can check the arithmetic instead of taking the prose on faith.</p>
-        <p><a class="part-ref" href="#reading">How to read this</a> <a class="part-ref" href="#cis-math">The position score</a> <a class="part-ref" href="#fis-math">The construction score</a> <a class="part-ref" href="#sizing-math">Score to size</a> <a class="part-ref" href="#governance-math">What fires, and what it does</a></p>
+        <p><a class="part-ref" href="#reading">How to read this</a> <a class="part-ref" href="#cis-math">The position score</a> <a class="part-ref" href="#fis-math">The construction score</a> <a class="part-ref" href="#sizing-math">Score to size</a> <a class="part-ref" href="#governance-math">What fires, and what it does</a> <a class="part-ref" href="#bitcoin-math">The backbone</a> <a class="part-ref" href="#tax-math">Wrappers and basis</a> <a class="part-ref" href="#evidence-math">Evidence and confidence</a> <a class="part-ref" href="#nds-math">The next dollar</a></p>
       </div>
     </header>
 
@@ -489,14 +489,232 @@ const main = `<main class="shell-main">
       </div>
     </section>
 
+    <section class="section" id="bitcoin-math" aria-labelledby="bitcoin-math-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Backbone</p>
+        <h2 class="section-title" id="bitcoin-math-title">Bitcoin: identity, headroom, accumulation.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Bitcoin is scored by a different model from everything else, so the first question the system answers is what actually counts as Bitcoin. Four categories, and they are not interchangeable.</p>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+          <div><span class="name">Native</span><p>The asset itself. Quoted on its own lane, valued in Bitcoin units, displayed to eight decimal places.</p></div>
+          <div><span class="name">Spot wrapper</span><p>An anchored set of eleven spot funds. Checked <em>before</em> the fund branch so they score through the monetary model rather than as generic funds.</p></div>
+          <div><span class="name">Futures product</span><p>Never treated as Bitcoin-class. A futures-based product is a different instrument with a different risk.</p></div>
+          <div><span class="name">Proxy equity</span><p>Companies with Bitcoin exposure are ordinary operating equities. There is no proxy archetype, and they are not exempt from anything.</p></div>
+        </div>
+      </div>
+
+      <div class="measure prose">
+        <p>Market capitalisation resolves down a chain, and the last rung is worth seeing: network data, then a quoted figure, then <strong>price &times; 21,000,000</strong>. The protocol cap, not circulating supply, is the denominator &mdash; and a stale fundamental is never substituted for a missing one. Null is preferred to wrong.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Headroom &middot; the monetary model</p>
+        <h3 class="sub-title">What the scoring engine actually uses.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Bitcoin runs through the same logarithmic headroom curve as everything else &mdash; the difference is what goes in the numerator. Absent a live research profile, the baseline is a <em>conservative</em> monetary total of roughly 11.5 trillion dollars, deliberately below the headline figures the doctrine discusses:</p>
+        <p><strong>headroom = 35 &times; ln(1 + H) / ln(31)</strong>, where <strong>H = min(TAM &divide; market cap, 30)</strong></p>
+        <p>At a market capitalisation near 1.4 trillion that is about 8.2&times; of headroom, scoring roughly 22.6 out of 35 &mdash; a strong reading, not a maximal one. Choosing the conservative pool is the point: the score should not depend on the most optimistic version of the thesis being right.</p>
+        <p>Network convexity decays as adoption progresses:</p>
+        <p><strong>network convexity = 18 &times; max(0, 1 &minus; penetration<sup>0.6</sup>)</strong>, where <strong>penetration = market cap &divide; TAM</strong></p>
+        <p>Separately, the software displays a scenario that builds a total addressable market from three pools &mdash; a share of above-ground gold, a small share of global real estate, and a small share of emerging-market broad money &mdash; and divides by the 21 million cap to imply a price. <strong>That panel is a display scenario, not the scoring input</strong>, it is labelled as such, and its only live input is the gold price.</p>
+        <p>The power-law overlay on the price chart is also modelling rather than scoring: a trend of <strong>2.88 &times; (days &divide; 1000)<sup>5.82</sup></strong> and a floor of <strong>1.2828 &times; (days &divide; 1000)<sup>5.928</sup></strong>. The accumulation doctrine built on top of it &mdash; reduce buying above convergence, deploy reserves below it &mdash; is written guidance. No code triggers on it.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Accumulation &middot; simulated and real</p>
+        <h3 class="sub-title">A plan is not a purchase.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Scheduled contributions are simulated as a daily flow. The engine has no concept of weekly or monthly at all:</p>
+        <p><strong>daily contribution = monthly amount &times; 12 &divide; 365</strong></p>
+        <p>Contributions are added <em>after</em> each day&rsquo;s return, and they consume no randomness &mdash; the same simulation with and without contributions draws identical market paths. That is what makes the two headline numbers separable and honest:</p>
+        <p><strong>contribution effect = wealth growth &minus; market gain</strong></p>
+        <p>Expected compound return and probability of loss are computed on the <em>market-only</em> path. Money you added is not performance, and the framework refuses to let it flatter a return figure. A simulation with zero market return and active contributions shows wealth rising and market gain at exactly zero.</p>
+      </div>
+
+      <aside class="callout callout-insight">
+        <p class="callout-label">A projection never becomes a holding</p>
+        <p>Configuring a purchase schedule writes a projection setting and nothing else &mdash; no contribution event, no trade, no change to cost basis or net asset value. The only path that creates a real record is a purchase <em>you confirm</em>, which writes exactly one contribution event and one buy, and refuses a fill where the entered price and the received amount disagree by more than one percent. Simulated accumulation is never rendered as Bitcoin you own.</p>
+      </aside>
+
+      <div class="measure prose">
+        <p>Allocation is measured against the canonical portfolio balance &mdash; <strong>Bitcoin value &divide; total portfolio balance &times; 100</strong> &mdash; counting native holdings only by default. The mode that also counts spot wrappers requires the wrapper set to resolve, and fails closed to native-only if it cannot. Bitcoin is excluded from every concentration measure, and carries its own posture target of 10 percent within a 5 to 15 percent range.</p>
+      </div>
+    </section>
+
+    <section class="section" id="tax-math" aria-labelledby="tax-math-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Wrappers &amp; Basis</p>
+        <h2 class="section-title" id="tax-math-title">What the system computes about tax, and what it does not.</h2>
+      </div>
+      <div class="measure prose">
+        <p>This section is unusual because the most important thing in it is an absence, and stating it plainly is the whole point.</p>
+      </div>
+
+      <aside class="callout callout-info">
+        <p class="callout-label">There is no tax rate anywhere in this system</p>
+        <p>No ordinary rate, no short- or long-term capital-gains rate, no qualified-dividend rate, no net investment income tax, no state or bracket table, no user-entered rate. Nothing computes or displays an estimated tax liability, because there is nothing to compute it from. Every percentage the framework discusses about tax is written doctrine, carried in prose, with no consumer in code.</p>
+      </aside>
+
+      <div class="measure prose">
+        <p>What <em>is</em> computed is accounting: cost basis, realised gain, holding period, and the effect of a return of capital. Those are facts about your ledger, not statements about your return.</p>
+        <p><strong>Wrappers</strong> are Roth, Taxable, Pre-tax, Bitcoin, and Unknown. The last one matters: no normaliser anywhere defaults an unrecognised account to Taxable. An unknown wrapper stays unknown and is reported as such, because guessing the wrapper is guessing the entire tax character of everything in it.</p>
+        <p><strong>Cost basis is total dollars</strong> at the position layer, and per-share only inside a lot &mdash; where it is not even stored at purchase but recomputed at disposal from what remains. Fees never enter basis; they are recorded as audit fields and kept out of the arithmetic.</p>
+        <p><strong>Lot ordering</strong> is a property of the account, not of the sale: oldest first for first-in-first-out and average cost, newest first for last-in-first-out, highest basis first for highest-in-first-out with ties broken by the older acquisition date.</p>
+        <p><strong>Holding period</strong> uses a threshold of 365 days, compared strictly &mdash; day 365 is short, day 366 is long. Where an acquisition date cannot be established the term is reported as unknown rather than assumed. Every surface carrying it says the same thing: this is advisory, and it is not tax advice.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Return of capital</p>
+        <h3 class="sub-title">A distribution that reduces what you paid.</h3>
+      </div>
+      <div class="measure prose">
+        <p>A distribution is split by its return-of-capital fraction <em>p</em>. If <em>p</em> is 1 the entire gross amount is return of capital with no companion dividend. Otherwise:</p>
+        <p><strong>return of capital = round(gross &times; p)</strong> and <strong>taxable portion = gross &minus; return of capital</strong></p>
+        <p>The two sum to the gross by construction. The return-of-capital portion then reduces basis <em>per share</em> across open lots, floored at zero so a lot can never go negative. Reinvestment runs after the reduction, never before.</p>
+        <p>The accounting language here is deliberately flat &mdash; a return of capital <em>reduces cost basis and is not immediately taxable</em>. That is a mechanical statement, and it is as far as the arithmetic goes.</p>
+      </div>
+
+      <div class="measure prose">
+        <p>Three more absences are worth naming, because their presence is often assumed. <strong>There is no wash-sale engine</strong> &mdash; no substantially-identical matching, no replacement detection, no disallowed-loss carryover. <strong>There is no Roth conversion, rollover, or required-distribution primitive.</strong> And <strong>a transfer between accounts carries no economics at all</strong>: it moves at a price of zero, preserves basis and the original acquisition date, and never realises a gain. A move that may have tax consequences is recorded as accounting motion, and the framework does not classify it.</p>
+      </div>
+    </section>
+
+    <section class="section" id="evidence-math" aria-labelledby="evidence-math-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Epistemics</p>
+        <h2 class="section-title" id="evidence-math-title">Evidence, confidence, and the limits of both.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Four things get called &ldquo;confidence&rdquo; in most systems. Here they are four separate quantities and are never collapsed into one number.</p>
+      </div>
+
+      <div class="measure-feature">
+        <div class="failure-modes">
+          <div><span class="name">Confidence</span><p>The quality of evidence at the moment of scoring.</p></div>
+          <div><span class="name">Freshness</span><p>The age of an input against its own time-to-live.</p></div>
+          <div><span class="name">Completeness</span><p>What fraction of the expected fields are present.</p></div>
+          <div><span class="name">Source quality</span><p>Where each individual input came from.</p></div>
+        </div>
+      </div>
+
+      <div class="measure prose">
+        <p>And a fifth state sits off the ladder entirely. <strong>Unknown is not low.</strong> It is the absence of a rank, and it is carried as such rather than being quietly folded into the bottom tier &mdash; because &ldquo;we do not know&rdquo; and &ldquo;we know it is bad&rdquo; are different claims about the same position.</p>
+        <p>Confidence has exactly one channel into the score, and it is the delta clamp: how far a score may move in one update. It does not otherwise raise or lower the number. Two caps illustrate the discipline &mdash; an unclassified over-the-counter venue forces confidence to low, and a market capitalisation under fifty million dollars caps it at medium. <strong>Both change the confidence tier only. Neither touches the score.</strong></p>
+      </div>
+
+      <div class="compare compare-wrap">
+        <table>
+          <caption>How long an input stays fresh</caption>
+          <thead>
+            <tr><th scope="col">Input</th><th scope="col">Window</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Quotes</th><td data-label="Window">5 minutes</td></tr>
+            <tr><th scope="row">Macro series</th><td data-label="Window">6 hours</td></tr>
+            <tr><th scope="row">Earnings</th><td data-label="Window">12 hours</td></tr>
+            <tr><th scope="row">Fundamentals</th><td data-label="Window">7 days</td></tr>
+            <tr><th scope="row">Research</th><td data-label="Window">72 hours</td></tr>
+            <tr><th scope="row">Model estimates</th><td data-label="Window">30 days</td></tr>
+            <tr><th scope="row">Addressable market</th><td data-label="Window">90 days</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-key">These are freshness boundaries, not confidence values &mdash; crossing one marks a record stale, and never rewrites a confidence tier</p>
+
+      <div class="measure">
+        <p class="sub-meta">Evidence discount</p>
+        <h3 class="sub-title">Thin evidence can only subtract.</h3>
+      </div>
+      <div class="measure prose">
+        <p>An evidence-adjusted view of a score discounts each component by how directly its inputs were observed &mdash; nothing for company-specific direct evidence, rising through category-level and proxy evidence to half for missing:</p>
+        <p><strong>evidence-adjusted score = max(0, CIS &minus; &Sigma; points &times; weight &times; discount rate)</strong></p>
+        <p>The direction is fixed and it is one-way. <strong>The adjustment can only reduce. There is no path by which good-looking evidence inflates a score above what the components produced.</strong></p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Model estimates</p>
+        <h3 class="sub-title">A language model is never the top of the ladder.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Where a language model contributes, its own stated confidence is one factor among four and never the largest: model self-report 0.30, evidence completeness 0.30, persistence across runs 0.20, agreement with deterministic classification 0.20. The self-report is additionally passed through a compressing curve with a hard ceiling of 0.85 &mdash; <strong>a model, on its own testimony alone, can never reach full confidence.</strong></p>
+        <p>Beneath that: a model estimate never counts toward real coverage, is bounds-checked per field and rejected if implausible, expires after 30 days, and is refused outright for market data such as momentum, volatility, and volume. A classification must clear a calibrated score of 50 before it may be written at all.</p>
+        <p>Where a research claim becomes a catalyst probability, the mapping is bounded and stated as what it is: <strong>probability = clamp(confidence &divide; 100, 0.20, 0.85)</strong>. That is a heuristic translation. It has never been fitted to outcomes, and it is not a statistical probability.</p>
+      </div>
+
+      <aside class="callout callout-info">
+        <p class="callout-label">Two things the framework does not claim</p>
+        <p>There is <strong>no portfolio-level confidence number</strong>. Confidence exists per position, and no surface manufactures an aggregate where no formula exists. And nothing here is <strong>calibrated, backtested, validated, or proven</strong> in the empirical sense &mdash; the scores are a designed instrument with documented reasoning, not a model fitted to realised outcomes. Where the software says &ldquo;calibrated&rdquo;, it means simulation parameters fitted to historical series, which is a different and narrower claim.</p>
+      </aside>
+    </section>
+
+    <section class="section" id="nds-math" aria-labelledby="nds-math-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Marginal Capital</p>
+        <h2 class="section-title" id="nds-math-title">The next dollar.</h2>
+      </div>
+      <div class="measure prose">
+        <p>The position score asks how good a holding is. The Next Dollar Score asks a narrower question: given what you already own, where would the <em>next</em> dollar do the most work? It is a ranking instrument, and it is separate from CIS by design.</p>
+        <p>Six components, weighted:</p>
+      </div>
+
+      <div class="compare compare-wrap">
+        <table>
+          <caption>Next Dollar Score components</caption>
+          <thead>
+            <tr><th scope="col">Component</th><th scope="col">Weight</th><th scope="col">What it measures</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row" class="col-primary">Position score</th><td data-label="Weight">0.30</td><td data-label="Measures">The quality of the holding itself. A missing score enters as 40, not as zero.</td></tr>
+            <tr><th scope="row">Size opportunity</th><td data-label="Weight">0.20</td><td data-label="Measures">How much room is left before the position is already large</td></tr>
+            <tr><th scope="row">Expression purity</th><td data-label="Weight">0.15</td><td data-label="Measures">Whether the holding expresses the thesis cleanly or by proxy</td></tr>
+            <tr><th scope="row">Posture alignment</th><td data-label="Weight">0.15</td><td data-label="Measures">Distance from the posture budget &mdash; underweight scores higher</td></tr>
+            <tr><th scope="row">Momentum context</th><td data-label="Weight">0.10</td><td data-label="Measures">Recent price behaviour, read against whether the thesis still holds</td></tr>
+            <tr><th scope="row">P&amp;L context</th><td data-label="Weight">0.10</td><td data-label="Measures">Unrealised position, read the same way</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="measure prose">
+        <p>Size opportunity decays exponentially with what you already hold:</p>
+        <p><strong>size opportunity = clamp(round(90 &times; e<sup>&minus;0.18 &times; allocation%</sup>), 0, 100)</strong></p>
+        <p>An untouched name scores 90. At 5 percent it is 37. Past roughly 35 percent it approaches zero. The curve is the arithmetic form of a simple idea: the marginal dollar is worth less to a position that already has plenty.</p>
+        <p>Two components are deliberately asymmetric, and both condition on whether the thesis survives. A deep drawdown in a position whose score is still intact <em>raises</em> the next-dollar reading &mdash; that is the averaging-down case. The same drawdown where the score has broken lowers it sharply. Large unrealised gains only reduce urgency; they never make a position more attractive to add to.</p>
+        <p>Six bounded modifiers then adjust the composite &mdash; opportunity cost against the best available peer, posture throttles and boosts under a defensive regime, an expression-purity penalty, a score-trend adjustment bounded to &plusmn;8, and a readiness penalty capped at 12. A positive trend bonus requires a score of at least 40, so a weak or missing score can never be lifted by momentum in its own trend line.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Gates &middot; what they actually do</p>
+        <h3 class="sub-title">Advisory, and precisely bounded.</h3>
+      </div>
+      <div class="measure prose">
+        <p>Above 15 percent of the portfolio, the surface stops recommending additions. Between 10 and 15 percent it raises a caution and <em>keeps</em> recommending &mdash; <strong>the 10 percent line is advisory, not a freeze.</strong> A score below 40 blocks additions. Cash blocks. Bitcoin blocks, because it is managed at the wrapper level rather than position by position.</p>
+        <p>Trimming is never hard-blocked in any state. The framework will always let you reduce.</p>
+        <p>An ineligible position still receives a full score and still appears in the ranking. Gates annotate; they do not erase.</p>
+        <p>Bands are 75 and above for strong, 55 for moderate, 35 for weak, below that avoid &mdash; lower-bound inclusive at every edge. They order advisory copy. They size nothing.</p>
+        <p>Rotation pairs a bottom-quartile candidate with a top-quartile one, requires a score gap of at least 15, emits at most five pairs, and needs at least four eligible positions to run at all. Cash and Bitcoin are excluded from the exercise.</p>
+      </div>
+
+      <aside class="callout callout-insight">
+        <p class="callout-label">The next dollar score sizes nothing</p>
+        <p>The portfolio builder contains no reference to it. Position sizing, concentration limits, and wrapper placement are decided by the position score and the construction rules, and they remain authoritative. A rotation pair carries two scores, a gap, and a sentence &mdash; no weight, no order, no execution. <strong>Advisory only, and not a trade signal.</strong></p>
+      </aside>
+    </section>
+
     <section class="section" id="scope" aria-labelledby="scope-title">
       <div class="measure">
         <p class="section-eyebrow section-signal" data-glyph-text>Scope</p>
         <h2 class="section-title" id="scope-title">What this page does not yet cover.</h2>
       </div>
       <div class="measure prose">
-        <p>The extraction this page draws from runs to twelve chapters. Published here: the position score, the construction score, allocation and sizing, and governance. Still to come: the Bitcoin identity and accumulation arithmetic, the tax and wrapper-location math, the decay and confidence model, and the Next Dollar Score.</p>
-        <p>Deliberately held back: forward projection and parameter estimation, earnings and forward valuation, performance accounting, and margin mechanics. Those are modelling and accounting surfaces where a published formula reads too easily as a forecast or a claim about results, and they will not appear here without a specific decision to publish them.</p>
+        <p>The extraction this page draws from runs to twelve chapters. Eight are published here: the position score, the construction score, allocation and sizing, governance, the Bitcoin backbone, wrappers and basis, evidence and confidence, and the next dollar.</p>
+        <p>Four are deliberately held back &mdash; forward projection and parameter estimation, earnings and forward valuation, performance accounting and net asset value, and margin mechanics. Those are modelling and accounting surfaces where a published formula reads too easily as a forecast or a claim about results. They will not appear here without a specific decision to publish them.</p>
+        <p>Within the eight, the same rule applies at a finer grain: this page carries the mathematics, not the audit apparatus that verified it. Engine locations, verification logs, and the register of places where a specification and the running code have drifted apart live in the internal reference, which is where they are useful.</p>
       </div>
     </section>
 
