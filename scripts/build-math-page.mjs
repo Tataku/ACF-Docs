@@ -460,11 +460,11 @@ const main = `<main class="shell-main">
       </div>
 
       <div class="measure">
-        <p class="sub-meta">Cohort confluence &middot; ten conditions</p>
+        <p class="sub-meta">Cohort confluence</p>
         <h3 class="sub-title">One signal is noise. Several at once is a regime.</h3>
       </div>
       <div class="measure prose">
-        <p>Ten conditions are evaluated against the live cohort &mdash; your own positions, not a generic index. Among them: an equal-weighted one-day advance of 7 percent or more with at least five names up more than 4; four or more names at a two-period relative-strength reading of 98 or higher; a five-day liquidity drain of 100 billion dollars or more across the Fed&rsquo;s balance-sheet components; three or more names gapping up 8 percent then reversing 5 percent from the high on two-and-a-half times median volume; a three-session decline of 4 percent or more with 60 percent of names at five-day lows.</p>
+        <p>A registered set of conditions is evaluated against the live cohort &mdash; your own positions, not a generic index. The set is extended as new measurable conditions are added, and each one declares whether it is measured directly or approximated. Among those in place: an equal-weighted one-day advance of 7 percent or more with at least five names up more than 4; four or more names at a two-period relative-strength reading of 98 or higher; a five-day liquidity drain of 100 billion dollars or more across the Fed&rsquo;s balance-sheet components; three or more names gapping up 8 percent then reversing 5 percent from the high on two-and-a-half times median volume; a three-session decline of 4 percent or more with 60 percent of names at five-day lows.</p>
         <p>Escalation is not a raw count. Thresholds &mdash; two signals for level one, three for level two, four for level three &mdash; are <em>normalised by how many signals are actually evaluable</em>, and each firing signal is weighted by how directly it is measured: a fully implemented signal counts 1.0, an approximation built from free data counts 0.6. A level requires both the count and the weighted score to clear the bar.</p>
         <p>That normalisation is the honest part. When a data source is unavailable, the system does not pretend the signal is quiet &mdash; it lowers the denominator and discloses that the reading rests on a proxy.</p>
       </div>
@@ -475,7 +475,7 @@ const main = `<main class="shell-main">
       </aside>
 
       <div class="measure prose">
-        <p>Seven macro conditions are watched alongside the cohort, each with a three-step ladder of watch, caution and critical: liquidity contraction, volatility regime shift at a VIX of 20, 25 and 35, credit stress at 1.0, 1.5 and 2.5 standard deviations of high-yield spreads, yield-curve inversion, a dollar spike of 2, 3 and 5 percent over ten days, bond-volatility acceleration, and a compound condition requiring both an elevated VIX and a sharp rise in it.</p>
+        <p>A core set of macro conditions is watched alongside the cohort, each with a three-step ladder of watch, caution and critical: liquidity contraction, volatility regime shift at a VIX of 20, 25 and 35, credit stress at 1.0, 1.5 and 2.5 standard deviations of high-yield spreads, yield-curve inversion, a dollar spike of 2, 3 and 5 percent over ten days, bond-volatility acceleration, and a compound condition requiring both an elevated VIX and a sharp rise in it.</p>
       </div>
 
       <div class="measure">
@@ -501,7 +501,7 @@ const main = `<main class="shell-main">
       <div class="measure-feature">
         <div class="failure-modes">
           <div><span class="name">Native</span><p>The asset itself. Quoted on its own lane, valued in Bitcoin units, displayed to eight decimal places.</p></div>
-          <div><span class="name">Spot wrapper</span><p>An anchored set of eleven spot funds. Checked <em>before</em> the fund branch so they score through the monetary model rather than as generic funds.</p></div>
+          <div><span class="name">Spot wrapper</span><p>A maintained allowlist of spot funds, checked <em>before</em> the fund branch so they score through the monetary model rather than as generic funds. Membership is explicit: a newly launched wrapper is an ordinary fund until it is registered.</p></div>
           <div><span class="name">Futures product</span><p>Never treated as Bitcoin-class. A futures-based product is a different instrument with a different risk.</p></div>
           <div><span class="name">Proxy equity</span><p>Companies with Bitcoin exposure are ordinary operating equities. There is no proxy archetype, and they are not exempt from anything.</p></div>
         </div>
@@ -712,8 +712,8 @@ const main = `<main class="shell-main">
         <h2 class="section-title" id="scope-title">What this page does not yet cover.</h2>
       </div>
       <div class="measure prose">
-        <p>The extraction this page draws from runs to twelve chapters. Eight are published here: the position score, the construction score, allocation and sizing, governance, the Bitcoin backbone, wrappers and basis, evidence and confidence, and the next dollar.</p>
-        <p>Four are deliberately held back &mdash; forward projection and parameter estimation, earnings and forward valuation, performance accounting and net asset value, and margin mechanics. Those are modelling and accounting surfaces where a published formula reads too easily as a forecast or a claim about results. They will not appear here without a specific decision to publish them.</p>
+        <p>Published here: the position score, the construction score, allocation and sizing, governance, the Bitcoin backbone, wrappers and basis, evidence and confidence, and the next dollar.</p>
+        <p>Deliberately held back &mdash; forward projection and parameter estimation, earnings and forward valuation, performance accounting and net asset value, and margin mechanics. Those are modelling and accounting surfaces where a published formula reads too easily as a forecast or a claim about results. They will not appear here without a specific decision to publish them.</p>
         <p>Within the eight, the same rule applies at a finer grain: this page carries the mathematics, not the audit apparatus that verified it. Engine locations, verification logs, and the register of places where a specification and the running code have drifted apart live in the internal reference, which is where they are useful.</p>
       </div>
     </section>
