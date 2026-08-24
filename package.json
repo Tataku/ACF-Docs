@@ -20,7 +20,8 @@
     "audit:navigation": "node scripts/build-navigation-registry.mjs --check",
     "sync:counts": "node scripts/sync-counts.mjs",
     "audit:counts": "node scripts/sync-counts.mjs --check",
-    "audit:social": "node scripts/build-social-meta.mjs --check"
+    "audit:social": "node scripts/build-social-meta.mjs --check",
+    "audit:brand": "node scripts/audit-brand-mark.mjs"
   },
   "dependencies": {
     "next": "14.2.25",
