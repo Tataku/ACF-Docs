@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:navigation && npm run sync:counts",
+    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:social-meta && npm run build:navigation && npm run sync:counts",
     "build": "next build",
     "start": "next start",
     "test:chart-core": "node --test components/framework-charts/chart-core/tests/*.test.mjs",
@@ -14,10 +14,13 @@
     "build:glossary": "node scripts/build-glossary-page.mjs",
     "build:pictures": "node scripts/build-pictures-page.mjs",
     "build:math": "node scripts/build-math-page.mjs",
+    "build:social-meta": "node scripts/build-social-meta.mjs",
+    "build:social-cards": "node scripts/build-social-cards.mjs",
     "build:navigation": "node scripts/build-navigation-registry.mjs",
     "audit:navigation": "node scripts/build-navigation-registry.mjs --check",
     "sync:counts": "node scripts/sync-counts.mjs",
-    "audit:counts": "node scripts/sync-counts.mjs --check"
+    "audit:counts": "node scripts/sync-counts.mjs --check",
+    "audit:social": "node scripts/build-social-meta.mjs --check"
   },
   "dependencies": {
     "next": "14.2.25",

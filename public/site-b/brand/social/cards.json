@@ -1,0 +1,38 @@
+{
+  "note": "Written by scripts/build-social-cards.mjs. `npm run audit:social` compares these titles to the live <title> to catch art that outran its page.",
+  "cards": {
+    "cover-docs": {
+      "title": "The Adaptive Convexity Framework"
+    },
+    "part-1-foundation": {
+      "title": "Part 1 — Foundation &amp; Philosophy · The Adaptive Convexity Framework"
+    },
+    "part-1-pictures": {
+      "title": "Part 1 in Pictures &middot; The Adaptive Convexity Framework"
+    },
+    "part-2-lineage-macro": {
+      "title": "Part 2 — Lineage &amp; Macro Thesis · The Adaptive Convexity Framework"
+    },
+    "part-3-bitcoin-convexity": {
+      "title": "Part 3 — Bitcoin: Convexity Backbone · The Adaptive Convexity Framework"
+    },
+    "part-4-tax-architecture": {
+      "title": "Part 4 — Tax Architecture and ROC Strategy · The Adaptive Convexity Framework"
+    },
+    "part-5-portfolio-construction": {
+      "title": "Part 5 — Portfolio Construction and Position Management · The Adaptive Convexity Framework"
+    },
+    "part-6-convexity-scoring": {
+      "title": "Part 6 — Convexity and Framework Integrity Scoring · The Adaptive Convexity Framework"
+    },
+    "glossary": {
+      "title": "Glossary &middot; The Adaptive Convexity Framework"
+    },
+    "framework-in-math": {
+      "title": "The Framework in Math &middot; The Adaptive Convexity Framework"
+    },
+    "framework-in-pictures": {
+      "title": "The Framework in Pictures &middot; The Adaptive Convexity Framework"
+    }
+  }
+}
