@@ -1,5 +1,9 @@
 {
   "note": "Written by scripts/build-social-cards.mjs. `npm run audit:social` compares these titles to the live <title> to catch art that outran its page.",
+  "themes": [
+    "light",
+    "dark"
+  ],
   "cards": {
     "cover-docs": {
       "title": "The Adaptive Convexity Framework"
