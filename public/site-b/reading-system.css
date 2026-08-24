@@ -950,7 +950,11 @@ body {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  /* The mark's viewBox is taller than its art so the HEAD lands on the text's
+     optical centre rather than the SVG box's. Fitting that box into a square
+     leaves ~2px of empty column beside the art, which the eye reads as gap on
+     top of this one. Subtracting it keeps the lockup as tight as it looks. */
+  gap: calc(var(--space-2) - 2px);
   text-decoration: none;
   color: var(--ink);
 }
