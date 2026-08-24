@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ACF">
+  <!--
+    ACF favicon — transparent, theme-aware.
+
+    WHY NO PLATE. The predecessor drew the mark on a #08090b rounded square.
+    At the 16px a browser tab actually renders, the plate was the only thing
+    that read: a dark blob on a light tab strip, with 3.2/64 strokes
+    collapsing to ~0.8 device pixels of mush inside it. Dropping the plate
+    lets the silhouette carry the identity at tab scale, which is the only
+    scale this file is ever used at.
+
+    WHY THE GEOMETRY IS HEAVIER THAN THE MASTER ART. The full mascot has an
+    antenna, a visor, a three-line neck, a three-branch arc and three feet.
+    Below ~24px the neck and feet stop being strokes and become noise, so
+    this reduction keeps only what survives: antenna, head, two eyes. The
+    stroke is 7/64 (~1.75 device px at 16) against the master's 3.2 — a
+    favicon is a different drawing of the same mark, not a scaled one.
+
+    WHY BOTH MEDIA QUERIES AND A BASE RULE. One emerald cannot serve both
+    chromes: #10b981 is ~8.2:1 on a dark tab strip but ~2.6:1 on a white
+    one. The queries pick the right end of the ramp; the unqueried rule is
+    the fallback for any surface that ignores them, so it sits in the
+    middle (~3.8:1 on white, ~4.5:1 on Chrome dark) rather than at either
+    end.
+
+    WHY CLASSES, NOT CUSTOM PROPERTIES. A favicon renders in an image
+    context, not a document one. Plain class rules are the conservative
+    form that every engine honouring prefers-color-scheme here supports.
+    Stroke and fill are split across two classes so a CSS fill rule can
+    never win over the presentation `fill="none"` the outline needs.
+
+    Colours are literal: a static asset has no access to the app token
+    register. They are the emerald ramp from design-tokens.css (700/600/400).
+  -->
+  <style>
+    .l { fill: none; stroke: #059669; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+    .d { fill: #059669; }
+    @media (prefers-color-scheme: light) { .l { stroke: #047857; } .d { fill: #047857; } }
+    @media (prefers-color-scheme: dark)  { .l { stroke: #34d399; } .d { fill: #34d399; } }
+  </style>
+  <line class="l" x1="32" y1="12" x2="32" y2="22"/>
+  <rect class="l" x="6" y="22" width="52" height="34" rx="15"/>
+  <circle class="d" cx="32" cy="7" r="5.5"/>
+  <circle class="d" cx="22" cy="39" r="4.5"/>
+  <circle class="d" cx="42" cy="39" r="4.5"/>
+</svg>

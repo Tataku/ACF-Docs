@@ -4,6 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="canonical" href="https://docs.acfdashboard.com/glossary">
+  <!-- Brand / icon identity. The SVG is the mark browsers scale; it carries its
+       own prefers-color-scheme rules because a tab strip's colour is not the
+       page theme and cannot be read from here. The .ico is the raster fallback
+       and apple-touch-icon keeps its plate, which iOS composites onto its own
+       background. -->
+  <link rel="icon" href="/site-b/brand/favicon.svg" type="image/svg+xml">
+  <link rel="shortcut icon" href="/site-b/brand/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/site-b/brand/apple-touch-icon.png">
   <title>Glossary &middot; The Adaptive Convexity Framework</title>
   <meta name="description" content="The Adaptive Convexity Framework glossary: 70 terms defined where they are taught, each linked to the Part that develops it and the exhibit that shows it.">
 
@@ -98,9 +106,14 @@
       </div>
       <div class="sidebar-head">
         <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
-          <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
-            <rect width="22" height="22" rx="3" fill="#10b981"></rect>
-            <path d="M5.5 15 L11 7 L16.5 15 Z" fill="#08090b"></path>
+          <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"
+               fill="none" stroke="currentColor" stroke-width="7"
+               stroke-linecap="round" stroke-linejoin="round">
+            <line x1="32" y1="12" x2="32" y2="22"></line>
+            <rect x="6" y="22" width="52" height="34" rx="15"></rect>
+            <circle cx="32" cy="7" r="5.5" fill="currentColor" stroke="none"></circle>
+            <circle cx="22" cy="39" r="4.5" fill="currentColor" stroke="none"></circle>
+            <circle cx="42" cy="39" r="4.5" fill="currentColor" stroke="none"></circle>
           </svg>
           <span class="brand-word">ACF</span>
         </a>
