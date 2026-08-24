@@ -19,6 +19,30 @@ size bump for these icons lives in `reading-system.css`
 (`svg[viewBox="0 0 100 100"]` scoped to `.part-actions / .floatnav /
 .sidebar-toggle`).
 
+## Brand mark
+
+The brand mark is **not** from this set, but it follows the same `currentColor`
+rule, and since 2026-08-24 it is bound to the theme rather than fixed.
+
+It used to be a filled emerald plate with a knocked-out triangle, hardcoded to
+`#10b981`. A filled plate tolerates low contrast — the shape reads even when the
+colour does not — so a fixed brand colour cost nothing. The mark is now the ACF
+mascot in line art, and thin strokes do not have that tolerance: `#10b981` is
+~2.6:1 on paper. `tokens.css` already says so at the point of definition —
+`--brand-emerald` is commented "dashboard brand reference — NOT used as ink on
+paper" — and line art is ink.
+
+So the mark is `currentColor` and inherits `.brand-mark { color: var(--accent) }`:
+`#0d7d6b` on paper (4.9:1), `#34d399` on dark. That also makes the
+`.brand:hover .brand-mark` rule in `reading-system.css` live; it had been inert
+for as long as the fill was hardcoded.
+
+The mark is a **reduction**, not the full mascot: the master art
+(`ACFDashboard/public/assets/brand/`) has a three-line neck, a three-branch arc
+and three feet, which stop being strokes below roughly 40px. At the 1.6rem this
+renders at, only antenna, head and eyes survive. The geometry is identical to
+the dashboard's own tab icon, so the two cannot drift.
+
 ## Icon → UI role mapping (integrated)
 | Icon | Role | Control |
 |------|------|---------|
@@ -35,8 +59,6 @@ size bump for these icons lives in `reading-system.css`
 - **share-on-X / email** (brand-X and envelope are more specific than the set's
   generic `share`)
 - **mobile hamburger** (no menu glyph in the set)
-- **brand mark** (the green ACF logo is a fixed-colour identity mark, not a UI
-  icon)
 
 ## Sanitization applied to every integrated icon
 - Removed the `<?xml?>` prolog and all Figma `data-fg*` / `data-fgid*` attributes.
