@@ -28,18 +28,13 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { PAGES, THEMES, CARD_THEME, CARD_DIR, cardFile } from './social-cards.config.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SITE = path.join(ROOT, 'public', 'site-b');
-const MANIFEST = path.join(SITE, 'brand', 'social', 'cards.json');
+const CARDS = path.join(ROOT, ...CARD_DIR);
+const MANIFEST = path.join(CARDS, 'cards.json');
 const CHECK = process.argv.includes('--check');
-
-/** Every page reachable on a clean slug (see next.config.mjs siteBRewrites). */
-const PAGES = [
-  'cover-docs', 'part-1-foundation', 'part-1-pictures', 'part-2-lineage-macro',
-  'part-3-bitcoin-convexity', 'part-4-tax-architecture', 'part-5-portfolio-construction',
-  'part-6-convexity-scoring', 'glossary', 'framework-in-math', 'framework-in-pictures',
-];
 
 const BEGIN = '  <!-- BEGIN generated social meta — build-social-meta.mjs. Do not edit by hand. -->';
 const END = '  <!-- END generated social meta -->';
@@ -70,14 +65,22 @@ function readPage(page) {
   };
 }
 
-/** Cards are optional: a page without one falls back to the site card, so a
- *  new page previews correctly the moment it exists rather than after someone
- *  remembers to render art for it. */
+/**
+ * The card this page's tags point at.
+ *
+ * Only ONE appearance is ever served — og:image is a single URL fetched by a
+ * crawler with no theme, so there is no prefers-color-scheme here the way
+ * there is for the favicon. CARD_THEME (social-cards.config.mjs) is that
+ * choice; both appearances are rendered so flipping it needs no browser.
+ *
+ * Cards are optional: a page without art falls back to the site card, so a new
+ * page previews correctly the moment it exists rather than after someone
+ * remembers to render for it.
+ */
 function cardFor(page) {
-  const rel = `/site-b/brand/social/${page}.png`;
-  return fs.existsSync(path.join(SITE, 'brand', 'social', `${page}.png`))
-    ? rel
-    : '/site-b/brand/social/default.png';
+  const own = cardFile(page, CARD_THEME);
+  const name = fs.existsSync(path.join(CARDS, own)) ? own : cardFile('default', CARD_THEME);
+  return `/site-b/brand/social/${name}`;
 }
 
 function render({ title, description, url, page }) {
@@ -131,6 +134,14 @@ if (fs.existsSync(MANIFEST)) {
   for (const [page, recorded] of Object.entries(manifest.cards || {})) {
     if (!PAGES.includes(page)) { problems.push(`card manifest lists unknown page "${page}"`); continue; }
     const live = readPage(page).title;
+    for (const theme of Object.keys(THEMES)) {
+      // Both appearances are checked, not just the served one: an unserved
+      // card that silently went missing would only surface later, at the
+      // moment someone flipped CARD_THEME and had no art to flip to.
+      if (!fs.existsSync(path.join(CARDS, cardFile(page, theme)))) {
+        problems.push(`${page}: no ${theme} card art — run \`npm run build:social-cards\``);
+      }
+    }
     if (live !== recorded.title) {
       problems.push(`${page}: card art was rendered from a different title — re-run \`npm run build:social-cards\`\n      card: ${recorded.title}\n      page: ${live}`);
     }
@@ -145,5 +156,5 @@ if (problems.length) {
 }
 
 console.log(CHECK
-  ? `Social audit passed: ${PAGES.length} pages carry derived og/twitter metadata, every card matches its page title.`
+  ? `Social audit passed: ${PAGES.length} pages carry derived og/twitter metadata; ${Object.keys(THEMES).length} appearances present for each, serving "${CARD_THEME}"; every card matches its page title.`
   : `Social meta built: ${PAGES.length} pages checked, ${written} updated.`);
