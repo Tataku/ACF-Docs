@@ -77,11 +77,14 @@ const b64 = (f) => fs.readFileSync(path.join(FONTS, f)).toString('base64');
 const INTER = b64('InterVariable.woff2');
 const MONO = b64('JetBrainsMono-Medium.woff2');
 
-const mark = (ink) => `<svg viewBox="0 0 64 64" width="86" height="86" fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <line x1="32" y1="12" x2="32" y2="22"/><rect x="6" y="22" width="52" height="34" rx="15"/>
-  <circle cx="32" cy="7" r="5.5" fill="${ink}" stroke="none"/>
-  <circle cx="22" cy="39" r="4.5" fill="${ink}" stroke="none"/>
-  <circle cx="42" cy="39" r="4.5" fill="${ink}" stroke="none"/></svg>`;
+// The same geometry the nav marks and the favicon draw — antenna, tip, head,
+// eyes, and the three-line neck. `npm run audit:brand` pins these numbers, and
+// ACFDashboard's brand-identity gate pins the identical ones from its side.
+const mark = (ink) => `<svg viewBox="0 0 64 64" width="86" height="86" fill="none" stroke="${ink}" stroke-linecap="round" stroke-linejoin="round">
+  <g stroke-width="6"><rect x="6" y="19" width="52" height="18" rx="8"/></g>
+  <g stroke-width="4"><line x1="32" y1="8" x2="32" y2="16"/></g>
+  <g stroke-width="4"><line x1="22" y1="46" x2="42" y2="46"/><line x1="22" y1="54" x2="42" y2="54"/><line x1="22" y1="62" x2="42" y2="62"/></g>
+  <g fill="${ink}" stroke="none"><circle cx="32" cy="4" r="4"/><circle cx="20" cy="28" r="4"/><circle cx="44" cy="28" r="4"/></g></svg>`;
 
 function card({ eyebrow, headline, description }, t) {
   // Long headlines step down rather than wrap into the rule below them. The
