@@ -268,6 +268,7 @@
       "exhibit-p4-gross-not-net",
       "exhibit-p4-roc-yield",
       "exhibit-p4-tax-wedge",
+      "exhibit-p4-wrapper-routing",
       "pretax",
       "pretax-title",
       "resilience",
@@ -463,6 +464,7 @@
       "pic-p4-gross-not-net",
       "pic-p4-roc-yield",
       "pic-p4-tax-wedge",
+      "pic-p4-wrapper-routing",
       "pic-p5-ballast-rotation",
       "pic-p5-change-hierarchy",
       "pic-p5-earned-size",
@@ -999,6 +1001,24 @@
       "route": "/part-3-bitcoin-convexity-backbone",
       "hash": "#exhibit-p3-reserve-share-evolves",
       "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-reserve-share-evolves"
+    },
+    "p4-wrapper-routing": {
+      "chartId": "p4-wrapper-routing",
+      "idx": "P4-04",
+      "title": "Routing the Dollar",
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "hash": "#exhibit-p4-wrapper-routing",
+      "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-wrapper-routing"
+    },
+    "P4-04": {
+      "chartId": "p4-wrapper-routing",
+      "idx": "P4-04",
+      "title": "Routing the Dollar",
+      "part": 4,
+      "route": "/part-4-tax-architecture-roc-strategy",
+      "hash": "#exhibit-p4-wrapper-routing",
+      "href": "/part-4-tax-architecture-roc-strategy#exhibit-p4-wrapper-routing"
     },
     "p4-tax-wedge": {
       "chartId": "p4-tax-wedge",
@@ -1969,9 +1989,9 @@
   },
   "audit": {
     "pages": 11,
-    "anchors": 437,
-    "chartSpecs": 45,
-    "liveChartMounts": 97,
+    "anchors": 438,
+    "chartSpecs": 46,
+    "liveChartMounts": 99,
     "glossaryTerms": 70,
     "glossaryTermsAlreadyTagged": 28,
     "glossaryTermsAutoTagEligible": 42,

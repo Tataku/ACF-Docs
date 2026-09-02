@@ -725,15 +725,20 @@ function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
     st.nodes.forEach((nd, j) => { pos.push({ ...nd, x: cx, y: pad.t + avail * ((j + 1) / (m + 1)), stageIdx: i }); });
   });
   const byId = (id) => pos.find((p) => p.id === id);
+  // Explicit `flow.edges` ({ from, to }) draw a ROUTING map — each node connects
+  // only where the spec says it does. Without them every node fans to every node
+  // in the next stage (the bottleneck-map / gauntlet shape), unchanged.
+  const routed = Array.isArray(spec.flow.edges) && spec.flow.edges.length > 0;
   const connectors = useMemo(() => {
     const out = [];
-    for (let i = 0; i < N - 1; i++) {
-      stages[i].nodes.forEach((an) => stages[i + 1].nodes.forEach((bn) => {
-        const p1 = byId(an.id), p2 = byId(bn.id);
-        const x1 = p1.x + NW / 2, x2 = p2.x - NW / 2, dx = (x2 - x1) * 0.45;
-        out.push(`M${x1} ${p1.y} C${x1 + dx} ${p1.y} ${x2 - dx} ${p2.y} ${x2} ${p2.y}`);
-      }));
-    }
+    const link = (a, b) => {
+      const p1 = byId(a), p2 = byId(b);
+      if (!p1 || !p2) return;
+      const x1 = p1.x + NW / 2, x2 = p2.x - NW / 2, dx = (x2 - x1) * 0.45;
+      out.push({ d: `M${x1} ${p1.y} C${x1 + dx} ${p1.y} ${x2 - dx} ${p2.y} ${x2} ${p2.y}`, from: a, to: b });
+    };
+    if (routed) spec.flow.edges.forEach((e) => link(e.from, e.to));
+    else for (let i = 0; i < N - 1; i++) stages[i].nodes.forEach((an) => stages[i + 1].nodes.forEach((bn) => link(an.id, bn.id)));
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
@@ -760,7 +765,12 @@ function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Staged flow diagram" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {stages.map((st, i) => st.label ? <text key={`sl${i}`} x={pad.l + colW * (i + 0.5)} y={pad.t - 18} textAnchor="middle" style={halo(pal, 8.5, pal.text4)}>{st.label.toUpperCase()}</text> : null)}
         <g style={{ opacity: entered ? 0.5 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 200ms' }}>
-          {connectors.map((d, i) => <path key={`c${i}`} d={d} fill="none" stroke={accent} strokeWidth="1" opacity="0.5" />)}
+          {connectors.map((c, i) => {
+            // On a routing map the focused node lights its own routes and the rest recede,
+            // so the reader can follow one dollar without losing the map.
+            const lit = routed && focusId ? (c.from === focusId || c.to === focusId) : null;
+            return <path key={`c${i}`} d={c.d} fill="none" stroke={accent} strokeWidth={lit ? 1.6 : 1} opacity={lit === null ? 0.5 : lit ? 1 : 0.18} style={{ transition: trans('opacity') }} />;
+          })}
         </g>
         {pos.map((n) => {
           const on = focusId === n.id;
