@@ -202,7 +202,7 @@
         <div class="measure">
           <div class="doc-signal" data-glyph-text>Framework Documentation</div>
           <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
-          <p class="doc-kicker">Part 4 of 6 &middot; &approx; 13 min read &middot; <a class="kicker-link" href="/framework-in-pictures#tax">In pictures &middot; 3 exhibits &rarr;</a></p>
+          <p class="doc-kicker">Part 4 of 6 &middot; &approx; 13 min read &middot; <a class="kicker-link" href="/framework-in-pictures#tax">In pictures &middot; 4 exhibits &rarr;</a></p>
           <h1 class="doc-title">Tax Architecture and ROC Strategy</h1>
 
           <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
@@ -305,6 +305,11 @@
           <li><p><span class="lead">Route remaining capital by position type.</span> Send never-sold Bitcoin to taxable cold storage, rotating Torque to Roth, income and ballast to taxable, and, in an unusually high-income year, a deductible pre-tax contribution intended for later conversion.</p></li>
         </ol>
       </div>
+
+      <!-- Chart island: p4-wrapper-routing "Routing the Dollar" — the wrapper routing map.
+           Spec: components/framework-charts/chart-specs.mjs (idx P4-04 · group part-4 · routed flow: five kinds of new capital on the left, each connected only to the wrapper the framework assigns it on the right).
+           Hydrated at runtime by /site-b/site-b-charts.js (the FrameworkChart engine). -->
+      <figure class="fc-mount" id="exhibit-p4-wrapper-routing" data-fc-chart="p4-wrapper-routing"></figure>
 
       <div class="measure prose">
         <p>That is the map. The three sections that follow take each container in turn, starting where the space is tightest and the payoff highest.</p>
