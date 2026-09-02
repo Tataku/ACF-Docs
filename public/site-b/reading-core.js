@@ -14,21 +14,47 @@
   var NARRATION = null;
 
   /* ---- Theme toggle (shared by cover + Part pages) ----------------------- *
-   * The pre-paint <head> script sets data-theme; this only handles the click.  */
+   * The pre-paint <head> script sets data-theme; this only handles the click.
+   *
+   * The switch lands inside a View Transition when the browser offers one:
+   * the page is snapshotted, the attribute flips, and the two snapshots
+   * crossfade as ONE composited animation (timed in reading-system.css under
+   * `html.theme-crossfade`). Every surface — paper, ink, rules, the hero
+   * field canvas, chart SVG — changes at the same rate, which an attribute
+   * swap alone (the previous behaviour: an instant hard cut) and a
+   * per-property CSS transition (which eases colours and lets gradients,
+   * SVG and canvas snap) both fail to do. Reduced-motion users, and browsers
+   * without the API, get the plain swap: a clean cut rather than a partial
+   * animation. */
   function theme() {
     var btn = document.getElementById('theme-toggle');
     if (!btn) return;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
     function sync() {
       var dark = root.getAttribute('data-theme') === 'dark';
       btn.setAttribute('aria-pressed', String(dark));
       btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
     }
-    sync();
-    btn.addEventListener('click', function () {
-      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    function commit(next) {
       root.setAttribute('data-theme', next);
       try { localStorage.setItem('acf-theme', next); } catch (e) {}
       sync();
+    }
+    sync();
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      var canFade = typeof document.startViewTransition === 'function'
+        && !(reduceMotion && reduceMotion.matches);
+      if (!canFade) { commit(next); return; }
+      root.classList.add('theme-crossfade');
+      var settle = function () { root.classList.remove('theme-crossfade'); };
+      try {
+        var transition = document.startViewTransition(function () { commit(next); });
+        transition.finished.then(settle, settle);
+      } catch (e) {
+        settle();
+        commit(next);
+      }
     });
   }
 

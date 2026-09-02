@@ -21,6 +21,21 @@ html {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+/* ---- Theme crossfade ------------------------------------------------------
+   reading-core.js commits a theme switch inside document.startViewTransition()
+   and holds `theme-crossfade` on <html> for exactly that transition, so these
+   pseudo-elements time ONE page-level crossfade and nothing else. Only the
+   duration and easing are set: the default keyframes (old fades out, new fades
+   in, composited plus-lighter so the midpoint never dips dark) are the right
+   crossfade. --motion-slow is the deliberate step of the band; the whole page
+   moving together earns it. Reduced-motion never starts the transition (the JS
+   checks first), so no override is needed here. */
+html.theme-crossfade::view-transition-old(root),
+html.theme-crossfade::view-transition-new(root) {
+  animation-duration: var(--motion-slow);
+  animation-timing-function: var(--ease-standard);
+}
+
 body {
   margin: 0;
   /* Faint top atmosphere: a soft light source at the top of the page so content
