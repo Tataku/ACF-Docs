@@ -1012,7 +1012,24 @@
   var triggers = document.querySelectorAll('.gloss[data-gloss]');
   if (!triggers.length) return;
 
-  var desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  // Which interaction model: anchored popover vs full-width bottom sheet.
+  //
+  // This asked `(hover: hover) and (pointer: fine)`, which describes the
+  // PRIMARY pointing device. On a hybrid — a touchscreen laptop, a Surface, a
+  // 2-in-1 — the browser reports the touchscreen as primary, so the query was
+  // FALSE while the reader was driving a mouse, and the touch bottom sheet rose
+  // across the width of a 1900px desktop page. `any-hover` / `any-pointer` ask
+  // the question this always meant: can ANY attached input hover and point
+  // precisely? A touch-only phone still answers no, so the sheet survives where
+  // it belongs.
+  //
+  // The width floor is the second half of the same guard: a wide viewport is
+  // not a bottom-sheet context whatever the pointer reports, and 768px is this
+  // stylesheet's established mobile edge. It also covers browsers that do not
+  // support the `any-` features at all, where matchMedia answers false.
+  var desktop =
+    window.matchMedia('(any-hover: hover) and (any-pointer: fine)').matches ||
+    window.matchMedia('(min-width: 769px)').matches;
   var GLOSSARY = {}, card = null, backdrop = null;
   var pinned = false, hoverTimer = null, closeTimer = null, lastTrigger = null;
 
