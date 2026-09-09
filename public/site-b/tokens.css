@@ -3,15 +3,44 @@
    Single source of truth for the editorial reading surface.
    Derived from the ACF dashboard design system, NOT copied from it.
 
-   SURFACE SPLIT (intentional — do not "fix" toward consistency):
+   SURFACE SPLIT — CORRECTED 2026-09-09. READ THIS BEFORE TRUSTING THE OLD NOTE.
    ----------------------------------------------------------------------------
-   The dashboard surface uses  Inter (sans) on a dark app chrome (#08090b).
-   This editorial reading surface uses  Geist (sans) + Newsreader (serif)
-   on light paper. Two surfaces, two sans faces, on purpose:
-     • Inter   → dashboard / application chrome
-     • Geist   → editorial reading surface (matches the Phase 1 reports)
-   If you see Geist here and Inter in the dashboard, that is the designed
-   split, not drift.
+   This header used to warn: "The dashboard uses Inter; this editorial reading
+   surface uses Geist (sans) + Newsreader (serif) … If you see Geist here and
+   Inter in the dashboard, that is the designed split, not drift — do not fix
+   toward consistency."
+
+   THAT SPLIT NO LONGER EXISTS, and the same file retired it: see
+   `--font-sans` below (Inter) and `--font-serif: var(--font-sans)`
+   ("retired serif → Inter", for design-system alignment). Both properties now
+   run Inter + JetBrains Mono. The warning outlived the divergence it
+   described and became the main thing deterring anyone from reconciling the
+   two registers — which is the actual current state:
+
+     • COLOUR IS ALREADY IDENTICAL. All 14 surface/ink/rule/accent tokens below
+       match the dashboard's `--lp-*` publication register byte-for-byte, in
+       BOTH themes (`--paper` = `--lp-paper` = #f7f4ec / #14171a, and so on
+       through `--accent`, `--ink-*`, `--rule*`, `--on-accent`). This is not
+       "derived" — it is the same register, hand-duplicated across two repos
+       under two naming conventions, with no shared source and no drift check.
+
+     • TYPE IS NOT. The scales share the token NAMES and not the values:
+       `--text-2xl` is 1.953rem here and 2.3125rem on the landing page;
+       `--text-5xl` is 4rem vs 4.75rem; `--measure-full` 62rem vs 73.75rem.
+       Same name, different size, invisible to any tool — neither name ever
+       appears in the other repo.
+
+   WHAT REMAINS GENUINELY INTENTIONAL: light paper here vs dark app chrome
+   there, and the paper-tuned accent (see ACCENT DERIVATION below). Those are
+   real surface decisions. The FACES are not a split any more, and the colour
+   duplication is a maintenance hazard rather than a design choice.
+
+   So: reconciling these two registers is an OPEN QUESTION, not a forbidden
+   one. It needs a decision (share a source, or keep two and pin the deltas
+   with a cross-repo check) — see
+   `ACFDashboard/docs/audits/DESIGN_SYSTEM_COVERAGE_GAP_AUDIT_v1.md` §5.
+   Until that decision is made, changing a colour token HERE without changing
+   its `--lp-*` twin THERE silently splits the two public surfaces.
 
    ACCENT DERIVATION:
    The dashboard brand accent is emerald #10b981 (kept below as the brand
