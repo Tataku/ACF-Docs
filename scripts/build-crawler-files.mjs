@@ -35,25 +35,109 @@ const CHECK = process.argv.includes('--check');
 
 const ORIGIN = 'https://docs.acfdashboard.com';
 
-/** Read a page's declared canonical. Missing is a hard error, not a skip: a
- *  page without one is an SEO defect, and silently omitting it from the
- *  sitemap would hide that rather than surface it. */
-function canonicalOf(page) {
+/**
+ * THE ROUTABLE UNIVERSE IS THE REWRITE TABLE, not a hand-kept page list.
+ *
+ * v1 of this script took its page set from `PAGES` in social-cards.config.mjs
+ * and stopped there. `PAGES` is the list of pages that have SOCIAL ART; the
+ * list of pages that have a URL is `siteBRewrites` in next.config.mjs. They
+ * happen to hold the same eleven entries today, and nothing whatsoever made
+ * that true — which is precisely the second-source-of-truth this repo's
+ * generator pipeline exists to prevent, reproduced by the script written to
+ * prevent it. A page added to the rewrite table and not to PAGES would have
+ * been silently absent from the sitemap; the reverse would have advertised a
+ * URL that 404s.
+ *
+ * So the rewrites are parsed and the two sets are asserted equal in BOTH
+ * directions. The array is sliced by its own declaration first, because
+ * `next.config.mjs` also declares a `source:` inside `headers()` for the
+ * noindex rule and a naive scan would pull that in as a twelfth route.
+ */
+function routableRoutes() {
+  const config = fs.readFileSync(path.join(ROOT, 'next.config.mjs'), 'utf8');
+  const open = config.indexOf('const siteBRewrites = [');
+  if (open === -1) throw new Error('next.config.mjs: siteBRewrites declaration not found.');
+  const close = config.indexOf('];', open);
+  if (close === -1) throw new Error('next.config.mjs: siteBRewrites array is not terminated.');
+  const block = config.slice(open, close);
+
+  const routes = [...block.matchAll(/\{\s*source:\s*"([^"]+)"\s*,\s*destination:\s*"\/site-b\/([^".]+)\.html"\s*\}/g)]
+    .map(([, slug, page]) => ({ slug, page }));
+  if (routes.length === 0) throw new Error('next.config.mjs: siteBRewrites parsed to zero routes.');
+  return routes;
+}
+
+/** Fail loudly on any set difference, naming BOTH directions separately. */
+function assertRouteParity(routes) {
+  const routed = new Set(routes.map((r) => r.page));
+  const arted = new Set(PAGES);
+  const missingArt = [...routed].filter((p) => !arted.has(p));
+  const missingRoute = [...arted].filter((p) => !routed.has(p));
+  if (missingArt.length || missingRoute.length) {
+    throw new Error(
+      'next.config.mjs siteBRewrites and social-cards.config.mjs PAGES disagree.\n'
+      + (missingArt.length ? `  routed but not in PAGES: ${missingArt.join(', ')}\n` : '')
+      + (missingRoute.length ? `  in PAGES but not routed: ${missingRoute.join(', ')}\n` : '')
+      + '  These two lists must name the same pages — one is the URL surface, the other the art.',
+    );
+  }
+}
+
+/**
+ * Read a page's declared canonical and check it against the URL the rewrite
+ * table actually serves it on.
+ *
+ * A page with no canonical is a hard error, not a skip: silently omitting it
+ * would hide an SEO defect instead of surfacing it. A canonical that disagrees
+ * with its own route is the same class of defect one layer down — the page
+ * would be telling crawlers to index an address the site does not serve.
+ */
+function canonicalOf({ slug, page }) {
   const file = path.join(SITE, `${page}.html`);
   const html = fs.readFileSync(file, 'utf8');
   const match = html.match(/<link rel="canonical" href="([^"]+)"/);
   if (!match) throw new Error(`${page}.html declares no rel=canonical — cannot build a sitemap entry for it.`);
   const url = match[1];
-  if (!url.startsWith(`${ORIGIN}/`) && url !== `${ORIGIN}/`) {
-    throw new Error(`${page}.html canonical is off-origin: ${url}`);
+  const expected = `${ORIGIN}${slug}`;
+  if (url !== expected) {
+    throw new Error(
+      `${page}.html canonical disagrees with the route that serves it.\n`
+      + `  declared: ${url}\n  routed:   ${expected}\n`
+      + '  Fix the page, or fix siteBRewrites — a canonical pointing anywhere else is a lie to crawlers.',
+    );
   }
   return url;
 }
 
-const urls = PAGES.map(canonicalOf);
-// The cover sorts first (it is the origin root); the rest read in slug order so
-// a diff on this file shows what actually moved.
-const ordered = [...new Set(urls)].sort((a, b) => (a.length - b.length) || a.localeCompare(b));
+const routes = routableRoutes();
+assertRouteParity(routes);
+const urls = routes.map(canonicalOf);
+
+/**
+ * DUPLICATES ARE A FAILURE, NOT SOMETHING TO DEDUPE.
+ *
+ * v1 wrote `[...new Set(urls)]`, which quietly collapsed two pages sharing one
+ * canonical into a single sitemap entry and then reported success — hiding the
+ * exact drift this generator exists to catch, and in the likeliest way for it
+ * to occur: three of the eleven pages are CLONED from part-6's shell and
+ * rewrite their own canonical, so a missed replace produces two pages claiming
+ * one URL. The canonical↔route check above already makes this unreachable
+ * (routes are unique by construction), and it is asserted anyway, because a
+ * guard whose only protection is another guard is one refactor from silent.
+ */
+const duplicates = urls.filter((u, i) => urls.indexOf(u) !== i);
+if (duplicates.length) {
+  throw new Error(
+    `Two or more pages declare the same canonical: ${[...new Set(duplicates)].join(', ')}\n`
+    + '  A sitemap cannot represent that, and deduping it would hide the defect.',
+  );
+}
+
+// Emitted in the REWRITE TABLE's own order. v1 sorted by URL length with a
+// comment claiming slug order — two different things, and the comment was the
+// one being read. The rewrite table is the authority this file derives from,
+// so echoing its order keeps a diff here readable against a diff there.
+const ordered = urls;
 
 const robots = `# ACF Framework Documentation — crawler policy
 #
