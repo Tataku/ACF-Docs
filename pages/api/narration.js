@@ -28,7 +28,7 @@ const OPENAI_TTS_ENDPOINT = 'https://api.openai.com/v1/audio/speech';
 const OPENAI_TTS_MODEL = process.env.NARRATION_TTS_MODEL || 'gpt-4o-mini-tts';
 const DEFAULT_VOICE = process.env.NARRATION_TTS_VOICE || 'nova';
 // gpt-4o-mini-tts voice set (superset of the legacy six). Any of these may be
-// requested per-call via body.voice; unknown values fall back to DEFAULT_VOICE.
+// requested per-call via body.voice; unknown values resolve via resolveVoice().
 const ALLOWED_VOICES = [
   'alloy', 'ash', 'ballad', 'coral', 'echo', 'fable',
   'onyx', 'nova', 'sage', 'shimmer', 'verse', 'marin', 'cedar',
@@ -47,6 +47,41 @@ const DEFAULT_INSTRUCTIONS =
 const supportsInstructions = (model) => !/^tts-1/i.test(model || '');
 const MAX_INPUT_LENGTH = 4096; // OpenAI TTS hard limit
 const TTS_TIMEOUT_MS = 45000;  // gpt-4o-mini-tts can take a beat longer than tts-1
+
+// The ONE place a voice name is resolved, for both the capability answer and the
+// generation call. It must be one path: a mistyped NARRATION_TTS_VOICE used to
+// flow straight through to the provider, which rejected every request, and the
+// reader simply heard the browser voice from then on.
+function resolveVoice(requested) {
+  if (requested && ALLOWED_VOICES.indexOf(requested) >= 0) return requested;
+  if (ALLOWED_VOICES.indexOf(DEFAULT_VOICE) >= 0) return DEFAULT_VOICE;
+  return 'nova'; // env holds a voice the provider does not know — do not forward it
+}
+
+// Describe the RESOLVED voice configuration. Returned with every capability
+// check and with every config rejection, because the failure this endpoint
+// actually suffers in the field is silent: the key is fine, the route is up,
+// `available` says true, and every generation is rejected for a model or voice
+// ops mistyped — which reaches the reader as "the robotic voice is back" with
+// nothing anywhere saying why. Contains no secrets.
+//
+// Mirrors `api/lib/narrationVoice.js` in the ACFDashboard repo — the two must
+// agree, or the docs and the app narrate in different voices.
+function describeVoice() {
+  const model = OPENAI_TTS_MODEL;
+  const configuredVoice = process.env.NARRATION_TTS_VOICE || '';
+  const legacyModel = !supportsInstructions(model);
+  const voice = resolveVoice();
+
+  let configWarning = null;
+  if (configuredVoice && ALLOWED_VOICES.indexOf(configuredVoice) < 0) {
+    configWarning = 'NARRATION_TTS_VOICE="' + configuredVoice + '" is not a known voice; using "' + voice + '"';
+  } else if (legacyModel) {
+    configWarning = 'NARRATION_TTS_MODEL="' + model + '" is a legacy model that ignores delivery instructions';
+  }
+
+  return { model, voice, instructions: !legacyModel, legacyModel, configWarning };
+}
 
 // Best-effort in-memory rate limit. Serverless instances are ephemeral, so this
 // only dampens a single warm instance — it is a cost guard, not a security
@@ -138,8 +173,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       available: !!apiKey,
       provider: apiKey ? 'openai' : null,
-      model: apiKey ? OPENAI_TTS_MODEL : null,
-      voice: apiKey ? DEFAULT_VOICE : null,
+      ...(apiKey ? describeVoice() : { model: null, voice: null }),
     });
   }
 
@@ -154,7 +188,12 @@ export default async function handler(req, res) {
   // Reject anything that doesn't look like a request from our own pages before
   // spending a provider call. fallback:'browser' keeps a rare mis-fire graceful.
   if (!requestAllowed(req)) {
-    return res.status(403).json({ error: 'ORIGIN_NOT_ALLOWED', fallback: 'browser' });
+    return res.status(403).json({
+      error: 'ORIGIN_NOT_ALLOWED',
+      message: 'Narration requests are only accepted from this site\'s own pages',
+      configRejected: true,
+      fallback: 'browser',
+    });
   }
 
   if (!apiKey) {
@@ -174,7 +213,7 @@ export default async function handler(req, res) {
   }
 
   const input = text.slice(0, MAX_INPUT_LENGTH);
-  const voice = ALLOWED_VOICES.indexOf(body.voice) >= 0 ? body.voice : DEFAULT_VOICE;
+  const voice = resolveVoice(body.voice);
   const instructions = supportsInstructions(OPENAI_TTS_MODEL) ? DEFAULT_INSTRUCTIONS : '';
   const ckey = cacheKey(OPENAI_TTS_MODEL, voice, instructions, input);
 
@@ -234,6 +273,18 @@ export default async function handler(req, res) {
       if (status === 429) {
         res.setHeader('Retry-After', upstream.headers.get('retry-after') || '60');
         return res.status(429).json({ error: 'UPSTREAM_RATE_LIMITED', fallback: 'browser' });
+      }
+      if (status === 400 || status === 404) {
+        // Fails identically on every retry — a deployment misconfiguration,
+        // not a transient blip. Naming it here is what stops it presenting as
+        // an unexplained return of the robotic voice.
+        return res.status(502).json({
+          error: 'UPSTREAM_CONFIG_REJECTED',
+          message: `OpenAI TTS rejected the configured model/voice (HTTP ${status})`,
+          configRejected: true,
+          voiceConfig: describeVoice(),
+          fallback: 'browser',
+        });
       }
       return res.status(502).json({
         error: 'UPSTREAM_ERROR',

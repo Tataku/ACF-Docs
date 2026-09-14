@@ -409,6 +409,27 @@
       var SLOW_FALLBACK_MS = 8000;   // if the API hasn't produced first audio by now, fall back to Web Speech (non-sticky; prewarm usually makes this moot)
       var loadTimer = 0;             // the slow-API safety-net timer (cleared on success / stop)
 
+      // --- which voice are we actually hearing? ------------------------------
+      // The premium voice can vanish for reasons no reader can see (key removed,
+      // model or voice mistyped, origin gate refusing) and every one of them
+      // arrives as the same robotic Web Speech fallback. `data-narration-voice`
+      // records the truth on the transport, and the reason is warned ONCE so it
+      // is recoverable from a console without a debug flag.
+      var warnedVoice = false;
+      var voiceInfo = null;      // { model, voice, instructions, configWarning } once the API has answered
+      function warnVoice(reason) {
+        if (warnedVoice) return;
+        warnedVoice = true;
+        try { console.warn('[narration] premium voice unavailable — using the browser voice · ' + reason); } catch (e) {}
+      }
+      function setVoiceKind(kind, reason) {
+        bar.setAttribute('data-narration-voice', kind);
+        if (kind === 'premium' && voiceInfo && voiceInfo.model) {
+          bar.setAttribute('data-narration-model', voiceInfo.model);
+        }
+        if (kind === 'browser' && reason) warnVoice(reason);
+      }
+
       // --- floatnav scrubber: estimated progress clock ------------------------
       // partActions owns the engine; narrationDock() is pure UI that drives it via
       // the NARRATION controller exposed at the end. Progress is a wall-clock
@@ -482,15 +503,36 @@
       //     Web Speech already covers us) --------------------------------------
       var method = null; // 'api' | 'browser' | 'unavailable'
       var capabilityPromise = null;
+      // A capability verdict reached WITHOUT the server answering (timeout,
+      // offline, 5xx on the probe) is a guess made under failure. Remembering
+      // it is how one slow cold start pins the whole visit to the browser
+      // voice long after the API recovered — so a degraded verdict is thrown
+      // away and the next click asks again.
       function resolveCapability() {
         if (capabilityPromise) return capabilityPromise;
         var ctrl = new AbortController();
         var to = setTimeout(function () { ctrl.abort(); }, 5000);
+        var degraded = true;
         capabilityPromise = fetch('/api/narration', { method: 'GET', signal: ctrl.signal })
           .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (d) { method = (d && d.available) ? 'api' : (synth ? 'browser' : 'unavailable'); })
+          .then(function (d) {
+            if (d) {
+              degraded = false;                 // the server answered; its word is final
+              if (d.available) voiceInfo = d;
+              if (d.configWarning) warnVoice('server reports: ' + d.configWarning);
+            }
+            method = (d && d.available) ? 'api' : (synth ? 'browser' : 'unavailable');
+          })
           .catch(function () { method = synth ? 'browser' : 'unavailable'; })
-          .then(function () { clearTimeout(to); return method; });
+          .then(function () {
+            clearTimeout(to);
+            var m = method;
+            if (degraded && m !== 'api') {      // could not ask — do not treat it as an answer
+              mark('capability-degraded', m);
+              method = null; capabilityPromise = null;
+            }
+            return m;
+          });
         return capabilityPromise;
       }
 
@@ -553,6 +595,7 @@
                 var err = new Error((e && e.message) || ('HTTP ' + r.status));
                 err.fallback = e && e.fallback;
                 err.code = e && e.error;
+                err.configRejected = !!(e && e.configRejected);
                 err.status = r.status;
                 throw err;
               });
@@ -565,7 +608,12 @@
             return u;
           }, function (err) {
             var aborted = err && err.name === 'AbortError';
-            var definitive = err && (err.status === 401 || err.status === 503 || err.code === 'VALIDATION_FAILED');
+            // configRejected / 403 fail identically on every retry — retrying a
+            // mistyped voice or a refused origin just delays the fallback.
+            var definitive = err && (
+              err.status === 401 || err.status === 403 || err.status === 503 ||
+              err.configRejected === true || err.code === 'VALIDATION_FAILED'
+            );
             if (!aborted && !definitive && n < 2) {                 // retry transient failures on the AI voice
               return new Promise(function (r2) { setTimeout(r2, 350 * (n + 1)); }).then(function () { return attempt(n + 1); });
             }
@@ -594,6 +642,7 @@
           audio.onerror = function () { if (myRun === runId) { setState('error'); announce('Narration error'); } };
           var p = audio.play();
           if (p && p.catch) p.catch(function () { if (myRun === runId) setState('error'); });
+          setVoiceKind('premium');
           setState('playing');
           if (i === 0) mark('first-audio-playing');
           // look-ahead: warm upcoming segments so playback stays gapless
@@ -608,12 +657,15 @@
           // the premium AI voice instead of reverting for good. (This is the fix
           // for "narration keeps reverting to the in-browser voice.")
           var definitive = err && (
-            err.status === 401 || err.status === 503 ||
-            err.code === 'PROVIDER_NOT_CONFIGURED' || err.code === 'UPSTREAM_AUTH_FAILED'
+            err.status === 401 || err.status === 403 || err.status === 503 ||
+            err.configRejected === true ||
+            err.code === 'PROVIDER_NOT_CONFIGURED' || err.code === 'UPSTREAM_AUTH_FAILED' ||
+            err.code === 'UPSTREAM_CONFIG_REJECTED' || err.code === 'ORIGIN_NOT_ALLOWED'
           );
           if (synth) {
             if (definitive) { mark('fallback-browser-stick', 'segment ' + i); method = 'browser'; }
             else mark('fallback-browser-transient', 'segment ' + i);
+            setVoiceKind('browser', (err && (err.code || err.message)) || 'generation failed');
             startBrowser(myRun);
             return;
           }
@@ -651,6 +703,7 @@
           if (myRun !== runId || STATE !== 'loading') return;
           if (method === 'api' && synth) {
             mark('slow-fallback');
+            setVoiceKind('browser', 'API did not produce audio within ' + SLOW_FALLBACK_MS + 'ms');
             runId++; var r2 = runId;                // invalidate the in-flight API attempt
             controllers.forEach(function (c) { try { c.abort(); } catch (e) {} });
             controllers.clear(); pending.clear();
@@ -661,7 +714,11 @@
           if (myRun !== runId) { mark('stale-ignored', 'capability'); return; }   // stopped / fell back while resolving
           mark('method', m);
           if (m === 'api') playApi(0, myRun);
-          else if (m === 'browser') { clearTimeout(loadTimer); startBrowser(myRun); }
+          else if (m === 'browser') {
+            clearTimeout(loadTimer);
+            setVoiceKind('browser', 'narration API reports no provider configured');
+            startBrowser(myRun);
+          }
           else { clearTimeout(loadTimer); setState('idle'); announce('Narration unavailable'); }
         });
       }
