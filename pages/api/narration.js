@@ -67,6 +67,16 @@ function resolveVoice(requested) {
 //
 // Mirrors `api/lib/narrationVoice.js` in the ACFDashboard repo — the two must
 // agree, or the docs and the app narrate in different voices.
+// An exhausted balance and a throughput limit are both HTTP 429, and they need
+// opposite handling: a throughput limit clears by waiting, an empty balance does
+// not ("retrying a billing, spending, or quota error does not restore access").
+// It is still NOT definitive — a top-up restores it with no deploy and no
+// reload — so the client must stop RETRYING it without giving up on the voice.
+function isQuotaExhausted(upstreamError) {
+  if (!upstreamError) return false;
+  return upstreamError.type === 'insufficient_quota' || upstreamError.code === 'insufficient_quota';
+}
+
 function describeVoice() {
   const model = OPENAI_TTS_MODEL;
   const configuredVoice = process.env.NARRATION_TTS_VOICE || '';
@@ -271,8 +281,18 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'UPSTREAM_AUTH_FAILED', fallback: 'browser' });
       }
       if (status === 429) {
+        let upstreamError = null;
+        try { upstreamError = (await upstream.json()).error || null; } catch (e) {}
+        const quotaExhausted = isQuotaExhausted(upstreamError);
         res.setHeader('Retry-After', upstream.headers.get('retry-after') || '60');
-        return res.status(429).json({ error: 'UPSTREAM_RATE_LIMITED', fallback: 'browser' });
+        return res.status(429).json({
+          error: quotaExhausted ? 'UPSTREAM_QUOTA_EXHAUSTED' : 'UPSTREAM_RATE_LIMITED',
+          message: quotaExhausted
+            ? 'OpenAI balance exhausted — check billing and credits'
+            : 'OpenAI TTS rate limited',
+          quotaExhausted,
+          fallback: 'browser',
+        });
       }
       if (status === 400 || status === 404) {
         // Fails identically on every retry — a deployment misconfiguration,

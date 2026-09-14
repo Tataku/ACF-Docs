@@ -85,3 +85,26 @@ test('client: every drop to the browser voice is recorded and reported once', ()
   const drops = CLIENT.match(/setVoiceKind\('browser'/g) || [];
   assert.ok(drops.length >= 3, `every fallback path reports itself (found ${drops.length})`);
 });
+
+test('an exhausted balance is told apart from a throughput rate limit', () => {
+  // Both are HTTP 429. Only one of them is a human going to the billing page.
+  assert.match(API, /function isQuotaExhausted\(upstreamError\)/);
+  assert.match(API, /insufficient_quota/);
+  assert.match(API, /UPSTREAM_QUOTA_EXHAUSTED/);
+});
+
+test('client: a quota failure skips the retries but is NOT treated as definitive', () => {
+  // Reads backwards on purpose. Retrying an empty balance cannot help, so the
+  // backoff is skipped — but a top-up restores the premium voice with no
+  // reload, so capability must stay re-probable. Making it definitive would
+  // leave a reader on the robotic voice after the problem was already fixed.
+  assert.match(CLIENT, /var noRetry = definitive \|\| \(err && err\.quotaExhausted === true\)/);
+  assert.doesNotMatch(
+    CLIENT,
+    /var definitive = err && \([^)]*quotaExhausted/s,
+  );
+});
+
+test('client: the fallback names an empty balance as the reason', () => {
+  assert.match(CLIENT, /balance exhausted/);
+});

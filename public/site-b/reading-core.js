@@ -596,6 +596,7 @@
                 err.fallback = e && e.fallback;
                 err.code = e && e.error;
                 err.configRejected = !!(e && e.configRejected);
+                err.quotaExhausted = !!(e && e.quotaExhausted);
                 err.status = r.status;
                 throw err;
               });
@@ -614,7 +615,12 @@
               err.status === 401 || err.status === 403 || err.status === 503 ||
               err.configRejected === true || err.code === 'VALIDATION_FAILED'
             );
-            if (!aborted && !definitive && n < 2) {                 // retry transient failures on the AI voice
+            // An exhausted balance is a 429 that a backoff cannot clear, so it
+            // is not worth retrying — but it is NOT definitive either: a top-up
+            // restores the premium voice without a reload, so capability stays
+            // re-probable and only the pointless retries are skipped.
+            var noRetry = definitive || (err && err.quotaExhausted === true);
+            if (!aborted && !noRetry && n < 2) {                    // retry transient failures on the AI voice
               return new Promise(function (r2) { setTimeout(r2, 350 * (n + 1)); }).then(function () { return attempt(n + 1); });
             }
             throw err;
@@ -665,7 +671,9 @@
           if (synth) {
             if (definitive) { mark('fallback-browser-stick', 'segment ' + i); method = 'browser'; }
             else mark('fallback-browser-transient', 'segment ' + i);
-            setVoiceKind('browser', (err && (err.code || err.message)) || 'generation failed');
+            setVoiceKind('browser', (err && err.quotaExhausted)
+              ? 'OpenAI balance exhausted — add credits to restore the premium voice'
+              : ((err && (err.code || err.message)) || 'generation failed'));
             startBrowser(myRun);
             return;
           }
