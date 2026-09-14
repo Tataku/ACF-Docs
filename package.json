@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:social-meta && npm run build:navigation && npm run sync:counts",
+    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:social-meta && npm run build:crawler && npm run build:navigation && npm run sync:counts",
     "build": "next build",
     "start": "next start",
     "test:chart-core": "node --test components/framework-charts/chart-core/tests/*.test.mjs",
@@ -22,7 +22,9 @@
     "sync:counts": "node scripts/sync-counts.mjs",
     "audit:counts": "node scripts/sync-counts.mjs --check",
     "audit:social": "node scripts/build-social-meta.mjs --check",
-    "audit:brand": "node scripts/audit-brand-mark.mjs"
+    "audit:brand": "node scripts/audit-brand-mark.mjs",
+    "build:crawler": "node scripts/build-crawler-files.mjs",
+    "audit:crawler": "node scripts/build-crawler-files.mjs --check"
   },
   "dependencies": {
     "next": "14.2.25",
