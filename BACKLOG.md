@@ -241,9 +241,12 @@ Decisions taken at build time, now contract:
 
 ## 3. Reader-experience decisions left open by the 2026-09-15 visitor read
 
-**Status:** `OPEN — owner decision, not scoped work` · **Captured:** 2026-09-15
+**Status:** `3 OPEN — owner decision, not scoped work` · `1 CLOSED — decision 4, shipped 2026-09-15`
+**Captured:** 2026-09-15
 **Type:** Reading-surface UX. Four findings from a full read of the live tree, deliberately
-not fixed, because each needs a judgment call rather than a patch.
+not fixed, because each needs a judgment call rather than a patch. Decision (4) has since been
+taken and shipped; it is kept below, marked, because what it records is now the rule for
+maintaining the thing that shipped.
 
 ### Context
 
@@ -256,6 +259,8 @@ chart stepper dots announcing themselves as "Element 3").
 
 The four below were the residue. Each is real, each is small, and each has more than one
 defensible answer — which is why they are recorded here rather than decided by a session.
+Three are still open. The fourth was decided by the owner on 2026-09-15 and is marked as such
+where it sits.
 
 > The read also produced a **non-finding worth keeping**: 18 remaining tap-target reports are
 > inline links inside prose and metadata lines, which WCAG 2.2 explicitly exempts ("the target
@@ -286,20 +291,43 @@ defensible answer — which is why they are recorded here rather than decided by
    is acceptable or whether the dock should offset the reading column while visible. **No
    change recommended without an owner view; it may be working as designed.**
 
-4. **Share links build their URL from the current origin, not the canonical.** `partActions()`
-   composes the X and email share targets from `location.href`. On production that is
-   identical to the canonical, so this is latent — but a reader who lands on a Vercel preview
-   deployment and shares the page shares the preview URL. Every page already carries
-   `<link rel="canonical">`; reading it instead is small. The decision is whether to prefer
-   the canonical always, or only when the current origin is not the canonical host.
+4. ~~**Share links build their URL from the current origin, not the canonical.**~~
+   **`CLOSED 2026-09-15 — decided and shipped.`**
+
+   *The finding, as recorded:* `partActions()` composes the X and email share targets from
+   `location.href`. On production that is identical to the canonical, so this is latent — but a
+   reader who lands on a Vercel preview deployment and shares the page shares the preview URL.
+   Every page already carries `<link rel="canonical">`; reading it instead is small. The decision
+   is whether to prefer the canonical always, or only when the current origin is not the canonical
+   host.
+
+   **Decided:** prefer the canonical **always**. A conditional that only fires when the origin
+   differs is dormant in every environment anyone tests in — which is the same property that let
+   this defect sit unnoticed behind a comment already claiming `// canonical part URL`. One rule,
+   always on, is the one that stays true.
+
+   **Dropping the fragment is part of the decision, not an oversight.** The bar sits in the
+   document header and means "share this part"; it already sends the PART's title, so a shared
+   `#section` link would arrive captioned with the part regardless. Nothing on this site rewrites
+   `location.hash` while reading, so a hash present at click time is a jump the reader made
+   earlier, not where they are now.
+
+   **Shipped:** `public/site-b/reading-core.js` (`partActions()`, the six part pages) and
+   `public/site-b/cover-docs.js` (`shareOffer()`, the cover footer's share offer, which was
+   written to this rule from the start while this entry was still open). `location.href` survives
+   in both as the fallback for a page declaring no canonical; there is none today.
+
+   **The rule this now leaves behind:** no share control on this site composes its URL from the
+   serving origin, and any page carrying `.part-actions` declares the canonical it would send.
+   Both are pinned in `tests/control-reachability.test.mjs` § 1b, falsified against a revert to
+   `location.href`.
 
 ### Activation prerequisites
 
 - (1) and (2) need an owner call on the jump-row treatment before any CSS is written; they
   should ship as one slice because (2) is a consequence of (1).
 - (3) needs an owner view on whether the current behaviour is a defect at all.
-- (4) is independently shippable and needs no design input — only a decision on which of the
-  two rules to apply.
+- (4) needed only a choice between two rules, and has had it — nothing left to activate.
 
 ### Guardrails inherited from the surrounding work
 

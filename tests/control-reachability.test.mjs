@@ -30,6 +30,13 @@
  *      as "Element 3" — in a row whose own prev/next buttons were already a
  *      correct 44x44, and with the element's real name sitting in the spec.
  *
+ *   4. The share controls composed their URL from `location.href`, so a reader
+ *      who landed on a preview deployment shared a preview link. Recorded as an
+ *      open owner decision (BACKLOG.md section 3) because it had two defensible
+ *      answers; closed 2026-09-15 in favour of preferring the canonical ALWAYS.
+ *      It sits with 1-3 because it came from the same read and is the same kind
+ *      of defect: a control that works, and does not do what it says.
+ *
  * Measured in Chromium at 390 and 1440 before these were written.
  */
 
@@ -45,6 +52,8 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const COVER = read('public/site-b/cover-docs.html');
 const CONFIG = read('next.config.mjs');
 const CSS = read('public/site-b/reading-system.css');
+const CORE = read('public/site-b/reading-core.js');
+const COVER_JS = read('public/site-b/cover-docs.js');
 const CHART = read('components/framework-charts/FrameworkChart.jsx');
 const BUNDLE = read('public/site-b/site-b-charts.js');
 
@@ -128,6 +137,37 @@ test('share: the offer in the base rule is hittable without breaking the line', 
   assert.ok(btn, 'the control exists');
   const name = (btn[0].match(/aria-label="([^"]+)"/) || [, ''])[1];
   assert.match(name.toLowerCase(), /\bshare\b/, `accessible name "${name}" contains the visible word`);
+});
+
+// ---------------------------------------------------------------------------
+// 1b. What the share controls actually hand over
+// ---------------------------------------------------------------------------
+test('share: no control on this site composes its URL from the serving origin', () => {
+  // The invariant, over BOTH implementations, so a third one cannot be written
+  // the old way: partActions() on the six part pages, shareOffer() in the cover
+  // footer. `location.href` survives only as the fallback for a page that
+  // declares no canonical — there is none today, and a page that loses its
+  // canonical has a bigger problem than its share button.
+  for (const [label, src] of [['partActions', CORE], ['shareOffer', COVER_JS]]) {
+    const fn = label === 'partActions'
+      ? src.slice(src.indexOf('function partActions()'), src.indexOf('function partActions()') + 4000)
+      : src.slice(src.indexOf('function shareOffer()'), src.indexOf('function mascot()'));
+    assert.ok(fn.length > 400, `${label} located`);
+    assert.match(fn, /link\[rel="canonical"\]/, `${label} reads the page's canonical`);
+    assert.match(fn, /canonical && canonical\.href\) \|\| location\.href/, `${label} falls back only when there is none`);
+    assert.doesNotMatch(fn, /var url = location\.href/, `${label} does not start from the serving origin`);
+  }
+});
+
+test('share: every page that carries the bar declares the canonical it would send', () => {
+  // The fallback must never be the operative path. If a page grows a share bar
+  // without a canonical, this goes red instead of that page quietly sharing
+  // whichever host served it.
+  for (const file of fs.readdirSync(path.join(ROOT, 'public/site-b')).filter((f) => f.endsWith('.html'))) {
+    const html = read(`public/site-b/${file}`);
+    if (!html.includes('class="part-actions"')) continue;
+    assert.match(html, /<link rel="canonical" href="https:\/\/[^"]+"/, `${file} declares a canonical`);
+  }
 });
 
 // ---------------------------------------------------------------------------

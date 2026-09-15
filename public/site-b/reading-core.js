@@ -498,7 +498,28 @@
     var bar = document.querySelector('.part-actions');
     if (!bar) return;
 
-    var url = location.href; // canonical part URL
+    /* THE CANONICAL, not the URL that happened to serve this page. The line this
+       replaces read `location.href; // canonical part URL` — the comment already
+       claimed what the code did not do, which is why it went unnoticed: on
+       production the two ARE identical, so the defect only surfaces where nobody
+       is looking. A reader who lands on a Vercel preview and shares the page
+       hands someone a preview link, and every page here already declares the
+       right answer in its head.
+
+       OWNER DECISION, 2026-09-15 (BACKLOG.md section 3, decision 4): prefer the
+       canonical ALWAYS, rather than only when the current origin differs. One
+       rule is easier to reason about than a conditional that is dormant in every
+       environment anyone tests in — which is the same property that let this bug
+       live.
+
+       It drops a fragment, and that is deliberate rather than overlooked. This
+       bar sits in the document header and says "share this part"; it already
+       sends the PART's title, so a shared #section link would arrive captioned
+       with the part anyway. Nothing on this site rewrites location.hash while
+       reading, so a hash here is a jump the reader made at some earlier point,
+       not where they are now. */
+    var canonical = document.querySelector('link[rel="canonical"]');
+    var url = (canonical && canonical.href) || location.href;
     var title = (document.title.split('·')[0] || '').trim() || 'The Adaptive Convexity Framework';
     var status = bar.querySelector('.part-actions-status');
     function announce(msg) { if (status) status.textContent = msg; }
