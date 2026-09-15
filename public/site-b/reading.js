@@ -190,6 +190,11 @@
       });
       appendGlossaryLink(layer, 'gloss-later gloss-chart', meta.chart);
     }
+    // Every tooltip is a door to the reference index: the row for this term,
+    // opened in place by glossary-index.js when the hash lands.
+    if (meta.entry && meta.entry.href) {
+      appendGlossaryLink(layer, 'gloss-later gloss-entry', meta.entry);
+    }
     normalizeLinks(layer);
   }
 

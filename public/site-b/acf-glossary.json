@@ -1,100 +1,349 @@
 {
   "meta": {
     "name": "ACF Glossary",
-    "version": "1.2.0",
-    "purpose": "Single source of truth for inline tooltip content across all six framework parts. Tooltips are populated from this file; do not create a separate dead glossary page.",
+    "version": "1.3.0",
+    "purpose": "Single source of truth for inline tooltip content across all six framework parts and for the /glossary reference index, which is GENERATED from this file (scripts/build-glossary-page.mjs). Tooltips and the index are populated from this file; never hand-author a second glossary.",
     "schema": {
       "id": "stable slug, used as the data key and tooltip anchor (kebab-case)",
       "term": "display label",
       "aliases": "alternate spellings/phrasings the tagger should also match",
       "wave": "1 = first rollout pass (highest comprehension value), 2 = second pass",
+      "category": "closed key from meta.categories; groups the /glossary index (explicit, never derived from appearsLater)",
       "definition": "layer-one tooltip copy: concise, plain-English, no em dashes",
       "length": "short | medium — sizing hint for the tooltip card",
-      "source": { "kind": "internal | external", "ref": "internal -> own Part; external -> primary/academic citation" },
+      "source": {
+        "kind": "internal | external",
+        "ref": "internal -> own Part; external -> primary/academic citation"
+      },
       "related": "layer-two: sibling concept ids whose roots should wake on hover (the mycelium adjacency)",
       "appearsLater": "layer-two: the part where this term becomes operational ('see where this appears later')",
       "chart": "id of the chart in the chart-handoff inventory that substantiates this term, if any"
     },
     "usage": "Tooltip layer one shows 'definition'. Layer two ('see where this appears later') is built from 'appearsLater' + 'related'. The 'related' and 'chart' ids share vocabulary with the chart-handoff CONNECTS-TO network so the glossary and the charts form one cross-reference graph. Internal sources cite the framework's own Parts; external sources cite primary/academic references.",
     "rollout": {
-      "wave1": ["cis", "convexity", "macro-thesis", "tripwire", "momentum-filter", "tax-wrapper", "torque", "ballast", "hype", "fiscal-dominance", "buy-borrow-die", "fragility", "posture", "tam", "power-law-corridor", "sequence-of-returns-risk", "barbell", "dca", "dry-powder", "fis", "return-of-capital"],
-      "wave2": ["policy-reflexivity", "volatility-clustering", "correlation-instability", "survivable-compounding", "right-tail-outcomes", "agentic-verification", "carry-vector"],
-      "wave3": ["roth", "taxable-account", "pretax-account", "backdoor-roth", "rmd", "niit", "capital-gains", "cost-basis", "step-up-in-basis", "tax-loss-harvesting", "wash-sale", "bracket-arbitrage", "terminal-wealth", "position-sizing", "allocation-band", "concentration-limit", "drawdown", "volatility", "survivability", "rotation", "stop-loss", "earnings-proximity", "regime-force", "52-week-high", "breadth", "margin", "override", "doctrine", "conviction", "regime", "optionality", "asymmetry", "score-band", "delta-clamp", "confidence", "archetype", "subtractive-scoring", "attribution", "dead-capital", "value-weighted", "posture-drift", "decision-log"]
+      "wave1": [
+        "cis",
+        "convexity",
+        "macro-thesis",
+        "tripwire",
+        "momentum-filter",
+        "tax-wrapper",
+        "torque",
+        "ballast",
+        "hype",
+        "fiscal-dominance",
+        "buy-borrow-die",
+        "fragility",
+        "posture",
+        "tam",
+        "power-law-corridor",
+        "sequence-of-returns-risk",
+        "barbell",
+        "dca",
+        "dry-powder",
+        "fis",
+        "return-of-capital"
+      ],
+      "wave2": [
+        "policy-reflexivity",
+        "volatility-clustering",
+        "correlation-instability",
+        "survivable-compounding",
+        "right-tail-outcomes",
+        "agentic-verification",
+        "carry-vector"
+      ],
+      "wave3": [
+        "roth",
+        "taxable-account",
+        "pretax-account",
+        "backdoor-roth",
+        "rmd",
+        "niit",
+        "capital-gains",
+        "cost-basis",
+        "step-up-in-basis",
+        "tax-loss-harvesting",
+        "wash-sale",
+        "bracket-arbitrage",
+        "terminal-wealth",
+        "position-sizing",
+        "allocation-band",
+        "concentration-limit",
+        "drawdown",
+        "volatility",
+        "survivability",
+        "rotation",
+        "stop-loss",
+        "earnings-proximity",
+        "regime-force",
+        "52-week-high",
+        "breadth",
+        "margin",
+        "override",
+        "doctrine",
+        "conviction",
+        "regime",
+        "optionality",
+        "asymmetry",
+        "score-band",
+        "delta-clamp",
+        "confidence",
+        "archetype",
+        "subtractive-scoring",
+        "attribution",
+        "dead-capital",
+        "value-weighted",
+        "posture-drift",
+        "decision-log"
+      ],
+      "wave4": [
+        "narrative-drift",
+        "attention-scarcity",
+        "risk-of-ruin",
+        "global-liquidity",
+        "bitcoin-backbone",
+        "cold-storage",
+        "accumulate-only",
+        "model-convergence",
+        "realized-price",
+        "reserve-share",
+        "valuation-extension",
+        "tax-wedge",
+        "purchased-convexity",
+        "household-aggregate",
+        "single-name-sleeve",
+        "thesis-drift",
+        "core-assertion",
+        "position-freeze",
+        "torque-eligibility",
+        "ballast-eligibility",
+        "profit-taking-ladder",
+        "parameter",
+        "change-governance",
+        "regime-throttle",
+        "cis-convexity-optionality",
+        "cis-risk-fragility",
+        "cis-macro-alignment",
+        "cis-execution-sentiment",
+        "headroom",
+        "catalyst-density",
+        "penalty-bucket",
+        "action-line",
+        "drift-trigger",
+        "continuous-scoring",
+        "weekly-loop",
+        "intra-week-trigger",
+        "restraint-principle",
+        "correlation-stacking",
+        "score-decay"
+      ]
     },
     "harmonizeBeforeLocking": [],
-    "harmonizeNote": "Carry vectors harmonized 2026-07-26: defined at first use in the Part 1 abstract, sourced to the product's closed structure enum (Long Carry | Short Carry | Barbell), and cross-linked to carry direction inside the CIS macro component (Part 6). Power-law corridor was harmonized against Part 3 earlier."
+    "harmonizeNote": "Carry vectors harmonized 2026-07-26: defined at first use in the Part 1 abstract, sourced to the product's closed structure enum (Long Carry | Short Carry | Barbell), and cross-linked to carry direction inside the CIS macro component (Part 6). Power-law corridor was harmonized against Part 3 earlier.",
+    "categories": [
+      {
+        "key": "foundations",
+        "label": "Foundations",
+        "title": "Payoff shape, survival, and the vocabulary of the thesis.",
+        "part": 1
+      },
+      {
+        "key": "macro",
+        "label": "Lineage & Macro",
+        "title": "Regime, thesis, and the policy backdrop.",
+        "part": 2
+      },
+      {
+        "key": "bitcoin",
+        "label": "The Backbone",
+        "title": "Bitcoin, valuation, and accumulation.",
+        "part": 3
+      },
+      {
+        "key": "tax",
+        "label": "Tax Architecture",
+        "title": "Wrappers, basis, and what you keep.",
+        "part": 4
+      },
+      {
+        "key": "construction",
+        "label": "Construction & Governance",
+        "title": "Postures, sizing, and the rules of change.",
+        "part": 5
+      },
+      {
+        "key": "scoring",
+        "label": "Scoring",
+        "title": "The two-score execution kernel and its cadence.",
+        "part": 6
+      }
+    ],
+    "wave4Note": "Wave 4 (2026-09-15): the reference index was rebuilt as a categorized, term-only accordion, and every named concept the site explains but the file lacked was added, with each definition paraphrased from the passage that teaches it (source.ref)."
   },
   "terms": [
     {
       "id": "convexity",
       "term": "Convexity",
-      "aliases": ["convex", "convex payoff", "convex payoffs"],
+      "aliases": [
+        "convex",
+        "convex payoff",
+        "convex payoffs"
+      ],
       "wave": 1,
+      "category": "foundations",
       "definition": "Exposure where the upside can compound far faster than the downside, so being right pays off disproportionately more than being wrong costs.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 1 — Foundation & Philosophy; scored in Part 6" },
-      "related": ["cis", "posture", "torque", "fragility", "power-law-corridor"],
-      "appearsLater": { "part": 5, "topic": "How convexity is expressed through Posture" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 — Foundation & Philosophy; scored in Part 6"
+      },
+      "related": [
+        "cis",
+        "posture",
+        "torque",
+        "fragility",
+        "power-law-corridor"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "How convexity is expressed through Posture"
+      },
       "chart": "S1"
     },
     {
       "id": "cis",
       "term": "CIS",
-      "aliases": ["Convexity Integrity Score"],
+      "aliases": [
+        "Convexity Integrity Score"
+      ],
       "wave": 1,
+      "category": "scoring",
       "definition": "Convexity Integrity Score: a 0 to 100 score rating one position at a time on convexity and optionality, risk and fragility, macro alignment, and execution and sentiment.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — Convexity & Framework Integrity Scoring" },
-      "related": ["convexity", "fragility", "momentum-filter", "macro-thesis"],
-      "appearsLater": { "part": 6, "topic": "The formal scoring definition" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Convexity & Framework Integrity Scoring"
+      },
+      "related": [
+        "convexity",
+        "fragility",
+        "momentum-filter",
+        "macro-thesis"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The formal scoring definition"
+      },
       "chart": "p6-cis-composition"
     },
     {
       "id": "macro-thesis",
       "term": "Macro thesis",
-      "aliases": ["macro thesis", "the thesis"],
+      "aliases": [
+        "macro thesis",
+        "the thesis"
+      ],
       "wave": 1,
+      "category": "macro",
       "definition": "A probabilistic read of the current regime that sets the portfolio's structure. It is a framing device, not a point forecast.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 2 — Lineage & Macro Thesis" },
-      "related": ["fiscal-dominance", "policy-reflexivity", "posture", "tripwire", "tam"],
-      "appearsLater": { "part": 2, "topic": "The lineage and the full regime thesis" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 2 — Lineage & Macro Thesis"
+      },
+      "related": [
+        "fiscal-dominance",
+        "policy-reflexivity",
+        "posture",
+        "tripwire",
+        "tam"
+      ],
+      "appearsLater": {
+        "part": 2,
+        "topic": "The lineage and the full regime thesis"
+      },
       "chart": "L2"
     },
     {
       "id": "tripwire",
       "term": "Tripwire",
-      "aliases": ["tripwires"],
+      "aliases": [
+        "tripwires"
+      ],
       "wave": 1,
+      "category": "construction",
       "definition": "A predefined threshold that forces review or action before denial, emotion, or information overload can take over.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 1 order of operations; operational in Part 5" },
-      "related": ["momentum-filter", "cis", "agentic-verification", "fragility"],
-      "appearsLater": { "part": 5, "topic": "Tripwires as position-management gates" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 order of operations; operational in Part 5"
+      },
+      "related": [
+        "momentum-filter",
+        "cis",
+        "agentic-verification",
+        "fragility"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Tripwires as position-management gates"
+      },
       "chart": "L3"
     },
     {
       "id": "momentum-filter",
       "term": "Momentum filter",
-      "aliases": ["momentum", "trend filter", "trend validation"],
+      "aliases": [
+        "momentum",
+        "trend filter",
+        "trend validation"
+      ],
       "wave": 1,
+      "category": "construction",
       "definition": "A trend-validation rule: the framework checks that the market is confirming the thesis before it allows a full position size.",
       "length": "medium",
-      "source": { "kind": "external", "ref": "Moskowitz, Ooi & Pedersen (2012); Hurst, Ooi & Pedersen (2017), trend-following evidence" },
-      "related": ["tripwire", "cis", "macro-thesis"],
-      "appearsLater": { "part": 5, "topic": "Momentum as the sizing gate" },
+      "source": {
+        "kind": "external",
+        "ref": "Moskowitz, Ooi & Pedersen (2012); Hurst, Ooi & Pedersen (2017), trend-following evidence"
+      },
+      "related": [
+        "tripwire",
+        "cis",
+        "macro-thesis"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Momentum as the sizing gate"
+      },
       "chart": "p5-momentum-gate"
     },
     {
       "id": "tax-wrapper",
       "term": "Tax wrapper",
-      "aliases": ["wrapper", "wrapper engineering", "wrapper placement", "account wrapper"],
+      "aliases": [
+        "wrapper",
+        "wrapper engineering",
+        "wrapper placement",
+        "account wrapper"
+      ],
       "wave": 1,
+      "category": "tax",
       "definition": "The legal account container (Roth, taxable, or pre-tax) whose tax rules materially change long-run compounding outcomes.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy; external IRS Pubs 590-A / 590-B" },
-      "related": ["buy-borrow-die", "right-tail-outcomes", "survivable-compounding"],
-      "appearsLater": { "part": 4, "topic": "Wrapper engineering as structural edge" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy; external IRS Pubs 590-A / 590-B"
+      },
+      "related": [
+        "buy-borrow-die",
+        "right-tail-outcomes",
+        "survivable-compounding"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Wrapper engineering as structural edge"
+      },
       "chart": "p4-tax-wedge"
     },
     {
@@ -102,11 +351,23 @@
       "term": "Torque",
       "aliases": [],
       "wave": 1,
+      "category": "construction",
       "definition": "Controlled convexity: high-upside exposure to durable, real regime forces that can tolerate serious drawdowns.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["ballast", "hype", "posture", "convexity"],
-      "appearsLater": { "part": 5, "topic": "The Torque posture" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "ballast",
+        "hype",
+        "posture",
+        "convexity"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The Torque posture"
+      },
       "chart": "p5-operating-system"
     },
     {
@@ -114,11 +375,22 @@
       "term": "Ballast",
       "aliases": [],
       "wave": 1,
+      "category": "construction",
       "definition": "Capital-preserving reserve and rotation capital that helps the portfolio survive stress and buy into dislocations.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["torque", "hype", "posture"],
-      "appearsLater": { "part": 5, "topic": "The Ballast posture" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "torque",
+        "hype",
+        "posture"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The Ballast posture"
+      },
       "chart": "p5-ballast-rotation"
     },
     {
@@ -126,191 +398,410 @@
       "term": "Hype",
       "aliases": [],
       "wave": 1,
+      "category": "construction",
       "definition": "Narrative-driven convexity with weak structural backing. Useful only with strict limits and automatic exits.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["torque", "ballast", "posture", "convexity"],
-      "appearsLater": { "part": 5, "topic": "The Hype posture and its limits" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "torque",
+        "ballast",
+        "posture",
+        "convexity"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The Hype posture and its limits"
+      },
       "chart": "p5-posture-sizing"
     },
     {
       "id": "fiscal-dominance",
       "term": "Fiscal dominance",
-      "aliases": ["fiscal dominance"],
+      "aliases": [
+        "fiscal dominance"
+      ],
       "wave": 1,
+      "category": "macro",
       "definition": "A condition where public debt and financing constraints begin to dictate what monetary policy can realistically do.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 tripwire language; external fiscal-dominance literature (Federal Reserve Board)" },
-      "related": ["macro-thesis", "policy-reflexivity"],
-      "appearsLater": { "part": 2, "topic": "The macro thesis and policy backdrop" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 tripwire language; external fiscal-dominance literature (Federal Reserve Board)"
+      },
+      "related": [
+        "macro-thesis",
+        "policy-reflexivity"
+      ],
+      "appearsLater": {
+        "part": 2,
+        "topic": "The macro thesis and policy backdrop"
+      },
       "chart": "04"
     },
     {
       "id": "buy-borrow-die",
       "term": "Buy, borrow, die",
-      "aliases": ["buy borrow die", "buy-borrow-die"],
+      "aliases": [
+        "buy borrow die",
+        "buy-borrow-die"
+      ],
       "wave": 1,
+      "category": "tax",
       "definition": "Borrowing against appreciated assets instead of selling them, potentially deferring realization. It depends on current law and financing availability.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["tax-wrapper", "right-tail-outcomes"],
-      "appearsLater": { "part": 4, "topic": "Realization deferral mechanics" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "tax-wrapper",
+        "right-tail-outcomes"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Realization deferral mechanics"
+      },
       "chart": "p3-cold-storage-to-borrow"
     },
     {
       "id": "fragility",
       "term": "Fragility",
-      "aliases": ["fragile"],
+      "aliases": [
+        "fragile"
+      ],
       "wave": 1,
+      "category": "foundations",
       "definition": "Vulnerability to disorder and nonlinear shocks, not just price movement. A fragile position breaks when stress rises.",
       "length": "medium",
-      "source": { "kind": "external", "ref": "Taleb & Douady (2012), Mathematical Definition, Mapping, and Detection of (Anti)Fragility" },
-      "related": ["convexity", "tripwire", "cis", "sequence-of-returns-risk"],
-      "appearsLater": { "part": 6, "topic": "Fragility inside the CIS score" },
+      "source": {
+        "kind": "external",
+        "ref": "Taleb & Douady (2012), Mathematical Definition, Mapping, and Detection of (Anti)Fragility"
+      },
+      "related": [
+        "convexity",
+        "tripwire",
+        "cis",
+        "sequence-of-returns-risk"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Fragility inside the CIS score"
+      },
       "chart": "01"
     },
     {
       "id": "posture",
       "term": "Posture",
-      "aliases": ["postures"],
+      "aliases": [
+        "postures"
+      ],
       "wave": 1,
+      "category": "construction",
       "definition": "The behavioral classification every non-Bitcoin position carries: Torque, Ballast, or Hype. It sets the position's sizing bands and governance rules; behavior, not asset type, is what the framework classifies. Bitcoin sits outside all three, governed by Part 3.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["torque", "ballast", "hype", "macro-thesis"],
-      "appearsLater": { "part": 5, "topic": "The three postures in full" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "torque",
+        "ballast",
+        "hype",
+        "macro-thesis"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The three postures in full"
+      },
       "chart": "p5-operating-system"
     },
     {
       "id": "policy-reflexivity",
       "term": "Policy reflexivity",
-      "aliases": ["reflexivity"],
+      "aliases": [
+        "reflexivity"
+      ],
       "wave": 2,
+      "category": "macro",
       "definition": "Markets react to policy and policymakers react back to markets, creating feedback loops that can amplify instability.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 abstract; literary lineage (Soros reflexivity)" },
-      "related": ["macro-thesis", "fiscal-dominance"],
-      "appearsLater": { "part": 2, "topic": "The intellectual lineage" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 abstract; literary lineage (Soros reflexivity)"
+      },
+      "related": [
+        "macro-thesis",
+        "fiscal-dominance"
+      ],
+      "appearsLater": {
+        "part": 2,
+        "topic": "The intellectual lineage"
+      },
       "chart": "p2-markets-feed-back"
     },
     {
       "id": "volatility-clustering",
       "term": "Volatility clustering",
-      "aliases": ["vol clustering"],
+      "aliases": [
+        "vol clustering"
+      ],
       "wave": 2,
+      "category": "foundations",
       "definition": "High-volatility periods tend to arrive in clusters rather than as isolated events, which changes how risk should be managed.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 1 abstract" },
-      "related": ["fragility", "momentum-filter"],
-      "appearsLater": null,
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 abstract"
+      },
+      "related": [
+        "fragility",
+        "momentum-filter"
+      ],
+      "appearsLater": {
+        "part": 1,
+        "topic": "The traditional playbook is failing quietly"
+      },
       "chart": null
     },
     {
       "id": "correlation-instability",
       "term": "Correlation instability",
-      "aliases": ["correlation regime", "correlation breakdown"],
+      "aliases": [
+        "correlation regime",
+        "correlation breakdown"
+      ],
       "wave": 2,
+      "category": "macro",
       "definition": "Correlations between assets are regime-dependent and can flip when inflation or liquidity stress dominates.",
       "length": "medium",
-      "source": { "kind": "external", "ref": "BIS (2023), The correlation of equity and bond returns" },
-      "related": ["macro-thesis", "fragility"],
-      "appearsLater": { "part": 2, "topic": "Why the diversification regime changed" },
+      "source": {
+        "kind": "external",
+        "ref": "BIS (2023), The correlation of equity and bond returns"
+      },
+      "related": [
+        "macro-thesis",
+        "fragility"
+      ],
+      "appearsLater": {
+        "part": 2,
+        "topic": "Why the diversification regime changed"
+      },
       "chart": "02"
     },
     {
       "id": "survivable-compounding",
       "term": "Survivable compounding",
-      "aliases": ["survivable compounding under uncertainty"],
+      "aliases": [
+        "survivable compounding under uncertainty"
+      ],
       "wave": 2,
+      "category": "foundations",
       "definition": "Building a portfolio that can stay alive through timing errors, volatility, and thesis delays while keeping exposure to large upside.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 manifesto" },
-      "related": ["convexity", "fragility", "posture", "sequence-of-returns-risk"],
-      "appearsLater": null,
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 manifesto"
+      },
+      "related": [
+        "convexity",
+        "fragility",
+        "posture",
+        "sequence-of-returns-risk"
+      ],
+      "appearsLater": {
+        "part": 1,
+        "topic": "Survivable compounding under uncertainty"
+      },
       "chart": "06"
     },
     {
       "id": "right-tail-outcomes",
       "term": "Right-tail outcomes",
-      "aliases": ["right tail", "right-tail"],
+      "aliases": [
+        "right tail",
+        "right-tail"
+      ],
       "wave": 2,
+      "category": "foundations",
       "definition": "Rare but very large gains that dominate total portfolio outcomes, which is why their tax treatment matters so much.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 1 abstract; Part 4 examples" },
-      "related": ["convexity", "tax-wrapper", "buy-borrow-die"],
-      "appearsLater": { "part": 4, "topic": "Taxing the right tail" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 abstract; Part 4 examples"
+      },
+      "related": [
+        "convexity",
+        "tax-wrapper",
+        "buy-borrow-die"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Taxing the right tail"
+      },
       "chart": "p4-tax-wedge"
     },
     {
       "id": "agentic-verification",
       "term": "Agentic verification",
-      "aliases": ["agentic research", "verification loop"],
+      "aliases": [
+        "agentic research",
+        "verification loop"
+      ],
       "wave": 2,
+      "category": "construction",
       "definition": "An AI-assisted research loop that speeds evidence-gathering once a tripwire fires, without handing final judgment to the machine.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 abstract / order of operations" },
-      "related": ["tripwire", "cis"],
-      "appearsLater": { "part": 5, "topic": "Verification inside position management" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 abstract / order of operations"
+      },
+      "related": [
+        "tripwire",
+        "cis"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Verification inside position management"
+      },
       "chart": null
     },
     {
       "id": "tam",
       "term": "TAM",
-      "aliases": ["total addressable market", "addressable market"],
+      "aliases": [
+        "total addressable market",
+        "addressable market"
+      ],
       "wave": 1,
+      "category": "bitcoin",
       "definition": "Total Addressable Market: a deliberately conservative estimate of the capital a market could absorb over time, used to size an asset's potential rather than to forecast a price.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone" },
-      "related": ["convexity", "cis", "macro-thesis"],
-      "appearsLater": { "part": 3, "topic": "The conservative addressable-market estimate for the Bitcoin reserve" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Bitcoin: Convexity Backbone"
+      },
+      "related": [
+        "convexity",
+        "cis",
+        "macro-thesis"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "The conservative addressable-market estimate for the Bitcoin reserve"
+      },
       "chart": null
     },
     {
       "id": "power-law-corridor",
       "term": "Power-law corridor",
-      "aliases": ["power law", "power-law", "power-law bands", "power-law trendline", "power-law convergence", "valuation corridor"],
+      "aliases": [
+        "power law",
+        "power-law",
+        "power-law bands",
+        "power-law trendline",
+        "power-law convergence",
+        "valuation corridor"
+      ],
       "wave": 1,
+      "category": "bitcoin",
       "definition": "A long-run regression channel, on a log scale, that Bitcoin's price has historically tracked. The framework reads it as a context band for accumulation pace, not a deterministic price prediction.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone; external power-law model (Santostasi)" },
-      "related": ["convexity", "cis", "macro-thesis"],
-      "appearsLater": { "part": 3, "topic": "Power-law bands and model convergence" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Bitcoin: Convexity Backbone; external power-law model (Santostasi)"
+      },
+      "related": [
+        "convexity",
+        "cis",
+        "macro-thesis"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "Power-law bands and model convergence"
+      },
       "chart": "p3-power-law-holds"
     },
     {
       "id": "sequence-of-returns-risk",
       "term": "Sequence-of-returns risk",
-      "aliases": ["sequence of returns risk", "sequence risk", "sequencing risk"],
+      "aliases": [
+        "sequence of returns risk",
+        "sequence risk",
+        "sequencing risk"
+      ],
       "wave": 1,
+      "category": "foundations",
       "definition": "The risk that the order of gains and losses, not just their average, determines whether a portfolio survives. A large drawdown at the wrong time can permanently impair compounding.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 manifesto; operational in Part 5" },
-      "related": ["survivable-compounding", "fragility", "posture"],
-      "appearsLater": { "part": 5, "topic": "Position sizing against sequence risk" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 manifesto; operational in Part 5"
+      },
+      "related": [
+        "survivable-compounding",
+        "fragility",
+        "posture"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Position sizing against sequence risk"
+      },
       "chart": "05"
     },
     {
       "id": "barbell",
       "term": "Barbell",
-      "aliases": ["barbell strategy", "barbell structure"],
+      "aliases": [
+        "barbell strategy",
+        "barbell structure"
+      ],
       "wave": 1,
+      "category": "foundations",
       "definition": "A structure that pairs very safe holdings with a small, highly convex allocation and skips the fragile middle. It targets payoff asymmetry, not low volatility.",
       "length": "medium",
-      "source": { "kind": "external", "ref": "Taleb, barbell strategy; internal Part 2 lineage" },
-      "related": ["convexity", "fragility", "ballast", "torque"],
-      "appearsLater": { "part": 5, "topic": "Portfolio construction and posture expression" },
+      "source": {
+        "kind": "external",
+        "ref": "Taleb, barbell strategy; internal Part 2 lineage"
+      },
+      "related": [
+        "convexity",
+        "fragility",
+        "ballast",
+        "torque"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Portfolio construction and posture expression"
+      },
       "chart": null
     },
     {
       "id": "dca",
       "term": "Dollar-cost averaging",
-      "aliases": ["DCA", "dollar cost averaging"],
+      "aliases": [
+        "DCA",
+        "dollar cost averaging"
+      ],
       "wave": 1,
+      "category": "bitcoin",
       "definition": "Buying a fixed amount on a set schedule regardless of price, which spreads entry risk across time. The framework funds it from income and accelerates it into deep drawdowns.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone" },
-      "related": ["survivable-compounding", "ballast", "sequence-of-returns-risk"],
-      "appearsLater": { "part": 5, "topic": "Accumulation discipline and position management" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Bitcoin: Convexity Backbone"
+      },
+      "related": [
+        "survivable-compounding",
+        "ballast",
+        "sequence-of-returns-risk"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Accumulation discipline and position management"
+      },
       "chart": "p3-accumulate-dont-trade"
     },
     {
@@ -318,239 +809,518 @@
       "term": "Dry powder",
       "aliases": [],
       "wave": 1,
+      "category": "construction",
       "definition": "Reserve cash kept ready to deploy into dislocations. The framework builds it during extensions and spends it when valuations converge on undervaluation.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 3 — Bitcoin: Convexity Backbone" },
-      "related": ["ballast", "posture", "sequence-of-returns-risk"],
-      "appearsLater": { "part": 5, "topic": "Reserve capital and redeployment rules" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Bitcoin: Convexity Backbone"
+      },
+      "related": [
+        "ballast",
+        "posture",
+        "sequence-of-returns-risk"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Reserve capital and redeployment rules"
+      },
       "chart": null
     },
     {
       "id": "return-of-capital",
       "term": "Return of capital",
-      "aliases": ["return of capital", "ROC", "return-of-capital income", "return of capital distribution"],
+      "aliases": [
+        "return of capital",
+        "ROC",
+        "return-of-capital income",
+        "return of capital distribution"
+      ],
       "wave": 2,
+      "category": "tax",
       "definition": "A distribution treated as a return of your own invested capital rather than taxable income. It reduces cost basis and defers tax rather than eliminating it; classification can change and depends on current law.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["tax-wrapper", "ballast"],
-      "appearsLater": { "part": 5, "topic": "The Ballast posture" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "tax-wrapper",
+        "ballast"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The Ballast posture"
+      },
       "chart": "p4-roc-yield"
     },
     {
       "id": "fis",
       "term": "FIS",
-      "aliases": ["Framework Integrity Score"],
+      "aliases": [
+        "Framework Integrity Score"
+      ],
       "wave": 1,
+      "category": "scoring",
       "definition": "Framework Integrity Score: a 0 to 100 portfolio-construction score that starts the assembled portfolio at 100 and deducts a named penalty for each rule violation, so every lost point is attributable and repairable.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — Convexity & Framework Integrity Scoring" },
-      "related": ["cis", "posture", "tax-wrapper"],
-      "appearsLater": { "part": 6, "topic": "The subtractive construction score" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Convexity & Framework Integrity Scoring"
+      },
+      "related": [
+        "cis",
+        "posture",
+        "tax-wrapper"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The subtractive construction score"
+      },
       "chart": "p6-fis-waterfall"
     },
     {
       "id": "carry-vector",
       "term": "Carry vectors",
-      "aliases": ["carry vector", "carry direction", "long carry", "short carry"],
+      "aliases": [
+        "carry vector",
+        "carry direction",
+        "long carry",
+        "short carry"
+      ],
       "wave": 2,
+      "category": "construction",
       "definition": "The framework's closed structure classification for a position: Long Carry, Short Carry, or Barbell. In CIS scoring, carry direction measures whether a position benefits from or suffers under the current rate and inflation regime; a barbell pairs the two exposures.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 abstract (carry vectors, after Park's carry framework); CIS Spec v2.1 §5.2 (carry direction); product structure registry (closed enum)" },
-      "related": ["barbell", "posture", "convexity", "cis"],
-      "appearsLater": { "part": 6, "topic": "Carry direction inside the CIS macro component" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 abstract (carry vectors, after Park's carry framework); CIS Spec v2.1 §5.2 (carry direction); product structure registry (closed enum)"
+      },
+      "related": [
+        "barbell",
+        "posture",
+        "convexity",
+        "cis"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Carry direction inside the CIS macro component"
+      },
       "chart": null
     },
     {
       "id": "roth",
       "term": "Roth account",
-      "aliases": ["Roth", "Roth IRA", "Roth 401(k)"],
+      "aliases": [
+        "Roth",
+        "Roth IRA",
+        "Roth 401(k)"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "An account funded with after-tax dollars where qualified withdrawals are not taxed, so appreciation compounds and trades without tax friction. The framework treats its annual capacity as scarce and reserves it for positions that may be rotated.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["tax-wrapper", "torque", "right-tail-outcomes", "backdoor-roth"],
-      "appearsLater": { "part": 4, "topic": "Reserving Roth for Torque" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "tax-wrapper",
+        "torque",
+        "right-tail-outcomes",
+        "backdoor-roth"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Reserving Roth for Torque"
+      },
       "chart": "p4-tax-wedge"
     },
     {
       "id": "taxable-account",
       "term": "Taxable account",
-      "aliases": ["taxable", "brokerage account"],
+      "aliases": [
+        "taxable",
+        "brokerage account"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "An ordinary investment account with no contribution limit, where realized gains and distributions are taxed in the year they occur. The framework routes never-sold and income-producing holdings here, including the Bitcoin backbone.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["tax-wrapper", "buy-borrow-die", "ballast", "step-up-in-basis"],
-      "appearsLater": { "part": 4, "topic": "The work taxable accounts do" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "tax-wrapper",
+        "buy-borrow-die",
+        "ballast",
+        "step-up-in-basis"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "The work taxable accounts do"
+      },
       "chart": "p4-roc-yield"
     },
     {
       "id": "pretax-account",
       "term": "Pre-tax account",
-      "aliases": ["pre-tax", "pre-tax account", "traditional IRA", "401(k)"],
+      "aliases": [
+        "pre-tax",
+        "pre-tax account",
+        "traditional IRA",
+        "401(k)"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "An account funded before tax where contributions reduce current income and withdrawals are taxed as ordinary income. The framework treats it as tactical rather than structural, because the deferred tax obligation compounds alongside the balance.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["tax-wrapper", "rmd", "bracket-arbitrage"],
-      "appearsLater": { "part": 4, "topic": "Pre-tax accounts: inferior, occasionally useful" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "tax-wrapper",
+        "rmd",
+        "bracket-arbitrage"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Pre-tax accounts: inferior, occasionally useful"
+      },
       "chart": "p4-gross-not-net"
     },
     {
       "id": "backdoor-roth",
       "term": "Backdoor Roth",
-      "aliases": ["backdoor Roth conversion", "mega backdoor Roth"],
+      "aliases": [
+        "backdoor Roth conversion",
+        "mega backdoor Roth"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "Reaching Roth treatment above the direct income limits by contributing to a traditional IRA and converting. It preserves access under current law and is subject to the pro-rata rule when other pre-tax balances exist.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["roth", "tax-wrapper"],
-      "appearsLater": { "part": 4, "topic": "Roth allocation discipline" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "roth",
+        "tax-wrapper"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Roth allocation discipline"
+      },
       "chart": null
     },
     {
       "id": "rmd",
       "term": "Required minimum distribution",
-      "aliases": ["RMD", "RMDs", "required minimum distributions"],
+      "aliases": [
+        "RMD",
+        "RMDs",
+        "required minimum distributions"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "A withdrawal the law compels from pre-tax accounts starting at age 73, rising to 75 in 2033 under current rules. It forces taxable income regardless of need, which is one reason the framework prefers Roth for long-horizon convexity.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy; external IRS Pub 590-B" },
-      "related": ["pretax-account", "tax-wrapper"],
-      "appearsLater": { "part": 4, "topic": "Pre-tax accounts: inferior, occasionally useful" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy; external IRS Pub 590-B"
+      },
+      "related": [
+        "pretax-account",
+        "tax-wrapper"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Pre-tax accounts: inferior, occasionally useful"
+      },
       "chart": null
     },
     {
       "id": "niit",
       "term": "Net investment income tax",
-      "aliases": ["NIIT"],
+      "aliases": [
+        "NIIT"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "An additional 3.8 percent federal tax on investment income above certain income thresholds. It is part of why a taxable account retains materially less of a large gain than a Roth.",
       "length": "short",
-      "source": { "kind": "external", "ref": "IRC 26 U.S.C. 1411" },
-      "related": ["taxable-account", "capital-gains", "tax-wrapper"],
-      "appearsLater": { "part": 4, "topic": "The tax wedge" },
+      "source": {
+        "kind": "external",
+        "ref": "IRC 26 U.S.C. 1411"
+      },
+      "related": [
+        "taxable-account",
+        "capital-gains",
+        "tax-wrapper"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "The tax wedge"
+      },
       "chart": "p4-tax-wedge"
     },
     {
       "id": "capital-gains",
       "term": "Capital gains",
-      "aliases": ["capital gain", "long-term capital gains", "LTCG"],
+      "aliases": [
+        "capital gain",
+        "long-term capital gains",
+        "LTCG"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "The taxable profit realized when an appreciated position is sold. Long-held positions generally receive preferential rates, which is why holding period and wrapper placement change what a gain is worth.",
       "length": "medium",
-      "source": { "kind": "external", "ref": "IRC 26 U.S.C. 1(h)" },
-      "related": ["taxable-account", "tax-loss-harvesting", "cost-basis"],
-      "appearsLater": { "part": 4, "topic": "The tax wedge" },
+      "source": {
+        "kind": "external",
+        "ref": "IRC 26 U.S.C. 1(h)"
+      },
+      "related": [
+        "taxable-account",
+        "tax-loss-harvesting",
+        "cost-basis"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "The tax wedge"
+      },
       "chart": "p4-tax-wedge"
     },
     {
       "id": "cost-basis",
       "term": "Cost basis",
-      "aliases": ["basis"],
+      "aliases": [
+        "basis"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "What a position is treated as having cost for tax purposes. Gains are measured against it, return-of-capital distributions reduce it, and under current law it may reset at death.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["capital-gains", "return-of-capital", "step-up-in-basis"],
-      "appearsLater": { "part": 4, "topic": "Return of capital and basis" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "capital-gains",
+        "return-of-capital",
+        "step-up-in-basis"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Return of capital and basis"
+      },
       "chart": null
     },
     {
       "id": "step-up-in-basis",
       "term": "Step-up in basis",
-      "aliases": ["basis step-up"],
+      "aliases": [
+        "basis step-up"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "The reset of an inherited asset's cost basis to its value at death under current law, which can erase the embedded gain. It is policy-dependent and not guaranteed, and it underpins the never-sell treatment of the Bitcoin backbone.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 3 + Part 4" },
-      "related": ["cost-basis", "buy-borrow-die", "taxable-account"],
-      "appearsLater": { "part": 4, "topic": "Why Bitcoin sits in taxable" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 + Part 4"
+      },
+      "related": [
+        "cost-basis",
+        "buy-borrow-die",
+        "taxable-account"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Why Bitcoin sits in taxable"
+      },
       "chart": null
     },
     {
       "id": "tax-loss-harvesting",
       "term": "Tax-loss harvesting",
-      "aliases": ["harvesting", "TLH"],
+      "aliases": [
+        "harvesting",
+        "TLH"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "Realizing a loss deliberately to offset gains, or a limited amount of ordinary income, while keeping the exposure through a non-identical position. The harvested loss carries forward as a durable tax asset.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["taxable-account", "capital-gains", "wash-sale"],
-      "appearsLater": { "part": 4, "topic": "Tax-loss harvesting" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "taxable-account",
+        "capital-gains",
+        "wash-sale"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Tax-loss harvesting"
+      },
       "chart": null
     },
     {
       "id": "wash-sale",
       "term": "Wash sale",
-      "aliases": ["wash-sale rule"],
+      "aliases": [
+        "wash-sale rule"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "A rule that disallows a realized loss when a substantially identical position is repurchased inside a set window. It is why harvesting redeploys into a similar but not identical holding.",
       "length": "short",
-      "source": { "kind": "external", "ref": "IRC 26 U.S.C. 1091" },
-      "related": ["tax-loss-harvesting", "capital-gains"],
-      "appearsLater": { "part": 4, "topic": "Tax-loss harvesting" },
+      "source": {
+        "kind": "external",
+        "ref": "IRC 26 U.S.C. 1091"
+      },
+      "related": [
+        "tax-loss-harvesting",
+        "capital-gains"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Tax-loss harvesting"
+      },
       "chart": null
     },
     {
       "id": "bracket-arbitrage",
       "term": "Bracket arbitrage",
-      "aliases": ["bracket spread"],
+      "aliases": [
+        "bracket spread"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "Taking a deduction at a high marginal rate in one year and converting the balance to Roth in a later, lower-rate year. The captured value is the spread between the two rates.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["pretax-account", "roth"],
-      "appearsLater": { "part": 4, "topic": "Pre-tax accounts: inferior, occasionally useful" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "pretax-account",
+        "roth"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Pre-tax accounts: inferior, occasionally useful"
+      },
       "chart": null
     },
     {
       "id": "terminal-wealth",
       "term": "Terminal wealth",
-      "aliases": ["terminal value"],
+      "aliases": [
+        "terminal value"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "What the portfolio is actually worth at the end of the horizon, after every tax, fee, and friction has been paid. The framework optimizes for it rather than for any single year's return.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 4 — Tax Architecture & ROC Strategy" },
-      "related": ["tax-wrapper", "survivable-compounding", "right-tail-outcomes"],
-      "appearsLater": { "part": 4, "topic": "Wrapper engineering as a structural edge" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+      },
+      "related": [
+        "tax-wrapper",
+        "survivable-compounding",
+        "right-tail-outcomes"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Wrapper engineering as a structural edge"
+      },
       "chart": "p4-tax-wedge"
     },
     {
       "id": "position-sizing",
       "term": "Position sizing",
-      "aliases": ["sizing"],
+      "aliases": [
+        "sizing"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "How much capital a single position is allowed to carry. In this framework size is earned: the score selects a band, the posture scales it, and concentration limits cap it at the household level.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["allocation-band", "concentration-limit", "posture", "cis"],
-      "appearsLater": { "part": 5, "topic": "Sizing by posture" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "allocation-band",
+        "concentration-limit",
+        "posture",
+        "cis"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Sizing by posture"
+      },
       "chart": "p5-posture-sizing"
     },
     {
       "id": "allocation-band",
       "term": "Allocation band",
-      "aliases": ["sizing band", "bands"],
+      "aliases": [
+        "sizing band",
+        "sizing bands",
+        "allocation bands"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "The target size range a score maps into for a given posture. Seventy and above supports core sizing, sixty to sixty-nine constrained, fifty to fifty-nine starter, and below fifty is not allocation-worthy.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["position-sizing", "score-band", "cis", "posture"],
-      "appearsLater": { "part": 5, "topic": "The sizing tables" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "position-sizing",
+        "score-band",
+        "cis",
+        "posture"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The sizing tables"
+      },
       "chart": "p5-posture-sizing"
     },
     {
       "id": "concentration-limit",
       "term": "Concentration limit",
-      "aliases": ["concentration limits", "position cap"],
+      "aliases": [
+        "concentration limits",
+        "position cap"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "A ceiling on how much any single name or small group may represent, applied to the household aggregate across every account. Fifteen percent is the default single-position cap, eighteen percent the absolute with a documented override.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["position-sizing", "override", "fis"],
-      "appearsLater": { "part": 5, "topic": "Concentration limits" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "position-sizing",
+        "override",
+        "fis"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Concentration limits"
+      },
       "chart": "p5-posture-sizing"
     },
     {
@@ -558,11 +1328,23 @@
       "term": "Drawdown",
       "aliases": [],
       "wave": 3,
+      "category": "foundations",
       "definition": "A decline from a position's or portfolio's recent peak. The framework treats a survivable drawdown as the price of convexity rather than as a malfunction, provided reserves make it holdable.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 manifesto; operational in Part 5" },
-      "related": ["ballast", "sequence-of-returns-risk", "survivability", "volatility"],
-      "appearsLater": { "part": 5, "topic": "Drawdown tolerance" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 manifesto; operational in Part 5"
+      },
+      "related": [
+        "ballast",
+        "sequence-of-returns-risk",
+        "survivability",
+        "volatility"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Drawdown tolerance"
+      },
       "chart": "p5-operating-system"
     },
     {
@@ -570,83 +1352,173 @@
       "term": "Volatility",
       "aliases": [],
       "wave": 3,
+      "category": "foundations",
       "definition": "How much a price moves. The framework separates it from fragility: a position can be highly volatile and still robust, and the difference is whether the move threatens survival.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 manifesto" },
-      "related": ["fragility", "drawdown", "survivability"],
-      "appearsLater": { "part": 1, "topic": "Fragility is not volatility" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 manifesto"
+      },
+      "related": [
+        "fragility",
+        "drawdown",
+        "survivability"
+      ],
+      "appearsLater": {
+        "part": 1,
+        "topic": "Fragility is not volatility"
+      },
       "chart": "p3-volatility-is-the-toll"
     },
     {
       "id": "survivability",
       "term": "Survivability",
-      "aliases": ["survive"],
+      "aliases": [
+        "survive"
+      ],
       "wave": 3,
+      "category": "foundations",
       "definition": "Whether a position or portfolio can withstand stress without being forced into a decision that ends the compounding. It is scored inside CIS as Risk and Fragility, where a higher score means lower fragility.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — CIS components" },
-      "related": ["fragility", "drawdown", "cis", "ballast"],
-      "appearsLater": { "part": 6, "topic": "Risk and Fragility inside CIS" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — CIS components"
+      },
+      "related": [
+        "fragility",
+        "drawdown",
+        "cis",
+        "ballast"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Risk and Fragility inside CIS"
+      },
       "chart": "p6-cis-composition"
     },
     {
       "id": "rotation",
       "term": "Rotation",
-      "aliases": ["rotate", "rotation capital"],
+      "aliases": [
+        "rotate",
+        "rotation capital"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "Moving capital between postures as conditions change, most often trimming Ballast after Torque runs and redeploying into Torque during dislocations. It is the framework's primary way of buying low without raising outside cash.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["ballast", "torque", "dry-powder"],
-      "appearsLater": { "part": 5, "topic": "The rotation function" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "ballast",
+        "torque",
+        "dry-powder"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The rotation function"
+      },
       "chart": "p5-ballast-rotation"
     },
     {
       "id": "stop-loss",
       "term": "Stop-loss",
-      "aliases": ["stop", "stops"],
+      "aliases": [
+        "stop",
+        "stops"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "An exit level committed to before entry. Hype positions carry them by doctrine, and the framework forbids widening a stop or reclassifying a position to avoid honoring one.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["hype", "tripwire"],
-      "appearsLater": { "part": 5, "topic": "Hype governance" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "hype",
+        "tripwire"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Hype governance"
+      },
       "chart": null
     },
     {
       "id": "earnings-proximity",
       "term": "Earnings proximity",
-      "aliases": ["earnings window", "T-5"],
+      "aliases": [
+        "earnings window",
+        "T-5"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "The protocol governing exposure around a scheduled earnings date. A position entering the final five trading days is capped at three percent of portfolio value, because the event is binary and conviction does not predict it.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["tripwire", "position-sizing"],
-      "appearsLater": { "part": 5, "topic": "Earnings proximity: cap the binary event" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "tripwire",
+        "position-sizing"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Earnings proximity: cap the binary event"
+      },
       "chart": "p5-earnings-window"
     },
     {
       "id": "regime-force",
       "term": "Regime force",
-      "aliases": ["regime forces", "structural force"],
+      "aliases": [
+        "regime forces",
+        "structural force"
+      ],
       "wave": 3,
+      "category": "macro",
       "definition": "A durable structural driver that capital must flow toward, identified in the macro thesis. The framework allocates by force rather than by sector, and diversifies across several expressions of the same force.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["macro-thesis", "torque"],
-      "appearsLater": { "part": 5, "topic": "Allocate by force, not by sector" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "macro-thesis",
+        "torque"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Allocate by force, not by sector"
+      },
       "chart": "p5-force-channels"
     },
     {
       "id": "52-week-high",
       "term": "52-week high",
-      "aliases": ["52 week high"],
+      "aliases": [
+        "52 week high"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "The highest price of the past year, used as the reference for absolute momentum. Distance below it grades a position from healthy, through correction, to severe distress.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["momentum-filter", "breadth"],
-      "appearsLater": { "part": 5, "topic": "Momentum: conviction requires confirmation" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "momentum-filter",
+        "breadth"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Momentum: conviction requires confirmation"
+      },
       "chart": "p5-momentum-gate"
     },
     {
@@ -654,47 +1526,96 @@
       "term": "Breadth",
       "aliases": [],
       "wave": 3,
+      "category": "construction",
       "definition": "How widely a move is shared across related names. Broad participation supports a thesis; narrowing leadership warns that a move is thinning even while the index holds.",
       "length": "short",
-      "source": { "kind": "internal", "ref": "Part 5 — Portfolio Construction & Position Management" },
-      "related": ["momentum-filter", "52-week-high"],
-      "appearsLater": { "part": 5, "topic": "Momentum: conviction requires confirmation" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Portfolio Construction & Position Management"
+      },
+      "related": [
+        "momentum-filter",
+        "52-week-high"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Momentum: conviction requires confirmation"
+      },
       "chart": "p5-momentum-gate"
     },
     {
       "id": "margin",
       "term": "Margin",
-      "aliases": ["margin borrowing", "securities-backed lending", "SBLOC"],
+      "aliases": [
+        "margin borrowing",
+        "securities-backed lending",
+        "SBLOC"
+      ],
       "wave": 3,
+      "category": "tax",
       "definition": "Borrowing against portfolio assets rather than selling them. The framework treats it as an optional overlay, revocable by the broker and repriceable under stress, never as a structural requirement.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 4 + Part 5" },
-      "related": ["buy-borrow-die", "taxable-account"],
-      "appearsLater": { "part": 4, "topic": "Margin as an optional overlay" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 + Part 5"
+      },
+      "related": [
+        "buy-borrow-die",
+        "taxable-account"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Margin as an optional overlay"
+      },
       "chart": null
     },
     {
       "id": "override",
       "term": "Override",
-      "aliases": ["overrides", "documented override"],
+      "aliases": [
+        "overrides",
+        "documented override"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "A conscious, documented, time-bounded deviation from a default parameter, carrying the reasoning and the conditions under which it reverts. An unexamined drift is not an override; it is the framework being abandoned quietly.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Change governance" },
-      "related": ["doctrine", "concentration-limit"],
-      "appearsLater": { "part": 5, "topic": "Doctrine, parameters, overrides" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Change governance"
+      },
+      "related": [
+        "doctrine",
+        "concentration-limit"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Doctrine, parameters, overrides"
+      },
       "chart": "p5-change-hierarchy"
     },
     {
       "id": "doctrine",
       "term": "Doctrine",
-      "aliases": ["doctrine layer"],
+      "aliases": [
+        "doctrine layer"
+      ],
       "wave": 3,
+      "category": "construction",
       "definition": "The non-negotiable layer of the framework: the principles that define what it is. Changing one means no longer implementing the framework, as distinct from tuning a parameter or logging an override.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 — Change governance" },
-      "related": ["override", "posture"],
-      "appearsLater": { "part": 5, "topic": "Doctrine, parameters, overrides" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Change governance"
+      },
+      "related": [
+        "override",
+        "posture"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Doctrine, parameters, overrides"
+      },
       "chart": "p5-change-hierarchy"
     },
     {
@@ -702,119 +1623,247 @@
       "term": "Conviction",
       "aliases": [],
       "wave": 3,
+      "category": "construction",
       "definition": "The strength of the evidence behind a position, as opposed to enthusiasm for it. The framework quantifies it through CIS so that size follows demonstrated evidence rather than feeling.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 5 + Part 6" },
-      "related": ["cis", "position-sizing", "allocation-band"],
-      "appearsLater": { "part": 5, "topic": "Earned size" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 + Part 6"
+      },
+      "related": [
+        "cis",
+        "position-sizing",
+        "allocation-band"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Earned size"
+      },
       "chart": "p5-earned-size"
     },
     {
       "id": "regime",
       "term": "Regime",
-      "aliases": ["regimes", "regime shift"],
+      "aliases": [
+        "regimes",
+        "regime shift"
+      ],
       "wave": 3,
+      "category": "macro",
       "definition": "The prevailing structural conditions that determine how assets behave and correlate. The framework is built to adapt when the regime changes rather than to optimize for the average of all regimes.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 manifesto; Part 2 macro thesis" },
-      "related": ["macro-thesis", "correlation-instability", "regime-force"],
-      "appearsLater": { "part": 2, "topic": "Identifying the macro thesis" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 manifesto; Part 2 macro thesis"
+      },
+      "related": [
+        "macro-thesis",
+        "correlation-instability",
+        "regime-force"
+      ],
+      "appearsLater": {
+        "part": 2,
+        "topic": "Identifying the macro thesis"
+      },
       "chart": "p2-phase-changes-sizing"
     },
     {
       "id": "optionality",
       "term": "Optionality",
-      "aliases": ["optional"],
+      "aliases": [
+        "optional"
+      ],
       "wave": 3,
+      "category": "foundations",
       "definition": "Holding a position whose future paths include large upside without committing to which one occurs. It is the property CIS scores first, because it is what convexity is made of.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — CIS components" },
-      "related": ["convexity", "right-tail-outcomes", "cis"],
-      "appearsLater": { "part": 6, "topic": "Convexity and Optionality inside CIS" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — CIS components"
+      },
+      "related": [
+        "convexity",
+        "right-tail-outcomes",
+        "cis"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Convexity and Optionality inside CIS"
+      },
       "chart": "p6-cis-composition"
     },
     {
       "id": "asymmetry",
       "term": "Asymmetry",
-      "aliases": ["asymmetric"],
+      "aliases": [
+        "asymmetric"
+      ],
       "wave": 3,
+      "category": "foundations",
       "definition": "A payoff where the upside and downside are unequal in size or probability. The framework seeks it deliberately and treats symmetric risk measures as an incomplete description of survival.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 1 manifesto; Part 2 lineage" },
-      "related": ["convexity", "barbell", "fragility"],
-      "appearsLater": { "part": 1, "topic": "Shape the payoff" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 manifesto; Part 2 lineage"
+      },
+      "related": [
+        "convexity",
+        "barbell",
+        "fragility"
+      ],
+      "appearsLater": {
+        "part": 1,
+        "topic": "Shape the payoff"
+      },
       "chart": "sig-payoff"
     },
     {
       "id": "score-band",
       "term": "Score band",
-      "aliases": ["four bands", "band", "bands"],
+      "aliases": [
+        "four bands",
+        "score bands",
+        "band register"
+      ],
       "wave": 3,
+      "category": "scoring",
       "definition": "The shared four-level register both scores read: seventy and above Strong, sixty to sixty-nine Moderate, fifty to fifty-nine Caution, below fifty Weak. On FIS seventy is also the action line; on CIS it is a band boundary, not an action trigger.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — Reading the number" },
-      "related": ["cis", "fis", "allocation-band"],
-      "appearsLater": { "part": 6, "topic": "Reading the number" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Reading the number"
+      },
+      "related": [
+        "cis",
+        "fis",
+        "allocation-band"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Reading the number"
+      },
       "chart": null
     },
     {
       "id": "delta-clamp",
       "term": "Delta clamp",
-      "aliases": ["delta clamping", "clamp"],
+      "aliases": [
+        "delta clamping",
+        "clamp"
+      ],
       "wave": 3,
+      "category": "scoring",
       "definition": "A cap on how far a score may move in a single update, scaled by how good the underlying evidence is. It forces a large re-rating to be earned across successive updates rather than granted in one enthusiastic week.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — Scoring mechanics" },
-      "related": ["cis", "confidence"],
-      "appearsLater": { "part": 6, "topic": "Delta clamping" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Scoring mechanics"
+      },
+      "related": [
+        "cis",
+        "confidence"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Delta clamping"
+      },
       "chart": "p6-weekly-loop"
     },
     {
       "id": "confidence",
       "term": "Confidence",
-      "aliases": ["confidence level"],
+      "aliases": [
+        "confidence level"
+      ],
       "wave": 3,
+      "category": "scoring",
       "definition": "How much the evidence behind a score can support, derived by the engine from the quality of each source rather than asserted by hand. It sets how far a single update is allowed to move the score.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — Scoring mechanics" },
-      "related": ["delta-clamp", "cis"],
-      "appearsLater": { "part": 6, "topic": "Confidence is derived, not asserted" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Scoring mechanics"
+      },
+      "related": [
+        "delta-clamp",
+        "cis"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Confidence is derived, not asserted"
+      },
       "chart": null
     },
     {
       "id": "archetype",
       "term": "Archetype",
-      "aliases": ["archetypes"],
+      "aliases": [
+        "archetypes"
+      ],
       "wave": 3,
+      "category": "scoring",
       "definition": "The structural class a position belongs to, which selects the lens CIS scores it through. It changes how the rubric is applied, never what the final number is floored at.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — Scoring mechanics" },
-      "related": ["cis", "tam"],
-      "appearsLater": { "part": 6, "topic": "Archetype awareness" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Scoring mechanics"
+      },
+      "related": [
+        "cis",
+        "tam"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Archetype awareness"
+      },
       "chart": "p6-cis-composition"
     },
     {
       "id": "subtractive-scoring",
       "term": "Subtractive scoring",
-      "aliases": ["subtractive"],
+      "aliases": [
+        "subtractive"
+      ],
       "wave": 3,
+      "category": "scoring",
       "definition": "Starting a portfolio at one hundred and deducting a named penalty for each rule violation. Every point below one hundred is attributable to a specific departure, so the score reads as a repair list rather than a verdict.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — FIS architecture" },
-      "related": ["fis", "attribution"],
-      "appearsLater": { "part": 6, "topic": "Subtractive scoring" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — FIS architecture"
+      },
+      "related": [
+        "fis",
+        "attribution"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Subtractive scoring"
+      },
       "chart": "p6-fis-waterfall"
     },
     {
       "id": "attribution",
       "term": "Attribution",
-      "aliases": ["penalty attribution"],
+      "aliases": [
+        "penalty attribution"
+      ],
       "wave": 3,
+      "category": "scoring",
       "definition": "The itemized account of which rule cost how many points. It is what makes a construction score actionable, because the fix is named alongside the deduction.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — FIS architecture" },
-      "related": ["fis", "subtractive-scoring", "dead-capital"],
-      "appearsLater": { "part": 6, "topic": "The five penalty buckets" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — FIS architecture"
+      },
+      "related": [
+        "fis",
+        "subtractive-scoring",
+        "dead-capital"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The five penalty buckets"
+      },
       "chart": "p6-fis-waterfall"
     },
     {
@@ -822,23 +1871,45 @@
       "term": "Dead capital",
       "aliases": [],
       "wave": 3,
+      "category": "scoring",
       "definition": "Capital held without a documented thesis or on a score nobody has refreshed. It is one of the five FIS penalty buckets, and it scales with position size.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — FIS penalty buckets" },
-      "related": ["fis", "attribution"],
-      "appearsLater": { "part": 6, "topic": "The five penalty buckets" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — FIS penalty buckets"
+      },
+      "related": [
+        "fis",
+        "attribution"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The five penalty buckets"
+      },
       "chart": "p6-fis-waterfall"
     },
     {
       "id": "value-weighted",
       "term": "Value-weighted",
-      "aliases": ["value weighting"],
+      "aliases": [
+        "value weighting"
+      ],
       "wave": 3,
+      "category": "scoring",
       "definition": "Scaling a penalty by how large the offending position is, within a floor and a cap. A bigger position generates a proportionally bigger charge, but no single position is allowed to dominate the score.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — FIS architecture" },
-      "related": ["fis", "attribution"],
-      "appearsLater": { "part": 6, "topic": "Value-weighting is scoped precisely" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — FIS architecture"
+      },
+      "related": [
+        "fis",
+        "attribution"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Value-weighting is scoped precisely"
+      },
       "chart": null
     },
     {
@@ -846,24 +1917,1117 @@
       "term": "Posture drift",
       "aliases": [],
       "wave": 3,
+      "category": "scoring",
       "definition": "The gap between the portfolio's actual posture mix and its target, which the market can open without a single trade. It is reported as a diagnostic alongside the score rather than billed as a penalty.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — Failure modes" },
-      "related": ["posture", "fis"],
-      "appearsLater": { "part": 6, "topic": "How implementations quietly degrade" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Failure modes"
+      },
+      "related": [
+        "posture",
+        "fis"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "How implementations quietly degrade"
+      },
       "chart": "p6-decay-drift"
     },
     {
       "id": "decision-log",
       "term": "Decision log",
-      "aliases": ["decision logging"],
+      "aliases": [
+        "decision logging"
+      ],
       "wave": 3,
+      "category": "scoring",
       "definition": "The record of what changed, why, and what would reverse it, written as the weekly loop closes. It is what makes the next week's pass a measurement rather than a memory.",
       "length": "medium",
-      "source": { "kind": "internal", "ref": "Part 6 — Weekly workflow" },
-      "related": ["fis", "cis"],
-      "appearsLater": { "part": 6, "topic": "The weekly workflow" },
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Weekly workflow"
+      },
+      "related": [
+        "fis",
+        "cis"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The weekly workflow"
+      },
       "chart": "p6-weekly-loop"
+    },
+    {
+      "id": "narrative-drift",
+      "term": "Narrative drift",
+      "aliases": [],
+      "wave": 4,
+      "category": "foundations",
+      "definition": "Holding a deteriorating position because the story still sounds right. The framework names it as a failure mode of traditional portfolio management and answers it with quantified reassessment, so evidence rather than narrative decides whether a position stays.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 — the failure modes the architecture addresses"
+      },
+      "related": [
+        "cis",
+        "thesis-drift",
+        "conviction",
+        "decision-log"
+      ],
+      "appearsLater": {
+        "part": 1,
+        "topic": "The failure modes the system answers"
+      },
+      "chart": null
+    },
+    {
+      "id": "attention-scarcity",
+      "term": "Attention scarcity",
+      "aliases": [],
+      "wave": 4,
+      "category": "foundations",
+      "definition": "Missing a thesis break because there is more information than attention. The framework answers it with tripwires, which automate attention to the critical signals so a break is noticed when it happens rather than when it becomes convenient.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 1 — the failure modes the architecture addresses"
+      },
+      "related": [
+        "tripwire",
+        "agentic-verification",
+        "intra-week-trigger"
+      ],
+      "appearsLater": {
+        "part": 1,
+        "topic": "The failure modes the system answers"
+      },
+      "chart": "L3"
+    },
+    {
+      "id": "risk-of-ruin",
+      "term": "Risk of ruin",
+      "aliases": [
+        "ruin",
+        "ruin risk",
+        "ruin avoidance"
+      ],
+      "wave": 4,
+      "category": "foundations",
+      "definition": "The chance of a loss large enough to end compounding, which no later gain can repair. The framework treats ruin as a boundary condition rather than a risk to be traded off: survival comes first, because nothing compounds from zero.",
+      "length": "medium",
+      "source": {
+        "kind": "external",
+        "ref": "Taleb, Antifragile and The Black Swan; internal Part 2 lineage"
+      },
+      "related": [
+        "fragility",
+        "survivable-compounding",
+        "sequence-of-returns-risk",
+        "barbell"
+      ],
+      "appearsLater": {
+        "part": 2,
+        "topic": "Taleb: antifragility and ruin avoidance"
+      },
+      "chart": "p2-ruin-comes-first"
+    },
+    {
+      "id": "global-liquidity",
+      "term": "Global liquidity",
+      "aliases": [
+        "liquidity cycle",
+        "liquidity cycles",
+        "liquidity conditions"
+      ],
+      "wave": 4,
+      "category": "macro",
+      "definition": "The aggregate supply of money and credit in the system, read through measures such as M2 growth, central-bank balance sheets, and real rates. The framework treats its expansion and contraction as a tide that convex assets amplify rather than merely follow.",
+      "length": "medium",
+      "source": {
+        "kind": "external",
+        "ref": "Lyn Alden, liquidity-cycle work; internal Part 2 lineage"
+      },
+      "related": [
+        "macro-thesis",
+        "fiscal-dominance",
+        "regime",
+        "policy-reflexivity"
+      ],
+      "appearsLater": {
+        "part": 2,
+        "topic": "Lyn Alden: liquidity cycles"
+      },
+      "chart": "p2-liquidity-sets-tide"
+    },
+    {
+      "id": "bitcoin-backbone",
+      "term": "Bitcoin backbone",
+      "aliases": [
+        "the backbone",
+        "convexity backbone",
+        "reserve asset",
+        "Bitcoin reserve"
+      ],
+      "wave": 4,
+      "category": "bitcoin",
+      "definition": "The reserve asset and principal source of convexity: a Bitcoin position held outside the three postures, accumulated on a schedule, governed by valuation discipline, and never sold, traded, or rebalanced. Liquidity comes from elsewhere.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Bitcoin as the convexity backbone"
+      },
+      "related": [
+        "posture",
+        "power-law-corridor",
+        "dca",
+        "cold-storage",
+        "accumulate-only",
+        "reserve-share"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "Bitcoin as the convexity backbone"
+      },
+      "chart": "p3-volatility-is-the-toll"
+    },
+    {
+      "id": "cold-storage",
+      "term": "Cold storage",
+      "aliases": [
+        "cold-storage",
+        "self-custody",
+        "hardware wallet"
+      ],
+      "wave": 4,
+      "category": "bitcoin",
+      "definition": "Holding the Bitcoin reserve in hardware wallets under the holder’s own keys, accumulated through payroll contributions and held rather than trimmed on valuation. A custodian enters only if and when collateralized borrowing begins.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — TAM, custody, and the borrow phase"
+      },
+      "related": [
+        "bitcoin-backbone",
+        "buy-borrow-die",
+        "taxable-account",
+        "accumulate-only"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "Cold-storage architecture and the borrow phase"
+      },
+      "chart": "p3-cold-storage-to-borrow"
+    },
+    {
+      "id": "accumulate-only",
+      "term": "Accumulate-only doctrine",
+      "aliases": [
+        "accumulate only",
+        "never-sell",
+        "never sell",
+        "never sold",
+        "accumulate, don’t trade"
+      ],
+      "wave": 4,
+      "category": "bitcoin",
+      "definition": "The handling rule for the backbone: Bitcoin is accumulated and never sold, traded, or rebalanced. Valuation models shape the pace of buying, not entries and exits, and cash needs are met from income, other assets, or borrowing against the reserve.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Handling doctrine: accumulate, then borrow"
+      },
+      "related": [
+        "bitcoin-backbone",
+        "dca",
+        "model-convergence",
+        "cold-storage"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "Handling doctrine: accumulate, then borrow"
+      },
+      "chart": "p3-accumulate-dont-trade"
+    },
+    {
+      "id": "model-convergence",
+      "term": "Model convergence",
+      "aliases": [
+        "convergence",
+        "models converge",
+        "model divergence"
+      ],
+      "wave": 4,
+      "category": "bitcoin",
+      "definition": "The valuation read for Bitcoin: several independent models are compared, and their agreement is the signal. Convergence on undervaluation accelerates accumulation, convergence on overvaluation slows it, and wide divergence counsels holding the range.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Why Bitcoin can be modeled"
+      },
+      "related": [
+        "power-law-corridor",
+        "realized-price",
+        "dca",
+        "dry-powder",
+        "valuation-extension"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "Power-law bands and model convergence"
+      },
+      "chart": "p3-models-must-converge"
+    },
+    {
+      "id": "realized-price",
+      "term": "Realized price",
+      "aliases": [
+        "on-chain cost basis",
+        "realized-price"
+      ],
+      "wave": 4,
+      "category": "bitcoin",
+      "definition": "Bitcoin’s aggregate on-chain cost basis, with each coin valued at the price it last moved. It rises with adoption and marks a historically important bear-market regime level, not a hard floor: price can trade below it for extended stretches.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Why Bitcoin can be modeled"
+      },
+      "related": [
+        "model-convergence",
+        "power-law-corridor",
+        "cost-basis"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "Valuation models: realized price"
+      },
+      "chart": "p3-models-must-converge"
+    },
+    {
+      "id": "reserve-share",
+      "term": "Reserve share",
+      "aliases": [
+        "reserve sizing",
+        "Bitcoin share",
+        "mature share"
+      ],
+      "wave": 4,
+      "category": "bitcoin",
+      "definition": "Bitcoin’s share of the whole portfolio. A ten to fifteen percent target suits long horizons and moderate risk capacity, twenty to thirty percent suits higher conviction, and a mature thirty to fifty percent share can emerge over decades through accumulation rather than rebalancing.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Reserve sizing by horizon and risk capacity"
+      },
+      "related": [
+        "bitcoin-backbone",
+        "position-sizing",
+        "concentration-limit",
+        "cold-storage"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "Reserve sizing by horizon and risk capacity"
+      },
+      "chart": "p3-reserve-share-evolves"
+    },
+    {
+      "id": "valuation-extension",
+      "term": "Extension",
+      "aliases": [
+        "valuation extension",
+        "price extension"
+      ],
+      "wave": 4,
+      "category": "bitcoin",
+      "definition": "A stretch in which Bitcoin trades well above its power-law trend and its realized-price basis. The response is to slow discretionary accumulation and build dry powder from income; an extension never prompts a sale of the reserve.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 3 — Through two cycles"
+      },
+      "related": [
+        "model-convergence",
+        "power-law-corridor",
+        "dry-powder",
+        "dca"
+      ],
+      "appearsLater": {
+        "part": 3,
+        "topic": "Through two cycles: extension and convergence"
+      },
+      "chart": "p3-power-law-holds"
+    },
+    {
+      "id": "tax-wedge",
+      "term": "Tax wedge",
+      "aliases": [
+        "after-tax wedge",
+        "retained value"
+      ],
+      "wave": 4,
+      "category": "tax",
+      "definition": "The gap between a gross gain and what a given wrapper lets you keep after tax. It widens as the outcome grows, which is why the largest wins are the ones where wrapper placement matters most.",
+      "length": "short",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — The tax wedge"
+      },
+      "related": [
+        "tax-wrapper",
+        "roth",
+        "taxable-account",
+        "right-tail-outcomes",
+        "niit"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "The tax wedge"
+      },
+      "chart": "p4-tax-wedge"
+    },
+    {
+      "id": "purchased-convexity",
+      "term": "Purchased convexity",
+      "aliases": [
+        "defined-risk options",
+        "long options"
+      ],
+      "wave": 4,
+      "category": "tax",
+      "definition": "The only options use permitted inside a Roth: long calls, long puts, and defined-risk spreads, never undefined-risk strategies such as naked options or short volatility. A tactical overlay for a high-conviction thesis, capped at three to five percent of the account measured as maximum loss at entry.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 4 — Options within the Roth"
+      },
+      "related": [
+        "roth",
+        "optionality",
+        "asymmetry",
+        "conviction"
+      ],
+      "appearsLater": {
+        "part": 4,
+        "topic": "Options within the Roth: purchased convexity only"
+      },
+      "chart": null
+    },
+    {
+      "id": "household-aggregate",
+      "term": "Household aggregate",
+      "aliases": [
+        "portfolio boundary",
+        "household portfolio",
+        "household level"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "The portfolio boundary for every concentration rule: the total across all wrappers, including Roth, pre-tax, taxable, and Bitcoin cold storage. A position held in several accounts sums to one exposure, and the limits apply to that sum rather than to any single account.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — The portfolio boundary and single-name sleeves"
+      },
+      "related": [
+        "concentration-limit",
+        "single-name-sleeve",
+        "tax-wrapper",
+        "position-sizing"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The portfolio boundary and single-name sleeves"
+      },
+      "chart": null
+    },
+    {
+      "id": "single-name-sleeve",
+      "term": "Single-name sleeve",
+      "aliases": [
+        "sleeve",
+        "single-name sleeves"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "A wrapper intentionally concentrated in one position, permitted only while the household aggregate stays inside its limits. The designation is explicit and documented, drift is monitored, and trimming is required if the aggregate breaches a cap. A governance structure, not an exception.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — The portfolio boundary and single-name sleeves"
+      },
+      "related": [
+        "household-aggregate",
+        "concentration-limit",
+        "roth",
+        "override"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "The portfolio boundary and single-name sleeves"
+      },
+      "chart": null
+    },
+    {
+      "id": "thesis-drift",
+      "term": "Thesis drift",
+      "aliases": [
+        "thesis failure",
+        "thesis-damaged"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "The truth problem, as distinct from the price problem: a core assertion behind a position has broken. Reassessment is immediate and price is irrelevant; a thesis-damaged position is downgraded or exited, and a later price recovery does not rehabilitate it.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Thesis drift: price problems versus truth problems"
+      },
+      "related": [
+        "core-assertion",
+        "momentum-filter",
+        "tripwire",
+        "narrative-drift"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Thesis drift: price problems versus truth problems"
+      },
+      "chart": null
+    },
+    {
+      "id": "core-assertion",
+      "term": "Core assertions",
+      "aliases": [
+        "core assertion",
+        "assertions"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "The one to three claims a position depends on, written down at entry in a form that can be checked. They are what thesis drift is measured against: when one breaks, the position is reassessed on the evidence, whatever the price is doing.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Protocol 05: one to three core assertions per position"
+      },
+      "related": [
+        "thesis-drift",
+        "decision-log",
+        "conviction",
+        "cis"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Protocol 05: one to three core assertions per position"
+      },
+      "chart": null
+    },
+    {
+      "id": "position-freeze",
+      "term": "Position freeze",
+      "aliases": [
+        "freeze",
+        "frozen",
+        "adds and freezes"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "A rule on the way in: a position down twenty percent or more from cost basis takes no new capital until a confirming signal arrives, such as a higher low, a reclaimed level, or new thesis-supporting evidence. Scaling in happens over weeks, with no more than a quarter of the target added in any one week.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Adds and freezes: discipline on the way in"
+      },
+      "related": [
+        "position-sizing",
+        "momentum-filter",
+        "drawdown",
+        "conviction"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Adds and freezes: discipline on the way in"
+      },
+      "chart": null
+    },
+    {
+      "id": "torque-eligibility",
+      "term": "Torque eligibility",
+      "aliases": [
+        "Torque-eligible",
+        "Torque gate"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "The gate a position must pass before it can be Torque, and entry is earned three ways at once: a structural tailwind from an identifiable regime force, business survivability through stress without continuous access to capital markets, and valuation headroom large enough for a convex payoff, often five times or more. Passing earns a place, not a size.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Torque: leverage on regime forces"
+      },
+      "related": [
+        "torque",
+        "regime-force",
+        "headroom",
+        "position-sizing",
+        "conviction"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Torque: leverage on regime forces"
+      },
+      "chart": "p5-earned-size"
+    },
+    {
+      "id": "ballast-eligibility",
+      "term": "Ballast eligibility",
+      "aliases": [
+        "five tests, three required",
+        "Ballast criteria",
+        "eligibility criteria"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "A checklist, not an impression: a Ballast candidate must pass at least three of five tests covering a fortress balance sheet, diversified revenue, durable cash generation, low factor correlation, and a liquidity-resilient valuation. Yield is deliberately not on the list; income follows quality rather than qualifying it.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Ballast: five tests, three required"
+      },
+      "related": [
+        "ballast",
+        "survivability",
+        "rotation"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Ballast: five tests, three required"
+      },
+      "chart": "p5-ballast-rotation"
+    },
+    {
+      "id": "profit-taking-ladder",
+      "term": "Profit-taking ladder",
+      "aliases": [
+        "profit-taking",
+        "take profits"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "The Hype exit schedule: one third of the position is sold at a fifty percent gain, another third at one hundred percent, and the remainder runs with the stop raised to breakeven. It converts a narrative trade into banked gains without pretending to know the top.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Hype governance"
+      },
+      "related": [
+        "hype",
+        "stop-loss",
+        "rotation"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Hype governance"
+      },
+      "chart": "p5-posture-sizing"
+    },
+    {
+      "id": "parameter",
+      "term": "Parameter",
+      "aliases": [
+        "parameters",
+        "tunable threshold"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "The middle layer of change governance: a threshold that may be tuned inside a documented envelope for an articulated reason, such as component weights, sizing bands, momentum thresholds, or concentration limits. Changing one adjusts the framework; changing doctrine abandons it.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Doctrine, parameters, overrides"
+      },
+      "related": [
+        "doctrine",
+        "override",
+        "change-governance",
+        "delta-clamp"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Doctrine, parameters, overrides"
+      },
+      "chart": "p5-change-hierarchy"
+    },
+    {
+      "id": "change-governance",
+      "term": "Change governance",
+      "aliases": [
+        "change hierarchy",
+        "know what you are changing"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "The rule that every change to the rules is itself governed, by routing it to exactly one of three levels: doctrine, which cannot change without abandoning the framework; parameters, tunable within documented ranges; and overrides, temporary, documented, and time-bounded.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Doctrine, parameters, overrides"
+      },
+      "related": [
+        "doctrine",
+        "parameter",
+        "override",
+        "decision-log"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Doctrine, parameters, overrides"
+      },
+      "chart": "p5-change-hierarchy"
+    },
+    {
+      "id": "regime-throttle",
+      "term": "Regime throttle",
+      "aliases": [
+        "throttle",
+        "regime-aware throttling",
+        "liquidity throttle",
+        "stressed regime"
+      ],
+      "wave": 4,
+      "category": "construction",
+      "definition": "A state machine for stressed markets, when rising correlation and departing liquidity make positions that looked independent trade as one. The response is deliberately boring: pause new Torque adds, enforce posture limits strictly, consider trimming gross exposure by ten to twenty percent, and resume only after two calm weeks.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 5 — Liquidity and correlation: throttle the regime"
+      },
+      "related": [
+        "correlation-instability",
+        "correlation-stacking",
+        "torque",
+        "tripwire"
+      ],
+      "appearsLater": {
+        "part": 5,
+        "topic": "Liquidity and correlation: throttle the regime"
+      },
+      "chart": "p5-liquidity-throttle"
+    },
+    {
+      "id": "cis-convexity-optionality",
+      "term": "Convexity and Optionality (C)",
+      "aliases": [
+        "convexity & optionality",
+        "convexity and optionality",
+        "C component"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The heaviest CIS component at forty percent, because asymmetric upside is the objective. It scores TAM headroom, the optionality surface, catalyst density, and scarcity, each capped, summing to a 0 to 100 component score.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — The four CIS components; Framework in Math, component C"
+      },
+      "related": [
+        "cis",
+        "headroom",
+        "catalyst-density",
+        "optionality",
+        "convexity"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The four CIS components"
+      },
+      "chart": "p6-cis-composition"
+    },
+    {
+      "id": "cis-risk-fragility",
+      "term": "Risk and Fragility (R)",
+      "aliases": [
+        "risk & fragility",
+        "risk and fragility",
+        "R component"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The CIS component, weighted twenty-five percent, that measures survivability under stress rather than price volatility: balance sheet, business-model fragility, factor correlation, and tail exposure. A higher score means lower fragility.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — The four CIS components; Framework in Math, component R"
+      },
+      "related": [
+        "cis",
+        "fragility",
+        "survivability",
+        "volatility"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The four CIS components"
+      },
+      "chart": "p6-cis-composition"
+    },
+    {
+      "id": "cis-macro-alignment",
+      "term": "Macro Alignment (M)",
+      "aliases": [
+        "macro alignment",
+        "M component"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The CIS component, weighted twenty-five percent, that measures fit to the current regime rather than a forecast: regime sensitivity, carry direction, and policy alignment against the Part 2 thesis. A macro read may tilt a score; it is bounded so it can never determine one.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — The four CIS components; Framework in Math, component M"
+      },
+      "related": [
+        "cis",
+        "macro-thesis",
+        "regime-force",
+        "carry-vector"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The four CIS components"
+      },
+      "chart": "p6-cis-composition"
+    },
+    {
+      "id": "cis-execution-sentiment",
+      "term": "Execution and Sentiment (E)",
+      "aliases": [
+        "execution & sentiment",
+        "execution and sentiment",
+        "E component"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The lightest CIS component at ten percent: momentum, relative strength, and market acceptance. It carries the least weight because execution confirms quality and never dominates it.",
+      "length": "short",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — The four CIS components; Framework in Math, component E"
+      },
+      "related": [
+        "cis",
+        "momentum-filter",
+        "52-week-high",
+        "breadth"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The four CIS components"
+      },
+      "chart": "p6-cis-composition"
+    },
+    {
+      "id": "headroom",
+      "term": "Headroom",
+      "aliases": [
+        "TAM headroom",
+        "valuation headroom"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "How much larger the addressable market is than the company, the first and largest sub-score inside Convexity and Optionality. It is scored on a logarithmic curve capped at thirty times, so the first multiple of headroom counts for far more than the twentieth.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Framework in Math — Convexity and optionality; Part 5 Torque eligibility"
+      },
+      "related": [
+        "tam",
+        "cis-convexity-optionality",
+        "torque-eligibility",
+        "catalyst-density"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The four CIS components"
+      },
+      "chart": "p6-cis-composition"
+    },
+    {
+      "id": "catalyst-density",
+      "term": "Catalyst density",
+      "aliases": [
+        "catalysts",
+        "catalyst"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "A sub-score inside Convexity and Optionality that prices identifiable, dated reasons for a re-rating. Each catalyst earns points from its impact, probability, independence, evidence confidence, and time decay, so several versions of the same catalyst do not count twice.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Framework in Math — Convexity and optionality"
+      },
+      "related": [
+        "cis-convexity-optionality",
+        "headroom",
+        "confidence"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The four CIS components"
+      },
+      "chart": "p6-cis-composition"
+    },
+    {
+      "id": "penalty-bucket",
+      "term": "Penalty buckets",
+      "aliases": [
+        "penalty bucket",
+        "five buckets",
+        "FIS buckets"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The five named deductions FIS can take from one hundred: allocation, governance, dead capital, concentration, and complexity, each with its own cap. Because the caps sum to eighty, FIS can never fall below twenty, and every point lost names the rule that cost it.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — The five penalty buckets"
+      },
+      "related": [
+        "fis",
+        "subtractive-scoring",
+        "attribution",
+        "dead-capital",
+        "value-weighted"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The five penalty buckets"
+      },
+      "chart": "p6-fis-waterfall"
+    },
+    {
+      "id": "action-line",
+      "term": "Action line",
+      "aliases": [
+        "the 70 line",
+        "70 line"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The FIS reading of seventy: at or above it the portfolio holds, below it repair begins, with the attribution naming the fix. CIS reads the same four-band register, but there seventy is only the floor of the Strong band, a boundary rather than a trigger.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Reading the number"
+      },
+      "related": [
+        "score-band",
+        "fis",
+        "cis",
+        "attribution"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Reading the number"
+      },
+      "chart": "p6-fis-waterfall"
+    },
+    {
+      "id": "drift-trigger",
+      "term": "Promotion and demotion",
+      "aliases": [
+        "promotion",
+        "demotion",
+        "drift trigger",
+        "10-point drift trigger"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The ten-point signal on score movement. A CIS rise of ten points flags the position for resizing toward its larger target, a fall of ten flags a downsize, and either is paced over two to four weeks. Neither changes posture, which Part 5 governs, and neither alone forces an exit.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — How CIS feeds decisions"
+      },
+      "related": [
+        "cis",
+        "delta-clamp",
+        "allocation-band",
+        "posture"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "How CIS feeds decisions"
+      },
+      "chart": "p6-weekly-loop"
+    },
+    {
+      "id": "continuous-scoring",
+      "term": "Continuous scoring",
+      "aliases": [
+        "floats, not tiers"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "All CIS sub-scores are continuous values rather than bucketed tiers: a position scores 78.3, not 75 or 80. Continuity preserves the small week-over-week movement that longitudinal tracking exists to see.",
+      "length": "short",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Mechanics: floats, not tiers"
+      },
+      "related": [
+        "cis",
+        "delta-clamp",
+        "score-decay"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Mechanics: floats, not tiers"
+      },
+      "chart": null
+    },
+    {
+      "id": "weekly-loop",
+      "term": "Weekly loop",
+      "aliases": [
+        "weekly workflow",
+        "weekly evidence loop",
+        "weekly cadence",
+        "operating cadence"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The operating cadence, run Sunday evening or Monday pre-market: update CIS, calculate FIS, run the governance gates, act or deliberately hold, and log the evidence. It closes every week whether or not anything moved, which is what makes the next pass a measurement.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — The weekly workflow"
+      },
+      "related": [
+        "decision-log",
+        "intra-week-trigger",
+        "restraint-principle",
+        "delta-clamp"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The weekly workflow"
+      },
+      "chart": "p6-weekly-loop"
+    },
+    {
+      "id": "intra-week-trigger",
+      "term": "Intra-week triggers",
+      "aliases": [
+        "intra-week trigger"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The four events that interrupt the weekly cadence rather than wait for it: a position moving more than five percent in one day, material news, an earnings announcement, or a tripwire condition met. Between triggers, frequency limits keep activity from passing for diligence.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — Intra-week triggers"
+      },
+      "related": [
+        "weekly-loop",
+        "tripwire",
+        "earnings-proximity",
+        "restraint-principle"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "Intra-week triggers"
+      },
+      "chart": "p6-weekly-loop"
+    },
+    {
+      "id": "restraint-principle",
+      "term": "Restraint principle",
+      "aliases": [
+        "the restraint principle",
+        "restraint"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "Discipline includes doing nothing. A CIS or FIS change under five points is monitored, a position inside its band is not resized, and a week in which every check passed and nothing moved is the system working, not the system idle.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — The Restraint Principle"
+      },
+      "related": [
+        "weekly-loop",
+        "delta-clamp",
+        "score-band",
+        "decision-log"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "The Restraint Principle"
+      },
+      "chart": "p6-weekly-loop"
+    },
+    {
+      "id": "correlation-stacking",
+      "term": "Correlation stacking",
+      "aliases": [
+        "stacking",
+        "stacking diagnostic"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "The failure CIS cannot see because it scores one position at a time: several high-scoring positions that move together under regime stress. Average correlation above 0.7 is flagged as a diagnostic; any penalty routes through FIS and governance, never through CIS.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — How implementations quietly degrade"
+      },
+      "related": [
+        "fis",
+        "regime-throttle",
+        "correlation-instability",
+        "cis"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "How implementations quietly degrade"
+      },
+      "chart": "p6-decay-drift"
+    },
+    {
+      "id": "score-decay",
+      "term": "Score decay",
+      "aliases": [
+        "CIS decay",
+        "slow CIS decay",
+        "stale score",
+        "stale scores"
+      ],
+      "wave": 4,
+      "category": "scoring",
+      "definition": "A position whose score has quietly fallen while its sizing stayed put, because nobody recalculated: a thesis played out, a market compressed, catalysts exhausted. Scores stale past ninety days are flagged, and the dead-capital bucket bills them.",
+      "length": "medium",
+      "source": {
+        "kind": "internal",
+        "ref": "Part 6 — How implementations quietly degrade"
+      },
+      "related": [
+        "dead-capital",
+        "weekly-loop",
+        "tripwire",
+        "continuous-scoring"
+      ],
+      "appearsLater": {
+        "part": 6,
+        "topic": "How implementations quietly degrade"
+      },
+      "chart": "p6-decay-drift"
     }
   ]
 }
