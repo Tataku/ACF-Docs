@@ -1,6 +1,6 @@
 /* ============================================================================
    ACF DOCS COVER (Option B) — page-specific enhancement
-   1) ⌘K search over Parts, sections, and the glossary (acf-glossary.json).
+   1) ⌘K search over pages, sections, and the glossary (search-index.json).
    2) GSAP load/scroll choreography. Start states are applied AT RUNTIME, so the
       page ships fully visible: JS-off, reduced-motion, or a blocked CDN all
       degrade to the complete static page. No dependencies beyond GSAP itself.
@@ -8,39 +8,27 @@
 (function () {
   'use strict';
 
-  /* ---- Search index ------------------------------------------------------- */
-  var PARTS = [
-    { t: 'Part 1 · Foundation & Philosophy', s: 'The premise, the operating posture, and the order of operations.', h: '/part-1-foundation' },
-    { t: 'Part 2 · Lineage & Macro Thesis', s: 'Intellectual lineage and the regime-shift macro thesis.', h: '/part-2-lineage-macro-thesis' },
-    { t: 'Part 3 · Bitcoin: Convexity Backbone', s: 'Why Bitcoin anchors the portfolio’s asymmetric upside.', h: '/part-3-bitcoin-convexity-backbone' },
-    { t: 'Part 1 in Pictures', s: 'The Foundation as a visual essay: seven exhibits.', h: '/part-1-pictures' }
-  ];
-  var SECTIONS = [
-    { t: 'Manifesto', s: 'Part 1 · The traditional portfolio playbook is failing quietly.', h: '/part-1-foundation#manifesto' },
-    { t: 'Abstract', s: 'Part 1 · A portfolio operating system for unstable regimes.', h: '/part-1-foundation#abstract' },
-    { t: 'Order of Operations', s: 'Part 1 · The system at a glance.', h: '/part-1-foundation#order-of-operations' },
-    { t: 'Framework Lineage', s: 'Part 2 · The intellectual foundations, thesis-agnostic.', h: '/part-2-lineage-macro-thesis#lineage' },
-    { t: 'What It Excludes', s: 'Part 2 · What the framework intentionally excludes.', h: '/part-2-lineage-macro-thesis#excludes' },
-    { t: 'Tax as Multiplier', s: 'Part 2 · A dominant structural return multiplier.', h: '/part-2-lineage-macro-thesis#tax' },
-    { t: 'Thought Leaders', s: 'Part 2 · How the framework uses thought leaders.', h: '/part-2-lineage-macro-thesis#thought-leaders' },
-    { t: 'Macro Thesis Process', s: 'Part 2 · Identification, evaluation, and governance.', h: '/part-2-lineage-macro-thesis#macro-thesis' },
-    { t: 'The Backbone', s: 'Part 3 · Bitcoin as the convexity backbone.', h: '/part-3-bitcoin-convexity-backbone#backbone' },
-    { t: 'Structural Fit', s: 'Part 3 · Why Bitcoin specifically.', h: '/part-3-bitcoin-convexity-backbone#irreplaceability' },
-    { t: 'Multi-Cycle Survivability', s: 'Part 3 · Optimizing for multi-cycle survivability.', h: '/part-3-bitcoin-convexity-backbone#survivability' },
-    { t: 'Risk Register', s: 'Part 3 · What can break.', h: '/part-3-bitcoin-convexity-backbone#risks' },
-    { t: 'Valuation Models', s: 'Part 3 · Why Bitcoin can be modeled.', h: '/part-3-bitcoin-convexity-backbone#valuation' },
-    { t: 'TAM & Implementation', s: 'Part 3 · TAM, custody, and the borrow phase.', h: '/part-3-bitcoin-convexity-backbone#tam' }
-  ];
-  var WAVE_FILES = { 1: '/part-1-foundation', 2: '/part-2-lineage-macro-thesis', 3: '/part-3-bitcoin-convexity-backbone' };
-  var GLOSSARY = [];
+  /* ---- Search index --------------------------------------------------------
+     Derived, not written here. Three hand-maintained arrays used to live at this
+     spot and all three had gone stale: Parts stopped at Part 3, Sections stopped
+     at Part 3, and every glossary hit resolved through a wave-to-route map that
+     only knew waves 1-3, so a term from a later wave sent the reader to Part 1
+     with nothing highlighted. Nothing errored — the links were simply wrong,
+     which is the only failure mode a hand-written index has.
 
-  fetch('/site-b/acf-glossary.json')
+     scripts/build-search-index.mjs now generates search-index.json from the
+     navigation registry, each page's own "on this page" list, and the glossary
+     term file, and refuses to write a link it cannot resolve. It is also smaller
+     than the term file this used to fetch, so the panel costs less than before. */
+  var INDEX = { parts: [], sections: [], glossary: [] };
+  var indexReady = false;
+
+  var loading = fetch('/site-b/search-index.json')
     .then(function (r) { return r.json(); })
     .then(function (d) {
-      if (!d || !d.terms) return;
-      GLOSSARY = d.terms.map(function (t) {
-        return { t: t.term, s: t.definition, h: WAVE_FILES[t.wave] || WAVE_FILES[1] };
-      });
+      if (!d || !d.glossary) return;
+      INDEX = d;
+      indexReady = true;
     })
     .catch(function () {});
 
@@ -64,7 +52,7 @@
     input = document.createElement('input');
     input.className = 'dc-search-input';
     input.type = 'text';
-    input.placeholder = 'Search Parts, sections, and the glossary…';
+    input.placeholder = '';   // set per mode in openPanel: the panel has two
     input.setAttribute('role', 'combobox');
     input.setAttribute('aria-expanded', 'true');
     input.setAttribute('aria-controls', 'dc-results');
@@ -109,9 +97,9 @@
     var q = (query || '').trim().toLowerCase();
     var html = '';
     if (glossaryOnly) {
-      html = group('Glossary', GLOSSARY, q, 20);
+      html = group('Glossary', INDEX.glossary, q, 20);
     } else {
-      html = group('Parts', PARTS, q, 4) + group('Sections', SECTIONS, q, 6) + group('Glossary', GLOSSARY, q, 6);
+      html = group('Pages', INDEX.parts, q, 4) + group('Sections', INDEX.sections, q, 6) + group('Glossary', INDEX.glossary, q, 6);
     }
     results.innerHTML = html || '<p class="dc-sr-empty">No matches. Try a Part, a section, or a framework term.</p>';
     rows = Array.prototype.slice.call(results.querySelectorAll('.dc-sr'));
@@ -139,12 +127,20 @@
   function openPanel(glossaryMode) {
     buildPanel();
     glossaryOnly = !!glossaryMode;
+    // The panel opens in one of two modes and the placeholder used to promise the
+    // wider one in both. Today only the Glossary tile opens it, so every reader
+    // who saw "Search Parts, sections..." was being told about a corpus that
+    // search was not going to look in.
+    input.placeholder = glossaryOnly
+      ? 'Search ' + INDEX.glossary.length + ' glossary terms\u2026'
+      : 'Search pages, sections, and the glossary\u2026';
     lastFocus = document.activeElement;
     backdrop.hidden = false;
     panel.hidden = false;
     input.value = '';
     render('');
     input.focus();
+    loading.then(function () { if (panel && !panel.hidden) render(input.value); });
   }
 
   function closePanel() {
@@ -161,7 +157,14 @@
      search when Parts 4-6 and the glossary page make the corpus deep enough. */
   var glossTile = document.querySelector('[data-glossary-tile]');
   if (glossTile) {
-    glossTile.addEventListener('click', function (e) { e.preventDefault(); openPanel(true); });
+    glossTile.addEventListener('click', function (e) {
+      // Only swallow the navigation if the panel can actually answer. Before the
+      // index loads — or if it never does — the tile stays what its href says it
+      // is, a link to the glossary, instead of a click that does nothing.
+      if (!indexReady) return;
+      e.preventDefault();
+      openPanel(true);
+    });
   }
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closePanel();
