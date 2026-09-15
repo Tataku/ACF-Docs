@@ -190,3 +190,99 @@ test('spoken-form normalisation covers the tokens this book actually contains', 
 test('the narration script is inspectable without listening to the whole page', () => {
   assert.match(CLIENT, /script:\s*function \(\) \{ return buildBlocks\(\)\.slice\(\); \}/);
 });
+
+// ---------------------------------------------------------------------------
+// Spoken acronyms — resolved from the glossary, never guessed
+// ---------------------------------------------------------------------------
+
+const GLOSSARY = JSON.parse(read('public/site-b/acf-glossary.json'));
+const GLOSS_ENTRIES = Array.isArray(GLOSSARY) ? GLOSSARY : (GLOSSARY.terms || []);
+/** Every all-caps short form the glossary defines, with its canonical term. */
+function glossaryAcronyms() {
+  const out = new Map();
+  for (const e of GLOSS_ENTRIES) {
+    const names = [e.term, ...(e.aliases || [])].filter(Boolean);
+    const acro = names.find(n => /^[A-Z]{2,5}s?$/.test(n.trim()));
+    if (!acro) continue;
+    const full = names.find(n => n !== acro && /[a-z]/.test(n)) || (e.definition || '').split(':')[0];
+    out.set(acro.trim().replace(/s$/, ''), (full || '').trim());
+  }
+  return out;
+}
+
+test('every acronym the glossary defines has a spoken form', () => {
+  // The guard derives its coverage from the glossary rather than restating a
+  // list, so a term added to the book with no narration rule shows up here.
+  const missing = [];
+  for (const [acro] of glossaryAcronyms()) {
+    const handled = CLIENT.includes('\\b' + acro + '\\b') ||
+                    CLIENT.includes('\\b' + acro + 's\\b');
+    if (!handled) missing.push(acro);
+  }
+  assert.deepEqual(missing, [], `glossary acronyms with no spoken form: ${missing.join(', ')}`);
+});
+
+test('the spoken form matches what the glossary says the acronym MEANS', () => {
+  // "R O C" for a term the glossary defines as "Return of capital" was a guess,
+  // and a wrong one. These pin the meaning, not just the presence of a rule.
+  const g = glossaryAcronyms();
+  assert.match(g.get('ROC') || '', /return of capital/i);
+  assert.match(g.get('FIS') || '', /Framework Integrity Score/i);
+  assert.match(CLIENT, /say: 'return of capital'/);
+  assert.match(CLIENT, /first: 'Framework Integrity Score, or F I S'/);
+  assert.match(CLIENT, /say: 'total addressable market'/);
+  assert.match(CLIENT, /say: 'dollar-cost averaging'/);
+});
+
+test('no acronym in the EXPAND class is left as bare letters', () => {
+  for (const bad of ["'R O C'", "'T A M'", "'D C A'"]) {
+    assert.ok(!CLIENT.includes(bad), `${bad} should be spoken as words, not letters`);
+  }
+});
+
+test('terms of art are introduced once, then shortened', () => {
+  assert.match(CLIENT, /var acronymSeen = null;/);
+  assert.match(CLIENT, /acronymSeen\[a\.say\] = 1;/);
+  assert.match(CLIENT, /acronymSeen = \{\};/);          // reset per page build
+  assert.match(CLIENT, /a\.first \+ \(\/\^\\s\+\[A-Za-z\]\/\.test\(after\) \? ',' : ''\)/);
+});
+
+test("the book's own prose outranks the synthetic introduction", () => {
+  // Part 6 spells out "Convexity Integrity Score" in its own text before any
+  // "CIS" appears; saying it again a sentence later is the repetition this pass
+  // exists to remove.
+  assert.match(CLIENT, /full: \/\\bConvexity Integrity Score\\b\//);
+  assert.match(CLIENT, /if \(acronymSeen && a\.full && a\.full\.test\(t\)\) acronymSeen\[a\.say\] = 1;/);
+});
+
+test('pull quotes carry no synthetic lead-in', () => {
+  // Seven identical frames in a continuous listen is the robotic tell. Each
+  // quote is a self-standing declarative and none repeats body text.
+  assert.ok(!CLIENT.includes('Put plainly'), 'the fixed quote frame should be gone');
+  assert.match(CLIENT, /kind === 'quote'/);
+  assert.match(CLIENT, /return sentence\(raw\(el\)\);/);
+});
+
+test('no blanket lowercase rule can damage a proper noun', () => {
+  // Deliberately NOT implemented: capitalisation does not change TTS
+  // pronunciation, and the obvious heuristic would lowercase "Bitcoin".
+  assert.ok(!/toLowerCase\(\)/.test(CLIENT.split('function labelled')[1]?.slice(0, 400) || ''),
+    'labelled() must not lowercase the tail');
+});
+
+test('conversational glue is reserved for a genuine two-card comparison', () => {
+  // `.failure-modes` carries 2 to 10 cards. Applying an A/B hand-off down a
+  // ten-item risk register produced "And finally." six times in one segment —
+  // the same robotic repetition the pull-quote frame was removed for.
+  assert.match(CLIENT, /var pair = cards\.length === 2;/);
+  assert.match(CLIENT, /lead = pair \? GLIDE2\[i\] \+ ' ' : '';/);
+  assert.ok(!CLIENT.includes("'After that.'"), 'the N>2 glide ladder should be gone');
+});
+
+test('chart UI affordances never reach the narrator', () => {
+  // The chart islands render a "↳ Concept" jump chip with inline styles and no
+  // class, so the glyph itself is the only reliable handle.
+  assert.match(CLIENT, /var UI_GLYPH = /);
+  assert.match(CLIENT, /UI_GLYPH\.test\(n\.textContent \|\| ''\)/);
+  assert.match(CLIENT, /u21b3\/g, ' '\)/);   // belt and braces: never spoken even if it slips through
+});

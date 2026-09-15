@@ -459,16 +459,70 @@
           .replace(/(\d)\s*[x×]\b/g, '$1 times')         // 6x / 10x / 100x → "… times", not "ex"
           .replace(/(\S)\s+\/\s+(\S)/g, '$1, $2')          // "3.26 BTC / $326,000" → a pause, never "slash"
           .replace(/\s*&\s*/g, ' and ')                       // "S&P" → "S and P"
-          // confirmed-by-ear custom initialisms: force letter-by-letter reading
-          .replace(/\bCIS\b/g, 'C I S')                       // Convexity Integrity Score — not "siss"
-          .replace(/\bTAM\b/g, 'T A M')                       // total addressable market
-          .replace(/\bDCA\b/g, 'D C A')                       // dollar-cost averaging
-          // same shape as the three above (3-letter framework acronyms that form
-          // English-ish words), added by inference rather than confirmed by ear
-          .replace(/\bFIS\b/g, 'F I S')                       // Framework Integrity Score — not "fiss"
-          .replace(/\bROC\b/g, 'R O C')                       // return of capital — not "rock"
+
+          .replace(/\u21b3/g, ' ')                            // never speak a UI arrow
           .replace(/\s{2,}/g, ' ')
           .trim();
+      }
+      function speakLine(t) { return speakNorm(speakAcronyms(t)); }
+
+      // How the book's acronyms should SOUND. What each one MEANS is not decided
+      // here — `acf-glossary.json` is the authority, and the narration test reads
+      // it to check every entry below and to fail on a glossary acronym nothing
+      // handles. Letter-by-letter was a guess, and a wrong one: "R O C" for a term
+      // the glossary defines as "Return of capital" is strictly worse than saying
+      // the words.
+      //
+      // Two classes, which is what a human narrator actually does:
+      //   EXPAND    — short, natural phrases nobody spells out loud.
+      //   INTRODUCE — the book's own terms of art: expanded on FIRST use, short
+      //               after. CIS appears 122 times and FIS 52, so expanding every
+      //               one is exhausting; but leaving both as bare letters makes two
+      //               DIFFERENT scores (one per-position, one per-portfolio) sound
+      //               nearly identical, which is a comprehension failure, not a
+      //               style one.
+      var SPOKEN_ACRONYMS = [
+        { find: /\bROC-(?=\w)/g,  say: 'return-of-capital ' },   // "ROC-characterized"
+        { find: /\bROC\b/g,        say: 'return of capital' },
+        { find: /\bTAM\b/g,        say: 'total addressable market' },
+        { find: /\bDCA\b/g,        say: 'dollar-cost averaging' },
+        { find: /\bNIIT\b/g,       say: 'net investment income tax' },
+        { find: /\bRMDs\b/g,       say: 'required minimum distributions' },
+        { find: /\bRMD\b/g,        say: 'required minimum distribution' },
+        // present in the glossary as aliases but not (yet) in the book's prose —
+        // forward cover, each taken from the entry's own sibling alias
+        { find: /\bLTCG\b/g,       say: 'long-term capital gains' },
+        { find: /\bTLH\b/g,        say: 'tax-loss harvesting' },
+        { find: /\bSBLOC\b/g,      say: 'securities-backed lending' },
+        { find: /\bCIS\b/g, say: 'C I S', first: 'Convexity Integrity Score, or C I S',
+          full: /\bConvexity Integrity Score\b/ },
+        { find: /\bFIS\b/g, say: 'F I S', first: 'Framework Integrity Score, or F I S',
+          full: /\bFramework Integrity Score\b/ }
+      ];
+      // Reset per page build, so "first use" means first in reading order.
+      var acronymSeen = null;
+      function speakAcronyms(t) {
+        for (var i = 0; i < SPOKEN_ACRONYMS.length; i++) {
+          var a = SPOKEN_ACRONYMS[i];
+          a.find.lastIndex = 0;
+          if (!a.first) { t = t.replace(a.find, a.say); continue; }
+          // The book often spells the term out in its own prose first. When it
+          // does, that IS the introduction — saying it again a sentence later is
+          // the repetition this pass exists to remove.
+          if (acronymSeen && a.full && a.full.test(t)) acronymSeen[a.say] = 1;
+          t = t.replace(a.find, function (m, offset, str) {
+            if (acronymSeen && !acronymSeen[a.say]) {
+              acronymSeen[a.say] = 1;
+              // "…, or C I S" opens a parenthetical; close it when the sentence
+              // continues, so the narrator takes a breath in the right place
+              // instead of running "or C I S quantifies" together.
+              var after = String(str).slice(offset + m.length);
+              return a.first + (/^\s+[A-Za-z]/.test(after) ? ',' : '');
+            }
+            return a.say;
+          });
+        }
+        return t;
       }
 
       // ---------------------------------------------------------------------
@@ -515,6 +569,9 @@
       // exhibit's own index/mode chips are already carried by the exhibit handler.
       var NARRATION_MUTE = '.compare-key, .ex-idx, .ex-mode, .ex-src, .gloss-panel, .fc-legend, figcaption, .sidebar-nav, .on-this-page, .site-footer';
 
+      // A leading ↳ marks a chart's concept chip — a jump affordance for the eye.
+      var UI_GLYPH = /^\s*\u21b3/;
+
       var ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
                       'seventh', 'eighth', 'ninth', 'tenth'];
 
@@ -530,6 +587,7 @@
           if (n.nodeType === 3) out += n.nodeValue;
           else if (n.nodeType === 1) {
             if (n.matches && n.matches(NARRATION_MUTE)) continue;
+            if (UI_GLYPH.test(n.textContent || '')) continue;   // chart concept chip: visual affordance, not prose
             out += BLOCKISH.test(n.tagName) ? ' ' + raw(n) + ' ' : raw(n);
           }
         }
@@ -580,16 +638,20 @@
           // The move the eye makes across two cards has to become an audible one.
           cards = kids(el, ':scope > div');
           if (!cards.length) return raw(el);
+          // `.failure-modes` carries anything from 2 to 10 cards. Exactly two is a
+          // COMPARISON — the eye moves between them, so the ear needs a hand-off.
+          // More than two is a REGISTER, and conversational glue applied down a
+          // ten-item list produces "And finally." six times, which is the robotic
+          // repetition this pass exists to remove. There, each card's own name is
+          // the structure and no synthetic lead-in is added.
+          var pair = cards.length === 2;
           var GLIDE2 = ['Take the first.', 'Now the second.'];
-          var GLIDEN = ['First.', 'Next.', 'Then.', 'After that.', 'And finally.'];
           for (i = 0; i < cards.length; i++) {
             name = one(cards[i], '.name');
             body = raw(cards[i]);
             if (name && body.indexOf(name) === 0) body = body.slice(name.length).trim();
-            lead = cards.length === 2 ? GLIDE2[i]
-                 : GLIDEN[Math.min(i, GLIDEN.length - 1)];
-            if (i === cards.length - 1 && cards.length > 2) lead = 'And finally.';
-            parts.push(lead + ' ' + sentence(name ? name + ': ' + body : body));
+            lead = pair ? GLIDE2[i] + ' ' : '';
+            parts.push(lead + sentence(name ? name + ': ' + body : body));
           }
           return parts.join(' ');
         }
@@ -629,8 +691,13 @@
         }
 
         if (kind === 'quote') {
-          body = raw(el);
-          return body ? sentence('Put plainly: ' + body) : '';
+          // No synthetic lead-in. Every pull quote in this book is a self-standing
+          // declarative that reads as part of the argument, and none repeats body
+          // text (checked across all seven). One fixed frame said seven times in a
+          // continuous listen is the robotic tell the owner flagged; the beat a
+          // pull quote earns visually is already there in audio, because each block
+          // is its own utterance and its own API segment.
+          return sentence(raw(el));
         }
 
         if (kind === 'nextup') {
@@ -666,6 +733,7 @@
       function buildBlocks() {
         if (blocks) return blocks;
         blocks = [];
+        acronymSeen = {};                                   // "first use" = first in reading order
         var main = document.querySelector('.shell-main');
         if (!main) return blocks;
 
@@ -685,7 +753,7 @@
           for (var k = 0; k < NARRATION_BLOCKS.length; k++) {
             if (el.matches(NARRATION_BLOCKS[k].sel)) { kind = NARRATION_BLOCKS[k].kind; break; }
           }
-          var spoken = speakNorm(speakBlock(el, kind));
+          var spoken = speakLine(speakBlock(el, kind));
           if (kind !== 'para' && kind !== 'heading') claimed.push(el);
           if (spoken) blocks.push(spoken);
         }
