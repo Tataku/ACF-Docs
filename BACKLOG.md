@@ -236,3 +236,77 @@ Decisions taken at build time, now contract:
   engine actually computes; clamp/weight values quote the engine constants verbatim.
 - **Advisory calibration** — worked examples follow the same representative/illustrative
   hedging the prose uses (no promissory arithmetic).
+
+---
+
+## 3. Reader-experience decisions left open by the 2026-09-15 visitor read
+
+**Status:** `OPEN — owner decision, not scoped work` · **Captured:** 2026-09-15
+**Type:** Reading-surface UX. Four findings from a full read of the live tree, deliberately
+not fixed, because each needs a judgment call rather than a patch.
+
+### Context
+
+The docs site was read end to end as a visitor on 2026-09-15 — all eleven routes, desktop
+1440 and phone 390, light and dark — and six defects were found. Three were fixed in PR #174
+(the cover's "Resume reading" always going to Part 1; the cover and part pages disagreeing
+about reading time on all six parts; three chart concept chips dead on two pages) and three
+in PR #175 (the glossary missing from the cover's top nav; 23px drawer section links; 7×7
+chart stepper dots announcing themselves as "Element 3").
+
+The four below were the residue. Each is real, each is small, and each has more than one
+defensible answer — which is why they are recorded here rather than decided by a session.
+
+> The read also produced a **non-finding worth keeping**: 18 remaining tap-target reports are
+> inline links inside prose and metadata lines, which WCAG 2.2 explicitly exempts ("the target
+> is in a sentence or its size is otherwise constrained by the line-height of non-target
+> text"). Enlarging them would break the reading line to satisfy a rule that does not apply.
+> A scanner reports candidates, not verdicts. Do not "fix" these.
+
+### The four decisions
+
+1. **Jump rows on the reference pages are a row of links, not prose.** `/glossary`,
+   `/framework-in-pictures` and `/framework-in-math` each open with a row of `.part-ref`
+   links to their sections. They are navigation wearing prose clothing: 20–22px tall,
+   inline-wrapped, and the WCAG inline exception is arguable at best because they are not in
+   a sentence. Making them hittable means deciding **what they become** — chips like the
+   glossary's related-term pills, small buttons, or a segmented control — and that is a
+   design decision with a visual consequence on three pages. **The highest-value of the four.**
+
+2. **Jump-link labels wrap mid-phrase.** The same rows break "Part 4 ·" onto one line and
+   "Tax Architecture" onto the next. `white-space: nowrap` per link is one line of CSS, but
+   applied globally to `.part-ref` it risks overflow on a narrow screen for a long label, so
+   it wants scoping to the jump rows — which is the same scoping question as (1), and is why
+   the two are recorded together. Likely falls out of (1) for free.
+
+3. **The floating dock overlaps body text while scrolling.** On both form factors the dock
+   sits over the reading column during an active scroll and fades ~3.2s after the last tick
+   (`floatNav`'s `hideSoon`). It is transient and plausibly intended — a thumb-reachable
+   control that yields when you stop. The decision is whether "overlaps prose while moving"
+   is acceptable or whether the dock should offset the reading column while visible. **No
+   change recommended without an owner view; it may be working as designed.**
+
+4. **Share links build their URL from the current origin, not the canonical.** `partActions()`
+   composes the X and email share targets from `location.href`. On production that is
+   identical to the canonical, so this is latent — but a reader who lands on a Vercel preview
+   deployment and shares the page shares the preview URL. Every page already carries
+   `<link rel="canonical">`; reading it instead is small. The decision is whether to prefer
+   the canonical always, or only when the current origin is not the canonical host.
+
+### Activation prerequisites
+
+- (1) and (2) need an owner call on the jump-row treatment before any CSS is written; they
+  should ship as one slice because (2) is a consequence of (1).
+- (3) needs an owner view on whether the current behaviour is a defect at all.
+- (4) is independently shippable and needs no design input — only a decision on which of the
+  two rules to apply.
+
+### Guardrails inherited from the surrounding work
+
+- The reference pages are **generated** (`scripts/build-{glossary,pictures,math}-page.mjs`);
+  jump-row markup changes belong in those generators plus `scripts/site-b-shell.mjs`, never
+  in the emitted HTML, and `npm run audit:glossary` will catch a page edited by hand.
+- Chart changes must be followed by `npm run build:site-b-charts`: `site-b-charts.js` is a
+  committed artifact built **outside** `prebuild`, so a source-only fix ships nothing.
+- `tests/control-reachability.test.mjs` already pins the target-size and accessible-name
+  properties for the controls that were fixed; extend it rather than starting a new file.
