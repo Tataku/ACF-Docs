@@ -96,6 +96,13 @@ test('mascot: it is alive without GSAP, and still under a stated motion preferen
   assert.match(fn, /requestAnimationFrame/, 'one rAF loop');
   assert.match(fn, /setProperty\('--acf-gaze-x'/, 'which writes custom properties, not layout');
   assert.match(fn, /passive: true/, 'and listens passively');
+  // The rect read is a forced layout. Gating only the rAF loop left it running
+  // on every pointer move anywhere on the page, for a figure below the fold.
+  assert.match(fn, /function onMove\(e\) \{[\s\S]{0,400}?if \(!onScreen\) return;[\s\S]{0,80}getBoundingClientRect/,
+    'the rect read is gated on the figure being on screen');
+  // And the wake is symmetrical: a cycle that never stops is a cycle running
+  // for nobody once the reader has scrolled away.
+  assert.match(fn, /classList\.toggle\('is-awake', seen\)/, 'the blink sleeps again when the footer leaves');
   // Blink is CSS, so the media query is the whole gate there.
   const gate = CSS.slice(CSS.indexOf('/* ---- The mascot'), CSS.indexOf('@keyframes acf-mascot-pleased'));
   assert.match(gate, /@media \(prefers-reduced-motion: no-preference\)/, 'and the CSS half is gated too');

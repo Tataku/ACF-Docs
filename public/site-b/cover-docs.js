@@ -296,6 +296,10 @@
     var targetX = 0, targetY = 0, currentX = 0, currentY = 0, frame = null, onScreen = false;
 
     function onMove(e) {
+      // The rAF loop was gated on onScreen but this was not, so a rect read — a
+      // forced synchronous layout — ran on EVERY pointer move anywhere on the
+      // page, for a figure five screens below the fold. The gate belongs here.
+      if (!onScreen) return;
       var r = mark.getBoundingClientRect();
       var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
       targetX = Math.max(-1, Math.min(1, (e.clientX - cx) / (window.innerWidth * REACH)));
@@ -320,7 +324,12 @@
 
     function arrive(seen) {
       onScreen = seen;
-      if (seen) { mark.classList.add('is-awake'); start(); } else stop();
+      // Symmetrical, which the first version was not: it added the class and
+      // never took it back, so the 12s cycle went on running once the reader had
+      // scrolled away. The reason for waking on arrival — not blinking to an
+      // empty room — is the same reason for sleeping on departure.
+      mark.classList.toggle('is-awake', seen);
+      if (seen) start(); else stop();
     }
 
     if (window.IntersectionObserver) {
