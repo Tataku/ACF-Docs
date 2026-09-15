@@ -160,12 +160,31 @@
     var rows = document.querySelectorAll('[data-part]');
     if (!rows.length) return;
     var p = readProgress();
+    var firstUnread = null;
     var anyRead = false;
     rows.forEach(function (row) {
       if (p[row.getAttribute('data-part')]) { row.setAttribute('data-read', ''); anyRead = true; }
+      else if (!firstUnread) firstUnread = row;                 // rows are in reading order
     });
-    var resume = document.querySelector('.resume');
-    if (resume && anyRead) resume.hidden = false;
+
+    /* Resume: go where the reader actually stopped.
+       This link used to be a static href to Part 1 — the same destination as the
+       primary button beside it — so a reader returning mid-book was sent back to
+       the start, on a page that was ALREADY marking the parts they had finished
+       two elements away. The data was loaded; only this control ignored it.
+       It ships hidden and earns its place: shown only when there IS a next
+       unfinished part, so a first-time visitor is never offered a "resume" for a
+       book they have not begun, and a reader who has finished all six is not
+       offered one either. With JS off there is no stored progress, so it stays
+       hidden, which is the honest state rather than a broken promise. */
+    var resume = document.querySelector('[data-resume]');
+    if (!resume) return;
+    var href = firstUnread && firstUnread.getAttribute('href');
+    if (!anyRead || !firstUnread || !href) { resume.hidden = true; return; }
+    resume.setAttribute('href', href);
+    var label = resume.querySelector('[data-resume-label]');
+    if (label) label.textContent = 'Resume \u00b7 Part ' + firstUnread.getAttribute('data-part');
+    resume.hidden = false;
   }
 
   /* ---- Sidebar collapse/expand (desktop), persisted ---------------------- */
