@@ -32,6 +32,17 @@
     })
     .catch(function () {});
 
+  // Show the shortcut this reader's keyboard actually has. userAgentData is the
+  // supported way to ask; navigator.platform is deprecated but is still the only
+  // answer in some engines, so it stays as the fallback rather than the source.
+  function shortcutKey() {
+    var ua = navigator.userAgentData;
+    var apple = ua && ua.platform
+      ? /mac/i.test(ua.platform)
+      : /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '');
+    return apple ? '\u2318K' : 'Ctrl K';
+  }
+
   /* ---- Search panel -------------------------------------------------------- */
   var panel = null, backdrop = null, input = null, results = null;
   var rows = [], active = -1, glossaryOnly = false, lastFocus = null;
@@ -47,6 +58,7 @@
     panel.className = 'dc-search-panel';
     panel.hidden = true;
     panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
     panel.setAttribute('aria-label', 'Search the framework');
 
     input = document.createElement('input');
@@ -62,10 +74,30 @@
     results.id = 'dc-results';
     results.setAttribute('role', 'listbox');
 
+    var foot = document.createElement('p');
+    foot.className = 'dc-search-foot';
+    foot.innerHTML = '<span><kbd>' + shortcutKey() + '</kbd>open</span>' +
+                     '<span><kbd>\u2191</kbd><kbd>\u2193</kbd>move</span>' +
+                     '<span><kbd>\u21b5</kbd>go</span>' +
+                     '<span><kbd>esc</kbd>close</span>';
+
     panel.appendChild(input);
     panel.appendChild(results);
+    panel.appendChild(foot);
     document.body.appendChild(backdrop);
     document.body.appendChild(panel);
+
+    // Tab must not walk out of a modal dialog and into the page behind its own
+    // backdrop. It did not matter much while one tile opened this; it matters now
+    // that the panel is header chrome a keyboard reader will actually reach.
+    panel.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var focusable = panel.querySelectorAll('input, a[href], button:not([disabled])');
+      if (!focusable.length) return;
+      var first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
 
     input.addEventListener('input', function () { render(input.value); });
     input.addEventListener('keydown', function (e) {
@@ -101,7 +133,13 @@
     } else {
       html = group('Pages', INDEX.parts, q, 4) + group('Sections', INDEX.sections, q, 6) + group('Glossary', INDEX.glossary, q, 6);
     }
-    results.innerHTML = html || '<p class="dc-sr-empty">No matches. Try a Part, a section, or a framework term.</p>';
+    // "No matches" is a claim about the corpus. Before it arrives there is no
+    // corpus to have missed, and saying so is the difference between a slow
+    // search and a broken one.
+    var fallback = indexReady
+      ? '<p class="dc-sr-empty">No matches. Try a page, a section, or a framework term.</p>'
+      : '<p class="dc-sr-empty">Loading the index\u2026</p>';
+    results.innerHTML = html || fallback;
     rows = Array.prototype.slice.call(results.querySelectorAll('.dc-sr'));
     setActive(rows.length ? 0 : -1);
   }
@@ -151,10 +189,26 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
-  /* The in-flow search bar was removed after a pattern review (references put
-     search in persistent chrome, and only at corpus scale). The panel remains
-     solely as the Glossary tile's term browser; reintroduce a compact top-nav
-     search when Parts 4-6 and the glossary page make the corpus deep enough. */
+  /* ---- entry points ---------------------------------------------------------
+     A pattern review had put search in persistent chrome "only at corpus scale",
+     and deferred it until Parts 4-6 and the glossary page existed. They do: ten
+     pages, 41 sections and 109 terms. Until now the only way in was the Glossary
+     tile, in a mode that searched the glossary alone, so the pages and sections
+     in the index were unreachable.
+
+     The header trigger opens the full corpus. The Glossary tile keeps its own
+     term-only mode, because arriving from that tile you are asking about a word,
+     not about the book. */
+  var navSearch = document.querySelector('[data-search-open]');
+  if (navSearch) navSearch.addEventListener('click', function () { openPanel(false); });
+
+  var hint = document.querySelector('[data-search-hint]');
+  if (hint) hint.textContent = shortcutKey();
+  // The header has no room for a visible legend, so a pointer reader gets the
+  // shortcut on hover. The accessible name stays the aria-label, which a title
+  // would otherwise quietly override.
+  if (navSearch) navSearch.title = 'Search (' + shortcutKey() + ')';
+
   var glossTile = document.querySelector('[data-glossary-tile]');
   if (glossTile) {
     glossTile.addEventListener('click', function (e) {
@@ -166,8 +220,25 @@
       openPanel(true);
     });
   }
+  function typingTarget(el) {
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    var tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+  }
+
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closePanel();
+    if (e.key === 'Escape') { closePanel(); return; }
+    if (panel && !panel.hidden) return;
+    // Cmd/Ctrl-K is the shortcut the trigger advertises. "/" is the other one
+    // readers try; it is only safe because it must never steal a keystroke from
+    // someone typing, hence the guard.
+    var k = (e.key || '').toLowerCase();
+    if (k === 'k' && (e.metaKey || e.ctrlKey) && !e.altKey) { e.preventDefault(); openPanel(false); return; }
+    if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey && !typingTarget(e.target)) {
+      e.preventDefault();
+      openPanel(false);
+    }
   });
 
   /* Hero field: moved to the shared hero-field.js (loaded by both covers). */

@@ -152,3 +152,94 @@ test('build: an unresolvable link is an error, not a row', () => {
   assert.match(BUILDER, /errors\.push\(`\$\{where\}: \$\{href\} — no such anchor on \$\{route\}`\)/);
   assert.match(BUILDER, /if \(errors\.length\) \{[\s\S]*?process\.exit\(1\)/, 'and nothing is written when there are any');
 });
+
+// ---------------------------------------------------------------------------
+// 5. The entry point — the corpus was correct and unreachable
+// ---------------------------------------------------------------------------
+// Pages and sections were indexed, resolved and audited, and nothing on the site
+// could open the panel in the mode that searched them: the Glossary tile was the
+// only way in, in glossary-only mode. A pattern review had deferred a persistent
+// entry point "until Parts 4-6 and the glossary page make the corpus deep
+// enough", and they do — ten pages, 41 sections, 109 terms.
+//
+// Measured in Chromium at 390 and 1440 before these were written: the trigger
+// opens all three groups, Ctrl/Cmd-K and "/" open it, "/" does not steal a
+// keystroke from someone typing, Tab does not leave the dialog, and Escape hands
+// focus back to the trigger.
+
+const COVER = read('public/site-b/cover-docs.html');
+const CSS = read('public/site-b/reading-system.css');
+
+test('entry: the trigger lives in the half of the header that survives a phone', () => {
+  const head = COVER.slice(COVER.indexOf('<div class="nav-right">'), COVER.indexOf('</header>'));
+  assert.match(head, /class="nav-search"[^>]*data-search-open/, 'the trigger is in .nav-right');
+  // .nav-links is display:none below the phone breakpoint, so a trigger placed
+  // there would have shipped search to desktop only — which is what the in-page
+  // bar it replaces did. Anchored on the rule itself: the file has several
+  // 768px blocks and the first one is about pull-quotes.
+  const hide = CSS.indexOf('.nav-links { display: none; }');
+  assert.notEqual(hide, -1, 'the phone rule exists');
+  const phone = CSS.slice(hide, CSS.indexOf('}\n', CSS.indexOf('\n}', hide)) + 2);
+  assert.doesNotMatch(phone, /\.nav-search[^{]*\{[^}]*display:\s*none/, 'the trigger is not hidden with it');
+  assert.match(phone, /\.nav-search \{ min-width: 2\.75rem; min-height: 2\.75rem; \}/,
+    'it is given a touch-sized target instead');
+});
+
+test('entry: it is named and typed for assistive tech', () => {
+  const btn = COVER.match(/<button[^>]*class="nav-search"[^>]*>/)[0];
+  assert.match(btn, /type="button"/, 'not a submit');
+  assert.match(btn, /aria-label="Search the framework"/, 'it has a name of its own');
+  assert.match(btn, /aria-haspopup="dialog"/, 'and says what it opens');
+});
+
+test('entry: the trigger opens the full corpus, the tile keeps term-only', () => {
+  assert.match(JS, /\[data-search-open\][\s\S]{0,180}openPanel\(false\)/, 'the header opens all three groups');
+  assert.match(JS, /glossTile[\s\S]{0,400}openPanel\(true\)/, 'the tile still opens the glossary alone');
+});
+
+test('entry: the shortcuts work, and "/" never steals a keystroke', () => {
+  const handler = JS.slice(JS.indexOf('function typingTarget('), JS.length);
+  assert.match(handler, /e\.metaKey \|\| e\.ctrlKey/, 'Cmd and Ctrl both open it');
+  assert.match(handler, /e\.key === '\/'[\s\S]{0,120}!typingTarget\(e\.target\)/,
+    '"/" is guarded against firing while someone is typing');
+  assert.match(handler, /tag === 'INPUT' \|\| tag === 'TEXTAREA'/, 'and the guard knows what a field is');
+  assert.match(handler, /el\.isContentEditable/, 'including a contenteditable one');
+  // Escape has to come before the "already open" bail, or the panel cannot close.
+  const body = JS.slice(JS.indexOf("document.addEventListener('keydown'"), JS.length);
+  assert.ok(body.indexOf("=== 'Escape'") < body.indexOf('!panel.hidden'),
+    'Escape is handled before the open-panel early return');
+});
+
+test('entry: the dialog is modal, and Tab stays inside it', () => {
+  assert.match(JS, /panel\.setAttribute\('aria-modal', 'true'\)/);
+  const trap = JS.slice(JS.indexOf("panel.addEventListener('keydown'"), JS.indexOf("input.addEventListener('input'"));
+  assert.match(trap, /e\.key !== 'Tab'/, 'it only intercepts Tab');
+  assert.match(trap, /e\.shiftKey && document\.activeElement === first/, 'Shift-Tab wraps backwards');
+  assert.match(trap, /!e\.shiftKey && document\.activeElement === last/, 'and Tab wraps forwards');
+});
+
+test('entry: one function decides which modifier this keyboard has', () => {
+  // The hint, the title and the panel legend must never disagree about whether
+  // this reader presses Cmd or Ctrl.
+  assert.equal((JS.match(/function shortcutKey\(\)/g) || []).length, 1, 'declared once');
+  assert.equal((JS.match(/'Ctrl K'/g) || []).length, 1, 'and the string it returns appears once');
+  assert.match(JS, /navigator\.userAgentData/, 'it asks the supported API first');
+  assert.match(JS, /navigator\.platform \|\| navigator\.userAgent/, 'with the deprecated one as fallback only');
+  for (const use of [/hint\.textContent = shortcutKey\(\)/, /navSearch\.title = 'Search \(' \+ shortcutKey\(\)/, /<kbd>' \+ shortcutKey\(\)/]) {
+    assert.match(JS, use, `a consumer does not hardcode the key: ${use}`);
+  }
+});
+
+test('entry: "no matches" is not claimed before there is a corpus to miss', () => {
+  const render = JS.slice(JS.indexOf('function render('), JS.indexOf('function setActive('));
+  assert.match(render, /indexReady[\s\S]{0,200}Loading the index/, 'a pending index says so');
+  assert.match(render, /No matches\./, 'and a loaded one can say there were none');
+});
+
+test('entry: the shortcut legend the header has no room for lives in the panel', () => {
+  assert.match(JS, /foot\.className = 'dc-search-foot'/);
+  assert.match(CSS, /\.dc-search-foot \{/, 'and it is styled');
+  // A legend of keyboard shortcuts on a touch device is furniture.
+  assert.match(CSS, /@media \(max-width: 680px\) \{ \.dc-search-foot \{ display: none; \} \}/,
+    'hidden on a phone');
+});

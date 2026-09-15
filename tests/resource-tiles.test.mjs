@@ -65,15 +65,23 @@ test('tiles: the Part 1 subset is gone, the framework-wide gallery is not', () =
     'the page is still linked from the gallery it belongs to');
 });
 
-test('tiles: the Pictures tile quotes no count, and no rule still hunts for one', () => {
+test('tiles: no tile quotes a count, and no rule still hunts for one', () => {
+  // Both counts went, one owner request at a time: the exhibit count first, the
+  // term count after. Each tile leads to the whole of its thing, so a number on
+  // it only ages.
   assert.doesNotMatch(SECTION, /\d+ exhibits/, 'no exhibit count on the cover tiles');
-  // The paired half of the same edit. A sync-counts rule whose marker no longer
+  assert.doesNotMatch(SECTION, /\d+ terms/, 'and no term count');
+  // The paired half of each edit. A sync-counts rule whose marker no longer
   // exists does not fail loudly at the edit — it reports drift on every run
   // afterwards, which is how a count audit becomes noise people learn to skip.
   assert.doesNotMatch(SYNC, /The Framework in Pictures \$\{DOT\} \)\\\\d\+\( exhibits/,
     'the cover exhibits rule is gone with the marker it matched');
-  assert.match(SYNC, /generated \$\{DOT\} all \)\\\\d\+\( exhibits/,
-    'and the count is still derived and audited where it is still published');
+  assert.doesNotMatch(SYNC, /\(Glossary \$\{DOT\} \)\\\\d\+\( terms\)/,
+    'and so is the cover terms rule');
+  // Both counts are still derived and still audited where they are still
+  // published, which is why EXHIBITS and TERMS have not become dead code.
+  assert.match(SYNC, /generated \$\{DOT\} all \)\\\\d\+\( exhibits/);
+  assert.match(SYNC, /generated \$\{DOT\} \)\\\\d\+\( terms/);
 });
 
 test('tiles: the count audit passes against the edited cover', () => {

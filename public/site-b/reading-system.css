@@ -935,7 +935,14 @@ body {
 }
 .nav > .brand { justify-self: start; }
 .nav-links { display: flex; align-items: center; justify-self: center; gap: var(--space-6); }
-.nav-right { display: flex; align-items: center; justify-self: end; gap: var(--space-6); }
+/* The actions column is the one the header's `1fr auto 1fr` grid squeezes: the
+   sides are equal, so both get what the BRAND needs mirrored, and the actions
+   have to fit in it. Measured at 1440: the column is 237.75px and, with the
+   search trigger added, its contents want 262 — 24px over, which is what pushed
+   "Start reading" onto two lines. A --space-6 gap between three adjacent icon
+   and pill controls was generous anyway; --space-3 buys back 28.5px and the
+   column fits again with room to spare. */
+.nav-right { display: flex; align-items: center; justify-self: end; gap: var(--space-3); }
 .nav-links a {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -945,6 +952,48 @@ body {
   transition: color var(--motion-base) var(--ease-standard);
 }
 .nav-links a:hover, .nav-links a:focus-visible { color: var(--accent); }
+
+/* ---- Header search trigger ------------------------------------------------
+   The search panel existed and was reachable from exactly one place: the
+   Glossary tile, far down the cover, in a mode that searched only the glossary.
+   Pages and sections were indexed and unreachable. This is the persistent entry
+   point the old comment deferred "until Parts 4-6 and the glossary page make the
+   corpus deep enough" — a condition that has since been met.
+
+   It lives in .nav-right, the half of the header that survives on a phone
+   (.nav-links is display:none there), so search is reachable on both form
+   factors — which the in-page bar it replaces never was.
+
+   ICON ONLY, at every width, and that is a measurement rather than a taste. The
+   field-shaped pill this started as (icon + "Search" + a Ctrl-K hint) is ~172px
+   against the icon's ~40px, and .nav is `grid-template-columns: 1fr auto 1fr`:
+   the two side columns are equal, so the header pays for its widest side TWICE
+   and the centred links pay the difference. Measured at 1100-1920, the pill
+   wrapped all four nav links onto two lines — at every width, because .nav is
+   capped at --measure-full and a wider viewport gives it nothing. Widening the
+   control means restructuring the header's grid, which is not this change. The
+   shortcut it used to advertise now lives in the panel footer, which is where a
+   reader looks for one anyway. */
+.nav-search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: var(--space-1);
+  color: var(--ink-quiet);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.nav-search:hover, .nav-search:focus-visible { color: var(--accent); }
+.nav-search-icon { width: 1.15rem; height: 1.15rem; flex: none; }
+/* Kept in the markup so the accessible name is not the only thing describing the
+   control, and so a future header with room can show them again. */
+.nav-search-label, .nav-search-key { display: none; }
+
 .nav-cta {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -983,12 +1032,27 @@ body {
 }
 .brand:hover .brand-mark, .brand:focus-visible .brand-mark { color: var(--accent-link); }
 
+/* Between the phone breakpoint and a comfortable desktop, the header is simply
+   narrow: .nav is capped at --measure-full and its `1fr auto 1fr` grid hands the
+   actions only what the brand's mirror image leaves. Measured at 1100, the
+   actions column is 209px and wants 226. Rather than drop a control, the gaps
+   close a notch — the links give back 4 x 9.5px, which the sides split, and
+   everything stays on one line. This band already wrapped links on the way down
+   before any of this; tightening here makes that later, not sooner. */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .nav { gap: var(--space-4); }
+  .nav-links { gap: var(--space-4); }
+  .nav-right { gap: var(--space-2); }
+}
+
 /* Mobile: drop the in-page anchors; keep brand + theme + Start reading */
 @media (max-width: 768px) {
   /* links hidden on mobile → fall back to a simple brand-left / actions-right row */
   .nav { display: flex; justify-content: space-between; gap: var(--space-3); padding-inline: var(--page-gutter); }
   .nav-links { display: none; }
   .nav-right { gap: var(--space-3); }
+  /* A touch header wants a bigger target than a pointer one. */
+  .nav-search { min-width: 2.75rem; min-height: 2.75rem; }
 }
 
 /* Theme toggle — icon button, sun/moon swap by theme. Unboxed: the glyph IS the
@@ -3816,6 +3880,26 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 .dc-sr-snippet { display: block; font-size: var(--text-xs); color: var(--ink-faint); margin-top: 2px; }
 .dc-sr.is-active, .dc-sr:hover { background: var(--accent-faint); }
 .dc-sr-empty { padding: var(--space-4); color: var(--ink-faint); font-size: var(--text-sm); }
+/* The shortcut legend the header no longer has room for. It is more use here:
+   a reader sees it at the moment the keys apply. */
+.dc-search-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-5) var(--space-3);
+  border-top: 1px solid var(--rule-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+}
+.dc-search-foot kbd {
+  font-family: inherit;
+  border: 1px solid var(--rule-faint);
+  border-radius: var(--radius);
+  padding: 0 0.3rem;
+  margin-right: 0.25rem;
+}
+@media (max-width: 680px) { .dc-search-foot { display: none; } }
 
 /* ============================================================================
    ACF DESIGN-SYSTEM §08 — TYPE ROLE OVERRIDES
