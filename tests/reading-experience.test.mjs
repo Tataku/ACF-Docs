@@ -84,8 +84,46 @@ test('resume: the destination is read from the card, not a second route table', 
 });
 
 // ---------------------------------------------------------------------------
-// 2. Reading time
+// 2. The footer's reading dial
 // ---------------------------------------------------------------------------
+test('dial: the foot of the page ships in the honest first-visit state', () => {
+  const dial = COVER.slice(COVER.indexOf('data-foot-progress'), COVER.indexOf('</footer>'));
+  assert.ok(dial.length > 200, 'the cover carries a reading dial');
+  assert.equal((dial.match(/data-foot-seg/g) || []).length, PARTS.length, 'one segment per part');
+  // A pre-filled segment or a pre-written count would be a claim about a reader
+  // the page has not met yet — the same lie the static resume href used to tell.
+  assert.doesNotMatch(dial, /data-foot-seg[^>]*data-read/, 'no segment ships filled');
+  assert.match(dial, /data-foot-count/, 'the count is a node the painter can rewrite');
+  assert.match(dial, /data-foot-resume-label/, 'and so is the destination label');
+});
+
+test('dial: it is painted from the cards, not from a second read of the store', () => {
+  const paint = CORE.slice(CORE.indexOf('function progressPaint()'), CORE.indexOf('function footDial('));
+  assert.match(paint, /footDial\(rows, firstUnread\)/, 'progressPaint hands the dial the rows it just painted');
+  const dial = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function sidebarCollapse()'));
+  assert.ok(dial.length > 200, 'footDial located');
+  // Two surfaces reading the same store independently is two surfaces that can
+  // disagree, with nothing on the page to say which one is lying.
+  assert.doesNotMatch(dial, /readProgress\(\)/, 'the dial never re-reads the store');
+  assert.doesNotMatch(dial, /part-1-foundation/, 'no hard-coded part route in the dial');
+  assert.match(dial, /segs\.length !== rows\.length/, 'a strip that does not match the book is left as authored');
+});
+
+// ---------------------------------------------------------------------------
+// 3. Reading time
+// ---------------------------------------------------------------------------
+test('reading time: the footer states the sum of the six cards, not its own count', () => {
+  const total = Number((COVER.match(/class="foot-dial-meta">&approx; (\d+) min of reading/) || [, NaN])[1]);
+  assert.ok(Number.isFinite(total), 'the dial states a total');
+  let sum = 0;
+  for (const [n] of PARTS) {
+    const seg = COVER.slice(COVER.indexOf(`data-part="${n}"`));
+    sum += Number((seg.match(/&approx; (\d+) min read/) || [, 0])[1]);
+  }
+  assert.equal(total, sum, `the footer says ${total} min; the cards add to ${sum}`);
+  assert.match(SYNC, /const TOTAL_MINUTES = /, 'and the total is derived, not typed');
+});
+
 test('reading time: the cover and the page state the same number for every part', () => {
   const coverTimes = {};
   for (const [n] of PARTS) {
@@ -129,7 +167,7 @@ test('reading time: every stated value matches the word count at the stated rate
 });
 
 // ---------------------------------------------------------------------------
-// 3. Chart concept links
+// 4. Chart concept links
 // ---------------------------------------------------------------------------
 test('charts: no concept link is page-relative — a chart is mounted on several pages', () => {
   // The whole defect in one property: an exhibit does not know which page it is

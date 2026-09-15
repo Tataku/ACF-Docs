@@ -86,6 +86,13 @@ function readingMinutes(file) {
 
 const MINUTES = new Map(PART_FILES.map(([n, file]) => [n, readingMinutes(file)]));
 
+// The cover's footer states what the whole book costs a reader. It is the SUM OF
+// THE SIX CARD TIMES, not a second measurement of the prose: a reader who adds
+// the cards up must land on the number at the foot of the page, and rounding the
+// total independently would put the two a minute apart for no reason the reader
+// could see.
+const TOTAL_MINUTES = [...MINUTES.values()].reduce((a, b) => a + b, 0);
+
 const TERMS = glossary.terms.length;
 const EXHIBITS = charts.size;
 const perPart = (n) => [...charts.values()].filter((c) => c.part === n).length;
@@ -99,6 +106,7 @@ const RULES = [
     // One rule per card, anchored on that card's own data-part so a reading time
     // can never be written onto the wrong Part (which is how 1 and 2 were swapped).
     ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*?&approx; )\\d+( min read)`), () => MINUTES.get(n)]),
+    [/(class="foot-dial-meta">&approx; )\d+( min of reading)/, () => TOTAL_MINUTES],
   ]],
   ['_index.html', [
     [new RegExp(`(generated ${DOT} all )\\d+( exhibits)`), () => EXHIBITS],

@@ -167,6 +167,8 @@
       else if (!firstUnread) firstUnread = row;                 // rows are in reading order
     });
 
+    footDial(rows, firstUnread);
+
     /* Resume: go where the reader actually stopped.
        This link used to be a static href to Part 1 — the same destination as the
        primary button beside it — so a reader returning mid-book was sent back to
@@ -185,6 +187,52 @@
     var label = resume.querySelector('[data-resume-label]');
     if (label) label.textContent = 'Resume \u00b7 Part ' + firstUnread.getAttribute('data-part');
     resume.hidden = false;
+  }
+
+  /* The cover footer's reading dial — the same progress, stated once more at the
+     foot of the page, where a reader who has just scrolled the whole cover is
+     deciding whether to start or to carry on.
+
+     IT IS PAINTED FROM THE ROWS, not from a second read of the store. A footer
+     that re-derived progress could disagree with the cards two screens above it,
+     and nothing on the page would tell a reader which of the two was lying —
+     the same class of split-source bug the resume link above was written to fix.
+     Whenever the dial cannot be trusted to say something true — no dial on this
+     page, a strip that does not match the book, or nothing read yet — it is left
+     exactly as authored, and the markup's first-visit copy stands. */
+  function footDial(rows, firstUnread) {
+    var dial = document.querySelector('[data-foot-progress]');
+    if (!dial) return;
+    var segs = dial.querySelectorAll('[data-foot-seg]');
+    if (segs.length !== rows.length) return;
+
+    var read = 0;
+    rows.forEach(function (row, i) {
+      if (!row.hasAttribute('data-read')) return;
+      segs[i].setAttribute('data-read', '');
+      read += 1;
+    });
+    if (!read) return;
+
+    var count = dial.querySelector('[data-foot-count]');
+    if (count) count.textContent = read + ' of ' + rows.length + ' parts read';
+
+    var go = dial.querySelector('[data-foot-resume]');
+    var label = go && go.querySelector('[data-foot-resume-label]');
+    if (!go || !label) return;
+
+    var next = firstUnread && firstUnread.getAttribute('href');
+    if (next) {
+      go.setAttribute('href', next);
+      label.textContent = 'Resume \u00b7 Part ' + firstUnread.getAttribute('data-part');
+      return;
+    }
+    // Every part read. The control stops pretending to be a bookmark and becomes
+    // the only offer left that is still true.
+    var first = rows[0].getAttribute('href');
+    if (!first) return;
+    go.setAttribute('href', first);
+    label.textContent = 'Read it again';
   }
 
   /* ---- Sidebar collapse/expand (desktop), persisted ---------------------- */

@@ -189,6 +189,28 @@
           g.from(batch, { y: 16, opacity: 0, duration: 0.5, ease: 'power2.out', stagger: 0.08, clearProps: 'all' });
         }
       });
+
+      /* The page lands on the curve it opened with: the footer's signature draws
+         itself once as the colophon arrives, and the mark blinks back at the
+         reader who got there. Both sit inside this function's reduced-motion and
+         no-GSAP guards, so the static footer — already a finished curve and a
+         still mark — is what every other reader gets. */
+      var sig = document.querySelector('.foot-sig-curve');
+      if (sig) {
+        g.fromTo(sig, { strokeDashoffset: 1 }, {
+          strokeDashoffset: 0, duration: 1.2, ease: 'power2.out',
+          scrollTrigger: { trigger: '.site-footer', start: 'top 92%', once: true }
+        });
+      }
+      var footMark = document.querySelector('.foot-brand .brand-mark');
+      if (footMark) {
+        window.ScrollTrigger.create({
+          trigger: '.foot-brand',
+          start: 'top 95%',
+          once: true,
+          onEnter: function () { footMark.classList.add('is-awake'); }
+        });
+      }
     }
 
     // Watchdog: if rAF is throttled (background tab, occluded window), frames
@@ -197,7 +219,7 @@
       if (g.ticker.frame < 30) {
         g.killTweensOf('*');
         if (window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(function (t) { t.kill(); });
-        g.set(['.dc-kicker', '.dc-title', '.dc-lede', '.dc-hero-actions', '.dc-parts-head', '.dc-card', '.dc-tile'], { clearProps: 'all' });
+        g.set(['.dc-kicker', '.dc-title', '.dc-lede', '.dc-hero-actions', '.dc-parts-head', '.dc-card', '.dc-tile', '.foot-sig-curve'], { clearProps: 'all' });
       }
     }, 2500);
   }

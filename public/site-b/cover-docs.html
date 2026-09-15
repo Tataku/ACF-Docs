@@ -417,8 +417,38 @@
 
     </main>
 
-    <!-- Two-tier editorial footer (Option A's simplified, nav-mirrored footer) -->
-    <footer class="site-footer">
+    <!-- ----------------------------------------------------------------------
+         THE COLOPHON. Three tiers, each answering one question a reader
+         actually has at the foot of a long page: where am I (the mark, the
+         descriptor, the reading dial) · where can I go (the map) · what is
+         this (the base rule).
+
+         WHAT IT REPLACED. The previous footer restated the header nav verbatim
+         and repeated "Start reading" — the third copy of that ask inside two
+         screens, directly beneath the CTA band that exists to make it — while
+         not one of the six Parts, which are the entire book, was reachable
+         from the foot of the page. Five links right-aligned opposite a brand
+         lockup also left the dead half-width band in the middle that made it
+         read as unfinished. On a phone none of that was cosmetic: the header's
+         links are display:none under 768px, so this is the site's ONLY map,
+         and it was a map of five destinations out of eleven.
+
+         The routes below are pinned against next.config.mjs by
+         tests/control-reachability.test.mjs, so a page that gains a URL and
+         never gains a link here goes red rather than quietly unreachable.
+         ---------------------------------------------------------------------- -->
+    <footer class="site-footer site-footer--cover">
+      <!-- The convexity signature. The hero opens on a rising curve; the page
+           lands on the same one, in place of a flat hairline. Decorative and
+           inert — the draw-in is GSAP behind the reduced-motion guard, and this
+           static path is the FINISHED state, never a half-drawn one. -->
+      <div class="foot-sig" aria-hidden="true">
+        <svg viewBox="0 0 1200 96" preserveAspectRatio="none" fill="none">
+          <path class="foot-sig-wash" d="M0 94 C 260 94, 470 88, 630 74 C 820 57, 1010 34, 1200 4 L 1200 96 L 0 96 Z"></path>
+          <path class="foot-sig-curve" pathLength="1" vector-effect="non-scaling-stroke" d="M0 94 C 260 94, 470 88, 630 74 C 820 57, 1010 34, 1200 4"></path>
+        </svg>
+      </div>
+
       <div class="measure-full foot-top">
         <div class="foot-brand">
           <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
@@ -449,19 +479,71 @@
           </a>
           <p class="foot-descriptor">An executable philosophy for compounding through instability.</p>
         </div>
-        <div class="foot-actions">
-          <nav class="nav-links" aria-label="Footer">
-            <a href="#parts">The Framework</a>
-            <a href="/framework-in-pictures">In Pictures</a>
-            <a href="/framework-in-math">In Math</a>
-            <a href="/glossary">Glossary</a>
-            <a href="https://acfdashboard.com">The Software</a>
-          </nav>
-          <a class="nav-cta" href="/part-1-foundation">Start reading</a>
+
+        <!-- The reading dial. Painted by progressPaint() in reading-core.js from
+             the SAME rows as the part cards above, so the foot of the page can
+             never disagree with the top of it. It ships in the honest
+             first-visit state: with no stored progress — or no JS at all — it
+             states how big the book is and offers the start, which is the true
+             thing to say to a reader who has not begun one. -->
+        <div class="foot-dial" data-foot-progress>
+          <p class="foot-dial-count" data-foot-count>Six parts, end to end</p>
+          <div class="foot-dial-track" aria-hidden="true">
+            <span class="foot-dial-seg" data-foot-seg></span>
+            <span class="foot-dial-seg" data-foot-seg></span>
+            <span class="foot-dial-seg" data-foot-seg></span>
+            <span class="foot-dial-seg" data-foot-seg></span>
+            <span class="foot-dial-seg" data-foot-seg></span>
+            <span class="foot-dial-seg" data-foot-seg></span>
+          </div>
+          <p class="foot-dial-meta">&approx; 95 min of reading</p>
+          <a class="foot-dial-go" href="/part-1-foundation" data-foot-resume>
+            <span data-foot-resume-label>Start at Part 1</span> <span class="dc-arr" aria-hidden="true">&rarr;</span>
+          </a>
         </div>
       </div>
+
+      <nav class="measure-full foot-cols" aria-label="Site map">
+        <div class="foot-col foot-col--parts">
+          <h2 class="foot-h" id="foot-h-parts">The six parts</h2>
+          <ul aria-labelledby="foot-h-parts">
+            <li><a href="/part-1-foundation"><span class="foot-num" aria-hidden="true">01</span>Foundation &amp; Philosophy</a></li>
+            <li><a href="/part-2-lineage-macro-thesis"><span class="foot-num" aria-hidden="true">02</span>Lineage &amp; Macro Thesis</a></li>
+            <li><a href="/part-3-bitcoin-convexity-backbone"><span class="foot-num" aria-hidden="true">03</span>Bitcoin: Convexity Backbone</a></li>
+            <li><a href="/part-4-tax-architecture-roc-strategy"><span class="foot-num" aria-hidden="true">04</span>Tax Architecture &amp; ROC Strategy</a></li>
+            <li><a href="/part-5-portfolio-construction-position-management"><span class="foot-num" aria-hidden="true">05</span>Portfolio Construction &amp; Position Management</a></li>
+            <li><a href="/part-6-convexity-framework-integrity-scoring"><span class="foot-num" aria-hidden="true">06</span>Convexity &amp; Framework Integrity Scoring</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-col">
+          <h2 class="foot-h" id="foot-h-reference">Reference</h2>
+          <ul aria-labelledby="foot-h-reference">
+            <li><a href="/framework-in-pictures">The Framework in Pictures</a></li>
+            <li><a href="/part-1-pictures">Part 1 in Pictures</a></li>
+            <li><a href="/framework-in-math">The Framework in Math</a></li>
+            <li><a href="/glossary">Glossary</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-col">
+          <h2 class="foot-h" id="foot-h-elsewhere">Elsewhere</h2>
+          <ul aria-labelledby="foot-h-elsewhere">
+            <li><a class="foot-out" href="https://acfdashboard.com">The Software <span class="foot-out-arr" aria-hidden="true">&#8599;</span></a></li>
+          </ul>
+          <h2 class="foot-h foot-h--second" id="foot-h-page">On this page</h2>
+          <ul aria-labelledby="foot-h-page">
+            <li><a href="#parts">The framework</a></li>
+            <li><a href="#lens">Three pictures</a></li>
+            <li><a href="#faq">Questions</a></li>
+          </ul>
+        </div>
+      </nav>
+
       <div class="measure-full foot-base">
         <span>&copy; 2026 Adaptive Convexity Framework</span>
+        <span>Free to read, free to share.</span>
+        <span>Educational and analytical &mdash; not investment advice.</span>
       </div>
     </footer>
   </div>
