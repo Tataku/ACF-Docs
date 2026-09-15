@@ -232,6 +232,18 @@
   --chart-warn:         #aab4be;                     /* depletion / burden line */
   --chart-lbl:          var(--feature-ink-quiet);    /* mono labels             */
   --chart-lbl-strong:   var(--feature-ink);          /* emphasized labels       */
+
+  /* ---- Resource tile art — wash + motif (consumed by .dc-tile) ------------- *
+   * The Resources tiles carry a faded line drawing of what they lead to, over a
+   * gradient whose GEOMETRY says which tile it is. Hue deliberately does NOT
+   * vary: this document keeps one chromatic line (see the chart note above), so
+   * four differently coloured cards would break the system they sit in. Both
+   * values derive from --accent, so they follow the theme for free; tune the
+   * whole set here rather than per tile.                                       */
+  --tile-wash:       color-mix(in oklab, var(--accent) 13%, transparent);
+  --tile-wash-lift:  color-mix(in oklab, var(--accent) 24%, transparent);
+  --tile-motif:      color-mix(in oklab, var(--accent) 30%, transparent);
+  --tile-motif-lift: color-mix(in oklab, var(--accent) 54%, transparent);
 }
 
 /* ============================================================================
@@ -305,4 +317,12 @@
   /* ---- Feature surface — emerald edge + glow so the panel reads on dark ----- */
   --feature-edge:   rgba(52, 211, 153, .30);
   --feature-shadow: 0 0 0 1px rgba(52, 211, 153, .08), 0 14px 40px -14px rgba(0, 0, 0, .6);
+
+  /* ---- Resource tile art — a touch more wash, a touch less motif ----------- *
+   * The night accent is brighter than the paper one, so the same percentages
+   * would read as a louder drawing and a fainter field. These re-balance it.   */
+  --tile-wash:       color-mix(in oklab, var(--accent) 14%, transparent);
+  --tile-wash-lift:  color-mix(in oklab, var(--accent) 26%, transparent);
+  --tile-motif:      color-mix(in oklab, var(--accent) 26%, transparent);
+  --tile-motif-lift: color-mix(in oklab, var(--accent) 48%, transparent);
 }
