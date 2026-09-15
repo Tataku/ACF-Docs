@@ -233,6 +233,18 @@
       say(msg + ' \u00b7 ' + url.replace(/^https?:\/\//, ''));
       settleBack('data-shared');
       if (!mark) return;
+      /* Restart, don't re-add. Adding a class that is already there is not a
+         change, so a second share inside the reaction window played nothing —
+         the same shape of silence as writing identical text into a live region.
+         Remove, flush the removal, then add.
+
+         THE FLUSH IS getBoundingClientRect, NOT offsetWidth. `mark` is an
+         <svg>, and offsetWidth is an HTMLElement property that SVGElement simply
+         does not have — so the usual `void el.offsetWidth` reads undefined,
+         forces no layout, and the restart silently does nothing. Measured before
+         the fix: three presses, one animationstart. */
+      mark.classList.remove('is-pleased');
+      void mark.getBoundingClientRect().width;
       mark.classList.add('is-pleased');
       clearTimeout(unpleased);
       unpleased = setTimeout(function () { mark.classList.remove('is-pleased'); }, 900);

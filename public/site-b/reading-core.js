@@ -227,6 +227,24 @@
     });
     if (!read) return;                       // first visit: the authored copy stands
 
+    /* The frontier: the end of the reader's UNBROKEN run, in minutes. It stops at
+       the first gap on purpose — a reader who jumped to Part 5 has not got that
+       far, they have been that far, and the lit stretch out beyond the dot is
+       where that fact is told. It is the same walk the resume link is derived
+       from, so the dot and the words can never disagree.
+       Zero is a real answer, not a missing one: read only Part 3 and there is no
+       unbroken run, so there is no position and no dot. */
+    var runAt = 0;
+    for (var r = 0; r < rows.length; r += 1) {
+      if (!rows[r].hasAttribute('data-read')) break;
+      runAt += minutes[r];
+    }
+    if (read === rows.length) dial.setAttribute('data-complete', '');
+    if (runAt) {
+      dial.style.setProperty('--at-target', runAt);
+      dial.setAttribute('data-run', '');
+    }
+
     var count = dial.querySelector('[data-foot-count]');
     if (count) count.textContent = read + ' of ' + rows.length + ' parts read';
 
@@ -266,6 +284,35 @@
    * gets the same reading — and the curve's arcs stay aria-hidden, because a
    * screen reader is served by the link text, not by a highlight.
    */
+  /* The dot runs the curve when the reader reaches the colophon, not when the
+   * page loads five screens above it. footDial has already written the TRUTH into
+   * --at-target; this only decides when the eye is there to see it travel.
+   *
+   * Truth and beat are deliberately separate properties. If this never runs — no
+   * IntersectionObserver, an observer that never fires — the fallback writes the
+   * same value immediately, so a missed arrival costs the travel and never the
+   * position. That is the opposite of gating the FACT on an observer, which would
+   * tell a returning reader they had read nothing.
+   */
+  function footArrive() {
+    var dial = document.querySelector('[data-foot-progress]');
+    if (!dial) return;
+    function land() {
+      var target = dial.style.getPropertyValue('--at-target');
+      if (target) dial.style.setProperty('--at-min', target);
+    }
+    if (!window.IntersectionObserver) { land(); return; }
+    // threshold 0 on purpose: any sliver counts. A card taller than a short
+    // viewport can never satisfy a fractional threshold, and the cost of missing
+    // is a dot that never moves.
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (en) { return en.isIntersecting; })) return;
+      land();
+      io.disconnect();
+    }, { threshold: 0 });
+    io.observe(dial);
+  }
+
   function footPeek() {
     var dial = document.querySelector('[data-foot-progress]');
     var footer = document.querySelector('.site-footer');
@@ -1526,6 +1573,7 @@
   progressWrite();
   progressPaint();
   footPeek();   // after progressPaint: the peek line rests on whatever it decided
+  footArrive();
   sectionReveal();
   hamburgerFade();
   highlights();

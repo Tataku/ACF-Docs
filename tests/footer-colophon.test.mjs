@@ -35,6 +35,8 @@ const COVER = read('public/site-b/cover-docs.html');
 const CSS = read('public/site-b/reading-system.css');
 const COVER_JS = read('public/site-b/cover-docs.js');
 const CORE = read('public/site-b/reading-core.js');
+const TOKENS = read('public/site-b/tokens.css');
+const SYNC = read('scripts/sync-counts.mjs');
 
 const FOOTER = COVER.slice(COVER.indexOf('<footer class="site-footer'), COVER.indexOf('</footer>'));
 
@@ -174,6 +176,109 @@ test('curve: the resume arrow is gated like every other nudge in the footer', ()
   assert.match(gated, /@media \(prefers-reduced-motion: no-preference\)/, 'the nudge sits inside the gate');
   const bare = CSS.match(/\.foot-dial-go \.dc-arr \{[^}]*\}/);
   assert.doesNotMatch(bare[0], /transition|transform/, 'and nothing moves outside it');
+});
+
+// ---------------------------------------------------------------------------
+// 2b. The frontier
+// ---------------------------------------------------------------------------
+test('frontier: it is a dot ON the path, in the units the curve is measured in', () => {
+  // A zero-length dash with a round cap cannot drift off the line it marks,
+  // however the curve is later retuned — which a positioned <circle> could.
+  const rule = CSS.match(/\.foot-head \{[\s\S]*?\n\}/);
+  assert.ok(rule, 'the frontier has a rule');
+  assert.match(rule[0], /stroke-dasharray: 0\.01 999;/, 'a zero-length dash');
+  assert.match(rule[0], /stroke-linecap: round;/, 'with a round cap, so it is a dot');
+  assert.match(rule[0], /stroke-dashoffset: calc\(-1 \* var\(--at-min, 0\)\);/, 'placed in minutes');
+  assert.match(rule[0], /stroke: none;/, 'and invisible until the painter gives it a position');
+  // It rides the same normalisation as the six stretches, and that is derived.
+  assert.match(FOOTER, /data-foot-head pathLength="\d+"/, 'it declares a pathLength');
+  assert.match(SYNC, /data-foot-head pathLength="/, 'which sync-counts writes');
+});
+
+test('frontier: it marks the unbroken run, not the minutes read', () => {
+  // The distinction the whole mark exists for. A reader who jumped to Part 5 has
+  // BEEN that far, not GOT that far; that stretch lights on its own beyond the
+  // dot, and the resume link agrees with the dot because both come from one walk.
+  const fn = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function footArrive('));
+  assert.match(fn, /if \(!rows\[r\]\.hasAttribute\('data-read'\)\) break;/, 'the run stops at the first gap');
+  assert.match(fn, /if \(runAt\) \{/, 'and a run of zero claims no position at all');
+  assert.match(fn, /data-complete/, 'a finished book is marked');
+  assert.match(CSS, /\[data-foot-progress\]\[data-complete\] \.foot-head \{ stroke: none; \}/,
+    'and has no frontier left to mark');
+});
+
+test('frontier: the truth is written immediately, only the travel waits for arrival', () => {
+  // Gating the FACT on an observer would tell a returning reader they had read
+  // nothing. footDial writes --at-target at once; footArrive only decides when
+  // the eye is there to watch it move, and falls through to the same value.
+  const dial = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function footArrive('));
+  assert.match(dial, /setProperty\('--at-target', runAt\)/, 'footDial writes the truth');
+  const arrive = CORE.slice(CORE.indexOf('function footArrive('), CORE.indexOf('function footPeek('));
+  assert.match(arrive, /if \(!window\.IntersectionObserver\) \{ land\(\); return; \}/, 'no observer still lands it');
+  assert.match(arrive, /threshold: 0/, 'and any sliver counts, so a tall card in a short viewport still fires');
+  assert.match(arrive, /--at-min/, 'the beat is a second property, not the same one');
+});
+
+test('frontier: the travel duration is a token, and the frontier composes it', () => {
+  // The whole run hangs on this custom property. If it were renamed the
+  // declaration would be invalid at computed-value time and the travel would
+  // silently never happen.
+  assert.match(TOKENS, /^\s*--motion-draw:\s*\d+ms;/m, 'the duration is a token');
+  assert.match(CSS, /transition: stroke-dashoffset var\(--motion-draw\)/, 'and the frontier uses it');
+  assert.match(CSS, /html\.js \.foot-head \{ transition/, 'behind html.js, so a JS-off page has no half-run dot');
+});
+
+// ---------------------------------------------------------------------------
+// 2c. The transmission
+// ---------------------------------------------------------------------------
+test('transmission: the peak carries MORE ink than rest, not less', () => {
+  // The first draft paired a thicker ring with a lower opacity, which cancels:
+  // width 15 at 0.45 is 416 ink-units against 517 at rest, so the "pulse" read as
+  // a dim. Ink is pi(outer^2 - inner^2) x opacity on a hollow ring.
+  const kf = CSS.slice(CSS.indexOf('@keyframes acf-mascot-send'));
+  const body = kf.slice(0, kf.indexOf('\n}'));
+  const REST_R = 9.8;
+  const ink = (w, o) => Math.PI * ((REST_R + w / 2) ** 2 - (REST_R - w / 2) ** 2) * o;
+  const stops = [...body.matchAll(/stroke-width: (?:var\(--acf-tip-rest\)|([\d.]+)); stroke-opacity: ([\d.]+)/g)]
+    .map((m) => ({ w: m[1] ? Number(m[1]) : null, o: Number(m[2]) }));
+  assert.ok(stops.length >= 3, 'the cycle has a rest, a wave and an echo');
+  const rest = ink(8.4, 1);
+  for (const st of stops) {
+    if (st.w === null) continue;                       // the rest stops
+    assert.ok(ink(st.w, st.o) > rest, `a pulse at width ${st.w} opacity ${st.o} must outweigh rest`);
+  }
+});
+
+test('transmission: it is stroke, never fill and never scale', () => {
+  // This emitter draws the tip as a hollow RING where the dashboard's component
+  // fills it, so a `fill` port would do nothing at all; and a scale would move
+  // about one pixel at this render where closing the ring changes the silhouette.
+  const kf = CSS.slice(CSS.indexOf('@keyframes acf-mascot-send'));
+  const body = kf.slice(0, kf.indexOf('\n}'));
+  assert.doesNotMatch(body, /fill|transform|scale/, 'no fill and no transform in the cycle');
+  assert.match(CSS, /\.foot-brand \.brand-mark\.is-pleased circle\[cy="14"\]/, 'and it targets the antenna tip');
+});
+
+test('transmission: the resting weight it restates is the mark\'s own', () => {
+  // `inherit` is ignored inside @keyframes, so the rest stops have to name the
+  // weight. If ACFDashboard ever re-emits the figure at a different one, the tip
+  // would silently snap to this number on every share and audit:brand would not
+  // notice — it pins geometry and the viewBox, never the weight.
+  const declared = (CSS.match(/--acf-tip-rest:\s*([\d.]+);/) || [, null])[1];
+  assert.ok(declared, 'the resting weight is declared once');
+  const markWeight = (COVER.match(/<svg class="brand-mark"[\s\S]*?<g stroke-width="([\d.]+)"/) || [, null])[1];
+  assert.equal(declared, markWeight, `the keyframe rests at ${declared}; the mark draws at ${markWeight}`);
+});
+
+test('transmission: a second share inside the window replays it', () => {
+  // Adding a class that is already there is not a change. The flush must be
+  // getBoundingClientRect: `mark` is an <svg>, and offsetWidth is an HTMLElement
+  // property SVGElement does not have, so `void el.offsetWidth` forces nothing.
+  // Measured before the fix: three presses, one animationstart.
+  const fn = COVER_JS.slice(COVER_JS.indexOf('function shareOffer()'), COVER_JS.indexOf('function mascot()'));
+  assert.match(fn, /classList\.remove\('is-pleased'\);[\s\S]{0,600}?getBoundingClientRect\(\)[\s\S]{0,80}classList\.add\('is-pleased'\)/,
+    'remove, flush with a rect read, add');
+  assert.doesNotMatch(fn, /void mark\.offsetWidth/, 'never offsetWidth on an SVG');
 });
 
 // ---------------------------------------------------------------------------

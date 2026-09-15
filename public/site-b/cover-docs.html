@@ -523,6 +523,15 @@
             <path class="foot-arc" data-foot-arc="4" pathLength="95" style="--arc-len: 13; --arc-at: 43" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
             <path class="foot-arc" data-foot-arc="5" pathLength="95" style="--arc-len: 24; --arc-at: 56" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
             <path class="foot-arc" data-foot-arc="6" pathLength="95" style="--arc-len: 15; --arc-at: 80" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
+            <!-- The frontier: a zero-length dash with a round cap, so it is a DOT
+                 ON the path rather than a circle positioned near it, placed by the
+                 same minute scale the stretches are measured in. It marks where
+                 this reader's UNBROKEN run ends, which is not the same number as
+                 the minutes they have read: jump ahead to Part 5 and that stretch
+                 lights on its own, out beyond the dot. Both are true and the curve
+                 shows both. No stroke until the painter writes [data-run], because
+                 a reader with no unbroken run has no position to claim. -->
+            <path class="foot-head" data-foot-head pathLength="95" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
             </svg>
           </div>
 

@@ -119,6 +119,8 @@ const RULES = [
     // never be written onto the wrong Part — the failure the per-card rule above
     // was added for after 1 and 2 were transposed.
     ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength=")\\d+(")`), () => TOTAL_MINUTES]),
+    // The frontier dot rides the same normalisation, so it is the same count.
+    [/(data-foot-head pathLength=")\d+(")/, () => TOTAL_MINUTES],
     ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength="\\d+" style="--arc-len: )\\d+(;)`), () => MINUTES.get(n)]),
     ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength="\\d+" style="--arc-len: \\d+; --arc-at: )\\d+(")`), () => MINUTES_BEFORE(n)]),
   ]],

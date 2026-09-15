@@ -180,6 +180,14 @@
   --motion-fast:   120ms;
   --motion-base:   200ms;
   --motion-slow:   320ms;
+  /* Expressive tier — a mark that TRAVELS rather than a state that changes. The
+     three above are the transition band; a dot running the length of a 95-minute
+     curve inside 320ms is a flick, not a journey. This value is --build-medium
+     from the chart bundle's own private scale, named here so the second
+     vocabulary stops being private rather than a third one being invented.
+     Motion is shared across themes (see the note below), so :root is the whole
+     declaration. */
+  --motion-draw:   1100ms;
   --ease-standard: cubic-bezier(.2, .0, .2, 1);
   --ease-emphasis: cubic-bezier(.2, .0, .0, 1);
 
