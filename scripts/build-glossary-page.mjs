@@ -34,6 +34,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { stripSeriesChain } from './site-b-shell.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SITE = path.join(ROOT, 'public', 'site-b');
@@ -259,15 +260,9 @@ html = html.slice(0, blockEnd) + sidebarInsert + html.slice(blockEnd + '      </
 // Swap the body content.
 html = html.replace(/<main class="shell-main">[\s\S]*<\/main>/, main);
 
-// The reference page has no previous/next part chain: drop the next-up band and
-// the dock's prev/next segment (the donor is Part 6, so it would otherwise read
-// "← Part 5 · Series complete" on a page that is not in the series).
-html = html.replace(/\s*<nav class="next-up"[\s\S]*?<\/nav>/g, '');
-html = html.replace(/\s*<span class="floatnav-div" aria-hidden="true"><\/span>\s*<a class="floatnav-prev"[\s\S]*?<\/a>\s*<span class="floatnav-div" aria-hidden="true"><\/span>\s*<span class="floatnav-next"[\s\S]*?<\/span>/, '');
-if (/floatnav-prev|floatnav-next/.test(html)) {
-  console.error('Glossary build failed: the donor dock\'s prev/next segment changed shape and was not removed.');
-  process.exit(1);
-}
+// A reference page is not in the six-part series: drop the donor's next-up band
+// and the dock's "← Part 5 · Series complete" chain. Shared, and fails closed.
+html = stripSeriesChain(html, 'Glossary build');
 
 // The index's behaviour is page-only: load it after the shared reading runtime.
 if (!/glossary-index\.js/.test(html)) {

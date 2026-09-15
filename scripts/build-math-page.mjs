@@ -36,6 +36,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { stripSeriesChain } from './site-b-shell.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SITE = path.join(ROOT, 'public', 'site-b');
@@ -761,7 +762,9 @@ const blockEnd = html.lastIndexOf('      </div>', navEnd);
 html = html.slice(0, blockEnd) + sidebarInsert + html.slice(blockEnd + '      </div>'.length);
 
 html = html.replace(/<main class="shell-main">[\s\S]*<\/main>/, main);
-html = html.replace(/\s*<nav class="next-up"[\s\S]*?<\/nav>/g, '');
+// A reference page is not in the six-part series: drop the donor's next-up band
+// and the dock's "← Part 5 · Series complete" chain. Shared, and fails closed.
+html = stripSeriesChain(html, 'Math build');
 
 fs.writeFileSync(OUT, html);
 const sections = (main.match(/<section class="section"/g) || []).length;

@@ -9,6 +9,7 @@
     "test:chart-core": "node --test components/framework-charts/chart-core/tests/*.test.mjs",
     "test:narration": "node --test tests/*.test.mjs",
     "test:glossary": "node --test tests/glossary-index.test.mjs",
+    "test:reference-pages": "node --test tests/reference-pages.test.mjs",
     "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
     "validate:charts": "node scripts/validate-chart-specs.mjs",
     "audit:chart-experience": "node scripts/audit-chart-experience.mjs",

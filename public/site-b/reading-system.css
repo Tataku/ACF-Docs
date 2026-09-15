@@ -2538,6 +2538,13 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
    and the links may shrink, so Next can never bleed past the rounded edge. */
 @media (max-width: 600px) {
   .floatnav-home, .floatnav-home + .floatnav-div { display: none; }
+  /* ...unless the dock has no Part links to give that room to. The three
+     generated reference pages (Glossary, In Pictures, In Math) are not in the
+     series, so their dock is stripped of Prev/Next at build time and marked
+     [data-no-series]. There the home segment is the ONLY destination the dock
+     has, and without it a phone reader gets a lone Back-to-top button trailed
+     by the divider that used to precede the home link. */
+  .floatnav[data-no-series] .floatnav-home { display: inline-flex; }
   .floatnav-inner { max-width: 100%; }
   .floatnav-prev, .floatnav-next { padding-inline: var(--space-3); flex: 0 1 auto; min-width: 0; overflow: hidden; }
   .floatnav-div { margin-inline: 0; flex: 0 0 auto; }
