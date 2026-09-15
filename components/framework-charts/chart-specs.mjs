@@ -3055,7 +3055,7 @@ export const FRAMEWORK_CHART_SPECS = [
       visualProof: 'Five stations on a governed path — update CIS, calculate FIS, run the governance gates, act or deliberately hold, log the evidence — closed by a weekly return arc, with the gates as the checkpoint',
       interactionRole: 'Hover a station to read what it produces; the gates carry the trigger list',
       readerAction: 'Walk the five stations, then note that the loop closes weekly whether or not anything traded',
-      caution: 'The live weekly governance engine runs this exact sequence — ingest, CIS updates, FIS, governance checks, action determination, decision logging',
+      caution: 'The weekly governance engine in the ACF Dashboard implements this exact sequence — ingest, CIS updates, FIS, governance checks, action determination, decision logging',
     },
     status: 'implemented', wiredPublic: true,
     title: 'The Weekly Evidence Loop', setupLine: 'Regular measurement, explicit attribution, action only on a governing threshold',

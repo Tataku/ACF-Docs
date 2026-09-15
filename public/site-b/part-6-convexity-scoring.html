@@ -518,7 +518,7 @@
         <h2 class="section-title" id="weekly-title">The weekly workflow.</h2>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">The framework operates on a weekly cadence with event-triggered updates, executed Sunday evening or Monday pre-market. The live governance engine runs exactly this sequence each pass: ingest current state &rarr; CIS updates &rarr; FIS calculation &rarr; governance checks &rarr; action determination &rarr; decision logging. The loop closes weekly whether or not anything traded.</p>
+        <p class="prose-lead">The framework operates on a weekly cadence with event-triggered updates, executed Sunday evening or Monday pre-market. The governance engine in the ACF Dashboard implements exactly this sequence: ingest current state &rarr; CIS updates &rarr; FIS calculation &rarr; governance checks &rarr; action determination &rarr; decision logging. The loop closes weekly whether or not anything traded.</p>
       </div>
 
       <!-- Chart island: p6-weekly-loop "The Weekly Evidence Loop" — the five-station operating cadence.
@@ -627,7 +627,7 @@
         <ol class="architecture-list" data-stepper>
           <li><p class="step-title">Manual tracking</p><p class="step-body">Spreadsheets with weekly routines. Feasible for small portfolios under 10 positions, but prone to drift as complexity increases.</p></li>
           <li><p class="step-title">Custom tooling</p><p class="step-body">Self-built CIS and FIS calculations with alerts. Works where development capability and ongoing maintenance exist.</p></li>
-          <li><p class="step-title">The ACF Dashboard</p><p class="step-body">The native implementation layer: the live build runs delta-clamped CIS updates, the five-bucket FIS with attribution, the weekly governance engine with decision logging, tripwire surfaces &mdash; a weekly three-level check and a cohort confluence tripwire &mdash; and the longitudinal diagnostics catalogued above.</p></li>
+          <li><p class="step-title">The ACF Dashboard</p><p class="step-body">The native implementation layer: the live build runs delta-clamped CIS updates, the five-bucket FIS with attribution, tripwire surfaces &mdash; a weekly three-level check and a cohort confluence tripwire &mdash; and the longitudinal diagnostics catalogued above. The weekly governance engine with decision logging ships in the build; automated weekly execution is not yet enabled.</p></li>
         </ol>
       </div>
 
