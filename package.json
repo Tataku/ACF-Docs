@@ -14,6 +14,7 @@
     "test:control-reachability": "node --test tests/control-reachability.test.mjs",
     "test:resource-tiles": "node --test tests/resource-tiles.test.mjs",
     "test:search-index": "node --test tests/search-index.test.mjs",
+    "test:header-layout": "node --test tests/header-layout.test.mjs",
     "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
     "validate:charts": "node scripts/validate-chart-specs.mjs",
     "audit:chart-experience": "node scripts/audit-chart-experience.mjs",
