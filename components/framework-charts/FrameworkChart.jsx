@@ -2096,8 +2096,27 @@ function MobileInsight({ spec, pal, accent, active, order, onStep, onPick, onCle
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <button onClick={() => onStep(-1)} style={tapBtn} aria-label="Previous element"><BrushChevron size={14} dir="left" /></button>
-        <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
-          {ord.map((id, i) => <button key={id} onClick={() => onPick(id)} aria-label={`Element ${i + 1}`} style={{ width: i === idx ? 18 : 7, height: 7, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', background: i === idx ? accent : pal.cardBorder, transition: 'all .2s ease' }} />)}
+        <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {ord.map((id, i) => {
+            const t = targets.find((x) => x.id === id) || {};
+            const on = i === idx;
+            /* The dot is the VISUAL; the button around it is the TARGET. These
+               were 7x7 — under the 24px WCAG 2.2 AA minimum, in a row whose own
+               prev/next buttons are already a correct 44 — and every one of them
+               announced itself as "Element 3", while the spec has held the real
+               name all along (it is the heading this same rail shows on tap). */
+            return (
+              <button
+                key={id}
+                onClick={() => onPick(id)}
+                aria-label={`${t.name || t.label || `Element ${i + 1}`} (${i + 1} of ${ord.length})`}
+                aria-current={on ? 'true' : undefined}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: on ? 30 : 24, height: 24, padding: 0, border: 'none', background: 'transparent', borderRadius: 6, cursor: 'pointer', flexShrink: 0 }}
+              >
+                <span aria-hidden style={{ display: 'block', width: on ? 18 : 7, height: 7, borderRadius: 4, background: on ? accent : pal.cardBorder, transition: 'all .2s ease' }} />
+              </button>
+            );
+          })}
         </div>
         <button onClick={() => onStep(1)} style={tapBtn} aria-label="Next element"><BrushChevron size={14} dir="right" /></button>
       </div>

@@ -2248,6 +2248,19 @@ a.side-part:hover, a.side-part:focus-visible {
               border-color var(--motion-fast) var(--ease-standard);
 }
 .on-this-page a:hover, .on-this-page a:focus-visible { color: var(--ink-quiet); }
+/* On a phone this list lives inside the off-canvas drawer, where it is the only
+   way to jump within a Part — and it was rendering at 23px tall, under the 24px
+   WCAG 2.2 AA target and packed tight. The desktop rail keeps its density (the
+   pointer there is precise); only the touch drawer opens up. */
+@media (max-width: 1024px) {
+  .on-this-page { gap: var(--space-2); }
+  .on-this-page a {
+    min-height: 2.25rem;          /* 42px at the 19px root */
+    display: flex;
+    align-items: center;
+    padding-block: var(--space-2);
+  }
+}
 .on-this-page a[aria-current="true"] {
   color: var(--accent);
   border-left-color: var(--accent);
