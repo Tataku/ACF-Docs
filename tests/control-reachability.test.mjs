@@ -116,3 +116,44 @@ test('stepper: the fix reached the bundle a visitor actually loads', () => {
   assert.match(BUNDLE, /of \$\{|of "\+/, 'the positional label is in the bundle');
   assert.ok(/aria-current/.test(BUNDLE), 'and so is the current-dot marking');
 });
+
+// ---------------------------------------------------------------------------
+// 4. The theme toggle, unboxed (owner-directed, 2026-09-15)
+// ---------------------------------------------------------------------------
+// The toggle shipped inside a hairline square while .sidebar-toggle, which sits
+// beside it in the sidebar head, had none; the owner called the box ugly here
+// and on the dashboard's landing and tiers pages, which carry a port of this
+// same recipe. Removing a border from a <button> has a trap that a plain
+// `not.toContain` would not catch, so both directions are pinned: the rule must
+// declare `border: none` and NOT a width, because a <button> with no border
+// declaration at all falls back to the UA's 2px outset — a worse box than the
+// one this removed. The hover and focus affordances are pinned too, since the
+// border used to carry one of them.
+
+const themeToggleRule = () => {
+  const i = CSS.indexOf('.theme-toggle {');
+  assert.notEqual(i, -1, '.theme-toggle rule exists');
+  const open = CSS.indexOf('{', i);
+  return CSS.slice(open, CSS.indexOf('}', open) + 1);
+};
+
+test('theme toggle: no hairline square, and the UA button border stays off', () => {
+  const rule = themeToggleRule();
+  assert.match(rule, /border:\s*none;/, 'border: none is explicit, not deleted');
+  assert.doesNotMatch(rule, /border:\s*\d/, 'no width — that is the box the owner removed');
+  assert.doesNotMatch(rule, /border-(color|width|style)\s*:/, 'and no longhand re-introduces one');
+});
+
+test('theme toggle: hover still announces the control, without an edge', () => {
+  const i = CSS.indexOf('.theme-toggle:hover, .theme-toggle:focus-visible {');
+  assert.notEqual(i, -1, 'the hover/focus rule exists');
+  const block = CSS.slice(CSS.indexOf('{', i), CSS.indexOf('}', CSS.indexOf('{', i)) + 1);
+  assert.match(block, /color:\s*var\(--accent\)/, 'the glyph shifts to accent');
+  assert.doesNotMatch(block, /border-color\s*:/, 'nothing paints the border back on');
+});
+
+test('theme toggle: keyboard focus is an outline, independent of the border', () => {
+  // The global rule — the reason unboxing costs no focus visibility.
+  assert.match(CSS, /^:focus-visible \{ outline: 2px solid var\(--accent\)/m,
+    'the site-wide :focus-visible outline is intact');
+});

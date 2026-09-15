@@ -991,7 +991,12 @@ body {
   .nav-right { gap: var(--space-3); }
 }
 
-/* Theme toggle — icon button, sun/moon swap by theme */
+/* Theme toggle — icon button, sun/moon swap by theme. Unboxed: the glyph IS the
+   affordance, so there is no hairline square around it (same treatment as
+   .sidebar-toggle, which sits beside it in the sidebar head). `border: none` is
+   explicit — dropping the declaration would restore the UA <button> border.
+   Hover shifts the glyph colour; the global :focus-visible rule carries the
+   keyboard ring, so removing the border costs no focus visibility. */
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -999,18 +1004,16 @@ body {
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
-  border: 1px solid var(--rule);
+  border: none;
   border-radius: var(--radius);
   background: transparent;
   color: var(--ink-quiet);
   cursor: pointer;
   transition: color var(--motion-base) var(--ease-standard),
-              border-color var(--motion-base) var(--ease-standard),
               background var(--motion-base) var(--ease-standard);
 }
 .theme-toggle:hover, .theme-toggle:focus-visible {
   color: var(--accent);
-  border-color: var(--accent);
 }
 .theme-toggle svg { width: 1.1rem; height: 1.1rem; display: block; }
 /* Show the icon for the theme you'd switch TO: moon in light, sun in dark */
@@ -2022,8 +2025,9 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
 
 /* ============================================================================
    PART ACTION BAR  — Listen (Web Speech placeholder) + Share. Shared component,
-   identical on every Part; keyed off .part-actions. Affordance + icon-swap reuse
-   the .theme-toggle pattern; label reuses the .doc-kicker mono treatment.
+   identical on every Part; keyed off .part-actions. Icon-swap reuses the
+   .theme-toggle pattern; the hairline chip affordance is this bar's own (the
+   toggle is unboxed); label reuses the .doc-kicker mono treatment.
    ============================================================================ */
 .part-actions {
   display: flex;
