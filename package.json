@@ -21,6 +21,8 @@
     "build:social-cards": "node scripts/build-social-cards.mjs",
     "build:navigation": "node scripts/build-navigation-registry.mjs",
     "audit:navigation": "node scripts/build-navigation-registry.mjs --check",
+    "audit:narration": "node scripts/audit-narration-coverage.mjs --check",
+    "acceptance:narration": "node scripts/acceptance-narration.mjs",
     "sync:counts": "node scripts/sync-counts.mjs",
     "audit:counts": "node scripts/sync-counts.mjs --check",
     "audit:social": "node scripts/build-social-meta.mjs --check",
