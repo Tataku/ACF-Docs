@@ -108,3 +108,85 @@ test('client: a quota failure skips the retries but is NOT treated as definitive
 test('client: the fallback names an empty balance as the reason', () => {
   assert.match(CLIENT, /balance exhausted/);
 });
+
+// ---------------------------------------------------------------------------
+// Narration COVERAGE and HUMANISATION
+//
+// The failure these pin is silent by construction: text that is never spoken
+// looks identical on the page to text that is. The old extractor was three
+// selectors and read 55% of the book — every bullet list, every numbered
+// requirement, every pull quote and BOTH cards of every side-by-side example
+// were dropped, so a listener heard the analysis of two investors without ever
+// being told who they were.
+// ---------------------------------------------------------------------------
+
+test('the rule table is the single source of truth, and the audit derives from it', () => {
+  assert.match(CLIENT, /var NARRATION_BLOCKS = \[/);
+  assert.match(CLIENT, /var NARRATION_MUTE = /);
+  const audit = read('scripts/audit-narration-coverage.mjs');
+  // The audit must PARSE the rules, never restate them — a second copy is a
+  // second thing to rot, and a guard that declares its own coverage set can be
+  // narrowed without anything going red.
+  assert.match(audit, /block\('NARRATION_BLOCKS'\)/);
+  assert.match(audit, /block\('NARRATION_MUTE'\)/);
+  assert.doesNotMatch(audit, /sel:\s*'(p|li|aside\.callout)'/);
+});
+
+test('every structural block the book actually uses has a rule', () => {
+  for (const sel of ['figure.exhibit', '.failure-modes', 'aside.callout',
+                     'ol.architecture-list', 'blockquote.pull-quote',
+                     '.posture-hero', '.compare table', 'li']) {
+    assert.ok(CLIENT.includes(`sel: '${sel}'`), `no narration rule for ${sel}`);
+  }
+});
+
+test('muted blocks are a decision with a reason, not an accident', () => {
+  // A glyph legend ("✓ satisfies (1 pt)"), the site chrome, and the nav rail
+  // are unlistenable; they are excluded explicitly rather than missed.
+  for (const sel of ['.compare-key', '.sidebar-nav', '.site-footer']) {
+    assert.ok(CLIENT.includes(sel), `${sel} should be muted explicitly`);
+  }
+});
+
+test('side-by-side examples glide between the cards instead of colliding', () => {
+  // The owner's report: "cannot be read verbatim to glide into the examples and
+  // swap from A to B". Two cards get an explicit hand-off.
+  assert.match(CLIENT, /Take the first\./);
+  assert.match(CLIENT, /Now the second\./);
+  assert.match(CLIENT, /And finally\./);
+});
+
+test('a numbered rail becomes ordinals, not silence', () => {
+  assert.match(CLIENT, /ORDINALS = \['first', 'second', 'third'/);
+  assert.match(CLIENT, /kind === 'steps'/);
+});
+
+test('a bold lead-in becomes a label, not a false sentence break', () => {
+  // "Accumulate only. Bitcoin is never sold" reads as two unrelated statements.
+  assert.match(CLIENT, /function labelled\(el, leadSel\)/);
+  assert.match(CLIENT, /head \+ ' \u2014 ' \+ tail/);   // joined by an em dash, not a full stop
+});
+
+test('a comparison table is summarised, never read cell by cell', () => {
+  assert.match(CLIENT, /kind === 'table'/);
+  assert.match(CLIENT, /tfoot tr/);
+  assert.match(CLIENT, /The full comparison is in the table on the page\./);
+});
+
+test("an author-written aria-label wins over reconstructed markup", () => {
+  // .posture-hero carries a hand-written spoken form ("three to fifteen percent
+  // per position"); the markup underneath is "<em>3–15%</em>per position".
+  assert.match(CLIENT, /kind === 'aria'/);
+  assert.match(CLIENT, /getAttribute\('aria-label'\)/);
+});
+
+test('spoken-form normalisation covers the tokens this book actually contains', () => {
+  assert.match(CLIENT, /·/);                 // "Investor A · 100% Bitcoin" → comma
+  assert.match(CLIENT, /' to '|'\$1 to \$2'/);     // en-dash ranges
+  assert.match(CLIENT, /approximately /);          // "~3.26 BTC"
+  assert.match(CLIENT, /out of/);                  // 10/10 scores
+});
+
+test('the narration script is inspectable without listening to the whole page', () => {
+  assert.match(CLIENT, /script:\s*function \(\) \{ return buildBlocks\(\)\.slice\(\); \}/);
+});

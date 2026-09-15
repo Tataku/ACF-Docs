@@ -451,20 +451,244 @@
       // unambiguous cases only (named ratio, scores, N-times multipliers, ampersand).
       function speakNorm(t) {
         return t
+          .replace(/\s*[··•]\s*/g, ', ')            // "Investor A · 100% Bitcoin" → a comma, not silence
+          .replace(/(\d)\s*[–—]\s*(\d)/g, '$1 to $2') // "8–10%", "10–100x", "30–60 year" → spoken ranges
+          .replace(/~\s*(?=[\d$])/g, 'approximately ')        // "~3.26 BTC" → "approximately 3.26 BTC"
           .replace(/\b60\s*\/\s*40\b/g, 'sixty-forty')        // "the 60/40 portfolio" → not "sixty slash forty"
-          .replace(/\b8\s*\/\s*10\b/g, 'eight out of ten')    // score "(8/10)"
+          .replace(/\b(\d{1,2}(?:\.\d)?)\s*\/\s*(\d{1,2})\b/g, '$1 out of $2') // scores: 8/10, 10/10, 5.5/10
           .replace(/(\d)\s*[x×]\b/g, '$1 times')         // 6x / 10x / 100x → "… times", not "ex"
+          .replace(/(\S)\s+\/\s+(\S)/g, '$1, $2')          // "3.26 BTC / $326,000" → a pause, never "slash"
           .replace(/\s*&\s*/g, ' and ')                       // "S&P" → "S and P"
           // confirmed-by-ear custom initialisms: force letter-by-letter reading
           .replace(/\bCIS\b/g, 'C I S')                       // Convexity Integrity Score — not "siss"
           .replace(/\bTAM\b/g, 'T A M')                       // total addressable market
-          .replace(/\bDCA\b/g, 'D C A');                      // dollar-cost averaging
+          .replace(/\bDCA\b/g, 'D C A')                       // dollar-cost averaging
+          // same shape as the three above (3-letter framework acronyms that form
+          // English-ish words), added by inference rather than confirmed by ear
+          .replace(/\bFIS\b/g, 'F I S')                       // Framework Integrity Score — not "fiss"
+          .replace(/\bROC\b/g, 'R O C')                       // return of capital — not "rock"
+          .replace(/\s{2,}/g, ' ')
+          .trim();
       }
+
+      // ---------------------------------------------------------------------
+      // Humanised block narration
+      // ---------------------------------------------------------------------
+      // The old extractor was three selectors — `.section-title`, `.prose-lead`,
+      // `.prose p` — which reads 55% of the book and silently drops the rest:
+      // every bullet list, every numbered requirement, every pull quote, every
+      // side-by-side example card, and every paragraph that happens to sit in a
+      // `.measure` without the `prose` class. A listener therefore heard the
+      // ANALYSIS of the two investors without ever being told who they were.
+      //
+      // So narration is a per-block decision, not one selector. Each entry below
+      // names a structure and how it should SOUND, because structure that the eye
+      // reads (a label above bullets, an A-card beside a B-card, 01/02/03 down a
+      // rail) carries meaning that verbatim text loses the moment it is spoken.
+      //
+      // NARRATION_BLOCKS is the coverage contract, and it is the SINGLE source of
+      // truth: `scripts/audit-narration-coverage.mjs` parses this array out of
+      // this file rather than restating it, so the audit cannot drift from the
+      // runtime and new content that no rule claims shows up as a measured gap.
+      // Order matters — earlier entries claim their subtree, so a container is
+      // spoken as one coherent unit and its children are not re-read loose.
+      var NARRATION_BLOCKS = [
+        { sel: '.posture-hero',         kind: 'aria' },     // author wrote the spoken form by hand; use it
+        { sel: 'figure.exhibit',        kind: 'exhibit' },  // chart caption; the SVG itself is unspeakable
+        { sel: '.failure-modes',        kind: 'sidebyside' },// A-vs-B cards: needs a glide between them
+        { sel: '.posture-card',         kind: 'card' },
+        { sel: 'aside.callout',         kind: 'callout' },  // label + bullets
+        { sel: 'ol.architecture-list',  kind: 'steps' },    // 01/02/03 → ordinals
+        { sel: 'blockquote.pull-quote', kind: 'quote' },
+        { sel: '.next-up-card',         kind: 'nextup' },
+        { sel: '.compare table',        kind: 'table' },    // summarised, never cell-by-cell
+        { sel: 'h2.section-title',      kind: 'heading' },
+        { sel: 'h3.sub-title',          kind: 'heading' },
+        { sel: 'p.section-eyebrow',     kind: 'heading' },
+        { sel: 'p.prose-lead',          kind: 'para' },
+        { sel: 'p',                     kind: 'para' },     // fallback: any unclaimed paragraph
+        { sel: 'li',                    kind: 'para' }      // fallback: any unclaimed list item
+      ];
+
+      // Deliberately NOT spoken. "Skipped" must be a decision with a reason, not
+      // an accident of the selector — a glyph legend read aloud is noise, and the
+      // exhibit's own index/mode chips are already carried by the exhibit handler.
+      var NARRATION_MUTE = '.compare-key, .ex-idx, .ex-mode, .ex-src, .gloss-panel, .fc-legend, figcaption, .sidebar-nav, .on-this-page, .site-footer';
+
+      var ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
+                      'seventh', 'eighth', 'ninth', 'tenth'];
+
+      // textContent concatenates across block boundaries, so <p>Dual custody</p>
+      // <p>holdable in…</p> comes back as "Dual custodyholdable in…". Re-insert
+      // the boundary the markup implies.
+      var BLOCKISH = /^(P|DIV|LI|UL|OL|H1|H2|H3|H4|H5|SECTION|ASIDE|FIGURE|FIGCAPTION|BLOCKQUOTE|TABLE|THEAD|TBODY|TFOOT|TR|TD|TH|BR|HEADER|FOOTER)$/;
+      function raw(el) {
+        if (!el) return '';
+        var out = '', i, n;
+        for (i = 0; i < el.childNodes.length; i++) {
+          n = el.childNodes[i];
+          if (n.nodeType === 3) out += n.nodeValue;
+          else if (n.nodeType === 1) {
+            if (n.matches && n.matches(NARRATION_MUTE)) continue;
+            out += BLOCKISH.test(n.tagName) ? ' ' + raw(n) + ' ' : raw(n);
+          }
+        }
+        return out.replace(/\s+/g, ' ').trim();
+      }
+      function one(el, sel) { var n = el.querySelector(sel); return n ? raw(n) : ''; }
+      function kids(el, sel) {
+        var out = [], list = el.querySelectorAll(sel), i;
+        for (i = 0; i < list.length; i++) out.push(list[i]);
+        return out;
+      }
+      // "Accumulate only. Bitcoin is never sold" reads as two unrelated sentences.
+      // The bold run is a LABEL for what follows, so give it a label's punctuation.
+      function labelled(el, leadSel) {
+        var lead = el.querySelector(leadSel);
+        if (!lead) return raw(el);
+        var head = raw(lead).replace(/[.:—\s]+$/, '');
+        var full = raw(el), tail = full;
+        if (full.indexOf(raw(lead)) === 0) tail = full.slice(raw(lead).length).trim();
+        tail = tail.replace(/^[.:—\s]+/, '');
+        return tail ? head + ' — ' + tail : head;
+      }
+      function sentence(t) {
+        if (!t) return '';
+        return /[.!?:—]$/.test(t) ? t : t + '.';
+      }
+
+      function speakBlock(el, kind) {
+        var parts = [], i, name, body, lead, cards, items, cap, rows, cells, bits;
+
+        if (kind === 'aria') {
+          return el.getAttribute('aria-label') || raw(el);
+        }
+
+        if (kind === 'exhibit') {
+          // A listener cannot see the plot, so the caption IS the exhibit.
+          var etitle = one(el, '.ex-title'), esub = one(el, '.ex-sub');
+          if (!etitle && !esub) return '';
+          if (etitle) parts.push(sentence('Exhibit: ' + etitle));
+          if (esub) parts.push(sentence(esub));
+          ['.ex-claim', '.ex-takeaway'].forEach(function (s) {
+            var v = one(el, s); if (v) parts.push(sentence(v));
+          });
+          return parts.join(' ');
+        }
+
+        if (kind === 'sidebyside') {
+          // The move the eye makes across two cards has to become an audible one.
+          cards = kids(el, ':scope > div');
+          if (!cards.length) return raw(el);
+          var GLIDE2 = ['Take the first.', 'Now the second.'];
+          var GLIDEN = ['First.', 'Next.', 'Then.', 'After that.', 'And finally.'];
+          for (i = 0; i < cards.length; i++) {
+            name = one(cards[i], '.name');
+            body = raw(cards[i]);
+            if (name && body.indexOf(name) === 0) body = body.slice(name.length).trim();
+            lead = cards.length === 2 ? GLIDE2[i]
+                 : GLIDEN[Math.min(i, GLIDEN.length - 1)];
+            if (i === cards.length - 1 && cards.length > 2) lead = 'And finally.';
+            parts.push(lead + ' ' + sentence(name ? name + ': ' + body : body));
+          }
+          return parts.join(' ');
+        }
+
+        if (kind === 'card') {
+          bits = ['.posture-card-eyebrow', '.posture-card-name', '.posture-card-role', '.posture-card-def'];
+          for (i = 0; i < bits.length; i++) { var v = one(el, bits[i]); if (v) parts.push(sentence(v)); }
+          return parts.length ? parts.join(' ') : raw(el);
+        }
+
+        if (kind === 'callout') {
+          var clabel = one(el, '.callout-label');
+          items = kids(el, 'li');
+          if (clabel) parts.push(sentence(clabel));
+          if (items.length) {
+            for (i = 0; i < items.length; i++) parts.push(sentence(labelled(items[i], 'strong, b')));
+          } else {
+            body = raw(el);
+            if (clabel && body.indexOf(clabel) === 0) body = body.slice(clabel.length).trim();
+            if (body) parts.push(sentence(body));
+          }
+          return parts.join(' ');
+        }
+
+        if (kind === 'steps') {
+          // 01/02/03 is a sequence the eye gets for free. Spoken, it needs ordinals.
+          items = kids(el, ':scope > li');
+          for (i = 0; i < items.length; i++) {
+            var t = labelled(items[i], '.step-title, strong, b');
+            if (!t) continue;
+            lead = i < ORDINALS.length
+              ? ORDINALS[i].charAt(0).toUpperCase() + ORDINALS[i].slice(1)
+              : 'Item ' + (i + 1);
+            parts.push(sentence(lead + ', ' + t));
+          }
+          return parts.join(' ');
+        }
+
+        if (kind === 'quote') {
+          body = raw(el);
+          return body ? sentence('Put plainly: ' + body) : '';
+        }
+
+        if (kind === 'nextup') {
+          var ntitle = one(el, '.next-up-title'), nteaser = one(el, '.next-up-teaser'), nbody = one(el, '.next-up-body');
+          if (ntitle) parts.push(sentence('Next up: ' + ntitle));
+          if (nteaser) parts.push(sentence(nteaser));
+          if (nbody) parts.push(sentence(nbody));
+          return parts.join(' ');
+        }
+
+        if (kind === 'table') {
+          // 47 cells read row-by-row is unlistenable. The caption states the
+          // question and the footer states the answer; speak those and stop.
+          cap = one(el, 'caption');
+          if (cap) parts.push(sentence(cap));
+          rows = kids(el, 'tfoot tr');
+          for (i = 0; i < rows.length; i++) {
+            var head2 = one(rows[i], 'th');
+            cells = kids(rows[i], 'td').map(function (td) {
+              var lbl = td.getAttribute('data-label');
+              return (lbl ? lbl + ' ' : '') + raw(td);
+            }).filter(Boolean);
+            if (cells.length) parts.push(sentence((head2 ? head2 + ': ' : '') + cells.join(', ')));
+          }
+          if (!parts.length) return '';
+          parts.push('The full comparison is in the table on the page.');
+          return parts.join(' ');
+        }
+
+        return raw(el); // heading / para
+      }
+
       function buildBlocks() {
         if (blocks) return blocks;
         blocks = [];
-        document.querySelectorAll('.shell-main .section-title, .shell-main .prose-lead, .shell-main .prose p')
-          .forEach(function (n) { var t = speakNorm((n.textContent || '').trim()); if (t) blocks.push(t); });
+        var main = document.querySelector('.shell-main');
+        if (!main) return blocks;
+
+        var sel = NARRATION_BLOCKS.map(function (b) { return b.sel; }).join(',');
+        var nodes = main.querySelectorAll(sel);
+        var claimed = [];
+        function isClaimed(el) {
+          for (var i = 0; i < claimed.length; i++) if (claimed[i].contains(el)) return true;
+          return false;
+        }
+        for (var i = 0; i < nodes.length; i++) {
+          var el = nodes[i];
+          if (isClaimed(el)) continue;                       // spoken already, as part of its container
+          if (el.matches(NARRATION_MUTE)) continue;
+          if (el.closest(NARRATION_MUTE)) continue;
+          var kind = 'para';
+          for (var k = 0; k < NARRATION_BLOCKS.length; k++) {
+            if (el.matches(NARRATION_BLOCKS[k].sel)) { kind = NARRATION_BLOCKS[k].kind; break; }
+          }
+          var spoken = speakNorm(speakBlock(el, kind));
+          if (kind !== 'para' && kind !== 'heading') claimed.push(el);
+          if (spoken) blocks.push(spoken);
+        }
         return blocks;
       }
       // Segment the page for the API path. The first segments are deliberately
@@ -856,8 +1080,14 @@
         },
         stop:        stop,
         seek:        seekTo,
-        subscribe:   function (cb) { onTick = cb; if (cb) cb(); }
+        subscribe:   function (cb) { onTick = cb; if (cb) cb(); },
+        // What the narrator will actually SAY, before any audio is generated.
+        // Narration quality is otherwise only checkable by listening to the whole
+        // page, which is why half the book could go unread without anyone noticing.
+        script:      function () { return buildBlocks().slice(); }
       };
+      // Reachable for QA: `ACFNarration.script()` prints what this page will say.
+      try { window.ACFNarration = NARRATION; } catch (e) {}
 
       // Visibility: Web Speech => usable immediately. Otherwise reveal only if
       // the capability check confirms a provider (avoid a dead button).
