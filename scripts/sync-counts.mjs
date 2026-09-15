@@ -94,7 +94,10 @@ const perPart = (n) => [...charts.values()].filter((c) => c.part === n).length;
 // stray number elsewhere on the page is never touched.
 const RULES = [
   ['cover-docs.html', [
-    [new RegExp(`(The Framework in Pictures ${DOT} )\\d+( exhibits)`), () => EXHIBITS],
+    // The cover's Pictures tile no longer quotes a count (owner, 2026-09-15:
+    // the tile leads to the whole gallery, so a number on it only ages). The
+    // exhibit count still has a home on _index.html, which is why EXHIBITS is
+    // still derived and still audited.
     [new RegExp(`(Glossary ${DOT} )\\d+( terms)`), () => TERMS],
     // One rule per card, anchored on that card's own data-part so a reading time
     // can never be written onto the wrong Part (which is how 1 and 2 were swapped).

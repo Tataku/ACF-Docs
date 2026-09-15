@@ -3603,27 +3603,178 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
   color: var(--ink-faint);
   margin: var(--space-4) 0 var(--space-4);
 }
-.dc-res-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+/* ---- Resource tiles -------------------------------------------------------
+   These were four identical boxes: same fill, same hairline, same silhouette,
+   so the card said nothing about whether it led to a chart gallery or a
+   dictionary. Each now carries two layers beneath its text:
+
+     ::before      a WASH whose gradient GEOMETRY carries the idea — a gallery
+                   fills its card corner to corner; the math tile is ruled and
+                   linear because the arithmetic is regular; the glossary is a
+                   calm column that fades straight up; the software glows from
+                   one point, the way a screen that is on does.
+     .dc-tile-art  a faded line DRAWING of the destination, inline SVG in
+                   currentColor: it themes for free and costs no request.
+     ::after       a SCRIM in the surface colour, so the text side stays clean
+                   while the drawing keeps the corner. It thins on hover, which
+                   is what brings the drawing forward.
+
+   Hue is deliberately NOT the differentiator. tokens.css keeps one chromatic
+   line for the whole document, so four coloured cards would break the system
+   they sit in — form does the work instead. Motion is transform/opacity only,
+   and the global prefers-reduced-motion rule disables all of it. */
+.dc-res-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
 .dc-tile {
-  display: block;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 8.75rem;
   background: var(--surface-raised);
   border: 1px solid var(--rule);
   border-radius: var(--radius-card);
   padding: var(--space-4);
   text-decoration: none;
   color: inherit;
-  transition: border-color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
+  transition: border-color var(--motion-base) var(--ease-standard),
+              transform var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard);
 }
-.dc-tile:hover, .dc-tile:focus-visible { border-color: var(--accent-quiet); transform: translateY(-2px); }
-.dc-tile-title { font-weight: var(--weight-semibold); font-size: var(--text-base); color: var(--ink); margin: 0 0 var(--space-1); }
-.dc-tile-desc { font-size: var(--text-xs); color: var(--ink-quiet); margin: 0; line-height: var(--leading-normal); }
+
+.dc-tile::before,
+.dc-tile::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+
+/* The wash — geometry per tile below; this layer only holds the sweep. */
+.dc-tile::before {
+  z-index: -3;
+  transition: opacity var(--motion-base) var(--ease-standard),
+              transform var(--motion-slow) var(--ease-standard);
+}
+
+/* The scrim — keeps the title and description off the drawing. */
+.dc-tile::after {
+  z-index: -1;
+  background: linear-gradient(104deg,
+    var(--surface-raised) 14%,
+    color-mix(in oklab, var(--surface-raised) 62%, transparent) 46%,
+    transparent 76%);
+  transition: opacity var(--motion-base) var(--ease-standard);
+}
+
+/* The drawing — run to the bottom-right corner of the card, NOT bled past it.
+   A bleed was the first instinct and it was wrong: these are framed objects (a
+   grid of exhibit panels, a console, a pair of axes), so a cropped edge reads as
+   a rendering fault rather than as a fragment of something larger. Flush to the
+   corner keeps them whole and still off-centre. */
+.dc-tile-art {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: -2;
+  /* Sized from the card's HEIGHT, not its width: a width-driven square grew
+     taller than a short card and clipped its own top row. */
+  height: min(100%, 184px);
+  width: auto;
+  aspect-ratio: 1;
+  color: var(--tile-motif);
+  transform-origin: 100% 100%;
+  transition: color var(--motion-base) var(--ease-standard),
+              transform var(--motion-slow) var(--ease-emphasis);
+}
+.dc-tile-art svg { display: block; width: 100%; height: 100%; }
+
+.dc-tile-title {
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-base);
+  color: var(--ink);
+  margin: 0 0 var(--space-1);
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.dc-tile-desc {
+  font-size: var(--text-xs);
+  color: var(--ink-quiet);
+  margin: 0;
+  max-width: 34ch;
+  line-height: var(--leading-normal);
+}
+
+/* ---- Hover / focus: one coordinated move ---------------------------------
+   The card lifts, the wash sweeps outward from its own origin, the scrim thins,
+   and the drawing brightens and steps toward the reader. Four small things on
+   the same curve, not four separate effects. */
+.dc-tile:hover, .dc-tile:focus-visible {
+  border-color: var(--accent-quiet);
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-1);
+}
+.dc-tile:hover::before, .dc-tile:focus-visible::before { transform: scale(1.14); }
+.dc-tile:hover::after, .dc-tile:focus-visible::after { opacity: .78; }
+.dc-tile:hover .dc-tile-title, .dc-tile:focus-visible .dc-tile-title { color: var(--accent); }
+.dc-tile:hover .dc-tile-art, .dc-tile:focus-visible .dc-tile-art {
+  color: var(--tile-motif-lift);
+  transform: scale(1.06) translate(-2%, -3%);
+}
+
+/* ---- Per-tile wash geometry ----------------------------------------------
+   Four gradients, four shapes, one hue. Read them as diagrams: */
+
+/* A gallery — the light fills the card from its far corner, the way the grid of
+   exhibits fills the page it leads to. */
+.dc-tile[data-motif="exhibits"]::before {
+  background: radial-gradient(130% 100% at 100% 100%, var(--tile-wash-lift), var(--tile-wash) 34%, transparent 70%);
+}
+/* Arithmetic — the only wash here with STEPS in it, because that is what this
+   page is about: a continuous score quantised into a discrete size. */
+.dc-tile[data-motif="math"]::before {
+  background: linear-gradient(to right,
+    transparent 30%, var(--tile-wash) 48%, var(--tile-wash) 66%,
+    var(--tile-wash-lift) 82%, var(--tile-wash-lift) 100%);
+}
+/* A reference column — one calm fade straight up from the foot of the page. No
+   direction, no motion: you do not read a glossary, you look things up in it. */
+.dc-tile[data-motif="glossary"]::before {
+  background: linear-gradient(to top, var(--tile-wash-lift), var(--tile-wash) 26%, transparent 64%);
+}
+/* A screen that is on — one convergent backlight behind the console. */
+.dc-tile[data-motif="software"]::before {
+  background: radial-gradient(66% 104% at 82% 56%, var(--tile-wash-lift), var(--tile-wash) 42%, transparent 74%);
+}
+
+/* The one tile-specific flourish: the live dashboard's indicator breathes while
+   the pointer is on it, because "in motion" is the whole claim of that card.
+   Scale + opacity only — animating the SVG `r` attribute is not portable. */
+.dc-tile[data-motif="software"]:hover .dc-pulse-ring,
+.dc-tile[data-motif="software"]:focus-visible .dc-pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dc-pulse 1.9s var(--ease-standard) infinite;
+}
+@keyframes dc-pulse {
+  0%   { transform: scale(.45); opacity: .6; }
+  70%  { transform: scale(1.55); opacity: 0; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
 
 @media (max-width: 768px) {
   .dc-grid { grid-template-columns: 1fr; }
   .dc-movement-pair { grid-template-columns: 1fr; }
   .dc-movement-pair .dc-movement { margin-bottom: var(--space-10); }
 }
-@media (max-width: 680px) { .dc-res-grid { grid-template-columns: 1fr; } }
+@media (max-width: 680px) {
+  .dc-res-grid { grid-template-columns: 1fr; }
+  /* A one-column tile is wide and short and its copy runs the full width, so the
+     desktop proportions put the description straight through the artwork. Three
+     things fix it together and all three are needed: the drawing shrinks, the
+     copy takes a right margin that clears it, and the wash steps back so a
+     narrow card is not half-flooded. */
+  .dc-tile { min-height: 9rem; }
+  .dc-tile-art { height: min(72%, 104px); }
+  .dc-tile-desc { max-width: 68%; }
+  .dc-tile::before { opacity: .7; }
+  .dc-tile::after { background: linear-gradient(96deg, var(--surface-raised) 30%, color-mix(in oklab, var(--surface-raised) 60%, transparent) 58%, transparent 84%); }
+}
 
 /* --- search panel ---------------------------------------------------------- */
 .dc-search-backdrop { position: fixed; inset: 0; z-index: 70; background: rgba(8, 9, 11, 0.45); }
