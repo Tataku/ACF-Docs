@@ -40,6 +40,52 @@ const glossary = JSON.parse(fs.readFileSync(path.join(SITE, 'acf-glossary.json')
 const charts = new Map();
 for (const c of Object.values(reg.charts)) charts.set(c.chartId, c);
 
+// ---- reading time: derived from the prose, never typed -----------------------
+// A reading time is a count of the same kind as the two above: it restates a
+// fact about content that lives somewhere else. It was stated TWICE by hand —
+// once on the cover card, once in the part page's own kicker — so the two drifted
+// apart on all six parts. Measured 2026-09-15: the cover claimed 12 minutes for a
+// part whose own header said 18, 22 for one that said 13, and Parts 1 and 2 were
+// transposed. A reader planning an evening was being told the wrong number before
+// they clicked, and a different one after.
+//
+// WPM is not a guess. It is the rate implied by the six hand-authored page
+// headers (226, 237, 226, 227, 234, 232 words per minute), so at 230 the derived
+// value reproduces every page's existing number exactly: the prose becomes the
+// source without rewriting a single page, and the correction lands where the
+// drift actually is.
+//
+// Boundary: chart exhibits are empty placeholders in the HTML and are hydrated at
+// runtime, so their labels are not counted. This measures prose, which is what a
+// reading time is about.
+const WPM = 230;
+const PART_FILES = [
+  [1, 'part-1-foundation.html'],
+  [2, 'part-2-lineage-macro.html'],
+  [3, 'part-3-bitcoin-convexity.html'],
+  [4, 'part-4-tax-architecture.html'],
+  [5, 'part-5-portfolio-construction.html'],
+  [6, 'part-6-convexity-scoring.html'],
+];
+
+function readingMinutes(file) {
+  const html = fs.readFileSync(path.join(SITE, file), 'utf8');
+  const main = (html.match(/<main class="shell-main">([\s\S]*?)<\/main>/) || [, ''])[1];
+  if (!main) throw new Error(`${file}: no <main class="shell-main"> to measure`);
+  const words = main
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&[a-z]+;|&#\d+;/gi, ' ')
+    .split(/\s+/).filter(Boolean).length;
+  const minutes = Math.round(words / WPM);
+  if (!Number.isFinite(minutes) || minutes < 1) throw new Error(`${file}: implausible reading time from ${words} words`);
+  return minutes;
+}
+
+const MINUTES = new Map(PART_FILES.map(([n, file]) => [n, readingMinutes(file)]));
+
 const TERMS = glossary.terms.length;
 const EXHIBITS = charts.size;
 const perPart = (n) => [...charts.values()].filter((c) => c.part === n).length;
@@ -50,11 +96,17 @@ const RULES = [
   ['cover-docs.html', [
     [new RegExp(`(The Framework in Pictures ${DOT} )\\d+( exhibits)`), () => EXHIBITS],
     [new RegExp(`(Glossary ${DOT} )\\d+( terms)`), () => TERMS],
+    // One rule per card, anchored on that card's own data-part so a reading time
+    // can never be written onto the wrong Part (which is how 1 and 2 were swapped).
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*?&approx; )\\d+( min read)`), () => MINUTES.get(n)]),
   ]],
   ['_index.html', [
     [new RegExp(`(generated ${DOT} all )\\d+( exhibits)`), () => EXHIBITS],
     [new RegExp(`(generated ${DOT} )\\d+( terms)`), () => TERMS],
   ]],
+  ...PART_FILES.map(([n, file]) => [file, [
+    [new RegExp(`(Part ${n} of 6 ${DOT} &approx; )\\d+( min read)`), () => MINUTES.get(n)],
+  ]]),
   ['part-1-foundation.html',             [[new RegExp(`(#foundation">In pictures ${DOT} )\\d+( exhibits)`),   () => perPart(1)]]],
   ['part-2-lineage-macro.html',          [[new RegExp(`(#lineage">In pictures ${DOT} )\\d+( exhibits)`),      () => perPart(2)]]],
   ['part-3-bitcoin-convexity.html',      [[new RegExp(`(#backbone">In pictures ${DOT} )\\d+( exhibits)`),     () => perPart(3)]]],
@@ -82,9 +134,16 @@ for (const [file, rules] of RULES) {
 
   if (html !== before) {
     if (CHECK) {
-      const was = [...before.matchAll(/&middot; (\d+) (exhibits|terms)/g)].map((m) => m[0]).join(', ');
-      const now = [...html.matchAll(/&middot; (\d+) (exhibits|terms)/g)].map((m) => m[0]).join(', ');
-      drift.push(`${file}: stale count — page says [${was}], sources say [${now}]`);
+      // Report the actual divergence rather than a fixed vocabulary: reading
+      // times drift too, and a message that only knows "exhibits|terms" would
+      // print two identical strings and explain nothing.
+      const shown = [];
+      for (let i = 0; i < before.length && shown.length < 4; i += 1) {
+        if (before[i] === html[i]) continue;
+        shown.push(`"${before.slice(Math.max(0, i - 40), i + 20).replace(/\s+/g, ' ').trim()}" -> "${html.slice(Math.max(0, i - 40), i + 20).replace(/\s+/g, ' ').trim()}"`);
+        while (i < before.length && before[i] !== html[i]) i += 1;
+      }
+      drift.push(`${file}: stale derived value — ${shown.join(' | ')}`);
     } else {
       fs.writeFileSync(abs, html);
       written += 1;
