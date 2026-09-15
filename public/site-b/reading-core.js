@@ -218,10 +218,13 @@
       total += minutes[i];
       if (!row.hasAttribute('data-read')) return;
       arcs[i].setAttribute('data-read', '');
-      // The map says it too. On a phone the curve's hue is the only channel there
-      // is, and the map is the only site-wide nav under 768px.
-      var link = document.querySelector('[data-foot-part-link="' + row.getAttribute('data-part') + '"]');
+      // The map and the tick say it too. On a phone the curve's hue is the only
+      // channel there is, and the map is the only site-wide nav under 768px.
+      var n = row.getAttribute('data-part');
+      var link = document.querySelector('[data-foot-part-link="' + n + '"]');
+      var tick = dial.querySelector('[data-foot-tick="' + n + '"]');
       if (link) link.setAttribute('data-read', '');
+      if (tick) tick.setAttribute('data-read', '');
       done += minutes[i];
       read += 1;
     });
@@ -239,7 +242,7 @@
       if (!rows[r].hasAttribute('data-read')) break;
       runAt += minutes[r];
     }
-    if (read === rows.length) dial.setAttribute('data-complete', '');
+    if (read === rows.length) dial.setAttribute('data-complete', '');   // the figure at the summit
     if (runAt) {
       dial.style.setProperty('--at-target', runAt);
       dial.setAttribute('data-run', '');
@@ -284,33 +287,52 @@
    * gets the same reading — and the curve's arcs stay aria-hidden, because a
    * screen reader is served by the link text, not by a highlight.
    */
-  /* The dot runs the curve when the reader reaches the colophon, not when the
-   * page loads five screens above it. footDial has already written the TRUTH into
-   * --at-target; this only decides when the eye is there to see it travel.
+  /* The figure walks the curve when the reader reaches the colophon, not when
+   * the page loads five screens above it. footDial has already written the
+   * TRUTH into --at-target; this only decides when the eye is there to see it.
    *
-   * Truth and beat are deliberately separate properties. If this never runs — no
-   * IntersectionObserver, an observer that never fires — the fallback writes the
-   * same value immediately, so a missed arrival costs the travel and never the
-   * position. That is the opposite of gating the FACT on an observer, which would
-   * tell a returning reader they had read nothing.
+   * Truth and beat are deliberately separate. If this never runs — no
+   * IntersectionObserver, an observer that never fires — the fallback places the
+   * figure at once, so a missed arrival costs the walk and never the position.
+   * Gating the FACT on an observer would tell a returning reader they had read
+   * nothing.
+   *
+   * The position is sampled from the curve itself (getPointAtLength on the same
+   * path the stretches are drawn on, in the same minute units), then expressed
+   * as a fraction of the viewBox so it survives the stage's non-uniform scaling.
+   * It is NEVER computed from x alone: pathLength normalises by arc length, and
+   * the climb is steeper than the approach.
    */
   function footArrive() {
-    var dial = document.querySelector('[data-foot-progress]');
-    if (!dial) return;
+    var section = document.querySelector('[data-foot-progress]');
+    if (!section) return;
+    var stage = section.querySelector('.foot-stage');
+    var figure = section.querySelector('[data-foot-figure]');
+    var path = section.querySelector('[data-foot-arc]');
+    var svg = path && path.ownerSVGElement;
+    if (!stage || !figure || !path || !svg) return;
+
     function land() {
-      var target = dial.style.getPropertyValue('--at-target');
-      if (target) dial.style.setProperty('--at-min', target);
+      var target = Number(section.style.getPropertyValue('--at-target'));
+      var total = Number(path.getAttribute('pathLength'));
+      if (!target || !total || !path.getTotalLength) return;
+      var vb = svg.viewBox.baseVal;
+      var pt = path.getPointAtLength(path.getTotalLength() * Math.min(target, total) / total);
+      stage.style.setProperty('--at-min', target);
+      figure.style.left = (pt.x / vb.width * 100).toFixed(3) + '%';
+      figure.style.top = (pt.y / vb.height * 100).toFixed(3) + '%';
+      section.setAttribute('data-run', '');
     }
     if (!window.IntersectionObserver) { land(); return; }
-    // threshold 0 on purpose: any sliver counts. A card taller than a short
-    // viewport can never satisfy a fractional threshold, and the cost of missing
-    // is a dot that never moves.
+    // threshold 0 on purpose: any sliver counts. A stage taller than a short
+    // viewport can never satisfy a fraction, and the cost of missing is a figure
+    // that never walks.
     var io = new IntersectionObserver(function (entries) {
       if (!entries.some(function (en) { return en.isIntersecting; })) return;
       land();
       io.disconnect();
     }, { threshold: 0 });
-    io.observe(dial);
+    io.observe(stage);
   }
 
   function footPeek() {
@@ -319,6 +341,7 @@
     if (!dial || !footer) return;
     var links = footer.querySelectorAll('[data-foot-part-link]');
     var arcs = dial.querySelectorAll('[data-foot-arc]');
+    var ticks = dial.querySelectorAll('[data-foot-tick]');
     var meta = dial.querySelector('[data-foot-meta]');
     if (!links.length || arcs.length !== links.length) return;
     // The line this returns to. Captured now, AFTER footDial has had its say, so
@@ -335,8 +358,10 @@
     function peek(n) {
       var link = find(links, 'data-foot-part-link', n);
       var arc = find(arcs, 'data-foot-arc', n);
+      var tick = find(ticks, 'data-foot-tick', n);
       if (link) link.setAttribute('data-peek', '');
       if (arc) arc.setAttribute('data-peek', '');
+      if (tick) tick.setAttribute('data-peek', '');
       if (!meta || !arc) return;
       // The arc already carries the minutes sync-counts wrote onto it, so the
       // hover reads the same number the geometry is drawn from.
@@ -350,6 +375,7 @@
       var i;
       for (i = 0; i < links.length; i += 1) links[i].removeAttribute('data-peek');
       for (i = 0; i < arcs.length; i += 1) arcs[i].removeAttribute('data-peek');
+      for (i = 0; i < ticks.length; i += 1) ticks[i].removeAttribute('data-peek');
       if (!meta) return;
       meta.removeAttribute('data-peek');
       meta.textContent = rest;
@@ -363,7 +389,10 @@
     }
     var k;
     for (k = 0; k < links.length; k += 1) wire(links[k], links[k].getAttribute('data-foot-part-link'));
-    for (k = 0; k < arcs.length; k += 1) wire(arcs[k], arcs[k].getAttribute('data-foot-arc'));
+    // The ticks are the pointer's surface on the curve: each spans its own Part's
+    // columns, so a thin 2.5px stroke never has to be hit. Hover only — they are
+    // not focusable, and the map rows already give the keyboard the same peek.
+    for (k = 0; k < ticks.length; k += 1) wire(ticks[k], ticks[k].getAttribute('data-foot-tick'));
   }
   /* ---- Sidebar collapse/expand (desktop), persisted ---------------------- */
   function sidebarCollapse() {

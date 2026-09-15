@@ -199,7 +199,7 @@
     var url = (canonical && canonical.href) || location.href;
     var title = (document.title.split('\u00b7')[0] || '').trim() || 'The Adaptive Convexity Framework';
     var status = document.querySelector('[data-foot-share-status]');
-    var mark = document.querySelector('.foot-brand .brand-mark');
+    var mark = document.querySelector('[data-foot-figure] .brand-mark');
     var settle = null, unpleased = null;
 
     btn.hidden = false;
@@ -291,7 +291,7 @@
    * empty room five screens below the fold), and it runs the gaze loop ONLY
    * while the footer is on screen. */
   function mascot() {
-    var brand = document.querySelector('.foot-brand');
+    var brand = document.querySelector('[data-foot-figure]');
     var mark = brand && brand.querySelector('.brand-mark');
     if (!mark) return;
 
@@ -348,7 +348,7 @@
       var io = new IntersectionObserver(function (entries) {
         arrive(entries.some(function (en) { return en.isIntersecting; }));
       }, { threshold: 0.35 });
-      io.observe(brand);
+      io.observe(brand.parentNode);       // the stage: the figure walks across it
     } else {
       arrive(true);
     }
@@ -383,18 +383,6 @@
         }
       });
 
-      /* The page lands on the curve it opened with: the footer's signature draws
-         itself once as the colophon arrives. Inside this function's
-         reduced-motion and no-GSAP guards, so the static footer — already a
-         finished curve — is what every other reader gets. The mascot is
-         deliberately NOT here: see mascot() below. */
-      var sig = document.querySelector('.foot-sig-curve');
-      if (sig) {
-        g.fromTo(sig, { strokeDashoffset: 1 }, {
-          strokeDashoffset: 0, duration: 1.2, ease: 'power2.out',
-          scrollTrigger: { trigger: '.site-footer', start: 'top 92%', once: true }
-        });
-      }
     }
 
     // Watchdog: if rAF is throttled (background tab, occluded window), frames
@@ -403,7 +391,7 @@
       if (g.ticker.frame < 30) {
         g.killTweensOf('*');
         if (window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(function (t) { t.kill(); });
-        g.set(['.dc-kicker', '.dc-title', '.dc-lede', '.dc-hero-actions', '.dc-parts-head', '.dc-card', '.dc-tile', '.foot-sig-curve'], { clearProps: 'all' });
+        g.set(['.dc-kicker', '.dc-title', '.dc-lede', '.dc-hero-actions', '.dc-parts-head', '.dc-card', '.dc-tile'], { clearProps: 'all' });
       }
     }, 2500);
   }

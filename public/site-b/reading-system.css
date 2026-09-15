@@ -1789,62 +1789,205 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
    Two shapes share `.site-footer`. A READING page gets the base rule and a
    single `.foot-base` line: it already ends on its own next-up band, and a
    second map underneath that is furniture. The COVER gets `--cover`, a colophon
-   in three tiers — where am I · where can I go · what is this.
+   in three tiers — the reading curve · the map · the base rule.
 
-   WHY THE COVER'S IS A MAP AND NOT A MIRROR. It used to restate the header nav
-   verbatim beside a third copy of "Start reading", and listed none of the six
-   Parts. The header's links are display:none under 768px, so on a phone this is
-   the site's only map; the routes are pinned against next.config.mjs by
-   tests/control-reachability.test.mjs.
-
-   Everything here except `.site-footer` and `.foot-base` is COVER-ONLY — the
-   ten reading pages use those two and nothing else.
+   ONE CURVE. The first cover footer drew the convexity sweep twice: full-bleed
+   and decorative across the top, then again boxed in a card as data. The
+   beautiful one did nothing and the useful one was a widget. This is that sweep
+   with the data in it and the figure standing on it. Everything here except
+   `.site-footer` and `.foot-base` is COVER-ONLY.
    ============================================================================ */
 .site-footer { border-top: 1px solid var(--rule); }
-
-/* ---- The convexity signature --------------------------------------------- *
- * The hero opens on a rising curve and the page lands on the same one, in place
- * of the flat hairline. `preserveAspectRatio: none` stretches the geometry to
- * any width; the stroke is held at its authored weight by vector-effect rather
- * than stretched with it. The dash pattern is the draw-in's rest state, not a
- * decoration: with pathLength="1" a single dash covers the whole path, so the
- * un-animated line — JS off, reduced motion, GSAP blocked — is the FINISHED
- * one, and cover-docs.js only ever animates the offset back to zero. */
 .site-footer--cover { border-top: 0; }
-.foot-sig {
-  height: clamp(3rem, 6vw, 5.5rem);
-  overflow: hidden;
-  pointer-events: none;
-}
-.foot-sig svg { width: 100%; height: 100%; display: block; }
-.foot-sig-wash  { fill: var(--accent); opacity: 0.05; }
-.foot-sig-curve {
-  stroke: var(--accent);
-  stroke-width: 1.5;
-  fill: none;
-  opacity: 0.32;
-  stroke-dasharray: 1;
-}
 
-/* ---- Tier 1: the brand, and the reader's own place in the book ------------ */
-.foot-top {
-  display: grid;
-  /* Both sides carry weight. A narrow card opposite a capped line of prose is
-     how the old footer opened a dead half-width band down the middle of itself;
-     the dial takes a real column and the descriptor is bounded by ITS column
-     rather than by a `max-width` that leaves the rest of the row empty. */
-  grid-template-columns: minmax(0, 1fr) minmax(20rem, 30rem);
-  gap: var(--space-10) var(--space-12);
-  padding-block: var(--space-10) var(--space-12);
-  align-items: center;
+/* ---- Tier 1: the reading curve -------------------------------------------- */
+.foot-curve {
+  position: relative;
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-10);         /* the ticks hang below the stage */
+  /* The wash runs to the viewport edges (see .foot-stage::before/::after); this
+     clips only the x-axis so the tick labels below the stage are not cut. */
+  overflow-x: clip;
 }
-.foot-brand .brand { margin-bottom: var(--space-4); }
+.foot-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-6) var(--space-12);
+  margin-bottom: var(--space-8);
+}
+.foot-brand .brand { margin-bottom: var(--space-2); }
 .foot-descriptor {
   font-family: var(--font-serif);
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
   line-height: var(--leading-snug);
   color: var(--ink-quiet);
   margin: 0;
+  max-width: 30ch;
+}
+.foot-status { text-align: right; }
+.foot-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wider);
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 var(--space-2);
+}
+.foot-count {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-tight);
+  color: var(--ink);
+  margin: 0;
+  /* The running head must not change height under the cursor: a peek writes a
+     Part's own time into .foot-meta. The leading is declared, not inherited,
+     so the floor below is a real line of it. */
+  line-height: var(--leading-snug);
+  min-height: 1.35em;
+}
+.foot-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-normal);
+  letter-spacing: var(--track-wide);
+  color: var(--ink-faint);
+  margin-left: var(--space-3);
+  white-space: nowrap;
+}
+.foot-meta[data-peek] { color: var(--ink-quiet); }
+.foot-dial-go {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--accent-link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-quiet);
+  white-space: nowrap;
+}
+/* Gated like every other nudge in the footer. The global reduce reset kills the
+   transition but not the transform, so an ungated nudge does not slow down under
+   a stated preference — it SNAPS 4px. */
+.foot-dial-go .dc-arr { display: inline-block; }
+@media (prefers-reduced-motion: no-preference) {
+  .foot-dial-go .dc-arr { transition: transform var(--motion-base) var(--ease-standard); }
+  .foot-dial-go:hover .dc-arr, .foot-dial-go:focus-visible .dc-arr { transform: translateX(4px); }
+}
+
+/* ---- The stage ------------------------------------------------------------- *
+ * Uniform scaling would fix the curve's aspect and make it 50px tall on a phone;
+ * `preserveAspectRatio: none` lets it keep its height at every width, and the
+ * dash maths survive it because they live in path space — PROVIDED nothing
+ * asks for `vector-effect: non-scaling-stroke`, which moves the dash into
+ * screen space and, measured at 390px, painted the unread stretches accent. */
+.foot-stage {
+  position: relative;
+  height: clamp(120px, 14vw, 172px);
+}
+/* Absolutely-positioned children resolve against the PADDING box, which on a
+   .measure-full element is a gutter wider than the text column on each side.
+   The inner box is the content box, so the curve's origin and terminus land
+   exactly under the running head's margins. */
+.foot-stage-inner { position: relative; height: 100%; }
+/* The wash continues past the measure to the viewport edges as flat bands at the
+   curve's two end heights: 6/156 of the stage on the left where the sweep
+   begins, 150/156 on the right where it lands. They hang off the INNER box, so
+   they abut the curve's ends rather than starting a gutter's width past them. */
+.foot-stage-inner::before, .foot-stage-inner::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 100vw;
+  background: var(--accent);
+  opacity: 0.06;
+  pointer-events: none;
+}
+.foot-stage-inner::before { right: 100%; height: calc(6 / 156 * 100%); }
+.foot-stage-inner::after  { left: 100%;  height: calc(150 / 156 * 100%); }
+.foot-stage-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.foot-fill { fill: var(--accent); opacity: 0.06; }
+.foot-arc {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  /* One dash, its length the Part's minutes less a 1.4 seam, half taken at each
+     end so the ink is CENTRED on the true span. The second value is any number
+     past the end of the curve — deliberately not the book's length, which would
+     be a count typed into a stylesheet where no rule could keep it true. */
+  stroke-dasharray: calc(var(--arc-len) - 1.4) 999;
+  stroke-dashoffset: calc(-1 * (var(--arc-at) + 0.7));
+  transition: stroke var(--motion-slow) var(--ease-standard),
+              stroke-width var(--motion-base) var(--ease-standard);
+}
+.foot-arc[data-read] { stroke: var(--accent); stroke-width: 4; }
+/* Peek — A HIGHLIGHT IS NOT THE READ STATE. Emerald means read on this curve and
+   nothing else earns it; an unread peek lifts to ink, which reads as attention
+   in both themes without ever reading as progress. */
+.foot-arc[data-peek] { stroke: var(--ink-quiet); stroke-width: 4; }
+.foot-arc[data-read][data-peek] { stroke: var(--accent); stroke-width: 6; }
+
+/* The ticks: each one spans its own Part's columns, so it is both the numeral
+   beneath the curve and the surface a pointer peeks with. Not controls (the map
+   rows are) and aria-hidden, because a screen reader is served by the link text. */
+.foot-tick {
+  position: absolute;
+  top: 0;
+  bottom: calc(-1 * var(--space-8));
+  left: calc(var(--at) / var(--total) * 100%);
+  width: calc(var(--len) / var(--total) * 100%);
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  color: var(--ink-faint);
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.foot-tick[data-read] { color: var(--accent); }
+.foot-tick[data-peek] { color: var(--ink); }
+
+/* The figure. One of the two pinned marks, at a size where the dashboard's own
+   blink and gaze are legible rather than a favicon's. It stands with its feet on
+   the line — the planted ground line is the brand — and its resting place is the
+   curve's ORIGIN, written to match the path's first point (0,150 in a 156-tall
+   box; pinned against the `d` by tests/footer-colophon). With nothing read, or
+   no JS, that is where it stands: at the foot of the climb. footArrive() walks
+   it to the frontier when the reader gets here. */
+.foot-figure {
+  position: absolute;
+  left: 0;
+  top: calc(150 / 156 * 100%);
+  width: clamp(2.6rem, 4.5vw, 3.6rem);
+  height: clamp(2.6rem, 4.5vw, 3.6rem);
+  transform: translate(-50%, -100%);
+  color: var(--accent);
+  pointer-events: none;
+}
+.foot-figure .brand-mark { width: 100%; height: 100%; display: block; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The walk. footDial writes the truth into --at-target at once; footArrive
+     places the figure when the colophon is on screen, and these transitions
+     carry it from the origin to the frontier. Under reduce it simply appears
+     there — the fact survives, only the travel is dropped. */
+  html.js .foot-figure {
+    transition: left var(--motion-draw) var(--ease-standard),
+                top var(--motion-draw) var(--ease-standard);
+  }
+  /* The ground lights under its feet. A read stretch starts grey and turns
+     accent when the figure reaches it: its delay is its place in the walk, so
+     Part 3 at minute 30 of a 43-minute frontier lights at 30/43 of the journey.
+     An ANIMATION with backwards fill, not a transition-delay — a delay on the
+     transition would also delay every peek by up to the same amount. */
+  @keyframes foot-arrive { from { stroke: var(--rule); stroke-width: 2.5; } }
+  html.js [data-foot-progress][data-run] .foot-arc[data-read] {
+    animation: foot-arrive var(--motion-base) var(--ease-standard)
+               calc(var(--arc-at) / var(--at-min, 1) * var(--motion-draw)) backwards;
+  }
 }
 
 /* ---- The mascot ----------------------------------------------------------- *
@@ -1858,106 +2001,70 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
  *
  * TWO LAYERS, BECAUSE THEY CANNOT SHARE ONE. Gaze is a `transform` and blink is
  * an `animation` OF `transform`; on one element the animation simply wins and
- * the gaze silently stops. The dashboard splits them across a gaze group and a
- * per-eye element, and the pinned markup here happens to give us exactly that
- * for free: the eyes are a <g fill="currentColor"> containing two <circle>s. The
- * group takes the gaze, the circles take the blink. Both are addressed by that
- * fill attribute rather than by a class, because the markup is re-emitted from
- * the shared geometry module and a class added here would vanish at the next
- * regeneration with no check noticing.
- *
- * WHERE GAZE IS ALLOWED. The dashboard's rule, verbatim: "Idle and marketing
- * surfaces only — landing hero, 404, boot overlay, empty states. NOT persistent
- * chrome." A landing page's colophon is the former; that is also why only
- * .foot-brand gazes and the nav lockup on this same page does not. */
+ * the gaze silently stops. The pinned markup gives us exactly two for free: the
+ * eyes are a <g fill="currentColor"> containing two <circle>s. The group takes
+ * the gaze, the circles take the blink. Both are addressed by that fill
+ * attribute rather than by a class, because the markup is re-emitted from the
+ * shared geometry module and a class added here would vanish at the next
+ * regeneration with no check noticing. */
 @media (prefers-reduced-motion: no-preference) {
-  /* Gaze — the eyes track the pointer, trailing it. cover-docs.js writes the two
-     custom properties as unitless -1..1; they default to 0, so with no driver
-     mounted the mark renders exactly as it does in the nav.
-
-     AMPLITUDE IS THE ONE DELIBERATE DIVERGENCE. The dashboard translates the
-     eyes 3.4 x 2.2 USER UNITS in a 256-unit box. This mark draws a 164.4-unit
-     window into 1.6rem, so one user unit is 0.185 CSS px and the canonical sweep
-     measures 0.92px wide on screen — invisible. Measured in Chromium against the
-     dashboard's own render size, 10 x 6.5 reproduces its APPARENT deflection at
-     this one, and keeps the 1.545 x:y ratio. The eyes travel at most 10 units
-     from centres at cx 96/160 inside a head spanning x 50..206, so they never
-     approach the frame. */
-  .foot-brand .brand-mark g[fill="currentColor"] {
+  /* Gaze. cover-docs.js writes the two custom properties as unitless -1..1; they
+     default to 0, so with no driver mounted the mark renders exactly as drawn.
+     AMPLITUDE IS THE ONE DIVERGENCE, and it is a re-measurement, not a taste: the
+     dashboard's 3.4 x 2.2 user units are calibrated for its ~128px hero mascot,
+     where they sweep about 3.4px on screen. At this figure's size 6 x 4 sweeps
+     the same 3.4px (measured), keeping the 1.5 x:y ratio. */
+  .foot-figure .brand-mark g[fill="currentColor"] {
     transform: translate(
-      calc(var(--acf-gaze-x, 0) * 10px),
-      calc(var(--acf-gaze-y, 0) * 6.5px)
+      calc(var(--acf-gaze-x, 0) * 6px),
+      calc(var(--acf-gaze-y, 0) * 4px)
     );
   }
-
-  /* Blink — the dashboard's cycle, verbatim, started when the footer arrives.
+  /* Blink — the dashboard's cycle, verbatim, started when the figure arrives.
      Five blinks over 12s, one of them a double, the gaps deliberately uneven:
-     "An evenly spaced blink reads as a machine with a fault light." The negative
-     delay lands the first blink ~0.6s after the reader gets here rather than
-     1.8s; the cycle is otherwise untouched.
-
-     A SQUASH, NEVER A LINE — also the dashboard's rule. Flat bars are that
-     family's BLOCKED reading, so an eye that blinked by drawing a line would
-     flash the mark's own worst state several times a minute. */
-  .foot-brand .brand-mark g[fill="currentColor"] circle {
+     "An evenly spaced blink reads as a machine with a fault light." A SQUASH,
+     NEVER A LINE: flat bars are that family's BLOCKED reading. */
+  .foot-figure .brand-mark g[fill="currentColor"] circle {
     transform-box: fill-box;
     transform-origin: center;
   }
-  .foot-brand .brand-mark.is-awake g[fill="currentColor"] circle {
+  .foot-figure .brand-mark.is-awake g[fill="currentColor"] circle {
     animation: acf-mascot-blink 12s -1.2s infinite;
   }
-  /* A share that worked is the one event on this page worth a reaction, so the
-     figure gives it one: the eyes widen, then settle. It replaces the blink
-     animation rather than stacking with it — one element, one `animation`
-     property — and the class is removed after 900ms so the cycle resumes.
-     `eye-widen` is the dashboard rig's own term (TapeReadMascotLoader.css
-     --trb-rig-eye-widen), not a new idea about what this character does. */
-  .foot-brand .brand-mark.is-pleased g[fill="currentColor"] circle {
+  /* A share that worked is the one event on this page worth a reaction. The eyes
+     widen and the antenna transmits. It replaces the blink animation rather than
+     stacking with it — one element, one `animation` property — and the class is
+     removed after 900ms so the cycle resumes. 1.42 is a re-measurement of the
+     rig's 1.16 widen for this size, for the same reason as the gaze. */
+  .foot-figure .brand-mark.is-pleased g[fill="currentColor"] circle {
     animation: acf-mascot-pleased 900ms var(--ease-emphasis) 1;
   }
-
   /* ---- The transmission --------------------------------------------------
-   * The antenna is the figure's only receiver and, until now, the only feature
-   * that had never moved. A share IS a transmission, so this is the one beat the
-   * pinned geometry already means rather than a new idea about the character.
-   *
-   * STROKE, NEVER FILL, AND NEVER SCALE. This emitter draws the tip as a hollow
-   * RING where the dashboard's React component fills it — brandMark.mjs is
-   * explicit that the eyes are the only solid in the figure — so a `fill` port
-   * lifted from the tape rig would do nothing at all here. Thickening the ring
-   * CLOSES it, which changes the silhouette instead of nudging a pixel. Measured
-   * at this render: stroke-width 8.4 is a 3.76px ring with a 1.50px hole; 15 is a
-   * 4.64px near-solid dot with a 0.62px hole. A 1.7x scale would move about one.
-   *
-   * THE PEAK CARRIES MORE INK THAN REST, which the first draft got backwards.
-   * Pairing a thicker ring with a lower opacity cancels: width 15 at 0.45 is 416
-   * ink-units against 517 at rest, so the "pulse" read as a dim. Ink is
-   * pi(outer^2 - inner^2) x opacity; the stops below are 923 and 591 against 517.
-   *
-   * Wave then echo — the tape rig's double-ping shape, translated out of the
-   * extra <circle> this pinned mark can never gain. Two pulses in 900ms is 2.2Hz,
-   * under the 3Hz flash threshold, over a 4.6px region. */
-  .foot-brand .brand-mark.is-pleased circle[cy="14"] {
+   * The antenna is the figure's only receiver, and a share IS a transmission.
+   * STROKE, NEVER FILL, AND NEVER SCALE: this emitter draws the tip as a hollow
+   * RING, so thickening the ring CLOSES it — a silhouette change, not a nudge.
+   * THE PEAK CARRIES MORE INK THAN REST: a thicker ring at lower opacity cancels
+   * (width 15 at 0.45 is 416 ink-units against 517 at rest, a dim). The stops
+   * below are 923 and 591 against 517. Wave then echo, the tape rig's
+   * double-ping shape; 2.2Hz over a few px, under the flash threshold. */
+  .foot-figure .brand-mark.is-pleased circle[cy="14"] {
     animation: acf-mascot-send 900ms var(--ease-standard) 1;
   }
-}
-
-/* The tip's resting weight, declared once. It is the mark's own stroke-width
-   (6 x the 1.4 small-size multiplier), which the keyframe has to restate because
-   `inherit` is ignored inside @keyframes. Pinned against the markup by
-   tests/footer-colophon.test.mjs so a re-emit at a different weight cannot leave
-   the tip silently snapping to this number on every share. */
-:root { --acf-tip-rest: 8.4; }
-@keyframes acf-mascot-send {
-  0%, 26%, 29%, 52%, 100% { stroke-width: var(--acf-tip-rest); stroke-opacity: 1; }
-  13%                     { stroke-width: 15; stroke-opacity: 1; }
-  40%                     { stroke-width: 12; stroke-opacity: 0.8; }
 }
 @keyframes acf-mascot-pleased {
   0%   { transform: scale(1); }
   22%  { transform: scale(1.42); }
   55%  { transform: scale(1.42); }
   100% { transform: scale(1); }
+}
+/* The tip's resting weight, declared once. It is the mark's own stroke-width,
+   which the keyframe has to restate because `inherit` is ignored inside
+   @keyframes. Pinned against the markup by tests/footer-colophon.test.mjs. */
+:root { --acf-tip-rest: 8.4; }
+@keyframes acf-mascot-send {
+  0%, 26%, 29%, 52%, 100% { stroke-width: var(--acf-tip-rest); stroke-opacity: 1; }
+  13%                     { stroke-width: 15; stroke-opacity: 1; }
+  40%                     { stroke-width: 12; stroke-opacity: 0.8; }
 }
 @keyframes acf-mascot-blink {
   0%, 15.3% { transform: scaleY(1); }
@@ -1976,149 +2083,6 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   88.3%     { transform: scaleY(0.1); }
   89%       { transform: scaleY(1); }
   100%      { transform: scaleY(1); }
-}
-
-/* ---- The reading dial ----------------------------------------------------- *
- * A card, not a floating row: the old footer put five text links opposite the
- * lockup and the band between them read as a mistake. This gives that side mass
- * and gives it something only the foot of the page can say — how far through
- * the book this particular reader is. Segments are decorative; the sentence
- * above them carries the meaning. */
-.foot-dial {
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-card);
-  background: var(--surface-raised);
-  box-shadow: var(--elevation-1);
-  padding: var(--space-5) var(--space-6) var(--space-6);
-}
-.foot-dial-count {
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--ink);
-  margin: 0 0 var(--space-3);
-}
-/* The reading curve. Uniform scaling on purpose: `preserveAspectRatio: none`
-   would stretch the geometry non-uniformly and the arcs would stop being
-   proportional to the minutes they stand for, which is the whole point of them. */
-.foot-dial-curve { margin-bottom: var(--space-3); }
-.foot-dial-curve svg { display: block; width: 100%; height: auto; overflow: visible; }
-.foot-arc {
-  fill: none;
-  stroke: var(--rule);
-  stroke-width: 3;
-  stroke-linecap: round;
-  /* One dash, its length the part's minutes, offset to its place in the book.
-     The gap is subtracted so consecutive arcs read as six parts and not one
-     line; it is small enough that the arc still measures its own time. */
-  stroke-dasharray: calc(var(--arc-len) - 1.4) 999;
-  /* Half the seam at EACH end, not the whole seam at the far one. Offsetting by
-     --arc-at alone drew the stretch across [at, at + len - 1.4], so every arc
-     sat 0.7 minutes early and the markup's claim that a dash of 18 is eighteen
-     minutes of arc was 7.8% false. +0.7 centres the ink on the true span. */
-  stroke-dashoffset: calc(-1 * (var(--arc-at) + 0.7));
-  transition: stroke var(--motion-slow) var(--ease-standard),
-              stroke-width var(--motion-base) var(--ease-standard);
-}
-.foot-arc[data-read] { stroke: var(--accent); stroke-width: 4.5; }
-/* Peek — the map and the curve are one instrument. Pointing at a Part in the
-   list lights its arc here, and pointing at an arc lights the Part there.
-   A HIGHLIGHT IS NOT THE READ STATE, and the first draft of this rule proved
-   why it has to be said: peeking an unread arc in --accent-quiet drew it
-   BRIGHTER AND THICKER than the finished ones beside it, so the one part the
-   reader had not read looked like the one part they had. Emerald means read on
-   this curve and nothing else earns it; an unread peek lifts to ink, which
-   reads as attention in both themes without ever reading as progress. */
-.foot-arc[data-peek] { stroke: var(--ink-quiet); stroke-width: 4; }
-.foot-arc[data-read][data-peek] { stroke: var(--accent); stroke-width: 6; }
-
-/* ---- The frontier ---------------------------------------------------------- *
- * Where this reader's UNBROKEN run ends, drawn in the units the curve is
- * measured in. A zero-length dash with a round cap is a dot ON the path, so it
- * cannot drift off the line it marks however the curve is retuned.
- *
- * IT IS NOT THE MINUTES READ. A reader who jumped to Part 5 has read past this;
- * that stretch lights on its own, out beyond the dot. The dot answers "how far
- * have I got, without skipping", which is the question the resume link answers
- * in words, and the two can never disagree because footDial derives both from
- * the same walk.
- *
- * It lands on a stretch BOUNDARY every time, which is exactly where the 1.4
- * seam leaves a gap — so the dot reads as a bead at the junction rather than a
- * blob over ink.
- *
- * No stroke at rest: the painter writes [data-run] or there is no position to
- * claim, which is why this element is invisible in the static file. */
-.foot-head {
-  fill: none;
-  stroke: none;
-  stroke-width: 9;
-  stroke-linecap: round;
-  stroke-dasharray: 0.01 999;
-  stroke-dashoffset: calc(-1 * var(--at-min, 0));
-}
-[data-foot-progress][data-run] .foot-head { stroke: var(--accent); }
-/* Finished readers have no frontier left to mark: at 95 the dot would sit on the
-   terminal cap of a stretch that is already accent, which reads as a blob on the
-   end of the line rather than as a position. The line itself says done. */
-[data-foot-progress][data-complete] .foot-head { stroke: none; }
-
-@media (prefers-reduced-motion: no-preference) {
-  /* The run. footDial writes the truth into --at-target immediately; footArrive
-     copies it into --at-min when the colophon is actually on screen, and the
-     transition on stroke-dashoffset carries the dot from the start of the book
-     to where the reader stopped.
-     Verified in Chromium rather than assumed: the custom property substitutes at
-     computed-value time, so stroke-dashoffset's own computed value changes and
-     its transition interpolates (measured -1.4 -> -41.8 -> -56 across a set).
-     An engine that declines to interpolate lands the dot in the right place with
-     no travel, which is a lost flourish and never a wrong reading. */
-  html.js .foot-head { transition: stroke-dashoffset var(--motion-draw) var(--ease-emphasis); }
-}
-.foot-dial-meta {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--track-wide);
-  color: var(--ink-faint);
-  margin: 0 0 var(--space-5);
-  /* Peeking a Part writes its own time here and the line must not change height
-     under the cursor. This reserved NOTHING as first written: the rule sets no
-     line-height, so it inherits the body's --leading-relaxed (1.7) and one line
-     already stood taller than the 1.4em floor. Pinning the leading is what makes
-     the floor mean anything, and 1.7em is one line of it — the readout is built
-     to fit on one ("Part 5 · ≈ 24 min · read" is the longest it can produce). */
-  line-height: var(--leading-relaxed);
-  min-height: 1.7em;
-}
-.foot-dial-meta[data-peek] { color: var(--ink-quiet); }
-/* The list side of the same instrument. */
-.foot-col a[data-peek] { color: var(--accent); }
-.foot-col a[data-peek] .foot-num { color: var(--accent); }
-/* Read state, stated in the map and not only on the curve. The curve carries it
-   in hue plus a 3->4.5 stroke step on a ~2.5px line, and on a phone there is no
-   hover to ask with — so the footer's only map had no answer to "which have I
-   finished" at rest. The page already knows: the cards two screens up carry the
-   same tick. The mark is a glyph, not a colour, so it survives greyscale, and it
-   is spoken because the ::after content of a link is announced with its name. */
-.foot-col a[data-read]::after {
-  content: " \2713";
-  color: var(--accent);
-  font-size: 0.9em;
-}
-.foot-dial-go {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--accent-link);
-  text-decoration: none;
-  border-bottom: 1px solid var(--accent-quiet);
-}
-/* Gated like its sibling .foot-out-arr. The global reduce reset kills the
-   transition but not the transform, so an ungated nudge does not slow down under
-   a stated preference — it SNAPS 4px, which is the one thing it should not do. */
-.foot-dial-go .dc-arr { display: inline-block; }
-@media (prefers-reduced-motion: no-preference) {
-  .foot-dial-go .dc-arr { transition: transform var(--motion-base) var(--ease-standard); }
-  .foot-dial-go:hover .dc-arr, .foot-dial-go:focus-visible .dc-arr { transform: translateX(4px); }
 }
 
 /* ---- Tier 2: the map ------------------------------------------------------ */
@@ -2163,6 +2127,17 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   transition: color var(--motion-base) var(--ease-standard);
 }
 .foot-col a:hover .foot-num, .foot-col a:focus-visible .foot-num { color: var(--accent); }
+/* The list side of the same instrument. */
+.foot-col a[data-peek] { color: var(--accent); }
+.foot-col a[data-peek] .foot-num { color: var(--accent); }
+/* Read state, stated in the map and not only on the curve. On a phone there is
+   no hover to ask the curve with, and the map is the only site-wide nav under
+   768px. A glyph, not a colour, so it survives greyscale; spoken with the link. */
+.foot-col a[data-read]::after {
+  content: " \2713";
+  color: var(--accent);
+  font-size: 0.9em;
+}
 /* The external mark belongs to the word it follows, not to the column's
    numeral gutter, so it closes the gap the numbered rows need. It leaves in the
    direction it points, which is the same grammar as .dc-arr sliding right on a
@@ -2252,8 +2227,6 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
 }
 
 @media (max-width: 900px) {
-  .foot-top { grid-template-columns: 1fr; gap: var(--space-8); }
-  .foot-dial { max-width: 26rem; }
   /* The Parts take the full width and split in two, so the map stays three rows
      tall instead of six and Reference/Elsewhere keep a real column each. */
   .foot-cols { grid-template-columns: 1fr 1fr; gap: var(--space-8) var(--space-6); }
@@ -2263,6 +2236,12 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
 @media (max-width: 768px) {
   /* Shared with the reading pages: their two-item base line centres on a phone. */
   .foot-base { justify-content: center; text-align: center; }
+}
+@media (max-width: 700px) {
+  .foot-head { grid-template-columns: 1fr; align-items: start; }
+  .foot-status { text-align: left; }
+  .foot-arc { stroke-width: 4; }
+  .foot-arc[data-read] { stroke-width: 6; }
 }
 @media (max-width: 560px) {
   .foot-cols, .foot-col--parts ul { grid-template-columns: 1fr; }

@@ -114,13 +114,17 @@ const RULES = [
     // One rule per card, anchored on that card's own data-part so a reading time
     // can never be written onto the wrong Part (which is how 1 and 2 were swapped).
     ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*?&approx; )\\d+( min read)`), () => MINUTES.get(n)]),
-    [/(class="foot-dial-meta" data-foot-meta>&approx; )\d+( min end to end)/, () => TOTAL_MINUTES],
+    [/(class="foot-meta" data-foot-meta>&approx; )\d+( min end to end)/, () => TOTAL_MINUTES],
+    // The stage normalises the ticks' positions to the same total the arcs use.
+    [/(class="measure-full foot-stage" style="--total: )\d+(")/, () => TOTAL_MINUTES],
+    // The ticks: one per Part, each spanning its own columns. Anchored on the
+    // tick's own data-foot-tick for the same reason the arcs and cards are.
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-tick="${n}" style="--at: )\\d+(;)`), () => MINUTES_BEFORE(n)]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-tick="${n}" style="--at: \\d+; --len: )\\d+(")`), () => MINUTES.get(n)]),
     // One rule per arc, anchored on that arc's own data-foot-arc, so a length can
     // never be written onto the wrong Part — the failure the per-card rule above
     // was added for after 1 and 2 were transposed.
     ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength=")\\d+(")`), () => TOTAL_MINUTES]),
-    // The frontier dot rides the same normalisation, so it is the same count.
-    [/(data-foot-head pathLength=")\d+(")/, () => TOTAL_MINUTES],
     ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength="\\d+" style="--arc-len: )\\d+(;)`), () => MINUTES.get(n)]),
     ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength="\\d+" style="--arc-len: \\d+; --arc-at: )\\d+(")`), () => MINUTES_BEFORE(n)]),
   ]],
