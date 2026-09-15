@@ -124,6 +124,51 @@ test('peek: it rides focus as well as hover, and adds no new controls', () => {
   assert.doesNotMatch(FOOTER, /data-foot-arc[^>]*(tabindex|role=)/, 'no arc pretends to be a control');
 });
 
+test('curve: the seam is half at each end, so a stretch is centred on its own minutes', () => {
+  // The claim the whole display rests on. The first draft clipped the entire
+  // 1.4 seam off the FAR end, so a stretch of 18 was painted across
+  // [at, at+16.6] — every arc 0.7 minutes early, while the markup comment
+  // asserted the dash simply WAS the minutes. 7.8% false, in the sentence that
+  // asserted it. Reverting the offset restores that silently, so it is pinned.
+  assert.match(CSS, /stroke-dasharray: calc\(var\(--arc-len\) - 1\.4\) 999;/, 'the seam is 1.4 total');
+  assert.match(CSS, /stroke-dashoffset: calc\(-1 \* \(var\(--arc-at\) \+ 0\.7\)\);/, 'and half of it is taken at the near end');
+  // And the comment must not go back to overclaiming.
+  assert.doesNotMatch(FOOTER, /a dash of \d+ IS \w+ minutes of arc/, 'the markup no longer says the dash is the minutes');
+});
+
+test('curve: the readout line reserves a real line, not a number below one', () => {
+  // `min-height: 1.4em` reserved nothing: the rule sets no line-height, so it
+  // inherited the body's --leading-relaxed (1.7) and one line already stood
+  // taller than the floor. A floor under the natural height is a comment, not a
+  // guarantee — so the leading is pinned here and the floor matches it.
+  const rule = CSS.match(/\.foot-dial-meta \{[\s\S]*?\n\}/);
+  assert.ok(rule, 'the readout has a rule');
+  assert.match(rule[0], /line-height: var\(--leading-relaxed\);/, 'the leading is declared, not inherited');
+  assert.match(rule[0], /min-height: 1\.7em;/, 'and the floor is one line of it');
+});
+
+test('map: read state is stated in the list, not only in the curve', () => {
+  // Under 768px the header nav is display:none, so this map is the site's only
+  // one — and on a phone there is no hover to ask the curve with. The curve
+  // carries read in hue plus a 3->4.5 stroke step on a ~2.5px line; the list
+  // carries it in a glyph, which survives greyscale and is spoken with the link.
+  const fn = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function footPeek('));
+  assert.match(fn, /\[data-foot-part-link="' \+ row\.getAttribute\('data-part'\) \+ '"\]/, 'footDial marks the matching row');
+  assert.match(CSS, /\.foot-col a\[data-read\]::after \{[\s\S]*?content: " \\2713";/, 'and the row shows a tick');
+  // Nothing ships pre-ticked, for the same reason no arc ships lit.
+  assert.doesNotMatch(FOOTER, /data-foot-part-link="\d"[^>]*data-read/, 'no row ships read');
+});
+
+test('curve: the resume arrow is gated like every other nudge in the footer', () => {
+  // The global reduce reset kills the transition but NOT the transform, so an
+  // ungated nudge does not slow down under a stated preference — it snaps 4px.
+  // .foot-out-arr was already gated; this one was not.
+  const gated = CSS.slice(CSS.indexOf('.foot-dial-go .dc-arr'), CSS.indexOf('.foot-dial-go .dc-arr') + 400);
+  assert.match(gated, /@media \(prefers-reduced-motion: no-preference\)/, 'the nudge sits inside the gate');
+  const bare = CSS.match(/\.foot-dial-go \.dc-arr \{[^}]*\}/);
+  assert.doesNotMatch(bare[0], /transition|transform/, 'and nothing moves outside it');
+});
+
 // ---------------------------------------------------------------------------
 // 3. The share offer
 // ---------------------------------------------------------------------------
@@ -152,12 +197,35 @@ test('share: it hands over the canonical URL, not whatever origin served the pag
   assert.match(fn, /if \(!canNative && !canCopy\) return/, 'and with neither, the sentence stays a sentence');
 });
 
+test('share: a failure is visible, not only audible', () => {
+  // Without an end state a sighted reader clicks "share", the clipboard rejects,
+  // and the word does nothing at all — indistinguishable from a dead control.
+  const fn = COVER_JS.slice(COVER_JS.indexOf('function shareOffer()'), COVER_JS.indexOf('function mascot()'));
+  assert.match(fn, /function failed\(\)/, 'there is a failure path');
+  assert.match(fn, /settleBack\('data-share-failed'\)/, 'and it sets a visible state');
+  assert.match(fn, /\.catch\(failed\)/, 'which the clipboard rejection reaches');
+  // No motion in it, so it survives the reduce reset as an end state.
+  const rule = CSS.match(/\.foot-share\[data-share-failed\] \{[^}]*\}/);
+  assert.ok(rule, 'the failure state has a rule');
+  assert.doesNotMatch(rule[0], /transition|animation|transform/, 'and it is an end state, not a tween');
+});
+
+test('share: a second press is announced, and the announcement names the link', () => {
+  // Writing the same string into a live region twice is not a mutation and most
+  // screen readers stay silent — so copy, then copy again, said nothing the
+  // second time. Verified in Chromium: the region now mutates write / blank /
+  // write across two presses.
+  const fn = COVER_JS.slice(COVER_JS.indexOf('function shareOffer()'), COVER_JS.indexOf('function mascot()'));
+  assert.match(fn, /status\.textContent = '';[\s\S]{0,160}requestAnimationFrame/, 'the region is blanked first');
+  assert.match(fn, /say\(msg \+ ' \\u00b7 ' \+ url\.replace/, 'and the announcement names the URL it shared');
+});
+
 test('share: the visible word never changes', () => {
   // "Free to read, free to copied" is not a sentence, and a visible label that
   // drifts from the accessible name breaks WCAG 2.5.3. Success speaks through
   // the icon, the mascot and the live region instead.
   const fn = COVER_JS.slice(COVER_JS.indexOf('function shareOffer()'), COVER_JS.indexOf('function mascot()'));
   assert.doesNotMatch(fn, /textContent = '(copied|shared|Copied|Shared)'/, 'the word is never rewritten');
-  assert.match(fn, /setAttribute\('data-shared'/, 'the icon carries the confirmation');
+  assert.match(fn, /settleBack\('data-shared'\)/, 'the icon carries the confirmation');
   assert.match(CSS, /\.foot-share\[data-shared\] \.foot-share-icon--go \{ display: none; \}/, 'which swaps for a check');
 });

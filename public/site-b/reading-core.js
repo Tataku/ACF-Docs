@@ -218,6 +218,10 @@
       total += minutes[i];
       if (!row.hasAttribute('data-read')) return;
       arcs[i].setAttribute('data-read', '');
+      // The map says it too. On a phone the curve's hue is the only channel there
+      // is, and the map is the only site-wide nav under 768px.
+      var link = document.querySelector('[data-foot-part-link="' + row.getAttribute('data-part') + '"]');
+      if (link) link.setAttribute('data-read', '');
       done += minutes[i];
       read += 1;
     });

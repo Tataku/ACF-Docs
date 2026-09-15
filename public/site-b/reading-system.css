@@ -1975,7 +1975,11 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
      The gap is subtracted so consecutive arcs read as six parts and not one
      line; it is small enough that the arc still measures its own time. */
   stroke-dasharray: calc(var(--arc-len) - 1.4) 999;
-  stroke-dashoffset: calc(-1 * var(--arc-at));
+  /* Half the seam at EACH end, not the whole seam at the far one. Offsetting by
+     --arc-at alone drew the stretch across [at, at + len - 1.4], so every arc
+     sat 0.7 minutes early and the markup's claim that a dash of 18 is eighteen
+     minutes of arc was 7.8% false. +0.7 centres the ink on the true span. */
+  stroke-dashoffset: calc(-1 * (var(--arc-at) + 0.7));
   transition: stroke var(--motion-slow) var(--ease-standard),
               stroke-width var(--motion-base) var(--ease-standard);
 }
@@ -1997,14 +2001,29 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   color: var(--ink-faint);
   margin: 0 0 var(--space-5);
   /* Peeking a Part writes its own time here and the line must not change height
-     under the cursor, so it holds two lines' worth of room at the narrow widths
-     where the longer string wraps. */
-  min-height: 1.4em;
+     under the cursor. This reserved NOTHING as first written: the rule sets no
+     line-height, so it inherits the body's --leading-relaxed (1.7) and one line
+     already stood taller than the 1.4em floor. Pinning the leading is what makes
+     the floor mean anything, and 1.7em is one line of it — the readout is built
+     to fit on one ("Part 5 · ≈ 24 min · read" is the longest it can produce). */
+  line-height: var(--leading-relaxed);
+  min-height: 1.7em;
 }
 .foot-dial-meta[data-peek] { color: var(--ink-quiet); }
 /* The list side of the same instrument. */
 .foot-col a[data-peek] { color: var(--accent); }
 .foot-col a[data-peek] .foot-num { color: var(--accent); }
+/* Read state, stated in the map and not only on the curve. The curve carries it
+   in hue plus a 3->4.5 stroke step on a ~2.5px line, and on a phone there is no
+   hover to ask with — so the footer's only map had no answer to "which have I
+   finished" at rest. The page already knows: the cards two screens up carry the
+   same tick. The mark is a glyph, not a colour, so it survives greyscale, and it
+   is spoken because the ::after content of a link is announced with its name. */
+.foot-col a[data-read]::after {
+  content: " \2713";
+  color: var(--accent);
+  font-size: 0.9em;
+}
 .foot-dial-go {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
@@ -2012,8 +2031,14 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   text-decoration: none;
   border-bottom: 1px solid var(--accent-quiet);
 }
-.foot-dial-go .dc-arr { display: inline-block; transition: transform var(--motion-base) var(--ease-standard); }
-.foot-dial-go:hover .dc-arr, .foot-dial-go:focus-visible .dc-arr { transform: translateX(4px); }
+/* Gated like its sibling .foot-out-arr. The global reduce reset kills the
+   transition but not the transform, so an ungated nudge does not slow down under
+   a stated preference — it SNAPS 4px, which is the one thing it should not do. */
+.foot-dial-go .dc-arr { display: inline-block; }
+@media (prefers-reduced-motion: no-preference) {
+  .foot-dial-go .dc-arr { transition: transform var(--motion-base) var(--ease-standard); }
+  .foot-dial-go:hover .dc-arr, .foot-dial-go:focus-visible .dc-arr { transform: translateX(4px); }
+}
 
 /* ---- Tier 2: the map ------------------------------------------------------ */
 .foot-cols {
@@ -2120,6 +2145,11 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
 .foot-share[data-shared] .foot-share-icon--go { display: none; }
 .foot-share[data-shared] .foot-share-icon--done { display: block; }
 .foot-share[data-shared] { color: var(--accent); text-decoration-color: transparent; }
+/* A clipboard that rejects has to say so where the cursor is. No motion, so it
+   survives the reduce reset as an end state rather than a lost tween. */
+.foot-share[data-share-failed] { color: var(--ink-quiet); text-decoration-color: var(--ink-quiet); }
+.foot-share[data-share-failed] .foot-share-icon--go { display: none; }
+.foot-share[data-share-failed] .foot-share-icon--done { display: none; }
 @media (prefers-reduced-motion: no-preference) {
   .foot-share .foot-share-icon--go { transition: transform var(--motion-base) var(--ease-emphasis); }
   .foot-share:hover .foot-share-icon--go,

@@ -178,9 +178,10 @@
    * IT SHARES THE CANONICAL URL, NOT location.href. Every page here declares a
    * <link rel="canonical">, and on a preview deployment the two differ: a reader
    * sharing from a Vercel preview would otherwise hand someone a preview link.
-   * BACKLOG.md section 3 decision 4 records changing partActions() for this as an
-   * OPEN OWNER DECISION, and it stays open — new code choosing correctly for
-   * itself is not that decision being taken on the owner's behalf.
+   * This control was written to that rule while BACKLOG.md section 3 decision 4
+   * was still open; the owner closed it on 2026-09-15 in favour of preferring the
+   * canonical ALWAYS, and partActions() now follows the same rule. The invariant
+   * over both is pinned in tests/control-reachability.test.mjs section 1b.
    *
    * The word never changes. "Free to read, free to copied" is not a sentence,
    * and a visible label that drifts from the accessible name breaks WCAG 2.5.3.
@@ -204,16 +205,45 @@
     btn.hidden = false;
     plain.hidden = true;
 
-    function done(msg) {
-      if (status) status.textContent = msg;
-      btn.setAttribute('data-shared', '');
-      if (mark) {
-        mark.classList.add('is-pleased');
-        clearTimeout(unpleased);
-        unpleased = setTimeout(function () { mark.classList.remove('is-pleased'); }, 900);
-      }
+    /* Writing the same string into a live region twice is not a mutation, and
+       most screen readers stay silent for it — so copying the link, then copying
+       it again, announced nothing the second time. Blank first, write on the next
+       frame, and every press is heard. */
+    function say(msg) {
+      if (!status) return;
+      status.textContent = '';
+      window.requestAnimationFrame(function () { status.textContent = msg; });
+    }
+
+    function settleBack(attr) {
       clearTimeout(settle);
-      settle = setTimeout(function () { btn.removeAttribute('data-shared'); }, 2400);
+      settle = setTimeout(function () {
+        btn.removeAttribute('data-shared');
+        btn.removeAttribute('data-share-failed');
+      }, 2400);
+      btn.removeAttribute('data-shared');
+      btn.removeAttribute('data-share-failed');
+      btn.setAttribute(attr, '');
+    }
+
+    function done(msg) {
+      // The announcement names the link, not just the act: a reader who cannot
+      // see the page has otherwise been told something is on their clipboard
+      // without being told what.
+      say(msg + ' \u00b7 ' + url.replace(/^https?:\/\//, ''));
+      settleBack('data-shared');
+      if (!mark) return;
+      mark.classList.add('is-pleased');
+      clearTimeout(unpleased);
+      unpleased = setTimeout(function () { mark.classList.remove('is-pleased'); }, 900);
+    }
+
+    /* A failure needs a VISIBLE end state, not only a live-region one. Without it
+       a sighted reader clicks "share", the clipboard rejects, and the word does
+       nothing at all — indistinguishable from a dead control. */
+    function failed() {
+      say('Copy failed');
+      settleBack('data-share-failed');
     }
 
     btn.addEventListener('click', function () {
@@ -225,9 +255,7 @@
           .catch(function () {});
         return;
       }
-      navigator.clipboard.writeText(url)
-        .then(function () { done('Link copied'); })
-        .catch(function () { if (status) status.textContent = 'Copy failed'; });
+      navigator.clipboard.writeText(url).then(function () { done('Link copied'); }).catch(failed);
     });
   }
   shareOffer();
