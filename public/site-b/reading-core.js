@@ -203,19 +203,37 @@
   function footDial(rows, firstUnread) {
     var dial = document.querySelector('[data-foot-progress]');
     if (!dial) return;
-    var segs = dial.querySelectorAll('[data-foot-seg]');
-    if (segs.length !== rows.length) return;
+    var arcs = dial.querySelectorAll('[data-foot-arc]');
+    if (arcs.length !== rows.length) return;
 
-    var read = 0;
+    /* Minutes, not parts. Every card states its own reading time, so the book's
+       shape is already on the page: Part 5 is a quarter of it and Part 2 an
+       eighth, and a count of six equal ticks says neither. The numbers are READ
+       BACK OFF THE CARDS rather than restated here — a second copy is a second
+       thing to drift, and sync-counts already owns the first. */
+    var minutes = [], total = 0, done = 0, read = 0;
     rows.forEach(function (row, i) {
+      var m = (row.textContent.match(/(\d+)\s*min read/) || [, 0])[1];
+      minutes[i] = Number(m) || 0;
+      total += minutes[i];
       if (!row.hasAttribute('data-read')) return;
-      segs[i].setAttribute('data-read', '');
+      arcs[i].setAttribute('data-read', '');
+      done += minutes[i];
       read += 1;
     });
-    if (!read) return;
+    if (!read) return;                       // first visit: the authored copy stands
 
     var count = dial.querySelector('[data-foot-count]');
     if (count) count.textContent = read + ' of ' + rows.length + ' parts read';
+
+    /* What is LEFT is the number a reader actually wants at the foot of the
+       page, and it is only truthful once there is progress to subtract. */
+    var meta = dial.querySelector('[data-foot-meta]');
+    if (meta && total) {
+      meta.textContent = read === rows.length
+        ? '\u2248 ' + total + ' min, start to finish'
+        : '\u2248 ' + (total - done) + ' min left';
+    }
 
     var go = dial.querySelector('[data-foot-resume]');
     var label = go && go.querySelector('[data-foot-resume-label]');
@@ -235,6 +253,67 @@
     label.textContent = 'Read it again';
   }
 
+  /* The map and the curve are one instrument -----------------------------------
+   * Pointing at a Part in the footer's list lights its arc on the curve; pointing
+   * at an arc lights the Part in the list, and the dial's meta line states that
+   * Part's own reading time. Nothing here is a control: the six links were
+   * already the controls, and this only makes what they refer to visible. So it
+   * rides :focus-visible as well as hover — a keyboard reader tabbing the map
+   * gets the same reading — and the curve's arcs stay aria-hidden, because a
+   * screen reader is served by the link text, not by a highlight.
+   */
+  function footPeek() {
+    var dial = document.querySelector('[data-foot-progress]');
+    var footer = document.querySelector('.site-footer');
+    if (!dial || !footer) return;
+    var links = footer.querySelectorAll('[data-foot-part-link]');
+    var arcs = dial.querySelectorAll('[data-foot-arc]');
+    var meta = dial.querySelector('[data-foot-meta]');
+    if (!links.length || arcs.length !== links.length) return;
+    // The line this returns to. Captured now, AFTER footDial has had its say, so
+    // a peek can never strand the dial showing one Part's time as if it were the
+    // whole book's.
+    var rest = meta ? meta.textContent : '';
+
+    function find(list, attr, n) {
+      for (var i = 0; i < list.length; i += 1) {
+        if (list[i].getAttribute(attr) === n) return list[i];
+      }
+      return null;
+    }
+    function peek(n) {
+      var link = find(links, 'data-foot-part-link', n);
+      var arc = find(arcs, 'data-foot-arc', n);
+      if (link) link.setAttribute('data-peek', '');
+      if (arc) arc.setAttribute('data-peek', '');
+      if (!meta || !arc) return;
+      // The arc already carries the minutes sync-counts wrote onto it, so the
+      // hover reads the same number the geometry is drawn from.
+      var mins = arc.style.getPropertyValue('--arc-len').trim();
+      if (!mins) return;
+      meta.textContent = 'Part ' + n + ' \u00b7 \u2248 ' + mins + ' min'
+        + (arc.hasAttribute('data-read') ? ' \u00b7 read' : '');
+      meta.setAttribute('data-peek', '');
+    }
+    function clear() {
+      var i;
+      for (i = 0; i < links.length; i += 1) links[i].removeAttribute('data-peek');
+      for (i = 0; i < arcs.length; i += 1) arcs[i].removeAttribute('data-peek');
+      if (!meta) return;
+      meta.removeAttribute('data-peek');
+      meta.textContent = rest;
+    }
+
+    function wire(el, n) {
+      el.addEventListener('mouseenter', function () { peek(n); });
+      el.addEventListener('mouseleave', clear);
+      el.addEventListener('focus', function () { peek(n); });
+      el.addEventListener('blur', clear);
+    }
+    var k;
+    for (k = 0; k < links.length; k += 1) wire(links[k], links[k].getAttribute('data-foot-part-link'));
+    for (k = 0; k < arcs.length; k += 1) wire(arcs[k], arcs[k].getAttribute('data-foot-arc'));
+  }
   /* ---- Sidebar collapse/expand (desktop), persisted ---------------------- */
   function sidebarCollapse() {
     var btn = document.querySelector('.sidebar-toggle');
@@ -1421,6 +1500,7 @@
   floatNav();
   progressWrite();
   progressPaint();
+  footPeek();   // after progressPaint: the peek line rests on whatever it decided
   sectionReveal();
   hamburgerFade();
   highlights();

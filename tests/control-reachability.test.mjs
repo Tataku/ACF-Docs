@@ -111,6 +111,25 @@ test('nav: the glossary is reachable from the top of the page', () => {
   assert.ok(navLinks('Primary').some((a) => a.href === '/glossary'), 'primary nav links the glossary');
 });
 
+test('share: the offer in the base rule is hittable without breaking the line', () => {
+  // "Free to read, free to share" is now a control, and it is a WORD IN A
+  // SENTENCE — the case WCAG 2.2's target-size minimum explicitly exempts, and
+  // the same exemption this file's own non-finding note invokes for inline
+  // links. It is still given a real hit box, because an exemption is a reason
+  // not to be red, not a reason to be hard to hit. The negative margin is what
+  // keeps that padding from opening up the line it sits in; without it the base
+  // rule grows and the fix reads as a layout bug.
+  const rule = CSS.match(/\.foot-share \{[\s\S]*?\n\}/);
+  assert.ok(rule, 'the share control has a rule');
+  assert.match(rule[0], /padding: 0\.45em/, 'it has vertical padding to stand on');
+  assert.match(rule[0], /margin: -0\.45em 0/, 'cancelled by an equal negative margin');
+  // Label in Name (WCAG 2.5.3): the accessible name must contain the visible word.
+  const btn = COVER.match(/<button[^>]*data-foot-share[^>]*>/);
+  assert.ok(btn, 'the control exists');
+  const name = (btn[0].match(/aria-label="([^"]+)"/) || [, ''])[1];
+  assert.match(name.toLowerCase(), /\bshare\b/, `accessible name "${name}" contains the visible word`);
+});
+
 // ---------------------------------------------------------------------------
 // 2. The drawer's section list
 // ---------------------------------------------------------------------------

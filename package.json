@@ -11,6 +11,7 @@
     "test:glossary": "node --test tests/glossary-index.test.mjs",
     "test:reference-pages": "node --test tests/reference-pages.test.mjs",
     "test:reading-experience": "node --test tests/reading-experience.test.mjs",
+    "test:footer": "node --test tests/footer-colophon.test.mjs",
     "test:control-reachability": "node --test tests/control-reachability.test.mjs",
     "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
     "validate:charts": "node scripts/validate-chart-specs.mjs",

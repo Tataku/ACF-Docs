@@ -169,6 +169,150 @@
 
   /* Hero field: moved to the shared hero-field.js (loaded by both covers). */
 
+  /* ---- The share offer ------------------------------------------------------ *
+   * The base rule offers the framework "free to read, free to share"; this makes
+   * the second half true. It is the SAME ladder partActions() walks on the part
+   * pages — native sheet, else clipboard, else nothing — so the site has one
+   * share behaviour rather than two that drift apart.
+   *
+   * IT SHARES THE CANONICAL URL, NOT location.href. Every page here declares a
+   * <link rel="canonical">, and on a preview deployment the two differ: a reader
+   * sharing from a Vercel preview would otherwise hand someone a preview link.
+   * BACKLOG.md section 3 decision 4 records changing partActions() for this as an
+   * OPEN OWNER DECISION, and it stays open — new code choosing correctly for
+   * itself is not that decision being taken on the owner's behalf.
+   *
+   * The word never changes. "Free to read, free to copied" is not a sentence,
+   * and a visible label that drifts from the accessible name breaks WCAG 2.5.3.
+   * Success is carried by the icon, the mascot, and the live region instead. */
+  function shareOffer() {
+    var btn = document.querySelector('[data-foot-share]');
+    var plain = document.querySelector('[data-foot-share-plain]');
+    if (!btn || !plain) return;
+
+    var canNative = !!navigator.share;
+    var canCopy = !!(navigator.clipboard && navigator.clipboard.writeText);
+    if (!canNative && !canCopy) return;   // neither API: the sentence stays a sentence
+
+    var canonical = document.querySelector('link[rel="canonical"]');
+    var url = (canonical && canonical.href) || location.href;
+    var title = (document.title.split('\u00b7')[0] || '').trim() || 'The Adaptive Convexity Framework';
+    var status = document.querySelector('[data-foot-share-status]');
+    var mark = document.querySelector('.foot-brand .brand-mark');
+    var settle = null, unpleased = null;
+
+    btn.hidden = false;
+    plain.hidden = true;
+
+    function done(msg) {
+      if (status) status.textContent = msg;
+      btn.setAttribute('data-shared', '');
+      if (mark) {
+        mark.classList.add('is-pleased');
+        clearTimeout(unpleased);
+        unpleased = setTimeout(function () { mark.classList.remove('is-pleased'); }, 900);
+      }
+      clearTimeout(settle);
+      settle = setTimeout(function () { btn.removeAttribute('data-shared'); }, 2400);
+    }
+
+    btn.addEventListener('click', function () {
+      if (canNative) {
+        // A dismissed share sheet rejects. That is the reader deciding not to,
+        // not a failure, so it says nothing rather than reporting an error.
+        navigator.share({ title: title, url: url })
+          .then(function () { done('Shared'); })
+          .catch(function () {});
+        return;
+      }
+      navigator.clipboard.writeText(url)
+        .then(function () { done('Link copied'); })
+        .catch(function () { if (status) status.textContent = 'Copy failed'; });
+    });
+  }
+  shareOffer();
+
+  /* ---- The mascot ----------------------------------------------------------- *
+   * A port of ACFDashboard's useMascotGaze
+   * (src/features/shared/components/ACFMascot/useMascotGaze.js) to vanilla JS.
+   * LERP and REACH are that file's constants: 0.09 so the mark TRAILS the
+   * pointer instead of snapping to it — "a snap reads as a security camera" —
+   * and 0.42 of the viewport for full deflection.
+   *
+   * IT IS NOT INSIDE motion(). That function returns early when GSAP has not
+   * loaded, and whether the figure is alive must not depend on a vendored
+   * animation library. Blink is CSS and needs no JS at all; gaze needs this, and
+   * carries its own reduced-motion gate because a transform driven from JS is
+   * the one place the mark could drift out of a stated preference — so the loop
+   * simply never starts.
+   *
+   * The observer does double duty: it starts the blink cycle when the reader
+   * actually reaches the colophon (rather than leaving the figure blinking to an
+   * empty room five screens below the fold), and it runs the gaze loop ONLY
+   * while the footer is on screen. */
+  function mascot() {
+    var brand = document.querySelector('.foot-brand');
+    var mark = brand && brand.querySelector('.brand-mark');
+    if (!mark) return;
+
+    var still = true;
+    if (window.matchMedia) {
+      // `any-hover`, never `hover`. The bare form asks about the PRIMARY pointer,
+      // so a 2-in-1 or a touchscreen laptop reports `hover: none` while its owner
+      // is driving a mouse, and the gaze would silently never run for them.
+      still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        || !window.matchMedia('(any-hover: hover)').matches;
+    }
+
+    var LERP = 0.09, REACH = 0.42;
+    var targetX = 0, targetY = 0, currentX = 0, currentY = 0, frame = null, onScreen = false;
+
+    function onMove(e) {
+      var r = mark.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      targetX = Math.max(-1, Math.min(1, (e.clientX - cx) / (window.innerWidth * REACH)));
+      targetY = Math.max(-1, Math.min(1, (e.clientY - cy) / (window.innerHeight * REACH)));
+    }
+    function step() {
+      currentX += (targetX - currentX) * LERP;
+      currentY += (targetY - currentY) * LERP;
+      mark.style.setProperty('--acf-gaze-x', currentX.toFixed(3));
+      mark.style.setProperty('--acf-gaze-y', currentY.toFixed(3));
+      frame = window.requestAnimationFrame(step);
+    }
+    function start() {
+      if (still || frame != null || !onScreen || document.hidden) return;
+      frame = window.requestAnimationFrame(step);
+    }
+    function stop() {
+      if (frame == null) return;
+      window.cancelAnimationFrame(frame);
+      frame = null;
+    }
+
+    function arrive(seen) {
+      onScreen = seen;
+      if (seen) { mark.classList.add('is-awake'); start(); } else stop();
+    }
+
+    if (window.IntersectionObserver) {
+      var io = new IntersectionObserver(function (entries) {
+        arrive(entries.some(function (en) { return en.isIntersecting; }));
+      }, { threshold: 0.35 });
+      io.observe(brand);
+    } else {
+      arrive(true);
+    }
+
+    if (!still) {
+      document.addEventListener('mousemove', onMove, { passive: true });
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) stop(); else start();
+      });
+    }
+  }
+  mascot();
+
   /* ---- GSAP choreography ---------------------------------------------------- *
    * Guarded: reduced-motion or a missing GSAP leaves the (visible) static page. */
   function motion() {
@@ -191,24 +335,15 @@
       });
 
       /* The page lands on the curve it opened with: the footer's signature draws
-         itself once as the colophon arrives, and the mark blinks back at the
-         reader who got there. Both sit inside this function's reduced-motion and
-         no-GSAP guards, so the static footer — already a finished curve and a
-         still mark — is what every other reader gets. */
+         itself once as the colophon arrives. Inside this function's
+         reduced-motion and no-GSAP guards, so the static footer — already a
+         finished curve — is what every other reader gets. The mascot is
+         deliberately NOT here: see mascot() below. */
       var sig = document.querySelector('.foot-sig-curve');
       if (sig) {
         g.fromTo(sig, { strokeDashoffset: 1 }, {
           strokeDashoffset: 0, duration: 1.2, ease: 'power2.out',
           scrollTrigger: { trigger: '.site-footer', start: 'top 92%', once: true }
-        });
-      }
-      var footMark = document.querySelector('.foot-brand .brand-mark');
-      if (footMark) {
-        window.ScrollTrigger.create({
-          trigger: '.foot-brand',
-          start: 'top 95%',
-          once: true,
-          onEnter: function () { footMark.classList.add('is-awake'); }
         });
       }
     }

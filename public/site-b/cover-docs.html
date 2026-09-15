@@ -488,15 +488,33 @@
              thing to say to a reader who has not begun one. -->
         <div class="foot-dial" data-foot-progress>
           <p class="foot-dial-count" data-foot-count>Six parts, end to end</p>
-          <div class="foot-dial-track" aria-hidden="true">
-            <span class="foot-dial-seg" data-foot-seg></span>
-            <span class="foot-dial-seg" data-foot-seg></span>
-            <span class="foot-dial-seg" data-foot-seg></span>
-            <span class="foot-dial-seg" data-foot-seg></span>
-            <span class="foot-dial-seg" data-foot-seg></span>
-            <span class="foot-dial-seg" data-foot-seg></span>
+
+          <!-- THE READING CURVE. Not a progress bar: the six arcs are one convex
+               sweep — the same shape the hero opens on and the footer lands on —
+               and each arc's LENGTH IS THAT PART'S READING TIME. Part 5 is a
+               quarter of the book, and on a bar of six equal ticks it looked
+               like a sixth of it. Reading in minutes also makes the shape true:
+               the early parts are the long flat approach and the last stretch is
+               the climb, which is the argument the framework is named for.
+
+               `pathLength` normalises the curve to the book's total minutes, so
+               a dash of 18 IS eighteen minutes of arc. Every number below is
+               written by scripts/sync-counts.mjs from the prose — the same rule
+               that already forbids typing the per-part times on the cards above.
+               The curve is decorative and carries no meaning of its own: the
+               count above it and the map beside it say everything it says. -->
+          <div class="foot-dial-curve">
+            <svg viewBox="0 0 400 62" fill="none" aria-hidden="true">
+            <path class="foot-arc" data-foot-arc="1" pathLength="95" style="--arc-len: 18; --arc-at: 0" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
+            <path class="foot-arc" data-foot-arc="2" pathLength="95" style="--arc-len: 12; --arc-at: 18" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
+            <path class="foot-arc" data-foot-arc="3" pathLength="95" style="--arc-len: 13; --arc-at: 30" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
+            <path class="foot-arc" data-foot-arc="4" pathLength="95" style="--arc-len: 13; --arc-at: 43" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
+            <path class="foot-arc" data-foot-arc="5" pathLength="95" style="--arc-len: 24; --arc-at: 56" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
+            <path class="foot-arc" data-foot-arc="6" pathLength="95" style="--arc-len: 15; --arc-at: 80" d="M8 56 C 104 56, 190 51, 250 40 C 318 27, 356 17, 392 6"></path>
+            </svg>
           </div>
-          <p class="foot-dial-meta">&approx; 95 min of reading</p>
+
+          <p class="foot-dial-meta" data-foot-meta>&approx; 95 min end to end</p>
           <a class="foot-dial-go" href="/part-1-foundation" data-foot-resume>
             <span data-foot-resume-label>Start at Part 1</span> <span class="dc-arr" aria-hidden="true">&rarr;</span>
           </a>
@@ -507,12 +525,12 @@
         <div class="foot-col foot-col--parts">
           <h2 class="foot-h" id="foot-h-parts">The six parts</h2>
           <ul aria-labelledby="foot-h-parts">
-            <li><a href="/part-1-foundation"><span class="foot-num" aria-hidden="true">01</span>Foundation &amp; Philosophy</a></li>
-            <li><a href="/part-2-lineage-macro-thesis"><span class="foot-num" aria-hidden="true">02</span>Lineage &amp; Macro Thesis</a></li>
-            <li><a href="/part-3-bitcoin-convexity-backbone"><span class="foot-num" aria-hidden="true">03</span>Bitcoin: Convexity Backbone</a></li>
-            <li><a href="/part-4-tax-architecture-roc-strategy"><span class="foot-num" aria-hidden="true">04</span>Tax Architecture &amp; ROC Strategy</a></li>
-            <li><a href="/part-5-portfolio-construction-position-management"><span class="foot-num" aria-hidden="true">05</span>Portfolio Construction &amp; Position Management</a></li>
-            <li><a href="/part-6-convexity-framework-integrity-scoring"><span class="foot-num" aria-hidden="true">06</span>Convexity &amp; Framework Integrity Scoring</a></li>
+            <li><a data-foot-part-link="1" href="/part-1-foundation"><span class="foot-num" aria-hidden="true">01</span>Foundation &amp; Philosophy</a></li>
+            <li><a data-foot-part-link="2" href="/part-2-lineage-macro-thesis"><span class="foot-num" aria-hidden="true">02</span>Lineage &amp; Macro Thesis</a></li>
+            <li><a data-foot-part-link="3" href="/part-3-bitcoin-convexity-backbone"><span class="foot-num" aria-hidden="true">03</span>Bitcoin: Convexity Backbone</a></li>
+            <li><a data-foot-part-link="4" href="/part-4-tax-architecture-roc-strategy"><span class="foot-num" aria-hidden="true">04</span>Tax Architecture &amp; ROC Strategy</a></li>
+            <li><a data-foot-part-link="5" href="/part-5-portfolio-construction-position-management"><span class="foot-num" aria-hidden="true">05</span>Portfolio Construction &amp; Position Management</a></li>
+            <li><a data-foot-part-link="6" href="/part-6-convexity-framework-integrity-scoring"><span class="foot-num" aria-hidden="true">06</span>Convexity &amp; Framework Integrity Scoring</a></li>
           </ul>
         </div>
 
@@ -542,7 +560,18 @@
 
       <div class="measure-full foot-base">
         <span>&copy; 2026 Adaptive Convexity Framework</span>
-        <span>Free to read, free to share.</span>
+        <!-- "share" IS the control. It ships as plain text and cover-docs.js
+             swaps in the button only when this browser can actually share or
+             copy, so with JS off — or anywhere neither API exists — the sentence
+             stays a sentence instead of carrying a dead control in the middle of
+             one. The visible word never changes: "free to read, free to copied"
+             is not a sentence, and swapping it would also break the accessible
+             name away from the label. Success speaks through the icon, the
+             mascot, and the live region below. -->
+        <span class="foot-offer">Free to read, free to <button type="button"
+            class="foot-share" data-foot-share hidden
+            aria-label="Share the Adaptive Convexity Framework"><span>share</span><svg class="foot-share-icon foot-share-icon--go" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 51.58 65 Q 55.18 42.5 51.58 20 A 1.58 1.58 0 0 1 48.43 20 Q 48.43 42.5 48.43 65 A 1.58 1.58 0 0 1 51.58 65 Z" fill-rule="evenodd"></path><path d="M 36.11 36.11 Q 45.65 30.65 51.11 21.11 A 1.58 1.58 0 0 1 48.89 18.89 Q 40.88 25.88 33.89 33.89 A 1.58 1.58 0 0 1 36.11 36.11 Z" fill-rule="evenodd"></path><path d="M 66.11 33.89 Q 60.65 24.35 51.11 18.89 A 1.58 1.58 0 0 1 48.89 21.11 Q 55.88 29.12 63.89 36.11 A 1.58 1.58 0 0 1 66.11 33.89 Z" fill-rule="evenodd"></path><path d="M 25 81.58 Q 50 85.33 75 81.58 A 1.58 1.58 0 0 1 75 78.43 Q 50 78.58 25 78.43 A 1.58 1.58 0 0 1 25 81.58 Z" fill-rule="evenodd"></path><path d="M 26.58 80 Q 29.13 75 26.58 70 A 1.58 1.58 0 0 1 23.43 70 Q 22.38 75 23.43 80 A 1.58 1.58 0 0 1 26.58 80 Z" fill-rule="evenodd"></path><path d="M 76.58 80 Q 79.13 75 76.58 70 A 1.58 1.58 0 0 1 73.43 70 Q 72.38 75 73.43 80 A 1.58 1.58 0 0 1 76.58 80 Z" fill-rule="evenodd"></path></svg><svg class="foot-share-icon foot-share-icon--done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 12.5l5 5 10-11"></path></svg></button><span data-foot-share-plain>share</span>.</span>
+        <span class="visually-hidden" role="status" aria-live="polite" data-foot-share-status></span>
         <span>Educational and analytical &mdash; not investment advice.</span>
       </div>
     </footer>

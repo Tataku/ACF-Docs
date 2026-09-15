@@ -93,6 +93,14 @@ const MINUTES = new Map(PART_FILES.map(([n, file]) => [n, readingMinutes(file)])
 // could see.
 const TOTAL_MINUTES = [...MINUTES.values()].reduce((a, b) => a + b, 0);
 
+// Minutes BEFORE part n — where its arc starts on the cover footer's reading
+// curve. The curve is normalised by `pathLength` to the book's total minutes, so
+// an arc of 18 is eighteen minutes of arc and the six of them are the book to
+// scale. Those are the same cardinality as every other number in this file: a
+// fact about the prose, restated in markup, and therefore derived here rather
+// than typed into an SVG where nothing would ever check it again.
+const MINUTES_BEFORE = (n) => PART_FILES.slice(0, n - 1).reduce((a, [p]) => a + MINUTES.get(p), 0);
+
 const TERMS = glossary.terms.length;
 const EXHIBITS = charts.size;
 const perPart = (n) => [...charts.values()].filter((c) => c.part === n).length;
@@ -106,7 +114,13 @@ const RULES = [
     // One rule per card, anchored on that card's own data-part so a reading time
     // can never be written onto the wrong Part (which is how 1 and 2 were swapped).
     ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*?&approx; )\\d+( min read)`), () => MINUTES.get(n)]),
-    [/(class="foot-dial-meta">&approx; )\d+( min of reading)/, () => TOTAL_MINUTES],
+    [/(class="foot-dial-meta" data-foot-meta>&approx; )\d+( min end to end)/, () => TOTAL_MINUTES],
+    // One rule per arc, anchored on that arc's own data-foot-arc, so a length can
+    // never be written onto the wrong Part — the failure the per-card rule above
+    // was added for after 1 and 2 were transposed.
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength=")\\d+(")`), () => TOTAL_MINUTES]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength="\\d+" style="--arc-len: )\\d+(;)`), () => MINUTES.get(n)]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength="\\d+" style="--arc-len: \\d+; --arc-at: )\\d+(")`), () => MINUTES_BEFORE(n)]),
   ]],
   ['_index.html', [
     [new RegExp(`(generated ${DOT} all )\\d+( exhibits)`), () => EXHIBITS],
