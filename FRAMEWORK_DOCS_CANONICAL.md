@@ -41,7 +41,7 @@ The canonical Framework Docs are **hand-authored static HTML** in
   `reading.js` + `glyph-text.js` (all `defer`).
 - **Design vocabulary (classes from `reading-system.css`):** `.section` / `.section-eyebrow`
   / `.section-title` / `.measure` / `.prose` / `.prose-lead`; `.gloss` glossary buttons
-  (`data-gloss="<id>"` — the 25 ids live in `public/site-b/acf-glossary.json`);
+  (`data-gloss="<id>"` — the ids live in `public/site-b/acf-glossary.json`, which also generates `/glossary` via `scripts/build-glossary-page.mjs`);
   `aside.callout.callout-info|callout-insight|callout-transition`; `ol.architecture-list`
   / `ol.proc-steps` (`data-stepper`); `.compare` tables + `.compare-key`; `.failure-modes`
   grid; `blockquote.pull-quote` (`.hl`); `.rule-mark` dividers; `.key-term` / `.part-ref`.

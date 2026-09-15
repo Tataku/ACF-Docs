@@ -151,7 +151,8 @@ for (const t of terms) {
   const live = t.chart && charts[String(t.chart)];
   const chart = live ? { href: live.href, label: `View the chart → ${live.idx || live.chartId} · ${live.title}` } : null;
   if (t.chart && !live) { const known = specByRef.has(String(t.chart)); unresolvedGlossaryCharts.push({ term: t.id, ref: String(t.chart), knownSpec: known }); if (!known) warnings.push(`${t.id}: unknown chart ref ${t.chart}`); }
-  glossaryNav[t.id] = { later, chart };
+  const entry = { href: `/glossary#g-${t.id}`, label: `View the glossary entry → ${t.term}` };
+  glossaryNav[t.id] = { later, chart, entry };
 }
 
 const sections = Object.fromEntries([...byRoute].map(([route, page]) => [route, [...page.ids].sort()]));
