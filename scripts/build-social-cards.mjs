@@ -77,14 +77,19 @@ const b64 = (f) => fs.readFileSync(path.join(FONTS, f)).toString('base64');
 const INTER = b64('InterVariable.woff2');
 const MONO = b64('JetBrainsMono-Medium.woff2');
 
-// The same geometry the nav marks and the favicon draw — antenna, tip, head,
-// eyes, and the three-line neck. `npm run audit:brand` pins these numbers, and
-// ACFDashboard's brand-identity gate pins the identical ones from its side.
-const mark = (ink) => `<svg viewBox="0 0 64 64" width="86" height="86" fill="none" stroke="${ink}" stroke-linecap="round" stroke-linejoin="round">
-  <g stroke-width="6"><rect x="6" y="19" width="52" height="18" rx="8"/></g>
-  <g stroke-width="4"><line x1="32" y1="8" x2="32" y2="16"/></g>
-  <g stroke-width="4"><line x1="22" y1="46" x2="42" y2="46"/><line x1="22" y1="54" x2="42" y2="54"/><line x1="22" y1="62" x2="42" y2="62"/></g>
-  <g fill="${ink}" stroke="none"><circle cx="32" cy="4" r="4"/><circle cx="20" cy="28" r="4"/><circle cx="44" cy="28" r="4"/></g></svg>`;
+// The same geometry the nav marks and the favicon draw — the WHOLE figure:
+// antenna with its tip, head, eyes, the three-line neck, the three-branch
+// convexity arc and three feet. `npm run audit:brand` pins these numbers here
+// as well as on the pages, and ACFDashboard's brand-identity gate pins the
+// identical ones from its side.
+//
+// MASTER stroke weight, not the pages' ×1.4: this renders at 86px, far above
+// the 32px below which ACFDashboard's SMALL_RENDER concession applies. The
+// COORDINATES are the same either way, which is what both audits check.
+const mark = (ink) => `<svg viewBox="47 4 162 219" width="86" height="86" fill="none" stroke="${ink}" stroke-linecap="round" stroke-linejoin="round">
+  <g stroke-width="6"><line x1="128" y1="20" x2="128" y2="38"/><circle cx="128" cy="14" r="7"/><rect x="50" y="38" width="156" height="74" rx="32"/><path d="M128 146 C128 158 82 157 68 204"/><path d="M128 146 L128 204"/><path d="M128 146 C128 158 174 157 188 204"/><circle cx="66" cy="214" r="6"/><circle cx="128" cy="214" r="6"/><circle cx="190" cy="214" r="6"/></g>
+  <g stroke-width="5" stroke-linecap="square"><line x1="116" y1="124" x2="140" y2="124"/><line x1="116" y1="132" x2="140" y2="132"/><line x1="116" y1="140" x2="140" y2="140"/></g>
+  <g fill="${ink}" stroke="none"><circle cx="96" cy="76" r="5.5"/><circle cx="160" cy="76" r="5.5"/></g></svg>`;
 
 function card({ eyebrow, headline, description }, t) {
   // Long headlines step down rather than wrap into the rule below them. The
