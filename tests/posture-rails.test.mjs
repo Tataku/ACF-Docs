@@ -167,3 +167,33 @@ test('decorative: the rail is hidden from the accessibility tree, sits under the
   const rails = CSS.slice(CSS.indexOf('/* ---- Posture rails'), CSS.indexOf('@keyframes pc-hype-in'));
   assert.doesNotMatch(rails.replace(/\/\*[\s\S]*?\*\//g, ''), /#[0-9a-fA-F]{3,8}\b|rgba?\(/, 'no raw colour in the rail rules');
 });
+
+// ---------------------------------------------------------------------------
+// Focus indication
+//
+// The card is a link, so it is a tab stop on every part page that carries the
+// trio. Its hover and focus states were authored as one rule ending in
+// `outline: none`, which cancelled the site-wide `:focus-visible` indicator for
+// these three elements alone. Measured: `:focus-visible` matched, computed
+// outline was `none 0px`, and the only remaining cue was a border change at
+// 2.01:1 — under the 3:1 a non-text indicator needs — with its companion lift
+// suppressed under reduced motion, leaving nothing at all.
+//
+// The fix is to stop cancelling, not to invent a local ring: the global rule at
+// the top of the stylesheet is the authority, and a card that opts out is a card
+// a keyboard user cannot locate.
+// ---------------------------------------------------------------------------
+test('posture cards keep the site-wide focus ring instead of cancelling it', () => {
+  const rule = CSS.slice(CSS.indexOf('.posture-card:hover, .posture-card:focus-visible'));
+  const body = rule.slice(rule.indexOf('{'), rule.indexOf('}') + 1);
+  assert.ok(body.length > 10 && body.length < 400, 'located the combined hover/focus rule');
+  assert.doesNotMatch(body, /outline\s*:\s*(none|0)/,
+    'this rule covers :focus-visible, so suppressing the outline here removes the only focus indicator the card has');
+  // The shared authority it now inherits.
+  assert.match(CSS, /:focus-visible \{ outline: 2px solid var\(--accent\)/,
+    'the global focus indicator is what the card falls back to');
+  // The hover treatment itself is unchanged: colour plus lift, lift dropped
+  // under reduced motion.
+  assert.match(body, /border-color:/, 'hover still tints the border');
+  assert.match(body, /transform: translateY\(-2px\)/, 'hover still lifts');
+});

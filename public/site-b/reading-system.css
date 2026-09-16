@@ -2693,6 +2693,14 @@ html.js [data-foot-progress][data-pending] .foot-arc[data-read][data-peek]:not([
               border-color var(--motion-base) var(--ease-standard),
               background var(--motion-base) var(--ease-standard);
 }
+/* `hidden` is a UA `display: none`, the weakest declaration in the cascade, so
+   the author `display` above outranks it. Without this guard the native Share
+   button — authored `hidden` and un-hidden by reading-core.js only where
+   navigator.share exists — painted on every desktop, took a tab stop, and
+   announced as "Share, button" while no handler was ever attached.
+   Same guard as .foot-share[hidden], .floatnav[hidden] and .gl-empty[hidden].
+   Pinned by tests/hidden-controls.test.mjs. */
+.part-action[hidden] { display: none; }
 .part-action:hover, .part-action:focus-visible {
   color: var(--accent);
   border-color: var(--accent);
@@ -4891,10 +4899,14 @@ a.dc-card[data-part="6"]:focus-visible .art-cell-lit,
   text-decoration: none; color: inherit;
   transition: border-color 180ms ease, transform 180ms ease;
 }
+/* No `outline: none` here. This rule covers :focus-visible, so cancelling the
+   outline cancelled the site-wide focus indicator for these three cards alone —
+   leaving a 2.01:1 border change as the only cue, and nothing at all under
+   reduced motion, where the lift is suppressed too. The global
+   `:focus-visible` rule is the authority; the card inherits it. */
 .posture-card:hover, .posture-card:focus-visible {
   border-color: color-mix(in srgb, var(--pi-c) 45%, var(--rule));
   transform: translateY(-2px);
-  outline: none;
 }
 .posture-card-eyebrow {
   font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;

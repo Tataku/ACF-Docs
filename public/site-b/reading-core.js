@@ -1848,6 +1848,11 @@
 
   var GLOSSARY = {}, card = null, backdrop = null;
   var pinned = false, hoverTimer = null, closeTimer = null, lastTrigger = null, sheetOpen = false;
+  // Escape hands focus back to the trigger, and a trigger receiving keyboard
+  // focus opens the card. Those two are correct on their own and reopen the
+  // card together, which only became reachable once focus could be inside the
+  // card to begin with. This suppresses that one programmatic restore.
+  var restoringFocus = false;
 
   /* ---- Pointer policy — the decision this file used to get wrong -----------
      It read `(hover: hover) and (pointer: fine)` ONCE at load and branched the
@@ -2027,11 +2032,53 @@
     card = document.createElement('div');
     card.className = 'gloss-card';
     card.setAttribute('role', 'dialog');
+    card.id = 'gloss-card';                 // so a trigger can name what it opens
     card.hidden = true;
     card.addEventListener(ENTER, function (e) { if (hovers(e)) clearTimeout(closeTimer); });
     card.addEventListener(LEAVE, function (e) { if (hovers(e) && !pinned) scheduleClose(); });
+    // The card is the last child of <body>, so Tab out of its last control used
+    // to leave the document entirely. Once a reader has been handed the card,
+    // Tab stays inside it and Escape is the way out — which is what
+    // role="dialog" already promised and did not deliver.
+    card.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var items = focusables();
+      if (!items.length) return;
+      var first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === cardLead())) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
     document.body.appendChild(backdrop);
     document.body.appendChild(card);
+  }
+
+  // Layer two's controls, in document order: the appears-later link, the chart
+  // link, and the related-concept chips.
+  function focusables() {
+    return card ? [].slice.call(card.querySelectorAll('a[href], button:not([disabled])')) : [];
+  }
+  // The card reads term -> definition -> layer two. The beginning of that is the
+  // term, and it is where an activated reader is put.
+  function cardLead() { return card ? card.querySelector('.gloss-term') : null; }
+
+  // Hand the reader the card, at its BEGINNING. Focusing the first control
+  // instead made layer two reachable at the cost of the reading order: it
+  // dropped the reader past the definition onto "Appears in Part..." or a chip,
+  // which is the one thing they came for the tooltip to read. The term carries
+  // tabindex="-1" so it can receive focus without joining the tab order; Tab
+  // from there reaches the first control by document order, so the definition
+  // is passed THROUGH rather than jumped over. The container is never the
+  // target — a dialog box is not a place in a document.
+  //
+  // Called ONLY from an activation — a click, a tap or Enter — never from
+  // hover, which must not move focus. That is an interaction distinction, not a
+  // device one: nothing here asks what kind of machine this is.
+  function focusIntoCard() {
+    if (!card || card.hidden) return;
+    var lead = cardLead();
+    if (lead) { lead.focus(); return; }
+    var items = focusables();
+    if (items.length) items[0].focus();
   }
 
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -2066,12 +2113,15 @@
   function render(entry) {
     ensureCard();
     card.innerHTML =
-      '<p class="gloss-term">' + esc(entry.term) + '</p>' +
+      '<p class="gloss-term" tabindex="-1">' + esc(entry.term) + '</p>' +
       '<p class="gloss-def">' + esc(entry.definition) + '</p>' +
       '<div class="gloss-layer2">' + partLink(entry.appearsLater) + chartLink(entry) + relatedChips(entry) + '</div>';
     card.setAttribute('aria-label', entry.term);
     card.querySelectorAll('[data-hop]').forEach(function (chip) {
-      chip.addEventListener('click', function () { open(lastTrigger, GLOSSARY[chip.getAttribute('data-hop')], sheetOpen); });
+      chip.addEventListener('click', function () {
+        open(lastTrigger, GLOSSARY[chip.getAttribute('data-hop')], sheetOpen);
+        focusIntoCard();                    // render() rebuilt the card; the chip that was focused is gone
+      });
     });
     var cl = card.querySelector('.gloss-chart');
     if (cl) cl.addEventListener('click', closeNow); // same-page anchor: close the card, let the jump happen
@@ -2127,6 +2177,8 @@
   function wire() {
     triggers.forEach(function (btn) {
       if (!GLOSSARY[btn.getAttribute('data-gloss')]) return; // unknown id: leave as text
+      btn.setAttribute('aria-haspopup', 'dialog');
+      btn.setAttribute('aria-controls', 'gloss-card');
       btn.addEventListener(ENTER, function (e) {
         if (!hovers(e)) return;                       // a finger is not a hover
         clearTimeout(closeTimer);
@@ -2137,15 +2189,23 @@
         clearTimeout(hoverTimer);
         if (!pinned) scheduleClose();
       });
-      btn.addEventListener('focus', function () { if (keyboardFocus(btn)) open(btn, null, false); });
+      btn.addEventListener('focus', function () { if (!restoringFocus && keyboardFocus(btn)) open(btn, null, false); });
       btn.addEventListener('blur', function () { if (!pinned) scheduleClose(); });
       btn.addEventListener('click', function (e) {
         clearTimeout(hoverTimer); clearTimeout(closeTimer);
-        if (hovers(e)) { pinned = true; open(btn, null, false); }   // a click pins the popover
-        else open(btn, null, true);                                 // a tap raises the sheet
+        pinned = true;                              // an activation holds the card open, either presentation
+        open(btn, null, !hovers(e));                // a click pins the popover; a tap raises the sheet
+        focusIntoCard();                            // and layer two becomes reachable
       });
     });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && card && !card.hidden) { closeNow(); if (lastTrigger) lastTrigger.focus(); } });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || !card || card.hidden) return;
+      closeNow();
+      if (!lastTrigger) return;
+      restoringFocus = true;                        // the restore must not re-open what Escape just closed
+      lastTrigger.focus();
+      setTimeout(function () { restoringFocus = false; }, 0);
+    });
     document.addEventListener('click', function (e) { if (pinned && card && !card.contains(e.target) && !e.target.classList.contains('gloss')) closeNow(); });
     window.addEventListener('resize', function () { if (card && !card.hidden && !sheetOpen && lastTrigger) positionPopover(lastTrigger); });
   }
