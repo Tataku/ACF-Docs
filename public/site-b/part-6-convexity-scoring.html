@@ -660,7 +660,19 @@
       <aside class="next-up" aria-label="Next in the series">
         <div class="measure">
           <p class="next-up-label">Next up</p>
-          <a class="next-up-card" href="/">
+          <a class="next-up-card" href="/" data-plate="1">
+            <!-- The cover's plate for the part this card leads to — synced from cover-docs.html by scripts/sync-plates.mjs; never edit the picture here. -->
+            <span class="next-up-plate dc-art" aria-hidden="true" data-plate="1">
+              <svg viewBox="0 0 480 120" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+                <path class="art-floor" d="M0 98H480V120H0Z"/><path class="art-floor-rule" d="M0 98H480"/>
+                <path class="art-grid art-in art-d0" d="M120 12V98M240 12V98M360 12V98"/>
+                <path class="art-ref art-in art-d1" d="M24 92 L420 26"/>
+                <path class="art-field art-move art-in art-d1" d="M24 92C116 92 190 90 250 78S350 46 420 26V96H24Z"/>
+                <path class="art-glow art-draw art-d1" pathLength="1" d="M24 92C116 92 190 90 250 78S350 46 420 26"/>
+                <path class="art-thesis art-draw art-d1" pathLength="1" d="M24 92C116 92 190 90 250 78S350 46 420 26"/>
+                <circle class="art-dot art-move art-pop" cx="420" cy="26" r="4"/>
+              </svg>
+            </span>
             <span class="next-up-num">01&ndash;06</span>
             <span class="next-up-body">
               <span class="next-up-title">The Adaptive Convexity Framework</span>
@@ -706,6 +718,7 @@
   <script src="/site-b/site-b-charts.js" defer></script>
   <script src="/site-b/reading.js" defer></script>
   <script src="/site-b/glyph-text.js" defer></script>
+  <script src="/site-b/plates.js" defer></script>
   <!-- Deep links land exactly: islands hydrate after the initial anchor jump,
        so re-anchor once mounting settles — unless the reader has scrolled. -->
   <script defer>

@@ -141,7 +141,13 @@
     "/": [
       "acf-reference-integrity-fallback",
       "cta-band-title",
+      "dc-g-accent-down",
+      "dc-g-accent-up",
+      "dc-g-ink-down",
+      "dc-g-ink-left",
+      "dc-g-ink-right",
       "dc-lens-title",
+      "dc-p-dots",
       "dc-parts-title",
       "dc-title",
       "exhibit-dl-convexity-window",

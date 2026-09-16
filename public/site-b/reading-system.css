@@ -4155,9 +4155,11 @@ html[data-narrating] .shell-main { padding-bottom: var(--dock-clear); }
   color: var(--tile-motif);
   transition: color var(--motion-base) var(--ease-standard);
 }
-.dc-plate::before { content: ''; position: absolute; inset: 0; pointer-events: none; }
+.dc-plate::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .82;
+                    transition: opacity var(--motion-base) var(--ease-standard); }
 .dc-plate svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
 a.dc-card:hover .dc-plate, a.dc-card:focus-visible .dc-plate { color: var(--tile-motif-lift); }
+a.dc-card:hover .dc-plate::before, a.dc-card:focus-visible .dc-plate::before { opacity: 1; }
 .dc-card.pending .dc-plate { opacity: 0.55; }
 a.dc-card:hover, a.dc-card:focus-visible {
   border-color: var(--accent-quiet);
@@ -4311,7 +4313,8 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 .dc-art .art-frame   { fill: var(--surface-raised); stroke: currentColor; stroke-width: 1.4; }
 .dc-art .art-page    { fill: var(--surface-raised); stroke: currentColor; stroke-width: 1.4; opacity: .9; }
 .dc-art .art-margin  { stroke: currentColor; stroke-width: 1; opacity: .45; }
-.dc-art .art-field   { fill: var(--accent); opacity: .09; }
+.dc-art .art-field   { fill: url(#dc-g-accent-down); opacity: .42; }
+.dc-art .art-field-ink { fill: url(#dc-g-ink-right); opacity: .4; }
 .dc-art .art-grid    { stroke: currentColor; stroke-width: 1; opacity: .22; }
 .dc-art .art-axis    { stroke: currentColor; stroke-width: 1.4; opacity: .6; stroke-linecap: round; }
 .dc-art .art-ref     { stroke: currentColor; stroke-width: 1.2; stroke-dasharray: 3 4; opacity: .5; }
@@ -4364,7 +4367,7 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 .dc-art .art-tick       { stroke: currentColor; stroke-width: 1.4; opacity: .55; }
 .dc-art .art-node       { fill: currentColor; opacity: .55; }
 .dc-art .art-cell       { fill: none; stroke: currentColor; stroke-width: 1.2; opacity: .45; }
-.dc-art .art-cell-lit   { fill: var(--accent); opacity: .16; stroke: none; }
+.dc-art .art-cell-lit   { fill: url(#dc-g-accent-down); opacity: .55; stroke: none; }
 .dc-art .art-cell-lines { stroke: currentColor; stroke-width: 1.2; opacity: .45; }
 .dc-art .art-wave       { stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; opacity: .5;
                           transition: transform var(--motion-slow) var(--ease-emphasis); }
@@ -4373,16 +4376,36 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 .dc-art .art-wedge      { fill: currentColor; opacity: .55; transform-box: fill-box; transform-origin: 50% 0;
                           transition: transform var(--motion-slow) var(--ease-emphasis), opacity var(--motion-base) var(--ease-standard); }
 .dc-art .art-box        { fill: var(--surface-raised); stroke: currentColor; stroke-width: 1.2; opacity: .6; }
-.dc-art .art-box-keep   { stroke: var(--accent); opacity: 1; }
+.dc-art .art-box-keep   { stroke: var(--accent); opacity: 1; fill: url(#dc-g-accent-down); fill-opacity: .45; }
 .dc-art .art-label-keep { fill: var(--accent); opacity: 1; }
 .dc-art .art-label-v    { writing-mode: vertical-rl; text-orientation: mixed; }
 .dc-art .art-arc        { stroke: currentColor; stroke-width: 1.2; fill: none; stroke-dasharray: 4 6; opacity: .4; }
 .dc-art .art-zone       { stroke: currentColor; stroke-width: 1; stroke-dasharray: 2 6; opacity: .35; }
 .dc-art .art-step       { fill: currentColor; opacity: .22; }
-.dc-art .art-step-final { fill: var(--accent); opacity: .9; }
+.dc-art .art-step-final { fill: url(#dc-g-accent-up); opacity: 1; }
 .dc-art .art-marker     { fill: var(--accent); transition: transform var(--motion-slow) var(--ease-emphasis); }
 .dc-art .art-sources    { transition: transform var(--motion-slow) var(--ease-emphasis); }
 .dc-art .art-size-top   { transform-box: fill-box; transform-origin: center; transition: transform var(--motion-slow) var(--ease-emphasis); }
+
+/* ---- The parity layer (owner, 2026-09-16: "parity with the newest designs") --
+   What the landing's system cards taught the cover: a gradient FIELD under the
+   picture's structure, a soft GLOW under its one accent subject, a draw-in on
+   reveal, and a hover that moves several elements at once. The defs are one
+   hidden <svg> at the head of the parts section; every stop is coloured here,
+   by token, and referenced by id from the planes above. */
+.dc-art-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.dc-art-defs .art-stop-accent     { stop-color: var(--accent); stop-opacity: .6; }
+.dc-art-defs .art-stop-accent-out { stop-color: var(--accent); stop-opacity: 0; }
+.dc-art-defs .art-stop-ink        { stop-color: var(--tile-motif-lift); stop-opacity: 1; }
+.dc-art-defs .art-stop-ink-out    { stop-color: var(--tile-motif-lift); stop-opacity: 0; }
+.dc-art-defs .art-ground-dot      { fill: var(--tile-motif-lift); }
+.dc-art .art-glow       { stroke: var(--accent); stroke-width: 10; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: .22; filter: blur(5px); }
+.dc-art .art-glow-live  { stroke: var(--chart-thesis); }
+.dc-art .art-glow-dot   { fill: var(--accent); opacity: .32; filter: blur(6px); }
+.dc-art .art-glow-tab   { fill: var(--accent); opacity: .38; filter: blur(5px); }
+.dc-art .art-move       { transition: transform var(--motion-slow) var(--ease-emphasis), opacity var(--motion-base) var(--ease-standard); }
+.dc-art .art-pop, .dc-art .art-grow { transform-box: fill-box; transform-origin: 50% 50%; }
+.dc-art .art-grow-y     { transform-box: fill-box; transform-origin: 50% 100%; }
 
 .dc-tile-title {
   font-weight: var(--weight-semibold);
@@ -4461,26 +4484,38 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
    01 the curve draws itself out of the floor · 02 the sources converge · 03 the
    cycle turns around the power law · 04 the wedge is taken · 05 the earned size
    grows · 06 the position moves a cell toward the corner. */
-.dc-card[data-part="1"] .dc-plate::before { background: radial-gradient(120% 140% at 100% 0%, var(--tile-wash-lift), var(--tile-wash) 38%, transparent 72%); }
-.dc-card[data-part="2"] .dc-plate::before { background: linear-gradient(to right, transparent 40%, var(--tile-wash) 62%, var(--tile-wash-lift) 100%); }
-.dc-card[data-part="3"] .dc-plate::before { background: linear-gradient(to top, var(--tile-wash-lift), var(--tile-wash) 30%, transparent 70%); }
-.dc-card[data-part="4"] .dc-plate::before { background: radial-gradient(60% 160% at 82% 30%, var(--tile-wash-lift), transparent 70%); }
-.dc-card[data-part="5"] .dc-plate::before { background: radial-gradient(70% 120% at 85% 100%, var(--tile-wash-lift), var(--tile-wash) 40%, transparent 74%); }
-.dc-card[data-part="6"] .dc-plate::before { background: linear-gradient(to right, transparent 30%, var(--tile-wash) 55%, var(--tile-wash) 70%, var(--tile-wash-lift) 88%); }
+.dc-card[data-part="1"] .dc-plate::before, .next-up-plate[data-plate="1"]::before { background: radial-gradient(120% 140% at 100% 0%, var(--tile-wash-lift), var(--tile-wash) 38%, transparent 72%); }
+.dc-card[data-part="2"] .dc-plate::before, .next-up-plate[data-plate="2"]::before { background: linear-gradient(to right, transparent 40%, var(--tile-wash) 62%, var(--tile-wash-lift) 100%); }
+.dc-card[data-part="3"] .dc-plate::before, .next-up-plate[data-plate="3"]::before { background: linear-gradient(to top, var(--tile-wash-lift), var(--tile-wash) 30%, transparent 70%); }
+.dc-card[data-part="4"] .dc-plate::before, .next-up-plate[data-plate="4"]::before { background: radial-gradient(60% 160% at 82% 30%, var(--tile-wash-lift), transparent 70%); }
+.dc-card[data-part="5"] .dc-plate::before, .next-up-plate[data-plate="5"]::before { background: radial-gradient(70% 120% at 85% 100%, var(--tile-wash-lift), var(--tile-wash) 40%, transparent 74%); }
+.dc-card[data-part="6"] .dc-plate::before, .next-up-plate[data-plate="6"]::before { background: linear-gradient(to right, transparent 30%, var(--tile-wash) 55%, var(--tile-wash) 70%, var(--tile-wash-lift) 88%); }
 
 .dc-art .art-thesis[pathLength] { stroke-dasharray: 1; stroke-dashoffset: 0; }
 a.dc-card[data-part="1"]:hover .art-thesis[pathLength],
-a.dc-card[data-part="1"]:focus-visible .art-thesis[pathLength] { animation: art-draw 1.1s var(--ease-emphasis) 1 both; }
+a.dc-card[data-part="1"]:focus-visible .art-thesis[pathLength],
+.next-up-card[data-plate="1"]:hover .art-thesis[pathLength],
+.next-up-card[data-plate="1"]:focus-visible .art-thesis[pathLength] { animation: art-draw 1.1s var(--ease-emphasis) 1 both; }
 a.dc-card[data-part="2"]:hover .art-sources,
-a.dc-card[data-part="2"]:focus-visible .art-sources { transform: translateX(8px); }
+a.dc-card[data-part="2"]:focus-visible .art-sources,
+.next-up-card[data-plate="2"]:hover .art-sources,
+.next-up-card[data-plate="2"]:focus-visible .art-sources { transform: translateX(8px); }
 a.dc-card[data-part="3"]:hover .art-wave,
-a.dc-card[data-part="3"]:focus-visible .art-wave { transform: translateX(-10px); }
+a.dc-card[data-part="3"]:focus-visible .art-wave,
+.next-up-card[data-plate="3"]:hover .art-wave,
+.next-up-card[data-plate="3"]:focus-visible .art-wave { transform: translateX(-10px); }
 a.dc-card[data-part="4"]:hover .art-wedge,
-a.dc-card[data-part="4"]:focus-visible .art-wedge { transform: translateY(7px); opacity: .85; }
+a.dc-card[data-part="4"]:focus-visible .art-wedge,
+.next-up-card[data-plate="4"]:hover .art-wedge,
+.next-up-card[data-plate="4"]:focus-visible .art-wedge { transform: translateY(7px); opacity: .85; }
 a.dc-card[data-part="5"]:hover .art-size-top,
-a.dc-card[data-part="5"]:focus-visible .art-size-top { transform: scale(1.16); }
+a.dc-card[data-part="5"]:focus-visible .art-size-top,
+.next-up-card[data-plate="5"]:hover .art-size-top,
+.next-up-card[data-plate="5"]:focus-visible .art-size-top { transform: scale(1.16); }
 a.dc-card[data-part="6"]:hover .art-marker,
-a.dc-card[data-part="6"]:focus-visible .art-marker { transform: translate(28px, -32px); }
+a.dc-card[data-part="6"]:focus-visible .art-marker,
+.next-up-card[data-plate="6"]:hover .art-marker,
+.next-up-card[data-plate="6"]:focus-visible .art-marker { transform: translate(28px, -32px); }
 
 /* The live dashboard's indicator breathes while the pointer is on it, because
    "in motion" is the whole claim of that card.
@@ -4495,6 +4530,140 @@ a.dc-card[data-part="6"]:focus-visible .art-marker { transform: translate(28px, 
   0%   { transform: scale(.45); opacity: .6; }
   70%  { transform: scale(1.55); opacity: 0; }
   100% { transform: scale(1.55); opacity: 0; }
+}
+
+/* ---- Draw-in — once, when the picture is looked at ---------------------------
+   cover-docs.js sets `data-drawn` on each .dc-art from an IntersectionObserver
+   (independent of GSAP, so a blocked CDN still draws). Everything here — the
+   hidden pre-state AND the animation — sits inside the no-preference gate, so
+   reduced motion paints the finished picture and the site-wide reduce rule has
+   nothing to kill. Keyframes carry only a `from`: the `to` is each element's own
+   resting value, and `backwards` releases it to the stylesheet when the
+   animation ends, so the hover moves own the transform from then on. All
+   durations derive from --motion-draw, the draw-on-hover's own token. */
+@media (prefers-reduced-motion: no-preference) {
+  .dc-art:not([data-drawn="true"]) .art-in,
+  .dc-art:not([data-drawn="true"]) .art-pop { opacity: 0; }
+  .dc-art:not([data-drawn="true"]) .art-draw { stroke-dashoffset: 1; }
+  .dc-art:not([data-drawn="true"]) .art-grow { transform: scale(0); }
+  .dc-art:not([data-drawn="true"]) .art-grow-y { transform: scaleY(0); }
+  .dc-art .art-draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+  .dc-art[data-drawn="true"] .art-in     { animation: dc-art-in     calc(var(--motion-draw) * .45) var(--ease-emphasis) backwards; }
+  .dc-art[data-drawn="true"] .art-draw   { animation: art-draw      var(--motion-draw) var(--ease-emphasis) backwards; }
+  .dc-art[data-drawn="true"] .art-grow   { animation: dc-art-grow   calc(var(--motion-draw) * .45) var(--ease-emphasis) backwards; }
+  .dc-art[data-drawn="true"] .art-grow-y { animation: dc-art-grow-y calc(var(--motion-draw) * .45) var(--ease-emphasis) backwards; }
+  .dc-art[data-drawn="true"] .art-pop    { animation: dc-art-pop    calc(var(--motion-draw) * .3) var(--ease-emphasis) calc(var(--motion-draw) * .55) backwards; }
+  .dc-art[data-drawn="true"] .art-d1 { animation-delay: calc(var(--motion-draw) * .09); }
+  .dc-art[data-drawn="true"] .art-d2 { animation-delay: calc(var(--motion-draw) * .18); }
+  .dc-art[data-drawn="true"] .art-d3 { animation-delay: calc(var(--motion-draw) * .27); }
+}
+@keyframes dc-art-in     { from { opacity: 0; transform: translateY(4px); } }
+@keyframes dc-art-grow   { from { transform: scale(0); } }
+@keyframes dc-art-grow-y { from { transform: scaleY(0); } }
+@keyframes dc-art-pop    { from { opacity: 0; transform: scale(.3); } }
+
+/* ---- The second and third moves ---------------------------------------------
+   Each picture keeps the one move that is its idea (above) and gains company:
+   the subject's dot swells, its field brightens, a lit cell or box comes up.
+   Transform and opacity only; focus-visible gets every one of them. */
+a.dc-card[data-part="1"]:hover .art-dot,
+a.dc-card[data-part="1"]:focus-visible .art-dot,
+.next-up-card[data-plate="1"]:hover .art-dot,
+.next-up-card[data-plate="1"]:focus-visible .art-dot { transform: scale(1.35); }
+a.dc-card[data-part="1"]:hover .art-field,
+a.dc-card[data-part="1"]:focus-visible .art-field,
+.next-up-card[data-plate="1"]:hover .art-field,
+.next-up-card[data-plate="1"]:focus-visible .art-field { opacity: .62; }
+a.dc-card[data-part="2"]:hover .art-dot,
+a.dc-card[data-part="2"]:focus-visible .art-dot,
+.next-up-card[data-plate="2"]:hover .art-dot,
+.next-up-card[data-plate="2"]:focus-visible .art-dot { transform: scale(1.35); }
+a.dc-card[data-part="2"]:hover .art-cell-lit,
+a.dc-card[data-part="2"]:focus-visible .art-cell-lit,
+.next-up-card[data-plate="2"]:hover .art-cell-lit,
+.next-up-card[data-plate="2"]:focus-visible .art-cell-lit { opacity: .85; }
+a.dc-card[data-part="3"]:hover .art-dot,
+a.dc-card[data-part="3"]:focus-visible .art-dot,
+.next-up-card[data-plate="3"]:hover .art-dot,
+.next-up-card[data-plate="3"]:focus-visible .art-dot { transform: scale(1.35); }
+a.dc-card[data-part="3"]:hover .art-field,
+a.dc-card[data-part="3"]:focus-visible .art-field,
+.next-up-card[data-plate="3"]:hover .art-field,
+.next-up-card[data-plate="3"]:focus-visible .art-field { opacity: .62; }
+a.dc-card[data-part="4"]:hover .art-box-keep,
+a.dc-card[data-part="4"]:focus-visible .art-box-keep,
+.next-up-card[data-plate="4"]:hover .art-box-keep,
+.next-up-card[data-plate="4"]:focus-visible .art-box-keep { fill-opacity: .7; }
+a.dc-card[data-part="4"]:hover .art-flow-keep,
+a.dc-card[data-part="4"]:focus-visible .art-flow-keep,
+.next-up-card[data-plate="4"]:hover .art-flow-keep,
+.next-up-card[data-plate="4"]:focus-visible .art-flow-keep { transform: translateY(-2px); }
+a.dc-card[data-part="5"]:hover .art-sizes,
+a.dc-card[data-part="5"]:focus-visible .art-sizes,
+.next-up-card[data-plate="5"]:hover .art-sizes,
+.next-up-card[data-plate="5"]:focus-visible .art-sizes { transform: translateX(5px); }
+a.dc-card[data-part="5"]:hover .art-arc,
+a.dc-card[data-part="5"]:focus-visible .art-arc,
+.next-up-card[data-plate="5"]:hover .art-arc,
+.next-up-card[data-plate="5"]:focus-visible .art-arc { opacity: .7; }
+a.dc-card[data-part="6"]:hover .art-step-final,
+a.dc-card[data-part="6"]:focus-visible .art-step-final,
+.next-up-card[data-plate="6"]:hover .art-step-final,
+.next-up-card[data-plate="6"]:focus-visible .art-step-final { transform: scaleY(1.12); }
+a.dc-card[data-part="6"]:hover .art-cell-lit,
+a.dc-card[data-part="6"]:focus-visible .art-cell-lit,
+.next-up-card[data-plate="6"]:hover .art-cell-lit,
+.next-up-card[data-plate="6"]:focus-visible .art-cell-lit { opacity: .85; }
+.dc-tile[data-motif="exhibits"]:hover .art-dot,
+.dc-tile[data-motif="exhibits"]:focus-visible .art-dot { transform: scale(1.4); }
+.dc-tile[data-motif="math"]:hover .art-dot,
+.dc-tile[data-motif="math"]:focus-visible .art-dot { transform: scale(1.4); }
+.dc-tile[data-motif="math"]:hover .art-size-top,
+.dc-tile[data-motif="math"]:focus-visible .art-size-top { transform: scale(1.2); }
+.dc-tile[data-motif="glossary"]:hover .art-entry-faint,
+.dc-tile[data-motif="glossary"]:focus-visible .art-entry-faint { opacity: .55; }
+.dc-tile[data-motif="glossary"]:hover .art-glow-tab,
+.dc-tile[data-motif="glossary"]:focus-visible .art-glow-tab { opacity: .6; }
+.dc-tile[data-motif="software"]:hover .art-live-dot,
+.dc-tile[data-motif="software"]:focus-visible .art-live-dot { transform: scale(1.4); }
+
+/* ---- Next up: the plate of the part it leads to ------------------------------
+   The card at the foot of every part carries the cover's plate for the part it
+   links to — the same markup, synced by scripts/sync-plates.mjs, so the picture
+   a reader met on the cover is the one that sends them on. It rides the card's
+   right edge and fades out under the text; it draws in, lifts and moves exactly
+   as the cover's plate does, because the selectors above name it as a twin. On
+   a phone, where the card stacks, it becomes the opener strip the cover cards
+   have. */
+.next-up-card { position: relative; overflow: hidden; }
+.next-up-num, .next-up-body, .next-up-arrow { position: relative; z-index: 1; }
+.next-up-plate {
+  display: block;                /* a span: without this the phone strip below is inline and ignores its box */
+  position: absolute;
+  inset: 0 0 0 auto;
+  height: 100%;
+  aspect-ratio: 480 / 120;
+  color: var(--tile-motif);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, currentColor 48%);
+  mask-image: linear-gradient(to right, transparent 0%, currentColor 48%);
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.next-up-plate::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .82;
+                         transition: opacity var(--motion-base) var(--ease-standard); }
+.next-up-plate svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
+.next-up-card:hover .next-up-plate, .next-up-card:focus-visible .next-up-plate { color: var(--tile-motif-lift); }
+.next-up-card:hover .next-up-plate::before, .next-up-card:focus-visible .next-up-plate::before { opacity: 1; }
+@media (max-width: 560px) {
+  .next-up-plate {
+    position: relative;
+    inset: auto;
+    height: auto;
+    width: calc(100% + 2 * var(--space-5));
+    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-3);
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 @media (max-width: 768px) {
