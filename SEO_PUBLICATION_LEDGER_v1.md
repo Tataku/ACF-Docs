@@ -437,6 +437,11 @@ work**; the one remaining item is in the other repository.
 Net effect: the remaining tranche went from four items to one, and the one that
 remains is not in this repository.
 
+**Revision 3 — 2026-09-16, after the dashboard change landed.** One status line
+in §8: [#5421](https://github.com/Tataku/ACFDashboard/pull/5421) merged to
+`preview` as `39a4828`. Nothing else changed — the obligation stands and the
+audit is still not closed.
+
 ---
 
 ## 8. Post-promotion verification obligation — **OPEN**
@@ -446,6 +451,12 @@ retires `/part1`…`/part6` by permanent redirect, and landing it closes the SEO
 **implementation on `preview`**. Production SEO is not operationally closed until
 the normal promotion lane deploys that change and the redirects are smoke-tested
 **on production**.
+
+**Status 2026-09-16 — #5421 has landed on `preview`.** Merged as
+[`39a4828`](https://github.com/Tataku/ACFDashboard/commit/39a48288143981941819694aaa38ad41c7428cec)
+by owner instruction; the dashboard queue's Backlog line for the duplicates is
+retired. **Not promoted, and none of the checks below has run** — the status of
+this section is unchanged.
 
 The distinction is not pedantry: the change is routing configuration, and nothing
 in this repository or that one observes what the production edge actually serves.
