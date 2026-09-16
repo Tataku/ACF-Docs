@@ -110,7 +110,16 @@
   });
 
   /* ---- deep links: #g-<id> on load, on hashchange, and via the related chips */
-  function reveal(id, moveFocus) {
+  function scrollRow(li, instant) {
+    // 'instant', NOT 'auto'. `auto` means "whatever scroll-behavior says", and the
+    // stylesheet sets `scroll-behavior: smooth` on <html> — so asking for auto
+    // here bought a ~900ms animated scroll across a 10,000px page, which is how a
+    // deep link could still be in flight when the reader looked.
+    try { li.scrollIntoView({ block: 'start', behavior: (reduce || instant) ? 'instant' : 'smooth' }); }
+    catch (e) { li.scrollIntoView(true); }
+  }
+
+  function reveal(id, moveFocus, instant) {
     var r = byId[id];
     if (!r) return false;
     if (search && search.value) { search.value = ''; applyFilter(''); }
@@ -118,23 +127,20 @@
     r.li.classList.add('is-target');
     clearTimeout(r.targetTimer);
     r.targetTimer = setTimeout(function () { r.li.classList.remove('is-target'); }, 2400);
-    try {
-      r.li.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
-    } catch (e) {
-      r.li.scrollIntoView(true);
-    }
+    scrollRow(r.li, instant);
     if (moveFocus) {
       try { r.btn.focus({ preventScroll: true }); } catch (e) { r.btn.focus(); }
     }
     return true;
   }
 
-  function fromHash() {
+  function fromHash(instant) {
     var m = /^#g-([a-z0-9-]+)$/.exec(location.hash || '');
-    if (m) reveal(m[1], false);
+    if (m) reveal(m[1], false, instant);
   }
 
-  window.addEventListener('hashchange', fromHash);
+  // A hash the reader caused mid-page is in-page motion, so it animates.
+  window.addEventListener('hashchange', function () { fromHash(false); });
 
   document.addEventListener('click', function (e) {
     var chip = e.target && e.target.closest && e.target.closest('a.gl-chip');
@@ -208,7 +214,33 @@
     records.forEach(function (r) { close(r, { instant: true }); });
   });
 
-  // The browser's own hash jump already happened (this script is deferred), so
-  // the row is in view; opening it is the part that was missing.
-  fromHash();
+  // On a deep link, the browser's own hash jump has already happened (this script
+  // is deferred) — but it aimed at the CLOSED row, on a page that is still
+  // settling: this row expands, fonts swap, and the shared reading runtime does
+  // its own first-paint work. Measured in Chromium, the row ended up off-screen
+  // on roughly one cold load in three, with the correct hash and the correct row
+  // open — the reader arriving at their term and not seeing it. So the landing is
+  // instant (you asked for this entry; you should not have to watch the page
+  // travel to it) and it is re-asserted once loading is done.
+  fromHash(true);
+
+  if (/^#g-[a-z0-9-]+$/.test(location.hash || '')) {
+    var taken = false;
+    var yield_ = function () { taken = true; };
+    ['wheel', 'touchstart', 'keydown'].forEach(function (evt) {
+      window.addEventListener(evt, yield_, { once: true, passive: true });
+    });
+    var settle = function () {
+      // Never fight a reader who has already started moving the page themselves.
+      if (taken) return;
+      var m = /^#g-([a-z0-9-]+)$/.exec(location.hash || '');
+      var r = m && byId[m[1]];
+      if (!r) return;
+      var top = r.li.getBoundingClientRect().top;
+      // Only correct a row that actually drifted: at rest it sits near the top.
+      if (top < 0 || top > window.innerHeight * 0.5) scrollRow(r.li, true);
+    };
+    if (document.readyState === 'complete') requestAnimationFrame(settle);
+    else window.addEventListener('load', function () { requestAnimationFrame(settle); });
+  }
 })();

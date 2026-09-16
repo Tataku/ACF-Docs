@@ -109,8 +109,12 @@ const perPart = (n) => [...charts.values()].filter((c) => c.part === n).length;
 // stray number elsewhere on the page is never touched.
 const RULES = [
   ['cover-docs.html', [
-    [new RegExp(`(The Framework in Pictures ${DOT} )\\d+( exhibits)`), () => EXHIBITS],
-    [new RegExp(`(Glossary ${DOT} )\\d+( terms)`), () => TERMS],
+    // Neither cover tile quotes a count any more (owner, 2026-09-15): each leads
+    // to the whole of its thing, so a number on it only ages. Both counts still
+    // have a home on _index.html, which is why EXHIBITS and TERMS are still
+    // derived and still audited — and why the rules went WITH the markers they
+    // matched. A rule left behind does not fail at the edit; it reports drift on
+    // every run afterwards, until the audit is noise people learn to skip.
     // One rule per card, anchored on that card's own data-part so a reading time
     // can never be written onto the wrong Part (which is how 1 and 2 were swapped).
     ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*?&approx; )\\d+( min read)`), () => MINUTES.get(n)]),

@@ -208,8 +208,29 @@ test('css: composes the system — tokens only, no raw colours in the glossary b
   assert.match(block, /var\(--rule\)/);
 });
 
+test('script: a deep link lands instantly — "instant", never "auto"', () => {
+  // The trap this pins: scrollIntoView({behavior:'auto'}) does not mean "jump",
+  // it means "use scroll-behavior", and reading-system.css sets that to smooth on
+  // <html>. A deep link that asked for auto animated ~900ms across a 10,000px
+  // page, so a reader arriving at /glossary#g-<id> could look before the scroll
+  // had finished and see the wrong part of the index. Measured in Chromium: the
+  // row sat at top=5478 at 200ms and only reached top=95 by 900ms; with 'instant'
+  // it is at top=95 on the first frame.
+  assert.match(SCRIPT, /behavior: \(reduce \|\| instant\) \? 'instant' : 'smooth'/,
+    'the instant path says instant');
+  assert.doesNotMatch(SCRIPT, /behavior:[^;\n]*'auto'/, "no scroll call defers to the stylesheet's smooth");
+  // The first hash landing is the instant one; a hash the reader causes mid-page
+  // still animates, because that is in-page motion they asked for.
+  assert.match(SCRIPT, /fromHash\(true\);/, 'the load-time deep link is instant');
+  assert.match(SCRIPT, /addEventListener\('hashchange', function \(\) \{ fromHash\(false\); \}\)/,
+    'and a mid-page hash change is not');
+});
+
 test('script: deep links, chip hops, find-in-page, filter, and expand/collapse are all wired', () => {
-  assert.match(SCRIPT, /addEventListener\('hashchange', fromHash\)/);
+  // The property is that a hash change re-runs the deep-link handler; the exact
+  // form changed when the handler took an argument (instant on load, animated
+  // mid-page), and the precise wiring is pinned in the 'lands instantly' test.
+  assert.match(SCRIPT, /addEventListener\('hashchange',[\s\S]{0,60}fromHash\(/);
   assert.match(SCRIPT, /\/\^#g-\(\[a-z0-9-\]\+\)\$\/\.exec\(location\.hash/);
   assert.match(SCRIPT, /closest\('a\.gl-chip'\)/);
   assert.match(SCRIPT, /chip\.hash/, 'reads the resolved hash (reading.js absolutises hrefs)');

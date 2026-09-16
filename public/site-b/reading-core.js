@@ -657,11 +657,17 @@
     nav.addEventListener('focusin', function () { clearTimeout(idle); });
     nav.addEventListener('focusout', hideSoon);
 
-    // Return-to-top: smooth unless the reader prefers reduced motion.
+    // Return-to-top: smooth unless the reader prefers reduced motion. 'instant',
+    // not 'auto': `auto` means "defer to scroll-behavior", and the stylesheet sets
+    // `scroll-behavior: smooth` on <html>. This branch happened to be correct
+    // anyway, because the reduced-motion media query overrides that declaration
+    // too — but it was correct by coincidence, and the same idiom copied into
+    // glossary-index.js, where no media query covered it, animated a deep link
+    // that was supposed to land instantly.
     var toTop = nav.querySelector('.floatnav-top');
     if (toTop) toTop.addEventListener('click', function () {
       var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      window.scrollTo({ top: 0, left: 0, behavior: reduce ? 'auto' : 'smooth' });
+      window.scrollTo({ top: 0, left: 0, behavior: reduce ? 'instant' : 'smooth' });
     });
   }
 
