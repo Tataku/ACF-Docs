@@ -2033,7 +2033,6 @@
     card.className = 'gloss-card';
     card.setAttribute('role', 'dialog');
     card.id = 'gloss-card';                 // so a trigger can name what it opens
-    card.setAttribute('tabindex', '-1');    // and so the card can hold focus itself
     card.hidden = true;
     card.addEventListener(ENTER, function (e) { if (hovers(e)) clearTimeout(closeTimer); });
     card.addEventListener(LEAVE, function (e) { if (hovers(e) && !pinned) scheduleClose(); });
@@ -2046,7 +2045,7 @@
       var items = focusables();
       if (!items.length) return;
       var first = items[0], last = items[items.length - 1];
-      if (e.shiftKey && (document.activeElement === first || document.activeElement === card)) { e.preventDefault(); last.focus(); }
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === cardLead())) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
     document.body.appendChild(backdrop);
@@ -2058,14 +2057,28 @@
   function focusables() {
     return card ? [].slice.call(card.querySelectorAll('a[href], button:not([disabled])')) : [];
   }
-  // Hand the reader the card. Called ONLY from an activation — a click, a tap
-  // or Enter — never from hover, which must not move focus. That is an
-  // interaction distinction, not a device one: nothing here asks what kind of
-  // machine this is.
+  // The card reads term -> definition -> layer two. The beginning of that is the
+  // term, and it is where an activated reader is put.
+  function cardLead() { return card ? card.querySelector('.gloss-term') : null; }
+
+  // Hand the reader the card, at its BEGINNING. Focusing the first control
+  // instead made layer two reachable at the cost of the reading order: it
+  // dropped the reader past the definition onto "Appears in Part..." or a chip,
+  // which is the one thing they came for the tooltip to read. The term carries
+  // tabindex="-1" so it can receive focus without joining the tab order; Tab
+  // from there reaches the first control by document order, so the definition
+  // is passed THROUGH rather than jumped over. The container is never the
+  // target — a dialog box is not a place in a document.
+  //
+  // Called ONLY from an activation — a click, a tap or Enter — never from
+  // hover, which must not move focus. That is an interaction distinction, not a
+  // device one: nothing here asks what kind of machine this is.
   function focusIntoCard() {
     if (!card || card.hidden) return;
+    var lead = cardLead();
+    if (lead) { lead.focus(); return; }
     var items = focusables();
-    (items.length ? items[0] : card).focus();
+    if (items.length) items[0].focus();
   }
 
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -2100,7 +2113,7 @@
   function render(entry) {
     ensureCard();
     card.innerHTML =
-      '<p class="gloss-term">' + esc(entry.term) + '</p>' +
+      '<p class="gloss-term" tabindex="-1">' + esc(entry.term) + '</p>' +
       '<p class="gloss-def">' + esc(entry.definition) + '</p>' +
       '<div class="gloss-layer2">' + partLink(entry.appearsLater) + chartLink(entry) + relatedChips(entry) + '</div>';
     card.setAttribute('aria-label', entry.term);

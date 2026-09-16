@@ -136,7 +136,10 @@ test('presentation is an argument, not a device: the sheet is chosen by the call
 // ---------------------------------------------------------------------------
 test('the card is addressable: it has an id, its triggers point at it, and it can hold focus', () => {
   assert.match(GLOSS, /card\.id = 'gloss-card';/, 'the card needs a stable id to be referenced');
-  assert.match(GLOSS, /card\.setAttribute\('tabindex', '-1'\)/, 'so the card itself can take focus when it has no controls');
+  // The container is deliberately NOT a focus target: a dialog box is not a
+  // place in a document. The term at the top of the card is.
+  assert.doesNotMatch(GLOSS, /card\.setAttribute\('tabindex', '-1'\)/, 'the box never takes focus itself');
+  assert.match(GLOSS, /'<p class="gloss-term" tabindex="-1">'/, 'the term is the intentional beginning, focusable without joining the tab order');
   const wire = GLOSS.slice(GLOSS.indexOf('function wire()'));
   assert.match(wire, /setAttribute\('aria-controls', 'gloss-card'\)/, 'the trigger names what it expands');
   assert.match(wire, /setAttribute\('aria-haspopup', 'dialog'\)/, 'and says what kind of thing it opens');
@@ -146,6 +149,14 @@ test('activation moves focus into the card; hover never does', () => {
   const wire = GLOSS.slice(GLOSS.indexOf('function wire()'));
   const click = wire.slice(wire.indexOf("btn.addEventListener('click'"), wire.indexOf('});', wire.indexOf("btn.addEventListener('click'")));
   assert.match(click, /focusIntoCard\(\)/, 'a click, a tap or Enter hands the reader the card');
+  // ...and hands it over at the BEGINNING. Focusing the first control instead
+  // made layer two reachable at the cost of the reading order, dropping the
+  // reader past the definition onto "Appears in Part..." or a chip.
+  const into = GLOSS.slice(GLOSS.indexOf('function focusIntoCard()'), GLOSS.indexOf('function esc('));
+  assert.match(into, /var lead = cardLead\(\);[\s\S]{0,60}lead\.focus\(\); return;/, 'the term takes focus first');
+  assert.doesNotMatch(into, /card\.focus\(\)/, 'and the container is never the fallback');
+  assert.match(GLOSS, /function cardLead\(\) \{ return card \? card\.querySelector\('\.gloss-term'\) : null; \}/,
+    'the beginning of the card is named once and used by both the hand-over and the trap');
   // The pointer contract is untouched: hovers(e) still decides the presentation.
   assert.match(click, /open\(btn, null, !hovers\(e\)\)/, 'a tap still raises the sheet and a click still pins the popover');
   const enter = wire.slice(wire.indexOf('btn.addEventListener(ENTER'), wire.indexOf('btn.addEventListener(LEAVE'));
@@ -159,7 +170,8 @@ test('Tab stays inside an activated card, and Escape is the way out', () => {
   assert.match(GLOSS, /querySelectorAll\('a\[href\], button:not\(\[disabled\]\)'\)/, 'links and chips, in document order');
   const trap = GLOSS.slice(GLOSS.indexOf("card.addEventListener('keydown'"));
   assert.match(trap, /e\.key !== 'Tab'/, 'only Tab is intercepted');
-  assert.match(trap, /e\.shiftKey[\s\S]{0,160}last\.focus\(\)/, 'Shift+Tab off the first control wraps to the last');
+  assert.match(trap, /e\.shiftKey && \(document\.activeElement === first \|\| document\.activeElement === cardLead\(\)\)[\s\S]{0,60}last\.focus\(\)/,
+    'Shift+Tab wraps to the last control from the first control AND from the term, which is where activation puts the reader');
   assert.match(trap, /document\.activeElement === last[\s\S]{0,80}first\.focus\(\)/, 'Tab off the last control wraps to the first');
   // Escape already closed the card and returned focus; that is the documented exit.
   assert.match(GLOSS, /e\.key !== 'Escape'[\s\S]{0,400}closeNow\(\);[\s\S]{0,400}lastTrigger\.focus\(\)/, 'Escape closes and hands focus back to the term');
