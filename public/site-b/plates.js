@@ -1,7 +1,7 @@
 /* ============================================================================
    ACF DOCS — the pictures draw themselves in
-   Shared by the cover (its chapter plates and Resources tiles) and every part
-   page (the plate on its "next up" card). reading-system.css holds each
+   Shared by the cover (its chapter plates and Resources tiles), every part
+   page (the plate on its "next up" card) and Part 5's posture rails. reading-system.css holds each
    picture's strokes back until `data-drawn` lands on its `.dc-art`, then runs
    the draw-in on --motion-draw. It is set here from an IntersectionObserver, so
    a picture below the fold draws when it is looked at rather than when the page
@@ -14,7 +14,8 @@
   'use strict';
 
   function plates() {
-    var arts = document.querySelectorAll('.dc-art');
+    // The cover's pictures, the part pages' next-up plates, and Part 5's posture rails.
+    var arts = document.querySelectorAll('.dc-art, .pc-rail');
     if (!arts.length) return;
     var draw = function (el) { el.setAttribute('data-drawn', 'true'); };
     if (!('IntersectionObserver' in window)) {

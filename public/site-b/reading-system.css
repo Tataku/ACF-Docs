@@ -4967,6 +4967,110 @@ a.dc-card[data-part="6"]:focus-visible .art-cell-lit,
 .posture-card[data-posture="hype"],    .posture-hero[data-posture="hype"]    { --pi-c: var(--posture-hype-fg); }
 .posture-card[data-posture="bitcoin"], .posture-hero[data-posture="bitcoin"] { --pi-c: var(--posture-bitcoin-fg); }
 
+/* ---- Posture rails — the allocation spine (Part 5 trio) --------------------
+   Each posture card carries a vertical 0–100% scale on its left edge, in the
+   posture's own colour: the AGGREGATE band lit where that posture may live in
+   the portfolio, the per-position band as a thin inner marker, Hype's hard cap
+   as a bar. The numbers are never typed here or in the rail —
+   scripts/sync-posture-rails.mjs derives them from the stats the card already
+   prints, writes them as the rail's custom properties, and `audit:posture-rails`
+   refuses drift. Identity stays colour PLUS name: the rail is decorative
+   (aria-hidden) and states nothing the card does not.
+
+   The character layer says what kind of force each posture is, in the drawing
+   of the band alone. Torque is the driving force: its band is brightest at its
+   head, a plume rises above it, a chevron marks the direction and lifts under
+   the pointer, and it draws in by growing from the foot. Ballast is stability:
+   a flat band on a keel, and the one thing on this page that does not move —
+   it fades in where the others grow. Hype is speculation: a translucent band
+   with a dashed edge under its cap, a draw-in that overshoots and settles, and
+   a ghost rising past the cap that shows itself only under the pointer. */
+.posture-card { position: relative; overflow: hidden; padding-left: calc(var(--space-6) + 54px); }
+.pc-rail {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 58px;
+  color: var(--pi-c, var(--posture-unclassified-fg));
+  pointer-events: none;
+  --pc-top: 18px;
+  --pc-run: calc(100% - 36px);
+  background: linear-gradient(to right, color-mix(in oklab, var(--pi-c) 13%, transparent), transparent 88%);
+}
+.pc-scale, .pc-ticks, .pc-band, .pc-pos, .pc-cap, .pc-keel, .pc-thrust, .pc-tip, .pc-ghost, .pc-lbl, .pc-end { position: absolute; }
+.pc-scale { left: 27px; top: var(--pc-top); bottom: var(--pc-top); width: 1px; background: color-mix(in oklab, currentColor 38%, transparent); }
+.pc-ticks { left: 23px; top: var(--pc-top); bottom: var(--pc-top); width: 9px;
+  background: repeating-linear-gradient(to bottom, color-mix(in oklab, currentColor 55%, transparent) 0 1px, transparent 1px 10%); }
+.pc-band { left: 20px; width: 15px; border-radius: 2px;
+  top: calc(var(--pc-top) + (100 - var(--hi)) * var(--pc-run) / 100);
+  height: calc((var(--hi) - var(--lo)) * var(--pc-run) / 100);
+  background: color-mix(in oklab, currentColor 62%, transparent);
+  box-shadow: 0 0 16px color-mix(in oklab, currentColor 38%, transparent); }
+.pc-pos { left: 38px; width: 4px; border-radius: 2px; background: currentColor;
+  top: calc(var(--pc-top) + (100 - var(--phi)) * var(--pc-run) / 100);
+  height: calc((var(--phi) - var(--plo)) * var(--pc-run) / 100); }
+.pc-lbl { left: 5px; bottom: calc(var(--pc-top) + var(--lo) * var(--pc-run) / 100);
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-family: var(--font-mono); font-size: 0.54rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
+  color: color-mix(in oklab, currentColor 85%, transparent); }
+.pc-end { left: 32px; font-family: var(--font-mono); font-size: 0.5rem; font-weight: 600; letter-spacing: .08em;
+  color: color-mix(in oklab, currentColor 55%, transparent); }
+/* The label and the scale's ends are drawn from attributes, never text nodes:
+   sync-counts.mjs derives the reading time from the page's words, and a
+   decoration is not one of them. */
+.pc-lbl::before { content: attr(data-label); }
+.pc-end--top { top: 8px; }
+.pc-end--bot { bottom: 8px; }
+.pc-end--top::before { content: '100'; }
+.pc-end--bot::before { content: '0'; }
+
+/* Torque — the driving force. */
+.posture-card[data-posture="torque"] .pc-band {
+  background: linear-gradient(to top, color-mix(in oklab, currentColor 46%, transparent), color-mix(in oklab, currentColor 86%, transparent)); }
+.pc-thrust { left: 20px; width: 15px; bottom: calc(var(--pc-top) + var(--hi) * var(--pc-run) / 100); height: calc(14 * var(--pc-run) / 100);
+  background: linear-gradient(to top, color-mix(in oklab, currentColor 34%, transparent), transparent); opacity: .75; }
+.pc-tip { left: 23px; width: 9px; height: 9px; border-top: 2px solid currentColor; border-left: 2px solid currentColor;
+  transform: rotate(45deg); top: calc(var(--pc-top) + (100 - var(--hi)) * var(--pc-run) / 100 - 14px); }
+/* Ballast — stability. */
+.posture-card[data-posture="ballast"] .pc-band { background: color-mix(in oklab, currentColor 58%, transparent); box-shadow: none; border-radius: 2px 2px 0 0; }
+.pc-keel { left: 16px; width: 23px; height: 3px; background: currentColor; bottom: calc(var(--pc-top) + var(--lo) * var(--pc-run) / 100 - 1px); }
+/* Hype — speculation, under a hard cap. */
+.posture-card[data-posture="hype"] .pc-band { background: color-mix(in oklab, currentColor 30%, transparent); box-shadow: none;
+  outline: 1px dashed color-mix(in oklab, currentColor 80%, transparent); outline-offset: -1px; }
+.pc-cap { left: 16px; width: 26px; height: 2px; background: currentColor;
+  top: calc(var(--pc-top) + (100 - var(--cap)) * var(--pc-run) / 100 - 1px);
+  box-shadow: 0 0 10px color-mix(in oklab, currentColor 60%, transparent); }
+.pc-cap::after { content: 'cap'; position: absolute; left: 30px; top: -7px;
+  font-family: var(--font-mono); font-size: .5rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.pc-ghost { left: 27px; width: 1px; bottom: calc(var(--pc-top) + var(--cap) * var(--pc-run) / 100 + 2px); height: calc(22 * var(--pc-run) / 100);
+  background: repeating-linear-gradient(to top, currentColor 0 3px, transparent 3px 7px);
+  -webkit-mask-image: linear-gradient(to top, currentColor, transparent);
+  mask-image: linear-gradient(to top, currentColor, transparent);
+  opacity: .35; }
+
+/* Under the pointer (and the keyboard): Torque's chevron lifts and its plume brightens; Hype's ghost shows itself; Ballast holds still. */
+.pc-tip, .pc-thrust, .pc-ghost { transition: transform var(--motion-base) var(--ease-emphasis), opacity var(--motion-base) var(--ease-standard); }
+.posture-card[data-posture="torque"]:hover .pc-tip,    .posture-card[data-posture="torque"]:focus-visible .pc-tip    { transform: translateY(-3px) rotate(45deg); }
+.posture-card[data-posture="torque"]:hover .pc-thrust, .posture-card[data-posture="torque"]:focus-visible .pc-thrust { opacity: 1; }
+.posture-card[data-posture="hype"]:hover .pc-ghost,    .posture-card[data-posture="hype"]:focus-visible .pc-ghost    { opacity: .8; }
+
+/* Draw-in, once, when the rail is looked at (plates.js sets data-drawn). The hidden
+   pre-state and the animation live inside the no-preference gate; Torque and Hype
+   grow from the foot, Ballast simply appears, the character parts fade in after. */
+@media (prefers-reduced-motion: no-preference) {
+  .pc-band, .pc-pos { transform-origin: 50% 100%; }
+  .pc-rail:not([data-drawn="true"]) .pc-band, .pc-rail:not([data-drawn="true"]) .pc-pos { transform: scaleY(0); }
+  .pc-rail:not([data-drawn="true"]) .pc-thrust, .pc-rail:not([data-drawn="true"]) .pc-tip, .pc-rail:not([data-drawn="true"]) .pc-ghost,
+  .pc-rail:not([data-drawn="true"]) .pc-cap, .pc-rail:not([data-drawn="true"]) .pc-keel, .pc-rail:not([data-drawn="true"]) .pc-lbl { opacity: 0; }
+  .pc-rail[data-drawn="true"] .pc-band { animation: dc-art-grow-y calc(var(--motion-draw) * .55) var(--ease-emphasis) backwards; }
+  .pc-rail[data-drawn="true"] .pc-pos  { animation: dc-art-grow-y calc(var(--motion-draw) * .45) var(--ease-emphasis) calc(var(--motion-draw) * .2) backwards; }
+  .pc-rail[data-drawn="true"] .pc-thrust, .pc-rail[data-drawn="true"] .pc-tip, .pc-rail[data-drawn="true"] .pc-ghost,
+  .pc-rail[data-drawn="true"] .pc-cap, .pc-rail[data-drawn="true"] .pc-keel, .pc-rail[data-drawn="true"] .pc-lbl {
+    animation: pc-fade calc(var(--motion-draw) * .4) var(--ease-emphasis) calc(var(--motion-draw) * .45) backwards; }
+  .posture-card[data-posture="ballast"] .pc-rail:not([data-drawn="true"]) .pc-band { transform: none; opacity: 0; }
+  .posture-card[data-posture="ballast"] .pc-rail[data-drawn="true"] .pc-band { animation-name: pc-fade; }
+  .posture-card[data-posture="hype"] .pc-rail[data-drawn="true"] .pc-band { animation-name: pc-hype-in; }
+}
+@keyframes pc-fade    { from { opacity: 0; } }
+@keyframes pc-hype-in { from { transform: scaleY(0); } 70% { transform: scaleY(1.14); } }
+
 @media (max-width: 768px) {
   .posture-trio { grid-template-columns: 1fr; gap: var(--space-4); }
   /* the chip takes its own line; the stat set flows below as one aligned row,
