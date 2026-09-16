@@ -25,6 +25,7 @@
     "test:glossary-pointer": "node --test tests/glossary-pointer.test.mjs",
     "test:header-layout": "node --test tests/header-layout.test.mjs",
     "test:font-corpus": "node --test tests/font-corpus.test.mjs",
+    "test:icon-vocabulary": "node --test tests/icon-vocabulary.test.mjs",
     "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
     "validate:charts": "node scripts/validate-chart-specs.mjs",
     "audit:chart-experience": "node scripts/audit-chart-experience.mjs",

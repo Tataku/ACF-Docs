@@ -1,0 +1,75 @@
+{
+  "note": "The Zen icon vocabulary and where each mark is implemented. Two production representations of one design vocabulary, deliberately NOT one shared source file: the two runtimes are different (static sanitized SVG here, procedural brush geometry in the dashboard) and coupling them would buy drift protection at the cost of an architectural dependency neither repo needs.",
+  "provenance": {
+    "origin": "Original Figma handoff \u2014 149 raw SVG exports, formerly at design/zen-icons-source/.",
+    "preservedAt": "git commit 9507332946db6357c557b902bc51e07e69a1d423 (2026-07-12)",
+    "retrieve": "git show 9507332946db:design/zen-icons-source/<name>.svg",
+    "inventory": "149 files, 324904 bytes. Per-file sha256 in design/zen-source-manifest.json.",
+    "status": "Removed from the working tree 2026-09-16. It was imported by nothing \u2014 no runtime, build, config, CI or test reference \u2014 and its presence invited the reading that 149 obsolete exports were canonical. Git preserves the originals; provenance does not require them in the tree.",
+    "authority": "The PRODUCTION implementations below are authoritative. The Figma export is their historical ancestor, not their master."
+  },
+  "representations": {
+    "docs": {
+      "path": "public/site-b/icons/optimized/",
+      "form": "sanitized static SVG, viewBox 0 0 100 100, fill=currentColor, inlined into the pages",
+      "sizing": "CSS; a 1.15x optical bump inside .part-actions / .floatnav / .sidebar-toggle",
+      "measuredFloor": "~18px. Measured 2026-09-16: at 16px five of six shipped marks fall below 0.75 peak alpha; at 20px all clear. Every shipped Zen control renders at 16-17.6px WITH the 1.15x bump, i.e. ~18-20px effective, so none is impaired."
+    },
+    "dashboard": {
+      "path": "ACFDashboard src/features/shared/ui/BrushIcon/brushIconPaths.js",
+      "form": "procedural brush geometry on a 100-unit box, generated at runtime through a turbulence + displacement filter",
+      "sizing": "the .acf-icon ladder; xl / 2xl / 3xl only",
+      "measuredFloor": "24px. A DIFFERENT number from the docs floor for a different reason: what fails below 24 there is the filter's taper and grain, not coverage. Same visual family, independently measured runtime constraints \u2014 neither floor transfers to the other repo."
+    }
+  },
+  "marks": [
+    {
+      "semantic": "collapse-sidebar",
+      "docsAsset": "collapse-sidebar.svg",
+      "dashboardMark": "collapse-sidebar",
+      "usage": "collapse the reading sidebar",
+      "control": ".sidebar-toggle .icon-collapse",
+      "shared": true
+    },
+    {
+      "semantic": "expand-sidebar",
+      "docsAsset": "expand-sidebar.svg",
+      "dashboardMark": "expand-sidebar",
+      "usage": "expand the reading sidebar",
+      "control": ".sidebar-toggle .icon-expand",
+      "shared": true
+    },
+    {
+      "semantic": "framework-docs",
+      "docsAsset": "framework-docs.svg",
+      "dashboardMark": "framework-docs",
+      "usage": "return to the Framework home",
+      "control": ".floatnav-home .fn-icon",
+      "shared": true
+    },
+    {
+      "semantic": "chevron-up",
+      "docsAsset": "chevron-up.svg",
+      "dashboardMark": null,
+      "usage": "back to top",
+      "control": ".floatnav-top .fn-icon",
+      "shared": false
+    },
+    {
+      "semantic": "copy",
+      "docsAsset": "copy.svg",
+      "dashboardMark": null,
+      "usage": "copy a link to this part",
+      "control": "[data-copy-link] .pa-icon",
+      "shared": false
+    },
+    {
+      "semantic": "share",
+      "docsAsset": "share.svg",
+      "dashboardMark": null,
+      "usage": "native share sheet",
+      "control": "[data-share-native] .pa-icon",
+      "shared": false
+    }
+  ]
+}
