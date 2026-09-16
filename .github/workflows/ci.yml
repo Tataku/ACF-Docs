@@ -1,0 +1,108 @@
+# Blocking PR gate for the Framework Docs.
+#
+# WHY THIS EXISTS. The repo already carried a substantial quality system — the
+# node suites under tests/, ten `audit:*` checks, and a generator chain whose
+# whole job is to keep derived files honest — and nothing ran any of it. The
+# only check on a pull request was Vercel's preview comment, so every green
+# claim in a commit message depended on somebody remembering to run the suite by
+# hand. The crawler-policy fix that prompted this made the cost concrete: that
+# bug was invisible in a browser and invisible to every audit that was never
+# executed.
+#
+# COMPOSED, NOT LISTED. This file names no individual test and no individual
+# audit. The suites are the repo's own scripts, and the audits are discovered
+# from package.json at run time, so a new `audit:*` script is enrolled the day
+# it is added and a second list can never drift from the first. The one thing
+# that would defeat that is adding a check here instead of adding a script.
+#
+# NOT `npm run build` alone. A successful build proves the site compiles. It
+# proves nothing about whether the glossary still matches its source, whether
+# the sitemap still matches the canonicals, or whether a crawler can fetch the
+# stylesheet. Those are what the steps below are for; the build is the last of
+# four gates, not the only one.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A newer push supersedes an in-flight run on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Tests, audits, generator drift, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # `npm install`, not `npm ci`: .gitignore records a deliberate decision
+      # that this project tracks dependency ranges in package.json rather than a
+      # lockfile, and `npm ci` requires one. Honour that here rather than
+      # quietly reversing it from a workflow file.
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      # Every tests/*.test.mjs plus the chart-core suite, via the repo's own
+      # scripts. New test files are picked up by the existing globs.
+      - name: Node test suites
+        run: npm test
+
+      # Discovered from package.json so this step never becomes a second list.
+      # Every audit runs even after one fails, because knowing all of what broke
+      # beats knowing the first thing that broke.
+      - name: Audits
+        run: |
+          set -uo pipefail
+          mapfile -t audits < <(node -p "Object.keys(require('./package.json').scripts).filter(k => k.startsWith('audit:')).sort().join('\n')")
+          if [ "${#audits[@]}" -eq 0 ]; then
+            echo "::error title=No audits found::package.json declares no audit:* scripts; this step would pass vacuously."
+            exit 1
+          fi
+          echo "Running ${#audits[@]} audits discovered from package.json."
+          failed=()
+          for s in "${audits[@]}"; do
+            echo "::group::$s"
+            if npm run --silent "$s"; then
+              echo "$s: ok"
+            else
+              echo "::error title=$s::audit failed"
+              failed+=("$s")
+            fi
+            echo "::endgroup::"
+          done
+          if [ "${#failed[@]}" -gt 0 ]; then
+            echo "::error title=Audits failed::${failed[*]}"
+            exit 1
+          fi
+
+      # The generators are the reason the derived files can be trusted. Running
+      # the real prebuild and then demanding an unchanged tree catches drift in
+      # every generator at once, including the two that have no `--check` twin
+      # and any generator added later. It is the check that cannot go stale.
+      - name: Generators leave no drift
+        run: |
+          npm run prebuild
+          if ! git diff --exit-code; then
+            echo "::error title=Generated files are stale::A generator rewrote a tracked file. Run 'npm run prebuild' and commit the result."
+            exit 1
+          fi
+          if [ -n "$(git status --porcelain --untracked-files=normal)" ]; then
+            git status --porcelain
+            echo "::error title=Generator produced untracked files::Commit them, or add them to .gitignore."
+            exit 1
+          fi
+
+      - name: Build
+        run: npm run build
