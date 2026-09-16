@@ -16,6 +16,7 @@
     "test:resource-tiles": "node --test tests/resource-tiles.test.mjs",
     "test:next-up-plates": "node --test tests/next-up-plates.test.mjs",
     "test:posture-rails": "node --test tests/posture-rails.test.mjs",
+    "test:glossary-pointer": "node --test tests/glossary-pointer.test.mjs",
     "test:header-layout": "node --test tests/header-layout.test.mjs",
     "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
     "validate:charts": "node scripts/validate-chart-specs.mjs",

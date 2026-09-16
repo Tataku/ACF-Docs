@@ -1838,15 +1838,62 @@
    Glossary tooltips — enhance [data-gloss] terms from acf-glossary.json (the
    single source of truth). Definitions are NEVER hard-coded here. Layer one is
    the definition; layer two is the appears-later link + related-concept chips.
-   Desktop: positioned popover on hover/focus/click-to-pin. Touch: bottom sheet.
+   A pointer that hovers gets the positioned popover on hover / focus / click-to-
+   pin; a finger gets the bottom sheet. WHICH ONE is decided per interaction,
+   never once at load — see hovers() below.
    =========================================================================== */
 (function () {
   var triggers = document.querySelectorAll('.gloss[data-gloss]');
   if (!triggers.length) return;
 
-  var desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   var GLOSSARY = {}, card = null, backdrop = null;
-  var pinned = false, hoverTimer = null, closeTimer = null, lastTrigger = null;
+  var pinned = false, hoverTimer = null, closeTimer = null, lastTrigger = null, sheetOpen = false;
+
+  /* ---- Pointer policy — the decision this file used to get wrong -----------
+     It read `(hover: hover) and (pointer: fine)` ONCE at load and branched the
+     wiring on the result, so when it came back false the hover listeners were
+     never attached at all. Both halves fail on a 2-in-1: the bare queries
+     describe the PRIMARY pointer, so a Surface reports `hover: none` and
+     `pointer: coarse` whenever Windows calls its touchscreen primary — and its
+     owner, driving a trackpad, got the touch sheet and no tooltip. A cached
+     boolean cannot follow a device that changes either: attach a mouse or fold
+     the keyboard back and the answer stays stale until a reload.
+
+     So nothing is cached and nothing is branched at wire time. Both sets of
+     listeners are always attached and every interaction is asked what it came
+     from. A device that is both gets both, which is the only true answer.
+     Pinned by tests/glossary-pointer.test.mjs — do not reintroduce a device
+     boolean here. */
+
+  // Pointer events carry pointerType; mouse events do not. Use one family or the
+  // other, never both: a touch also emits compatibility mouse events, and a
+  // doubled listener would open on the tap the pointer half just declined.
+  var ENTER = 'PointerEvent' in window ? 'pointerenter' : 'mouseenter';
+  var LEAVE = 'PointerEvent' in window ? 'pointerleave' : 'mouseleave';
+
+  // `any-hover`, never the bare `hover`: "can ANY pointer on this device hover?"
+  // Read live on every call, never stored. Unreadable assumes yes — a failed
+  // capability read must not cost the mouse and the keyboard their popover.
+  var hoverMedia = window.matchMedia ? window.matchMedia('(any-hover: hover)') : null;
+  function hoverCapable() { return hoverMedia ? hoverMedia.matches : true; }
+
+  // Does THIS interaction come from something that hovers? Ask the event first:
+  // pointerType is the only signal that tells one touch apart from the next
+  // trackpad move on the same machine. A keyboard-activated click carries '',
+  // and a legacy MouseEvent carries nothing, so an unreadable type falls back
+  // to the live capability query.
+  function hovers(e) {
+    var t = e && e.pointerType;
+    if (t === 'touch') return false;
+    if (t === 'mouse' || t === 'pen') return true;
+    return hoverCapable();
+  }
+
+  // Keyboard focus takes the popover. Focus that merely follows a tap or a click
+  // does not — there the click decides, or the sheet and the popover would fight.
+  function keyboardFocus(el) {
+    try { return el.matches(':focus-visible'); } catch (err) { return hoverCapable(); }
+  }
 
   // id -> part file (the ACTUAL built filenames). Unbuilt parts render layer-two
   // as muted plain text, never a dead link.
@@ -1981,8 +2028,8 @@
     card.className = 'gloss-card';
     card.setAttribute('role', 'dialog');
     card.hidden = true;
-    card.addEventListener('mouseenter', function () { clearTimeout(closeTimer); });
-    card.addEventListener('mouseleave', function () { if (!pinned) scheduleClose(); });
+    card.addEventListener(ENTER, function (e) { if (hovers(e)) clearTimeout(closeTimer); });
+    card.addEventListener(LEAVE, function (e) { if (hovers(e) && !pinned) scheduleClose(); });
     document.body.appendChild(backdrop);
     document.body.appendChild(card);
   }
@@ -2024,7 +2071,7 @@
       '<div class="gloss-layer2">' + partLink(entry.appearsLater) + chartLink(entry) + relatedChips(entry) + '</div>';
     card.setAttribute('aria-label', entry.term);
     card.querySelectorAll('[data-hop]').forEach(function (chip) {
-      chip.addEventListener('click', function () { open(lastTrigger, GLOSSARY[chip.getAttribute('data-hop')]); });
+      chip.addEventListener('click', function () { open(lastTrigger, GLOSSARY[chip.getAttribute('data-hop')], sheetOpen); });
     });
     var cl = card.querySelector('.gloss-chart');
     if (cl) cl.addEventListener('click', closeNow); // same-page anchor: close the card, let the jump happen
@@ -2049,7 +2096,7 @@
     card.style.top = (top + sy) + 'px';
   }
 
-  function open(trigger, entryOverride) {
+  function open(trigger, entryOverride, asSheet) {
     if (!trigger) return;
     var entry = entryOverride || GLOSSARY[trigger.getAttribute('data-gloss')];
     if (!entry) return;
@@ -2058,11 +2105,13 @@
     triggers.forEach(function (t) { t.setAttribute('aria-expanded', 'false'); });
     trigger.setAttribute('aria-expanded', 'true');
     card.hidden = false;
-    if (desktop) {
-      positionPopover(trigger);
-    } else {
+    sheetOpen = !!asSheet;
+    if (sheetOpen) {
       card.classList.add('as-sheet');
       backdrop.hidden = false;
+    } else {
+      if (backdrop) backdrop.hidden = true;
+      positionPopover(trigger);                       // which also drops .as-sheet
     }
   }
 
@@ -2070,7 +2119,7 @@
     if (!card) return;
     card.hidden = true; card.classList.remove('as-sheet');
     if (backdrop) backdrop.hidden = true;
-    pinned = false;
+    pinned = false; sheetOpen = false;
     if (lastTrigger) lastTrigger.setAttribute('aria-expanded', 'false');
   }
   function scheduleClose() { clearTimeout(closeTimer); closeTimer = setTimeout(closeNow, 200); }
@@ -2078,18 +2127,26 @@
   function wire() {
     triggers.forEach(function (btn) {
       if (!GLOSSARY[btn.getAttribute('data-gloss')]) return; // unknown id: leave as text
-      if (desktop) {
-        btn.addEventListener('mouseenter', function () { clearTimeout(closeTimer); hoverTimer = setTimeout(function () { if (!pinned) open(btn); }, 120); });
-        btn.addEventListener('mouseleave', function () { clearTimeout(hoverTimer); if (!pinned) scheduleClose(); });
-        btn.addEventListener('focus', function () { open(btn); });
-        btn.addEventListener('blur', function () { if (!pinned) scheduleClose(); });
-        btn.addEventListener('click', function () { pinned = true; open(btn); });
-      } else {
-        btn.addEventListener('click', function () { open(btn); });
-      }
+      btn.addEventListener(ENTER, function (e) {
+        if (!hovers(e)) return;                       // a finger is not a hover
+        clearTimeout(closeTimer);
+        hoverTimer = setTimeout(function () { if (!pinned) open(btn, null, false); }, 120);
+      });
+      btn.addEventListener(LEAVE, function (e) {
+        if (!hovers(e)) return;
+        clearTimeout(hoverTimer);
+        if (!pinned) scheduleClose();
+      });
+      btn.addEventListener('focus', function () { if (keyboardFocus(btn)) open(btn, null, false); });
+      btn.addEventListener('blur', function () { if (!pinned) scheduleClose(); });
+      btn.addEventListener('click', function (e) {
+        clearTimeout(hoverTimer); clearTimeout(closeTimer);
+        if (hovers(e)) { pinned = true; open(btn, null, false); }   // a click pins the popover
+        else open(btn, null, true);                                 // a tap raises the sheet
+      });
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && card && !card.hidden) { closeNow(); if (lastTrigger) lastTrigger.focus(); } });
-    if (desktop) document.addEventListener('click', function (e) { if (pinned && card && !card.contains(e.target) && !e.target.classList.contains('gloss')) closeNow(); });
-    window.addEventListener('resize', function () { if (card && !card.hidden && desktop && lastTrigger) positionPopover(lastTrigger); });
+    document.addEventListener('click', function (e) { if (pinned && card && !card.contains(e.target) && !e.target.classList.contains('gloss')) closeNow(); });
+    window.addEventListener('resize', function () { if (card && !card.hidden && !sheetOpen && lastTrigger) positionPopover(lastTrigger); });
   }
 })();
