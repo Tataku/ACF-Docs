@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:social-meta && npm run build:crawler && npm run build:navigation && npm run sync:counts && npm run sync:plates && npm run sync:posture-rails",
+    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:social-meta && npm run build:crawler && npm run build:navigation && npm run sync:counts && npm run sync:plates && npm run sync:posture-rails && npm run sync:card-motifs",
     "build": "next build",
     "start": "next start",
     "test": "npm run test:narration && npm run test:chart-core",
@@ -50,6 +50,8 @@
     "audit:brand": "node scripts/audit-brand-mark.mjs",
     "build:fonts": "python3 scripts/subset-fonts.py",
     "audit:fonts": "node scripts/audit-fonts.mjs",
+    "sync:card-motifs": "node scripts/sync-card-motifs.mjs",
+    "audit:card-motifs": "node scripts/sync-card-motifs.mjs --check",
     "build:crawler": "node scripts/build-crawler-files.mjs",
     "audit:crawler": "node scripts/build-crawler-files.mjs --check"
   },

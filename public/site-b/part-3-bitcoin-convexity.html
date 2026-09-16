@@ -353,12 +353,12 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div>
+        <div class="failure-modes" data-kind="compare">
+          <div data-figure="concentrated" style="--slot:1;--slots:2">
             <span class="name">Investor A &middot; 100% Bitcoin</span>
             <p>2.86 BTC at $35,000. Peak $197,000 (Nov 2021); trough $46,000 (Dec 2022), a 77% drawdown. With DCA, ends 2025 at ~3.26 BTC / $326,000. Maximum exposure captured the full upside; operational flexibility stayed at zero throughout.</p>
           </div>
-          <div>
+          <div data-figure="spread" style="--slot:2;--slots:2">
             <span class="name">Investor B &middot; Framework</span>
             <p>$15K Bitcoin, $40K regime equities, $30K income, $15K dry powder. The 77% BTC drawdown is only ~8&ndash;10% at the portfolio level; rules trigger trough accumulation and <button type="button" class="gloss" data-gloss="dry-powder" aria-expanded="false">dry powder</button> deploys into defense, energy, and AI dislocations. Ends 2025 at ~$190,000 with rebuilt dry powder and Bitcoin at 47% of net worth.</p>
           </div>
@@ -409,17 +409,17 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div><span class="name">Protocol &amp; technical</span><p>Undiscovered cryptographic vulnerabilities, consensus failures, or quantum advances breaking current encryption.</p></div>
-          <div><span class="name">Custody loss</span><p>Private-key loss, inheritance failures, hardware compromise, or multisig coordination breakdowns that eliminate access.</p></div>
-          <div><span class="name">Regulatory &amp; tax</span><p>Bans, confiscatory taxation, KYC undermining fungibility, or ETF de-listings forcing liquidation.</p></div>
-          <div><span class="name">ETF wrapper risk</span><p>Counterparty failures, fund closures, tracking errors, or changes to ETF tax treatment in qualified accounts.</p></div>
-          <div><span class="name">Market structure gaps</span><p>Liquidity evaporation during crises, exchange failures, or stablecoin collapses disrupting dollar on- and off-ramps.</p></div>
-          <div><span class="name">Leverage cascades</span><p>Systemic derivatives liquidations producing reflexive downward spirals beyond fundamental dislocation.</p></div>
-          <div><span class="name">Miner economics shocks</span><p>Hash-rate collapses, centralization, or energy-cost spikes that make mining unprofitable and weaken security.</p></div>
-          <div><span class="name">Geopolitical controls</span><p>Coordinated access restrictions, on-ramp closures, or internet-infrastructure disruption.</p></div>
-          <div><span class="name">Lender counterparty risk</span><p>Custodian insolvency, rehypothecation exposure, or force-majeure clauses permitting seizure of pledged collateral.</p></div>
-          <div><span class="name">Technology displacement</span><p>Emergence of superior monetary technology that renders Bitcoin obsolete despite network effects.</p></div>
+        <div class="failure-modes" data-kind="mechanism">
+          <div data-figure="rupture"><span class="name">Protocol &amp; technical</span><p>Undiscovered cryptographic vulnerabilities, consensus failures, or quantum advances breaking current encryption.</p></div>
+          <div data-figure="seizure"><span class="name">Custody loss</span><p>Private-key loss, inheritance failures, hardware compromise, or multisig coordination breakdowns that eliminate access.</p></div>
+          <div data-figure="seizure"><span class="name">Regulatory &amp; tax</span><p>Bans, confiscatory taxation, KYC undermining fungibility, or ETF de-listings forcing liquidation.</p></div>
+          <div data-figure="counterparty"><span class="name">ETF wrapper risk</span><p>Counterparty failures, fund closures, tracking errors, or changes to ETF tax treatment in qualified accounts.</p></div>
+          <div data-figure="liquidity"><span class="name">Market structure gaps</span><p>Liquidity evaporation during crises, exchange failures, or stablecoin collapses disrupting dollar on- and off-ramps.</p></div>
+          <div data-figure="cascade"><span class="name">Leverage cascades</span><p>Systemic derivatives liquidations producing reflexive downward spirals beyond fundamental dislocation.</p></div>
+          <div data-figure="erosion"><span class="name">Miner economics shocks</span><p>Hash-rate collapses, centralization, or energy-cost spikes that make mining unprofitable and weaken security.</p></div>
+          <div data-figure="seizure"><span class="name">Geopolitical controls</span><p>Coordinated access restrictions, on-ramp closures, or internet-infrastructure disruption.</p></div>
+          <div data-figure="counterparty"><span class="name">Lender counterparty risk</span><p>Custodian insolvency, rehypothecation exposure, or force-majeure clauses permitting seizure of pledged collateral.</p></div>
+          <div data-figure="displacement"><span class="name">Technology displacement</span><p>Emergence of superior monetary technology that renders Bitcoin obsolete despite network effects.</p></div>
         </div>
       </div>
 
@@ -468,10 +468,10 @@
       <figure class="fc-mount" id="exhibit-p3-models-must-converge" data-fc-chart="p3-models-must-converge"></figure>
 
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div><span class="name">Models cluster near price</span><p>Confidence in the target reserve range increases. Maintain the 10&ndash;15% range, continue systematic DCA, avoid aggressive changes.</p></div>
-          <div><span class="name">Models converge on undervaluation</span><p>A &gt;30% discount to convergent estimates. Temporarily increase accumulation (raise DCA ~50% or deploy dry powder). Existing holdings untouched.</p></div>
-          <div><span class="name">Models diverge widely</span><p>Elevated uncertainty; the divergence itself is informative. Hold the range, avoid aggressive changes either way, wait for reconvergence.</p></div>
+        <div class="failure-modes" data-kind="state">
+          <div data-figure="clustered" style="--slot:1;--slots:3"><span class="name">Models cluster near price</span><p>Confidence in the target reserve range increases. Maintain the 10&ndash;15% range, continue systematic DCA, avoid aggressive changes.</p></div>
+          <div data-figure="converged" style="--slot:2;--slots:3"><span class="name">Models converge on undervaluation</span><p>A &gt;30% discount to convergent estimates. Temporarily increase accumulation (raise DCA ~50% or deploy dry powder). Existing holdings untouched.</p></div>
+          <div data-figure="diverged" style="--slot:3;--slots:3"><span class="name">Models diverge widely</span><p>Elevated uncertainty; the divergence itself is informative. Hold the range, avoid aggressive changes either way, wait for reconvergence.</p></div>
         </div>
       </div>
 
@@ -497,11 +497,11 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div><span class="name">Gold coexistence &middot; ~$12T</span><p>Capturing 30&ndash;50% of gold&rsquo;s monetary premium over 20 years, with gold&rsquo;s market largely intact.</p></div>
-          <div><span class="name">Real-estate value storage &middot; ~$3T</span><p>A portion of property held primarily for preservation shifting to a more portable, divisible store of value.</p></div>
-          <div><span class="name">Offshore wealth &middot; ~$5T</span><p>Cross-jurisdictional holdings ($10T+) where self-custody offers a different intermediary and custody profile.</p></div>
-          <div><span class="name">EM currency substitution &middot; ~$3T</span><p>Holdings in 20%+ inflation economies as payment rails, custody, and regulatory clarity develop.</p></div>
+        <div class="failure-modes" data-kind="magnitude">
+          <div data-figure="share" style="--m:12"><span class="name">Gold coexistence &middot; ~$12T</span><p>Capturing 30&ndash;50% of gold&rsquo;s monetary premium over 20 years, with gold&rsquo;s market largely intact.</p></div>
+          <div data-figure="share" style="--m:3"><span class="name">Real-estate value storage &middot; ~$3T</span><p>A portion of property held primarily for preservation shifting to a more portable, divisible store of value.</p></div>
+          <div data-figure="share" style="--m:5"><span class="name">Offshore wealth &middot; ~$5T</span><p>Cross-jurisdictional holdings ($10T+) where self-custody offers a different intermediary and custody profile.</p></div>
+          <div data-figure="share" style="--m:3"><span class="name">EM currency substitution &middot; ~$3T</span><p>Holdings in 20%+ inflation economies as payment rails, custody, and regulatory clarity develop.</p></div>
         </div>
       </div>
 

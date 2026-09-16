@@ -223,11 +223,11 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div><span class="name">Doctrine</span><p>Structural. Changing it means you are running a different framework, not a tuned one.</p></div>
-          <div><span class="name">Parameter</span><p>Tunable inside a documented envelope, with the reasoning written down.</p></div>
-          <div><span class="name">Derived</span><p>An accounting identity. It follows from the others and cannot be set independently.</p></div>
-          <div><span class="name">Illustrative</span><p>Representative of the shape, not a forecast and not a promise.</p></div>
+        <div class="failure-modes" data-kind="taxonomy">
+          <div data-figure="fixed" style="--slot:1;--slots:4"><span class="name">Doctrine</span><p>Structural. Changing it means you are running a different framework, not a tuned one.</p></div>
+          <div data-figure="tunable" style="--slot:2;--slots:4"><span class="name">Parameter</span><p>Tunable inside a documented envelope, with the reasoning written down.</p></div>
+          <div data-figure="derived" style="--slot:3;--slots:4"><span class="name">Derived</span><p>An accounting identity. It follows from the others and cannot be set independently.</p></div>
+          <div data-figure="illustrative" style="--slot:4;--slots:4"><span class="name">Illustrative</span><p>Representative of the shape, not a forecast and not a promise.</p></div>
         </div>
       </div>
 
@@ -370,11 +370,11 @@
         <h3 class="sub-title">The thesis is bounded, and the bounds are the doctrine.</h3>
       </div>
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div><span class="name">Weights</span><p>Moves them, inside the &plusmn;0.10 envelope, renormalized.</p></div>
-          <div><span class="name">Sector relevance</span><p>Scales convexity and macro only, within 0.80 to 1.20. If risk is already poor, the uplift is damped in proportion.</p></div>
-          <div><span class="name">Volatility tolerance</span><p>Softens or sharpens risk penalties, floored at insolvency.</p></div>
-          <div><span class="name">Nothing else</span><p>Execution is thesis-invariant. Headroom, catalysts, balance sheet and margins are thesis-invariant. The posture-preference bonus is computed and displayed but is <em>not</em> applied to the score.</p></div>
+        <div class="failure-modes" data-kind="envelope">
+          <div data-figure="band" style="--sym:1"><span class="name">Weights</span><p>Moves them, inside the &plusmn;0.10 envelope, renormalized.</p></div>
+          <div data-figure="band" style="--sym:0"><span class="name">Sector relevance</span><p>Scales convexity and macro only, within 0.80 to 1.20. If risk is already poor, the uplift is damped in proportion.</p></div>
+          <div data-figure="floor"><span class="name">Volatility tolerance</span><p>Softens or sharpens risk penalties, floored at insolvency.</p></div>
+          <div data-figure="closed"><span class="name">Nothing else</span><p>Execution is thesis-invariant. Headroom, catalysts, balance sheet and margins are thesis-invariant. The posture-preference bonus is computed and displayed but is <em>not</em> applied to the score.</p></div>
         </div>
       </div>
       <div class="measure prose">
@@ -604,13 +604,13 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div><span class="name">Trigger</span><p>A threshold crossing inside one watched condition.</p></div>
-          <div><span class="name">Event</span><p>A logged <em>transition</em> &mdash; a state that changed. An unchanged state logs nothing, so the record is signal rather than noise.</p></div>
-          <div><span class="name">Recommendation</span><p>A described action with a priority and a deadline. Displayed. Never executed.</p></div>
-          <div><span class="name">Proposal</span><p>A draft change requiring explicit human acceptance &mdash; and acceptance still applies nothing automatically.</p></div>
-          <div><span class="name">Acknowledgement</span><p>A record that you saw it. Suppresses no arithmetic.</p></div>
-          <div><span class="name">Automated mutation</span><p>Does not exist in this system.</p></div>
+        <div class="failure-modes" data-kind="ladder">
+          <div data-figure="rung" style="--step:1;--steps:6"><span class="name">Trigger</span><p>A threshold crossing inside one watched condition.</p></div>
+          <div data-figure="rung" style="--step:2;--steps:6"><span class="name">Event</span><p>A logged <em>transition</em> &mdash; a state that changed. An unchanged state logs nothing, so the record is signal rather than noise.</p></div>
+          <div data-figure="rung" style="--step:3;--steps:6"><span class="name">Recommendation</span><p>A described action with a priority and a deadline. Displayed. Never executed.</p></div>
+          <div data-figure="rung" style="--step:4;--steps:6"><span class="name">Proposal</span><p>A draft change requiring explicit human acceptance &mdash; and acceptance still applies nothing automatically.</p></div>
+          <div data-figure="rung" style="--step:5;--steps:6"><span class="name">Acknowledgement</span><p>A record that you saw it. Suppresses no arithmetic.</p></div>
+          <div data-figure="absent" style="--step:6;--steps:6"><span class="name">Automated mutation</span><p>Does not exist in this system.</p></div>
         </div>
       </div>
 
@@ -654,11 +654,11 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div><span class="name">Native</span><p>The asset itself. Quoted on its own lane, valued in Bitcoin units, displayed to eight decimal places.</p></div>
-          <div><span class="name">Spot wrapper</span><p>A maintained allowlist of spot funds, checked <em>before</em> the fund branch so they score through the monetary model rather than as generic funds. Membership is explicit: a newly launched wrapper is an ordinary fund until it is registered.</p></div>
-          <div><span class="name">Futures product</span><p>Never treated as Bitcoin-class. A futures-based product is a different instrument with a different risk.</p></div>
-          <div><span class="name">Proxy equity</span><p>Companies with Bitcoin exposure are ordinary operating equities. There is no proxy archetype, and they are not exempt from anything.</p></div>
+        <div class="failure-modes" data-kind="taxonomy">
+          <div data-figure="fixed" style="--slot:1;--slots:4"><span class="name">Native</span><p>The asset itself. Quoted on its own lane, valued in Bitcoin units, displayed to eight decimal places.</p></div>
+          <div data-figure="tunable" style="--slot:2;--slots:4"><span class="name">Spot wrapper</span><p>A maintained allowlist of spot funds, checked <em>before</em> the fund branch so they score through the monetary model rather than as generic funds. Membership is explicit: a newly launched wrapper is an ordinary fund until it is registered.</p></div>
+          <div data-figure="excluded" style="--slot:3;--slots:4"><span class="name">Futures product</span><p>Never treated as Bitcoin-class. A futures-based product is a different instrument with a different risk.</p></div>
+          <div data-figure="excluded" style="--slot:4;--slots:4"><span class="name">Proxy equity</span><p>Companies with Bitcoin exposure are ordinary operating equities. There is no proxy archetype, and they are not exempt from anything.</p></div>
         </div>
       </div>
 
@@ -750,11 +750,11 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes">
-          <div><span class="name">Confidence</span><p>The quality of evidence at the moment of scoring.</p></div>
-          <div><span class="name">Freshness</span><p>The age of an input against its own time-to-live.</p></div>
-          <div><span class="name">Completeness</span><p>What fraction of the expected fields are present.</p></div>
-          <div><span class="name">Source quality</span><p>Where each individual input came from.</p></div>
+        <div class="failure-modes" data-kind="gauge">
+          <div data-figure="gauge"><span class="name">Confidence</span><p>The quality of evidence at the moment of scoring.</p></div>
+          <div data-figure="gauge"><span class="name">Freshness</span><p>The age of an input against its own time-to-live.</p></div>
+          <div data-figure="gauge"><span class="name">Completeness</span><p>What fraction of the expected fields are present.</p></div>
+          <div data-figure="gauge"><span class="name">Source quality</span><p>Where each individual input came from.</p></div>
         </div>
       </div>
 
