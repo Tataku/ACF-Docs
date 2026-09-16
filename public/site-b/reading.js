@@ -71,6 +71,25 @@
     return block.querySelectorAll('.gloss').length < MAX_GLOSS_PER_BLOCK;
   }
 
+  // Sense guard. A one-word term is a word first and a term second: "the framework
+  // stops describing", "margin expansion", "sector rotation" and "capital
+  // preservation overrides conviction" are all the wrong word in the right
+  // spelling, and each one spent its page's single highlight on a false positive.
+  // A term that declares `context` in acf-glossary.json is tagged only inside a
+  // block that also carries one of its context words, so the tagger reads the
+  // sense rather than the string. Terms without `context` are unaffected.
+  function inSense(entry, node) {
+    var need = entry.context;
+    if (!need || !need.length) return true;
+    var parent = node.parentElement;
+    var block = (parent && (parent.closest('p, li, td, th, blockquote') || parent)) || null;
+    var text = block ? block.textContent : node.nodeValue;
+    for (var i = 0; i < need.length; i += 1) {
+      if (new RegExp('(^|[^A-Za-z0-9])' + escapeRegExp(need[i]) + '(?=$|[^A-Za-z0-9])', 'i').test(text)) return true;
+    }
+    return false;
+  }
+
   function termCandidates(entry) {
     var values = [entry.term].concat(entry.aliases || []);
     var seen = {};
@@ -97,6 +116,7 @@
           // Links to OTHER terms are the point, so only self-reference is refused.
           var own = node.parentElement && node.parentElement.closest('[id^="g-"]');
           if (own && own.id === 'g-' + entry.id) return NodeFilter.FILTER_REJECT;
+          if (!inSense(entry, node)) return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_ACCEPT;
         }
       });

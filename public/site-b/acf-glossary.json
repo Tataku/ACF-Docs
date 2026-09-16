@@ -7,6 +7,7 @@
       "id": "stable slug, used as the data key and tooltip anchor (kebab-case)",
       "term": "display label",
       "aliases": "alternate spellings/phrasings the tagger should also match",
+      "context": "OPTIONAL sense guard. A one-word term is a word first and a term second, so a term listed here is only auto-tagged in a block that also carries one of these words. Added 2026-09-16 after 'the framework stops describing' was tagged as Stop-loss, 'margin expansion' as margin borrowing, and 'sector rotation' as posture Rotation. Use it whenever the term or an alias is a common English word with another meaning; prefer it over deleting an alias that is right somewhere else.",
       "wave": "1 = first rollout pass (highest comprehension value), 2 = second pass",
       "category": "closed key from meta.categories; groups the /glossary index (explicit, never derived from appearsLater)",
       "definition": "layer-one tooltip copy: concise, plain-English, no em dashes",
@@ -295,7 +296,6 @@
       "id": "momentum-filter",
       "term": "Momentum filter",
       "aliases": [
-        "momentum",
         "trend filter",
         "trend validation"
       ],
@@ -1403,6 +1403,15 @@
         "rotate",
         "rotation capital"
       ],
+      "context": [
+        "Ballast",
+        "redeploy",
+        "redeployment",
+        "dislocation",
+        "dry powder",
+        "posture",
+        "postures"
+      ],
       "wave": 3,
       "category": "construction",
       "definition": "Moving capital between postures as conditions change, most often trimming Ballast after Torque runs and redeploying into Torque during dislocations. It is the framework's primary way of buying low without raising outside cash.",
@@ -1426,8 +1435,7 @@
       "id": "stop-loss",
       "term": "Stop-loss",
       "aliases": [
-        "stop",
-        "stops"
+        "stop-losses"
       ],
       "wave": 3,
       "category": "construction",
@@ -1551,6 +1559,15 @@
         "securities-backed lending",
         "SBLOC"
       ],
+      "context": [
+        "borrow",
+        "borrowing",
+        "lending",
+        "collateral",
+        "pledge",
+        "loan",
+        "SBLOC"
+      ],
       "wave": 3,
       "category": "tax",
       "definition": "Borrowing against portfolio assets rather than selling them. The framework treats it as an optional overlay, revocable by the broker and repriceable under stress, never as a structural requirement.",
@@ -1575,6 +1592,15 @@
       "aliases": [
         "overrides",
         "documented override"
+      ],
+      "context": [
+        "documented",
+        "deviation",
+        "parameter",
+        "doctrine",
+        "reverts",
+        "waived",
+        "time-bounded"
       ],
       "wave": 3,
       "category": "construction",
@@ -2155,8 +2181,7 @@
       "term": "Model convergence",
       "aliases": [
         "convergence",
-        "models converge",
-        "model divergence"
+        "models converge"
       ],
       "wave": 4,
       "category": "bitcoin",
@@ -2347,7 +2372,6 @@
       "id": "single-name-sleeve",
       "term": "Single-name sleeve",
       "aliases": [
-        "sleeve",
         "single-name sleeves"
       ],
       "wave": 4,

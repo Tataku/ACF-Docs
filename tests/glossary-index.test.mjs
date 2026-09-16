@@ -270,3 +270,92 @@ test('generator: fails closed on a bad term file rather than rendering a lie', (
   assert.match(BUILD, /related id .* does not exist/);
   assert.match(BUILD, /process\.exit\(1\)/);
 });
+
+// ---------------------------------------------------------------------------
+// Sense, not spelling — which WORD gets the tooltip
+//
+// The tagger wraps the first occurrence of a term in a page's prose. For a
+// one-word term that is a word first and a term second, "first occurrence" and
+// "right occurrence" are different places, and the page spends its single
+// highlight on the wrong one. Four of these shipped:
+//
+//   "the framework stops describing"        tagged as Stop-loss
+//   "management is executing on margin expansion"  tagged as margin borrowing
+//   "not general beta or sector rotation"   tagged as posture Rotation
+//   "capital preservation overrides conviction"    tagged as a documented Override
+//   "the liquidity sleeve"                  tagged as a single-name sleeve
+//   "Execution measures momentum"           tagged as the momentum FILTER
+//   "large corrections of model divergence" tagged as model CONVERGENCE
+//
+// Two instruments fix the class. An alias that is simply the wrong word is
+// deleted. An alias that is right somewhere else keeps a `context` list, and the
+// tagger then requires one of those words in the same block.
+// ---------------------------------------------------------------------------
+
+const byId = Object.fromEntries(terms.map((t) => [t.id, t]));
+const TAGGER = fs.readFileSync(path.join(ROOT, 'public/site-b/reading.js'), 'utf8');
+
+test('sense: the tagger requires a term’s context words in the same block before it tags', () => {
+  const fn = TAGGER.slice(TAGGER.indexOf('function inSense('), TAGGER.indexOf('function termCandidates('));
+  assert.ok(fn.length > 200, 'inSense() located');
+  assert.match(fn, /var need = entry\.context;/, 'it reads context off the glossary entry, never a list hard-coded here');
+  assert.match(fn, /if \(!need \|\| !need\.length\) return true;/, 'a term without context is unaffected');
+  assert.match(fn, /closest\('p, li, td, th, blockquote'\)/, 'the sense is read from the whole block, not the text node');
+  assert.match(fn, /\(\^\|\[\^A-Za-z0-9\]\)' \+ escapeRegExp\(need\[i\]\)/, 'context words match on word boundaries, not substrings');
+  // And it is actually consulted by the walker, not merely defined.
+  assert.match(TAGGER, /if \(!inSense\(entry, node\)\) return NodeFilter\.FILTER_REJECT;/, 'the walker rejects an out-of-sense node');
+});
+
+test('sense: the aliases that were simply the wrong word are gone and stay gone', () => {
+  const aliasesOf = (id) => (byId[id].aliases || []).map((a) => a.toLowerCase());
+  // "stops" is an English verb before it is an exit level. No context guard can
+  // save it either: "strip out Torque and the portfolio stops compounding" sits
+  // in a block full of posture words.
+  assert.ok(!aliasesOf('stop-loss').includes('stop'), 'Stop-loss never claims the bare word "stop"');
+  assert.ok(!aliasesOf('stop-loss').includes('stops'), 'nor "stops"');
+  assert.ok(aliasesOf('stop-loss').includes('stop-losses'), 'the plural of the real term takes their place');
+  // "momentum" is the raw factor every part measures; the entry is a trend-validation RULE.
+  assert.ok(!aliasesOf('momentum-filter').includes('momentum'), 'the Momentum filter never claims bare "momentum"');
+  // An antonym is not an alias.
+  assert.ok(!aliasesOf('model-convergence').includes('model divergence'), 'Model convergence never claims "model divergence"');
+  // A bare sleeve is any sleeve, and Part 5's is a liquidity sleeve.
+  assert.ok(!aliasesOf('single-name-sleeve').includes('sleeve'), 'Single-name sleeve never claims the bare word "sleeve"');
+});
+
+test('sense: a term that is a common English word carries a context guard', () => {
+  // Words that read as ordinary English in this corpus far more often than as
+  // this framework's term. A term or alias on this list must declare `context`,
+  // or it will spend a page's highlight on the wrong sentence. Words that are
+  // domain-first here (harvesting, clamp, frozen, throttle, posture, ballast,
+  // torque, conviction) are deliberately NOT listed: they are the right sense
+  // wherever they appear.
+  const AMBIGUOUS = new Set([
+    'stop', 'stops', 'margin', 'rotation', 'rotations', 'sleeve', 'sleeves', 'momentum',
+    'override', 'overrides', 'hold', 'holds', 'size', 'sizes', 'exit', 'exits', 'run', 'runs',
+    'drift', 'floor', 'gate', 'gates', 'window', 'windows', 'trim', 'trims', 'spread', 'carry',
+    'noise', 'edge', 'lag', 'add', 'adds', 'cap', 'caps', 'band', 'bands', 'rule', 'rules',
+    'score', 'scores', 'weight', 'weights', 'decay'
+  ]);
+  for (const t of terms) {
+    for (const label of [t.term, ...t.aliases]) {
+      if (!AMBIGUOUS.has(label.toLowerCase())) continue;
+      assert.ok(Array.isArray(t.context) && t.context.length > 0,
+        `"${label}" (${t.id}) is a common English word: give the entry a "context" list, or drop the alias`);
+    }
+  }
+});
+
+test('sense: context is a list of plain words, and the guarded terms name the right ones', () => {
+  for (const t of terms) {
+    if (t.context === undefined) continue;
+    assert.ok(Array.isArray(t.context) && t.context.length > 0, `${t.id}: context is a non-empty array`);
+    for (const w of t.context) {
+      assert.equal(typeof w, 'string', `${t.id}: context words are strings`);
+      assert.ok(w.trim().length > 1, `${t.id}: "${w}" is too short to disambiguate anything`);
+    }
+  }
+  // The three guards that exist, each naming what the RIGHT sentence talks about.
+  assert.ok(byId.margin.context.includes('borrowing'), 'Margin is the borrowing sense');
+  assert.ok(byId.rotation.context.includes('Ballast'), 'Rotation is the posture sense');
+  assert.ok(byId.override.context.includes('documented'), 'Override is the governance sense');
+});
