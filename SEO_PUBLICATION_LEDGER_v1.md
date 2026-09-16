@@ -1,9 +1,11 @@
 # SEO & Publication Ledger v1
 
 **Status of record for `docs.acfdashboard.com` · reconciled 2026-09-16 against `main` at `97261e3`.**
-**Revision 2** — three findings corrected on owner review. See §7 for what changed
-and why, including one of my own conclusions that was reasoned wrongly rather
-than merely stated too strongly.
+**Revision 3** — §8 adds the post-promotion verification obligation and the
+distinction it turns on: implementation landing on `preview` is not the audit
+closing. **Revision 2** corrected three findings on owner review; see §7,
+including one of my own conclusions that was reasoned wrongly rather than merely
+stated too strongly.
 
 This is a reconciliation, not a fresh audit. It consolidates every publication and
 search finding raised across the original sweep, PR #169, the P0 crawler work
@@ -363,7 +365,10 @@ them is ever done.
 
 ## 6. Where this leaves the audit
 
-### 6.1 What is fully closed
+### 6.1 What is closed in the repositories
+
+> Repository-closed, not production-verified. See **§8** — the redirect retirement
+> still owes a production smoke test before the audit itself closes.
 The **publication plumbing**. A compliant crawler can fetch every resource the
 eleven pages need, renders the real documents, is told exactly which URLs are
 canonical, is given a sitemap derived from those same canonicals, and is kept out
@@ -431,6 +436,65 @@ work**; the one remaining item is in the other repository.
 
 Net effect: the remaining tranche went from four items to one, and the one that
 remains is not in this repository.
+
+---
+
+## 8. Post-promotion verification obligation — **OPEN**
+
+**The audit is NOT closed.** `ACFDashboard` [#5421](https://github.com/Tataku/ACFDashboard/pull/5421)
+retires `/part1`…`/part6` by permanent redirect, and landing it closes the SEO
+**implementation on `preview`**. Production SEO is not operationally closed until
+the normal promotion lane deploys that change and the redirects are smoke-tested
+**on production**.
+
+The distinction is not pedantry: the change is routing configuration, and nothing
+in this repository or that one observes what the production edge actually serves.
+Every check below was impossible to run before merge — Vercel produced no Preview
+deployment for #5421 (`Ignored`, by that project's cost-control policy), so there
+was no runtime surface to test. That is an environment limitation, not a defect
+in the change, and it is the reason this obligation exists rather than a test.
+
+**Required on production, after promotion:**
+
+| # | check |
+|---|---|
+| 1 | each of the six legacy routes returns a **permanent** redirect (308 on Vercel; 301 equally acceptable) |
+| 2 | the `Location` is exactly the target below — no trailing-slash or case drift |
+| 3 | no avoidable intermediate hop (one redirect, not a chain) |
+| 4 | each destination Docs route returns successfully |
+| 5 | `/`, the auth entry, and one authenticated app route are unaffected — the point is proving this routing change did not disturb the broad SPA fallback |
+
+```
+/part1 → https://docs.acfdashboard.com/part-1-foundation
+/part2 → https://docs.acfdashboard.com/part-2-lineage-macro-thesis
+/part3 → https://docs.acfdashboard.com/part-3-bitcoin-convexity-backbone
+/part4 → https://docs.acfdashboard.com/part-4-tax-architecture-roc-strategy
+/part5 → https://docs.acfdashboard.com/part-5-portfolio-construction-position-management
+/part6 → https://docs.acfdashboard.com/part-6-convexity-framework-integrity-scoring
+```
+
+```bash
+# 1-3: status, Location, and hop count for each legacy route
+for n in 1 2 3 4 5 6; do
+  curl -sSI "https://acfdashboard.com/part$n" | awk 'NR==1 || /^[Ll]ocation:/'
+  curl -sS -o /dev/null -w "  hops=%{num_redirects} final=%{http_code}\n" -L "https://acfdashboard.com/part$n"
+done
+
+# 4: the destinations themselves
+for s in part-1-foundation part-2-lineage-macro-thesis part-3-bitcoin-convexity-backbone \
+         part-4-tax-architecture-roc-strategy part-5-portfolio-construction-position-management \
+         part-6-convexity-framework-integrity-scoring; do
+  curl -sS -o /dev/null -w "$s %{http_code}\n" "https://docs.acfdashboard.com/$s"
+done
+
+# 5: the SPA was not disturbed
+curl -sS -o /dev/null -w "/ %{http_code}\n" https://acfdashboard.com/
+```
+
+**When all five pass, the technical SEO audit is CLOSED** and this section is
+replaced by the date and the result. Until then its status is
+**implementation complete, verification outstanding** — which is not the same
+thing, and the ledger should not be read as if it were.
 
 ---
 
