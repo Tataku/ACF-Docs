@@ -96,7 +96,7 @@ test('art: every tile carries an inline SVG, hidden from the accessibility tree'
   for (const t of tiles) {
     const block = SECTION.slice(SECTION.indexOf(`data-motif="${t.motif}"`));
     const art = block.slice(0, block.indexOf('</a>'));
-    assert.match(art, /<span class="dc-tile-art" aria-hidden="true">/, `${t.motif} has a drawing`);
+    assert.match(art, /<span class="dc-tile-art dc-art" aria-hidden="true">/, `${t.motif} has a drawing, in the shared vocabulary`);
     assert.match(art, /<svg[^>]*aria-hidden="true"[^>]*focusable="false"/, `${t.motif}: svg is inert`);
     // currentColor is what makes one drawing work in both themes and lets the
     // hover brighten it with a single colour transition.
@@ -139,10 +139,10 @@ test('pictures: every colour is a class the stylesheet resolves, never an attrib
   // And the stylesheet gives the accent to exactly the elements that carry the
   // idea — never to a frame, a grid or a label.
   for (const cls of ['art-thesis', 'art-dot', 'art-tab-lit', 'art-size-top']) {
-    assert.match(CSS, new RegExp(`\\.dc-tile-art \\.${cls}\\s*\\{[^}]*var\\(--accent\\)`), `${cls} is the accent`);
+    assert.match(CSS, new RegExp(`\\.dc-art \\.${cls}\\s*\\{[^}]*var\\(--accent\\)`), `${cls} is the accent`);
   }
   for (const cls of ['art-frame', 'art-grid', 'art-ref', 'art-ghost', 'art-tab', 'art-entry rect']) {
-    assert.match(CSS, new RegExp(`\\.dc-tile-art \\.${cls}\\s*\\{[^}]*currentColor`), `${cls} rides currentColor`);
+    assert.match(CSS, new RegExp(`\\.dc-art \\.${cls}\\s*\\{[^}]*currentColor`), `${cls} rides currentColor`);
   }
 });
 
@@ -165,10 +165,10 @@ test('pictures: each one carries the idea of its page', () => {
 test('pictures: the software card wears the exhibit surface, in both themes', () => {
   // These tokens are fixed by design — the panel is dark on the light page too —
   // which is what makes this card read as a screen rather than a diagram.
-  assert.match(CSS, /\.dc-tile-art \.art-panel\s*\{[^}]*var\(--feature-bg\)/);
-  assert.match(CSS, /\.dc-tile-art \.art-live\s*\{[^}]*var\(--chart-thesis\)/);
-  assert.match(CSS, /\.dc-tile-art \.art-live-field\s*\{[^}]*var\(--chart-field\)/);
-  assert.match(CSS, /\[data-motif="software"\] \.dc-tile-art \.art-context\s*\{[^}]*var\(--chart-context\)/,
+  assert.match(CSS, /\.dc-art \.art-panel\s*\{[^}]*var\(--feature-bg\)/);
+  assert.match(CSS, /\.dc-art \.art-live\s*\{[^}]*var\(--chart-thesis\)/);
+  assert.match(CSS, /\.dc-art \.art-live-field\s*\{[^}]*var\(--chart-field\)/);
+  assert.match(CSS, /\[data-motif="software"\] \.dc-art \.art-context\s*\{[^}]*var\(--chart-context\)/,
     'the grey context series is the exhibits’ own grey');
 });
 
@@ -187,7 +187,7 @@ test('pictures: each card has one hover move, and focus gets it too', () => {
   // The fan's rest state is CSS, not an SVG attribute, so it is still fanned
   // under reduced motion (which only removes the transition, not the pose) and
   // the hover opens it on the same property.
-  assert.match(CSS, /\.dc-tile-art \.art-print-back \{ transform: rotate\(-7deg\); \}/);
+  assert.match(CSS, /\.dc-art \.art-print-back \{ transform: rotate\(-7deg\); \}/);
   assert.doesNotMatch(artFor('exhibits'), /transform="rotate/, 'no attribute transform to fight the CSS one');
 });
 
