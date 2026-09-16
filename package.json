@@ -24,6 +24,7 @@
     "test:chart-palette-contrast": "node --test tests/chart-palette-contrast.test.mjs",
     "test:glossary-pointer": "node --test tests/glossary-pointer.test.mjs",
     "test:header-layout": "node --test tests/header-layout.test.mjs",
+    "test:font-corpus": "node --test tests/font-corpus.test.mjs",
     "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
     "validate:charts": "node scripts/validate-chart-specs.mjs",
     "audit:chart-experience": "node scripts/audit-chart-experience.mjs",
@@ -46,6 +47,8 @@
     "audit:counts": "node scripts/sync-counts.mjs --check",
     "audit:social": "node scripts/build-social-meta.mjs --check",
     "audit:brand": "node scripts/audit-brand-mark.mjs",
+    "build:fonts": "python3 scripts/subset-fonts.py",
+    "audit:fonts": "node scripts/audit-fonts.mjs",
     "build:crawler": "node scripts/build-crawler-files.mjs",
     "audit:crawler": "node scripts/build-crawler-files.mjs --check"
   },
