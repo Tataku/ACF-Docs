@@ -4133,29 +4133,32 @@ html[data-narrating] .shell-main { padding-bottom: var(--dock-clear); }
   border: 1px solid var(--rule);
   border-radius: var(--radius-card);
   padding: var(--space-5);
+  overflow: hidden;              /* the plate bleeds to the edges; the radius clips it */
   text-decoration: none;
   color: inherit;
   transition: border-color var(--motion-base) var(--ease-standard),
               transform var(--motion-base) var(--ease-standard),
               box-shadow var(--motion-base) var(--ease-standard);
 }
-.dc-glyph {
-  width: 52px;
-  height: 52px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent-faint);
-  border: 1px solid var(--rule-faint);
-  border-radius: 10px;
-  color: var(--accent);
-  margin-bottom: var(--space-4);
-  transition: transform var(--motion-base) var(--ease-standard);
+/* The opener plate — a full-width picture across the top of each chapter card,
+   where a 52px glyph square used to sit. Bled to the card's edges and clipped by
+   its radius, so it reads as a plate and not as a thumbnail; the chapter number
+   sits on it. Aspect-locked (4:1) so the picture is always whole — 140px tall at
+   the desktop card width, ~86px on a phone — and drawn in the same plane
+   vocabulary as the Resources pictures (see "The planes" below). */
+.dc-plate {
+  position: relative;
+  display: block;
+  width: calc(100% + 2 * var(--space-5));
+  margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-4);
+  aspect-ratio: 480 / 120;
+  color: var(--tile-motif);
+  transition: color var(--motion-base) var(--ease-standard);
 }
-.dc-glyph svg { display: block; width: 28px; height: 28px; }
-a.dc-card:hover .dc-glyph, a.dc-card:focus-visible .dc-glyph { transform: translateY(-2px); }
-.dc-card.pending .dc-glyph { opacity: 0.55; }
+.dc-plate::before { content: ''; position: absolute; inset: 0; pointer-events: none; }
+.dc-plate svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
+a.dc-card:hover .dc-plate, a.dc-card:focus-visible .dc-plate { color: var(--tile-motif-lift); }
+.dc-card.pending .dc-plate { opacity: 0.55; }
 a.dc-card:hover, a.dc-card:focus-visible {
   border-color: var(--accent-quiet);
   transform: translateY(-2px);
@@ -4300,34 +4303,36 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 .dc-tile-art svg { display: block; width: 100%; height: 100%; overflow: visible; }
 
 /* ---- The planes ------------------------------------------------------------
-   Shared vocabulary across the four pictures. Structure rides currentColor so
-   the hover's single colour transition brightens a whole drawing at once; the
-   accent is reserved for the one line that is the point of each picture. */
-.dc-tile-art .art-frame   { fill: var(--surface-raised); stroke: currentColor; stroke-width: 1.4; }
-.dc-tile-art .art-page    { fill: var(--surface-raised); stroke: currentColor; stroke-width: 1.4; opacity: .9; }
-.dc-tile-art .art-margin  { stroke: currentColor; stroke-width: 1; opacity: .45; }
-.dc-tile-art .art-field   { fill: var(--accent); opacity: .09; }
-.dc-tile-art .art-grid    { stroke: currentColor; stroke-width: 1; opacity: .22; }
-.dc-tile-art .art-axis    { stroke: currentColor; stroke-width: 1.4; opacity: .6; stroke-linecap: round; }
-.dc-tile-art .art-ref     { stroke: currentColor; stroke-width: 1.2; stroke-dasharray: 3 4; opacity: .5; }
-.dc-tile-art .art-ghost   { stroke: currentColor; stroke-width: 2; stroke-dasharray: 3.5 3.5; stroke-linecap: round; opacity: .38;
+   One vocabulary for every picture on the cover: the four Resources tiles and
+   the six chapter plates both carry `.dc-art`, so a plane defined once reads
+   the same everywhere. Structure rides currentColor so the hover's single
+   colour transition brightens a whole drawing at once; the accent is reserved
+   for the one line that is the point of each picture. */
+.dc-art .art-frame   { fill: var(--surface-raised); stroke: currentColor; stroke-width: 1.4; }
+.dc-art .art-page    { fill: var(--surface-raised); stroke: currentColor; stroke-width: 1.4; opacity: .9; }
+.dc-art .art-margin  { stroke: currentColor; stroke-width: 1; opacity: .45; }
+.dc-art .art-field   { fill: var(--accent); opacity: .09; }
+.dc-art .art-grid    { stroke: currentColor; stroke-width: 1; opacity: .22; }
+.dc-art .art-axis    { stroke: currentColor; stroke-width: 1.4; opacity: .6; stroke-linecap: round; }
+.dc-art .art-ref     { stroke: currentColor; stroke-width: 1.2; stroke-dasharray: 3 4; opacity: .5; }
+.dc-art .art-ghost   { stroke: currentColor; stroke-width: 2; stroke-dasharray: 3.5 3.5; stroke-linecap: round; opacity: .38;
                             transition: opacity var(--motion-base) var(--ease-standard); }
-.dc-tile-art .art-ceiling { stroke: currentColor; stroke-width: 1.2; opacity: .7; }
-.dc-tile-art .art-thesis  { stroke: var(--accent); stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.dc-tile-art .art-dot     { fill: var(--accent); }
-.dc-tile-art .art-context { stroke: currentColor; stroke-width: 1.4; fill: none; stroke-linecap: round; opacity: .55; }
-.dc-tile-art .art-label   { font-family: var(--font-mono); font-size: 6.5px; letter-spacing: .08em; text-transform: uppercase; fill: currentColor; opacity: .7; }
-.dc-tile-art .art-rung    { stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; opacity: .55; }
-.dc-tile-art .art-size    { fill: currentColor; opacity: .5; }
-.dc-tile-art .art-size-top { fill: var(--accent); opacity: 1; }
-.dc-tile-art .art-entry rect { fill: currentColor; opacity: .38; }
-.dc-tile-art .art-entry .art-headword { opacity: 1; }
-.dc-tile-art .art-entry-faint rect { opacity: .2; }
-.dc-tile-art .art-tab     { fill: currentColor; opacity: .18; }
-.dc-tile-art .art-tab-lit { fill: var(--accent); opacity: 1; }
-.dc-tile-art .art-tab-letter { font-family: var(--font-mono); font-size: 8px; font-weight: 600; text-anchor: middle; fill: currentColor; opacity: .8; }
-.dc-tile-art .art-tab-letter-lit { fill: var(--on-accent); opacity: 1; }
-.dc-tile-art .art-tab-pulled { transform-box: fill-box; transform-origin: 0 50%;
+.dc-art .art-ceiling { stroke: currentColor; stroke-width: 1.2; opacity: .7; }
+.dc-art .art-thesis  { stroke: var(--accent); stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.dc-art .art-dot     { fill: var(--accent); }
+.dc-art .art-context { stroke: currentColor; stroke-width: 1.4; fill: none; stroke-linecap: round; opacity: .55; }
+.dc-art .art-label   { font-family: var(--font-mono); font-size: 6.5px; letter-spacing: .08em; text-transform: uppercase; fill: currentColor; opacity: .7; }
+.dc-art .art-rung    { stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; opacity: .55; }
+.dc-art .art-size    { fill: currentColor; opacity: .5; }
+.dc-art .art-size-top { fill: var(--accent); opacity: 1; }
+.dc-art .art-entry rect { fill: currentColor; opacity: .38; }
+.dc-art .art-entry .art-headword { opacity: 1; }
+.dc-art .art-entry-faint rect { opacity: .2; }
+.dc-art .art-tab     { fill: currentColor; opacity: .18; }
+.dc-art .art-tab-lit { fill: var(--accent); opacity: 1; }
+.dc-art .art-tab-letter { font-family: var(--font-mono); font-size: 8px; font-weight: 600; text-anchor: middle; fill: currentColor; opacity: .8; }
+.dc-art .art-tab-letter-lit { fill: var(--on-accent); opacity: 1; }
+.dc-art .art-tab-pulled { transform-box: fill-box; transform-origin: 0 50%;
                                transition: transform var(--motion-base) var(--ease-emphasis); }
 
 /* The software picture wears the product's own chart surface: the always-dark
@@ -4335,23 +4340,49 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
    grey context series and the single emerald thesis line. These tokens are
    fixed by design (see tokens.css, "Chart exhibits"), which is why this one
    card looks like a screen on the light page and still like a screen at night. */
-.dc-tile-art .art-panel      { fill: var(--feature-bg); stroke: var(--feature-edge); stroke-width: 1; }
-.dc-tile-art .art-kpi rect   { fill: var(--feature-ink); opacity: .07; }
-.dc-tile-art .art-kpi-bar rect { fill: var(--feature-ink-quiet); }
-.dc-tile-art .art-panel-grid { stroke: var(--chart-grid); stroke-width: 1; }
-.dc-tile-art .art-live-field { fill: var(--chart-field); }
-.dc-tile[data-motif="software"] .dc-tile-art .art-context { stroke: var(--chart-context); opacity: .85; }
-.dc-tile-art .art-live       { stroke: var(--chart-thesis); stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round;
+.dc-art .art-panel      { fill: var(--feature-bg); stroke: var(--feature-edge); stroke-width: 1; }
+.dc-art .art-kpi rect   { fill: var(--feature-ink); opacity: .07; }
+.dc-art .art-kpi-bar rect { fill: var(--feature-ink-quiet); }
+.dc-art .art-panel-grid { stroke: var(--chart-grid); stroke-width: 1; }
+.dc-art .art-live-field { fill: var(--chart-field); }
+.dc-tile[data-motif="software"] .dc-art .art-context { stroke: var(--chart-context); opacity: .85; }
+.dc-art .art-live       { stroke: var(--chart-thesis); stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round;
                                stroke-dasharray: 1; stroke-dashoffset: 0; }
-.dc-tile-art .art-live-dot   { fill: var(--chart-thesis); }
-.dc-tile-art .art-live-ring  { stroke: var(--chart-thesis); stroke-width: 1.6; opacity: .35; }
+.dc-art .art-live-dot   { fill: var(--chart-thesis); }
+.dc-art .art-live-ring  { stroke: var(--chart-thesis); stroke-width: 1.6; opacity: .35; }
 
 /* The gallery's prints are fanned at rest — set here rather than as an SVG
    attribute so the hover can open the fan further on the same property. */
-.dc-tile-art .art-print { transform-box: fill-box; transform-origin: 50% 100%;
+.dc-art .art-print { transform-box: fill-box; transform-origin: 50% 100%;
                           transition: transform var(--motion-slow) var(--ease-emphasis); }
-.dc-tile-art .art-print-back { transform: rotate(-7deg); }
-.dc-tile-art .art-print-mid  { transform: rotate(-3deg); }
+.dc-art .art-print-back { transform: rotate(-7deg); }
+.dc-art .art-print-mid  { transform: rotate(-3deg); }
+
+/* Planes the chapter plates add to the same vocabulary. */
+.dc-art .art-floor      { fill: currentColor; opacity: .09; }
+.dc-art .art-floor-rule { stroke: currentColor; stroke-width: 1.2; opacity: .5; }
+.dc-art .art-tick       { stroke: currentColor; stroke-width: 1.4; opacity: .55; }
+.dc-art .art-node       { fill: currentColor; opacity: .55; }
+.dc-art .art-cell       { fill: none; stroke: currentColor; stroke-width: 1.2; opacity: .45; }
+.dc-art .art-cell-lit   { fill: var(--accent); opacity: .16; stroke: none; }
+.dc-art .art-cell-lines { stroke: currentColor; stroke-width: 1.2; opacity: .45; }
+.dc-art .art-wave       { stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; opacity: .5;
+                          transition: transform var(--motion-slow) var(--ease-emphasis); }
+.dc-art .art-flow       { stroke: currentColor; stroke-width: 3; fill: none; stroke-linecap: round; opacity: .42; }
+.dc-art .art-flow-keep  { stroke: var(--accent); opacity: 1; }
+.dc-art .art-wedge      { fill: currentColor; opacity: .55; transform-box: fill-box; transform-origin: 50% 0;
+                          transition: transform var(--motion-slow) var(--ease-emphasis), opacity var(--motion-base) var(--ease-standard); }
+.dc-art .art-box        { fill: var(--surface-raised); stroke: currentColor; stroke-width: 1.2; opacity: .6; }
+.dc-art .art-box-keep   { stroke: var(--accent); opacity: 1; }
+.dc-art .art-label-keep { fill: var(--accent); opacity: 1; }
+.dc-art .art-label-v    { writing-mode: vertical-rl; text-orientation: mixed; }
+.dc-art .art-arc        { stroke: currentColor; stroke-width: 1.2; fill: none; stroke-dasharray: 4 6; opacity: .4; }
+.dc-art .art-zone       { stroke: currentColor; stroke-width: 1; stroke-dasharray: 2 6; opacity: .35; }
+.dc-art .art-step       { fill: currentColor; opacity: .22; }
+.dc-art .art-step-final { fill: var(--accent); opacity: .9; }
+.dc-art .art-marker     { fill: var(--accent); transition: transform var(--motion-slow) var(--ease-emphasis); }
+.dc-art .art-sources    { transition: transform var(--motion-slow) var(--ease-emphasis); }
+.dc-art .art-size-top   { transform-box: fill-box; transform-origin: center; transition: transform var(--motion-slow) var(--ease-emphasis); }
 
 .dc-tile-title {
   font-weight: var(--weight-semibold);
@@ -4425,6 +4456,31 @@ a.dc-card:hover .dc-card-meta::after, a.dc-card:focus-visible .dc-card-meta::aft
 .dc-tile[data-motif="software"]:hover .art-live,
 .dc-tile[data-motif="software"]:focus-visible .art-live { animation: art-draw 1.1s var(--ease-emphasis) 1 both; }
 @keyframes art-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* ---- Chapter plates: wash geometry and the one move each ------------------
+   01 the curve draws itself out of the floor · 02 the sources converge · 03 the
+   cycle turns around the power law · 04 the wedge is taken · 05 the earned size
+   grows · 06 the position moves a cell toward the corner. */
+.dc-card[data-part="1"] .dc-plate::before { background: radial-gradient(120% 140% at 100% 0%, var(--tile-wash-lift), var(--tile-wash) 38%, transparent 72%); }
+.dc-card[data-part="2"] .dc-plate::before { background: linear-gradient(to right, transparent 40%, var(--tile-wash) 62%, var(--tile-wash-lift) 100%); }
+.dc-card[data-part="3"] .dc-plate::before { background: linear-gradient(to top, var(--tile-wash-lift), var(--tile-wash) 30%, transparent 70%); }
+.dc-card[data-part="4"] .dc-plate::before { background: radial-gradient(60% 160% at 82% 30%, var(--tile-wash-lift), transparent 70%); }
+.dc-card[data-part="5"] .dc-plate::before { background: radial-gradient(70% 120% at 85% 100%, var(--tile-wash-lift), var(--tile-wash) 40%, transparent 74%); }
+.dc-card[data-part="6"] .dc-plate::before { background: linear-gradient(to right, transparent 30%, var(--tile-wash) 55%, var(--tile-wash) 70%, var(--tile-wash-lift) 88%); }
+
+.dc-art .art-thesis[pathLength] { stroke-dasharray: 1; stroke-dashoffset: 0; }
+a.dc-card[data-part="1"]:hover .art-thesis[pathLength],
+a.dc-card[data-part="1"]:focus-visible .art-thesis[pathLength] { animation: art-draw 1.1s var(--ease-emphasis) 1 both; }
+a.dc-card[data-part="2"]:hover .art-sources,
+a.dc-card[data-part="2"]:focus-visible .art-sources { transform: translateX(8px); }
+a.dc-card[data-part="3"]:hover .art-wave,
+a.dc-card[data-part="3"]:focus-visible .art-wave { transform: translateX(-10px); }
+a.dc-card[data-part="4"]:hover .art-wedge,
+a.dc-card[data-part="4"]:focus-visible .art-wedge { transform: translateY(7px); opacity: .85; }
+a.dc-card[data-part="5"]:hover .art-size-top,
+a.dc-card[data-part="5"]:focus-visible .art-size-top { transform: scale(1.16); }
+a.dc-card[data-part="6"]:hover .art-marker,
+a.dc-card[data-part="6"]:focus-visible .art-marker { transform: translate(28px, -32px); }
 
 /* The live dashboard's indicator breathes while the pointer is on it, because
    "in motion" is the whole claim of that card.
