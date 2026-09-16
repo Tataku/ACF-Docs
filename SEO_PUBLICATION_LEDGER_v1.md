@@ -170,13 +170,20 @@ So the duplicate documents exist to serve six public URLs and nothing else.
 #### The fix: permanent redirect, and remove the `Disallow`
 
 ```
-301  acfdashboard.com/part1 → docs.acfdashboard.com/part-1-foundation
-301  …/part2 → …/part-2-lineage-macro-thesis
-301  …/part3 → …/part-3-bitcoin-convexity-backbone
-301  …/part4 → …/part-4-tax-architecture-roc-strategy
-301  …/part5 → …/part-5-portfolio-construction-position-management
-301  …/part6 → …/part-6-convexity-framework-integrity-scoring
+acfdashboard.com/part1 → permanent redirect → docs.acfdashboard.com/part-1-foundation
+             …/part2 → permanent redirect → …/part-2-lineage-macro-thesis
+             …/part3 → permanent redirect → …/part-3-bitcoin-convexity-backbone
+             …/part4 → permanent redirect → …/part-4-tax-architecture-roc-strategy
+             …/part5 → permanent redirect → …/part-5-portfolio-construction-position-management
+             …/part6 → permanent redirect → …/part-6-convexity-framework-integrity-scoring
 ```
+
+The requirement is **semantic: a permanent server-side redirect to the final Docs
+canonical.** It is deliberately not written as `301`. Vercel's native contract is
+`"permanent": true`, which emits **308**, and Google treats 301 and 308 alike as
+permanent redirects for canonicalization — so forcing `statusCode: 301` would pin
+a transport code the platform does not need and the search engine does not
+distinguish. Where an example status helps: **308 on Vercel**.
 
 …and delete the six `Disallow` lines from the dashboard's `robots.txt`, because a
 redirect a crawler is forbidden to fetch is not a redirect. `vercel.json` already
@@ -416,8 +423,9 @@ work**; the one remaining item is in the other repository.
    defects that would be real — duplication, omission, vagueness, mid-thought
    truncation — and found none. Moved to OPTIONAL EDITORIAL.
 3. **§3.1 — the recommendation was not sharp enough.** Established that nothing
-   requires those six URLs to serve HTML, so the answer is a **301 redirect**
-   that eliminates the duplicate, not a canonical that maintains it. Also found
+   requires those six URLs to serve HTML, so the answer is a **permanent
+   server-side redirect** that eliminates the duplicate, not a canonical that
+   maintains it. Also found
    that deleting the rewrites *without* redirecting would return HTTP 200 via the
    SPA fallback — a soft 404, worse than either alternative.
 
