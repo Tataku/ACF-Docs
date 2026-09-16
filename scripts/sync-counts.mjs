@@ -114,13 +114,21 @@ const RULES = [
     // One rule per card, anchored on that card's own data-part so a reading time
     // can never be written onto the wrong Part (which is how 1 and 2 were swapped).
     ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*?&approx; )\\d+( min read)`), () => MINUTES.get(n)]),
-    [/(class="foot-meta" data-foot-meta>&approx; )\d+( min end to end)/, () => TOTAL_MINUTES],
+    // The running head states the size of the book, and it is the one number in
+    // the colophon that JS never rewrites — so this is its only writer.
+    [/(data-foot-total>&approx; )\d+( min end to end)/, () => TOTAL_MINUTES],
     // The stage normalises the ticks' positions to the same total the arcs use.
-    [/(class="measure-full foot-stage" style="--total: )\d+(")/, () => TOTAL_MINUTES],
+    [/(class="foot-stage" style="--total: )\d+(")/, () => TOTAL_MINUTES],
     // The ticks: one per Part, each spanning its own columns. Anchored on the
     // tick's own data-foot-tick for the same reason the arcs and cards are.
     ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-tick="${n}" style="--at: )\\d+(;)`), () => MINUTES_BEFORE(n)]),
     ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-tick="${n}" style="--at: \\d+; --len: )\\d+(")`), () => MINUTES.get(n)]),
+    // The axis prints each Part's minutes under its numeral, and the contents
+    // page prints them again where a page number would stand. Two more places
+    // the same fact is stated, so two more anchored rules; both are anchored on
+    // the Part's own ordinal so a time can never land under the wrong stretch.
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-tick="${n}"[^>]*><span class="foot-tick-n">0${n}</span><span class="foot-tick-min">)\\d+( min)`), () => MINUTES.get(n)]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-part-min="${n}">)\\d+( min)`), () => MINUTES.get(n)]),
     // One rule per arc, anchored on that arc's own data-foot-arc, so a length can
     // never be written onto the wrong Part — the failure the per-card rule above
     // was added for after 1 and 2 were transposed.

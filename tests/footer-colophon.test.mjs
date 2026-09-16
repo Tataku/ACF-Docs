@@ -104,7 +104,15 @@ test('mascot: it is alive without GSAP, and still under a stated motion preferen
     'the rect read is gated on the figure being on screen');
   // And the wake is symmetrical: a cycle that never stops is a cycle running
   // for nobody once the reader has scrolled away.
-  assert.match(fn, /classList\.toggle\('is-awake', seen\)/, 'the blink sleeps again when the footer leaves');
+  assert.match(fn, /classList\.toggle\('is-awake', onScreen && settled\)/, 'the blink sleeps again when the footer leaves, and never wakes before the figure has landed');
+  // The figure has SUBJECTS, and they arrive from reading-core.js — which is
+  // loaded later, on a promise — as events, so neither file depends on the
+  // other's load order. A runtime that never arrives still wakes the blink
+  // after two beats of the walk token, never a typed number.
+  assert.match(fn, /addEventListener\('acf:foot-settled'/, 'it hears the landing');
+  assert.match(fn, /addEventListener\('acf:foot-subject'/, 'and the subjects');
+  assert.match(fn, /2 \* \(tokenMs\('--motion-draw'\)/, 'with a fallback wake read off the token');
+  assert.doesNotMatch(fn, /setTimeout\([^)]*, \d{3,}\)/, 'and no typed millisecond literal in the mascot');
   // Blink is CSS, so the media query is the whole gate there.
   const gate = CSS.slice(CSS.indexOf('/* ---- The mascot'), CSS.indexOf('@keyframes acf-mascot-pleased'));
   assert.match(gate, /@media \(prefers-reduced-motion: no-preference\)/, 'and the CSS half is gated too');
@@ -146,15 +154,23 @@ test('curve: the seam is half at each end, so a stretch is centred on its own mi
   assert.doesNotMatch(FOOTER, /a dash of \d+ IS \w+ minutes of arc/, 'the markup no longer says the dash is the minutes');
 });
 
-test('curve: the readout line reserves a real line, not a number below one', () => {
-  // `min-height: 1.4em` reserved nothing: the rule sets no line-height, so it
-  // inherited the body's --leading-relaxed (1.7) and one line already stood
-  // taller than the floor. A floor under the natural height is a comment, not a
-  // guarantee — so the leading is pinned here and the floor matches it.
-  const rule = CSS.match(/\.foot-count \{[\s\S]*?\n\}/);
-  assert.ok(rule, 'the running head has a rule');
-  assert.match(rule[0], /line-height: var\(--leading-snug\);/, 'the leading is declared, not inherited');
-  assert.match(rule[0], /min-height: 1\.35em;/, 'and the floor is one line of it');
+test('note: the reader\'s own line is never rewritten under the cursor', () => {
+  // A peek used to overwrite "≈ 52 min left" with the hovered Part's time, 600px
+  // from where the reader was looking. The minutes are printed in the row under
+  // the cursor and on the axis under the stretch; the note keeps saying what is
+  // true about the reader.
+  const fn = CORE.slice(CORE.indexOf('function footPeek()'), CORE.indexOf('  /* ---- Sidebar collapse'));
+  assert.doesNotMatch(fn, /textContent/, 'footPeek writes no text');
+  assert.match(fn, /acf:foot-subject/, 'it hands the figure a subject instead');
+  // And a first visit has nothing to count: the two fact lines ship hidden and
+  // empty, so JS-off is the finished first-visit page, not a stale claim.
+  assert.match(FOOTER, /<p class="foot-note-count" data-foot-count hidden><\/p>/, 'the count ships hidden and empty');
+  assert.match(FOOTER, /<p class="foot-note-meta" data-foot-meta hidden><\/p>/, 'so does the minutes line');
+  assert.match(CSS, /\.foot-note-count\[hidden\], \.foot-note-meta\[hidden\] \{ display: none; \}/, 'and hidden wins over the author display');
+  // The one control beside the figure has a real box: the shipped 23px link was
+  // one pixel under the floor for no reason.
+  const go = CSS.match(/\.foot-note-go \{[\s\S]*?\n\}/);
+  assert.match(go[0], /padding-block: var\(--space-1\);/, 'the resume link has vertical padding to stand on');
 });
 
 test('map: read state is stated in the list, not only in the curve', () => {
@@ -165,7 +181,16 @@ test('map: read state is stated in the list, not only in the curve', () => {
   const fn = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function footPeek('));
   assert.match(fn, /\[data-foot-part-link="' \+ n \+ '"\]/, 'footDial marks the matching row');
   assert.match(fn, /\[data-foot-tick="' \+ n \+ '"\]/, 'and the matching tick under the curve');
-  assert.match(CSS, /\.foot-col a\[data-read\]::after \{[\s\S]*?content: " \\2713";/, 'and the row shows a tick');
+  // The glyph is a COLUMN, so the eye can run down it, and it is silent to
+  // assistive tech (the alt-text form, with the plain form first for engines
+  // that lack it) — footDial writes the WORD into the visually-hidden span, so a
+  // screen reader hears "read" and never "check mark".
+  assert.match(CSS, /\.foot-col--parts a\[data-read\] \.foot-read::before \{ content: "\\2713"; content: "\\2713" \/ ""; \}/, 'and the row shows a tick in its own column');
+  assert.match(fn, /word\.textContent = ', read'/, 'and says the word');
+  assert.equal((FOOTER.match(/data-foot-read-word/g) || []).length, 6, 'one word slot per row');
+  // A finished Part keeps its minutes: the one fact the curve exists to show is
+  // never deleted by finishing.
+  assert.doesNotMatch(fn, /data-foot-part-min/, 'footDial never touches the minutes column');
   // Nothing ships pre-ticked, for the same reason no arc ships lit.
   assert.doesNotMatch(FOOTER, /data-foot-part-link="\d"[^>]*data-read/, 'no row ships read');
 });
@@ -174,9 +199,9 @@ test('curve: the resume arrow is gated like every other nudge in the footer', ()
   // The global reduce reset kills the transition but NOT the transform, so an
   // ungated nudge does not slow down under a stated preference — it snaps 4px.
   // .foot-out-arr was already gated; this one was not.
-  const gated = CSS.slice(CSS.indexOf('.foot-dial-go .dc-arr'), CSS.indexOf('.foot-dial-go .dc-arr') + 400);
+  const gated = CSS.slice(CSS.indexOf('.foot-note-go .dc-arr'), CSS.indexOf('.foot-note-go .dc-arr') + 400);
   assert.match(gated, /@media \(prefers-reduced-motion: no-preference\)/, 'the nudge sits inside the gate');
-  const bare = CSS.match(/\.foot-dial-go \.dc-arr \{[^}]*\}/);
+  const bare = CSS.match(/\.foot-note-go \.dc-arr \{[^}]*\}/);
   assert.doesNotMatch(bare[0], /transition|transform/, 'and nothing moves outside it');
 });
 
@@ -192,16 +217,53 @@ test('figure: it rests at the curve\'s origin, written to match the path', () =>
   assert.ok(d[1] !== null, 'the curve starts with an M');
   const vb = (FOOTER.match(/class="foot-stage-svg" viewBox="0 0 (\d+) (\d+)"/) || [, null, null]);
   assert.ok(vb[2], 'the stage declares its viewBox');
+  // The resting point is declared ONCE, on the stage, as --fx/--fy: the figure
+  // stands there and the read wash is clipped to the same --fx, so the ground
+  // the reader has covered ends exactly under the figure's feet.
+  const stage = CSS.match(/\.foot-stage \{[\s\S]*?\n\}/);
+  assert.ok(stage, 'the stage has a rule');
+  assert.match(stage[0], new RegExp(`--fx: ${Number(d[1])}%;`), `it rests at x=${d[1]}`);
+  assert.match(stage[0], new RegExp(`--fy: calc\\(${d[2]} / ${vb[2]} \\* 100%\\);`), `and at y=${d[2]} of ${vb[2]}`);
   const rule = CSS.match(/\.foot-figure \{[\s\S]*?\n\}/);
   assert.ok(rule, 'the figure has a rule');
-  assert.match(rule[0], new RegExp(`left: ${Number(d[1])};`), `it rests at x=${d[1]}`);
-  assert.match(rule[0], new RegExp(`top: calc\\(${d[2]} / ${vb[2]} \\* 100%\\);`), `and at y=${d[2]} of ${vb[2]}`);
+  // The x is CLAMPED, not bare, at BOTH ends: the figure is centred on the
+  // measure's edge at the origin and again at the terminus, and on a phone the
+  // gutter is narrower than half the figure, so a foot touched the screen. The
+  // inset is declared ONCE on the stage and pinned in full, so a widening of it
+  // (a fixed inset, a second term) is a deliberate change; the figure's rule
+  // only names it.
+  assert.match(stage[0], /--foot-inset: calc\(0\.5 \* var\(--fig\) - var\(--page-gutter\) \+ var\(--space-1\)\);/, 'the inset is half the figure past the gutter, plus a step');
+  assert.match(rule[0], /left: clamp\(var\(--foot-inset\), var\(--fx\), calc\(100% - var\(--foot-inset\)\)\);\s*top: var\(--fy\);/, 'and the figure stands at that point, its feet kept inside the page at either end');
   assert.match(rule[0], /transform: translate\(-50%, -100%\);/, 'standing on the line, not centred over it');
+  assert.match(CSS, /\.foot-ground-read \{[\s\S]*?clip-path: inset\(0 calc\(100% - var\(--fx\)\) 0 0\);/, 'and the wash ends under its feet');
   // The wash bands that carry the curve past the measure are the path's two end
   // heights, and the terminus is the last number in the same `d`.
   const end = (FOOTER.match(/data-foot-arc="1"[^>]*d="[^"]* ([\d.]+)"/) || [, null])[1];
   assert.match(CSS, new RegExp(`\\.foot-stage-inner::before \\{ right: 100%; height: calc\\(${vb[2] - d[2]} / ${vb[2]} \\* 100%\\); \\}`), 'the left band is the wash height at the origin');
   assert.match(CSS, new RegExp(`\\.foot-stage-inner::after  \\{ left: 100%;  height: calc\\(${vb[2] - end} / ${vb[2]} \\* 100%\\); \\}`), 'the right band is the wash height at the terminus');
+});
+
+test('figure: clamped at the page\'s edge, its feet stay on the line', () => {
+  // The origin clamp was fixed first and alone; the terminus is the same
+  // mechanism mirrored, with one difference that CSS cannot absorb: the path
+  // is flat at the origin and steep at the end, so a figure moved a few px
+  // along x at 6 of 6 floated above the line. So the inset is registered as a
+  // length (its computed value is px), footArrive() reads it, and re-samples
+  // the ground under the clamped x. The frontier (--fx) is the wash's edge and
+  // is never moved; only the feet are.
+  assert.match(CSS, /@property --foot-inset \{ syntax: '<length>'; inherits: true; initial-value: 0px; \}/, 'the inset is registered as a length, so JS reads px');
+  const arrive = CORE.slice(CORE.indexOf('function footArrive('), CORE.indexOf('function footPeek('));
+  assert.match(arrive, /function standAt\(min\)/, 'the runtime has one notion of where the figure stands');
+  assert.match(arrive, /getPropertyValue\('--foot-inset'\)/, 'read from the same inset the CSS clamps by, not a second number');
+  assert.match(arrive, /if \(!\/px\$\/\.test\(inset\)/, 'and only where it resolved to px (unregistered, it is the calc it was written as)');
+  assert.match(arrive, /return \{ x: x, y: g\.curveYAt\(x \/ 100\), fx: p\.x \};/, 'the ground is re-sampled under the clamped x; the frontier is kept as written');
+  const figureFn = arrive.slice(arrive.indexOf('function placeFigure('), arrive.indexOf('function placeNote('));
+  assert.match(figureFn, /var s = standAt\(min\);\s*stage\.style\.setProperty\('--fx', s\.fx\.toFixed\(3\)/, '--fx is the frontier: the wash ends there');
+  assert.match(figureFn, /setProperty\('--fy', s\.y\.toFixed\(3\)/, 'and --fy is the ground under the feet');
+  const noteFn = arrive.slice(arrive.indexOf('function placeNote('), arrive.indexOf('function land('));
+  assert.match(noteFn, /var p = standAt\(min\);/, 'the note sits beside where the figure STANDS');
+  assert.doesNotMatch(noteFn, /g\.pointAt\(/, 'never beside the unclamped point, a gap-width away from the figure');
+  assert.match(CSS, /\.foot-ground-read \{[\s\S]*?clip-path: inset\(0 calc\(100% - var\(--fx\)\) 0 0\);/, 'the wash is clipped to the frontier, so at 6 of 6 it reaches the end');
 });
 
 test('figure: it stands where the unbroken run ends, and the walk is sampled from the path', () => {
@@ -213,29 +275,69 @@ test('figure: it stands where the unbroken run ends, and the walk is sampled fro
   assert.match(dial, /if \(!rows\[r\]\.hasAttribute\('data-read'\)\) break;/, 'the run stops at the first gap');
   assert.match(dial, /if \(runAt\) \{/, 'and a run of zero claims no position');
   assert.match(dial, /setProperty\('--at-target', runAt\)/, 'the truth is written immediately');
+  // ONE sampler for the walk, the note and the peek, so the figure, the words
+  // and the gaze can never disagree about where a minute is. Sampled from the
+  // SAME path the stretches are drawn on, in minute units, then expressed as
+  // viewBox fractions so it survives non-uniform scaling. Never from x alone:
+  // pathLength normalises by arc length and the climb is steeper.
+  const geo = CORE.slice(CORE.indexOf('function footGeometry('), CORE.indexOf('function footEmit('));
+  assert.match(geo, /getPointAtLength\(path\.getTotalLength\(\) \* Math\.max\(0, Math\.min\(min, total\)\) \/ total\)/, 'the position is sampled from the curve');
+  assert.match(geo, /pt\.x \/ vb\.width \* 100/, 'as a fraction of the viewBox');
   const arrive = CORE.slice(CORE.indexOf('function footArrive('), CORE.indexOf('function footPeek('));
-  // Sampled from the SAME path the stretches are drawn on, in minute units, then
-  // expressed as viewBox fractions so it survives non-uniform scaling. Never from
-  // x alone: pathLength normalises by arc length and the climb is steeper.
-  assert.match(arrive, /getPointAtLength\(path\.getTotalLength\(\) \* Math\.min\(target, total\) \/ total\)/, 'the position is sampled from the curve');
-  assert.match(arrive, /pt\.x \/ vb\.width \* 100/, 'as a fraction of the viewBox');
-  assert.match(arrive, /if \(!window\.IntersectionObserver\) \{ land\(\); return; \}/, 'no observer still places it');
-  assert.match(arrive, /threshold: 0/, 'and any sliver of the stage counts');
+  assert.match(arrive, /if \(reduce \|\| !window\.IntersectionObserver\) \{ land\(\); return; \}/, 'no observer, or a motion preference, still places it at once');
+  assert.match(arrive, /threshold: 0\.5/, 'and the walk waits until half the stage is on screen — the audience seated');
+  // Truth before beat: a walk is OWED, not assumed. The pending gate is set only
+  // when a walk will actually happen, and lifted the moment it lands.
+  assert.match(arrive, /if \(target\) section\.setAttribute\('data-pending', ''\);/, 'pending only when there is somewhere to walk to');
+  assert.match(arrive, /section\.removeAttribute\('data-pending'\)/, 'and cleared on landing');
+  assert.match(arrive, /arcAt\(arcs\[k\]\) >= target\) arcs\[k\]\.setAttribute\('data-lit', ''\)/, 'stretches beyond the run are lit from the start');
 });
 
-test('figure: the walk is a token, and the ground lights under its feet by animation, not delay', () => {
+test('figure: the walk is a token in both duration AND ease, and the ground lights on the walker\'s own clock', () => {
   assert.match(TOKENS, /^\s*--motion-draw:\s*\d+ms;/m, 'the walk duration is a token');
-  assert.match(CSS, /html\.js \.foot-figure \{\s*transition: left var\(--motion-draw\)/, 'and the figure composes it, behind html.js');
-  // A transition-delay on the arcs would also delay every peek by up to the
-  // same amount. The arrival is an ANIMATION with backwards fill, so the
-  // transition stays free for the pointer.
-  const arrive = CSS.match(/html\.js \[data-foot-progress\]\[data-run\] \.foot-arc\[data-read\] \{[^}]*\}/);
-  assert.ok(arrive, 'read stretches have an arrival');
-  assert.match(arrive[0], /animation: foot-arrive/, 'as an animation');
-  assert.match(arrive[0], /backwards/, 'held grey until its turn');
-  assert.match(arrive[0], /calc\(var\(--arc-at\) \/ var\(--at-min, 1\) \* var\(--motion-draw\)\)/, 'timed to its place in the walk');
+  // The clock is a registered custom property transitioned by CSS, so the
+  // duration and the ease are the tokens themselves — never four bezier
+  // coefficients copied into JS, where the token could change and the walk
+  // would not. Where @property is unsupported the value simply arrives and the
+  // figure stands at the frontier: the truth without the travel.
+  assert.match(CSS, /@property --foot-walk \{ syntax: '<number>'; inherits: false; initial-value: 0; \}/, 'the clock is a registered number');
+  assert.match(CSS, /html\.js \.foot-stage \{ transition: --foot-walk var\(--motion-draw\) var\(--ease-standard\); \}/, 'transitioned with the tokens, behind html.js');
+  assert.match(CSS, /\.foot-stage\[data-walking\] \{ --foot-walk: var\(--at-target, 0\); \}/, 'toward the truth footDial wrote');
+  const arrive = CORE.slice(CORE.indexOf('function footArrive('), CORE.indexOf('function footPeek('));
+  assert.match(arrive, /getPropertyValue\('--foot-walk'\)/, 'and the walk samples that clock each frame');
+  assert.doesNotMatch(arrive, /cubic-bezier|function bez\(/, 'with no ease coefficients in JS');
+  assert.doesNotMatch(CORE, /transition: left|transition: top/, 'and no chord-cutting left/top transition on the figure');
+  // ONE CLOCK. A read stretch inside the run lights when the sampled position
+  // passes its own --arc-at — the same number that moves the figure and the
+  // wash — never from a delay computed against an eased traveller, which is how
+  // the wash edge and the strokes came to step apart.
+  assert.match(arrive, /arcAt\(arcs\[i\]\) <= min \+ 0\.01\) arcs\[i\]\.setAttribute\('data-lit', ''\)/, 'lit by the sampled position');
+  assert.doesNotMatch(CSS, /@keyframes foot-arrive|--at-min/, 'no delayed arrival keyframe');
+  assert.match(CSS, /html\.js \[data-foot-progress\]\[data-pending\] \.foot-arc\[data-read\]:not\(\[data-lit\]\) \{ stroke: var\(--ink-disabled\)/, 'held unread only while a walk is owed');
   const arcRule = CSS.match(/\.foot-arc \{[\s\S]*?\n\}/);
-  assert.doesNotMatch(arcRule[0], /transition-delay|--foot-arc-in/, 'and no delay rides the peek transition');
+  assert.doesNotMatch(arcRule[0], /transition-delay/, 'and no delay rides the peek transition');
+});
+
+test('note: where it goes is decided by numbers alone, and never on the line it describes', () => {
+  // The layout is a pure function of measured widths, so the envelope that
+  // broke two prototypes (a caption struck through by the curve at 880 and on a
+  // first-visit phone) is testable without a browser. LEFT is over the ground
+  // the reader has covered — always lower than the figure on a monotonic
+  // climb; RIGHT is over what is next, lifted when the line would reach it.
+  const src = CORE.slice(CORE.indexOf('function footNoteLayout('), CORE.indexOf('  /* The figure walks the curve'));
+  const footNoteLayout = new Function(src + '; return footNoteLayout;')();
+  const flat = () => 150, rising = () => 60;
+  const base = { fy: 150, fig: 64, noteW: 170, noteH: 98, gap: 13, topMin: -100, lockupRight: -Infinity, lockupBottom: -Infinity };
+  assert.equal(footNoteLayout({ ...base, fx: 540, curveYAt: flat }).side, 'left', 'mid-book: over the read run');
+  assert.equal(footNoteLayout({ ...base, fx: 0, curveYAt: flat }).side, 'right', 'first visit: over what is next');
+  const lifted = footNoteLayout({ ...base, fx: 0, curveYAt: rising });
+  assert.ok(lifted.top + base.noteH <= 150 - 64, 'a rising line lifts the note above the head');
+  const clamped = footNoteLayout({ ...base, fx: 1178, fy: 6, curveYAt: () => 90 });
+  assert.equal(clamped.side, 'left'); assert.equal(clamped.top, -100, 'at the summit it stops at the plate\'s top, never in the running head');
+  const under = footNoteLayout({ ...base, fx: 540, fy: 200, curveYAt: () => 200, lockupRight: 480, lockupBottom: 30 });
+  assert.equal(under.side, 'left'); assert.ok(under.top >= 30 + 13, 'and it steps below the lockup rather than into it');
+  const squeezed = footNoteLayout({ ...base, fx: 540, curveYAt: flat, lockupRight: 480, lockupBottom: 30 });
+  assert.equal(squeezed.side, 'right', 'and when stepping down would touch the line, it gives way to the right');
 });
 
 test('stage: the dash maths survive the non-uniform scale', () => {
@@ -369,5 +471,53 @@ test('share: the visible word never changes', () => {
   const fn = COVER_JS.slice(COVER_JS.indexOf('function shareOffer()'), COVER_JS.indexOf('function mascot()'));
   assert.doesNotMatch(fn, /textContent = '(copied|shared|Copied|Shared)'/, 'the word is never rewritten');
   assert.match(fn, /settleBack\('data-shared'\)/, 'the icon carries the confirmation');
-  assert.match(CSS, /\.foot-share\[data-shared\] \.foot-share-icon--go \{ display: none; \}/, 'which swaps for a check');
+  // A CROSS-FADE, not a display cut: the reader who pressed is looking at the
+  // word they pressed, and a cut there read as a glitch. The failed state keeps
+  // a visible end too.
+  assert.match(CSS, /\.foot-share\[data-shared\] \.foot-share-icon--go \{ opacity: 0; transform: translateY\(-4px\); \}/, 'which fades to a check');
+  assert.match(CSS, /\.foot-share\[data-shared\] \.foot-share-icon--done \{ opacity: 1; transform: none; \}/, 'and the check fades in');
+  assert.match(CSS, /\.foot-share\[data-share-failed\] \.foot-share-icon--go \{ opacity: 0\.4; \}/, 'while a failure dims the glyph rather than hiding it');
+  assert.match(FOOTER, /<span data-foot-share-plain>share\.<\/span>/, 'the plain word carries the full stop; the control\'s sentence ends on its icon');
+});
+
+// ---------------------------------------------------------------------------
+// 4. The plate
+// ---------------------------------------------------------------------------
+test('plate: the running head states the book, the note states the reader, and JS never confuses the two', () => {
+  const dial = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function footGeometry('));
+  assert.match(FOOTER, /<h2 class="foot-rh-title" id="foot-curve-title">The reading curve<\/h2>/, 'the section has a real heading');
+  assert.match(FOOTER, /<span data-foot-total>&approx; \d+ min end to end<\/span>/, 'the book line is authored, derived by sync-counts');
+  assert.doesNotMatch(dial, /data-foot-total|data-foot-book/, 'and footDial never rewrites it');
+  assert.match(dial, /count\.hidden = false/, 'the reader\'s count is revealed only once there is one');
+  // The stage is decoration to assistive tech; the running head, the note and
+  // the contents carry every fact it draws.
+  assert.match(FOOTER, /<div class="foot-stage" style="--total: \d+" aria-hidden="true">/, 'the stage is aria-hidden as a whole');
+});
+
+test('plate: the minutes reach the axis and the contents, derived like everything else', () => {
+  const cardMinutes = (n) => Number((COVER.slice(COVER.indexOf(`data-part="${n}"`)).match(/&approx; (\d+) min read/) || [, NaN])[1]);
+  for (let n = 1; n <= 6; n += 1) {
+    const axis = Number((FOOTER.match(new RegExp(`data-foot-tick="${n}"[^>]*><span class="foot-tick-n">0${n}</span><span class="foot-tick-min">(\\d+) min`)) || [, NaN])[1]);
+    const row = Number((FOOTER.match(new RegExp(`data-foot-part-min="${n}">(\\d+) min`)) || [, NaN])[1]);
+    assert.equal(axis, cardMinutes(n), `Part ${n}: the axis says ${axis}, its card says ${cardMinutes(n)}`);
+    assert.equal(row, cardMinutes(n), `Part ${n}: the contents says ${row}, its card says ${cardMinutes(n)}`);
+  }
+  assert.match(SYNC, /data-foot-part-min="\$\{n\}">/, 'the contents minutes have a sync-counts rule');
+  assert.match(SYNC, /class="foot-tick-min">/, 'so do the axis minutes');
+  assert.match(SYNC, /data-foot-total>&approx; /, 'and the book line');
+  // The numerals sit under the MIDDLE of their stretch, so six stretches count as six.
+  const tick = CSS.match(/\.foot-tick \{[\s\S]*?\n\}/);
+  assert.match(tick[0], /align-items: center;/, 'centred under their minutes');
+});
+
+test('peek: it never makes a stretch heavier than the read run, and the row answers under the cursor', () => {
+  // In greyscale a heavier peeked stretch was the loudest stroke on the curve,
+  // inverting the one signal it carries. The answer is also printed in the row
+  // the cursor is on: the minutes lift to ink with the title.
+  const read = CSS.match(/\.foot-arc\[data-read\] \{ stroke: var\(--accent\); stroke-width: ([\d.]+); \}/);
+  const peek = CSS.match(/\.foot-arc\[data-peek\] \{ stroke: var\(--ink\); stroke-width: ([\d.]+); \}/);
+  assert.ok(read && peek, 'both rules exist');
+  assert.ok(Number(peek[1]) <= Number(read[1]), `a peek at ${peek[1]} is never heavier than read at ${read[1]}`);
+  assert.match(CSS, /\.foot-col--parts a\[data-peek\] \.foot-min \{ color: var\(--ink\); \}/, 'the row\'s minutes lift with it');
+  assert.doesNotMatch(CSS, /\.foot-col a:hover, \.foot-col a:focus-visible \{ color: var\(--accent\); \}/, 'and a hovered row is ink, never the colour that means read');
 });

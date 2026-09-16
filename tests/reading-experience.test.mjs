@@ -141,7 +141,12 @@ test('curve: it is painted from the cards, not from a second read of the store',
 // 3. Reading time
 // ---------------------------------------------------------------------------
 test('reading time: the footer states the sum of the six cards, not its own count', () => {
-  const total = Number((COVER.match(/data-foot-meta>&approx; (\d+) min end to end/) || [, NaN])[1]);
+  // The running head's book line is the one number in the colophon JS never
+  // rewrites (the reader's numbers live beside the figure), so it is anchored on
+  // its own hook rather than on the note the painter overwrites.
+  const total = Number((COVER.match(/data-foot-total>&approx; (\d+) min end to end/) || [, NaN])[1]);
+  const dial = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function footGeometry('));
+  assert.doesNotMatch(dial, /data-foot-total/, 'and the painter never touches it');
   assert.ok(Number.isFinite(total), 'the curve states a total');
   let sum = 0;
   for (const [n] of PARTS) {

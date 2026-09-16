@@ -418,95 +418,110 @@
     </main>
 
     <!-- ----------------------------------------------------------------------
-         THE COLOPHON. Three tiers, each answering one question a reader
-         actually has at the foot of a long page: where am I (the mark, the
-         descriptor, the reading dial) · where can I go (the map) · what is
-         this (the base rule).
+         THE COLOPHON. The last page of the book, set in three tiers: the
+         plate (where am I) · the contents (where can I go) · the base rule
+         (what is this).
 
-         WHAT IT REPLACED. The previous footer restated the header nav verbatim
-         and repeated "Start reading" — the third copy of that ask inside two
-         screens, directly beneath the CTA band that exists to make it — while
-         not one of the six Parts, which are the entire book, was reachable
-         from the foot of the page. Five links right-aligned opposite a brand
-         lockup also left the dead half-width band in the middle that made it
-         read as unfinished. On a phone none of that was cosmetic: the header's
-         links are display:none under 768px, so this is the site's ONLY map,
-         and it was a map of five destinations out of eleven.
+         ONE CURVE, AND THE READER STANDING ON IT. The plate is a running head
+         on a hairline, the lockup set in the sky over the flat approach, and
+         the reading curve drawn once, full-measure, as the edge between the
+         page and the ground: six stretches whose lengths are their Parts'
+         reading minutes, the brand figure standing on the line where the
+         reader's unbroken run ends, and the three facts hung beside it like a
+         chart note — never in a card. Below the curve everything sits on the
+         ground (--paper-warm): the axis, the contents page, the base rule.
+
+         The figure is one of the cover's two pinned brand marks (the other is
+         the nav lockup, which stays text-only here so the count stays two).
+         audit:brand pins its geometry, viewBox and ink; it does not pin size
+         or position. Standing on the curve is what the dashboard's own
+         doctrine permits on "idle and marketing surfaces" and forbids in
+         chrome — which is why the nav mark does not gaze and this one does.
 
          The routes below are pinned against next.config.mjs by
          tests/control-reachability.test.mjs, so a page that gains a URL and
          never gains a link here goes red rather than quietly unreachable.
          ---------------------------------------------------------------------- -->
     <footer class="site-footer site-footer--cover">
-      <!-- TIER 1 — THE READING CURVE. One curve, not two. The previous footer
-           drew the convexity sweep twice: once full-bleed and decorative across
-           the top, once boxed in a card as data. They said the same thing and
-           the beautiful one did nothing. This is that sweep with the data IN it:
-           six stretches whose lengths are their Parts' reading minutes, the
-           brand figure STANDING on it where the reader's unbroken run ends, and
-           the copy set beside it as a running head rather than in a widget.
-
-           The figure is one of the cover's two pinned brand marks (the other is
-           the nav lockup). audit:brand pins its geometry, its viewBox and its
-           ink; it does not pin its size or where it stands, and standing on the
-           curve is what the dashboard's own doctrine permits on "idle and
-           marketing surfaces" and forbids in chrome — which is why the nav mark
-           does not gaze and this one does. -->
-      <section class="foot-curve" data-foot-progress aria-labelledby="foot-curve-title">
-        <div class="measure-full foot-head">
-          <div class="foot-brand">
-            <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
-              <span class="brand-word">Adaptive Convexity Framework</span>
-            </a>
-            <p class="foot-descriptor">An executable philosophy for compounding through instability.</p>
-          </div>
-          <div class="foot-status">
-            <p class="foot-eyebrow" id="foot-curve-title">The reading curve</p>
-            <!-- Painted by progressPaint() in reading-core.js from the SAME rows as
-                 the Part cards above, never from a second read of the store. Ships
-                 in the honest first-visit state: with nothing read, or no JS, it
-                 states the size of the book and offers the start. -->
-            <p class="foot-count"><span data-foot-count>Six parts, end to end</span> <span class="foot-meta" data-foot-meta>&approx; 95 min end to end</span></p>
-            <a class="foot-dial-go" href="/part-1-foundation" data-foot-resume>
-              <span data-foot-resume-label>Start at Part 1</span> <span class="dc-arr" aria-hidden="true">&rarr;</span>
-            </a>
-          </div>
+      <!-- TIER 1 — THE PLATE. -->
+      <section class="foot-plate" data-foot-progress aria-labelledby="foot-curve-title">
+        <!-- The running head: the section's name on the left, the size of the
+             book on the right, on one hairline. The right-hand line is the
+             BOOK, not the reader — it is written by sync-counts and never
+             rewritten by JS, so it is the one number here that is the same
+             for every visitor. The reader's own numbers live beside the
+             figure, at the place they describe. -->
+        <div class="measure-full foot-rh">
+          <h2 class="foot-rh-title" id="foot-curve-title">The reading curve</h2>
+          <p class="foot-rh-book"><span data-foot-book>Six parts</span><span class="foot-rh-sep" aria-hidden="true">&middot;</span><span data-foot-total>&approx; 95 min end to end</span></p>
         </div>
 
-        <!-- THE STAGE. `pathLength` normalises the curve to the book's total
-             minutes, so a stretch of 18 OCCUPIES eighteen minutes of arc — drawn
-             1.4 shorter, half a seam clipped from each end, so six stretches read
-             as six parts and not one line. Every number in here is written by
-             scripts/sync-counts.mjs from the prose: the arcs' lengths and
-             offsets, the ticks' positions, the stage's total. Nothing is typed.
+        <div class="measure-full foot-plate-body">
+          <div class="foot-lockup">
+            <a class="foot-word" href="/" aria-label="Adaptive Convexity Framework — home">Adaptive Convexity Framework</a>
+            <p class="foot-descriptor">An executable philosophy for compounding through instability.</p>
+          </div>
 
-             The ticks are the peek surfaces: each spans its own stretch's
-             columns, so pointing anywhere over a Part lights it here and in the
-             map. They are aria-hidden and not controls — the six links in the map
-             are the controls; these only make what they refer to visible.
+          <!-- THE NOTE. The reader's place, stated where it is: count, minutes
+               left and the one control, hung beside the figure's head over the
+               ground it has covered. Painted by footDial() in reading-core.js
+               from the SAME rows as the Part cards above, never from a second
+               read of the store. Ships in the honest first-visit state: the
+               count and the minutes are hidden because nothing has been read
+               to count, and the link offers the start. With JS off this is
+               the finished page. Under 700px it stands in flow above the
+               curve, because a phone has no room beside the figure. -->
+          <div class="foot-note" data-foot-note data-side="right">
+            <p class="foot-note-count" data-foot-count hidden></p>
+            <p class="foot-note-meta" data-foot-meta hidden></p>
+            <a class="foot-note-go" href="/part-1-foundation" data-foot-resume><span data-foot-resume-label>Start at Part 1</span> <span class="dc-arr" aria-hidden="true">&rarr;</span></a>
+          </div>
 
-             The figure's RESTING place is the curve's origin, written in CSS to
-             match the path's first point (pinned by tests/footer-colophon).
-             With nothing read, or with JS off, that is where it stands: at the
-             foot of the climb. footArrive() walks it to the frontier. -->
-        <div class="measure-full foot-stage" style="--total: 95">
-         <div class="foot-stage-inner">
-          <svg class="foot-stage-svg" viewBox="0 0 1200 156" preserveAspectRatio="none" fill="none" aria-hidden="true">
-            <path class="foot-fill" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6 L1200 156 L0 156 Z"></path>
-            <path class="foot-arc" data-foot-arc="1" pathLength="95" style="--arc-len: 18; --arc-at: 0" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
-            <path class="foot-arc" data-foot-arc="2" pathLength="95" style="--arc-len: 12; --arc-at: 18" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
-            <path class="foot-arc" data-foot-arc="3" pathLength="95" style="--arc-len: 13; --arc-at: 30" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
-            <path class="foot-arc" data-foot-arc="4" pathLength="95" style="--arc-len: 13; --arc-at: 43" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
-            <path class="foot-arc" data-foot-arc="5" pathLength="95" style="--arc-len: 24; --arc-at: 56" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
-            <path class="foot-arc" data-foot-arc="6" pathLength="95" style="--arc-len: 15; --arc-at: 80" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
-          </svg>
-          <span class="foot-tick" data-foot-tick="1" style="--at: 0; --len: 18">01</span>
-          <span class="foot-tick" data-foot-tick="2" style="--at: 18; --len: 12">02</span>
-          <span class="foot-tick" data-foot-tick="3" style="--at: 30; --len: 13">03</span>
-          <span class="foot-tick" data-foot-tick="4" style="--at: 43; --len: 13">04</span>
-          <span class="foot-tick" data-foot-tick="5" style="--at: 56; --len: 24">05</span>
-          <span class="foot-tick" data-foot-tick="6" style="--at: 80; --len: 15">06</span>
-          <div class="foot-figure" data-foot-figure aria-hidden="true">
+          <!-- THE STAGE. `pathLength` normalises the curve to the book's total
+               minutes, so a stretch of 18 OCCUPIES eighteen minutes of arc —
+               drawn 1.4 shorter, half a seam clipped from each end, so six
+               stretches read as six parts and not one line. Every number in
+               here is written by scripts/sync-counts.mjs from the prose: the
+               arcs' lengths and offsets, the ticks' positions and minutes,
+               the stage's total. Nothing is typed.
+
+               Above the curve is the page (--paper); below it, the ground.
+               .foot-sky paints the sky inside the measure and the stage's
+               bands continue it to the viewport edges; .foot-ground-read is
+               the accent wash under the stretch the reader has covered,
+               clipped to the figure's x, so it ends under its feet.
+
+               The ticks are the axis AND the peek surfaces: each spans its own
+               Part's columns, so pointing anywhere over a Part lights it here
+               and in the contents. Not controls (the contents rows are) and
+               aria-hidden with the rest of the stage; a screen reader is
+               served by the running head, the note and the contents.
+
+               The figure's RESTING place is the curve's origin, written in
+               CSS on .foot-stage (--fx/--fy) to match the path's first point
+               (pinned by tests/footer-colophon). With nothing read, or with
+               JS off, that is where it stands: at the foot of the climb.
+               footArrive() walks it to the frontier when the reader gets
+               here. -->
+          <div class="foot-stage" style="--total: 95" aria-hidden="true">
+           <div class="foot-stage-inner">
+            <svg class="foot-stage-svg" viewBox="0 0 1200 156" preserveAspectRatio="none" fill="none" aria-hidden="true">
+              <path class="foot-sky" d="M0 0 L1200 0 L1200 6 C 1090 44, 960 82, 760 112 C 560 142, 300 150, 0 150 Z"></path>
+              <path class="foot-ground-read" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6 L1200 156 L0 156 Z"></path>
+              <path class="foot-arc" data-foot-arc="1" pathLength="95" style="--arc-len: 18; --arc-at: 0" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
+              <path class="foot-arc" data-foot-arc="2" pathLength="95" style="--arc-len: 12; --arc-at: 18" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
+              <path class="foot-arc" data-foot-arc="3" pathLength="95" style="--arc-len: 13; --arc-at: 30" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
+              <path class="foot-arc" data-foot-arc="4" pathLength="95" style="--arc-len: 13; --arc-at: 43" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
+              <path class="foot-arc" data-foot-arc="5" pathLength="95" style="--arc-len: 24; --arc-at: 56" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
+              <path class="foot-arc" data-foot-arc="6" pathLength="95" style="--arc-len: 15; --arc-at: 80" d="M0 150 C 300 150, 560 142, 760 112 C 960 82, 1090 44, 1200 6"></path>
+            </svg>
+            <span class="foot-tick" data-foot-tick="1" style="--at: 0; --len: 18"><span class="foot-tick-n">01</span><span class="foot-tick-min">18 min</span></span>
+            <span class="foot-tick" data-foot-tick="2" style="--at: 18; --len: 12"><span class="foot-tick-n">02</span><span class="foot-tick-min">12 min</span></span>
+            <span class="foot-tick" data-foot-tick="3" style="--at: 30; --len: 13"><span class="foot-tick-n">03</span><span class="foot-tick-min">13 min</span></span>
+            <span class="foot-tick" data-foot-tick="4" style="--at: 43; --len: 13"><span class="foot-tick-n">04</span><span class="foot-tick-min">13 min</span></span>
+            <span class="foot-tick" data-foot-tick="5" style="--at: 56; --len: 24"><span class="foot-tick-n">05</span><span class="foot-tick-min">24 min</span></span>
+            <span class="foot-tick" data-foot-tick="6" style="--at: 80; --len: 15"><span class="foot-tick-n">06</span><span class="foot-tick-min">15 min</span></span>
+            <div class="foot-figure" data-foot-figure aria-hidden="true">
 <svg class="brand-mark" viewBox="45.8 0 164.4 226.6" aria-hidden="true" focusable="false"
           fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
           <g stroke-width="8.4">
@@ -530,21 +545,31 @@
           <circle cx="160" cy="76" r="7.7"/>
           </g>
           </svg>
+            </div>
+           </div>
           </div>
-         </div>
         </div>
       </section>
 
+      <!-- TIER 2 — THE CONTENTS. A book's contents page: ordinal, title, dot
+           leader, and where a page number would stand, the Part's reading
+           time. A read Part keeps its minutes and gains a tick in its own
+           column, so the read state is a column the eye can run down and the
+           one fact the curve exists to show is never deleted by finishing.
+           The visually-hidden ordinal and the read word give assistive tech
+           the sentence a sighted reader gets: "Part 1, Foundation &
+           Philosophy, 18 min, read". Under 768px the header nav is
+           display:none, so this is the site's only map. -->
       <nav class="measure-full foot-cols" aria-label="Site map">
         <div class="foot-col foot-col--parts">
           <h2 class="foot-h" id="foot-h-parts">The six parts</h2>
           <ul aria-labelledby="foot-h-parts">
-            <li><a data-foot-part-link="1" href="/part-1-foundation"><span class="foot-num" aria-hidden="true">01</span>Foundation &amp; Philosophy</a></li>
-            <li><a data-foot-part-link="2" href="/part-2-lineage-macro-thesis"><span class="foot-num" aria-hidden="true">02</span>Lineage &amp; Macro Thesis</a></li>
-            <li><a data-foot-part-link="3" href="/part-3-bitcoin-convexity-backbone"><span class="foot-num" aria-hidden="true">03</span>Bitcoin: Convexity Backbone</a></li>
-            <li><a data-foot-part-link="4" href="/part-4-tax-architecture-roc-strategy"><span class="foot-num" aria-hidden="true">04</span>Tax Architecture &amp; ROC Strategy</a></li>
-            <li><a data-foot-part-link="5" href="/part-5-portfolio-construction-position-management"><span class="foot-num" aria-hidden="true">05</span>Portfolio Construction &amp; Position Management</a></li>
-            <li><a data-foot-part-link="6" href="/part-6-convexity-framework-integrity-scoring"><span class="foot-num" aria-hidden="true">06</span>Convexity &amp; Framework Integrity Scoring</a></li>
+            <li><a data-foot-part-link="1" href="/part-1-foundation"><span class="foot-num" aria-hidden="true">01</span><span class="visually-hidden">Part 1, </span><span class="foot-title">Foundation &amp; Philosophy</span><span class="foot-lead" aria-hidden="true"></span><span class="foot-min" data-foot-part-min="1">18 min</span><span class="foot-read"><span class="visually-hidden" data-foot-read-word></span></span></a></li>
+            <li><a data-foot-part-link="2" href="/part-2-lineage-macro-thesis"><span class="foot-num" aria-hidden="true">02</span><span class="visually-hidden">Part 2, </span><span class="foot-title">Lineage &amp; Macro Thesis</span><span class="foot-lead" aria-hidden="true"></span><span class="foot-min" data-foot-part-min="2">12 min</span><span class="foot-read"><span class="visually-hidden" data-foot-read-word></span></span></a></li>
+            <li><a data-foot-part-link="3" href="/part-3-bitcoin-convexity-backbone"><span class="foot-num" aria-hidden="true">03</span><span class="visually-hidden">Part 3, </span><span class="foot-title">Bitcoin: Convexity Backbone</span><span class="foot-lead" aria-hidden="true"></span><span class="foot-min" data-foot-part-min="3">13 min</span><span class="foot-read"><span class="visually-hidden" data-foot-read-word></span></span></a></li>
+            <li><a data-foot-part-link="4" href="/part-4-tax-architecture-roc-strategy"><span class="foot-num" aria-hidden="true">04</span><span class="visually-hidden">Part 4, </span><span class="foot-title">Tax Architecture &amp; ROC Strategy</span><span class="foot-lead" aria-hidden="true"></span><span class="foot-min" data-foot-part-min="4">13 min</span><span class="foot-read"><span class="visually-hidden" data-foot-read-word></span></span></a></li>
+            <li><a data-foot-part-link="5" href="/part-5-portfolio-construction-position-management"><span class="foot-num" aria-hidden="true">05</span><span class="visually-hidden">Part 5, </span><span class="foot-title">Portfolio Construction &amp; Position Management</span><span class="foot-lead" aria-hidden="true"></span><span class="foot-min" data-foot-part-min="5">24 min</span><span class="foot-read"><span class="visually-hidden" data-foot-read-word></span></span></a></li>
+            <li><a data-foot-part-link="6" href="/part-6-convexity-framework-integrity-scoring"><span class="foot-num" aria-hidden="true">06</span><span class="visually-hidden">Part 6, </span><span class="foot-title">Convexity &amp; Framework Integrity Scoring</span><span class="foot-lead" aria-hidden="true"></span><span class="foot-min" data-foot-part-min="6">15 min</span><span class="foot-read"><span class="visually-hidden" data-foot-read-word></span></span></a></li>
           </ul>
         </div>
 
@@ -572,6 +597,7 @@
         </div>
       </nav>
 
+      <!-- TIER 3 — THE BASE RULE. -->
       <div class="measure-full foot-base">
         <span>&copy; 2026 Adaptive Convexity Framework</span>
         <!-- "share" IS the control. It ships as plain text and cover-docs.js
@@ -580,11 +606,13 @@
              stays a sentence instead of carrying a dead control in the middle of
              one. The visible word never changes: "free to read, free to copied"
              is not a sentence, and swapping it would also break the accessible
-             name away from the label. Success speaks through the icon, the
-             mascot, and the live region below. -->
+             name away from the label. Success speaks through the icon (which
+             cross-fades to a check rather than cutting), the figure, and the
+             live region below. The plain text carries the full stop; the
+             control's sentence ends on its icon. -->
         <span class="foot-offer">Free to read, free to <button type="button"
             class="foot-share" data-foot-share hidden
-            aria-label="Share the Adaptive Convexity Framework"><span>share</span><svg class="foot-share-icon foot-share-icon--go" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 51.58 65 Q 55.18 42.5 51.58 20 A 1.58 1.58 0 0 1 48.43 20 Q 48.43 42.5 48.43 65 A 1.58 1.58 0 0 1 51.58 65 Z" fill-rule="evenodd"></path><path d="M 36.11 36.11 Q 45.65 30.65 51.11 21.11 A 1.58 1.58 0 0 1 48.89 18.89 Q 40.88 25.88 33.89 33.89 A 1.58 1.58 0 0 1 36.11 36.11 Z" fill-rule="evenodd"></path><path d="M 66.11 33.89 Q 60.65 24.35 51.11 18.89 A 1.58 1.58 0 0 1 48.89 21.11 Q 55.88 29.12 63.89 36.11 A 1.58 1.58 0 0 1 66.11 33.89 Z" fill-rule="evenodd"></path><path d="M 25 81.58 Q 50 85.33 75 81.58 A 1.58 1.58 0 0 1 75 78.43 Q 50 78.58 25 78.43 A 1.58 1.58 0 0 1 25 81.58 Z" fill-rule="evenodd"></path><path d="M 26.58 80 Q 29.13 75 26.58 70 A 1.58 1.58 0 0 1 23.43 70 Q 22.38 75 23.43 80 A 1.58 1.58 0 0 1 26.58 80 Z" fill-rule="evenodd"></path><path d="M 76.58 80 Q 79.13 75 76.58 70 A 1.58 1.58 0 0 1 73.43 70 Q 72.38 75 73.43 80 A 1.58 1.58 0 0 1 76.58 80 Z" fill-rule="evenodd"></path></svg><svg class="foot-share-icon foot-share-icon--done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 12.5l5 5 10-11"></path></svg></button><span data-foot-share-plain>share</span>.</span>
+            aria-label="Share the Adaptive Convexity Framework"><span>share</span><span class="foot-share-ic" aria-hidden="true"><svg class="foot-share-icon foot-share-icon--go" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 51.58 65 Q 55.18 42.5 51.58 20 A 1.58 1.58 0 0 1 48.43 20 Q 48.43 42.5 48.43 65 A 1.58 1.58 0 0 1 51.58 65 Z" fill-rule="evenodd"></path><path d="M 36.11 36.11 Q 45.65 30.65 51.11 21.11 A 1.58 1.58 0 0 1 48.89 18.89 Q 40.88 25.88 33.89 33.89 A 1.58 1.58 0 0 1 36.11 36.11 Z" fill-rule="evenodd"></path><path d="M 66.11 33.89 Q 60.65 24.35 51.11 18.89 A 1.58 1.58 0 0 1 48.89 21.11 Q 55.88 29.12 63.89 36.11 A 1.58 1.58 0 0 1 66.11 33.89 Z" fill-rule="evenodd"></path><path d="M 25 81.58 Q 50 85.33 75 81.58 A 1.58 1.58 0 0 1 75 78.43 Q 50 78.58 25 78.43 A 1.58 1.58 0 0 1 25 81.58 Z" fill-rule="evenodd"></path><path d="M 26.58 80 Q 29.13 75 26.58 70 A 1.58 1.58 0 0 1 23.43 70 Q 22.38 75 23.43 80 A 1.58 1.58 0 0 1 26.58 80 Z" fill-rule="evenodd"></path><path d="M 76.58 80 Q 79.13 75 76.58 70 A 1.58 1.58 0 0 1 73.43 70 Q 72.38 75 73.43 80 A 1.58 1.58 0 0 1 76.58 80 Z" fill-rule="evenodd"></path></svg><svg class="foot-share-icon foot-share-icon--done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.5 12.5l5 5 10-11"></path></svg></span></button><span data-foot-share-plain>share.</span></span>
         <span class="visually-hidden" role="status" aria-live="polite" data-foot-share-status></span>
         <span>Educational and analytical &mdash; not investment advice.</span>
       </div>

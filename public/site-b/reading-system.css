@@ -1789,110 +1789,136 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
    Two shapes share `.site-footer`. A READING page gets the base rule and a
    single `.foot-base` line: it already ends on its own next-up band, and a
    second map underneath that is furniture. The COVER gets `--cover`, a colophon
-   in three tiers — the reading curve · the map · the base rule.
+   in three tiers — the plate · the contents · the base rule.
 
-   ONE CURVE. The first cover footer drew the convexity sweep twice: full-bleed
-   and decorative across the top, then again boxed in a card as data. The
-   beautiful one did nothing and the useful one was a widget. This is that sweep
-   with the data in it and the figure standing on it. Everything here except
-   `.site-footer` and `.foot-base` is COVER-ONLY.
+   THE PAGE LANDS ON THE CURVE. Above the curve is the page (--paper); the
+   curve is drawn once, across the measure, as the edge between the page and
+   the ground (--paper-warm), and everything below it — axis, contents, base —
+   sits on that ground. The reading figure stands on the line where the
+   reader's unbroken run ends; the three facts hang beside it as a chart
+   note, never in a card. Everything here except `.site-footer` and
+   `.foot-base` is COVER-ONLY.
    ============================================================================ */
 .site-footer { border-top: 1px solid var(--rule); }
-.site-footer--cover { border-top: 0; }
+.site-footer--cover { border-top: 0; background: var(--paper-warm); }
 
-/* ---- Tier 1: the reading curve -------------------------------------------- */
-.foot-curve {
+/* ---- Tier 1: the plate ----------------------------------------------------- *
+ * Sky. The plate is the page's paper down to the curve. `overflow: clip` (both
+ * axes, so the summit figure and its note — which rise above the stage — are
+ * still painted) contains the ground band that .foot-stage::after throws
+ * downward and the sky bands the stage-inner throws sideways. */
+.foot-plate {
   position: relative;
-  padding-top: var(--space-16);
-  padding-bottom: var(--space-10);         /* the ticks hang below the stage */
-  /* The wash runs to the viewport edges (see .foot-stage::before/::after); this
-     clips only the x-axis so the tick labels below the stage are not cut. */
-  overflow-x: clip;
+  background: var(--paper);
+  padding-top: var(--space-6);
+  overflow: clip;
+  /* The two lengths the whole plate is set from: the figure's size, and the
+     stage's height — near-uniform to the 1200x156 viewBox at the design width
+     (11.4vw of 1440 is the measure's own aspect), so at that width an arc's
+     screen length is its minutes. */
+  --fig: clamp(2.6rem, 4.5vw, 3.6rem);
+  --stage-h: clamp(8rem, 11.4vw, 11rem);
+  --axis-hang: var(--space-10);               /* how far the axis hangs below the stage */
 }
-.foot-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: var(--space-6) var(--space-12);
-  margin-bottom: var(--space-8);
-}
-.foot-brand .brand { margin-bottom: var(--space-2); }
-.foot-descriptor {
-  font-family: var(--font-serif);
-  font-size: var(--text-md);
-  line-height: var(--leading-snug);
-  color: var(--ink-quiet);
-  margin: 0;
-  max-width: 30ch;
-}
-.foot-status { text-align: right; }
-.foot-eyebrow {
+/* The running head: a book's, on one hairline. Section name left, the size of
+   the book right, in the numeral face at running-head size. The book line is
+   written by sync-counts and never by JS; the reader's numbers are at the
+   figure. Tertiary ink is --ink-disabled throughout the footer: in dark,
+   --ink-faint aliases --ink-micro, which is BRIGHTER than --ink-quiet, and
+   the least important lines would be painted loudest. */
+.foot-rh {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--track-wider);
   text-transform: uppercase;
-  color: var(--accent);
-  margin: 0 0 var(--space-2);
+  color: var(--ink-disabled);
 }
-.foot-count {
-  font-family: var(--font-sans);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--track-tight);
-  color: var(--ink);
-  margin: 0;
-  /* The running head must not change height under the cursor: a peek writes a
-     Part's own time into .foot-meta. The leading is declared, not inherited,
-     so the floor below is a real line of it. */
-  line-height: var(--leading-snug);
-  min-height: 1.35em;
+.foot-rh-title { margin: 0; font: inherit; letter-spacing: inherit; color: inherit; }
+.foot-rh-book { margin: 0; white-space: nowrap; }
+.foot-rh-sep { padding-inline: var(--space-2); }
+
+/* The plate body holds the lockup (in flow), the note (absolute, placed by
+   JS beside the figure; CSS default beside the origin) and the stage. It is
+   the note's positioning box, so the note can leave the stage's box when the
+   figure stands at the summit. */
+.foot-plate-body {
+  position: relative;
+  padding-top: var(--space-12);
+  padding-bottom: calc(var(--axis-hang) + var(--space-3));   /* room for the hanging axis */
 }
-.foot-meta {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-normal);
-  letter-spacing: var(--track-wide);
-  color: var(--ink-faint);
-  margin-left: var(--space-3);
-  white-space: nowrap;
-}
-.foot-meta[data-peek] { color: var(--ink-quiet); }
-.foot-dial-go {
+.foot-lockup { position: relative; z-index: 2; max-width: 34rem; }
+.foot-word {
   display: inline-block;
-  margin-top: var(--space-3);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--accent-link);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-wide);
+  color: var(--ink);
   text-decoration: none;
-  border-bottom: 1px solid var(--accent-quiet);
-  white-space: nowrap;
 }
-/* Gated like every other nudge in the footer. The global reduce reset kills the
-   transition but not the transform, so an ungated nudge does not slow down under
-   a stated preference — it SNAPS 4px. */
-.foot-dial-go .dc-arr { display: inline-block; }
-@media (prefers-reduced-motion: no-preference) {
-  .foot-dial-go .dc-arr { transition: transform var(--motion-base) var(--ease-standard); }
-  .foot-dial-go:hover .dc-arr, .foot-dial-go:focus-visible .dc-arr { transform: translateX(4px); }
+.foot-word:hover, .foot-word:focus-visible { color: var(--accent-link); }
+.foot-descriptor {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  color: var(--ink-quiet);
+  margin: var(--space-2) 0 0;
+  max-width: 30ch;
 }
 
 /* ---- The stage ------------------------------------------------------------- *
- * Uniform scaling would fix the curve's aspect and make it 50px tall on a phone;
- * `preserveAspectRatio: none` lets it keep its height at every width, and the
- * dash maths survive it because they live in path space — PROVIDED nothing
+ * `preserveAspectRatio: none` lets the curve keep a legible height on a phone;
+ * the dash maths survive it because they live in path space — PROVIDED nothing
  * asks for `vector-effect: non-scaling-stroke`, which moves the dash into
- * screen space and, measured at 390px, painted the unread stretches accent. */
+ * screen space and, measured at 390px, painted the unread stretches accent.
+ * The small negative top margin lets the climb rise to the descriptor's level
+ * while the flat approach keeps a note's height of clear sky beneath it. */
+/* Registered as a length so its computed value is px: footArrive() reads it
+   to put the ground under a clamped figure. Where @property is unsupported the
+   clamp still holds (it is plain calc); only that re-sampling is skipped. */
+@property --foot-inset { syntax: '<length>'; inherits: true; initial-value: 0px; }
 .foot-stage {
   position: relative;
-  height: clamp(120px, 14vw, 172px);
+  height: var(--stage-h);
+  margin-top: calc(-1 * var(--space-4));
+  /* The figure's resting place: the curve's ORIGIN, the path's first point
+     (0,150 in a 156-tall box; pinned against the `d` by tests/footer-colophon).
+     footArrive() overwrites these with the frontier. The read wash is clipped
+     to --fx, so it ends under the figure's feet. */
+  --fx: 0%;
+  --fy: calc(150 / 156 * 100%);
+  /* How far inside the measure's edge the figure's centre may come, so its
+     feet never touch the screen: half the figure past the gutter, plus a
+     step. Negative wherever the gutter is wider than half the figure, and then
+     the clamp on .foot-figure is no clamp at all. */
+  --foot-inset: calc(0.5 * var(--fig) - var(--page-gutter) + var(--space-1));
+}
+/* The ground continues below the stage — under the axis, and on a phone under
+   the lockup that follows it — to the plate's clipped edge. */
+.foot-stage::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: -100vw;
+  right: -100vw;
+  height: 100vh;
+  background: var(--paper-warm);
+  pointer-events: none;
 }
 /* Absolutely-positioned children resolve against the PADDING box, which on a
    .measure-full element is a gutter wider than the text column on each side.
    The inner box is the content box, so the curve's origin and terminus land
    exactly under the running head's margins. */
-.foot-stage-inner { position: relative; height: 100%; }
-/* The wash continues past the measure to the viewport edges as flat bands at the
-   curve's two end heights: 6/156 of the stage on the left where the sweep
+.foot-stage-inner { position: relative; z-index: 1; height: 100%; }
+/* The ground continues past the measure to the viewport edges as flat bands at
+   the curve's two end heights: 6/156 of the stage on the left where the sweep
    begins, 150/156 on the right where it lands. They hang off the INNER box, so
    they abut the curve's ends rather than starting a gutter's width past them. */
 .foot-stage-inner::before, .foot-stage-inner::after {
@@ -1900,17 +1926,24 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   position: absolute;
   bottom: 0;
   width: 100vw;
-  background: var(--accent);
-  opacity: 0.06;
+  background: var(--paper-warm);
   pointer-events: none;
 }
 .foot-stage-inner::before { right: 100%; height: calc(6 / 156 * 100%); }
 .foot-stage-inner::after  { left: 100%;  height: calc(150 / 156 * 100%); }
 .foot-stage-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.foot-fill { fill: var(--accent); opacity: 0.06; }
+.foot-sky { fill: var(--paper); }
+.foot-ground-read {
+  fill: var(--accent);
+  opacity: 0.1;
+  clip-path: inset(0 calc(100% - var(--fx)) 0 0);
+}
+/* Six stretches. Unread in an ink that CLEARS 3:1 on both grounds (--rule did
+   not: 1.23:1 in dark), read in accent and heavier. Emerald means read on this
+   curve and nothing else earns it. */
 .foot-arc {
   fill: none;
-  stroke: var(--rule);
+  stroke: var(--ink-disabled);
   stroke-width: 2.5;
   stroke-linecap: round;
   /* One dash, its length the Part's minutes less a 1.4 seam, half taken at each
@@ -1923,71 +1956,167 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
               stroke-width var(--motion-base) var(--ease-standard);
 }
 .foot-arc[data-read] { stroke: var(--accent); stroke-width: 4; }
-/* Peek — A HIGHLIGHT IS NOT THE READ STATE. Emerald means read on this curve and
-   nothing else earns it; an unread peek lifts to ink, which reads as attention
-   in both themes without ever reading as progress. */
-.foot-arc[data-peek] { stroke: var(--ink-quiet); stroke-width: 4; }
-.foot-arc[data-read][data-peek] { stroke: var(--accent); stroke-width: 6; }
+/* Peek — A HIGHLIGHT IS NOT THE READ STATE. An unread peek lifts to ink AT THE
+   READ WEIGHT, never heavier: in greyscale a heavier peeked stretch became the
+   loudest stroke on the curve, which inverts the one signal the curve carries. */
+.foot-arc[data-peek] { stroke: var(--ink); stroke-width: 4; }
+.foot-arc[data-read][data-peek] { stroke: var(--accent); stroke-width: 5.5; }
+/* While a walk is owed, a read stretch inside the run is held unread until the
+   figure steps onto it; footArrive() lights each one (data-lit) from the
+   walker's own position, so the wash edge and the stroke can never step apart.
+   Truth first: with no JS, no walk, or a walk already landed, this never
+   applies and every read stretch is simply lit. */
+html.js [data-foot-progress][data-pending] .foot-arc[data-read]:not([data-lit]) { stroke: var(--ink-disabled); stroke-width: 2.5; }
+/* The hold outranks the peek by specificity, so the peek is restated inside it:
+   attention is ink at read weight even while the walk is still owed. */
+html.js [data-foot-progress][data-pending] .foot-arc[data-read][data-peek]:not([data-lit]) { stroke: var(--ink); stroke-width: 4; }
 
-/* The ticks: each one spans its own Part's columns, so it is both the numeral
-   beneath the curve and the surface a pointer peeks with. Not controls (the map
-   rows are) and aria-hidden, because a screen reader is served by the link text. */
+/* The axis: each Part's column spans its own minutes; the numeral sits under the
+   MIDDLE of its stretch with the Part's minutes beneath it, so six stretches
+   count as six on any width and the curve explains its own scale. Each column
+   is also its Part's peek surface, full height, so pointing anywhere over a
+   stretch lights it — a thin stroke never has to be hit. Not controls; the
+   contents rows are. */
 .foot-tick {
   position: absolute;
+  z-index: 1;
   top: 0;
-  bottom: calc(-1 * var(--space-8));
+  bottom: calc(-1 * var(--axis-hang));
   left: calc(var(--at) / var(--total) * 100%);
   width: calc(var(--len) / var(--total) * 100%);
   display: flex;
-  align-items: flex-end;
-  padding-bottom: 0;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--track-wide);
-  color: var(--ink-faint);
+  line-height: var(--leading-snug);
+  text-align: center;
+  color: var(--ink-disabled);
   transition: color var(--motion-base) var(--ease-standard);
 }
-.foot-tick[data-read] { color: var(--accent); }
+/* A hairline on the floor at each seam, so the columns read as an axis. */
+.foot-tick::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: calc(var(--axis-hang) - var(--space-1));
+  width: 1px;
+  height: var(--space-2);
+  background: var(--rule);
+}
+.foot-tick[data-foot-tick="1"]::before { display: none; }   /* the origin has no seam; by attribute, not DOM order */
+.foot-tick-n { font-weight: var(--weight-medium); }
+.foot-tick-min { display: block; }
+.foot-tick[data-read] .foot-tick-n { color: var(--accent); }
 .foot-tick[data-peek] { color: var(--ink); }
 
 /* The figure. One of the two pinned marks, at a size where the dashboard's own
-   blink and gaze are legible rather than a favicon's. It stands with its feet on
-   the line — the planted ground line is the brand — and its resting place is the
-   curve's ORIGIN, written to match the path's first point (0,150 in a 156-tall
-   box; pinned against the `d` by tests/footer-colophon). With nothing read, or
-   no JS, that is where it stands: at the foot of the climb. footArrive() walks
-   it to the frontier when the reader gets here. */
+   blink and gaze can be seen. It stands with its feet on the line — the planted
+   ground line is the brand — at --fx/--fy, which rest at the curve's origin. */
 .foot-figure {
   position: absolute;
-  left: 0;
-  top: calc(150 / 156 * 100%);
-  width: clamp(2.6rem, 4.5vw, 3.6rem);
-  height: clamp(2.6rem, 4.5vw, 3.6rem);
+  z-index: 2;
+  /* At either end of the curve the figure is centred on the measure's edge,
+     and on a phone the gutter is narrower than half the figure: a foot sat at
+     the screen's edge — at the origin, and again at the terminus once the
+     book was finished. The clamp keeps the feet inside the page by
+     --foot-inset, declared once on the stage. At the origin the path is flat,
+     so the feet stay on the line by themselves; at the terminus it is not, so
+     footArrive() re-samples the ground under the clamped x. --fx itself is
+     the frontier and is never moved: the read wash is clipped to it. */
+  left: clamp(var(--foot-inset), var(--fx), calc(100% - var(--foot-inset)));
+  top: var(--fy);
+  width: var(--fig);
+  height: var(--fig);
   transform: translate(-50%, -100%);
   color: var(--accent);
   pointer-events: none;
 }
 .foot-figure .brand-mark { width: 100%; height: 100%; display: block; }
 
+/* ---- The note --------------------------------------------------------------- *
+ * The reader's place, beside the figure's head. LEFT of the figure when the
+ * words fit over the ground it has covered (the arrow then points into what
+ * is next), RIGHT over what is next when they do not — and lifted above the
+ * head when the rising line would otherwise reach them (footNoteLayout in
+ * reading-core.js, from measured widths). The CSS default is the first-visit
+ * truth: beside the figure at the origin, to its right. */
+.foot-note {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--page-gutter) + 0.5 * var(--fig) + 0.2 * var(--fig));
+  bottom: calc(var(--axis-hang) + var(--space-3) + 6 / 156 * var(--stage-h) + 0.3 * var(--fig));
+  max-width: calc(100% - 2 * var(--page-gutter));
+}
+.foot-note[data-side="left"] { text-align: right; }
+.foot-note-count {
+  margin: 0;
+  font-family: var(--font-sans);
+  /* Above the descriptor, not below it: the reader's own count is the most
+     personal line on the page and was set a token smaller than the tagline. */
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-tight);
+  line-height: var(--leading-snug);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.foot-note-meta {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  color: var(--ink-quiet);
+  white-space: nowrap;
+}
+/* `hidden` must win over any author display on these, as it must on the share
+   control below: a first visit has nothing to count. */
+.foot-note-count[hidden], .foot-note-meta[hidden] { display: none; }
+.foot-note-go {
+  display: inline-block;
+  margin-top: var(--space-1);
+  padding-block: var(--space-1);              /* a real >= 24px box for the one control here */
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--accent-link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-quiet);
+  white-space: nowrap;
+}
+/* Gated like every other nudge in the footer. The global reduce reset kills the
+   transition but not the transform, so an ungated nudge does not slow down under
+   a stated preference — it SNAPS 4px. */
+.foot-note-go .dc-arr { display: inline-block; }
 @media (prefers-reduced-motion: no-preference) {
-  /* The walk. footDial writes the truth into --at-target at once; footArrive
-     places the figure when the colophon is on screen, and these transitions
-     carry it from the origin to the frontier. Under reduce it simply appears
-     there — the fact survives, only the travel is dropped. */
-  html.js .foot-figure {
-    transition: left var(--motion-draw) var(--ease-standard),
-                top var(--motion-draw) var(--ease-standard);
-  }
-  /* The ground lights under its feet. A read stretch starts grey and turns
-     accent when the figure reaches it: its delay is its place in the walk, so
-     Part 3 at minute 30 of a 43-minute frontier lights at 30/43 of the journey.
-     An ANIMATION with backwards fill, not a transition-delay — a delay on the
-     transition would also delay every peek by up to the same amount. */
-  @keyframes foot-arrive { from { stroke: var(--rule); stroke-width: 2.5; } }
-  html.js [data-foot-progress][data-run] .foot-arc[data-read] {
-    animation: foot-arrive var(--motion-base) var(--ease-standard)
-               calc(var(--arc-at) / var(--at-min, 1) * var(--motion-draw)) backwards;
-  }
+  .foot-note-go .dc-arr { transition: transform var(--motion-base) var(--ease-standard); }
+  .foot-note-go:hover .dc-arr, .foot-note-go:focus-visible .dc-arr { transform: translateX(4px); }
+}
+
+/* ---- The walk ---------------------------------------------------------------- *
+ * The figure travels from the origin to the frontier ALONG THE PATH. The clock
+ * is a registered custom property transitioned by CSS — so the duration and
+ * the ease are the tokens themselves, never numbers copied into JS — and
+ * footArrive() samples the curve at that clock's value each frame. Where
+ * @property is unsupported the value simply arrives, the loop lands on its
+ * first frame, and the figure stands at the frontier: the truth without the
+ * travel. Gated behind html.js and the motion preference like every other
+ * beat here. */
+@property --foot-walk { syntax: '<number>'; inherits: false; initial-value: 0; }
+.foot-stage { --foot-walk: 0; }
+.foot-stage[data-walking] { --foot-walk: var(--at-target, 0); }
+@media (prefers-reduced-motion: no-preference) {
+  html.js .foot-stage { transition: --foot-walk var(--motion-draw) var(--ease-standard); }
+  /* The note waits for the figure: it is placed at the frontier before the
+     walk and fades up when the figure lands there, so the words are never
+     seen beside an empty place. */
+  html.js .foot-note { transition: opacity var(--motion-slow) var(--ease-standard); }
+}
+/* Only where the note hangs beside the figure. In flow on a phone it is a
+   caption above the curve, read before the walk, and never held back. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 701px) {
+  html.js [data-foot-progress][data-pending] .foot-note { opacity: 0; }
 }
 
 /* ---- The mascot ----------------------------------------------------------- *
@@ -2011,16 +2140,17 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   /* Gaze. cover-docs.js writes the two custom properties as unitless -1..1; they
      default to 0, so with no driver mounted the mark renders exactly as drawn.
      AMPLITUDE IS THE ONE DIVERGENCE, and it is a re-measurement, not a taste: the
-     dashboard's 3.4 x 2.2 user units are calibrated for its ~128px hero mascot,
-     where they sweep about 3.4px on screen. At this figure's size 6 x 4 sweeps
-     the same 3.4px (measured), keeping the 1.5 x:y ratio. */
+     dashboard's 3.4 x 2.2 user units are calibrated for its ~128px hero mascot.
+     At this figure's size (3.6rem at the design width, a 4.4px eye) 12 x 8
+     sweeps about 3.4px each way — a glance that can be seen from reading
+     distance, keeping the 1.5 x:y ratio. */
   .foot-figure .brand-mark g[fill="currentColor"] {
     transform: translate(
-      calc(var(--acf-gaze-x, 0) * 6px),
-      calc(var(--acf-gaze-y, 0) * 4px)
+      calc(var(--acf-gaze-x, 0) * 12px),
+      calc(var(--acf-gaze-y, 0) * 8px)
     );
   }
-  /* Blink — the dashboard's cycle, verbatim, started when the figure arrives.
+  /* Blink — the dashboard's cycle, verbatim, started when the figure has landed.
      Five blinks over 12s, one of them a double, the gaps deliberately uneven:
      "An evenly spaced blink reads as a machine with a fault light." A SQUASH,
      NEVER A LINE: flat bars are that family's BLOCKED reading. */
@@ -2085,13 +2215,12 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   100%      { transform: scaleY(1); }
 }
 
-/* ---- Tier 2: the map ------------------------------------------------------ */
+/* ---- Tier 2: the contents ------------------------------------------------- */
 .foot-cols {
   display: grid;
-  grid-template-columns: 1.5fr 1.15fr 1fr;
+  grid-template-columns: 1.7fr 1fr 0.9fr;
   gap: var(--space-10) var(--space-8);
-  padding-block: var(--space-10);
-  border-top: 1px solid var(--rule-faint);
+  padding-block: var(--space-12) var(--space-10);
 }
 .foot-h {
   font-family: var(--font-sans);
@@ -2115,29 +2244,60 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   text-decoration: none;
   transition: color var(--motion-base) var(--ease-standard);
 }
-.foot-col a:hover, .foot-col a:focus-visible { color: var(--accent); }
+/* Attention is ink; read is emerald. A hovered row lifting to accent made the
+   list say "read" about a Part the reader was merely pointing at. */
+.foot-col a:hover, .foot-col a:focus-visible { color: var(--ink); }
 /* The numerals are the Parts index in miniature — the same mono ordinals the
    cover cards carry, so the map reads as the book's table of contents rather
    than a second list of links that happen to be in order. */
 .foot-num {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--ink-faint);
+  color: var(--ink-disabled);
   flex: 0 0 auto;
   transition: color var(--motion-base) var(--ease-standard);
 }
-.foot-col a:hover .foot-num, .foot-col a:focus-visible .foot-num { color: var(--accent); }
+.foot-col a:hover .foot-num, .foot-col a:focus-visible .foot-num { color: var(--ink); }
 /* The list side of the same instrument. */
-.foot-col a[data-peek] { color: var(--accent); }
-.foot-col a[data-peek] .foot-num { color: var(--accent); }
-/* Read state, stated in the map and not only on the curve. On a phone there is
-   no hover to ask the curve with, and the map is the only site-wide nav under
-   768px. A glyph, not a colour, so it survives greyscale; spoken with the link. */
-.foot-col a[data-read]::after {
-  content: " \2713";
-  color: var(--accent);
-  font-size: 0.9em;
+.foot-col a[data-peek] { color: var(--ink); }
+.foot-col a[data-peek] .foot-num { color: var(--ink); }
+/* The contents page: ordinal · title · dot leader · minutes · read. The leader
+   and the minutes sit on the title's LAST line, as a contents page does. */
+.foot-col--parts a {
+  display: grid;
+  grid-template-columns: auto minmax(0, auto) minmax(var(--space-6), 1fr) auto 1.1em;
+  align-items: last baseline;
+  gap: 0 var(--space-3);
+  width: 100%;
+  padding-block: var(--space-1);
 }
+.foot-col--parts .foot-num { align-self: start; line-height: calc(var(--text-sm) * var(--leading-snug)); }
+.foot-title { min-width: 0; }
+.foot-lead {
+  align-self: end;
+  margin-bottom: 0.38em;
+  border-bottom: 1px dotted var(--rule);
+}
+.foot-min {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  color: var(--ink-disabled);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.foot-col--parts a:hover .foot-min, .foot-col--parts a:focus-visible .foot-min,
+.foot-col--parts a[data-peek] .foot-min { color: var(--ink); }
+/* Read state, stated in the list and not only on the curve: on a phone there is
+   no hover to ask the curve with, and this is the only site-wide nav under
+   768px. A GLYPH in its own column, so it survives greyscale and scans as a
+   column; silent to assistive tech (the alt-text form, with the plain form
+   first for engines that lack it), which hears the word footDial() writes
+   into the visually-hidden span instead of "check mark". */
+.foot-read { font-size: 0.9em; color: var(--accent); text-align: center; }
+.foot-col--parts a[data-read] .foot-read::before { content: "\2713"; content: "\2713" / ""; }
+.foot-col--parts a[data-read] .foot-num { color: var(--accent); }
 /* The external mark belongs to the word it follows, not to the column's
    numeral gutter, so it closes the gap the numbered rows need. It leaves in the
    direction it points, which is the same grammar as .dc-arr sliding right on a
@@ -2149,7 +2309,7 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   .foot-col a.foot-out:hover .foot-out-arr,
   .foot-col a.foot-out:focus-visible .foot-out-arr { transform: translate(2px, -2px); }
 }
-.foot-soon { font-family: var(--font-sans); font-size: var(--text-sm); color: var(--ink-faint); }
+.foot-soon { font-family: var(--font-sans); font-size: var(--text-sm); color: var(--ink-disabled); }
 
 /* ---- The share offer ------------------------------------------------------ *
  * "Free to read, free to share" was a claim the page did not honour, so the
@@ -2166,8 +2326,8 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   letter-spacing: inherit;
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
-  padding: 0.45em 0.2em;
+  gap: 0.3em;
+  padding: 0.45em 0.15em 0.45em 0.15em;
   margin: -0.45em 0;
   color: var(--accent-link);
   background: none;
@@ -2193,21 +2353,26 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
    beside the plain word it was supposed to replace, so the sentence reads "free
    to share share". Measured in Chromium with scripting disabled. */
 .foot-share[hidden] { display: none; }
-.foot-share-icon { width: 0.95em; height: 0.95em; flex: 0 0 auto; }
-/* The glyph is the part pages' own share mark, so one icon means one action
-   across the site. It swaps for a check on success and swaps back; the word
-   underneath is untouched, and assistive tech is told in the live region. */
-.foot-share-icon--done { display: none; }
-.foot-share[data-shared] .foot-share-icon--go { display: none; }
-.foot-share[data-shared] .foot-share-icon--done { display: block; }
+/* Two icons in one cell. The glyph is the part pages' own share mark, so one
+   icon means one action across the site. On success it CROSS-FADES to a check
+   and back — the reader who pressed is looking at the word they pressed, and
+   a display cut there read as a glitch. The word underneath is untouched, and
+   assistive tech is told in the live region. */
+.foot-share-ic { position: relative; display: inline-grid; width: 0.95em; height: 0.95em; flex: 0 0 auto; }
+.foot-share-ic .foot-share-icon { grid-area: 1 / 1; width: 100%; height: 100%; }
+.foot-share-icon--done { opacity: 0; transform: scale(0.6); }
+.foot-share[data-shared] .foot-share-icon--go { opacity: 0; transform: translateY(-4px); }
+.foot-share[data-shared] .foot-share-icon--done { opacity: 1; transform: none; }
 .foot-share[data-shared] { color: var(--accent); text-decoration-color: transparent; }
 /* A clipboard that rejects has to say so where the cursor is. No motion, so it
    survives the reduce reset as an end state rather than a lost tween. */
 .foot-share[data-share-failed] { color: var(--ink-quiet); text-decoration-color: var(--ink-quiet); }
-.foot-share[data-share-failed] .foot-share-icon--go { display: none; }
-.foot-share[data-share-failed] .foot-share-icon--done { display: none; }
+.foot-share[data-share-failed] .foot-share-icon--go { opacity: 0.4; }
 @media (prefers-reduced-motion: no-preference) {
-  .foot-share .foot-share-icon--go { transition: transform var(--motion-base) var(--ease-emphasis); }
+  .foot-share-ic .foot-share-icon {
+    transition: opacity var(--motion-base) var(--ease-standard),
+                transform var(--motion-slow) var(--ease-emphasis);
+  }
   .foot-share:hover .foot-share-icon--go,
   .foot-share:focus-visible .foot-share-icon--go { transform: translateY(-2px); }
 }
@@ -2219,32 +2384,64 @@ a.part:hover .ptitle, a.part:focus-visible .ptitle { color: var(--accent-link); 
   gap: var(--space-4);
   justify-content: space-between;
   padding-block: var(--space-6);
-  border-top: 1px solid var(--rule-faint);
+  border-top: 1px solid var(--rule);
   font-family: var(--font-sans);
   font-size: var(--text-xs);
   letter-spacing: var(--track-wide);
-  color: var(--ink-faint);
+  color: var(--ink-disabled);
 }
 
 @media (max-width: 900px) {
+  /* A shorter stage is steeper on screen, so a note over what is next is more
+     often lifted above the figure's head; the stage steps down from the lockup
+     by a note's clearance so a lifted note never rises into the descriptor. */
+  .foot-stage { margin-top: var(--space-8); }
   /* The Parts take the full width and split in two, so the map stays three rows
      tall instead of six and Reference/Elsewhere keep a real column each. */
   .foot-cols { grid-template-columns: 1fr 1fr; gap: var(--space-8) var(--space-6); }
   .foot-col--parts { grid-column: 1 / -1; }
-  .foot-col--parts ul { grid-template-columns: 1fr 1fr; column-gap: var(--space-6); }
+  .foot-col--parts ul { grid-template-columns: 1fr 1fr; column-gap: var(--space-8); }
 }
 @media (max-width: 768px) {
   /* Shared with the reading pages: their two-item base line centres on a phone. */
   .foot-base { justify-content: center; text-align: center; }
 }
 @media (max-width: 700px) {
-  .foot-head { grid-template-columns: 1fr; align-items: start; }
-  .foot-status { text-align: left; }
+  /* The phone has no room beside the figure, so the note stands in flow above
+     the curve — the reader's numbers first, then the instrument, then the only
+     map on this device, which now starts about half a screen in instead of a
+     screen and a half. The lockup does not travel: the base rule already names
+     the framework, and a tagline the reader passed at the top of the page is
+     not worth 90px between them and the map. */
+  .foot-plate { padding-top: var(--space-4); --axis-hang: var(--space-8); }
+  .foot-plate-body { display: flex; flex-direction: column; padding-top: var(--space-6); }
+  .foot-lockup { display: none; }
+  .foot-note, .foot-note[data-side="left"] {
+    position: static;
+    order: 1;
+    max-width: none;
+    text-align: left;
+    margin-bottom: var(--space-4);
+  }
+  .foot-stage { order: 2; margin-top: 0; --stage-h: 6.5rem; }
+  .foot-rh-book { white-space: normal; }
+  .foot-tick-min { display: none; }
   .foot-arc { stroke-width: 4; }
   .foot-arc[data-read] { stroke-width: 6; }
-}
-@media (max-width: 560px) {
+  .foot-arc[data-peek] { stroke-width: 6; }
+  .foot-arc[data-read][data-peek] { stroke-width: 8; }
+  html.js [data-foot-progress][data-pending] .foot-arc[data-read]:not([data-lit]) { stroke-width: 4; }
+  html.js [data-foot-progress][data-pending] .foot-arc[data-read][data-peek]:not([data-lit]) { stroke-width: 6; }
+  .foot-cols { padding-block: var(--space-8); gap: var(--space-8); }
+  /* Hairline rows at a real tap height, from here down rather than from 560:
+     between 561 and 700 the two-column contents with dot leaders staircased the
+     titles ("Portfolio / Construction & / Position / Management") — measured at
+     600 and 700. The leader goes; the minutes right-align. */
   .foot-cols, .foot-col--parts ul { grid-template-columns: 1fr; }
+  .foot-col--parts ul { gap: 0; }
+  .foot-col--parts li + li { border-top: 1px solid var(--rule-faint); }
+  .foot-col--parts a { grid-template-columns: auto minmax(0, 1fr) auto 1.1em; padding-block: var(--space-3); }
+  .foot-lead { display: none; }
 }
 
 /* ---- Entrance animation — quiet fade-up (disabled by reduced-motion) ------ */
