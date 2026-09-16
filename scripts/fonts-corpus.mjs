@@ -8,12 +8,16 @@
  *
  * Three sources, in order of how sure we are:
  *
- *   1. EVERY codepoint in every text file shipped under public/site-b — the
- *      HTML, the stylesheet, the scripts (the chart bundle included, which is
- *      where the exhibit labels live) and the JSON the runtime reads. This is a
- *      superset of what can appear, since it also catches characters inside code
- *      and comments — which costs a few glyphs and removes a whole class of
- *      mistake.
+ *   1. EVERY codepoint in every text file shipped under public/site-b, AT ANY
+ *      DEPTH — the HTML, the stylesheet, the scripts (the chart bundle included,
+ *      which is where the exhibit labels live), the vendored libraries and the
+ *      JSON the runtime reads. This is a superset of what can appear, since it
+ *      also catches characters inside code and comments — which costs a few
+ *      glyphs and removes a whole class of mistake.
+ *
+ *      Depth matters more than it looks. A root-only scan reads the eleven pages
+ *      and misses brand/, vendor/ and anything added later; the contract would
+ *      then be enforcing a promise about files it had never opened.
  *
  *      A character only counts if this file can SEE it, and two notations hide
  *      one in plain ASCII: an HTML entity (`&mdash;`) and a CSS escape
@@ -56,6 +60,32 @@ import path from 'node:path';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SITE_B = path.join(ROOT, 'public', 'site-b');
 const TEXT_EXT = new Set(['.html', '.css', '.js', '.json', '.mjs']);
+
+/**
+ * Every text file under public/site-b, at any depth, as a path relative to it.
+ *
+ * EXTENSION decides, never location. fonts/, icons/ and brand/ hold woff2, png
+ * and svg, which are not text extensions and so cost nothing to walk past — and
+ * naming those directories as exceptions would be the same blind spot in a new
+ * shape, since the next directory would not be on the list.
+ *
+ * Symlinks are not followed: isDirectory() is false for one, so there is no way
+ * to walk out of the tree or around a cycle.
+ *
+ * fonts/subset-manifest.json is written BY this corpus and read back by it,
+ * which is stable rather than circular: the manifest carries codepoints as
+ * numbers and its prose is ASCII, both of which source 2 already covers, so it
+ * can never add a character and can never move its own result.
+ */
+export function textFiles(dir = SITE_B, prefix = '') {
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) out.push(...textFiles(path.join(dir, entry.name), rel));
+    else if (TEXT_EXT.has(path.extname(entry.name))) out.push(rel);
+  }
+  return out.sort();
+}
 
 // Every named entity the pages actually use, plus the near neighbours a writer
 // is likely to reach for next. Anything outside this table stops the build
@@ -153,8 +183,7 @@ export function corpus() {
   // Latin-1 letters, for a cited name or a loanword. Precomposed, so no
   // combining-mark positioning is involved.
   for (let c = 0x00c0; c <= 0x00ff; c += 1) set.add(c);
-  for (const file of fs.readdirSync(SITE_B)) {                    // source 1
-    if (!TEXT_EXT.has(path.extname(file))) continue;
+  for (const file of textFiles()) {                                // source 1
     const raw = fs.readFileSync(path.join(SITE_B, file), 'utf8');
     const text = renderable(file, raw, (ent) => {
       if (!unknown.has(ent)) unknown.set(ent, file);
