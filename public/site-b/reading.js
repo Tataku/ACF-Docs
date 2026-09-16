@@ -25,6 +25,23 @@
       .catch(function () { return null; });
   }
 
+  // The core script used to be REQUESTED only after tagging finished, so every
+  // millisecond of the walk was a millisecond before the theme toggle, the
+  // scroll spy, the tooltips and the narration dock existed. Warming its bytes
+  // up front overlaps that fetch with the JSON round trip and the walk. This
+  // changes nothing about ORDER: loadCore() still runs after wireGlossaryTerms(),
+  // because the core captures its glossary triggers in a static NodeList and
+  // would otherwise miss every auto-tagged term.
+  function preloadCore() {
+    try {
+      var link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'script';
+      link.href = CORE_URL;
+      document.head.appendChild(link);
+    } catch (e) {}
+  }
+
   function loadCore() {
     return new Promise(function (resolve) {
       var script = document.createElement('script');
@@ -50,25 +67,67 @@
   // plain text and remain reachable from the glossary index.
   var MAX_GLOSS_PER_BLOCK = 3;
 
-  function isEligibleTextNode(node) {
+  // Controls, code and page chrome are never prose.
+  var SKIP_SEL = 'a, button, code, pre, script, style, svg, .fc-mount, .part-actions, nav, footer';
+  // Titles are furniture, not prose. A term that first appears as a title or a
+  // label is never highlighted there; the highlight moves to its first
+  // appearance in running prose. This covers every heading-like element in the
+  // system, not just h1-h4: callout labels, stepper step titles, table
+  // captions, failure-mode card names, eyebrows, and sub-metas.
+  var FURNITURE_SEL = '.doc-header, h1, h2, h3, h4, h5, h6, caption, ' +
+    '.section-eyebrow, .sub-meta, .callout-label, .step-title, ' +
+    '.doc-kicker, .dc-tile-title, .failure-modes .name, .compare-key';
+  var PROSE_SEL = '.prose, .callout, .compare, .failure-modes, .architecture-list, .proc-steps, .next-up';
+  var BLOCK_SEL = 'p, li, td, th, blockquote';
+
+  /* ONE STRUCTURAL PASS, REUSED BY EVERY TERM.
+     The tagger used to build a fresh TreeWalker per glossary entry and re-ask
+     the DOM the same structural questions about the same text nodes for each of
+     the 109: three closest() calls and a querySelectorAll('.gloss') every time.
+     Measured at 4x CPU throttle: 314,901 eligibility calls on /glossary to place
+     zero tags, 110,353 on the math page, and 546 to 1,166 ms of main thread
+     spent in front of the reading runtime, which is not even requested until the
+     walk finishes.
+
+     Nothing structural moves while we tag. A text node's ancestors, its block,
+     and the glossary entry it sits inside are fixed for the whole run; only the
+     block's tag count changes, and by exactly one each time. So the structural
+     questions are asked once here, and every term then scans a plain array in
+     the same document order the walker produced. Same rules, same sequence,
+     same nodes, same first-occurrence answer — just asked once instead of 109
+     times. */
+  function describe(node) {
     var parent = node.parentElement;
-    if (!parent || !node.nodeValue || !node.nodeValue.trim()) return false;
-    if (parent.closest('a, button, code, pre, script, style, svg, .fc-mount, .part-actions, nav, footer')) return false;
-    // Titles are furniture, not prose. A term that first appears as a title or a
-    // label is never highlighted there; the highlight moves to its first
-    // appearance in running prose. This covers every heading-like element in the
-    // system, not just h1-h4: callout labels, stepper step titles, table
-    // captions, failure-mode card names, eyebrows, and sub-metas.
-    if (parent.closest(
-      '.doc-header, h1, h2, h3, h4, h5, h6, caption, ' +
-      '.section-eyebrow, .sub-meta, .callout-label, .step-title, ' +
-      '.doc-kicker, .dc-tile-title, .failure-modes .name, .compare-key'
-    )) return false;
-    if (!parent.closest('.prose, .callout, .compare, .failure-modes, .architecture-list, .proc-steps, .next-up')) return false;
-    // Density guard: hand-authored tags count, so a deliberately tagged passage
-    // is never overrun by auto-tagging.
-    var block = parent.closest('p, li, td, th, blockquote') || parent;
-    return block.querySelectorAll('.gloss').length < MAX_GLOSS_PER_BLOCK;
+    if (!parent || !node.nodeValue || !node.nodeValue.trim()) return null;
+    if (parent.closest(SKIP_SEL)) return null;
+    if (parent.closest(FURNITURE_SEL)) return null;
+    if (!parent.closest(PROSE_SEL)) return null;
+    // On the glossary page a term must never link to itself: the entry for
+    // "drawdown" does not get a drawdown tooltip inside its own definition.
+    // Links to OTHER terms are the point, so only self-reference is refused.
+    var own = parent.closest('[id^="g-"]');
+    return { node: node, block: parent.closest(BLOCK_SEL) || parent, ownId: own ? own.id : null };
+  }
+
+  function collectCandidates() {
+    var roots = glossaryRoots(), out = [];
+    for (var r = 0; r < roots.length; r += 1) {
+      var walker = document.createTreeWalker(roots[r], NodeFilter.SHOW_TEXT, null);
+      var node;
+      while ((node = walker.nextNode())) {
+        var d = describe(node);
+        if (d) out.push(d);
+      }
+    }
+    return out;
+  }
+
+  // Density guard: hand-authored tags count, so a deliberately tagged passage is
+  // never overrun by auto-tagging. Seeded from the real count the first time a
+  // block is considered, then maintained — a wrap adds exactly one.
+  function densityOf(counts, block) {
+    if (!counts.has(block)) counts.set(block, block.querySelectorAll('.gloss').length);
+    return counts.get(block);
   }
 
   // Sense guard. A one-word term is a word first and a term second: "the framework
@@ -78,16 +137,25 @@
   // A term that declares `context` in acf-glossary.json is tagged only inside a
   // block that also carries one of its context words, so the tagger reads the
   // sense rather than the string. Terms without `context` are unaffected.
-  function inSense(entry, node) {
+  // Returns null when the entry declares no context, meaning every node passes.
+  // Otherwise the context words are compiled once for the entry and the answer
+  // is memoised per block: a block's text does not change when we wrap, because
+  // replacing a text node with text + button + text keeps the same characters.
+  function senseTester(entry) {
     var need = entry.context;
-    if (!need || !need.length) return true;
-    var parent = node.parentElement;
-    var block = (parent && (parent.closest('p, li, td, th, blockquote') || parent)) || null;
-    var text = block ? block.textContent : node.nodeValue;
-    for (var i = 0; i < need.length; i += 1) {
-      if (new RegExp('(^|[^A-Za-z0-9])' + escapeRegExp(need[i]) + '(?=$|[^A-Za-z0-9])', 'i').test(text)) return true;
-    }
-    return false;
+    if (!need || !need.length) return null;
+    var res = need.map(function (word) {
+      return new RegExp('(^|[^A-Za-z0-9])' + escapeRegExp(word) + '(?=$|[^A-Za-z0-9])', 'i');
+    });
+    var memo = new Map();
+    return function (cand) {
+      if (memo.has(cand.block)) return memo.get(cand.block);
+      var text = cand.block.textContent;
+      var ok = false;
+      for (var i = 0; i < res.length; i += 1) { if (res[i].test(text)) { ok = true; break; } }
+      memo.set(cand.block, ok);
+      return ok;
+    };
   }
 
   function termCandidates(entry) {
@@ -101,46 +169,60 @@
     }).sort(function (a, b) { return b.length - a.length; });
   }
 
-  function wrapFirstGlossaryOccurrence(entry) {
-    var rootList = glossaryRoots();
+  function wrapFirstGlossaryOccurrence(entry, cands, counts) {
     var candidates = termCandidates(entry);
     if (!candidates.length) return false;
     var pattern = new RegExp('(^|[^A-Za-z0-9])(' + candidates.map(escapeRegExp).join('|') + ')(?=$|[^A-Za-z0-9])', 'i');
+    var lower = candidates.map(function (c) { return c.toLowerCase(); });
+    var inSenseFor = senseTester(entry);
+    var ownWanted = 'g-' + entry.id;
 
-    for (var r = 0; r < rootList.length; r += 1) {
-      var walker = document.createTreeWalker(rootList[r], NodeFilter.SHOW_TEXT, {
-        acceptNode: function (node) {
-          if (!isEligibleTextNode(node)) return NodeFilter.FILTER_REJECT;
-          // On the glossary page a term must never link to itself: the entry for
-          // "drawdown" does not get a drawdown tooltip inside its own definition.
-          // Links to OTHER terms are the point, so only self-reference is refused.
-          var own = node.parentElement && node.parentElement.closest('[id^="g-"]');
-          if (own && own.id === 'g-' + entry.id) return NodeFilter.FILTER_REJECT;
-          if (!inSense(entry, node)) return NodeFilter.FILTER_REJECT;
-          return NodeFilter.FILTER_ACCEPT;
-        }
-      });
-      var node;
-      while ((node = walker.nextNode())) {
-        var match = pattern.exec(node.nodeValue);
-        if (!match) continue;
-        var start = match.index + match[1].length;
-        var end = start + match[2].length;
-        var fragment = document.createDocumentFragment();
-        fragment.appendChild(document.createTextNode(node.nodeValue.slice(0, start)));
-        var button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'gloss';
-        button.setAttribute('data-gloss', entry.id);
-        button.setAttribute('aria-expanded', 'false');
-        button.textContent = node.nodeValue.slice(start, end);
-        fragment.appendChild(button);
-        fragment.appendChild(document.createTextNode(node.nodeValue.slice(end)));
-        node.parentNode.replaceChild(fragment, node);
-        return true;
-      }
+    for (var i = 0; i < cands.length; i += 1) {
+      var cand = cands[i];
+      if (densityOf(counts, cand.block) >= MAX_GLOSS_PER_BLOCK) continue;
+      if (cand.ownId === ownWanted) continue;
+      if (inSenseFor && !inSenseFor(cand)) continue;
+      var value = cand.node.nodeValue;
+      // A necessary condition, and far cheaper than the alternation: the pattern
+      // cannot match unless one of the candidate strings is present at all.
+      var low = value.toLowerCase(), present = false;
+      for (var c = 0; c < lower.length; c += 1) { if (low.indexOf(lower[c]) !== -1) { present = true; break; } }
+      if (!present) continue;
+      var match = pattern.exec(value);
+      if (!match) continue;
+      wrapAt(cands, i, entry, match, counts);
+      return true;
     }
     return false;
+  }
+
+  function wrapAt(cands, idx, entry, match, counts) {
+    var cand = cands[idx], node = cand.node;
+    var seeded = densityOf(counts, cand.block);     // seed BEFORE the DOM changes, or the new button counts itself
+    var start = match.index + match[1].length;
+    var end = start + match[2].length;
+    var before = document.createTextNode(node.nodeValue.slice(0, start));
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'gloss';
+    button.setAttribute('data-gloss', entry.id);
+    button.setAttribute('aria-expanded', 'false');
+    button.textContent = node.nodeValue.slice(start, end);
+    var after = document.createTextNode(node.nodeValue.slice(end));
+    var fragment = document.createDocumentFragment();
+    fragment.appendChild(before);
+    fragment.appendChild(button);
+    fragment.appendChild(after);
+    node.parentNode.replaceChild(fragment, node);
+    counts.set(cand.block, seeded + 1);
+    // The two halves left behind are what a fresh walker would have found on the
+    // next term's pass, so they take the wrapped node's place in the array —
+    // same position, same block, same owning entry. Blank halves are dropped,
+    // exactly as the walker dropped them.
+    var repl = [];
+    if (before.nodeValue.trim()) repl.push({ node: before, block: cand.block, ownId: cand.ownId });
+    if (after.nodeValue.trim()) repl.push({ node: after, block: cand.block, ownId: cand.ownId });
+    cands.splice.apply(cands, [idx, 1].concat(repl));
   }
 
   function wireGlossaryTerms() {
@@ -149,9 +231,11 @@
     document.querySelectorAll('.gloss[data-gloss]').forEach(function (trigger) {
       existing[trigger.getAttribute('data-gloss')] = true;
     });
+    var cands = collectCandidates();
+    var counts = new Map();
     glossary.terms.forEach(function (entry) {
       if (!entry || !entry.id || existing[entry.id]) return;
-      if (wrapFirstGlossaryOccurrence(entry)) existing[entry.id] = true;
+      if (wrapFirstGlossaryOccurrence(entry, cands, counts)) existing[entry.id] = true;
     });
   }
 
@@ -291,6 +375,7 @@
     }
   }
 
+  preloadCore();
   Promise.all([getJson(REGISTRY_URL), getJson(GLOSSARY_URL)])
     .then(function (values) {
       registry = values[0];

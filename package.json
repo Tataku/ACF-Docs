@@ -20,6 +20,7 @@
     "test:crawler-contract": "node --test tests/crawler-contract.test.mjs",
     "test:hidden-controls": "node --test tests/hidden-controls.test.mjs",
     "test:narration-intent": "node --test tests/narration-intent.test.mjs",
+    "test:glossary-tagger": "node --test tests/glossary-tagger.test.mjs",
     "test:chart-palette-contrast": "node --test tests/chart-palette-contrast.test.mjs",
     "test:glossary-pointer": "node --test tests/glossary-pointer.test.mjs",
     "test:header-layout": "node --test tests/header-layout.test.mjs",
