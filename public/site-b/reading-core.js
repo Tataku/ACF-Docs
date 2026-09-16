@@ -1537,6 +1537,12 @@
       var prewarmed = false;
       function prewarm() {
         if (prewarmed) return;
+        // Data Saver is the one signal that a reader has asked the browser to
+        // spend less on their behalf. A prewarm is speculative even after a
+        // hover, so it is given up here; the press itself still generates and
+        // only the head start is lost. Checked BEFORE the once-flag, so turning
+        // Data Saver off does not leave the prewarm permanently disabled.
+        try { if (navigator.connection && navigator.connection.saveData) return; } catch (e) {}
         prewarmed = true;
         mark('prewarm-start');
         (method ? Promise.resolve(method) : resolveCapability()).then(function (m) {
@@ -1545,8 +1551,7 @@
           if (!list.length) return;
           // Warm the small head segments (the ramp keeps these tiny) so BOTH the
           // first click and the first gapless hand-off are instant. Sequential +
-          // bounded to two — no bulk pre-generation on load, and a no-op under
-          // Data Saver (the ambient callers gate on navigator.connection.saveData).
+          // bounded to two — never the whole page.
           fetchSegment(list[0]).then(function () {
             mark('prewarm-ready');
             if (list[1]) fetchSegment(list[1]).catch(function () {});
@@ -1576,24 +1581,28 @@
         else if (STATE === 'loading') mark('dup-suppressed', 'listen@loading');  // ignore repeat — Stop cancels
         else start();                             // idle / error
       });
-      // Warm the first segment ahead of the click. Hover/focus = explicit intent
-      // (always). Ambient triggers (page idle, first scroll, Listen entering the
-      // viewport) each fire once and are skipped under Data Saver, so we never
-      // pre-generate audio on metered connections without intent.
+      // Warm the first segment ahead of the press, but only once the reader has
+      // ADDRESSED the control: a hover, a keyboard focus, or the beginning of a
+      // press. POST /api/narration bills per character, so a trigger that is not
+      // intent is a purchase nobody asked for.
+      //
+      // Three ambient triggers used to sit here — page idle via
+      // requestIdleCallback, the first scroll, and the button entering the
+      // viewport — and between them they made every view of every part page a
+      // purchase. Measured in Chromium against a stub of the real route, loading
+      // a page and touching nothing: 2 requests and 839 to 1,937 characters per
+      // page, 9,459 characters across the six. The server's audio cache is
+      // documented as ephemeral per serverless instance, so that cost grows with
+      // traffic rather than amortising away.
+      //
+      // The three signals kept are symmetrical on purpose. A mouse crossing the
+      // button and a Tab passing through it both prewarm; the keyboard path must
+      // not be slower than the pointer path. pointerdown is what a finger gets in
+      // place of a hover, being the earliest honest signal from a reader who
+      // cannot hover, and it buys the same head start before the click lands.
       listenBtn.addEventListener('mouseenter', prewarm);
       listenBtn.addEventListener('focus', prewarm);
-      function autoPrewarm() {
-        try { if (navigator.connection && navigator.connection.saveData) return; } catch (e) {}
-        prewarm();
-      }
-      window.addEventListener('scroll', function onceScroll() { window.removeEventListener('scroll', onceScroll); autoPrewarm(); }, { passive: true });
-      if (window.requestIdleCallback) requestIdleCallback(autoPrewarm, { timeout: 4000 });
-      if ('IntersectionObserver' in window) {
-        var pwIo = new IntersectionObserver(function (es) {
-          if (es.some(function (e) { return e.isIntersecting; })) { pwIo.disconnect(); autoPrewarm(); }
-        }, { rootMargin: '0px 0px 20% 0px' });
-        pwIo.observe(listenBtn);
-      }
+      listenBtn.addEventListener('pointerdown', prewarm);
       stopBtn.addEventListener('click', stop);
       window.addEventListener('pagehide', function () {
         stop();
