@@ -403,6 +403,64 @@ body {
   .failure-modes { grid-template-columns: 1fr; }
 }
 
+/* ---- Definition-card plates — the picture each card opens with -------------
+   The family is one component used thirteen times for sixty-one cards, and it
+   holds SEVEN kinds of list: a closed taxonomy, a tunable envelope, an
+   escalation ladder, a quality gauge, a failure mechanism, a market state, and
+   a dollar magnitude. Identical cards said none of that. Each now opens with a
+   plate in the chapter plates' own plane vocabulary — grid, axis, field, one
+   accent thesis stroke, a terminal dot — and the plate draws what kind of thing
+   the card is and how it behaves. scripts/sync-card-motifs.mjs writes them;
+   `audit:card-motifs` refuses drift; plates.js draws them in on sight because
+   they are `.dc-art`, so the strokes below are the cover's rules verbatim.
+
+   Canvas is 480×100 rather than the chapter plates' 480×120: these cards are
+   435px wide at desktop and 362px on a phone, so the shallower plate lands at
+   87px and 72px — a picture, not a poster, over two to eight lines of prose. */
+.failure-modes > div { position: relative; overflow: hidden; }
+.fm-plate {
+  position: relative;
+  display: block;
+  width: calc(100% + 2 * var(--space-6));
+  margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-6)) var(--space-4);
+  aspect-ratio: 480 / 100;
+  color: var(--tile-motif);
+  pointer-events: none;
+}
+.fm-plate::before { content: ''; position: absolute; inset: 0; opacity: .82; pointer-events: none; }
+.fm-plate svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
+.failure-modes > div:hover .fm-plate { color: var(--tile-motif-lift); }
+/* The wash under each kind: where the eye should rest, in the accent at a
+   whisper. Mechanisms ground at the foot, where their thesis ends; magnitudes
+   rise from it; the ladder lights toward its top; the rest sit level. */
+.fm-plate[data-kind="mechanism"]::before { background: linear-gradient(to top, var(--tile-wash-lift), var(--tile-wash) 32%, transparent 68%); }
+.fm-plate[data-kind="magnitude"]::before { background: linear-gradient(to top, var(--tile-wash-lift), transparent 60%); }
+.fm-plate[data-kind="ladder"]::before    { background: linear-gradient(to bottom, var(--tile-wash-lift), var(--tile-wash) 40%, transparent 78%); }
+.fm-plate[data-kind="taxonomy"]::before,
+.fm-plate[data-kind="envelope"]::before,
+.fm-plate[data-kind="gauge"]::before,
+.fm-plate[data-kind="state"]::before,
+.fm-plate[data-kind="compare"]::before   { background: radial-gradient(90% 120% at 50% 100%, var(--tile-wash), transparent 72%); }
+/* Strokes the cover does not have, in its own register. A cell can be solid
+   (structural), dashed (tunable), thin (derived), a ghost (illustrative), or
+   struck (never that class); a bar can grow along x; a field can be dots. */
+.dc-art .art-cell-solid  { fill: var(--accent); fill-opacity: .55; stroke: var(--accent); stroke-width: 1.6; opacity: 1; }
+.dc-art .art-cell-dashed { stroke: var(--accent); stroke-dasharray: 4 4; stroke-width: 1.4; opacity: 1; }
+.dc-art .art-cell-thin   { stroke: var(--accent); stroke-width: 1; fill-opacity: .2; opacity: 1; }
+.dc-art .art-cell-ghost  { stroke: var(--accent); stroke-dasharray: 2 5; fill-opacity: .12; opacity: 1; }
+.dc-art .art-cell-struck { fill: none; stroke: currentColor; stroke-width: 1.2; opacity: .45; }
+.dc-art .art-grow-x      { transform-box: fill-box; transform-origin: 0 50%; }
+.dc-art .art-dots        { fill: url(#dc-p-dots); opacity: .55; }
+.dc-art-defs .art-ground-dot { fill: var(--tile-motif-lift); }
+@media (prefers-reduced-motion: no-preference) {
+  .dc-art:not([data-drawn="true"]) .art-grow-x { transform: scaleX(0); }
+  .dc-art[data-drawn="true"] .art-grow-x { animation: dc-art-grow-x calc(var(--motion-draw) * .6) var(--ease-emphasis) backwards; }
+}
+@keyframes dc-art-grow-x { from { transform: scaleX(0); } }
+@media (max-width: 680px) {
+  .fm-plate { width: calc(100% + 2 * var(--space-5)); margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-3); }
+}
+
 /* ============================================================================
    COMPARISON MATRIX  — requirements x assets table. Token-driven; the primary
    (framework's choice) column is washed in accent. Scrolls horizontally on
