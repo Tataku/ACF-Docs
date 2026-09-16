@@ -18,6 +18,8 @@
     "test:next-up-plates": "node --test tests/next-up-plates.test.mjs",
     "test:posture-rails": "node --test tests/posture-rails.test.mjs",
     "test:crawler-contract": "node --test tests/crawler-contract.test.mjs",
+    "test:hidden-controls": "node --test tests/hidden-controls.test.mjs",
+    "test:chart-palette-contrast": "node --test tests/chart-palette-contrast.test.mjs",
     "test:glossary-pointer": "node --test tests/glossary-pointer.test.mjs",
     "test:header-layout": "node --test tests/header-layout.test.mjs",
     "sync:chart-foundation": "node scripts/sync-chart-foundation.mjs",
