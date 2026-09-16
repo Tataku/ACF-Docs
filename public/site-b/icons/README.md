@@ -5,14 +5,38 @@ Bespoke brush-stroke ("zen") icon set used selectively in the promoted Site B UI
 ## Layout
 - `optimized/` — sanitized, production-ready copies of the icons actually used.
   Each is `currentColor`, `viewBox="0 0 100 100"`, `aria-hidden`, no IDs/cruft.
-- Full raw Figma export (149 SVGs) is preserved for provenance in
-  `/design/zen-icons-source/` at the repo root — **deliberately outside the web
-  root** so the raw exports are not served, and not built into the app.
+- The full raw Figma export (149 SVGs) **no longer lives in the tree.** It was
+  removed on 2026-09-16 after a reference audit found it imported by nothing —
+  no runtime, no build script, no config, no CI, no test. Git preserves it:
+
+      git show 9507332946db:design/zen-icons-source/<name>.svg
+
+  `design/icon-vocabulary.json` records the mapping and the provenance pointer;
+  `design/zen-source-manifest.json` keeps the 149 filenames and their sha256 so
+  the removed inventory stays checkable without shipping it.
+
+  It went because **a directory of 149 icons reads as canonical whether or not it
+  is.** It had already been mistaken for the authoritative set once. The
+  authority is the production implementations — these sanitized assets, and the
+  dashboard's own `BrushIcon` geometry — with the Figma export as their
+  historical ancestor rather than their master.
 
 ## How they're applied
-The integrated icons are **inlined** into the three full-chrome Part pages
-(`part-1-foundation.html`, `part-2-lineage-macro.html`,
-`part-3-bitcoin-convexity.html`) so they inherit the theme via `currentColor`.
+The integrated icons are **inlined** so they inherit the theme via
+`currentColor`. **Scope corrected 2026-09-16 — this used to say "the three
+full-chrome Part pages", and the rollout had already gone further than its own
+documentation:**
+
+| control | pages carrying it | all Zen? |
+|---|---|---|
+| `.sidebar-toggle` collapse / expand | 9 | yes |
+| `.floatnav` chevron-up / framework-docs | 9 | yes |
+| `.part-actions` copy / share | 6 | yes |
+
+Every page that HAS the chrome carries the Zen version of it; `cover-docs` and
+`part-1-pictures` simply do not have that chrome. There is no page where one of
+these controls is Zen and the same control elsewhere is not.
+
 Each replaced exactly one existing inline SVG, preserving the surrounding
 button/link, its class, `aria-*`, `data-*` hooks, and JS selectors. The optical
 size bump for these icons lives in `reading-system.css`
@@ -59,6 +83,21 @@ the dashboard's own tab icon, so the two cannot drift.
 - **share-on-X / email** (brand-X and envelope are more specific than the set's
   generic `share`)
 - **mobile hamburger** (no menu glyph in the set)
+- **callout icons** (`.ci-icon`, 7 sites) — a lightbulb. The set has `info`, which
+  is more generic, not clearer.
+- **disclosure chevrons** (`.gl-chevron` ×109 on the glossary, `.faq-chevron` ×5 on
+  the cover) — **tried, measured, and reverted on 2026-09-16.** The set *does*
+  contain `chevron-down`, so this is the one case where a match exists and the
+  answer is still no. Built it, rendered it against the geometric original, and
+  the brush mark reads as a faint tick rather than a disclosure affordance: its
+  ink spans **32% of its box against the geometric chevron's 58%**, so matching
+  the old ink needs a **1.81x** box — well past the 1.15x the rest of the set
+  carries — and even at 2.0rem it still read lighter, because the difference is
+  tapered-hairline character rather than size. A mark that is one-of-one inside a
+  labelled button (back-to-top) is doing a different job from a state indicator
+  that must read at a glance down 109 rows. There is also a mechanical reason:
+  both controls spend `transform` on `rotate(180deg)` when they open, which
+  collides with the `transform: scale(1.15)` the optical bump uses.
 
 ## Sanitization applied to every integrated icon
 - Removed the `<?xml?>` prolog and all Figma `data-fg*` / `data-fgid*` attributes.
@@ -69,6 +108,6 @@ the dashboard's own tab icon, so the two cannot drift.
   controls). No `id`s anywhere → safe to inline repeatedly with no collisions.
 
 ## Reversibility
-Revert the three Part HTML files and the `reading-system.css` zen block, and
-delete this folder + `/design/zen-icons-source/`, to fully restore the prior
-geometric icons.
+Revert the Part HTML files and the `reading-system.css` zen block, and delete
+this folder, to fully restore the prior geometric icons. (The raw Figma export
+is no longer a deletion target — see Layout above for how to retrieve it.)
