@@ -167,6 +167,8 @@
       else if (!firstUnread) firstUnread = row;                 // rows are in reading order
     });
 
+    footDial(rows, firstUnread);
+
     /* Resume: go where the reader actually stopped.
        This link used to be a static href to Part 1 — the same destination as the
        primary button beside it — so a reader returning mid-book was sent back to
@@ -187,6 +189,425 @@
     resume.hidden = false;
   }
 
+  /* The cover footer's reading curve — the same progress, stated once more at
+     the foot of the page, where a reader who has just scrolled the whole cover
+     is deciding whether to start or to carry on.
+
+     IT IS PAINTED FROM THE ROWS, not from a second read of the store. A footer
+     that re-derived progress could disagree with the cards two screens above it,
+     and nothing on the page would tell a reader which of the two was lying —
+     the same class of split-source bug the resume link above was written to fix.
+     Whenever the curve cannot be trusted to say something true — no curve on
+     this page, a strip that does not match the book, or nothing read yet — it is
+     left exactly as authored, and the markup's first-visit state stands: the
+     figure at the origin, the note offering the start, nothing counted. */
+  function footDial(rows, firstUnread) {
+    var dial = document.querySelector('[data-foot-progress]');
+    if (!dial) return;
+    var arcs = dial.querySelectorAll('[data-foot-arc]');
+    if (arcs.length !== rows.length) return;
+
+    /* Minutes, not parts. Every card states its own reading time, so the book's
+       shape is already on the page: Part 5 is a quarter of it and Part 2 an
+       eighth, and a count of six equal ticks says neither. The numbers are READ
+       BACK OFF THE CARDS rather than restated here — a second copy is a second
+       thing to drift, and sync-counts already owns the first. */
+    var minutes = [], total = 0, done = 0, read = 0;
+    rows.forEach(function (row, i) {
+      var m = (row.textContent.match(/(\d+)\s*min read/) || [, 0])[1];
+      minutes[i] = Number(m) || 0;
+      total += minutes[i];
+      if (!row.hasAttribute('data-read')) return;
+      arcs[i].setAttribute('data-read', '');
+      // The contents and the axis say it too. On a phone the curve's hue is the
+      // only channel there is, and the contents is the only site-wide nav under
+      // 768px. The row gets its glyph from CSS and its WORD from here, so a
+      // screen reader hears "read" and never "check mark".
+      var n = row.getAttribute('data-part');
+      var link = document.querySelector('[data-foot-part-link="' + n + '"]');
+      var tick = dial.querySelector('[data-foot-tick="' + n + '"]');
+      var word = link && link.querySelector('[data-foot-read-word]');
+      if (link) link.setAttribute('data-read', '');
+      if (word) word.textContent = ', read';
+      if (tick) tick.setAttribute('data-read', '');
+      done += minutes[i];
+      read += 1;
+    });
+    if (!read) return;                       // first visit: the authored state stands
+
+    /* The frontier: the end of the reader's UNBROKEN run, in minutes. It stops at
+       the first gap on purpose — a reader who jumped to Part 5 has not got that
+       far, they have been that far, and the lit stretch out beyond the figure is
+       where that fact is told. It is the same walk the resume link is derived
+       from, so the figure and the words can never disagree.
+       Zero is a real answer, not a missing one: read only Part 3 and there is no
+       unbroken run, so there is no position and the figure stays at the origin. */
+    var runAt = 0;
+    for (var r = 0; r < rows.length; r += 1) {
+      if (!rows[r].hasAttribute('data-read')) break;
+      runAt += minutes[r];
+    }
+    if (read === rows.length) dial.setAttribute('data-complete', '');   // the figure at the summit
+    if (runAt) {
+      dial.style.setProperty('--at-target', runAt);
+      dial.setAttribute('data-run', '');
+    }
+
+    /* The note: the reader's numbers, beside the figure. They ship hidden
+       because a first visit has nothing to count; with progress they are the
+       most personal lines on the page and are set as such. */
+    var count = dial.querySelector('[data-foot-count]');
+    if (count) { count.textContent = read + ' of ' + rows.length + ' parts read'; count.hidden = false; }
+
+    /* What is LEFT is the number a reader actually wants at the foot of the
+       page, and it is only truthful once there is progress to subtract. */
+    var meta = dial.querySelector('[data-foot-meta]');
+    if (meta && total) {
+      meta.textContent = read === rows.length
+        ? '\u2248 ' + total + ' min, start to finish'
+        : '\u2248 ' + (total - done) + ' min left';
+      meta.hidden = false;
+    }
+
+    var go = dial.querySelector('[data-foot-resume]');
+    var label = go && go.querySelector('[data-foot-resume-label]');
+    if (!go || !label) return;
+
+    var next = firstUnread && firstUnread.getAttribute('href');
+    if (next) {
+      go.setAttribute('href', next);
+      label.textContent = 'Resume \u00b7 Part ' + firstUnread.getAttribute('data-part');
+      return;
+    }
+    // Every part read. The control stops pretending to be a bookmark and becomes
+    // the only offer left that is still true.
+    var first = rows[0].getAttribute('href');
+    if (!first) return;
+    go.setAttribute('href', first);
+    label.textContent = 'Read it again';
+  }
+
+  /* ---- The curve's geometry, shared by the walk, the note and the peek ------
+   * One sampler for everything that needs a place on the curve, so the figure,
+   * the note and the gaze can never disagree about where a minute is. Positions
+   * are sampled from the curve itself (getPointAtLength on the same path the
+   * stretches are drawn on, in the same minute units), then expressed as a
+   * fraction of the viewBox so they survive the stage's non-uniform scaling.
+   * NEVER computed from x alone: pathLength normalises by arc length, and the
+   * climb is steeper than the approach. */
+  var footGeo = null;
+  function footGeometry() {
+    if (footGeo) return footGeo;
+    var section = document.querySelector('[data-foot-progress]');
+    var stage = section && section.querySelector('.foot-stage');
+    var inner = stage && stage.querySelector('.foot-stage-inner');
+    var path = section && section.querySelector('[data-foot-arc]');
+    var svg = path && path.ownerSVGElement;
+    if (!stage || !inner || !path || !svg || !path.getTotalLength) return null;
+    var total = Number(path.getAttribute('pathLength'));
+    if (!total) return null;
+    var vb = svg.viewBox.baseVal;
+    function pointAt(min) {
+      var pt = path.getPointAtLength(path.getTotalLength() * Math.max(0, Math.min(min, total)) / total);
+      return { x: pt.x / vb.width * 100, y: pt.y / vb.height * 100 };
+    }
+    function screenAt(min) {
+      var r = inner.getBoundingClientRect(), p = pointAt(min);
+      return { x: r.left + p.x / 100 * r.width, y: r.top + p.y / 100 * r.height };
+    }
+    // The curve's height at a horizontal fraction of the stage. x is monotonic
+    // along this path, so a bisection on length finds it.
+    function curveYAt(xFrac) {
+      var L = path.getTotalLength(), lo = 0, hi = L, mid, i;
+      for (i = 0; i < 20; i += 1) {
+        mid = (lo + hi) / 2;
+        if (path.getPointAtLength(mid).x / vb.width < xFrac) lo = mid; else hi = mid;
+      }
+      return path.getPointAtLength((lo + hi) / 2).y / vb.height * 100;
+    }
+    footGeo = { section: section, stage: stage, inner: inner, path: path, total: total,
+                pointAt: pointAt, screenAt: screenAt, curveYAt: curveYAt };
+    return footGeo;
+  }
+
+  /* One way to speak to cover-docs.js, which owns the figure's eyes and is
+     loaded before this file: events on the section, bubbling to the document.
+     `acf:foot-subject` carries a page point the figure should look at (or, with
+     no point, releases the subject that named itself); `acf:foot-settled` says
+     the figure has landed and may wake. */
+  function footEmit(el, name, detail) {
+    var ev;
+    try { ev = new CustomEvent(name, { bubbles: true, detail: detail }); }
+    catch (e) { ev = document.createEvent('CustomEvent'); ev.initCustomEvent(name, true, false, detail); }
+    el.dispatchEvent(ev);
+  }
+
+  /* Where the note goes, decided from numbers alone so it can be tested without
+     a browser. Everything is px in the stage's own box: m.fx/m.fy the figure's
+     feet · m.fig its width · m.noteW/m.noteH · m.gap · m.topMin the highest
+     the note's top may sit (the plate's top, so it never rises into the
+     running head) · m.lockupRight/m.lockupBottom the lockup's text box ·
+     m.curveYAt(x) the curve's height at x.
+     LEFT is over the ground the reader has covered: on a monotonic climb every
+     point to the left is LOWER than the figure, so a left note beside the head
+     cannot touch the line — unless the lockup has pushed it down, in which
+     case it gives way to the right. A RIGHT note sits over what is next, where
+     the line rises to meet it: when the line would reach the note it is lifted
+     above the head instead. */
+  function footNoteLayout(m) {
+    var bottom = m.fy - m.fig * 0.3;
+    var side = (m.fx - m.fig / 2 - m.gap - m.noteW >= 0) ? 'left' : 'right';
+    var left, top;
+    if (side === 'left') {
+      left = m.fx - m.fig / 2 - m.gap - m.noteW;
+      top = bottom - m.noteH;
+      if (left < m.lockupRight + m.gap && top < m.lockupBottom + m.gap) top = m.lockupBottom + m.gap;
+      if (top < m.topMin) top = m.topMin;
+      if (top + m.noteH + m.gap > m.curveYAt(left + m.noteW)) side = 'right';
+    }
+    if (side === 'right') {
+      left = m.fx + m.fig / 2 + m.gap;
+      top = bottom - m.noteH;
+      if (m.curveYAt(left + m.noteW) <= bottom + m.gap) top = m.fy - m.fig - m.gap - m.noteH;   // lifted above the head
+      if (left < m.lockupRight + m.gap && top < m.lockupBottom + m.gap) top = m.lockupBottom + m.gap;
+      if (top < m.topMin) top = m.topMin;
+    }
+    return { side: side, left: left, top: top };
+  }
+
+  /* The figure walks the curve when the reader reaches the colophon, not when
+   * the page loads five screens above it. footDial has already written the
+   * TRUTH into --at-target; this decides when the eye is there to see it.
+   *
+   * Truth and beat are deliberately separate. Under a reduced-motion preference,
+   * or with no IntersectionObserver, the figure is placed at once and nothing
+   * travels. Otherwise a walk is OWED (data-pending): the figure waits at the
+   * origin with the run unlit and the note held back, and when half the stage
+   * is on screen — the audience seated — the clock starts. The clock is CSS:
+   * --foot-walk transitions to --at-target with the token's own duration and
+   * ease, and each frame samples the curve at its value. Where that property is
+   * not registered the value simply arrives, the loop lands on its first frame,
+   * and the figure stands at the frontier: the truth without the travel.
+   *
+   * ONE CLOCK. The read stretches inside the run light as the figure steps onto
+   * them, from the same sampled position that moves the figure and the wash —
+   * never from a delay computed against an eased traveller. Stretches beyond
+   * the run were never walked, so they are lit from the start.
+   */
+  function footArrive() {
+    var g = footGeometry();
+    if (!g) return;
+    var section = g.section, stage = g.stage, inner = g.inner;
+    var figure = section.querySelector('[data-foot-figure]');
+    var note = section.querySelector('[data-foot-note]');
+    var arcs = section.querySelectorAll('[data-foot-arc]');
+    if (!figure) return;
+    var target = Number(section.style.getPropertyValue('--at-target')) || 0;
+    var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var lookAhead = g.total * 0.12;          // the eyes a little way up the curve, in the book's own units
+    var landed = false, raf = null, srW = 0;
+
+    function measure() { srW = inner.getBoundingClientRect().width; }
+    measure();
+
+    // A duration is read from the token, never typed here.
+    function ms(name) {
+      var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return /ms$/.test(v) ? parseFloat(v) : parseFloat(v) * 1000;
+    }
+    function arcAt(arc) { return Number(arc.style.getPropertyValue('--arc-at')) || 0; }
+
+    // The figure looks up the road: the point a little ahead of it, lifted toward
+    // the sky, so the glance reads as intent rather than tracking.
+    function ahead(min) {
+      var p = g.screenAt(Math.min(min + lookAhead, g.total));
+      var fig = figure.getBoundingClientRect().width;
+      footEmit(section, 'acf:foot-subject', { by: 'walk', x: p.x + fig * 0.4, y: p.y - fig * 0.5 });
+    }
+    // Where the figure stands: the frontier, unless that is nearer the page's
+    // edge than the figure's own half-width. .foot-figure clamps its x by
+    // --foot-inset (so JS off and the first visit are kept inside the page
+    // too), and the ground under the clamped x is re-sampled from the path
+    // here, because the curve is steep at its end and the feet would float.
+    // The frontier itself (--fx, where the read wash ends) is never moved.
+    function standAt(min) {
+      var p = g.pointAt(min);
+      var inset = getComputedStyle(stage).getPropertyValue('--foot-inset');
+      // An unregistered property arrives as the calc it was written as, not a
+      // length; the clamp still holds in CSS, only the ground is not re-sampled.
+      if (!/px$/.test(inset) || !srW) return { x: p.x, y: p.y, fx: p.x };
+      var lo = parseFloat(inset) / srW * 100, hi = 100 - lo;
+      if (!(lo > 0) || (p.x >= lo && p.x <= hi)) return { x: p.x, y: p.y, fx: p.x };
+      var x = Math.max(lo, Math.min(hi, p.x));
+      return { x: x, y: g.curveYAt(x / 100), fx: p.x };
+    }
+    function placeFigure(min) {
+      var s = standAt(min);
+      stage.style.setProperty('--fx', s.fx.toFixed(3) + '%');   // the frontier: the wash ends here
+      stage.style.setProperty('--fy', s.y.toFixed(3) + '%');    // the ground under the feet
+      for (var i = 0; i < arcs.length; i += 1) {
+        if (arcs[i].hasAttribute('data-read') && arcAt(arcs[i]) <= min + 0.01) arcs[i].setAttribute('data-lit', '');
+      }
+    }
+    function placeNote(min) {
+      if (!note) return;
+      if (getComputedStyle(note).position !== 'absolute') {      // in flow on a phone
+        note.style.left = ''; note.style.top = ''; note.style.bottom = '';
+        return;
+      }
+      var p = standAt(min);                     // beside where it STANDS, not the frontier
+      var sr = inner.getBoundingClientRect();
+      var fig = figure.getBoundingClientRect().width;
+      // The note lives in the plate body's box; the stage sits inside it.
+      var ox = stage.offsetLeft + inner.offsetLeft, oy = stage.offsetTop + inner.offsetTop;
+      var lockup = section.querySelector('.foot-lockup');
+      var lr = lockup ? lockup.getBoundingClientRect() : null;
+      var word = lockup && lockup.querySelector('.foot-word');
+      var desc = lockup && lockup.querySelector('.foot-descriptor');
+      var lay = footNoteLayout({
+        fx: p.x / 100 * sr.width, fy: p.y / 100 * sr.height, fig: fig,
+        noteW: note.offsetWidth, noteH: note.offsetHeight, gap: fig * 0.2,
+        topMin: fig * 0.25 - oy,
+        lockupRight: lr ? Math.max(word ? word.getBoundingClientRect().right : 0, desc ? desc.getBoundingClientRect().right : 0) - sr.left : -Infinity,
+        lockupBottom: lr ? lr.bottom - sr.top : -Infinity,
+        curveYAt: function (x) { return g.curveYAt(Math.max(0, Math.min(1, x / sr.width))) / 100 * sr.height; }
+      });
+      note.setAttribute('data-side', lay.side);
+      note.style.bottom = 'auto';
+      note.style.left = (ox + lay.left).toFixed(1) + 'px';
+      note.style.top = (oy + lay.top).toFixed(1) + 'px';
+    }
+    function land() {
+      if (landed) return;
+      landed = true;
+      if (raf != null) window.cancelAnimationFrame(raf);
+      placeFigure(target);
+      placeNote(target);
+      stage.removeAttribute('data-walking');
+      section.removeAttribute('data-pending');
+      footEmit(section, 'acf:foot-settled', null);
+      // On landing it looks up the road for one beat, then the eyes are released.
+      ahead(target);
+      window.setTimeout(function () { footEmit(section, 'acf:foot-subject', { by: 'walk' }); }, ms('--motion-draw') || 0);
+    }
+    function walk() {
+      var deadline = performance.now() + 2 * (ms('--motion-draw') || 0);
+      stage.setAttribute('data-walking', '');
+      // Neither the stage's box nor the figure's width changes during the walk,
+      // so they are read once here rather than as a forced layout on every
+      // frame. The per-frame read that remains is --foot-walk: the clock.
+      var sr = inner.getBoundingClientRect(), fw = figure.getBoundingClientRect().width;
+      function aheadCached(min) {
+        var p = g.pointAt(Math.min(min + lookAhead, g.total));
+        footEmit(section, 'acf:foot-subject', { by: 'walk',
+          x: sr.left + p.x / 100 * sr.width + fw * 0.4, y: sr.top + p.y / 100 * sr.height - fw * 0.5 });
+      }
+      function frame(now) {
+        var m = parseFloat(getComputedStyle(stage).getPropertyValue('--foot-walk')) || 0;
+        placeFigure(m);
+        aheadCached(m);
+        if (Math.abs(m - target) < 0.01 || now > deadline) { raf = null; land(); return; }
+        raf = window.requestAnimationFrame(frame);
+      }
+      raf = window.requestAnimationFrame(frame);
+    }
+
+    // Stretches beyond the unbroken run were never walked: lit from the start.
+    for (var k = 0; k < arcs.length; k += 1) {
+      if (arcs[k].hasAttribute('data-read') && arcAt(arcs[k]) >= target) arcs[k].setAttribute('data-lit', '');
+    }
+    placeNote(target);                        // at the frontier from the first frame; the walk only reveals it
+    var resizeFrame = null;
+    window.addEventListener('resize', function () {
+      if (resizeFrame != null) return;
+      resizeFrame = window.requestAnimationFrame(function () { resizeFrame = null; measure(); placeNote(target); });
+    });
+    // The note is placed from measured widths, and the self-hosted fonts can land
+    // after this runtime does (it arrives on a promise after two JSON fetches).
+    // A swap changes the note's width; re-place once the fonts have settled.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { measure(); placeNote(target); });
+
+    if (reduce || !window.IntersectionObserver) { land(); return; }
+    if (target) section.setAttribute('data-pending', '');
+    // Half the stage on screen — the audience seated — not any sliver of it. A
+    // stage this short satisfies the fraction on any viewport.
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (en) { return en.isIntersecting; })) return;
+      io.disconnect();
+      if (target) walk(); else land();
+    }, { threshold: 0.5 });
+    io.observe(stage);
+  }
+
+  /* The contents and the curve are one instrument --------------------------
+   * Pointing at a Part in the contents lights its stretch and its numeral on the
+   * curve; pointing at a stretch's column lights the row in the contents; and
+   * the figure turns its eyes to that stretch. Nothing here is a control: the
+   * six links were already the controls, and this only makes what they refer to
+   * visible. So it rides :focus-visible as well as hover — a keyboard reader
+   * tabbing the contents gets the same reading — and the stage stays
+   * aria-hidden, because a screen reader is served by the link text.
+   *
+   * THE NOTE IS NEVER REWRITTEN under the cursor. A peek used to overwrite the
+   * reader's own "52 min left" with the hovered Part's time, 600px from where
+   * they were looking; the minutes are already printed in the row under the
+   * cursor and on the axis under the stretch, so the note keeps saying what is
+   * true about the reader.
+   */
+  function footPeek() {
+    var dial = document.querySelector('[data-foot-progress]');
+    var footer = document.querySelector('.site-footer');
+    if (!dial || !footer) return;
+    var links = footer.querySelectorAll('[data-foot-part-link]');
+    var arcs = dial.querySelectorAll('[data-foot-arc]');
+    var ticks = dial.querySelectorAll('[data-foot-tick]');
+    if (!links.length || arcs.length !== links.length) return;
+
+    function find(list, attr, n) {
+      for (var i = 0; i < list.length; i += 1) {
+        if (list[i].getAttribute(attr) === n) return list[i];
+      }
+      return null;
+    }
+    function peek(n) {
+      var link = find(links, 'data-foot-part-link', n);
+      var arc = find(arcs, 'data-foot-arc', n);
+      var tick = find(ticks, 'data-foot-tick', n);
+      if (link) link.setAttribute('data-peek', '');
+      if (arc) arc.setAttribute('data-peek', '');
+      if (tick) tick.setAttribute('data-peek', '');
+      // The figure looks at the middle of the stretch being asked about. The
+      // arc already carries the minutes sync-counts wrote onto it, so the gaze
+      // lands on the same geometry the stretch is drawn from.
+      var g = footGeometry();
+      if (!g || !arc) return;
+      var at = Number(arc.style.getPropertyValue('--arc-at')) || 0;
+      var len = Number(arc.style.getPropertyValue('--arc-len')) || 0;
+      var p = g.screenAt(at + len / 2);
+      footEmit(dial, 'acf:foot-subject', { by: 'peek', x: p.x, y: p.y });
+    }
+    function clear() {
+      var i;
+      for (i = 0; i < links.length; i += 1) links[i].removeAttribute('data-peek');
+      for (i = 0; i < arcs.length; i += 1) arcs[i].removeAttribute('data-peek');
+      for (i = 0; i < ticks.length; i += 1) ticks[i].removeAttribute('data-peek');
+      footEmit(dial, 'acf:foot-subject', { by: 'peek' });
+    }
+
+    function wire(el, n) {
+      el.addEventListener('mouseenter', function () { peek(n); });
+      el.addEventListener('mouseleave', clear);
+      el.addEventListener('focus', function () { peek(n); });
+      el.addEventListener('blur', clear);
+    }
+    var k;
+    for (k = 0; k < links.length; k += 1) wire(links[k], links[k].getAttribute('data-foot-part-link'));
+    // The ticks are the pointer's surface on the curve: each spans its own Part's
+    // columns, full height, so a thin stroke never has to be hit. Hover only —
+    // they are not focusable, and the contents rows already give the keyboard
+    // the same peek.
+    for (k = 0; k < ticks.length; k += 1) wire(ticks[k], ticks[k].getAttribute('data-foot-tick'));
+  }
   /* ---- Sidebar collapse/expand (desktop), persisted ---------------------- */
   function sidebarCollapse() {
     var btn = document.querySelector('.sidebar-toggle');
@@ -377,7 +798,28 @@
     var bar = document.querySelector('.part-actions');
     if (!bar) return;
 
-    var url = location.href; // canonical part URL
+    /* THE CANONICAL, not the URL that happened to serve this page. The line this
+       replaces read `location.href; // canonical part URL` — the comment already
+       claimed what the code did not do, which is why it went unnoticed: on
+       production the two ARE identical, so the defect only surfaces where nobody
+       is looking. A reader who lands on a Vercel preview and shares the page
+       hands someone a preview link, and every page here already declares the
+       right answer in its head.
+
+       OWNER DECISION, 2026-09-15 (BACKLOG.md section 3, decision 4): prefer the
+       canonical ALWAYS, rather than only when the current origin differs. One
+       rule is easier to reason about than a conditional that is dormant in every
+       environment anyone tests in — which is the same property that let this bug
+       live.
+
+       It drops a fragment, and that is deliberate rather than overlooked. This
+       bar sits in the document header and says "share this part"; it already
+       sends the PART's title, so a shared #section link would arrive captioned
+       with the part anyway. Nothing on this site rewrites location.hash while
+       reading, so a hash here is a jump the reader made at some earlier point,
+       not where they are now. */
+    var canonical = document.querySelector('link[rel="canonical"]');
+    var url = (canonical && canonical.href) || location.href;
     var title = (document.title.split('·')[0] || '').trim() || 'The Adaptive Convexity Framework';
     var status = bar.querySelector('.part-actions-status');
     function announce(msg) { if (status) status.textContent = msg; }
@@ -1379,6 +1821,8 @@
   floatNav();
   progressWrite();
   progressPaint();
+  footPeek();   // after progressPaint: the peek line rests on whatever it decided
+  footArrive();
   sectionReveal();
   hamburgerFade();
   highlights();

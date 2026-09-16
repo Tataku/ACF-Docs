@@ -76,6 +76,13 @@ test('reference pages: the dock is marked chainless, so the phone keeps a destin
   assert.doesNotMatch(partPage, /data-no-series/, 'a page IN the series is never marked chainless');
 
   const css = read('public/site-b/reading-system.css');
+  // This slice is anchored on a QUERY STRING, not on the rule it wants, so a
+  // second `600px` block added anywhere earlier in the stylesheet silently
+  // hijacks it and reddens the three assertions below — which have nothing to do
+  // with whatever was added. Three separate reads of this repo named that as its
+  // sneakiest hazard; it costs one line to make it report itself instead.
+  assert.equal((css.match(/@media \(max-width: 600px\)/g) || []).length, 1,
+    'the floatnav block is the only 600px query \u2014 a second one hijacks the slice below');
   const mobile = css.slice(css.indexOf('@media (max-width: 600px)'));
   const block = mobile.slice(0, mobile.indexOf('\n}\n'));   // to the media block's own closing brace
   assert.match(block, /\.floatnav-home, \.floatnav-home \+ \.floatnav-div \{ display: none; \}/, 'the site-wide rule still stands');

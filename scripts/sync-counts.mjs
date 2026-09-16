@@ -86,6 +86,21 @@ function readingMinutes(file) {
 
 const MINUTES = new Map(PART_FILES.map(([n, file]) => [n, readingMinutes(file)]));
 
+// The cover's footer states what the whole book costs a reader. It is the SUM OF
+// THE SIX CARD TIMES, not a second measurement of the prose: a reader who adds
+// the cards up must land on the number at the foot of the page, and rounding the
+// total independently would put the two a minute apart for no reason the reader
+// could see.
+const TOTAL_MINUTES = [...MINUTES.values()].reduce((a, b) => a + b, 0);
+
+// Minutes BEFORE part n — where its arc starts on the cover footer's reading
+// curve. The curve is normalised by `pathLength` to the book's total minutes, so
+// an arc of 18 is eighteen minutes of arc and the six of them are the book to
+// scale. Those are the same cardinality as every other number in this file: a
+// fact about the prose, restated in markup, and therefore derived here rather
+// than typed into an SVG where nothing would ever check it again.
+const MINUTES_BEFORE = (n) => PART_FILES.slice(0, n - 1).reduce((a, [p]) => a + MINUTES.get(p), 0);
+
 const TERMS = glossary.terms.length;
 const EXHIBITS = charts.size;
 const perPart = (n) => [...charts.values()].filter((c) => c.part === n).length;
@@ -103,6 +118,27 @@ const RULES = [
     // One rule per card, anchored on that card's own data-part so a reading time
     // can never be written onto the wrong Part (which is how 1 and 2 were swapped).
     ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*?&approx; )\\d+( min read)`), () => MINUTES.get(n)]),
+    // The running head states the size of the book, and it is the one number in
+    // the colophon that JS never rewrites — so this is its only writer.
+    [/(data-foot-total>&approx; )\d+( min end to end)/, () => TOTAL_MINUTES],
+    // The stage normalises the ticks' positions to the same total the arcs use.
+    [/(class="foot-stage" style="--total: )\d+(")/, () => TOTAL_MINUTES],
+    // The ticks: one per Part, each spanning its own columns. Anchored on the
+    // tick's own data-foot-tick for the same reason the arcs and cards are.
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-tick="${n}" style="--at: )\\d+(;)`), () => MINUTES_BEFORE(n)]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-tick="${n}" style="--at: \\d+; --len: )\\d+(")`), () => MINUTES.get(n)]),
+    // The axis prints each Part's minutes under its numeral, and the contents
+    // page prints them again where a page number would stand. Two more places
+    // the same fact is stated, so two more anchored rules; both are anchored on
+    // the Part's own ordinal so a time can never land under the wrong stretch.
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-tick="${n}"[^>]*><span class="foot-tick-n">0${n}</span><span class="foot-tick-min">)\\d+( min)`), () => MINUTES.get(n)]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-part-min="${n}">)\\d+( min)`), () => MINUTES.get(n)]),
+    // One rule per arc, anchored on that arc's own data-foot-arc, so a length can
+    // never be written onto the wrong Part — the failure the per-card rule above
+    // was added for after 1 and 2 were transposed.
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength=")\\d+(")`), () => TOTAL_MINUTES]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength="\\d+" style="--arc-len: )\\d+(;)`), () => MINUTES.get(n)]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-foot-arc="${n}" pathLength="\\d+" style="--arc-len: \\d+; --arc-at: )\\d+(")`), () => MINUTES_BEFORE(n)]),
   ]],
   ['_index.html', [
     [new RegExp(`(generated ${DOT} all )\\d+( exhibits)`), () => EXHIBITS],

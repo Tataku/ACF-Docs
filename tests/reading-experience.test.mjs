@@ -84,8 +84,79 @@ test('resume: the destination is read from the card, not a second route table', 
 });
 
 // ---------------------------------------------------------------------------
-// 2. Reading time
+// 2. The cover footer's reading curve
 // ---------------------------------------------------------------------------
+test('curve: the foot of the page ships in the honest first-visit state', () => {
+  const dial = COVER.slice(COVER.indexOf('data-foot-progress'), COVER.indexOf('</footer>'));
+  assert.ok(dial.length > 200, 'the cover carries a reading curve');
+  assert.equal((dial.match(/data-foot-arc=/g) || []).length, PARTS.length, 'one arc per part');
+  // A pre-lit arc would be a claim about a reader the page has not met yet —
+  // the same lie the static resume href used to tell.
+  assert.doesNotMatch(dial, /data-foot-arc[^>]*data-read/, 'no arc ships lit');
+  assert.match(dial, /data-foot-count/, 'the count is a node the painter can rewrite');
+  assert.match(dial, /data-foot-meta/, 'so is the line under it');
+  assert.match(dial, /data-foot-resume-label/, 'and so is the destination label');
+});
+
+test('curve: each arc measures its own Part, and the six of them are the book', () => {
+  // The claim the whole display rests on: an arc's LENGTH is that Part's reading
+  // time. If these fall out of step the curve keeps drawing confidently and
+  // silently misstates the shape of the book.
+  const arc = (n) => {
+    const m = COVER.match(new RegExp(`data-foot-arc="${n}" pathLength="(\\d+)" style="--arc-len: (\\d+); --arc-at: (\\d+)"`));
+    assert.ok(m, `Part ${n} has an arc`);
+    return { total: Number(m[1]), len: Number(m[2]), at: Number(m[3]) };
+  };
+  const cardMinutes = (n) => Number(
+    (COVER.slice(COVER.indexOf(`data-part="${n}"`)).match(/&approx; (\d+) min read/) || [, NaN])[1]);
+
+  let running = 0;
+  for (const [n] of PARTS) {
+    const a = arc(n);
+    assert.equal(a.len, cardMinutes(n), `Part ${n}: arc is ${a.len}, its card says ${cardMinutes(n)}`);
+    assert.equal(a.at, running, `Part ${n}: arc starts at ${a.at}, the parts before it total ${running}`);
+    running += a.len;
+  }
+  assert.equal(arc(1).total, running, `pathLength is ${arc(1).total}, the six arcs total ${running}`);
+  for (const [n] of PARTS) assert.equal(arc(n).total, running, `Part ${n} normalises to the same total`);
+  assert.match(SYNC, /const MINUTES_BEFORE = /, 'and the offsets are derived, not typed');
+});
+
+test('curve: it is painted from the cards, not from a second read of the store', () => {
+  const paint = CORE.slice(CORE.indexOf('function progressPaint()'), CORE.indexOf('function footDial('));
+  assert.match(paint, /footDial\(rows, firstUnread\)/, 'progressPaint hands the curve the rows it just painted');
+  const dial = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function footPeek('));
+  assert.ok(dial.length > 200, 'footDial located');
+  // Two surfaces reading the same store independently is two surfaces that can
+  // disagree, with nothing on the page to say which one is lying.
+  assert.doesNotMatch(dial, /readProgress\(\)/, 'the curve never re-reads the store');
+  assert.doesNotMatch(dial, /part-1-foundation/, 'no hard-coded part route in the painter');
+  assert.match(dial, /arcs\.length !== rows\.length/, 'a curve that does not match the book is left as authored');
+  // Minutes are read back off the cards rather than restated in the runtime.
+  assert.match(dial, /min read/, 'it reads the per-part minutes off the cards');
+  assert.doesNotMatch(dial, /\b95\b/, 'and never carries the total as a literal');
+});
+
+// ---------------------------------------------------------------------------
+// 3. Reading time
+// ---------------------------------------------------------------------------
+test('reading time: the footer states the sum of the six cards, not its own count', () => {
+  // The running head's book line is the one number in the colophon JS never
+  // rewrites (the reader's numbers live beside the figure), so it is anchored on
+  // its own hook rather than on the note the painter overwrites.
+  const total = Number((COVER.match(/data-foot-total>&approx; (\d+) min end to end/) || [, NaN])[1]);
+  const dial = CORE.slice(CORE.indexOf('function footDial('), CORE.indexOf('function footGeometry('));
+  assert.doesNotMatch(dial, /data-foot-total/, 'and the painter never touches it');
+  assert.ok(Number.isFinite(total), 'the curve states a total');
+  let sum = 0;
+  for (const [n] of PARTS) {
+    const seg = COVER.slice(COVER.indexOf(`data-part="${n}"`));
+    sum += Number((seg.match(/&approx; (\d+) min read/) || [, 0])[1]);
+  }
+  assert.equal(total, sum, `the footer says ${total} min; the cards add to ${sum}`);
+  assert.match(SYNC, /const TOTAL_MINUTES = /, 'and the total is derived, not typed');
+});
+
 test('reading time: the cover and the page state the same number for every part', () => {
   const coverTimes = {};
   for (const [n] of PARTS) {
@@ -129,7 +200,7 @@ test('reading time: every stated value matches the word count at the stated rate
 });
 
 // ---------------------------------------------------------------------------
-// 3. Chart concept links
+// 4. Chart concept links
 // ---------------------------------------------------------------------------
 test('charts: no concept link is page-relative — a chart is mounted on several pages', () => {
   // The whole defect in one property: an exhibit does not know which page it is

@@ -149,6 +149,11 @@
       "exhibit-sig-shape",
       "faq",
       "faq-title",
+      "foot-curve-title",
+      "foot-h-elsewhere",
+      "foot-h-page",
+      "foot-h-parts",
+      "foot-h-reference",
       "lens",
       "parts",
       "theme-toggle"
@@ -2947,7 +2952,7 @@
   },
   "audit": {
     "pages": 11,
-    "anchors": 878,
+    "anchors": 887,
     "chartSpecs": 46,
     "liveChartMounts": 99,
     "glossaryTerms": 109,

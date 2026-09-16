@@ -9,12 +9,33 @@
  *   1. The cover's header nav listed four destinations; its footer nav listed
  *      five. The one missing from the top of the page was the Glossary — the
  *      109-term reference a returning reader is most likely to jump to.
+ *
+ *      The first fix pinned the two navs as EQUAL lists. That held the header
+ *      to the footer, and in doing so held the footer to the header: it was
+ *      five links because the bar above it was five links, and the six Parts —
+ *      the entire book — were reachable from every surface of the site except
+ *      the foot of its front door. The footer is now a map of the whole site,
+ *      so the two can no longer be the same list, and each end is pinned to
+ *      the thing it is actually answerable to: the FOOTER to the routable
+ *      universe (every page reachable from the foot of the cover), the HEADER
+ *      to the reference pages (the destinations a reader jumps to rather than
+ *      reads through). Both derive from next.config.mjs, so a page that gains
+ *      a URL and no link goes red instead of quietly unreachable — which the
+ *      equality check could never have caught, because a page missing from
+ *      both navs satisfied it perfectly.
  *   2. The "on this page" section list renders at 23px inside the mobile
  *      drawer, under the 24px WCAG 2.2 AA target size and packed tight, and on
  *      a phone that drawer is the only way to jump within a Part.
  *   3. The chart stepper dots were 7x7 and every one of them announced itself
  *      as "Element 3" — in a row whose own prev/next buttons were already a
  *      correct 44x44, and with the element's real name sitting in the spec.
+ *
+ *   4. The share controls composed their URL from `location.href`, so a reader
+ *      who landed on a preview deployment shared a preview link. Recorded as an
+ *      open owner decision (BACKLOG.md section 3) because it had two defensible
+ *      answers; closed 2026-09-15 in favour of preferring the canonical ALWAYS.
+ *      It sits with 1-3 because it came from the same read and is the same kind
+ *      of defect: a control that works, and does not do what it says.
  *
  * Measured in Chromium at 390 and 1440 before these were written.
  */
@@ -29,7 +50,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 
 const COVER = read('public/site-b/cover-docs.html');
+const CONFIG = read('next.config.mjs');
 const CSS = read('public/site-b/reading-system.css');
+const CORE = read('public/site-b/reading-core.js');
+const COVER_JS = read('public/site-b/cover-docs.js');
 const CHART = read('components/framework-charts/FrameworkChart.jsx');
 const BUNDLE = read('public/site-b/site-b-charts.js');
 
@@ -40,20 +64,110 @@ const navLinks = (label) => {
   return [...block.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g)].map((m) => ({ href: m[1], text: m[2].trim() }));
 };
 
+/**
+ * The routable universe is the rewrite table — the same source of truth
+ * build-crawler-files.mjs reads, and for the same reason it reads it: a page
+ * list kept anywhere else is the second source of truth this repo's generators
+ * exist to prevent. Sliced by its own declaration first, because `headers()`
+ * declares a `source:` too and a naive scan would pull it in as a twelfth route.
+ */
+const routableRoutes = () => {
+  const open = CONFIG.indexOf('const siteBRewrites = [');
+  assert.notEqual(open, -1, 'next.config.mjs declares siteBRewrites');
+  const block = CONFIG.slice(open, CONFIG.indexOf('];', open));
+  const routes = [...block.matchAll(/source:\s*"([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(routes.length > 1, 'the rewrite table parses');
+  return routes;
+};
+
+/** Every href in the cover's footer, whichever tier or column it sits in. */
+const footerHrefs = () => {
+  const open = COVER.indexOf('<footer class="site-footer');
+  assert.notEqual(open, -1, 'the cover has a footer');
+  const block = COVER.slice(open, COVER.indexOf('</footer>', open));
+  return new Set([...block.matchAll(/href="([^"]+)"/g)].map((m) => m[1]));
+};
+
 // ---------------------------------------------------------------------------
-// 1. The cover's two navs
+// 1. The cover's two navs — each pinned to what it is answerable to
 // ---------------------------------------------------------------------------
-test('nav: the header offers the same destinations as the footer', () => {
-  // The property, not today's list: one nav component, one set of destinations.
-  // Pinning the list would go stale the first time a page is added; pinning the
-  // agreement is what actually caught this.
-  const header = navLinks('Primary').map((a) => a.href);
-  const footer = navLinks('Footer').map((a) => a.href);
-  assert.deepEqual(header, footer, `header ${JSON.stringify(header)} vs footer ${JSON.stringify(footer)}`);
+test('footer: every page of the site is reachable from the foot of the cover', () => {
+  // The cover's footer is the site map, and under 768px it is the ONLY one —
+  // the header's links are display:none there. So the bar it has to clear is
+  // the whole routable universe, not whatever the bar above it happens to show.
+  const hrefs = footerHrefs();
+  for (const route of routableRoutes()) {
+    assert.ok(hrefs.has(route), `the cover footer links ${route}`);
+  }
+});
+
+test('nav: the header offers every reference destination the site has', () => {
+  // The original defect, generalised: a reference page is one a reader JUMPS to
+  // rather than reads through, and those belong in the persistent bar. Parts are
+  // excluded — the bar offers the book, not its six chapters — and so is the
+  // cover itself, which the brand lockup already links.
+  const header = new Set(navLinks('Primary').map((a) => a.href));
+  const reference = routableRoutes().filter((r) => r !== '/' && !r.startsWith('/part-'));
+  assert.ok(reference.length, 'the site has reference pages');
+  for (const route of reference) {
+    assert.ok(header.has(route), `the primary nav links ${route}`);
+  }
 });
 
 test('nav: the glossary is reachable from the top of the page', () => {
+  // Kept as itself. The rule above subsumes it today; the regression that was
+  // actually reported deserves a test that still names it if that rule loosens.
   assert.ok(navLinks('Primary').some((a) => a.href === '/glossary'), 'primary nav links the glossary');
+});
+
+test('share: the offer in the base rule is hittable without breaking the line', () => {
+  // "Free to read, free to share" is now a control, and it is a WORD IN A
+  // SENTENCE — the case WCAG 2.2's target-size minimum explicitly exempts, and
+  // the same exemption this file's own non-finding note invokes for inline
+  // links. It is still given a real hit box, because an exemption is a reason
+  // not to be red, not a reason to be hard to hit. The negative margin is what
+  // keeps that padding from opening up the line it sits in; without it the base
+  // rule grows and the fix reads as a layout bug.
+  const rule = CSS.match(/\.foot-share \{[\s\S]*?\n\}/);
+  assert.ok(rule, 'the share control has a rule');
+  assert.match(rule[0], /padding: 0\.45em/, 'it has vertical padding to stand on');
+  assert.match(rule[0], /margin: -0\.45em 0/, 'cancelled by an equal negative margin');
+  // Label in Name (WCAG 2.5.3): the accessible name must contain the visible word.
+  const btn = COVER.match(/<button[^>]*data-foot-share[^>]*>/);
+  assert.ok(btn, 'the control exists');
+  const name = (btn[0].match(/aria-label="([^"]+)"/) || [, ''])[1];
+  assert.match(name.toLowerCase(), /\bshare\b/, `accessible name "${name}" contains the visible word`);
+});
+
+// ---------------------------------------------------------------------------
+// 1b. What the share controls actually hand over
+// ---------------------------------------------------------------------------
+test('share: no control on this site composes its URL from the serving origin', () => {
+  // The invariant, over BOTH implementations, so a third one cannot be written
+  // the old way: partActions() on the six part pages, shareOffer() in the cover
+  // footer. `location.href` survives only as the fallback for a page that
+  // declares no canonical — there is none today, and a page that loses its
+  // canonical has a bigger problem than its share button.
+  for (const [label, src] of [['partActions', CORE], ['shareOffer', COVER_JS]]) {
+    const fn = label === 'partActions'
+      ? src.slice(src.indexOf('function partActions()'), src.indexOf('function partActions()') + 4000)
+      : src.slice(src.indexOf('function shareOffer()'), src.indexOf('function mascot()'));
+    assert.ok(fn.length > 400, `${label} located`);
+    assert.match(fn, /link\[rel="canonical"\]/, `${label} reads the page's canonical`);
+    assert.match(fn, /canonical && canonical\.href\) \|\| location\.href/, `${label} falls back only when there is none`);
+    assert.doesNotMatch(fn, /var url = location\.href/, `${label} does not start from the serving origin`);
+  }
+});
+
+test('share: every page that carries the bar declares the canonical it would send', () => {
+  // The fallback must never be the operative path. If a page grows a share bar
+  // without a canonical, this goes red instead of that page quietly sharing
+  // whichever host served it.
+  for (const file of fs.readdirSync(path.join(ROOT, 'public/site-b')).filter((f) => f.endsWith('.html'))) {
+    const html = read(`public/site-b/${file}`);
+    if (!html.includes('class="part-actions"')) continue;
+    assert.match(html, /<link rel="canonical" href="https:\/\/[^"]+"/, `${file} declares a canonical`);
+  }
 });
 
 // ---------------------------------------------------------------------------
