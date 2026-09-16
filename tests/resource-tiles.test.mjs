@@ -159,7 +159,7 @@ test('pictures: each one carries the idea of its page', () => {
   assert.match(glossary, /art-tab-pulled/, 'the lit tab is the one that pulls');
   const software = artFor('software');
   assert.match(software, /art-panel/, 'the product’s own dark panel');
-  assert.match(software, /<path class="art-live" pathLength="1"/, 'the live line is drawable (pathLength, not a measured length)');
+  assert.match(software, /<path class="art-live[^"]*" pathLength="1"/, 'the live line is drawable (pathLength, not a measured length)');
 });
 
 test('pictures: the software card wears the exhibit surface, in both themes', () => {

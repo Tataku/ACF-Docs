@@ -191,6 +191,19 @@
 
       <!-- The six Parts: the homepage's main act -->
       <section class="dc-parts" id="parts" aria-labelledby="dc-parts-title">
+        <!-- The pictures' shared gradients and dot ground. Rendered once; every
+             plate and tile references them by id from reading-system.css, where
+             the stops are coloured by token. -->
+        <svg class="dc-art-defs" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="dc-g-accent-down" x1="0" y1="0" x2="0" y2="1"><stop class="art-stop-accent" offset="0"/><stop class="art-stop-accent-out" offset="1"/></linearGradient>
+            <linearGradient id="dc-g-accent-up" x1="0" y1="1" x2="0" y2="0"><stop class="art-stop-accent" offset="0"/><stop class="art-stop-accent-out" offset="1"/></linearGradient>
+            <linearGradient id="dc-g-ink-down" x1="0" y1="0" x2="0" y2="1"><stop class="art-stop-ink" offset="0"/><stop class="art-stop-ink-out" offset="1"/></linearGradient>
+            <linearGradient id="dc-g-ink-right" x1="0" y1="0" x2="1" y2="0"><stop class="art-stop-ink-out" offset="0"/><stop class="art-stop-ink" offset="1"/></linearGradient>
+            <linearGradient id="dc-g-ink-left" x1="1" y1="0" x2="0" y2="0"><stop class="art-stop-ink-out" offset="0"/><stop class="art-stop-ink" offset="1"/></linearGradient>
+            <pattern id="dc-p-dots" width="12" height="12" patternUnits="userSpaceOnUse"><circle class="art-ground-dot" cx="1.5" cy="1.5" r="1.3"/></pattern>
+          </defs>
+        </svg>
 
         <div class="dc-parts-head">
           <p class="dc-parts-eyebrow">The framework</p>
@@ -204,11 +217,12 @@
             <a class="dc-card" href="/part-1-foundation" data-part="1">
               <span class="dc-plate dc-art" aria-hidden="true"><svg viewBox="0 0 480 120" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
               <path class="art-floor" d="M0 98H480V120H0Z"/><path class="art-floor-rule" d="M0 98H480"/>
-              <path class="art-grid" d="M120 12V98M240 12V98M360 12V98"/>
-              <path class="art-ref" d="M24 92 L420 26"/>
-              <path class="art-field" d="M24 92C116 92 190 90 250 78S350 46 420 26V96H24Z"/>
-              <path class="art-thesis" pathLength="1" d="M24 92C116 92 190 90 250 78S350 46 420 26"/>
-              <circle class="art-dot" cx="420" cy="26" r="4"/>
+              <path class="art-grid art-in art-d0" d="M120 12V98M240 12V98M360 12V98"/>
+              <path class="art-ref art-in art-d1" d="M24 92 L420 26"/>
+              <path class="art-field art-move art-in art-d1" d="M24 92C116 92 190 90 250 78S350 46 420 26V96H24Z"/>
+              <path class="art-glow art-draw art-d1" pathLength="1" d="M24 92C116 92 190 90 250 78S350 46 420 26"/>
+              <path class="art-thesis art-draw art-d1" pathLength="1" d="M24 92C116 92 190 90 250 78S350 46 420 26"/>
+              <circle class="art-dot art-move art-pop" cx="420" cy="26" r="4"/>
             </svg></span>
               <span class="dc-num">01</span>
               <p class="dc-card-title">Foundation &amp; Philosophy</p>
@@ -217,10 +231,11 @@
             </a>
             <a class="dc-card" href="/part-2-lineage-macro-thesis" data-part="2">
               <span class="dc-plate dc-art" aria-hidden="true"><svg viewBox="0 0 480 120" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-              <g class="art-quadrants"><rect class="art-cell" x="300" y="14" width="76" height="46" rx="3"/><rect class="art-cell art-cell-lit" x="380" y="14" width="76" height="46" rx="3"/><rect class="art-cell" x="300" y="64" width="76" height="46" rx="3"/><rect class="art-cell" x="380" y="64" width="76" height="46" rx="3"/></g>
-              <g class="art-sources"><path class="art-context" d="M24 28C110 28 170 40 236 58"/><path class="art-context" d="M24 60C110 60 170 60 236 60"/><path class="art-context" d="M24 92C110 92 170 80 236 62"/><circle class="art-node" cx="24" cy="28" r="3.5"/><circle class="art-node" cx="24" cy="60" r="3.5"/><circle class="art-node" cx="24" cy="92" r="3.5"/></g>
-              <path class="art-thesis" d="M236 60C280 60 330 44 418 37"/>
-              <circle class="art-dot" cx="418" cy="37" r="4"/>
+              <g class="art-quadrants art-in art-d0"><rect class="art-cell" x="300" y="14" width="76" height="46" rx="3"/><rect class="art-cell art-cell-lit art-move" x="380" y="14" width="76" height="46" rx="3"/><rect class="art-cell" x="300" y="64" width="76" height="46" rx="3"/><rect class="art-cell" x="380" y="64" width="76" height="46" rx="3"/></g>
+              <g class="art-sources art-in art-d1"><path class="art-context" d="M24 28C110 28 170 40 236 58"/><path class="art-context" d="M24 60C110 60 170 60 236 60"/><path class="art-context" d="M24 92C110 92 170 80 236 62"/><circle class="art-node" cx="24" cy="28" r="3.5"/><circle class="art-node" cx="24" cy="60" r="3.5"/><circle class="art-node" cx="24" cy="92" r="3.5"/></g>
+              <path class="art-glow art-draw art-d2" pathLength="1" d="M236 60C280 60 330 44 418 37"/>
+              <path class="art-thesis art-draw art-d2" pathLength="1" d="M236 60C280 60 330 44 418 37"/>
+              <circle class="art-dot art-move art-pop" cx="418" cy="37" r="4"/>
             </svg></span>
               <span class="dc-num">02</span>
               <p class="dc-card-title">Lineage &amp; Macro Thesis</p>
@@ -235,12 +250,14 @@
           <div class="dc-grid">
             <a class="dc-card" href="/part-3-bitcoin-convexity-backbone" data-part="3">
               <span class="dc-plate dc-art" aria-hidden="true"><svg viewBox="0 0 480 120" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-              <path class="art-grid" d="M24 104H456M24 76H456M24 56H456M24 42H456M24 32H456"/>
+              <path class="art-grid art-in art-d0" d="M24 104H456M24 76H456M24 56H456M24 42H456M24 32H456"/>
               <path class="art-axis" d="M24 104H456"/>
-              <path class="art-tick" d="M120 104v6M228 104v6M336 104v6M444 104v6"/>
-              <path class="art-wave" d="M24 96c20-14 34-30 54-20s26 22 48 4 26-40 50-22 26 30 50 10 24-42 50-26 26 24 50 8 26-30 50-18 24 18 44 4"/>
-              <path class="art-thesis" d="M24 100 L420 30"/>
-              <circle class="art-dot" cx="420" cy="30" r="4"/>
+              <path class="art-tick art-in art-d1" d="M120 104v6M228 104v6M336 104v6M444 104v6"/>
+              <path class="art-field art-move art-in art-d1" d="M24 100L420 30V104H24Z"/>
+              <path class="art-wave art-in art-d1" d="M24 96c20-14 34-30 54-20s26 22 48 4 26-40 50-22 26 30 50 10 24-42 50-26 26 24 50 8 26-30 50-18 24 18 44 4"/>
+              <path class="art-glow art-draw art-d2" pathLength="1" d="M24 100 L420 30"/>
+              <path class="art-thesis art-draw art-d2" pathLength="1" d="M24 100 L420 30"/>
+              <circle class="art-dot art-move art-pop" cx="420" cy="30" r="4"/>
             </svg></span>
               <span class="dc-num">03</span>
               <p class="dc-card-title">Bitcoin: Convexity Backbone</p>
@@ -249,14 +266,15 @@
             </a>
             <a class="dc-card" href="/part-4-tax-architecture-roc-strategy" data-part="4">
               <span class="dc-plate dc-art" aria-hidden="true"><svg viewBox="0 0 480 120" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-              <path class="art-flow" d="M24 60H140"/>
-              <path class="art-flow art-flow-keep" d="M140 60C190 60 200 26 250 26H310"/>
-              <path class="art-flow" d="M140 60H310"/>
-              <path class="art-flow" d="M140 60C190 60 200 94 250 94H310"/>
-              <path class="art-wedge" d="M270 60l12 0l-6 -11z"/>
-              <g class="art-boxes"><rect class="art-box art-box-keep" x="320" y="12" width="104" height="28" rx="4"/><rect class="art-box" x="320" y="46" width="104" height="28" rx="4"/><rect class="art-box" x="320" y="80" width="104" height="28" rx="4"/></g>
-              <text class="art-label art-label-keep" x="332" y="30">ROTH</text><text class="art-label" x="332" y="64">TAXABLE</text><text class="art-label" x="332" y="98">PRE-TAX</text>
-              <circle class="art-dot" cx="24" cy="60" r="4"/>
+              <path class="art-flow art-draw art-d0" pathLength="1" d="M24 60H140"/>
+              <path class="art-glow art-draw art-d1" pathLength="1" d="M140 60C190 60 200 26 250 26H310"/>
+              <path class="art-flow art-flow-keep art-move art-draw art-d1" pathLength="1" d="M140 60C190 60 200 26 250 26H310"/>
+              <path class="art-flow art-draw art-d1" pathLength="1" d="M140 60H310"/>
+              <path class="art-flow art-draw art-d1" pathLength="1" d="M140 60C190 60 200 94 250 94H310"/>
+              <path class="art-wedge art-in art-d3" d="M270 60l12 0l-6 -11z"/>
+              <g class="art-boxes art-in art-d2"><rect class="art-box art-box-keep art-move" x="320" y="12" width="104" height="28" rx="4"/><rect class="art-box" x="320" y="46" width="104" height="28" rx="4"/><rect class="art-box" x="320" y="80" width="104" height="28" rx="4"/></g>
+              <g class="art-in art-d2"><text class="art-label art-label-keep" x="332" y="30">ROTH</text><text class="art-label" x="332" y="64">TAXABLE</text><text class="art-label" x="332" y="98">PRE-TAX</text></g>
+              <circle class="art-dot art-in art-d0" cx="24" cy="60" r="4"/>
             </svg></span>
               <span class="dc-num">04</span>
               <p class="dc-card-title">Tax Architecture &amp; ROC Strategy</p>
@@ -272,11 +290,14 @@
             <div class="dc-grid">
               <a class="dc-card" href="/part-5-portfolio-construction-position-management" data-part="5">
                 <span class="dc-plate dc-art" aria-hidden="true"><svg viewBox="0 0 480 120" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-              <path class="art-arc" d="M40 110C120 10 360 10 440 110"/>
-              <path class="art-zone" d="M180 14V110M320 14V110"/>
+              <path class="art-field-ink art-move art-in art-d0" d="M40 110C120 10 360 10 440 110Z"/>
+              <path class="art-arc art-move art-draw art-d0" pathLength="1" d="M40 110C120 10 360 10 440 110"/>
+              <path class="art-zone art-in art-d1" d="M180 14V110M320 14V110"/>
               <path class="art-axis" d="M24 92H456"/>
-              <circle class="art-size" cx="80" cy="92" r="4"/><circle class="art-size" cx="160" cy="92" r="7"/><circle class="art-size" cx="240" cy="92" r="10.5"/><circle class="art-size" cx="320" cy="92" r="14"/><circle class="art-size art-size-top" cx="408" cy="92" r="19"/>
-              <text class="art-label" x="82" y="112">BALLAST</text><text class="art-label" x="326" y="112">TORQUE</text>
+              <g class="art-sizes art-move"><circle class="art-size art-grow art-d0" cx="80" cy="92" r="4"/><circle class="art-size art-grow art-d1" cx="160" cy="92" r="7"/><circle class="art-size art-grow art-d2" cx="240" cy="92" r="10.5"/><circle class="art-size art-grow art-d3" cx="320" cy="92" r="14"/></g>
+              <circle class="art-glow-dot art-pop" cx="408" cy="92" r="19"/>
+              <circle class="art-size art-size-top art-pop" cx="408" cy="92" r="19"/>
+              <g class="art-in art-d2"><text class="art-label" x="82" y="112">BALLAST</text><text class="art-label" x="326" y="112">TORQUE</text></g>
             </svg></span>
               <span class="dc-num">05</span>
                 <p class="dc-card-title">Portfolio Construction &amp; Position Management</p>
@@ -291,12 +312,13 @@
             <div class="dc-grid">
               <a class="dc-card" href="/part-6-convexity-framework-integrity-scoring" data-part="6">
                 <span class="dc-plate dc-art" aria-hidden="true"><svg viewBox="0 0 480 120" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-              <text class="art-label" x="26" y="22">FIS 100</text>
-              <g class="art-steps"><rect class="art-step" x="24" y="28" width="40" height="80"/><rect class="art-step" x="70" y="42" width="40" height="66"/><rect class="art-step" x="116" y="58" width="40" height="50"/><rect class="art-step art-step-final" x="162" y="70" width="40" height="38"/></g>
+              <text class="art-label art-in art-d0" x="26" y="22">FIS 100</text>
+              <g class="art-steps"><rect class="art-step art-grow-y art-d0" x="24" y="28" width="40" height="80"/><rect class="art-step art-grow-y art-d1" x="70" y="42" width="40" height="66"/><rect class="art-step art-grow-y art-d2" x="116" y="58" width="40" height="50"/><rect class="art-step art-step-final art-move art-grow-y art-d3" x="162" y="70" width="40" height="38"/></g>
               <path class="art-axis" d="M24 108H210"/>
-              <g class="art-matrix"><path class="art-cell-lines" d="M246 14V110M302 14V110M358 14V110M414 14V110M246 14H414M246 46H414M246 78H414M246 110H414"/><rect class="art-cell-lit" x="358" y="14" width="56" height="32"/></g>
-              <text class="art-label" x="246" y="120">CIS</text><text class="art-label art-label-v" x="234" y="110">FIS</text>
-              <circle class="art-marker" cx="330" cy="62" r="5"/>
+              <g class="art-matrix art-in art-d2"><path class="art-cell-lines" d="M246 14V110M302 14V110M358 14V110M414 14V110M246 14H414M246 46H414M246 78H414M246 110H414"/><rect class="art-cell-lit art-move" x="358" y="14" width="56" height="32"/></g>
+              <g class="art-in art-d2"><text class="art-label" x="246" y="120">CIS</text><text class="art-label art-label-v" x="234" y="110">FIS</text></g>
+              <circle class="art-glow-dot art-marker-glow art-pop" cx="330" cy="62" r="9"/>
+              <circle class="art-marker art-pop" cx="330" cy="62" r="5"/>
             </svg></span>
               <span class="dc-num">06</span>
                 <p class="dc-card-title">Convexity &amp; Framework Integrity Scoring</p>
@@ -344,15 +366,16 @@
         <div class="dc-res-grid">
           <a class="dc-tile" href="/framework-in-pictures" data-motif="exhibits" data-pictures-tile>
             <span class="dc-tile-art dc-art" aria-hidden="true"><svg viewBox="0 0 160 120" fill="none" aria-hidden="true" focusable="false">
-              <g class="art-print art-print-back"><rect class="art-frame" x="52" y="20" width="94" height="66" rx="4"/><path class="art-ref" d="M62 74 L134 36"/></g>
-              <g class="art-print art-print-mid"><rect class="art-frame" x="46" y="29" width="94" height="66" rx="4"/><path class="art-ref" d="M56 83 L128 45"/><path class="art-context" d="M56 81c14 0 24-4 34-12s18-16 30-22"/></g>
-              <g class="art-print art-print-front">
+              <g class="art-print art-print-back art-in art-d0"><rect class="art-frame" x="52" y="20" width="94" height="66" rx="4"/><path class="art-ref" d="M62 74 L134 36"/></g>
+              <g class="art-print art-print-mid art-in art-d1"><rect class="art-frame" x="46" y="29" width="94" height="66" rx="4"/><path class="art-ref" d="M56 83 L128 45"/><path class="art-context" d="M56 81c14 0 24-4 34-12s18-16 30-22"/></g>
+              <g class="art-print art-print-front art-in art-d2">
                 <rect class="art-frame" x="38" y="36" width="96" height="70" rx="4"/>
                 <path class="art-field" d="M46 96C64 96 80 92 92 84S114 64 128 46V98H46Z"/>
                 <path class="art-ref" d="M46 96 L128 46"/>
                 <path class="art-grid" d="M46 82H128M46 68H128M46 54H128"/>
-                <path class="art-thesis" d="M46 96C64 96 80 92 92 84S114 64 128 46"/>
-                <circle class="art-dot" cx="128" cy="46" r="3"/>
+                <path class="art-glow art-draw art-d2" pathLength="1" d="M46 96C64 96 80 92 92 84S114 64 128 46"/>
+                <path class="art-thesis art-draw art-d2" pathLength="1" d="M46 96C64 96 80 92 92 84S114 64 128 46"/>
+                <circle class="art-dot art-move art-pop" cx="128" cy="46" r="3"/>
               </g>
             </svg></span>
             <p class="dc-tile-title">The Framework in Pictures</p>
@@ -360,17 +383,18 @@
           </a>
           <a class="dc-tile" href="/framework-in-math" data-motif="math">
             <span class="dc-tile-art dc-art" aria-hidden="true"><svg viewBox="0 0 160 120" fill="none" aria-hidden="true" focusable="false">
-              <path class="art-grid" d="M18 20H118M18 36H118M18 52H118M18 68H118M18 84H118M34 8V100M50 8V100M66 8V100M82 8V100M98 8V100"/>
+              <path class="art-grid art-in art-d0" d="M18 20H118M18 36H118M18 52H118M18 68H118M18 84H118M34 8V100M50 8V100M66 8V100M82 8V100M98 8V100"/>
               <path class="art-axis" d="M18 8V100H118"/>
-              <path class="art-ceiling" d="M18 36H118"/>
-              <text class="art-label" x="20" y="32">clamp</text>
-              <path class="art-ghost" d="M92 36C98 30 104 22 110 12"/>
-              <path class="art-thesis" d="M18 96C40 95 58 80 74 58C80 50 86 42 92 36H118"/>
-              <circle class="art-dot" cx="92" cy="36" r="3"/>
+              <path class="art-ceiling art-in art-d1" d="M18 36H118"/>
+              <text class="art-label art-in art-d1" x="20" y="32">clamp</text>
+              <path class="art-ghost art-in art-d3" d="M92 36C98 30 104 22 110 12"/>
+              <path class="art-glow art-draw art-d1" pathLength="1" d="M18 96C40 95 58 80 74 58C80 50 86 42 92 36H118"/>
+              <path class="art-thesis art-draw art-d1" pathLength="1" d="M18 96C40 95 58 80 74 58C80 50 86 42 92 36H118"/>
+              <circle class="art-dot art-move art-pop" cx="92" cy="36" r="3"/>
               <g class="art-ladder">
-                <path class="art-rung" d="M130 92h10M130 74h10M130 56h10M130 38h10"/>
-                <circle class="art-size" cx="150" cy="92" r="2.2"/><circle class="art-size" cx="150" cy="74" r="3.6"/>
-                <circle class="art-size" cx="150" cy="56" r="5.2"/><circle class="art-size art-size-top" cx="150" cy="38" r="7"/>
+                <path class="art-rung art-in art-d2" d="M130 92h10M130 74h10M130 56h10M130 38h10"/>
+                <circle class="art-size art-grow art-d1" cx="150" cy="92" r="2.2"/><circle class="art-size art-grow art-d2" cx="150" cy="74" r="3.6"/>
+                <circle class="art-size art-grow art-d3" cx="150" cy="56" r="5.2"/><circle class="art-size art-size-top art-pop" cx="150" cy="38" r="7"/>
               </g>
             </svg></span>
             <p class="dc-tile-title">The Framework in Math</p>
@@ -378,14 +402,14 @@
           </a>
           <a class="dc-tile" href="/glossary" data-motif="glossary">
             <span class="dc-tile-art dc-art" aria-hidden="true"><svg viewBox="0 0 160 120" fill="none" aria-hidden="true" focusable="false">
-              <rect class="art-page" x="34" y="8" width="94" height="110" rx="3"/>
-              <path class="art-margin" d="M44 8V118"/>
-              <g class="art-entry art-entry-faint"><rect x="52" y="18" width="28" height="4" rx="2"/><rect x="52" y="26" width="64" height="2.6" rx="1.3"/></g>
-              <g class="art-entry"><rect class="art-headword" x="52" y="44" width="38" height="5" rx="2.5"/><rect x="52" y="54" width="68" height="2.8" rx="1.4"/><rect x="52" y="60" width="54" height="2.8" rx="1.4"/><rect x="52" y="66" width="60" height="2.8" rx="1.4"/></g>
-              <g class="art-entry art-entry-faint"><rect x="52" y="84" width="24" height="4" rx="2"/><rect x="52" y="92" width="66" height="2.6" rx="1.3"/><rect x="52" y="98" width="44" height="2.6" rx="1.3"/></g>
-              <g class="art-tabs">
+              <rect class="art-page art-in art-d0" x="34" y="8" width="94" height="110" rx="3"/>
+              <path class="art-margin art-in art-d0" d="M44 8V118"/>
+              <g class="art-entry art-entry-faint art-move art-in art-d1"><rect x="52" y="18" width="28" height="4" rx="2"/><rect x="52" y="26" width="64" height="2.6" rx="1.3"/></g>
+              <g class="art-entry art-in art-d2"><rect class="art-headword" x="52" y="44" width="38" height="5" rx="2.5"/><rect x="52" y="54" width="68" height="2.8" rx="1.4"/><rect x="52" y="60" width="54" height="2.8" rx="1.4"/><rect x="52" y="66" width="60" height="2.8" rx="1.4"/></g>
+              <g class="art-entry art-entry-faint art-move art-in art-d3"><rect x="52" y="84" width="24" height="4" rx="2"/><rect x="52" y="92" width="66" height="2.6" rx="1.3"/><rect x="52" y="98" width="44" height="2.6" rx="1.3"/></g>
+              <g class="art-tabs art-in art-d2">
                 <g><rect class="art-tab" x="128" y="12" width="22" height="15" rx="3"/><text class="art-tab-letter" x="139" y="22.5">A</text></g>
-                <g class="art-tab-pulled"><rect class="art-tab art-tab-lit" x="128" y="38" width="24" height="15" rx="3"/><text class="art-tab-letter art-tab-letter-lit" x="140" y="48.5">C</text></g>
+                <g class="art-tab-pulled"><rect class="art-glow-tab art-move" x="128" y="38" width="24" height="15" rx="3"/><rect class="art-tab art-tab-lit" x="128" y="38" width="24" height="15" rx="3"/><text class="art-tab-letter art-tab-letter-lit" x="140" y="48.5">C</text></g>
                 <g><rect class="art-tab" x="128" y="64" width="22" height="15" rx="3"/><text class="art-tab-letter" x="139" y="74.5">M</text></g>
                 <g><rect class="art-tab" x="128" y="90" width="22" height="15" rx="3"/><text class="art-tab-letter" x="139" y="100.5">T</text></g>
               </g>
@@ -395,15 +419,16 @@
           </a>
           <a class="dc-tile" href="https://acfdashboard.com" data-motif="software">
             <span class="dc-tile-art dc-art" aria-hidden="true"><svg viewBox="0 0 160 120" fill="none" aria-hidden="true" focusable="false">
-              <rect class="art-panel" x="8" y="8" width="144" height="104" rx="7"/>
-              <g class="art-kpi"><rect x="18" y="18" width="38" height="18" rx="3"/><rect x="61" y="18" width="38" height="18" rx="3"/><rect x="104" y="18" width="38" height="18" rx="3"/></g>
-              <g class="art-kpi-bar"><rect x="23" y="23" width="14" height="3" rx="1.5"/><rect x="23" y="29" width="24" height="2" rx="1"/><rect x="66" y="23" width="12" height="3" rx="1.5"/><rect x="66" y="29" width="26" height="2" rx="1"/><rect x="109" y="23" width="16" height="3" rx="1.5"/><rect x="109" y="29" width="22" height="2" rx="1"/></g>
-              <path class="art-panel-grid" d="M18 60H142M18 76H142M18 92H142"/>
-              <path class="art-live-field" d="M18 98C36 98 50 96 64 88S90 66 104 58S128 50 142 46V102H18Z"/>
-              <path class="art-context" d="M18 94c12-2 22-6 32-4s18 2 28-6 20-16 30-18 22 4 34 0"/>
-              <path class="art-live" pathLength="1" d="M18 98C36 98 50 96 64 88S90 66 104 58S128 50 142 46"/>
+              <rect class="art-panel art-in art-d0" x="8" y="8" width="144" height="104" rx="7"/>
+              <g class="art-kpi art-in art-d1"><rect x="18" y="18" width="38" height="18" rx="3"/><rect x="61" y="18" width="38" height="18" rx="3"/><rect x="104" y="18" width="38" height="18" rx="3"/></g>
+              <g class="art-kpi-bar art-in art-d1"><rect x="23" y="23" width="14" height="3" rx="1.5"/><rect x="23" y="29" width="24" height="2" rx="1"/><rect x="66" y="23" width="12" height="3" rx="1.5"/><rect x="66" y="29" width="26" height="2" rx="1"/><rect x="109" y="23" width="16" height="3" rx="1.5"/><rect x="109" y="29" width="22" height="2" rx="1"/></g>
+              <path class="art-panel-grid art-in art-d1" d="M18 60H142M18 76H142M18 92H142"/>
+              <path class="art-live-field art-in art-d2" d="M18 98C36 98 50 96 64 88S90 66 104 58S128 50 142 46V102H18Z"/>
+              <path class="art-context art-in art-d2" d="M18 94c12-2 22-6 32-4s18 2 28-6 20-16 30-18 22 4 34 0"/>
+              <path class="art-glow art-glow-live art-draw art-d2" pathLength="1" d="M18 98C36 98 50 96 64 88S90 66 104 58S128 50 142 46"/>
+              <path class="art-live art-draw art-d2" pathLength="1" d="M18 98C36 98 50 96 64 88S90 66 104 58S128 50 142 46"/>
               <circle class="dc-pulse-ring art-live-ring" cx="142" cy="46" r="7"/>
-              <circle class="art-live-dot" cx="142" cy="46" r="3"/>
+              <circle class="art-live-dot art-move art-pop" cx="142" cy="46" r="3"/>
             </svg></span>
             <p class="dc-tile-title">The Software</p>
             <p class="dc-tile-desc">The framework in motion. Explore the live dashboard.</p>
@@ -713,6 +738,7 @@
   <!-- Shared hero field (accumulation dot-matrix) -->
   <script src="/site-b/hero-field.js" defer></script>
   <!-- Page-specific: search panel + GSAP choreography -->
+  <script src="/site-b/plates.js" defer></script>
   <script src="/site-b/cover-docs.js" defer></script>
 </body>
 </html>
