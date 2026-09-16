@@ -3,9 +3,12 @@
  *
  * Run: npm run test:posture-rails
  *
- * Each posture card carries a vertical 0–100% rail: the AGGREGATE band lit
- * where that posture may live in the portfolio, the per-position band as a thin
- * inner marker, Hype's hard cap as a bar. Three things have to hold:
+ * Each posture card carries a vertical 0–100% rail in its left padding — the
+ * AGGREGATE band lit where that posture may live in the portfolio, the
+ * per-position band as a thin inner marker, Hype's hard cap as a bar — and a
+ * belt: the aggregate band continued under the card's text as a faint field
+ * that fades out to the right, so the text keeps its width and the overlap
+ * reads as a transition. Three things have to hold:
  *
  *   1. ONE SOURCE. The rail restates the numbers on the card's own stat line,
  *      so it is never authored: scripts/sync-posture-rails.mjs derives it from
@@ -62,14 +65,13 @@ test('source: the rail’s numbers are the stat line’s numbers, read from the 
   assert.deepEqual(hype, { lo: 0, hi: 10, plo: 2, phi: 5, cap: 10 });
   assert.match(card('torque'), /<em>40&ndash;60%<\/em>aggregate/);
   assert.match(card('hype'), /<em>&le;10%<\/em>hard cap/);
-  assert.match(card('torque'), /<span class="pc-lbl" data-label="Aggregate 40–60%"><\/span>/);
-  assert.match(card('hype'), /<span class="pc-lbl" data-label="Hard cap ≤10%"><\/span>/);
-  // no text nodes in a rail: the reading time counts words, and a decoration is not one
+  // no label and no text nodes in a rail: the stat line already says the number, and
+  // the reading time counts words — a decoration is not one
   for (const p of ['torque', 'ballast', 'hype']) {
     const rail = card(p).match(/<span class="pc-rail"[\s\S]*?<\/span>\n/)[0];
     assert.equal(rail.replace(/<[^>]+>/g, '').trim(), '', `${p}: the rail carries no text`);
+    assert.doesNotMatch(rail, /pc-lbl|data-label/, `${p}: no label`);
   }
-  assert.match(CSS, /\.pc-lbl::before \{ content: attr\(data-label\); \}/);
   assert.match(CSS, /\.pc-end--top::before \{ content: '100'; \}/);
   // no rail is typed: the sync refuses stats it cannot read and bands out of order
   const src = read('scripts/sync-posture-rails.mjs');
@@ -81,6 +83,7 @@ test('source: the rail’s numbers are the stat line’s numbers, read from the 
 // 2. Character, subtly
 // ---------------------------------------------------------------------------
 test('character: Torque drives, Ballast holds, Hype is capped — each in the parts its rail carries', () => {
+  for (const p of ['torque', 'ballast', 'hype']) assert.match(card(p), /pc-ticks[\s\S]*pc-belt[\s\S]*pc-band/, `${p}: the belt paints under the band core`);
   assert.match(card('torque'), /pc-thrust[\s\S]*pc-band[\s\S]*pc-tip/, 'Torque: plume below the band in source, chevron after');
   assert.doesNotMatch(card('torque'), /pc-keel|pc-cap|pc-ghost/);
   assert.match(card('ballast'), /pc-band[\s\S]*pc-keel/, 'Ballast: a keel under the band');
@@ -93,12 +96,31 @@ test('character: the drawing of the band differs, the scale does not', () => {
   assert.match(CSS, /\.posture-card\[data-posture="torque"\] \.pc-band \{\s*background: linear-gradient\(to top/, 'Torque: brightest at its head');
   assert.match(CSS, /\.posture-card\[data-posture="ballast"\] \.pc-band \{[^}]*box-shadow: none;/, 'Ballast: flat, no glow');
   assert.match(CSS, /\.posture-card\[data-posture="hype"\] \.pc-band \{[^}]*outline: 1px dashed/, 'Hype: a dashed edge');
-  assert.match(CSS, /\.pc-cap::after \{ content: 'cap';/);
+  assert.match(CSS, /\.pc-cap::after \{ content: 'cap'; position: absolute; right: 0; bottom: 4px; writing-mode: vertical-rl;/, 'the cap word stands in the gutter, never the text column');
   // one scale for all three: the same --pc-top / --pc-run arithmetic
   const rail = CSS.slice(CSS.indexOf('.pc-rail {'), CSS.indexOf('.pc-scale,'));
   assert.match(rail, /--pc-top: 18px;/);
   assert.match(rail, /--pc-run: calc\(100% - 36px\);/);
-  for (const part of ['.pc-band', '.pc-pos']) assert.match(CSS, new RegExp(`${part.replace('.', '\\.')} \\{[^}]*top: calc\\(var\\(--pc-top\\) \\+ \\(100 - var\\(--(hi|phi)\\)\\) \\* var\\(--pc-run\\) / 100\\);`));
+  for (const part of ['.pc-belt', '.pc-band', '.pc-pos']) assert.match(CSS, new RegExp(`${part.replace('.', '\\.')} \\{[^}]*top: calc\\(var\\(--pc-top\\) \\+ \\(100 - var\\(--(hi|phi)\\)\\) \\* var\\(--pc-run\\) / 100\\);`));
+});
+
+test('overlap: the geometry sits in the card’s own padding, the belt runs under the text and fades, and the text paints above it', () => {
+  assert.match(CSS, /\.posture-card \{ position: relative; overflow: hidden; padding-left: calc\(var\(--space-6\) \+ 8px\); \}/, 'eight pixels, not fifty-four');
+  assert.match(CSS, /\.posture-card > :not\(\.pc-rail\) \{ position: relative; z-index: 1; \}/, 'text above the rail');
+  assert.match(CSS, /\.pc-rail \{[^}]*inset: 0; z-index: 0;/, 'the rail is the whole card');
+  const belt = CSS.match(/\n\.pc-belt \{([^}]*)\}/)[1];
+  assert.match(belt, /left: 0; right: 0;/);
+  assert.match(belt, /background: linear-gradient\(to right,[^;]*transparent 84%\);/, 'fades out before the right edge');
+  assert.match(belt, /opacity: \.9; transition: opacity var\(--motion-base\)/);
+  assert.match(CSS, /\.posture-card:hover \.pc-belt, \.posture-card:focus-visible \.pc-belt \{ opacity: 1; \}/, 'the field lights with the card');
+  // the core geometry lives inside the 32px the text now clears: band 6–21, marker 24–27, scale at 13
+  assert.match(CSS, /\.pc-band \{ left: 6px; width: 15px;/);
+  assert.match(CSS, /\.pc-pos \{ left: 24px; width: 3px;/);
+  assert.match(CSS, /\.pc-scale \{ left: 13px;/);
+  // each posture's belt has its character: Torque feathers upward, Ballast's keel line runs on and fades, Hype is thinner
+  assert.match(CSS, /\.posture-card\[data-posture="torque"\] \.pc-belt::before \{[^}]*bottom: 100%; height: 70%;/);
+  assert.match(CSS, /\.posture-card\[data-posture="ballast"\] \.pc-belt \{ border-bottom: 1px solid[^}]*mask-image: linear-gradient\(to right, currentColor 30%, transparent 88%\);/);
+  assert.match(CSS, /\.posture-card\[data-posture="hype"\] \.pc-belt \{\s*background: linear-gradient\(to right, color-mix\(in oklab, currentColor 18%/);
 });
 
 test('character: under the pointer Torque lifts and Hype confesses; Ballast is left alone, and the keyboard gets every move', () => {
@@ -120,6 +142,7 @@ test('character: the draw-in grows Torque and Hype from the foot, fades Ballast 
   const gate = CSS.slice(CSS.indexOf('@media (prefers-reduced-motion: no-preference) {\n  .pc-band, .pc-pos { transform-origin: 50% 100%; }'));
   const block = gate.slice(0, gate.indexOf('\n}') + 2);
   assert.match(block, /\.pc-rail:not\(\[data-drawn="true"\]\) \.pc-band, \.pc-rail:not\(\[data-drawn="true"\]\) \.pc-pos \{ transform: scaleY\(0\); \}/, 'hidden pre-state inside the gate');
+  assert.match(block, /\.pc-rail:not\(\[data-drawn="true"\]\) \.pc-belt,/, 'the belt is hidden until drawn too');
   assert.match(block, /\.pc-rail\[data-drawn="true"\] \.pc-band \{ animation: dc-art-grow-y calc\(var\(--motion-draw\) \* \.55\)/);
   assert.match(block, /\.posture-card\[data-posture="ballast"\] \.pc-rail\[data-drawn="true"\] \.pc-band \{ animation-name: pc-fade; \}/);
   assert.match(block, /\.posture-card\[data-posture="hype"\] \.pc-rail\[data-drawn="true"\] \.pc-band \{ animation-name: pc-hype-in; \}/);
@@ -139,7 +162,6 @@ test('decorative: the rail is hidden from the accessibility tree, sits under the
     assert.ok(c.indexOf('pc-rail') < c.indexOf('posture-card-eyebrow'), `${p}: the rail is first in source`);
     assert.match(c, new RegExp(`<span class="posture-card-name">${p[0].toUpperCase() + p.slice(1)}</span>`), `${p}: identity is colour plus name`);
   }
-  assert.match(CSS, /\.posture-card \{ position: relative; overflow: hidden; padding-left: calc\(var\(--space-6\) \+ 54px\); \}/);
   assert.match(CSS, /\.pc-rail \{[^}]*pointer-events: none;/);
   assert.match(CSS, /\.pc-rail \{[^}]*color: var\(--pi-c, var\(--posture-unclassified-fg\)\);/, 'the posture token, never a hue of its own');
   const rails = CSS.slice(CSS.indexOf('/* ---- Posture rails'), CSS.indexOf('@keyframes pc-hype-in'));

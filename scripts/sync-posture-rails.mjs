@@ -4,21 +4,25 @@
  *
  * WHY THIS EXISTS. Each posture card in the trio now carries a vertical 0–100%
  * rail on its left edge with the posture's AGGREGATE band lit, its per-position
- * band as a thin inner marker, and (for Hype) its hard cap drawn as a bar. Those
+ * band as a thin inner marker, and (for Hype) its hard cap drawn as a bar. The
+ * lit band also runs under the card's text as a "belt" — a horizontal wash at
+ * the band's height that fades out under the prose — so the rail is read as a
+ * background the copy sits on rather than a column the copy must clear. Those
  * are numbers, and a number drawn is a number stated: if the rail carried its
  * own copy of "40–60%", the copy would drift from the stat line under it the
  * day someone re-tunes a band (sync-counts.mjs has the history of exactly that
  * failure). So the rail is never authored. This script reads the card's own
  * `.posture-card-stats` — the one place the bands are typed — and writes the
- * rail's custom properties and label from them; `--check` refuses a build in
- * which any rail disagrees with its stats.
+ * rail's custom properties from them; `--check` refuses a build in which any
+ * rail disagrees with its stats.
  *
  * Stats grammar it reads (already the cards' markup):
  *   <em>3&ndash;15%</em>per position   → --plo:3  --phi:15
- *   <em>40&ndash;60%</em>aggregate     → --lo:40  --hi:60   label "Aggregate 40–60%"
- *   <em>&le;10%</em>hard cap           → --lo:0   --hi:10  --cap:10  label "Hard cap ≤10%"
- * The label and the scale's ends are attributes drawn by CSS (content: attr()),
- * never text nodes: the reading time derived by sync-counts.mjs counts words.
+ *   <em>40&ndash;60%</em>aggregate     → --lo:40  --hi:60
+ *   <em>&le;10%</em>hard cap           → --lo:0   --hi:10  --cap:10
+ * The rail carries no text of its own — the numbers it draws are the stat
+ * line's, printed once, and the scale's ends are drawn by CSS — because the
+ * reading time derived by sync-counts.mjs counts words.
  *
  * Run: npm run sync:posture-rails     (rewrite)
  *      npm run audit:posture-rails    (verify, non-zero exit on drift)
@@ -40,11 +44,11 @@ function bands(stats, posture) {
   for (const m of stats.matchAll(RANGE)) {
     const [, lo, hi, kind] = m;
     if (kind === 'per position') { out.plo = +lo; out.phi = +hi; }
-    else { out.lo = +lo; out.hi = +hi; out.label = `Aggregate ${lo}–${hi}%`; }
+    else { out.lo = +lo; out.hi = +hi; }
   }
   const cap = stats.match(CAP);
-  if (cap) { out.lo = 0; out.hi = +cap[1]; out.cap = +cap[1]; out.label = `Hard cap ≤${cap[1]}%`; }
-  for (const k of ['plo', 'phi', 'lo', 'hi', 'label']) if (out[k] === undefined) fail(`${posture}: could not read ${k} from its stats`);
+  if (cap) { out.lo = 0; out.hi = +cap[1]; out.cap = +cap[1]; }
+  for (const k of ['plo', 'phi', 'lo', 'hi']) if (out[k] === undefined) fail(`${posture}: could not read ${k} from its stats`);
   if (!(out.plo < out.phi && out.lo < out.hi && out.hi <= 100)) fail(`${posture}: bands out of order (${JSON.stringify(out)})`);
   return out;
 }
@@ -54,16 +58,18 @@ function rail(posture, b, indent) {
   const vars = [`--lo:${b.lo}`, `--hi:${b.hi}`, `--plo:${b.plo}`, `--phi:${b.phi}`];
   if (b.cap !== undefined) vars.push(`--cap:${b.cap}`);
   const parts = ['<span class="pc-scale"></span><span class="pc-ticks"></span>'];
+  // The belt is the band's horizontal echo under the text: same top and height
+  // (CSS reads --lo/--hi), full card width, fading to nothing before the prose.
+  parts.push('<span class="pc-belt"></span>');
   if (posture === 'torque') parts.push('<span class="pc-thrust"></span>');
   parts.push('<span class="pc-band"></span>');
   if (posture === 'torque') parts.push('<span class="pc-tip"></span>');
   if (posture === 'ballast') parts.push('<span class="pc-keel"></span>');
   if (b.cap !== undefined) parts.push('<span class="pc-cap"></span><span class="pc-ghost"></span>');
   parts.push('<span class="pc-pos"></span>');
-  // No text nodes: the label and the scale's ends are drawn by CSS from attributes,
-  // so the rail adds nothing to the page's prose — the reading time derived by
+  // No text nodes: the scale's ends are drawn by CSS from pseudo-elements, so the
+  // rail adds nothing to the page's prose — the reading time derived by
   // sync-counts.mjs counts words, and a decoration must not be one.
-  parts.push(`<span class="pc-lbl" data-label="${b.label}"></span>`);
   parts.push('<span class="pc-end pc-end--top"></span><span class="pc-end pc-end--bot"></span>');
   return `${indent}<span class="pc-rail" aria-hidden="true" style="${vars.join(';')}">${parts.join('')}</span>`;
 }
