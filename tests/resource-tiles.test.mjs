@@ -114,6 +114,84 @@ test('art: the drawing is sized from the card height, never the card width', () 
 });
 
 // ---------------------------------------------------------------------------
+// 2b. The pictures (owner, 2026-09-16: "Create better imagery")
+// ---------------------------------------------------------------------------
+// The first drawings were outline icons: one flat opacity, one register,
+// generic enough for any features row. These are built the way the site's own
+// exhibits are — three tonal planes with the chart doctrine's hierarchy: field
+// and structure in ink tones, exactly one line in the accent. What is pinned is
+// the construction, since that is what the next edit would quietly flatten.
+
+const artFor = (motif) => {
+  const block = SECTION.slice(SECTION.indexOf(`data-motif="${motif}"`));
+  return block.slice(block.indexOf('<svg'), block.indexOf('</svg>') + 6);
+};
+
+test('pictures: every colour is a class the stylesheet resolves, never an attribute', () => {
+  for (const t of tiles) {
+    const art = artFor(t.motif);
+    // The old drawings coloured themselves with fill="currentColor" and opacity
+    // attributes; a picture with planes needs its tones in one place.
+    assert.doesNotMatch(art, /\s(fill|stroke)="(?!none")[^"]*"/, `${t.motif}: a colour attribute in the markup`);
+    assert.doesNotMatch(art, /\sopacity="/, `${t.motif}: an opacity attribute in the markup`);
+    assert.match(art, /class="art-/, `${t.motif}: styled by art-* classes`);
+  }
+  // And the stylesheet gives the accent to exactly the elements that carry the
+  // idea — never to a frame, a grid or a label.
+  for (const cls of ['art-thesis', 'art-dot', 'art-tab-lit', 'art-size-top']) {
+    assert.match(CSS, new RegExp(`\\.dc-tile-art \\.${cls}\\s*\\{[^}]*var\\(--accent\\)`), `${cls} is the accent`);
+  }
+  for (const cls of ['art-frame', 'art-grid', 'art-ref', 'art-ghost', 'art-tab', 'art-entry rect']) {
+    assert.match(CSS, new RegExp(`\\.dc-tile-art \\.${cls}\\s*\\{[^}]*currentColor`), `${cls} rides currentColor`);
+  }
+});
+
+test('pictures: each one carries the idea of its page', () => {
+  const gallery = artFor('exhibits');
+  assert.equal((gallery.match(/class="art-print /g) || []).length, 3, 'three prints in the stack');
+  assert.match(gallery, /art-print-front[\s\S]*art-thesis/, 'the framework’s own curve is on the front print');
+  const math = artFor('math');
+  assert.match(math, /art-ceiling/, 'the clamp is drawn');
+  assert.match(math, /art-ghost/, 'and so is the score it clamped away');
+  assert.equal((math.match(/art-size/g) || []).length, 5, 'four rungs map a score to a size (one of them lit)');
+  const glossary = artFor('glossary');
+  assert.equal((glossary.match(/art-tab-letter/g) || []).length, 5, 'four thumb tabs, one of them lit');
+  assert.match(glossary, /art-tab-pulled/, 'the lit tab is the one that pulls');
+  const software = artFor('software');
+  assert.match(software, /art-panel/, 'the product’s own dark panel');
+  assert.match(software, /<path class="art-live" pathLength="1"/, 'the live line is drawable (pathLength, not a measured length)');
+});
+
+test('pictures: the software card wears the exhibit surface, in both themes', () => {
+  // These tokens are fixed by design — the panel is dark on the light page too —
+  // which is what makes this card read as a screen rather than a diagram.
+  assert.match(CSS, /\.dc-tile-art \.art-panel\s*\{[^}]*var\(--feature-bg\)/);
+  assert.match(CSS, /\.dc-tile-art \.art-live\s*\{[^}]*var\(--chart-thesis\)/);
+  assert.match(CSS, /\.dc-tile-art \.art-live-field\s*\{[^}]*var\(--chart-field\)/);
+  assert.match(CSS, /\[data-motif="software"\] \.dc-tile-art \.art-context\s*\{[^}]*var\(--chart-context\)/,
+    'the grey context series is the exhibits’ own grey');
+});
+
+test('pictures: each card has one hover move, and focus gets it too', () => {
+  const moves = {
+    exhibits: /\.art-print-back \{ transform: rotate\(-11deg\)/,
+    math: /\.art-ghost \{ opacity: \.95; \}/,
+    glossary: /\.art-tab-pulled \{ transform: translateX\(4px\); \}/,
+    software: /\.art-live \{ animation: art-draw/,
+  };
+  for (const [motif, re] of Object.entries(moves)) {
+    const hover = CSS.match(new RegExp(`\\.dc-tile\\[data-motif="${motif}"\\]:hover [^,{]+,\\n\\.dc-tile\\[data-motif="${motif}"\\]:focus-visible [^{]+\\{[^}]*\\}`));
+    assert.ok(hover, `${motif}: a hover rule paired with focus-visible`);
+    assert.match(hover[0], re, `${motif}: the move is the one the picture is about`);
+  }
+  // The fan's rest state is CSS, not an SVG attribute, so it is still fanned
+  // under reduced motion (which only removes the transition, not the pose) and
+  // the hover opens it on the same property.
+  assert.match(CSS, /\.dc-tile-art \.art-print-back \{ transform: rotate\(-7deg\); \}/);
+  assert.doesNotMatch(artFor('exhibits'), /transform="rotate/, 'no attribute transform to fight the CSS one');
+});
+
+// ---------------------------------------------------------------------------
 // 3. One accent — the constraint that makes this a system and not decoration
 // ---------------------------------------------------------------------------
 test('wash: four geometries, and not one of them introduces a second hue', () => {
