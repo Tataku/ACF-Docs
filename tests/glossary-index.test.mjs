@@ -296,14 +296,18 @@ const byId = Object.fromEntries(terms.map((t) => [t.id, t]));
 const TAGGER = fs.readFileSync(path.join(ROOT, 'public/site-b/reading.js'), 'utf8');
 
 test('sense: the tagger requires a term’s context words in the same block before it tags', () => {
-  const fn = TAGGER.slice(TAGGER.indexOf('function inSense('), TAGGER.indexOf('function termCandidates('));
-  assert.ok(fn.length > 200, 'inSense() located');
+  // The guard is now compiled once per entry and memoised per block rather than
+  // rebuilt per node; the RULE it applies is unchanged and is asserted here.
+  const fn = TAGGER.slice(TAGGER.indexOf('function senseTester('), TAGGER.indexOf('function termCandidates('));
+  assert.ok(fn.length > 200, 'senseTester() located');
   assert.match(fn, /var need = entry\.context;/, 'it reads context off the glossary entry, never a list hard-coded here');
-  assert.match(fn, /if \(!need \|\| !need\.length\) return true;/, 'a term without context is unaffected');
-  assert.match(fn, /closest\('p, li, td, th, blockquote'\)/, 'the sense is read from the whole block, not the text node');
-  assert.match(fn, /\(\^\|\[\^A-Za-z0-9\]\)' \+ escapeRegExp\(need\[i\]\)/, 'context words match on word boundaries, not substrings');
-  // And it is actually consulted by the walker, not merely defined.
-  assert.match(TAGGER, /if \(!inSense\(entry, node\)\) return NodeFilter\.FILTER_REJECT;/, 'the walker rejects an out-of-sense node');
+  assert.match(fn, /if \(!need \|\| !need\.length\) return null;/, 'a term without context is unaffected');
+  assert.match(TAGGER, /block: parent\.closest\(BLOCK_SEL\) \|\| parent/, 'the sense is read from the whole block, not the text node');
+  assert.match(TAGGER, /var BLOCK_SEL = 'p, li, td, th, blockquote';/, 'and the block is the same one it always was');
+  assert.match(fn, /\(\^\|\[\^A-Za-z0-9\]\)' \+ escapeRegExp\(word\)/, 'context words match on word boundaries, not substrings');
+  assert.match(fn, /var text = cand\.block\.textContent;/, 'against the block\u2019s text, as before');
+  // And it is actually consulted by the per-term pass, not merely defined.
+  assert.match(TAGGER, /if \(inSenseFor && !inSenseFor\(cand\)\) continue;/, 'an out-of-sense node is still skipped');
 });
 
 test('sense: the aliases that were simply the wrong word are gone and stay gone', () => {
