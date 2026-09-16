@@ -403,238 +403,62 @@ body {
   .failure-modes { grid-template-columns: 1fr; }
 }
 
-/* ---- Definition-card motifs — the figure in the spine ----------------------
+/* ---- Definition-card plates — the picture each card opens with -------------
    The family is one component used thirteen times for sixty-one cards, and it
-   holds SEVEN different kinds of list: a closed taxonomy, a tunable envelope,
-   an escalation ladder, a quality gauge, a failure mechanism, a market state,
-   and a dollar magnitude. Identical cards said none of that. Each card now
-   draws a small figure in a reserved spine on its left, and the figure says
-   what kind of thing the card is and how it behaves.
+   holds SEVEN kinds of list: a closed taxonomy, a tunable envelope, an
+   escalation ladder, a quality gauge, a failure mechanism, a market state, and
+   a dollar magnitude. Identical cards said none of that. Each now opens with a
+   plate in the chapter plates' own plane vocabulary — grid, axis, field, one
+   accent thesis stroke, a terminal dot — and the plate draws what kind of thing
+   the card is and how it behaves. scripts/sync-card-motifs.mjs writes them;
+   `audit:card-motifs` refuses drift; plates.js draws them in on sight because
+   they are `.dc-art`, so the strokes below are the cover's rules verbatim.
 
-   The rules the posture rails set, kept: nothing here is authored where the
-   card prints it — the TAM bars are the `~$12T` in the card's own name and the
-   ladder's height is its own position — `sync-card-motifs.mjs --check` refuses
-   drift, the spine is decoration and states nothing the prose does not, and the
-   text paints above it. The figure is built from the two pseudo-elements the
-   card already has, so the markup gains one attribute and no elements.
-
-   Colour is `--accent` through `currentColor`, so both themes are handled by
-   the token rather than by a second palette. Everything is drawn at low
-   contrast on purpose: this is the floor the words stand on, not a competitor
-   for them. ------------------------------------------------------------- */
-.failure-modes > div {
+   Canvas is 480×100 rather than the chapter plates' 480×120: these cards are
+   435px wide at desktop and 362px on a phone, so the shallower plate lands at
+   87px and 72px — a picture, not a poster, over two to eight lines of prose. */
+.failure-modes > div { position: relative; overflow: hidden; }
+.fm-plate {
   position: relative;
-  overflow: hidden;
-  padding-left: calc(var(--space-6) + 16px);
-}
-.failure-modes > div > * { position: relative; z-index: 1; }
-/* The spine: a faint field that fades out under the prose, so the figure reads
-   as ground rather than as a column the text must clear. */
-.failure-modes > div[data-figure]::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0; width: 46%;
-  color: var(--accent);
-  background: linear-gradient(to right,
-    color-mix(in oklab, currentColor 7%, transparent) 0,
-    color-mix(in oklab, currentColor 2%, transparent) 42%, transparent 92%);
+  display: block;
+  width: calc(100% + 2 * var(--space-6));
+  margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-6)) var(--space-4);
+  aspect-ratio: 480 / 100;
+  color: var(--tile-motif);
   pointer-events: none;
 }
-/* The figure itself. `--fg` is the ink every motif draws in; `--x` is the
-   spine's centre line, so a motif can be re-sited without touching each rule. */
-.failure-modes > div[data-figure]::after {
-  content: '';
-  position: absolute;
-  left: 13px; top: var(--space-5); bottom: var(--space-5); width: 14px;
-  color: var(--accent);
-  --fg: color-mix(in oklab, currentColor 58%, transparent);
-  --dim: color-mix(in oklab, currentColor 20%, transparent);
-  pointer-events: none;
+.fm-plate::before { content: ''; position: absolute; inset: 0; opacity: .82; pointer-events: none; }
+.fm-plate svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
+.failure-modes > div:hover .fm-plate { color: var(--tile-motif-lift); }
+/* The wash under each kind: where the eye should rest, in the accent at a
+   whisper. Mechanisms ground at the foot, where their thesis ends; magnitudes
+   rise from it; the ladder lights toward its top; the rest sit level. */
+.fm-plate[data-kind="mechanism"]::before { background: linear-gradient(to top, var(--tile-wash-lift), var(--tile-wash) 32%, transparent 68%); }
+.fm-plate[data-kind="magnitude"]::before { background: linear-gradient(to top, var(--tile-wash-lift), transparent 60%); }
+.fm-plate[data-kind="ladder"]::before    { background: linear-gradient(to bottom, var(--tile-wash-lift), var(--tile-wash) 40%, transparent 78%); }
+.fm-plate[data-kind="taxonomy"]::before,
+.fm-plate[data-kind="envelope"]::before,
+.fm-plate[data-kind="gauge"]::before,
+.fm-plate[data-kind="state"]::before,
+.fm-plate[data-kind="compare"]::before   { background: radial-gradient(90% 120% at 50% 100%, var(--tile-wash), transparent 72%); }
+/* Strokes the cover does not have, in its own register. A cell can be solid
+   (structural), dashed (tunable), thin (derived), a ghost (illustrative), or
+   struck (never that class); a bar can grow along x; a field can be dots. */
+.dc-art .art-cell-solid  { fill: var(--accent); fill-opacity: .55; stroke: var(--accent); stroke-width: 1.6; opacity: 1; }
+.dc-art .art-cell-dashed { stroke: var(--accent); stroke-dasharray: 4 4; stroke-width: 1.4; opacity: 1; }
+.dc-art .art-cell-thin   { stroke: var(--accent); stroke-width: 1; fill-opacity: .2; opacity: 1; }
+.dc-art .art-cell-ghost  { stroke: var(--accent); stroke-dasharray: 2 5; fill-opacity: .12; opacity: 1; }
+.dc-art .art-cell-struck { fill: none; stroke: currentColor; stroke-width: 1.2; opacity: .45; }
+.dc-art .art-grow-x      { transform-box: fill-box; transform-origin: 0 50%; }
+.dc-art .art-dots        { fill: url(#dc-p-dots); opacity: .55; }
+.dc-art-defs .art-ground-dot { fill: var(--tile-motif-lift); }
+@media (prefers-reduced-motion: no-preference) {
+  .dc-art:not([data-drawn="true"]) .art-grow-x { transform: scaleX(0); }
+  .dc-art[data-drawn="true"] .art-grow-x { animation: dc-art-grow-x calc(var(--motion-draw) * .6) var(--ease-emphasis) backwards; }
 }
-
-/* --- Taxonomy: mutually exclusive kinds. The card's own slot is lit; the rest
-       of the set is drawn faint above and below it, so the card shows its
-       position within a closed list. ------------------------------------- */
-.failure-modes[data-kind="taxonomy"] > div::after,
-.failure-modes[data-kind="compare"] > div::after,
-.failure-modes[data-kind="state"] > div::after {
-  background:
-    linear-gradient(var(--fg), var(--fg)) no-repeat
-      0 calc((var(--slot) - 1) * 100% / var(--slots)) / 100% calc(100% / var(--slots) - 3px),
-    repeating-linear-gradient(to bottom, var(--dim) 0 calc(100% / var(--slots) - 3px),
-                              transparent calc(100% / var(--slots) - 3px) calc(100% / var(--slots)));
-  border-radius: 1px;
-}
-/* Structural — it cannot be moved, so it is drawn solid and square. */
-.failure-modes > div[data-figure="fixed"]::after { --fg: color-mix(in oklab, currentColor 78%, transparent); }
-/* Tunable — the same slot, outlined rather than filled: it has an envelope. */
-.failure-modes > div[data-figure="tunable"]::after { --fg: color-mix(in oklab, currentColor 34%, transparent); }
-/* Derived — it follows from the others, so it is the faintest and carries a tie. */
-.failure-modes > div[data-figure="derived"]::after { --fg: color-mix(in oklab, currentColor 26%, transparent); }
-/* Illustrative — representative of the shape, not a promise. */
-.failure-modes > div[data-figure="illustrative"]::after { --fg: color-mix(in oklab, currentColor 18%, transparent); }
-/* Excluded — never treated as that class: the slot is struck through. */
-.failure-modes > div[data-figure="excluded"]::after {
-  --fg: color-mix(in oklab, currentColor 22%, transparent);
-  border-left: 2px solid color-mix(in oklab, currentColor 42%, transparent);
-}
-
-/* --- Envelope: a tunable with documented bounds, drawn as a band with its
-       ends marked. `closed` draws no band at all — that card exists to say the
-       set is closed, and an empty bracket is the honest figure for it. ---- */
-.failure-modes > div[data-figure="band"]::after {
-  background: linear-gradient(to bottom, transparent 0 26%, var(--fg) 26% 74%, transparent 74%);
-  border-top: 2px solid var(--dim); border-bottom: 2px solid var(--dim);
-}
-.failure-modes > div[data-figure="floor"]::after {
-  background: linear-gradient(to bottom, transparent 0 26%, var(--fg) 26% 88%, transparent 88%);
-  border-bottom: 3px solid color-mix(in oklab, currentColor 70%, transparent);
-}
-.failure-modes > div[data-figure="closed"]::after {
-  background: none;
-  border-top: 2px solid var(--fg); border-bottom: 2px solid var(--fg);
-  border-left: 2px solid var(--dim);
-}
-
-/* --- Ladder: an escalation that rises through the block. The card's rung sits
-       at its own height with the riser below it; the terminal card draws a
-       BROKEN rung and no riser above, because the thing it names does not
-       exist in this system. That is the whole point of the block. -------- */
-.failure-modes[data-kind="ladder"] > div::after {
-  background:
-    linear-gradient(var(--fg), var(--fg)) no-repeat
-      6px calc(100% - (var(--step) - 0.5) * 100% / var(--steps)) / 2px calc((var(--step) - 0.5) * 100% / var(--steps)),
-    linear-gradient(var(--fg), var(--fg)) no-repeat
-      0 calc(100% - (var(--step) - 0.5) * 100% / var(--steps) - 1px) / 100% 2px;
-}
-.failure-modes > div[data-figure="absent"]::after {
-  background:
-    linear-gradient(var(--dim), var(--dim)) no-repeat
-      6px calc(100% - (var(--step) - 1.2) * 100% / var(--steps)) / 2px calc((var(--step) - 1.6) * 100% / var(--steps));
-  border-top: 2px dashed color-mix(in oklab, currentColor 40%, transparent);
-}
-
-/* --- Gauge: a quality dimension, filled from the foot with its scale beside it. */
-.failure-modes > div[data-figure="gauge"]::after {
-  background:
-    linear-gradient(to top, var(--fg) 0 62%, transparent 62%) no-repeat 5px 0 / 4px 100%,
-    repeating-linear-gradient(to bottom, var(--dim) 0 1px, transparent 1px 14%) no-repeat 0 0 / 14px 100%;
-}
-
-/* --- Magnitude: the bar IS the number the card prints. `--m` is the trillions
-       read out of the card's own name by sync-card-motifs.mjs; 12 is the
-       largest component, so the scale is shared across the block and the four
-       bars are comparable to each other rather than each full-height. ---- */
-.failure-modes > div[data-figure="share"]::after {
-  background: linear-gradient(to top,
-    color-mix(in oklab, currentColor 62%, transparent),
-    color-mix(in oklab, currentColor 30%, transparent)) no-repeat;
-  /* A FIXED unit, not a share of the card: cards differ in height, and a bar
-     measured as a percentage of its own card would draw $3T taller in a long
-     card than in a short one — which is the one thing a magnitude figure must
-     never do. 6px per trillion, floored at the box. */
-  background-size: 100% min(100%, calc(var(--m) * 6px));
-  background-position: 0 100%;
-  border-bottom: 2px solid color-mix(in oklab, currentColor 55%, transparent);
-}
-
-/* --- Mechanisms: how the thing breaks. Each is a gesture, not an illustration
-       — the figure is read in a glance beside the sentence that names it. - */
-.failure-modes[data-kind="mechanism"] > div::after { width: 16px; }
-/* A value falling away from where it was scored. */
-.failure-modes > div[data-figure="decay"]::after {
-  background: linear-gradient(163deg, transparent 46%, var(--fg) 46% 54%, transparent 54%); }
-/* Two things that were aligned, separating without a trade. */
-.failure-modes > div[data-figure="drift"]::after {
-  background: linear-gradient(172deg, transparent 47%, var(--fg) 47% 53%, transparent 53%),
-              linear-gradient(188deg, transparent 47%, var(--dim) 47% 53%, transparent 53%); }
-/* Each liquidation forcing the next. */
-.failure-modes > div[data-figure="cascade"]::after {
-  background: linear-gradient(var(--fg), var(--fg)) no-repeat 0 18% / 62% 2px,
-              linear-gradient(var(--fg), var(--fg)) no-repeat 19% 44% / 62% 2px,
-              linear-gradient(var(--fg), var(--fg)) no-repeat 38% 70% / 62% 2px; }
-/* Something wearing away while the price has not noticed. */
-.failure-modes > div[data-figure="erosion"]::after {
-  background: linear-gradient(to bottom, var(--fg), transparent 78%);
-  -webkit-mask-image: linear-gradient(to bottom, currentColor 40%, transparent);
-  mask-image: linear-gradient(to bottom, currentColor 40%, transparent); }
-/* Independent things moving together under stress. */
-.failure-modes > div[data-figure="convergence"]::after {
-  background: linear-gradient(196deg, transparent 47%, var(--fg) 47% 53%, transparent 53%),
-              linear-gradient(164deg, transparent 47%, var(--fg) 47% 53%, transparent 53%); }
-/* The loop: price drives attention drives buying drives price. */
-.failure-modes > div[data-figure="reflexive"]::after {
-  background: none;
-  border: 2px solid var(--fg);
-  border-right-color: transparent;
-  border-radius: 50%;
-  top: calc(50% - 8px); bottom: auto; height: 16px; left: 11px; width: 16px; }
-/* A break in something that was assumed whole. */
-.failure-modes > div[data-figure="rupture"]::after {
-  background: linear-gradient(to bottom, var(--fg) 0 38%, transparent 38% 62%, var(--fg) 62%) no-repeat 6px 0 / 3px 100%,
-              linear-gradient(115deg, transparent 44%, var(--fg) 44% 56%, transparent 56%) no-repeat 0 42% / 100% 16%; }
-/* Access cut by something outside the system. */
-.failure-modes > div[data-figure="seizure"]::after {
-  background: linear-gradient(var(--fg), var(--fg)) no-repeat 6px 0 / 3px 100%,
-              linear-gradient(var(--fg), var(--fg)) no-repeat 0 48% / 100% 3px; }
-/* Two parties, and the link between them failing. */
-.failure-modes > div[data-figure="counterparty"]::after {
-  background: linear-gradient(var(--fg), var(--fg)) no-repeat 0 8% / 100% 3px,
-              linear-gradient(var(--fg), var(--fg)) no-repeat 0 89% / 100% 3px,
-              linear-gradient(to bottom, var(--dim) 0 30%, transparent 30% 70%, var(--dim) 70%) no-repeat 6px 0 / 3px 100%; }
-/* Depth evaporating exactly when it is needed. */
-.failure-modes > div[data-figure="liquidity"]::after {
-  background: linear-gradient(to bottom, var(--fg), transparent);
-  -webkit-mask-image: linear-gradient(to right, currentColor, transparent 70%);
-  mask-image: linear-gradient(to right, currentColor, transparent 70%); }
-/* One thing superseded by another beside it. */
-.failure-modes > div[data-figure="displacement"]::after {
-  background: linear-gradient(to bottom, var(--dim) 0 58%, transparent 58%) no-repeat 0 0 / 5px 100%,
-              linear-gradient(to top, var(--fg) 0 72%, transparent 72%) no-repeat 10px 0 / 5px 100%; }
-/* More signal than attention. */
-.failure-modes > div[data-figure="overload"]::after {
-  background: repeating-linear-gradient(to bottom, var(--fg) 0 2px, transparent 2px 6px); }
-/* Past the point any plausible scenario supports. */
-.failure-modes > div[data-figure="overextension"]::after {
-  background: linear-gradient(to top, var(--fg) 0 86%, transparent 86%) no-repeat 6px 0 / 3px 100%,
-              linear-gradient(var(--dim), var(--dim)) no-repeat 0 38% / 100% 2px; }
-/* Burning down with no path to replacement. */
-.failure-modes > div[data-figure="depletion"]::after {
-  background: linear-gradient(to top, var(--fg) 0 34%, var(--dim) 34% 70%, transparent 70%); }
-/* Small misplacements that add up. */
-.failure-modes > div[data-figure="accretion"]::after {
-  background: linear-gradient(var(--fg), var(--fg)) no-repeat 0 86% / 100% 3px,
-              linear-gradient(var(--fg), var(--fg)) no-repeat 0 64% / 74% 3px,
-              linear-gradient(var(--dim), var(--dim)) no-repeat 0 42% / 52% 3px,
-              linear-gradient(var(--dim), var(--dim)) no-repeat 0 20% / 30% 3px; }
-/* Valuation moving inversely with the rate. */
-.failure-modes > div[data-figure="ratesensitivity"]::after {
-  background: linear-gradient(200deg, transparent 46%, var(--fg) 46% 54%, transparent 54%) no-repeat 0 0 / 100% 50%,
-              linear-gradient(160deg, transparent 46%, var(--fg) 46% 54%, transparent 54%) no-repeat 0 100% / 100% 50%; }
-/* Treatment changing underneath a position that did not move. */
-.failure-modes > div[data-figure="reclassification"]::after {
-  background: linear-gradient(to bottom, var(--fg) 0 44%, transparent 44%) no-repeat 0 0 / 5px 100%,
-              linear-gradient(to bottom, transparent 0 56%, var(--fg) 56%) no-repeat 10px 0 / 5px 100%,
-              linear-gradient(var(--dim), var(--dim)) no-repeat 0 48% / 100% 2px; }
-/* A structure with no maturity — nothing terminates it. */
-.failure-modes > div[data-figure="openended"]::after {
-  background: linear-gradient(var(--fg), var(--fg)) no-repeat 6px 0 / 3px 78%;
-  border-bottom: 2px dashed var(--dim); }
-
-/* --- Comparison and state: the slot machinery above already places these; the
-       weights differ so a concentrated holding reads heavier than a spread one,
-       and a wide divergence reads wider than a tight cluster. ------------- */
-.failure-modes > div[data-figure="concentrated"]::after { --fg: color-mix(in oklab, currentColor 74%, transparent); }
-.failure-modes > div[data-figure="spread"]::after      { --fg: color-mix(in oklab, currentColor 34%, transparent); }
-.failure-modes > div[data-figure="clustered"]::after   { --fg: color-mix(in oklab, currentColor 62%, transparent); }
-.failure-modes > div[data-figure="converged"]::after   { --fg: color-mix(in oklab, currentColor 70%, transparent); }
-.failure-modes > div[data-figure="diverged"]::after    { --fg: color-mix(in oklab, currentColor 30%, transparent); }
-
-/* One column on a phone: the spine narrows but never leaves, because a card
-   that loses its figure loses the one thing that said what kind it was. */
+@keyframes dc-art-grow-x { from { transform: scaleX(0); } }
 @media (max-width: 680px) {
-  .failure-modes > div { padding-left: calc(var(--space-5) + 14px); }
-  .failure-modes > div[data-figure]::after { left: 11px; width: 12px; }
+  .fm-plate { width: calc(100% + 2 * var(--space-5)); margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-3); }
 }
 
 /* ============================================================================

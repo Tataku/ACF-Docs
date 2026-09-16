@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:social-meta && npm run build:crawler && npm run build:navigation && npm run sync:counts && npm run sync:plates && npm run sync:posture-rails && npm run sync:card-motifs",
+    "prebuild": "npm run build:glossary && npm run build:pictures && npm run build:math && npm run build:social-meta && npm run build:crawler && npm run sync:card-motifs && npm run build:navigation && npm run sync:counts && npm run sync:plates && npm run sync:posture-rails",
     "build": "next build",
     "start": "next start",
     "test": "npm run test:narration && npm run test:chart-core",
