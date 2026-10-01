@@ -176,11 +176,11 @@ const main = `<main class="shell-main">
     <header class="doc-header">
       <div class="measure">
         <p class="doc-eyebrow" data-glyph-text>Framework Reference</p>
-        <p class="doc-kicker">${total} terms &middot; ${liveGroups.length} movements &middot; defined where they are taught</p>
+        <p class="doc-kicker">${total} terms &middot; ${liveGroups.length} Parts &middot; defined where they are taught</p>
         <h1 class="doc-title">Glossary</h1>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">Every term the framework defines for itself, grouped by the movement of the book that teaches it. Open a term for its definition, the Part that develops it, the exhibit that shows it, and the concepts it touches.</p>
+        <p class="prose-lead">The terms the framework defines for itself, each grouped by the Part that teaches it. Open one for a short definition, a link to the Part that develops it, the exhibit that shows it where there is one, and the related terms worth reading next.</p>
       </div>
       <div class="measure gl-toolbar" data-gl-toolbar>
         <label class="visually-hidden" for="gl-search">Filter terms</label>
@@ -216,7 +216,7 @@ html = html.replace(
 );
 html = html.replace(
   /<meta name="description" content="[^"]*">/,
-  `<meta name="description" content="The Adaptive Convexity Framework glossary: ${total} terms in ${liveGroups.length} movements, each defined where it is taught and linked to the Part that develops it and the exhibit that shows it.">`
+  `<meta name="description" content="${total} terms from the ${['zero', 'one', 'two', 'three', 'four', 'five', 'six'][liveGroups.length] || liveGroups.length} Parts, each defined where it is taught, with a link to the Part that develops it.">`
 );
 html = html.replace(/<a class="skip-link" href="#[^"]*">/, `<a class="skip-link" href="#${esc(liveGroups[0].key)}">`);
 

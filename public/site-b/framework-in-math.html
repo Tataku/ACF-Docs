@@ -7,17 +7,17 @@
   <!-- BEGIN generated social meta — build-social-meta.mjs. Do not edit by hand. -->
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="The Adaptive Convexity Framework">
-  <meta property="og:title" content="The Framework in Math &middot; The Adaptive Convexity Framework">
-  <meta property="og:description" content="The Adaptive Convexity Framework stated as mathematics: the position score and its four components, the subtractive construction score, the translation from score to position size, and what the governance layer does and does not do.">
-  <meta property="og:url" content="https://docs.acfdashboard.com/framework-in-math">
-  <meta property="og:image" content="https://docs.acfdashboard.com/site-b/brand/social/framework-in-math-light.png">
+  <meta property="og:title" content="Part 6 — Convexity and Framework Integrity Scoring · The Adaptive Convexity Framework">
+  <meta property="og:description" content="The two-score execution kernel of the framework: CIS quantifies position quality, FIS validates construction integrity, and a weekly workflow turns both measurements into disciplined action.">
+  <meta property="og:url" content="https://docs.acfdashboard.com/part-6-convexity-framework-integrity-scoring">
+  <meta property="og:image" content="https://docs.acfdashboard.com/site-b/brand/social/part-6-convexity-scoring-light.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="The Framework in Math &middot; The Adaptive Convexity Framework">
+  <meta property="og:image:alt" content="Part 6 — Convexity and Framework Integrity Scoring · The Adaptive Convexity Framework">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="The Framework in Math &middot; The Adaptive Convexity Framework">
-  <meta name="twitter:description" content="The Adaptive Convexity Framework stated as mathematics: the position score and its four components, the subtractive construction score, the translation from score to position size, and what the governance layer does and does not do.">
-  <meta name="twitter:image" content="https://docs.acfdashboard.com/site-b/brand/social/framework-in-math-light.png">
+  <meta name="twitter:title" content="Part 6 — Convexity and Framework Integrity Scoring · The Adaptive Convexity Framework">
+  <meta name="twitter:description" content="The two-score execution kernel of the framework: CIS quantifies position quality, FIS validates construction integrity, and a weekly workflow turns both measurements into disciplined action.">
+  <meta name="twitter:image" content="https://docs.acfdashboard.com/site-b/brand/social/part-6-convexity-scoring-light.png">
   <!-- END generated social meta -->
   <!-- Brand / icon identity. The SVG is the mark browsers scale; it carries its
        own prefers-color-scheme rules because a tab strip's colour is not the
@@ -206,7 +206,7 @@
         <h1 class="doc-title">The Framework in Math</h1>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">The Parts explain what the framework believes and why. This page states what it computes. Every quantity below is the value the live engine actually uses, expressed as a formula rather than a paragraph, so that a practitioner, an advisor, or a sceptic can check the arithmetic instead of taking the prose on faith.</p>
+        <p class="prose-lead">The Parts explain what the framework believes and why. This page states what it computes. Every computed quantity below is taken from the dashboard&rsquo;s code and written as a formula, so a practitioner, an advisor or a skeptic can check the arithmetic. Where the code has no input yet, where a number is doctrine a person follows, or where it is illustrative, the page says so.</p>
         <p><a class="part-ref" href="#reading">How to read this</a> <a class="part-ref" href="#cis-math">The position score</a> <a class="part-ref" href="#fis-math">The construction score</a> <a class="part-ref" href="#sizing-math">Score to size</a> <a class="part-ref" href="#governance-math">What fires, and what it does</a> <a class="part-ref" href="#bitcoin-math">The backbone</a> <a class="part-ref" href="#tax-math">Wrappers and basis</a> <a class="part-ref" href="#evidence-math">Evidence and confidence</a> <a class="part-ref" href="#nds-math">The next dollar</a></p>
       </div>
     </header>
@@ -217,37 +217,27 @@
         <h2 class="section-title" id="reading-title">How to read this page.</h2>
       </div>
       <div class="measure prose">
-        <p>Three conventions govern everything below.</p>
-        <p><strong>Authority.</strong> Where a shipped specification and the running engine disagree, the engine is quoted, because the engine is what scores your portfolio. Where the two have genuinely forked, the fork is stated rather than resolved silently.</p>
-        <p><strong>Classification.</strong> Not every number carries the same weight. A quantity is one of four things, and the difference matters more than the value.</p>
+        <p>A formula is only as useful as your sense of how much to trust it, so three conventions come first.</p>
+        <p><strong>Authority.</strong> Where a published specification and the running engine disagree, this page quotes the engine, because the engine is what scores your portfolio. Where the two have forked, the page says so rather than picking a side without telling you.</p>
+        <p><strong>Classification.</strong> Not every number carries the same weight. Each quantity below is one of four kinds, and the kind matters more than the value.</p>
       </div>
 
       <div class="measure-feature">
-        <svg class="dc-art-defs" aria-hidden="true" focusable="false">
-        <defs>
-        <linearGradient id="dc-g-accent-down" x1="0" y1="0" x2="0" y2="1"><stop class="art-stop-accent" offset="0"/><stop class="art-stop-accent-out" offset="1"/></linearGradient>
-        <linearGradient id="dc-g-accent-up" x1="0" y1="1" x2="0" y2="0"><stop class="art-stop-accent" offset="0"/><stop class="art-stop-accent-out" offset="1"/></linearGradient>
-        <linearGradient id="dc-g-ink-down" x1="0" y1="0" x2="0" y2="1"><stop class="art-stop-ink" offset="0"/><stop class="art-stop-ink-out" offset="1"/></linearGradient>
-        <linearGradient id="dc-g-ink-right" x1="0" y1="0" x2="1" y2="0"><stop class="art-stop-ink-out" offset="0"/><stop class="art-stop-ink" offset="1"/></linearGradient>
-        <linearGradient id="dc-g-ink-left" x1="1" y1="0" x2="0" y2="0"><stop class="art-stop-ink-out" offset="0"/><stop class="art-stop-ink" offset="1"/></linearGradient>
-        <pattern id="dc-p-dots" width="12" height="12" patternUnits="userSpaceOnUse"><circle class="art-ground-dot" cx="1.5" cy="1.5" r="1.3"/></pattern>
-        </defs>
-        </svg>
-        <div class="failure-modes" data-kind="taxonomy">
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="taxonomy" data-figure="fixed"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell art-cell-lit art-cell-solid art-move" x="24" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="134.5" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="245" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="355.5" y="30" width="100.5" height="44" rx="3"/></g><circle class="art-dot art-move art-pop" cx="74.25" cy="52" r="4"/></svg></span><span class="name">Doctrine</span><p>Structural. Changing it means you are running a different framework, not a tuned one.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="taxonomy" data-figure="tunable"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell" x="24" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell art-cell-lit art-cell-dashed art-move" x="134.5" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="245" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="355.5" y="30" width="100.5" height="44" rx="3"/></g><path class="art-thesis art-draw art-d2" pathLength="1" d="M156.75 58C170.75 58 176.75 44 184.75 46S198.75 60 212.75 50"/><circle class="art-dot art-move art-pop" cx="212.75" cy="50" r="4"/></svg></span><span class="name">Parameter</span><p>Tunable inside a documented envelope, with the reasoning written down.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="taxonomy" data-figure="derived"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell" x="24" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="134.5" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell art-cell-lit art-cell-thin art-move" x="245" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="355.5" y="30" width="100.5" height="44" rx="3"/></g><path class="art-context art-in art-d1" d="M74.25 22C74.25 12 295.25 12 295.25 30"/><path class="art-context art-in art-d1" d="M184.75 22C184.75 12 295.25 12 295.25 30"/><path class="art-context art-in art-d1" d="M405.75 22C405.75 12 295.25 12 295.25 30"/><circle class="art-dot art-move art-pop" cx="295.25" cy="30" r="4"/></svg></span><span class="name">Derived</span><p>An accounting identity. It follows from the others and cannot be set independently.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="taxonomy" data-figure="illustrative"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell" x="24" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="134.5" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="245" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell art-cell-lit art-cell-ghost art-move" x="355.5" y="30" width="100.5" height="44" rx="3"/></g><path class="art-ghost art-in art-d3" d="M375.75 62c10-14 20-22 30-14s20 18 30 6"/></svg></span><span class="name">Illustrative</span><p>Representative of the shape, not a forecast and not a promise.</p></div>
+        <div class="failure-modes">
+          <div><span class="name">Doctrine</span><p>Structural. Change it and you are running a different framework rather than tuning this one.</p></div>
+          <div><span class="name">Parameter</span><p>Tunable inside a documented envelope, with the reasoning written down.</p></div>
+          <div><span class="name">Derived</span><p>An accounting identity. It follows from the others and cannot be set on its own.</p></div>
+          <div><span class="name">Illustrative</span><p>It shows the shape of an idea. It is neither a forecast nor a promise.</p></div>
         </div>
       </div>
 
       <div class="measure prose">
-        <p><strong>Coded, or written down.</strong> Some of what the framework asserts runs as code against your portfolio. Some of it is doctrine a human follows. Those are not the same claim, and this page separates them wherever the difference could mislead. A threshold is called <em>live</em> only when a running consumer changes state because of it.</p>
+        <p><strong>Coded, or written down.</strong> Some of what the framework asserts runs as code against your portfolio; some of it is a written rule a person follows. This page keeps the two apart wherever mixing them could mislead. A threshold is called <em>live</em> only when a running consumer changes state because of it. Logic that exists but receives no input is called <em>coded but not yet fed</em>, and the page names what is missing. Descriptions of what the dashboard does are as of September 2026.</p>
       </div>
 
       <aside class="callout callout-info">
         <p class="callout-label">What this page is not</p>
-        <p>It is a description of computation, not advice. Nothing here recommends buying, selling, holding, or sizing any position. Score surfaces in the software carry the same disclaimer, for the same reason.</p>
+        <p>It describes computation. It is not advice, and nothing here recommends buying, selling, holding or sizing any position. The Next Dollar column and several of the software&rsquo;s reports carry the same disclaimer, for the same reason.</p>
       </aside>
     </section>
 
@@ -257,42 +247,43 @@
         <h2 class="section-title" id="cis-math-title">CIS: the position score.</h2>
       </div>
       <div class="measure prose">
-        <p>The Convexity Integrity Score is a weighted sum of four components, each scored 0 to 100, producing a 0 to 100 result. In its reference form:</p>
+        <p>Everything else on this page starts from one number per holding. The <button type="button" class="gloss" data-gloss="cis" aria-expanded="false">Convexity Integrity Score</button> is a weighted sum of four components, each scored 0 to 100, producing a 0 to 100 result. At the reference weights:</p>
         <p><strong>CIS = (C &times; 0.40) + (R &times; 0.25) + (M &times; 0.25) + (E &times; 0.10)</strong></p>
-        <p>The four-component structure is <em>doctrine</em>. The weights are <em>parameters</em>: they are read from the framework&rsquo;s source of truth rather than asserted per session, and an operating thesis may shift them.</p>
+        <p>The four-component structure is <em>doctrine</em>. The weights are <em>parameters</em>: the engine holds them in one place, and the active thesis shifts them within a fixed envelope, described below.</p>
       </div>
 
       <div class="measure">
-        <p class="sub-meta">Vocabulary &middot; five scores, one name</p>
+        <p class="sub-meta">Vocabulary &middot; six scores, one name</p>
         <h3 class="sub-title">Which CIS are we talking about?</h3>
       </div>
       <div class="measure prose">
-        <p>Five distinct objects travel under the name. Comparing one to another and calling the difference a bug is the most common misreading of the whole system, so they are separated here first.</p>
+        <p>Six distinct objects travel under the name. Comparing one with another and calling the difference a bug is the easiest way to misread the system, so they are separated here first.</p>
       </div>
 
       <div class="compare compare-wrap">
         <table>
-          <caption>The five score objects, and which one is <em>the</em> CIS</caption>
+          <caption>The six score objects, and which one is <em>the</em> CIS</caption>
           <thead>
             <tr><th scope="col">Object</th><th scope="col">What it is</th><th scope="col">Persists</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row">Neutral</th><td data-label="What it is">The thesis-free weighted sum: raw components against the reference weights. No thesis, no sector scaling, no macro downweight.</td><td data-label="Persists">In the score record</td></tr>
-            <tr><th scope="row" class="col-primary">Adjusted</th><td data-label="What it is"><strong>The canonical CIS.</strong> The thesis-adjusted aggregate after the full cascade below.</td><td data-label="Persists">Yes &mdash; as a float, unrounded</td></tr>
-            <tr><th scope="row">Effective</th><td data-label="What it is">A portfolio-contextual overlay for evaluating a candidate against what you already hold: Adjusted plus gap fit (0 to +6), minus overlap (0 to &minus;6), plus role demand (0 to +4).</td><td data-label="Persists">Never</td></tr>
+            <tr><th scope="row">Neutral</th><td data-label="What it is">The four components summed at the reference weights, with no sector-relevance scaling and no macro downweight. It is not thesis-free: the thesis inputs that live inside the components (volatility tolerance in risk, your sector preferences and the thesis themes in macro and optionality) are already in it.</td><td data-label="Persists">In the score record</td></tr>
+            <tr><th scope="row" class="col-primary">Adjusted</th><td data-label="What it is"><strong>The canonical CIS.</strong> The thesis-weighted aggregate after the full cascade below.</td><td data-label="Persists">Yes, as an unrounded float</td></tr>
+            <tr><th scope="row">Wrapper-adjusted</th><td data-label="What it is">The canonical CIS times a wrapper-and-posture factor (0.97 to 1.04), rounded; shown beside a holding and read by governance thresholds and the Next Dollar Score.</td><td data-label="Persists">Recomputed for display</td></tr>
+            <tr><th scope="row">Effective</th><td data-label="What it is">A portfolio-contextual overlay for judging a candidate against what you already hold: Adjusted, plus gap fit (0 to 6), less an overlap penalty (0 to 6), plus role demand (0 to 4), held within 0 to 100.</td><td data-label="Persists">Never</td></tr>
             <tr><th scope="row">Rank</th><td data-label="What it is">Ordering mechanics for a list. Not a decision value.</td><td data-label="Persists">No</td></tr>
-            <tr><th scope="row">Next Dollar</th><td data-label="What it is">A separate marginal-capital score that <em>consumes</em> Adjusted CIS at weight 0.45. Its own surface, its own bands.</td><td data-label="Persists">Own record</td></tr>
+            <tr><th scope="row">Next Dollar</th><td data-label="What it is">A separate marginal-capital score that <em>consumes</em> the position&rsquo;s wrapper-adjusted CIS at a base weight of 0.30. Its own surface, its own bands.</td><td data-label="Persists">Own record</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="compare-key">The difference between an Effective value on one screen and an Adjusted value on another is the system working as designed, not a disagreement</p>
+      <p class="compare-key">When two screens show different numbers for one holding, check which object each one shows: they answer different questions, and both can be right</p>
 
       <div class="measure">
-        <p class="sub-meta">Weights &middot; reference and live</p>
+        <p class="sub-meta">Weights &middot; reference and thesis</p>
         <h3 class="sub-title">The thesis moves the weights, inside an envelope.</h3>
       </div>
       <div class="measure prose">
-        <p>The 40/25/25/10 split above is the reference weighting the framework is described by. In production each thesis profile carries its own weighting, which is why a position can score differently under two theses without either score being wrong.</p>
+        <p>The 40/25/25/10 split above is the reference weighting. When a thesis is active, its profile sets the weights, which is why one position can score differently under two theses without either score being wrong.</p>
       </div>
 
       <div class="compare compare-wrap">
@@ -303,67 +294,72 @@
           </thead>
           <tbody>
             <tr><th scope="row" class="col-primary">Reference weighting</th><td data-label="C">0.40</td><td data-label="R">0.25</td><td data-label="M">0.25</td><td data-label="E">0.10</td></tr>
-            <tr><th scope="row">Fourth Turning (default)</th><td data-label="C">0.35</td><td data-label="R">0.30</td><td data-label="M">0.25</td><td data-label="E">0.10</td></tr>
-            <tr><th scope="row">Singularity</th><td data-label="C">0.45</td><td data-label="R">0.20</td><td data-label="M">0.25</td><td data-label="E">0.10</td></tr>
+            <tr><th scope="row">Fourth Turning</th><td data-label="C">0.35</td><td data-label="R">0.30</td><td data-label="M">0.25</td><td data-label="E">0.10</td></tr>
+            <tr><th scope="row">Singularity Accelerationist</th><td data-label="C">0.45</td><td data-label="R">0.20</td><td data-label="M">0.25</td><td data-label="E">0.10</td></tr>
             <tr><th scope="row">Monetary Debasement</th><td data-label="C">0.35</td><td data-label="R">0.25</td><td data-label="M">0.30</td><td data-label="E">0.10</td></tr>
             <tr><th scope="row">Capital Preservation</th><td data-label="C">0.30</td><td data-label="R">0.35</td><td data-label="M">0.20</td><td data-label="E">0.15</td></tr>
+            <tr><th scope="row">Conflict Economy</th><td data-label="C">0.30</td><td data-label="R">0.30</td><td data-label="M">0.30</td><td data-label="E">0.10</td></tr>
+            <tr><th scope="row">Re-industrialization</th><td data-label="C">0.35</td><td data-label="R">0.25</td><td data-label="M">0.30</td><td data-label="E">0.10</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="compare-key">Every profile stays inside the envelope: no component moves more than 0.10 from its reference weight, none falls below 0.05 or rises above 0.50, and the four are renormalized so they always sum to 1.0</p>
+      <p class="compare-key">Every profile stays inside the envelope: no component moves more than 0.10 from its reference weight, none falls below 0.05 or rises above 0.50, and the four are renormalized so they always sum to 1.0. With no thesis selected, the software does not choose one for you; any score computed without a thesis uses the reference weighting</p>
 
       <div class="measure prose">
-        <p>One further adjustment is automatic rather than chosen. When the macro read itself is low or medium confidence, the macro weight is reduced (to 60 or 80 percent of its value) and the reduction is redistributed evenly to convexity and risk. A weakly-evidenced macro view is not permitted to carry full weight.</p>
+        <p>One further adjustment is built in rather than chosen. When the macro read is low or medium confidence, the macro weight drops to 60 or 80 percent of its value, and the difference moves evenly to convexity and risk. A thinly evidenced macro view does not get to carry full weight.</p>
       </div>
 
       <div class="measure">
-        <p class="sub-meta">Component C &middot; weight 0.40</p>
+        <p class="sub-meta">Component C &middot; reference weight 0.40</p>
         <h3 class="sub-title">Convexity and optionality.</h3>
       </div>
       <div class="measure prose">
-        <p>The heaviest component, because asymmetric upside is the framework&rsquo;s object. It is built from four capped sub-scores that sum to 100: headroom 35, optionality 25, catalyst density 20, scarcity 20.</p>
-        <p><strong>Headroom (0&ndash;35)</strong> asks how much larger the addressable market is than the company. Let <em>H</em> be that ratio, capped at 30&times;:</p>
+        <p>The heaviest component at the reference weights, because asymmetric upside is the framework&rsquo;s objective. It is built from four capped sub-scores that sum to 100: headroom 35, optionality 25, catalyst density 20, scarcity 20.</p>
+        <p><strong><button type="button" class="gloss" data-gloss="headroom" aria-expanded="false">Headroom</button> (0&ndash;35)</strong> asks how much larger the addressable market is than the company. Let <em>H</em> be that ratio, capped at 30&times;:</p>
         <p><strong>headroom = 35 &times; ln(1 + H) / ln(31)</strong>, where <strong>H = min(TAM &divide; market cap, 30)</strong></p>
         <p>Logarithmic, so the first multiple of headroom counts for far more than the twentieth: 30&times; scores 35, 10&times; scores 24.4, 5&times; scores 18.3, 3&times; scores 14.1, and parity, an addressable market exactly the size of the company, still scores 7.1; the curve reaches zero only when the ratio does. The shape is <em>doctrine</em>; the 30&times; cap and the log base are <em>parameters</em>.</p>
-        <p><strong>Optionality (0&ndash;25)</strong> is size-convexity plus sector convexity. Size-convexity is a continuous curve over market capitalisation that <em>peaks between three and forty billion dollars</em> and decays in both directions &mdash; the operational form of the claim that capitalisation constrains how far a position can travel. Below 2bn it ramps 14&rarr;16; from 2 to 3bn, 16&rarr;18; it holds flat at 18 through 40bn; decays 18&rarr;10 by 100bn, 10&rarr;4 by 200bn, then tails exponentially toward 2. An unknown capitalisation scores the neutral midpoint rather than a guess. Funds route through the same curve on the weighted-average capitalisation of what they hold, not on their own assets under management.</p>
-        <p><strong>Catalyst density (0&ndash;20)</strong> prices identifiable, dated reasons for a re-rating. Each catalyst earns:</p>
+        <p><strong>Optionality (0&ndash;25)</strong> is size-convexity (0 to 18) plus sector convexity (0 to 7), and the thesis themes can add up to 4 of the sector points. Size-convexity is a continuous curve over market capitalization that <em>peaks between three and forty billion dollars</em> and falls away on both sides, which is the arithmetic form of the claim that size limits how far a company can travel. It is 14 below $0.5 billion and ramps to 16 at $2 billion; climbs from 16 to 18 between $2 billion and $3 billion; holds at 18 through $40 billion; falls to 10 by $100 billion and to 4 by $200 billion; then tails off exponentially toward 2. An unknown capitalization scores the midpoint, 9, rather than a guess. Four override flags (pricing power, a margin inflection, an embedded call option, regulatory leverage) can lift a company above $40 billion back toward 18; they are coded but not yet fed, because nothing in the software sets them today.</p>
+        <p>Funds score through the same size-convexity curve as equities, on the weighted-average market cap of what they hold rather than their own assets: a broad index fund lands in the curve&rsquo;s low, mega-cap zone, while a niche fund of smaller names can reach its peak. No data provider supplies that weighted average today, so the figure is usually an estimate (a language-model figure or a category average), and the score records which one it used.</p>
+        <p><strong><button type="button" class="gloss" data-gloss="catalyst-density" aria-expanded="false">Catalyst density</button> (0&ndash;20)</strong> prices identifiable, dated reasons for a re-rating. Each catalyst earns:</p>
         <p><strong>points = impact &times; probability &times; independence &times; confidence &times; time decay</strong></p>
-        <p>Impact is tiered (transformational 7, major 5, moderate 3.5, minor 2). Independence discounts catalysts that are really the same catalyst. Time decay is hyperbolic &mdash; <strong>1 &divide; (1 + months out &divide; 12)</strong> &mdash; so a catalyst today counts fully, one at six months two-thirds, one at a year half, one at two years a third. The top four catalysts are summed, with a small bonus for spanning several tiers rather than stacking one.</p>
-        <p><strong>Scarcity (0&ndash;20)</strong> prices what cannot be replicated. Each moat signal earns <strong>type weight &times; strength &times; durability &times; confidence</strong>, where type weight ranges from protocol scarcity at 5.0 down through regulatory licence, supply constraint, network effects, patents, capital intensity and data, to switching costs at 3.0; durability multiplies by 1.0 for permanent down to 0.45 for short-lived. Top five signals, plus a bonus for breadth of moat type.</p>
+        <p>Impact is tiered: transformational 7, major 5, moderate 3.5, minor 2. Independence runs from 0.5 to 1.0, so a catalyst that repeats another is discounted by up to half. Time decay is hyperbolic, <strong>1 &divide; (1 + months out &divide; 12)</strong>: a catalyst today counts fully, one at six months two-thirds, one at a year half, one at two years a third. Only the top four count, and catalysts spanning different impact tiers earn up to 3 more points.</p>
+        <p>That formula runs on a researched catalyst list when one exists. Without one, the engine scores a sector template list, blended toward a neutral 8 at 70 percent weight, or failing that a thematic prior. A catalyst score with no researched catalysts behind it is a sector estimate, and the score&rsquo;s breakdown records which source it came from.</p>
+        <p><strong>Scarcity (0&ndash;20)</strong> prices what cannot be replicated. Each moat signal earns <strong>type weight &times; strength &times; durability &times; confidence</strong>, where type weight runs from protocol scarcity at 5.0 down through regulatory license, supply constraint, network effects, patents, capital intensity and data, to switching costs at 3.0; durability multiplies by 1.0 for permanent down to 0.45 for short-lived. The top five signals count, plus a bonus for breadth of moat type. Without researched signals, scarcity falls back the same way catalysts do.</p>
       </div>
 
       <div class="measure">
-        <p class="sub-meta">Component R &middot; weight 0.25</p>
+        <p class="sub-meta">Component R &middot; reference weight 0.25</p>
         <h3 class="sub-title">Risk and fragility.</h3>
       </div>
       <div class="measure prose">
-        <p>Survivability under stress, not volatility. Higher is <em>less</em> fragile. Four sub-scores sum to 100: balance sheet 30, business model 30, factor correlation 20, tail risk 20. There is no sector bonus &mdash; the component is those four and nothing else.</p>
-        <p>The thesis enters risk through exactly one channel, and it is bounded:</p>
+        <p>Survivability under stress, which is a different thing from volatility. Higher is <em>less</em> fragile. Four sub-scores sum to 100: balance sheet 30, business model 30, factor correlation 20, tail risk 20. There is no sector bonus.</p>
+        <p>The thesis enters risk through one bounded channel:</p>
         <p><strong>risk penalty factor = clamp(2.0 &minus; thesis volatility multiplier, 0.5, 1.5)</strong></p>
-        <p>A thesis with a higher tolerance for volatility softens risk penalties; one with lower tolerance sharpens them. It applies only to factor correlation and tail risk. Balance sheet and business model are untouched by the thesis, deliberately.</p>
-        <p>And it stops at insolvency. When a company shows a current ratio below 0.8 <em>and</em> debt-to-equity above 3.0 &mdash; on directly observed data, not a proxy and not a language-model estimate &mdash; the penalty factor is floored at 0.90. <strong>A thesis can soften a volatility penalty. It cannot forgive a balance sheet.</strong></p>
-        <p>Factor correlation measures correlation to macro factors only. Overlap with the rest of your portfolio is deliberately excluded here &mdash; that is the construction score&rsquo;s job, and counting it twice would double-penalise a concentrated book.</p>
+        <p>A thesis with more tolerance for volatility softens the risk penalties; one with less sharpens them. The factor applies only to factor correlation and tail risk. Balance sheet and business model are untouched by the thesis, on purpose.</p>
+        <p>And it stops at insolvency. When a company shows a current ratio below 0.8 <em>and</em> debt-to-equity above 3.0, on reliable data (observed, derived from observed inputs, or a stale balance-sheet reading, never a proxy or a language-model estimate), the penalty factor is floored at 0.90. <strong>A thesis can soften a volatility penalty. It cannot forgive a balance sheet.</strong></p>
+        <p>Factor correlation measures correlation to macro factors only. Overlap with the rest of your portfolio is left out on purpose: the construction score handles concentration, and counting it here as well would charge a concentrated book twice.</p>
       </div>
 
       <div class="measure">
-        <p class="sub-meta">Component M &middot; weight 0.25</p>
+        <p class="sub-meta">Component M &middot; reference weight 0.25</p>
         <h3 class="sub-title">Macro alignment.</h3>
       </div>
       <div class="measure prose">
-        <p>Regime fit, not forecasting. Three sub-scores sum to 100: regime fit 40, carry 30, policy and flow 30.</p>
-        <p>Carry has been dividend-neutral since v3.0 &mdash; yield is not scored as quality. It sits at a neutral baseline of 20 for equities and preferreds, with a small bump where a return-of-capital structure genuinely belongs in a taxable account, and a bounded adjustment (&plusmn;2) from live macro conditions.</p>
-        <p>Regime fit and policy are written upstream from the sector posture, theme overlap, and the live macro regime, each bounded: regime fit moves at most &plusmn;4, policy at most &plusmn;3. Bounding them is the point &mdash; a macro read is allowed to tilt a score, never to determine it.</p>
+        <p>Regime fit, not forecasting. Three sub-scores sum to 100: regime fit (40 points), carry direction (30) and policy and flow (30), read against the macro thesis of <a class="part-ref" href="/part-2-lineage-macro-thesis#macro-thesis">Part 2</a>.</p>
+        <p>Carry has been dividend-neutral since v3.0: yield is not scored as quality. Without a supplied carry score it sits at a neutral baseline of 20 for equities and preferreds (22 for income funds), plus a fixed per-ticker offset of up to 6 points either way, a +3 for a return-of-capital preferred held as Ballast outside a known tax-advantaged account, and a macro adjustment of at most 2 points. Where the dashboard has beta or drawdown data but no yield, it supplies a stability proxy instead (10 to 27 points, from beta and one-year drawdown), and the bump and the macro adjustment do not apply.</p>
+        <p>Regime fit and policy are written upstream. Your sector preferences (the over, neutral or underweight tilt you set for each sector) set the base: regime fit 32, 22 or 10; policy 24, 16 or 7. Theme overlap with the thesis adds up to 6 and 4 points, and extracted policy evidence can add up to 5. The live macro regime then moves regime fit by at most 4 and policy by at most 3. A macro read can tilt these sub-scores; your own sector preferences move them much further.</p>
+        <p>The live macro regime is one of four labels (hawkish, dovish, stagflationary, neutral) set by the direction of three series: the Fed funds rate, CPI inflation and the unemployment rate. At least two must show a confirmed trend, or the label stays neutral. Rates, inflation and unemployment all rising read stagflationary; rising rates, or rising inflation without falling rates, read hawkish; falling rates without rising inflation read dovish; anything else is neutral. A new label must repeat across two consecutive syncs before it replaces the old one, and data more than 48 hours old leaves scores unadjusted. The yield curve is recorded but does not enter the label, and unemployment decides only the stagflationary case; there is no direct measure of output growth. By sector group, the label moves regime fit by at most 4 points, policy by at most 3 and carry by at most 2, a few CIS points at most. A second, portfolio-level reading (risk-on, selective, transition, defensive) combines this label with the VIX, high-yield spreads, tripwire alerts and how broadly your holdings are leading; it shapes the Next Dollar Score, not CIS.</p>
       </div>
 
       <div class="measure">
-        <p class="sub-meta">Component E &middot; weight 0.10</p>
+        <p class="sub-meta">Component E &middot; reference weight 0.10</p>
         <h3 class="sub-title">Execution and sentiment.</h3>
       </div>
       <div class="measure prose">
-        <p>Deliberately the lightest weight: momentum confirms, it never dominates. Two sub-scores of 50: execution quality (momentum) and market acceptance (turnover).</p>
-        <p>Momentum is defined precisely, and the definition is enforced: <strong>(price now &minus; price three months ago) &divide; price three months ago</strong>, stored as a ratio, requiring at least 60 observations. Below that minimum, or if a one-month series is substituted for a three-month one, the value is demoted to a proxy and loses weight. A language model may not supply it at all.</p>
-        <p>Market acceptance is turnover &mdash; thirty-day dollar volume over market capitalisation, clamped to a sane range and scored on a tier ladder. It asks whether the market is actually transacting in the name, which is a different question from whether the price went up.</p>
-        <p>Preferred equity runs an inverted momentum ladder, because for an instrument held for its carry, <em>stability</em> is the good outcome: the flattest tape scores highest.</p>
+        <p>E measures whether reality is starting to validate the thesis. It carries the least weight because execution follows quality: momentum confirms a thesis, and it never gets to dominate one. Two sub-scores of 50 points each: execution quality, read from three-month price momentum with a volatility adjustment, and market acceptance, read from trading turnover. That is the equity route; funds use expense ratio and assets, and Bitcoin and crypto have their own inputs.</p>
+        <p>Momentum has a strict definition, and the engine checks it: <strong>(price now &minus; price three months ago) &divide; price three months ago</strong>, stored as a ratio and requiring at least 60 observations. Below that minimum, or when a one-month series stands in for a three-month one, the value is demoted to a proxy and loses weight. A language model may not supply it at all.</p>
+        <p>Market acceptance is turnover: thirty-day dollar volume over market value, clamped to a sensible range and scored on a tier ladder. It asks whether the market is actually trading the name, which is a separate question from whether the price went up.</p>
+        <p>Preferred equity runs an inverted momentum ladder. For an instrument held for its carry, <em>stability</em> is the good outcome, so the flattest tape scores highest.</p>
       </div>
 
       <div class="measure">
@@ -371,8 +367,8 @@
         <h3 class="sub-title">Asset class decides the scorer, in strict precedence.</h3>
       </div>
       <div class="measure prose">
-        <p>Private &rarr; Bitcoin-class &rarr; fund &rarr; crypto &rarr; equity. First match wins, and there is no fallthrough to the equity path. Bitcoin-class means the asset itself or a spot wrapper for it, and it is checked <em>before</em> the fund branch so that a spot Bitcoin fund scores through the monetary model rather than as a generic fund. Cash sentinels are never scored on the market path at all.</p>
-        <p>This is the framework&rsquo;s central anti-fabrication control. The historical failure it prevents is scoring an instrument against inputs that do not exist for it &mdash; a preferred share graded on revenue growth, Bitcoin graded on a balance sheet &mdash; and producing a confident number from nothing.</p>
+        <p>Private &rarr; Bitcoin-class &rarr; fund &rarr; crypto &rarr; equity. First match wins, and nothing falls through to the equity path. Bitcoin-class means the asset itself or a spot wrapper for it, and it is checked <em>before</em> the fund branch so that a spot Bitcoin fund scores through the monetary model rather than as a generic fund. Cash sentinels are never scored on the market path at all.</p>
+        <p>This is the framework&rsquo;s central guard against fabrication. The failure it prevents is scoring an instrument against inputs that do not exist for it (a preferred share graded on revenue growth, Bitcoin graded on a balance sheet) and producing a confident number from nothing.</p>
       </div>
 
       <div class="measure">
@@ -380,15 +376,15 @@
         <h3 class="sub-title">The thesis is bounded, and the bounds are the doctrine.</h3>
       </div>
       <div class="measure-feature">
-        <div class="failure-modes" data-kind="envelope">
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="envelope" data-figure="band"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-ref art-in art-d1" d="M24 34H456"/><path class="art-ref art-in art-d1" d="M24 70H456"/><path class="art-field art-move art-in art-d1" d="M24 34H456V70H24Z"/><path class="art-glow art-draw art-d2" pathLength="1" d="M24 58C90 58 120 40 180 44S260 66 330 52 400 40 456 46"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M24 58C90 58 120 40 180 44S260 66 330 52 400 40 456 46"/><circle class="art-dot art-move art-pop" cx="456" cy="46" r="4"/></svg></span><span class="name">Weights</span><p>Moves them, inside the &plusmn;0.10 envelope, renormalized.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="envelope" data-figure="band"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-ref art-in art-d1" d="M24 34H456"/><path class="art-ref art-in art-d1" d="M24 70H456"/><path class="art-field art-move art-in art-d1" d="M24 34H456V70H24Z"/><path class="art-glow art-draw art-d2" pathLength="1" d="M24 58C90 58 120 40 180 44S260 66 330 52 400 40 456 46"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M24 58C90 58 120 40 180 44S260 66 330 52 400 40 456 46"/><circle class="art-dot art-move art-pop" cx="456" cy="46" r="4"/></svg></span><span class="name">Sector relevance</span><p>Scales convexity and macro only, within 0.80 to 1.20. If risk is already poor, the uplift is damped in proportion.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="envelope" data-figure="floor"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-ref art-in art-d1" d="M24 30H456"/><path class="art-ceiling art-in art-d1" d="M24 74H456"/><path class="art-field art-move art-in art-d1" d="M24 30H456V74H24Z"/><path class="art-glow art-draw art-d2" pathLength="1" d="M24 40C80 40 110 72 160 73S230 42 290 44 360 72 400 73 440 60 456 56"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M24 40C80 40 110 72 160 73S230 42 290 44 360 72 400 73 440 60 456 56"/><circle class="art-dot art-move art-pop" cx="456" cy="56" r="4"/></svg></span><span class="name">Volatility tolerance</span><p>Softens or sharpens risk penalties, floored at insolvency.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="envelope" data-figure="closed"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-ceiling art-in art-d1" d="M40 28H24V78H40M440 28H456V78H440"/><path class="art-ghost art-in art-d3" d="M60 54H420"/></svg></span><span class="name">Nothing else</span><p>Execution is thesis-invariant. Headroom, catalysts, balance sheet and margins are thesis-invariant. The posture-preference bonus is computed and displayed but is <em>not</em> applied to the score.</p></div>
+        <div class="failure-modes">
+          <div><span class="name">Weights</span><p>Moves them, inside the &plusmn;0.10 envelope, renormalized.</p></div>
+          <div><span class="name">Sector relevance</span><p>Scales convexity and macro only, within 0.80 to 1.20. When the risk score is below 45, any uplift is damped toward 1.0 in proportion (uplift &times; risk &divide; 45).</p></div>
+          <div><span class="name">Volatility tolerance</span><p>Softens or sharpens risk penalties, floored at insolvency.</p></div>
+          <div><span class="name">Inside the components</span><p>Your sector preferences and the thesis themes set the regime-fit and policy sub-scores of macro, and theme overlap adds up to 4 points of optionality. Execution, headroom, catalysts, balance sheet and margins are thesis-invariant. The posture-preference bonus is computed and displayed but is <em>not</em> applied to the score.</p></div>
         </div>
       </div>
       <div class="measure prose">
-        <p>Because the neutral score is emitted alongside the adjusted one, the whole thesis effect on any position is a single subtraction. Nothing about it is hidden. A typical thesis moves a score 3 to 25 points; beyond 30 is worth investigating.</p>
+        <p>The engine records the neutral score and a thesis delta (the weighted sum minus neutral) with every score. That delta captures what the weights and sector relevance do, but it also carries the macro downweight and, for Bitcoin, the addressable-market penalty in the cascade below, and neither of those is a thesis effect. It cannot show the thesis inputs inside the components, because they sit in both numbers. Subtracting Neutral from the final Adjusted score would also mix in the later evidence stages, so read the recorded delta instead. As a rule of thumb, a thesis delta of 3 to 25 points is typical; beyond 30 is worth investigating.</p>
       </div>
 
       <div class="measure">
@@ -396,8 +392,8 @@
         <h3 class="sub-title">Delta clamps.</h3>
       </div>
       <div class="measure prose">
-        <p>An update is capped by how good the evidence behind it is. Low confidence permits a move of &plusmn;3 points, medium &plusmn;5, high &plusmn;8, and evidence derived through a proxy rather than observed directly &plusmn;6. Two situations warrant wider bounds because a baseline is being set rather than adjusted: initial scoring permits &plusmn;20 and a material thesis change &plusmn;15.</p>
-        <p>Two situations bypass the clamp entirely. A change in the scoring model&rsquo;s own version re-bases rather than adjusts, and a divergence larger than 20 points is treated as a model disagreement rather than noise. Both exist so that machinery built to resist mood cannot also suppress a genuine correction.</p>
+        <p>An update is capped by how good the evidence behind it is. Low confidence permits a move of &plusmn;3 points, medium &plusmn;5, high &plusmn;8, and evidence derived through a proxy rather than observed directly &plusmn;6. A first score has no prior, so nothing clamps it. A material thesis change permits &plusmn;15. Because any move larger than 20 points bypasses the clamp as a model disagreement (below), the bands restrain only moves between their limit and 20 points: a low-confidence move of 12 is cut to 3, a move of 21 goes through.</p>
+        <p>Three cases skip the <button type="button" class="gloss" data-gloss="delta-clamp" aria-expanded="false">delta clamp</button>: a change in the scoring model&rsquo;s version, which re-bases rather than adjusts (for crypto, a change in the model that produced the prior score); a private position, scored on a separate structural path with no clamp; and the model disagreement above, which lands in full. So moderate re-ratings, up to 20 points, earn their way across successive updates, while a larger jump passes through and is logged as a model divergence for you to inspect. Machinery built to resist mood should not also be able to suppress a real correction.</p>
       </div>
 
       <div class="measure">
@@ -418,18 +414,19 @@
           <tbody>
             <tr><th scope="row" class="col-primary">Direct</th><td data-label="Weight">1.00</td><td data-label="Meaning">Observed from an authoritative source</td></tr>
             <tr><th scope="row">Derived</th><td data-label="Weight">0.85</td><td data-label="Meaning">Computed from observed inputs</td></tr>
-            <tr><th scope="row">Stale</th><td data-label="Weight">0.70</td><td data-label="Meaning">Real but old &mdash; full weight for slow-moving fundamentals</td></tr>
+            <tr><th scope="row">Stale</th><td data-label="Weight">0.70</td><td data-label="Meaning">Real but old; full weight for slow-moving fundamentals</td></tr>
             <tr><th scope="row">Proxy</th><td data-label="Weight">0.60</td><td data-label="Meaning">A stand-in for the quantity actually wanted</td></tr>
             <tr><th scope="row">Estimated</th><td data-label="Weight">0.50</td><td data-label="Meaning">Language-model estimate</td></tr>
             <tr><th scope="row">Rejected</th><td data-label="Weight">0.00</td><td data-label="Meaning">Not admissible for this metric at all</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="compare-key">Market metrics &mdash; momentum, realised volatility, volume, drawdown &mdash; reject language-model estimates outright. Slow-moving fundamentals such as margin and leverage treat a stale reading as full-weight, because they are stale by nature</p>
+      <p class="compare-key">Market metrics (momentum, realized volatility, volume, drawdown) reject language-model estimates, with one exception: for over-the-counter equities, where an estimate is the expected source, estimated market cap and trading volume are admitted at 0.70. Slow-moving fundamentals such as margin and leverage take a stale reading at full weight, because they are stale by nature. This weighting applies on the equity and fund routes; the crypto and Bitcoin routes use their own validated signals</p>
 
       <div class="measure prose">
-        <p>Two further gates sit above the individual metrics. <strong>Coverage</strong> weighs the core fields at 0.70 and the enhancing fields at 0.30; below 70 percent the score is capped at 75, below 50 percent at 68, below 30 percent at 60. <strong>Proxy suppression</strong> caps the score at 85 when more than 40 percent of the sub-scores rest on proxies or heuristics.</p>
-        <p>Both encode the same rule: <em>incomplete evidence limits how good a score is allowed to look, and never inflates one.</em> A missing field penalises confidence. It never penalises the economics of the position.</p>
+        <p>Two further gates sit above the individual metrics. <strong>Coverage</strong> weighs the core fields at 0.70 and the enhancing fields at 0.30; below 70 percent the score is capped at 75, below 50 percent at 68, below 30 percent at 60. Language-model estimates count as present here; the admission weight is where they are discounted. <strong>Proxy suppression</strong> caps the score at 85 when more than 40 percent of the sub-scores rest on proxies or heuristics.</p>
+        <p>Both encode the same rule: <em>incomplete evidence limits how good a score is allowed to look, and never inflates one.</em> A missing field can cap how high the score may go, and it lowers the score&rsquo;s confidence. It is never scored as if the missing value were bad: an absent margin is not a zero margin.</p>
+        <p>One input is not evidence at all. Where a sub-score falls back to a baseline, and on a few data paths as well (carry, business model, market acceptance, tail risk), the engine adds a fixed offset computed from the ticker symbol, at most 20 percent of that sub-score&rsquo;s maximum either way; on the catalyst and scarcity fallbacks it can only raise the score. It is deterministic, so a ticker always gets the same offset, and it exists to keep fallback scores from bunching on one value. Read it as a tie-breaker, not a measurement: on a name scored mostly from fallbacks it can move CIS by several points (the engine&rsquo;s own design note estimates about &plusmn;5).</p>
       </div>
 
       <div class="measure">
@@ -437,7 +434,7 @@
         <h3 class="sub-title">Order of operations.</h3>
       </div>
       <div class="measure prose">
-        <p>Each stage is clamped to 0&ndash;100. Precision is preserved end to end; rounding happens only at display.</p>
+        <p>Each stage is held within 0 to 100, and the result is carried as an unrounded float: a position scores 78.3, not 75 or 80. Only the wrapper-adjusted number shown beside a holding is rounded.</p>
       </div>
       <div class="measure-feature">
         <ol class="proc-steps">
@@ -445,8 +442,9 @@
           <li><span class="step-title">Thesis weights</span><p>Applied inside the &plusmn;0.10 envelope, renormalized to sum to 1.0.</p></li>
           <li><span class="step-title">Sector relevance</span><p>Scales convexity and macro only, 0.80 to 1.20, damped when risk is weak.</p></li>
           <li><span class="step-title">Macro downweight</span><p>Low or medium macro confidence reduces the macro weight; the remainder moves to convexity and risk.</p></li>
+          <li><span class="step-title">Bitcoin-class adjustment</span><p>For Bitcoin and its spot wrappers only: convexity loses 2 points when the addressable-market input is the baseline rather than a research profile. Other assets pass through unchanged.</p></li>
           <li><span class="step-title">Weighted sum</span><p>The raw aggregate, clamped.</p></li>
-          <li><span class="step-title">Delta clamp</span><p>Movement bounded by evidence, with the documented bypasses.</p></li>
+          <li><span class="step-title">Delta clamp</span><p>Movement bounded by evidence, with the bypasses above.</p></li>
           <li><span class="step-title">Research and market-structure deltas</span><p>Bounded adjustments from deeper evidence.</p></li>
           <li><span class="step-title">Coverage cap</span><p>75, 68 or 60, by how complete the evidence is.</p></li>
           <li><span class="step-title">Proxy suppression</span><p>Capped at 85 if the score leans on proxies.</p></li>
@@ -459,7 +457,7 @@
         <h3 class="sub-title">Reading the number.</h3>
       </div>
       <div class="measure prose">
-        <p>Scores are floats and are never bucketed until display. The bands are half-open and matched from the top: 70.0 lands in Strong, 69.999 in Moderate.</p>
+        <p>Scores stay floats until display, where they fall into four bands. The bands are half-open and matched from the top: 70.0 lands in Strong, 69.999 in Moderate.</p>
       </div>
 
       <div class="measure">
@@ -467,7 +465,9 @@
       </div>
 
       <div class="measure prose">
-        <p>The framework also carries a calibration target for how a healthy universe should distribute: roughly 3 to 5 percent above 88, 15 to 20 percent from 80 to 87, 30 to 40 percent from 70 to 79, 25 to 30 percent from 60 to 69, and 10 to 15 percent below 60. It is <em>illustrative</em> and not enforced anywhere. Its use is diagnostic, and the rule attached to it is worth stating in full: <strong>if the universe cannot reach 88, audit the implementation before questioning the philosophy.</strong></p>
+        <p>In the dashboard the same bands carry numeric labels (70+, 60&ndash;69, 50&ndash;59, &le;49) and conviction tiers (core, standard, starter, avoid); the Next Dollar Score&rsquo;s strong, moderate and weak ladder cuts at different points, so read the two separately.</p>
+        <p>The framework also carries a calibration target for how a healthy universe should distribute: roughly 3 to 5 percent above 88, 15 to 20 percent from 80 to 87, 30 to 40 percent from 70 to 79, 25 to 30 percent from 60 to 69, and 10 to 15 percent below 60. It is <em>illustrative</em>, and no code applies it. Its use is diagnostic, and the rule attached to it is worth stating in full: <strong>if the universe cannot reach 88, audit the implementation before questioning the philosophy.</strong></p>
+        <p>The canonical score stops at the single holding. The overlays in the table above are where context enters, and the book as a whole is judged by the construction score, next.</p>
       </div>
     </section>
 
@@ -477,10 +477,10 @@
         <h2 class="section-title" id="fis-math-title">FIS: the construction score.</h2>
       </div>
       <div class="measure prose">
-        <p>The Framework Integrity Score is subtractive. It starts the assembled portfolio at 100 and deducts a capped penalty per bucket:</p>
+        <p>Twelve good positions can still make a bad portfolio. Where CIS judges one holding, the <button type="button" class="gloss" data-gloss="fis" aria-expanded="false">Framework Integrity Score</button> judges the book as assembled. FIS starts the assembled portfolio at 100 and deducts capped, named penalties in five buckets: allocation (25), governance (15), dead capital (15), concentration (15) and complexity (10, hard cap).</p>
         <p><strong>FIS = max(0, 100 &minus; &Sigma; min(bucket penalty, bucket cap))</strong></p>
-        <p>Because the five caps sum to 80, a valid computation can never emit below 20. That floor is <em>derived</em>, not declared: it falls out of the caps. It also means a FIS of zero is structurally impossible from a real portfolio, so a zero on a screen is a broken input, not a terrible portfolio.</p>
-        <p>An invalid portfolio returns <em>null</em> &mdash; no positions, no capital, malformed input. It never returns 100. An empty portfolio is not a perfect one, and the engine refuses to say otherwise.</p>
+        <p>Because the five caps sum to 80, a valid computation can never emit below 20. That floor is <em>derived</em>, not declared: it falls out of the caps. It is also only a bound. Governance and dead capital are value-weighted (below), so for any book of fewer than 200 positions each of those buckets stays under 10 points, and FIS stays above 30 even with every other bucket full. A zero on a screen therefore means a broken input.</p>
+        <p>An invalid portfolio (no positions, no capital, malformed input) returns <em>null</em>, never 100. An empty portfolio is not a perfect one.</p>
       </div>
 
       <div class="measure">
@@ -488,9 +488,9 @@
         <h3 class="sub-title">A bad small position is not a bad big one.</h3>
       </div>
       <div class="measure prose">
-        <p>Two of the five buckets scale their penalties by how much of the portfolio the offending position actually represents:</p>
+        <p>Two of the five buckets scale their penalties by how much of the portfolio the offending position represents:</p>
         <p><strong>severity = clamp(position value &divide; portfolio total, 0.002, 0.12)</strong></p>
-        <p>The clamp does the work at both ends. The floor means a rounding-error position still registers rather than vanishing; the ceiling means one enormous position cannot alone consume a bucket. Governance and dead capital scale this way. Allocation, complexity and concentration use flat penalties.</p>
+        <p>Governance and dead-capital charges are multiplied by the position&rsquo;s share of the portfolio, counted between 0.2 and 12 percent: a 6-point charge on a 5 percent position costs 0.3 points, and no single position can cost more than 0.72 in governance or 0.84 in dead capital. Allocation, concentration and complexity charges are flat. The floor means a rounding-error position still registers; the ceiling means one enormous position cannot fill a bucket by itself. This is what <button type="button" class="gloss" data-gloss="value-weighted" aria-expanded="false">value-weighted</button> means wherever the framework uses the term.</p>
       </div>
 
       <div class="compare compare-wrap">
@@ -500,30 +500,33 @@
             <tr><th scope="col">Bucket</th><th scope="col">Cap</th><th scope="col">Scales with size</th><th scope="col">What it prices</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">Allocation</th><td data-label="Cap">25</td><td data-label="Scales">No</td><td data-label="Prices">Wrapper drift from target, and how the book distributes across score bands</td></tr>
-            <tr><th scope="row">Governance</th><td data-label="Cap">15</td><td data-label="Scales">Yes</td><td data-label="Prices">Positions held below the line, and oversized positions in the middle band</td></tr>
-            <tr><th scope="row">Dead capital</th><td data-label="Cap">15</td><td data-label="Scales">Yes</td><td data-label="Prices">Undocumented positions and stale scores</td></tr>
-            <tr><th scope="row">Complexity</th><td data-label="Cap">10 (hard)</td><td data-label="Scales">No &mdash; counts</td><td data-label="Prices">Unknown distributions, and unexplained sub-band holdings past an allowance of three</td></tr>
-            <tr><th scope="row">Concentration</th><td data-label="Cap">15</td><td data-label="Scales">No</td><td data-label="Prices">Single, top-three, and top-five share breaches</td></tr>
+            <tr><th scope="row" class="col-primary">Allocation</th><td data-label="Cap">25</td><td data-label="Scales">No</td><td data-label="Prices">The dollar split across Roth, taxable and pre-tax against the FIS wrapper targets, and how positions spread across score bands</td></tr>
+            <tr><th scope="row">Governance</th><td data-label="Cap">15</td><td data-label="Scales">Yes</td><td data-label="Prices">Positions scoring below 60, and positions in the 60s, charged more above 8 percent of the book</td></tr>
+            <tr><th scope="row">Dead capital</th><td data-label="Cap">15</td><td data-label="Scales">Yes</td><td data-label="Prices">Positions with no documented thesis, and scores older than 90 days</td></tr>
+            <tr><th scope="row">Complexity</th><td data-label="Cap">10 (hard)</td><td data-label="Scales">No (counts)</td><td data-label="Prices">Unclassified distributions, and undocumented positions below 70 beyond an allowance of three</td></tr>
+            <tr><th scope="row">Concentration</th><td data-label="Cap">15</td><td data-label="Scales">No</td><td data-label="Prices">A single position above 15 percent, the top three above 40, the top five above 60</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="measure prose">
-        <p><strong>Governance</strong> applies at most one penalty per position, in strict precedence: below 50 costs 6 points; 60 to 69 <em>and</em> weighing more than 8 percent costs 6; 60 to 69 alone costs 4; a momentum breakdown costs 4. The precedence matters &mdash; a position cannot be charged twice for one condition.</p>
-        <p><strong>Dead capital</strong> charges 5 points for a position with no thesis, fit, or written rationale, and 2 points for a score older than 90 days. Both can fire on the same position. A <em>missing</em> timestamp is treated as unknown, not as stale, and is not penalised.</p>
-        <p><strong>Concentration</strong> charges 8 points for each position above 15 percent, 6 if the top three exceed 40 percent, and 4 if the top five exceed 60 percent. Bitcoin and its spot wrappers are excluded from all three measures &mdash; the backbone is not a concentration failure. Equities with Bitcoin exposure are <em>not</em> excluded; they are ordinary concentration.</p>
-        <p>Acknowledging a concentration breach does not remove it. An override is recorded and displayed so the surface can show that you know &mdash; and the penalty still applies. <strong>The disclosure is the feature. The math does not bend.</strong></p>
+        <p><strong>Allocation</strong> checks two things. The first is the dollar split across Roth, taxable and pre-tax, measured against the FIS wrapper targets of 45, 35 and 20 percent and charged only once total drift passes 10 points (worth at most about 6 points). Bitcoin held under the dashboard&rsquo;s own Bitcoin wrapper counts in the total but has no target, so it adds to the measured drift. The second is the count of positions in each score band against a target spread: up to 5 points per band, and nothing for a drift of 2 points or less. The bucket does not check whether each position sits in the wrapper <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#wrappers">Part 4</a> assigns it; that placement stays your check.</p>
+        <p><strong>Governance</strong> applies one charge per position, first match wins, each multiplied by the position&rsquo;s severity: a score below 60 carries 6 base points (50 to 59 is charged the same as below 50); a position scoring 60 to 69 that weighs more than 8 percent of the portfolio, 6; a position scoring 60 to 69, 4; a momentum breakdown, 4 (specified, but nothing in the engine sets it yet). A 5 percent position scoring 55 therefore costs 0.3 points. Governance reads the canonical CIS, not the wrapper-adjusted one.</p>
+        <p><strong>Dead capital</strong> charges 5 base points, value-weighted, for a position with no documented thesis. A score older than 90 days is stale: the dead-capital bucket charges it 2 base points, value-weighted, and the dashboard&rsquo;s diagnostics warn once a score is more than 60 days old and fail past 90. A position more than 50 percent above its cost basis whose score is older than 60 days is flagged for a refresh. Both charges can fire on the same position, and a <em>missing</em> timestamp is treated as unknown rather than stale, so it draws nothing.</p>
+        <p><strong>Concentration</strong> charges 8 points for each position above 15 percent, matching the default cap in <a class="part-ref" href="/part-5-portfolio-construction-position-management#torque">Part 5</a>, so a position inside its 15 to 18 percent override band is still billed. It charges 6 if the top three exceed 40 percent and 4 if the top five exceed 60, looser than Part 5&rsquo;s caps of 35 and 50. Bitcoin and its spot wrappers are excluded from all three measures by archetype, because the backbone is not a concentration failure. Equities with Bitcoin exposure are ordinary concentration.</p>
+        <p><strong>Complexity</strong> charges 1 point for each position with an unclassified distribution, and 0.5 for each position scoring below 70 that is carried without documented rationale, beyond an allowance of three. By the FIS rules a documented thesis, hold rationale or remediation plan suppresses the low-score charge.</p>
+        <p>These are the framework&rsquo;s FIS rules as the engine computes them. Some inputs are not yet fed: nothing sets the momentum-breakdown flag, and the thesis, distribution-type, hold-rationale, remediation-plan and override records you keep on a holding are not read by the score, which in the current build bills every position as undocumented and unclassified. By the same rules, a concentration breach covered by a documented override is marked as acknowledged and charged in full. The score does not yet read overrides, so the acknowledgment does not appear; the points are the same either way.</p>
       </div>
 
       <div class="measure">
         <p class="sub-meta">Boundary &middot; where FIS leaves its own domain</p>
-        <h3 class="sub-title">Construction quality scales modelled outcomes.</h3>
+        <h3 class="sub-title">Construction quality scales modeled outcomes.</h3>
       </div>
       <div class="measure prose">
-        <p>FIS reaches exactly one thing outside itself. When the software models forward outcomes, it scales expected realisation by construction quality:</p>
+        <p>FIS reaches outside itself in one place, forward projections, and it does two things there. One projection path scales expected realization by construction quality:</p>
         <p><strong>multiplier = 0.50 + (FIS &divide; 100) &times; 0.70</strong></p>
-        <p>A FIS of 50 yields 0.85, a FIS of 100 yields 1.20. The claim being modelled is narrow and worth stating plainly: a poorly constructed portfolio is assumed to <em>capture less of its own assets&rsquo; upside</em>. FIS never feeds back into CIS, and never into itself.</p>
+        <p>A FIS of 50 yields 0.85, a FIS of 100 yields 1.20. Another projection path scales modeled volatility the other way, from 1.20 at FIS 0 to 0.80 at FIS 100. The claim being modeled is narrow: a poorly built portfolio is assumed to <em>capture less of its own assets&rsquo; upside</em>, and to swing more on the way. FIS never feeds back into CIS, and never into itself. The projection models themselves are among the surfaces this page holds back (<a class="part-ref" href="#scope">Scope</a>).</p>
+        <p>Neither score is a position size. Turning a score into a weight takes a posture and a band table, which come next.</p>
       </div>
     </section>
 
@@ -614,13 +617,13 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes" data-kind="ladder">
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="ladder" data-figure="rung"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-field art-move art-in art-d1" d="M120 78.33333333333333H360V84H120Z"/><path class="art-context art-in art-d0" d="M240 84V78.33333333333333"/><path class="art-rung art-in art-d1" d="M120 67H360"/><path class="art-rung art-in art-d1" d="M120 55.666666666666664H360"/><path class="art-rung art-in art-d1" d="M120 44.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 33H360"/><path class="art-rung art-in art-d1" d="M120 21.666666666666664H360"/><path class="art-glow art-draw art-d2" pathLength="1" d="M120 78.33333333333333H360"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M120 78.33333333333333H360"/><circle class="art-dot art-move art-pop" cx="360" cy="78.33333333333333" r="4"/></svg></span><span class="name">Trigger</span><p>A threshold crossing inside one watched condition.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="ladder" data-figure="rung"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-field art-move art-in art-d1" d="M120 67H360V84H120Z"/><path class="art-context art-in art-d0" d="M240 84V67"/><path class="art-rung art-in art-d1" d="M120 78.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 55.666666666666664H360"/><path class="art-rung art-in art-d1" d="M120 44.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 33H360"/><path class="art-rung art-in art-d1" d="M120 21.666666666666664H360"/><path class="art-glow art-draw art-d2" pathLength="1" d="M120 67H360"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M120 67H360"/><circle class="art-dot art-move art-pop" cx="360" cy="67" r="4"/></svg></span><span class="name">Event</span><p>A logged <em>transition</em> &mdash; a state that changed. An unchanged state logs nothing, so the record is signal rather than noise.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="ladder" data-figure="rung"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-field art-move art-in art-d1" d="M120 55.666666666666664H360V84H120Z"/><path class="art-context art-in art-d0" d="M240 84V55.666666666666664"/><path class="art-rung art-in art-d1" d="M120 78.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 67H360"/><path class="art-rung art-in art-d1" d="M120 44.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 33H360"/><path class="art-rung art-in art-d1" d="M120 21.666666666666664H360"/><path class="art-glow art-draw art-d2" pathLength="1" d="M120 55.666666666666664H360"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M120 55.666666666666664H360"/><circle class="art-dot art-move art-pop" cx="360" cy="55.666666666666664" r="4"/></svg></span><span class="name">Recommendation</span><p>A described action with a priority and a deadline. Displayed. Never executed.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="ladder" data-figure="rung"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-field art-move art-in art-d1" d="M120 44.33333333333333H360V84H120Z"/><path class="art-context art-in art-d0" d="M240 84V44.33333333333333"/><path class="art-rung art-in art-d1" d="M120 78.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 67H360"/><path class="art-rung art-in art-d1" d="M120 55.666666666666664H360"/><path class="art-rung art-in art-d1" d="M120 33H360"/><path class="art-rung art-in art-d1" d="M120 21.666666666666664H360"/><path class="art-glow art-draw art-d2" pathLength="1" d="M120 44.33333333333333H360"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M120 44.33333333333333H360"/><circle class="art-dot art-move art-pop" cx="360" cy="44.33333333333333" r="4"/></svg></span><span class="name">Proposal</span><p>A draft change requiring explicit human acceptance &mdash; and acceptance still applies nothing automatically.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="ladder" data-figure="rung"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-field art-move art-in art-d1" d="M120 33H360V84H120Z"/><path class="art-context art-in art-d0" d="M240 84V33"/><path class="art-rung art-in art-d1" d="M120 78.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 67H360"/><path class="art-rung art-in art-d1" d="M120 55.666666666666664H360"/><path class="art-rung art-in art-d1" d="M120 44.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 21.666666666666664H360"/><path class="art-glow art-draw art-d2" pathLength="1" d="M120 33H360"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M120 33H360"/><circle class="art-dot art-move art-pop" cx="360" cy="33" r="4"/></svg></span><span class="name">Acknowledgement</span><p>A record that you saw it. Suppresses no arithmetic.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="ladder" data-figure="absent"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-context art-in art-d0" d="M240 84V33"/><path class="art-rung art-in art-d1" d="M120 78.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 67H360"/><path class="art-rung art-in art-d1" d="M120 55.666666666666664H360"/><path class="art-rung art-in art-d1" d="M120 44.33333333333333H360"/><path class="art-rung art-in art-d1" d="M120 33H360"/><path class="art-ghost art-in art-d3" d="M120 21.666666666666664H360"/><path class="art-ghost art-in art-d3" d="M240 31V27.666666666666664"/></svg></span><span class="name">Automated mutation</span><p>Does not exist in this system.</p></div>
+        <div class="failure-modes">
+          <div><span class="name">Trigger</span><p>A threshold crossing inside one watched condition.</p></div>
+          <div><span class="name">Event</span><p>A logged <em>transition</em> &mdash; a state that changed. An unchanged state logs nothing, so the record is signal rather than noise.</p></div>
+          <div><span class="name">Recommendation</span><p>A described action with a priority and a deadline. Displayed. Never executed.</p></div>
+          <div><span class="name">Proposal</span><p>A draft change requiring explicit human acceptance &mdash; and acceptance still applies nothing automatically.</p></div>
+          <div><span class="name">Acknowledgement</span><p>A record that you saw it. Suppresses no arithmetic.</p></div>
+          <div><span class="name">Automated mutation</span><p>Does not exist in this system.</p></div>
         </div>
       </div>
 
@@ -664,11 +667,11 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes" data-kind="taxonomy">
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="taxonomy" data-figure="fixed"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell art-cell-lit art-cell-solid art-move" x="24" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="134.5" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="245" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="355.5" y="30" width="100.5" height="44" rx="3"/></g><circle class="art-dot art-move art-pop" cx="74.25" cy="52" r="4"/></svg></span><span class="name">Native</span><p>The asset itself. Quoted on its own lane, valued in Bitcoin units, displayed to eight decimal places.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="taxonomy" data-figure="tunable"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell" x="24" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell art-cell-lit art-cell-dashed art-move" x="134.5" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="245" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="355.5" y="30" width="100.5" height="44" rx="3"/></g><path class="art-thesis art-draw art-d2" pathLength="1" d="M156.75 58C170.75 58 176.75 44 184.75 46S198.75 60 212.75 50"/><circle class="art-dot art-move art-pop" cx="212.75" cy="50" r="4"/></svg></span><span class="name">Spot wrapper</span><p>A maintained allowlist of spot funds, checked <em>before</em> the fund branch so they score through the monetary model rather than as generic funds. Membership is explicit: a newly launched wrapper is an ordinary fund until it is registered.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="taxonomy" data-figure="excluded"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell" x="24" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="134.5" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell art-cell-struck art-move" x="245" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="355.5" y="30" width="100.5" height="44" rx="3"/></g><path class="art-ceiling art-draw art-d2" pathLength="1" d="M281.25 38L309.25 66M309.25 38L281.25 66"/></svg></span><span class="name">Futures product</span><p>Never treated as Bitcoin-class. A futures-based product is a different instrument with a different risk.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="taxonomy" data-figure="excluded"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell" x="24" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="134.5" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell" x="245" y="30" width="100.5" height="44" rx="3"/><rect class="art-cell art-cell-struck art-move" x="355.5" y="30" width="100.5" height="44" rx="3"/></g><path class="art-ceiling art-draw art-d2" pathLength="1" d="M391.75 38L419.75 66M419.75 38L391.75 66"/></svg></span><span class="name">Proxy equity</span><p>Companies with Bitcoin exposure are ordinary operating equities. There is no proxy archetype, and they are not exempt from anything.</p></div>
+        <div class="failure-modes">
+          <div><span class="name">Native</span><p>The asset itself. Quoted on its own lane, valued in Bitcoin units, displayed to eight decimal places.</p></div>
+          <div><span class="name">Spot wrapper</span><p>A maintained allowlist of spot funds, checked <em>before</em> the fund branch so they score through the monetary model rather than as generic funds. Membership is explicit: a newly launched wrapper is an ordinary fund until it is registered.</p></div>
+          <div><span class="name">Futures product</span><p>Never treated as Bitcoin-class. A futures-based product is a different instrument with a different risk.</p></div>
+          <div><span class="name">Proxy equity</span><p>Companies with Bitcoin exposure are ordinary operating equities. There is no proxy archetype, and they are not exempt from anything.</p></div>
         </div>
       </div>
 
@@ -760,11 +763,11 @@
       </div>
 
       <div class="measure-feature">
-        <div class="failure-modes" data-kind="gauge">
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="gauge" data-figure="confidence"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><path class="art-field-ink art-move art-in art-d1" d="M24 60C120 60 180 22 240 22S360 60 456 60Z"/><rect class="art-cell art-in art-d0" x="24" y="64" width="432" height="10" rx="5"/><rect class="art-cell-lit art-grow-x art-d1" x="24" y="64" width="300" height="10" rx="5"/><path class="art-context art-in art-d1" d="M24 60C120 60 180 22 240 22S360 60 456 60"/><circle class="art-dot art-move art-pop" cx="324" cy="69" r="4"/></svg></span><span class="name">Confidence</span><p>The quality of evidence at the moment of scoring.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="gauge" data-figure="freshness"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><rect class="art-cell art-in art-d0" x="24" y="64" width="432" height="10" rx="5"/><rect class="art-cell-lit art-grow-x art-d1" x="24" y="64" width="240" height="10" rx="5"/><path class="art-ref art-in art-d1" d="M264 20V74"/><path class="art-glow art-draw art-d2" pathLength="1" d="M24 26C100 26 160 34 240 46S360 70 456 78"/><path class="art-thesis art-draw art-d2" pathLength="1" d="M24 26C100 26 160 34 240 46S360 70 456 78"/><circle class="art-dot art-move art-pop" cx="264" cy="50" r="4"/></svg></span><span class="name">Freshness</span><p>The age of an input against its own time-to-live.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="gauge" data-figure="completeness"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-cell-lit" x="24" y="60" width="40" height="14" rx="2"/><rect class="art-cell-lit" x="72" y="60" width="40" height="14" rx="2"/><rect class="art-cell-lit" x="120" y="60" width="40" height="14" rx="2"/><rect class="art-cell-lit" x="168" y="60" width="40" height="14" rx="2"/><rect class="art-cell-lit" x="216" y="60" width="40" height="14" rx="2"/><rect class="art-cell-lit" x="264" y="60" width="40" height="14" rx="2"/><rect class="art-cell" x="312" y="60" width="40" height="14" rx="2"/><rect class="art-cell" x="360" y="60" width="40" height="14" rx="2"/><rect class="art-cell" x="408" y="60" width="40" height="14" rx="2"/></g><circle class="art-dot art-move art-pop" cx="284" cy="67" r="4"/></svg></span><span class="name">Completeness</span><p>What fraction of the expected fields are present.</p></div>
-          <div><span class="fm-plate dc-art" aria-hidden="true" data-kind="gauge" data-figure="provenance"><svg viewBox="0 0 480 100" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path class="art-grid art-in art-d0" d="M24 20H456M24 40H456M24 60H456"/><path class="art-axis" d="M24 84H456"/><g class="art-in art-d1"><rect class="art-step" x="24" y="66" width="432" height="10"/><rect class="art-step" x="72" y="50" width="336" height="10"/><rect class="art-step" x="120" y="34" width="240" height="10"/></g><rect class="art-step-final art-grow-y art-d2" x="168" y="18" width="144" height="10"/><circle class="art-dot art-move art-pop" cx="240" cy="23" r="4"/></svg></span><span class="name">Source quality</span><p>Where each individual input came from.</p></div>
+        <div class="failure-modes">
+          <div><span class="name">Confidence</span><p>The quality of evidence at the moment of scoring.</p></div>
+          <div><span class="name">Freshness</span><p>The age of an input against its own time-to-live.</p></div>
+          <div><span class="name">Completeness</span><p>What fraction of the expected fields are present.</p></div>
+          <div><span class="name">Source quality</span><p>Where each individual input came from.</p></div>
         </div>
       </div>
 

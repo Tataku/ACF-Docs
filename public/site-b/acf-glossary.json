@@ -1,20 +1,20 @@
 {
   "meta": {
     "name": "ACF Glossary",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "purpose": "Single source of truth for inline tooltip content across all six framework parts and for the /glossary reference index, which is GENERATED from this file (scripts/build-glossary-page.mjs). Tooltips and the index are populated from this file; never hand-author a second glossary.",
     "schema": {
       "id": "stable slug, used as the data key and tooltip anchor (kebab-case)",
       "term": "display label",
       "aliases": "alternate spellings/phrasings the tagger should also match",
       "context": "OPTIONAL sense guard. A one-word term is a word first and a term second, so a term listed here is only auto-tagged in a block that also carries one of these words. Added 2026-09-16 after 'the framework stops describing' was tagged as Stop-loss, 'margin expansion' as margin borrowing, and 'sector rotation' as posture Rotation. Use it whenever the term or an alias is a common English word with another meaning; prefer it over deleting an alias that is right somewhere else.",
-      "wave": "1 = first rollout pass (highest comprehension value), 2 = second pass",
+      "wave": "1 to 4 = rollout pass (1 = first pass, highest comprehension value; 2 = second pass; 3 = domain terms; 4 = named concepts added 2026-09-15)",
       "category": "closed key from meta.categories; groups the /glossary index (explicit, never derived from appearsLater)",
       "definition": "layer-one tooltip copy: concise, plain-English, no em dashes",
-      "length": "short | medium — sizing hint for the tooltip card",
+      "length": "short | medium: sizing hint for the tooltip card",
       "source": {
         "kind": "internal | external",
-        "ref": "internal -> own Part; external -> primary/academic citation"
+        "ref": "internal -> 'Part N · <Title>' of the Part that teaches it; external -> primary or academic citation"
       },
       "related": "layer-two: sibling concept ids whose roots should wake on hover (the mycelium adjacency)",
       "appearsLater": "layer-two: the part where this term becomes operational ('see where this appears later')",
@@ -42,8 +42,7 @@
         "barbell",
         "dca",
         "dry-powder",
-        "fis",
-        "return-of-capital"
+        "fis"
       ],
       "wave2": [
         "policy-reflexivity",
@@ -52,7 +51,8 @@
         "survivable-compounding",
         "right-tail-outcomes",
         "agentic-verification",
-        "carry-vector"
+        "carry-vector",
+        "return-of-capital"
       ],
       "wave3": [
         "roth",
@@ -141,12 +141,12 @@
       ]
     },
     "harmonizeBeforeLocking": [],
-    "harmonizeNote": "Carry vectors harmonized 2026-07-26: defined at first use in the Part 1 abstract, sourced to the product's closed structure enum (Long Carry | Short Carry | Barbell), and cross-linked to carry direction inside the CIS macro component (Part 6). Power-law corridor was harmonized against Part 3 earlier.",
+    "harmonizeNote": "Carry vectors harmonized 2026-07-26 and corrected 2026-09-30: the carry-vector entry defines the closed structure label (Long Carry | Short Carry | Barbell), which is not an input to the carry-direction sub-score inside the CIS macro component (Part 6). Power-law corridor was harmonized against Part 3 earlier.",
     "categories": [
       {
         "key": "foundations",
-        "label": "Foundations",
-        "title": "Payoff shape, survival, and the vocabulary of the thesis.",
+        "label": "Foundation",
+        "title": "Why the traditional playbook is failing.",
         "part": 1
       },
       {
@@ -158,7 +158,7 @@
       {
         "key": "bitcoin",
         "label": "The Backbone",
-        "title": "Bitcoin, valuation, and accumulation.",
+        "title": "Bitcoin as the convexity backbone.",
         "part": 3
       },
       {
@@ -169,7 +169,7 @@
       },
       {
         "key": "construction",
-        "label": "Construction & Governance",
+        "label": "Construction",
         "title": "Postures, sizing, and the rules of change.",
         "part": 5
       },
@@ -180,7 +180,7 @@
         "part": 6
       }
     ],
-    "wave4Note": "Wave 4 (2026-09-15): the reference index was rebuilt as a categorized, term-only accordion, and every named concept the site explains but the file lacked was added, with each definition paraphrased from the passage that teaches it (source.ref)."
+    "wave4Note": "Wave 4 (2026-09-15): the reference index was rebuilt as a categorized, term-only accordion, and most named concepts the site explains but the file lacked were added, with each definition paraphrased from the passage that teaches it (source.ref)."
   },
   "terms": [
     {
@@ -193,11 +193,11 @@
       ],
       "wave": 1,
       "category": "foundations",
-      "definition": "Exposure where the upside can compound far faster than the downside, so being right pays off disproportionately more than being wrong costs.",
-      "length": "short",
+      "definition": "A payoff that curves upward: a favorable move earns more than an equal adverse move costs. The framework sizes and places every position to keep that shape, and Part 6 scores how well each one holds it.",
+      "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 — Foundation & Philosophy; scored in Part 6"
+        "ref": "Part 2 · Lineage & Macro Thesis (lineage); defined on the cover; scored in Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "cis",
@@ -210,7 +210,7 @@
         "part": 5,
         "topic": "How convexity is expressed through Posture"
       },
-      "chart": "S1"
+      "chart": "sig-payoff"
     },
     {
       "id": "cis",
@@ -220,11 +220,11 @@
       ],
       "wave": 1,
       "category": "scoring",
-      "definition": "Convexity Integrity Score: a 0 to 100 score rating one position at a time on convexity and optionality, risk and fragility, macro alignment, and execution and sentiment.",
+      "definition": "Convexity Integrity Score: a 0 to 100 score for one position at a time, built from four components: convexity and optionality, risk and fragility, macro alignment, and execution and sentiment. The dashboard computes it, and Part 6 defines it. CIS below 50 removes allocation eligibility for a position in any of the three postures; Bitcoin answers to Part 3.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Convexity & Framework Integrity Scoring"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "convexity",
@@ -242,16 +242,15 @@
       "id": "macro-thesis",
       "term": "Macro thesis",
       "aliases": [
-        "macro thesis",
-        "the thesis"
+        "macro thesis"
       ],
       "wave": 1,
       "category": "macro",
-      "definition": "A probabilistic read of the current regime that sets the portfolio's structure. It is a framing device, not a point forecast.",
+      "definition": "A falsifiable view of the structural forces likely to shape markets over the next 5 to 20 years, which sets the portfolio's structure. It assigns probabilities across regime scenarios rather than making a point forecast.",
       "length": "short",
       "source": {
         "kind": "internal",
-        "ref": "Part 2 — Lineage & Macro Thesis"
+        "ref": "Part 2 · Lineage & Macro Thesis"
       },
       "related": [
         "fiscal-dominance",
@@ -264,7 +263,7 @@
         "part": 2,
         "topic": "The lineage and the full regime thesis"
       },
-      "chart": "L2"
+      "chart": "p2-narrative-not-thesis"
     },
     {
       "id": "tripwire",
@@ -274,11 +273,11 @@
       ],
       "wave": 1,
       "category": "construction",
-      "definition": "A predefined threshold that forces review or action before denial, emotion, or information overload can take over.",
+      "definition": "A predefined threshold that triggers a review before denial, emotion or information overload can take over. The dashboard detects and displays; the response is yours.",
       "length": "short",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 order of operations; operational in Part 5"
+        "ref": "Part 1 · Foundation & Philosophy; Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "momentum-filter",
@@ -290,7 +289,7 @@
         "part": 5,
         "topic": "Tripwires as position-management gates"
       },
-      "chart": "L3"
+      "chart": "dl-tripwire-loop"
     },
     {
       "id": "momentum-filter",
@@ -301,11 +300,11 @@
       ],
       "wave": 1,
       "category": "construction",
-      "definition": "A trend-validation rule: the framework checks that the market is confirming the thesis before it allows a full position size.",
+      "definition": "A trend-validation rule: the market must confirm a thesis before it carries full size, and when all three momentum dimensions turn negative the position exits even with a high CIS. The dashboard does not yet measure the three dimensions.",
       "length": "medium",
       "source": {
         "kind": "external",
-        "ref": "Moskowitz, Ooi & Pedersen (2012); Hurst, Ooi & Pedersen (2017), trend-following evidence"
+        "ref": "Part 5 · Portfolio Construction & Position Management; Moskowitz, Ooi & Pedersen (2012), 'Time Series Momentum', Journal of Financial Economics 104(2); Hurst, Ooi & Pedersen (2017), 'A Century of Evidence on Trend-Following Investing', Journal of Portfolio Management 44(1)"
       },
       "related": [
         "tripwire",
@@ -327,15 +326,28 @@
         "wrapper placement",
         "account wrapper"
       ],
+      "context": [
+        "Roth",
+        "taxable",
+        "pre-tax",
+        "tax",
+        "account",
+        "accounts",
+        "IRA",
+        "401(k)"
+      ],
       "wave": 1,
       "category": "tax",
-      "definition": "The legal account container (Roth, taxable, or pre-tax) whose tax rules materially change long-run compounding outcomes.",
+      "definition": "The type of account a holding sits in: Roth, taxable or pre-tax, each with its own tax rules. Over decades the wrapper can change what you keep by a wide margin, so the framework decides placement as deliberately as it picks positions; Parts 4 and 5 work the arithmetic.",
       "length": "short",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy; external IRS Pubs 590-A / 590-B"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy; IRS Publications 590-A and 590-B"
       },
       "related": [
+        "roth",
+        "taxable-account",
+        "pretax-account",
         "buy-borrow-die",
         "right-tail-outcomes",
         "survivable-compounding"
@@ -352,11 +364,11 @@
       "aliases": [],
       "wave": 1,
       "category": "construction",
-      "definition": "Controlled convexity: high-upside exposure to durable, real regime forces that can tolerate serious drawdowns.",
+      "definition": "The posture for high-upside positions in regime forces that are real, durable and capital-backed, yet still early or underowned by institutions. Torque carries the portfolio's upside and absorbs its deepest drawdowns, which can reach 50 to 70 percent in liquidity stress, so each position has to earn its size through its score.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "ballast",
@@ -376,16 +388,19 @@
       "aliases": [],
       "wave": 1,
       "category": "construction",
-      "definition": "Capital-preserving reserve and rotation capital that helps the portfolio survive stress and buy into dislocations.",
+      "definition": "The reserve posture: positions built to hold steady through liquidity stress, policy error or a narrative reversal, then supply the capital to buy the dislocation. Aggregate Ballast stays at or above 15 percent, and yield alone never qualifies a position (see Ballast eligibility).",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "torque",
         "hype",
-        "posture"
+        "posture",
+        "ballast-eligibility",
+        "rotation",
+        "dry-powder"
       ],
       "appearsLater": {
         "part": 5,
@@ -399,16 +414,17 @@
       "aliases": [],
       "wave": 1,
       "category": "construction",
-      "definition": "Narrative-driven convexity with weak structural backing. Useful only with strict limits and automatic exits.",
+      "definition": "Narrative-driven convexity with weak structural backing. Useful only under hard caps and an exit committed to before entry. The caps are 5 percent a position and 10 percent in aggregate, and the stop sits 15 to 25 percent below entry.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "torque",
         "ballast",
         "posture",
+        "stop-loss",
         "convexity"
       ],
       "appearsLater": {
@@ -425,11 +441,11 @@
       ],
       "wave": 1,
       "category": "macro",
-      "definition": "A condition where public debt and financing constraints begin to dictate what monetary policy can realistically do.",
+      "definition": "A condition in which government debt and the cost of financing it, rather than the inflation goal, start to dictate what monetary policy can do. Part 1 reads it in the interest bill: by 2025 federal interest was back at about 3.2 percent of GDP, level with its 1991 peak, on more than twice the debt.",
       "length": "medium",
       "source": {
-        "kind": "internal",
-        "ref": "Part 1 tripwire language; external fiscal-dominance literature (Federal Reserve Board)"
+        "kind": "external",
+        "ref": "Sargent & Wallace (1981), 'Some Unpleasant Monetarist Arithmetic', Federal Reserve Bank of Minneapolis Quarterly Review 5(3); FRED (OMB) series FYOIGDA188S and FYPUGDA188S; Part 1 · Foundation & Philosophy"
       },
       "related": [
         "macro-thesis",
@@ -439,7 +455,7 @@
         "part": 2,
         "topic": "The macro thesis and policy backdrop"
       },
-      "chart": "04"
+      "chart": "p1-policy-constraint"
     },
     {
       "id": "buy-borrow-die",
@@ -450,14 +466,16 @@
       ],
       "wave": 1,
       "category": "tax",
-      "definition": "Borrowing against appreciated assets instead of selling them, potentially deferring realization. It depends on current law and financing availability.",
+      "definition": "Holding appreciated assets instead of selling them, borrowing against them for cash, and leaving them to heirs, who under current US law receive a stepped-up basis, so the gain built up during life may never be taxed as income; the loan is repaid from the estate. It works for any appreciated capital asset, depends on current law and on credit staying available, and carries interest cost and liquidation risk.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone (TAM, custody, and the borrow phase); IRC §1014"
       },
       "related": [
         "tax-wrapper",
+        "step-up-in-basis",
+        "margin",
         "right-tail-outcomes"
       ],
       "appearsLater": {
@@ -474,23 +492,24 @@
       ],
       "wave": 1,
       "category": "foundations",
-      "definition": "Vulnerability to disorder and nonlinear shocks, not just price movement. A fragile position breaks when stress rises.",
+      "definition": "Harm that grows faster than the shock causing it, so one large shock does more damage than several small ones of the same total size. The framework keeps it apart from volatility, and CIS scores it in the Risk and Fragility component.",
       "length": "medium",
       "source": {
         "kind": "external",
-        "ref": "Taleb & Douady (2012), Mathematical Definition, Mapping, and Detection of (Anti)Fragility"
+        "ref": "Taleb & Douady (2013), 'Mathematical definition, mapping, and detection of (anti)fragility', Quantitative Finance 13(11)"
       },
       "related": [
         "convexity",
+        "volatility",
+        "cis-risk-fragility",
         "tripwire",
-        "cis",
         "sequence-of-returns-risk"
       ],
       "appearsLater": {
         "part": 6,
         "topic": "Fragility inside the CIS score"
       },
-      "chart": "01"
+      "chart": "p1-hedge-broke"
     },
     {
       "id": "posture",
@@ -498,18 +517,24 @@
       "aliases": [
         "postures"
       ],
+      "context": [
+        "Torque",
+        "Ballast",
+        "Hype"
+      ],
       "wave": 1,
       "category": "construction",
-      "definition": "The behavioral classification every non-Bitcoin position carries: Torque, Ballast, or Hype. It sets the position's sizing bands and governance rules; behavior, not asset type, is what the framework classifies. Bitcoin sits outside all three, governed by Part 3.",
-      "length": "short",
+      "definition": "The behavioral class every position except Bitcoin carries: Torque, Ballast or Hype. It sets the position's sizing table and governance rules, and it classifies how a holding behaves, whatever kind of asset it is. Bitcoin sits outside all three, under Part 3's rules.",
+      "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "torque",
         "ballast",
         "hype",
+        "bitcoin-backbone",
         "macro-thesis"
       ],
       "appearsLater": {
@@ -526,11 +551,11 @@
       ],
       "wave": 2,
       "category": "macro",
-      "definition": "Markets react to policy and policymakers react back to markets, creating feedback loops that can amplify instability.",
+      "definition": "Reflexivity, in Soros's sense, is the loop in which beliefs and prices change the fundamentals they are supposed to reflect. Policy reflexivity adds policymakers to the loop: they react to markets, markets react back, and the feedback can amplify instability in either direction.",
       "length": "medium",
       "source": {
-        "kind": "internal",
-        "ref": "Part 1 abstract; literary lineage (Soros reflexivity)"
+        "kind": "external",
+        "ref": "Soros, The Alchemy of Finance (1987); Part 1 · Foundation & Philosophy; Part 2 · Lineage & Macro Thesis"
       },
       "related": [
         "macro-thesis",
@@ -550,14 +575,15 @@
       ],
       "wave": 2,
       "category": "foundations",
-      "definition": "High-volatility periods tend to arrive in clusters rather than as isolated events, which changes how risk should be managed.",
+      "definition": "The tendency of large price moves to follow large moves, and calm to follow calm, so turbulence arrives in stretches rather than as one isolated shock. A risk plan sized for an average week can be undersized for the weeks that follow a shock.",
       "length": "short",
       "source": {
-        "kind": "internal",
-        "ref": "Part 1 abstract"
+        "kind": "external",
+        "ref": "Mandelbrot (1963), 'The Variation of Certain Speculative Prices', Journal of Business 36(4); Engle (1982), autoregressive conditional heteroscedasticity (ARCH), Econometrica 50(4); Part 1 · Foundation & Philosophy"
       },
       "related": [
         "fragility",
+        "volatility",
         "momentum-filter"
       ],
       "appearsLater": {
@@ -575,11 +601,11 @@
       ],
       "wave": 2,
       "category": "macro",
-      "definition": "Correlations between assets are regime-dependent and can flip when inflation or liquidity stress dominates.",
+      "definition": "The tendency of the relationship between asset classes to change with the regime. From roughly 2000 to 2021 stocks and bonds tended to move in opposite directions, so bonds cushioned equity losses; in 2021 and 2022 the correlation turned positive again, and in 2022 both fell together.",
       "length": "medium",
       "source": {
         "kind": "external",
-        "ref": "BIS (2023), The correlation of equity and bond returns"
+        "ref": "Lombardi & Sushko (2023), 'The correlation of equity and bond returns', BIS Quarterly Review, December 2023, Box A; Brixton, Brooks, Hecht, Ilmanen, Maloney & McQuinn (2023), 'A Changing Stock-Bond Correlation: Drivers and Implications', Journal of Portfolio Management 49(4)"
       },
       "related": [
         "macro-thesis",
@@ -589,7 +615,7 @@
         "part": 2,
         "topic": "Why the diversification regime changed"
       },
-      "chart": "02"
+      "chart": "p1-correlation"
     },
     {
       "id": "survivable-compounding",
@@ -599,11 +625,11 @@
       ],
       "wave": 2,
       "category": "foundations",
-      "definition": "Building a portfolio that can stay alive through timing errors, volatility, and thesis delays while keeping exposure to large upside.",
+      "definition": "The framework's objective: compounding that keeps going because the portfolio can survive being wrong about timing, size or outcome while keeping enough exposure to convex payoffs. Staying in the game comes first, since a large gain cannot rescue capital that was forced out before it arrived.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 manifesto"
+        "ref": "Part 1 · Foundation & Philosophy"
       },
       "related": [
         "convexity",
@@ -615,7 +641,7 @@
         "part": 1,
         "topic": "Survivable compounding under uncertainty"
       },
-      "chart": "06"
+      "chart": "p1-convexity-survival"
     },
     {
       "id": "right-tail-outcomes",
@@ -626,11 +652,11 @@
       ],
       "wave": 2,
       "category": "foundations",
-      "definition": "Rare but very large gains that dominate total portfolio outcomes, which is why their tax treatment matters so much.",
+      "definition": "Rare, very large gains: the few outcomes that can account for most of a convex portfolio's lifetime return. Because so much rides on them, the account they are realized in (Part 4) matters more for them than for an ordinary gain.",
       "length": "short",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 abstract; Part 4 examples"
+        "ref": "Part 1 · Foundation & Philosophy; Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "convexity",
@@ -652,11 +678,11 @@
       ],
       "wave": 2,
       "category": "construction",
-      "definition": "An AI-assisted research loop that speeds evidence-gathering once a tripwire fires, without handing final judgment to the machine.",
+      "definition": "An AI-assisted research step the practitioner runs after a tripwire fires to speed evidence-gathering, without handing final judgment to the machine.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 abstract / order of operations"
+        "ref": "Part 1 · Foundation & Philosophy"
       },
       "related": [
         "tripwire",
@@ -677,13 +703,14 @@
       ],
       "wave": 1,
       "category": "bitcoin",
-      "definition": "Total Addressable Market: a deliberately conservative estimate of the capital a market could absorb over time, used to size an asset's potential rather than to forecast a price.",
+      "definition": "Total addressable market: how much money a market could plausibly bring to an asset. For a company it is the market it could serve, set against its current value, which CIS scores as headroom; for Bitcoin, Part 3 estimates the share of existing monetary assets it could absorb. It sizes potential; it does not forecast a price.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Bitcoin: Convexity Backbone"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone; Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
+        "headroom",
         "convexity",
         "cis",
         "macro-thesis"
@@ -707,16 +734,18 @@
       ],
       "wave": 1,
       "category": "bitcoin",
-      "definition": "A long-run regression channel, on a log scale, that Bitcoin's price has historically tracked. The framework reads it as a context band for accumulation pace, not a deterministic price prediction.",
+      "definition": "A band around a power-law trend: on log-log axes (log price against log days since the genesis block), Bitcoin's price has historically tracked a straight line, with spikes above it and capitulations below. The framework reads it as context for accumulation pace, not a price prediction. No line in it is a hard floor: Bitcoin spent most of February to mid-September 2026 below the dashboard's floor line.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Bitcoin: Convexity Backbone; external power-law model (Santostasi)"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone; Santostasi, price-time power law (Reddit, 2018; Medium, 2024); Burger (2019), 'Bitcoin's natural long-term power-law corridor of growth', Medium"
       },
       "related": [
+        "model-convergence",
+        "realized-price",
+        "valuation-extension",
         "convexity",
-        "cis",
-        "macro-thesis"
+        "cis"
       ],
       "appearsLater": {
         "part": 3,
@@ -734,11 +763,11 @@
       ],
       "wave": 1,
       "category": "foundations",
-      "definition": "The risk that the order of gains and losses, not just their average, determines whether a portfolio survives. A large drawdown at the wrong time can permanently impair compounding.",
+      "definition": "The risk that the order of returns, not just their average, decides the outcome once money is flowing out or in. For someone withdrawing, early losses force sales at low prices and leave less capital for the recovery to work on; with no cash flows, the same returns in any order end at the same value.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 manifesto; operational in Part 5"
+        "ref": "Part 1 · Foundation & Philosophy; Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "survivable-compounding",
@@ -749,7 +778,7 @@
         "part": 5,
         "topic": "Position sizing against sequence risk"
       },
-      "chart": "05"
+      "chart": "p1-sequence-risk"
     },
     {
       "id": "barbell",
@@ -760,17 +789,18 @@
       ],
       "wave": 1,
       "category": "foundations",
-      "definition": "A structure that pairs very safe holdings with a small, highly convex allocation and skips the fragile middle. It targets payoff asymmetry, not low volatility.",
+      "definition": "A structure that pairs very safe holdings with a small, highly convex allocation and skips the fragile middle. It aims for payoff asymmetry rather than low volatility. In the dashboard, Barbell is also one of the three structure labels a position can carry (see Carry vectors).",
       "length": "medium",
       "source": {
         "kind": "external",
-        "ref": "Taleb, barbell strategy; internal Part 2 lineage"
+        "ref": "Taleb, The Black Swan (2007) and Antifragile (2012); Part 2 · Lineage & Macro Thesis"
       },
       "related": [
         "convexity",
         "fragility",
         "ballast",
-        "torque"
+        "torque",
+        "carry-vector"
       ],
       "appearsLater": {
         "part": 5,
@@ -787,11 +817,11 @@
       ],
       "wave": 1,
       "category": "bitcoin",
-      "definition": "Buying a fixed amount on a set schedule regardless of price, which spreads entry risk across time. The framework funds it from income and accelerates it into deep drawdowns.",
+      "definition": "Buying a fixed amount on a set schedule regardless of price, which spreads entry risk across time. The framework funds it from income, raises it about 50 percent when valuation models converge on a deep discount, and slows discretionary buying during extensions.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Bitcoin: Convexity Backbone"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "survivable-compounding",
@@ -810,14 +840,16 @@
       "aliases": [],
       "wave": 1,
       "category": "construction",
-      "definition": "Reserve cash kept ready to deploy into dislocations. The framework builds it during extensions and spends it when valuations converge on undervaluation.",
+      "definition": "Cash held ready to deploy into dislocations. It comes from two places: income held back from discretionary Bitcoin buying during extensions (Part 3), and Ballast distributions that build up between deployments and are spent in stress (Part 5).",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Bitcoin: Convexity Backbone"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone; Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "ballast",
+        "dca",
+        "rotation",
         "posture",
         "sequence-of-returns-risk"
       ],
@@ -838,13 +870,15 @@
       ],
       "wave": 2,
       "category": "tax",
-      "definition": "A distribution treated as a return of your own invested capital rather than taxable income. It reduces cost basis and defers tax rather than eliminating it; classification can change and depends on current law.",
+      "definition": "A distribution treated as a return of your own invested capital rather than as income, a characterization set each tax year that can change. It is not taxed when received but lowers your cost basis, deferring the tax until you sell, unless a step-up at death resets the basis first under current law. Once basis reaches zero, further return-of-capital distributions are taxed as capital gains when received.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy; IRC §301(c); Form 1099-DIV, Box 3"
       },
       "related": [
+        "cost-basis",
+        "step-up-in-basis",
         "tax-wrapper",
         "ballast"
       ],
@@ -862,14 +896,17 @@
       ],
       "wave": 1,
       "category": "scoring",
-      "definition": "Framework Integrity Score: a 0 to 100 portfolio-construction score that starts the assembled portfolio at 100 and deducts a named penalty for each rule violation, so every lost point is attributable and repairable.",
+      "definition": "Framework Integrity Score: a score out of 100 for the portfolio as a whole, measuring how closely its construction follows the framework's rules. FIS starts the assembled portfolio at 100 and deducts capped, named penalties in five buckets: allocation (25), governance (15), dead capital (15), concentration (15) and complexity (10, hard cap). The caps sum to 80, so a valid FIS cannot fall below 20.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Convexity & Framework Integrity Scoring"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "cis",
+        "subtractive-scoring",
+        "penalty-bucket",
+        "action-line",
         "posture",
         "tax-wrapper"
       ],
@@ -884,17 +921,16 @@
       "term": "Carry vectors",
       "aliases": [
         "carry vector",
-        "carry direction",
         "long carry",
         "short carry"
       ],
       "wave": 2,
       "category": "construction",
-      "definition": "The framework's closed structure classification for a position: Long Carry, Short Carry, or Barbell. In CIS scoring, carry direction measures whether a position benefits from or suffers under the current rate and inflation regime; a barbell pairs the two exposures.",
+      "definition": "The closed structure label every position carries: Long Carry (pro-liquidity, duration-sensitive growth that works when financial conditions ease), Short Carry (hard assets, defense and inflation or geopolitical stress plays that work when carry breaks), or Barbell (small positions with fat-tail optionality and discontinuous upside). Separately, the CIS Macro component has a carry-direction sub-score; the label is not an input to it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 abstract (carry vectors, after Park's carry framework); CIS Spec v2.1 §5.2 (carry direction); product structure registry (closed enum)"
+        "ref": "ACF dashboard · structure labels (software behavior as of September 2026); Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "barbell",
@@ -918,11 +954,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "An account funded with after-tax dollars where qualified withdrawals are not taxed, so appreciation compounds and trades without tax friction. The framework treats its annual capacity as scarce and reserves it for positions that may be rotated.",
+      "definition": "An account funded with after-tax money whose qualified withdrawals are tax-free, so gains compound and positions can be sold inside it without tax. The framework treats its annual capacity as scarce and spends it on Torque that may rotate. Bitcoin, which is never sold, sits outside it by default.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "tax-wrapper",
@@ -943,13 +979,23 @@
         "taxable",
         "brokerage account"
       ],
+      "context": [
+        "account",
+        "accounts",
+        "Roth",
+        "pre-tax",
+        "wrapper",
+        "wrappers",
+        "brokerage",
+        "cold storage"
+      ],
       "wave": 3,
       "category": "tax",
-      "definition": "An ordinary investment account with no contribution limit, where realized gains and distributions are taxed in the year they occur. The framework routes never-sold and income-producing holdings here, including the Bitcoin backbone.",
+      "definition": "An ordinary brokerage account with no contribution limit, where gains are taxed when you sell and distributions in the year they are paid. The framework places never-sold Bitcoin here, along with return-of-capital Ballast, buy-and-hold positions beyond Roth capacity, and harvesting satellites. Bitcoin belongs here by default: held to death it passes with a stepped-up basis under current law, and only a taxable holding can be pledged for a loan.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy; Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "tax-wrapper",
@@ -974,14 +1020,15 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "An account funded before tax where contributions reduce current income and withdrawals are taxed as ordinary income. The framework treats it as tactical rather than structural, because the deferred tax obligation compounds alongside the balance.",
+      "definition": "An account funded before tax: contributions lower your taxable income now, and withdrawals are taxed as ordinary income. At equal tax rates in and out, Roth and pre-tax end even. For convex, right-tail positions the balance tips toward Roth because contribution limits are set in dollars, required distributions can push large pre-tax balances into higher brackets, and heirs generally inherit a Roth free of income tax under current law (Part 4).",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "tax-wrapper",
+        "roth",
         "rmd",
         "bracket-arbitrage"
       ],
@@ -995,16 +1042,15 @@
       "id": "backdoor-roth",
       "term": "Backdoor Roth",
       "aliases": [
-        "backdoor Roth conversion",
-        "mega backdoor Roth"
+        "backdoor Roth conversion"
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "Reaching Roth treatment above the direct income limits by contributing to a traditional IRA and converting. It preserves access under current law and is subject to the pro-rata rule when other pre-tax balances exist.",
+      "definition": "A way to fund a Roth IRA when your income is above the limit for contributing directly: contribute to a traditional IRA without deducting it, then convert. It works under current law, and the pro-rata rule taxes part of the conversion if you hold other pre-tax IRA money at year-end.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy; IRS Form 8606"
       },
       "related": [
         "roth",
@@ -1026,11 +1072,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "A withdrawal the law compels from pre-tax accounts starting at age 73, rising to 75 in 2033 under current rules. It forces taxable income regardless of need, which is one reason the framework prefers Roth for long-horizon convexity.",
+      "definition": "A withdrawal the law requires each year from pre-tax retirement accounts. RMDs start at age 73, or at 75 for anyone born in 1960 or later, under current rules. They create taxable income whether or not you need it, one reason the framework favors Roth, which requires none from its original owner, for long-horizon convex positions.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy; external IRS Pub 590-B"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy; IRS Publication 590-B"
       },
       "related": [
         "pretax-account",
@@ -1050,11 +1096,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "An additional 3.8 percent federal tax on investment income above certain income thresholds. It is part of why a taxable account retains materially less of a large gain than a Roth.",
+      "definition": "A 3.8 percent federal tax on net investment income, owed on the smaller of that income or the amount by which modified adjusted gross income exceeds $200,000 (single) or $250,000 (married filing jointly). The thresholds are not indexed for inflation. Qualified Roth withdrawals are not subject to it, part of why a taxable account keeps less of a large gain than a Roth.",
       "length": "short",
       "source": {
         "kind": "external",
-        "ref": "IRC 26 U.S.C. 1411"
+        "ref": "IRC 26 U.S.C. §1411"
       },
       "related": [
         "taxable-account",
@@ -1077,16 +1123,17 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "The taxable profit realized when an appreciated position is sold. Long-held positions generally receive preferential rates, which is why holding period and wrapper placement change what a gain is worth.",
+      "definition": "The profit from selling a holding for more than its cost basis; in a taxable account it is taxed in the year you sell. Under current federal law a gain held more than a year is taxed at 0, 15 or 20 percent, plus the 3.8 percent NIIT at higher incomes (23.8 percent at the top), while a gain held a year or less is taxed as ordinary income. That gap, and the account the holding sits in, decide how much of a gain you keep.",
       "length": "medium",
       "source": {
         "kind": "external",
-        "ref": "IRC 26 U.S.C. 1(h)"
+        "ref": "IRC 26 U.S.C. §1(h) and §1411"
       },
       "related": [
         "taxable-account",
-        "tax-loss-harvesting",
-        "cost-basis"
+        "cost-basis",
+        "niit",
+        "tax-loss-harvesting"
       ],
       "appearsLater": {
         "part": 4,
@@ -1100,13 +1147,29 @@
       "aliases": [
         "basis"
       ],
+      "context": [
+        "cost",
+        "gain",
+        "gains",
+        "loss",
+        "losses",
+        "tax",
+        "return of capital",
+        "return-of-capital",
+        "step-up",
+        "stepped-up",
+        "1099",
+        "inherit",
+        "inherited",
+        "heirs"
+      ],
       "wave": 3,
       "category": "tax",
-      "definition": "What a position is treated as having cost for tax purposes. Gains are measured against it, return-of-capital distributions reduce it, and under current law it may reset at death.",
+      "definition": "What a holding counts as having cost you for tax purposes, usually the price paid plus fees. Your gain or loss on a sale is measured from it, return-of-capital distributions lower it, and under current law heirs generally receive it stepped up to the value at death.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "capital-gains",
@@ -1127,11 +1190,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "The reset of an inherited asset's cost basis to its value at death under current law, which can erase the embedded gain. It is policy-dependent and not guaranteed, and it underpins the never-sell treatment of the Bitcoin backbone.",
+      "definition": "The reset of an inherited asset's cost basis to its value at the owner's death under current US law (IRC §1014), so the gain built up during the owner's life is not taxed as income. Gifts made during life keep the giver's basis, and pre-tax retirement accounts get no step-up: heirs owe income tax on what they withdraw. It is policy-dependent, and it is one reason the framework holds never-sold Bitcoin in a taxable account.",
       "length": "medium",
       "source": {
-        "kind": "internal",
-        "ref": "Part 3 + Part 4"
+        "kind": "external",
+        "ref": "IRC 26 U.S.C. §1014 and §1015; Part 3 · Bitcoin: Convexity Backbone; Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "cost-basis",
@@ -1151,13 +1214,22 @@
         "harvesting",
         "TLH"
       ],
+      "context": [
+        "loss",
+        "losses",
+        "tax",
+        "wash",
+        "wash-sale",
+        "gain",
+        "gains"
+      ],
       "wave": 3,
       "category": "tax",
-      "definition": "Realizing a loss deliberately to offset gains, or a limited amount of ordinary income, while keeping the exposure through a non-identical position. The harvested loss carries forward as a durable tax asset.",
+      "definition": "Selling a holding at a loss on purpose to offset realized gains, plus up to $3,000 of ordinary income a year ($1,500 if married filing separately), while keeping similar exposure through a holding that is not substantially identical. Net losses beyond that carry forward to later years. The replacement starts at a lower basis, so much of the benefit is a deferral.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy; IRC §1211(b) and §1212(b)"
       },
       "related": [
         "taxable-account",
@@ -1178,11 +1250,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "A rule that disallows a realized loss when a substantially identical position is repurchased inside a set window. It is why harvesting redeploys into a similar but not identical holding.",
+      "definition": "A rule that disallows a loss on stock or securities if you buy substantially identical ones within 30 days before or after the sale, in any of your accounts. The disallowed loss is normally added to the replacement's basis, so it is deferred, but a repurchase inside an IRA or Roth IRA loses it for good. Directly held Bitcoin is not covered under current law; H.R. 10357, advanced by the House Ways and Means Committee on September 16, 2026, would extend the rule to digital assets if enacted, and it is not law.",
       "length": "short",
       "source": {
         "kind": "external",
-        "ref": "IRC 26 U.S.C. 1091"
+        "ref": "IRC 26 U.S.C. §1091; Rev. Rul. 2008-5; IRS Publication 550; H.R. 10357, Digital Asset Tax Certainty Act (committee vote 38 to 5, September 16, 2026)"
       },
       "related": [
         "tax-loss-harvesting",
@@ -1202,11 +1274,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "Taking a deduction at a high marginal rate in one year and converting the balance to Roth in a later, lower-rate year. The captured value is the spread between the two rates.",
+      "definition": "Deferring income into a pre-tax 401(k) or 403(b) in an unusually high-income year, then converting it to Roth or withdrawing it in a later year taxed at a lower rate. The value captured is the spread between the two marginal rates. A traditional IRA usually cannot carry it, because the deduction phases out in such a year for anyone covered by a workplace plan.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "pretax-account",
@@ -1226,11 +1298,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "What the portfolio is actually worth at the end of the horizon, after every tax, fee, and friction has been paid. The framework optimizes for it rather than for any single year's return.",
+      "definition": "What the portfolio leaves you at the end of the horizon, after taxes, fees and other frictions. The framework judges decisions by it rather than by any single year's return.",
       "length": "short",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Tax Architecture & ROC Strategy"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "tax-wrapper",
@@ -1249,13 +1321,22 @@
       "aliases": [
         "sizing"
       ],
+      "context": [
+        "CIS",
+        "score",
+        "scores",
+        "posture",
+        "postures",
+        "concentration",
+        "capital"
+      ],
       "wave": 3,
       "category": "construction",
-      "definition": "How much capital a single position is allowed to carry. In this framework size is earned: the score selects a band, the posture scales it, and concentration limits cap it at the household level.",
+      "definition": "How much capital a single position may carry. In this framework size is earned: the posture sets the band table, the score selects the band within it, and concentration limits cap the result at the household level.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "allocation-band",
@@ -1279,11 +1360,11 @@
       ],
       "wave": 3,
       "category": "construction",
-      "definition": "The target size range a score maps into for a given posture. Seventy and above supports core sizing, sixty to sixty-nine constrained, fifty to fifty-nine starter, and below fifty is not allocation-worthy.",
+      "definition": "The size range a CIS score earns within its posture's table. For Torque, 70 and above is core, 60 to 69 standard, 50 to 59 a starter, and below 50 nothing; Ballast uses the same cut points with smaller ranges (its 50 to 59 band is marginal), and Hype is simply eligible from 50 at 2 to 5 percent.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "position-sizing",
@@ -1306,14 +1387,15 @@
       ],
       "wave": 3,
       "category": "construction",
-      "definition": "A ceiling on how much any single name or small group may represent, applied to the household aggregate across every account. Fifteen percent is the default single-position cap, eighteen percent the absolute with a documented override.",
+      "definition": "A ceiling on how much of the household portfolio, summed across every account, a single position or a small group may hold. Fifteen percent is the default single-position cap and 18 percent the absolute maximum, reachable only with a documented override (Part 5 doctrine); the top three stay within 35 percent and the top five within 50, with Bitcoin excluded. The dashboard flags breaches on the book you hold and does not block trades.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "position-sizing",
+        "household-aggregate",
         "override",
         "fis"
       ],
@@ -1329,11 +1411,11 @@
       "aliases": [],
       "wave": 3,
       "category": "foundations",
-      "definition": "A decline from a position's or portfolio's recent peak. The framework treats a survivable drawdown as the price of convexity rather than as a malfunction, provided reserves make it holdable.",
+      "definition": "A fall from a prior peak, measured as the percentage lost from the high. The framework treats a survivable drawdown as the toll convex positions charge, provided position size and reserves let you hold through it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 manifesto; operational in Part 5"
+        "ref": "Part 1 · Foundation & Philosophy; Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "ballast",
@@ -1353,11 +1435,11 @@
       "aliases": [],
       "wave": 3,
       "category": "foundations",
-      "definition": "How much a price moves. The framework separates it from fragility: a position can be highly volatile and still robust, and the difference is whether the move threatens survival.",
+      "definition": "How widely and how often a price moves, usually measured as the standard deviation of returns. The framework keeps it apart from fragility: a position can swing hard and still be robust, and what matters is whether a move can force you out.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 manifesto"
+        "ref": "Part 1 · Foundation & Philosophy"
       },
       "related": [
         "fragility",
@@ -1378,14 +1460,15 @@
       ],
       "wave": 3,
       "category": "foundations",
-      "definition": "Whether a position or portfolio can withstand stress without being forced into a decision that ends the compounding. It is scored inside CIS as Risk and Fragility, where a higher score means lower fragility.",
+      "definition": "Whether a position or portfolio can come through stress without a forced sale or a decision that ends the compounding. For a single position, CIS scores it in the Risk and Fragility component, where a higher score means less fragile.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — CIS components"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "fragility",
+        "cis-risk-fragility",
         "drawdown",
         "cis",
         "ballast"
@@ -1414,11 +1497,11 @@
       ],
       "wave": 3,
       "category": "construction",
-      "definition": "Moving capital between postures as conditions change, most often trimming Ballast after Torque runs and redeploying into Torque during dislocations. It is the framework's primary way of buying low without raising outside cash.",
+      "definition": "Moving capital between postures as conditions change: trimming Torque after a run to rebuild Ballast, then deploying Ballast into Torque during dislocations. It is the framework's primary way of buying low without raising outside cash.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "ballast",
@@ -1439,15 +1522,16 @@
       ],
       "wave": 3,
       "category": "construction",
-      "definition": "An exit level committed to before entry. Hype positions carry them by doctrine, and the framework forbids widening a stop or reclassifying a position to avoid honoring one.",
+      "definition": "An exit price set before you buy. Every Hype position carries one, 15 to 25 percent below entry, and Part 5 forbids widening it or reclassifying the position to avoid honoring it. Placing and honoring the stop is yours: the dashboard places no orders, though it flags a Hype position 25 percent or more below cost.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "hype",
-        "tripwire"
+        "tripwire",
+        "override"
       ],
       "appearsLater": {
         "part": 5,
@@ -1464,11 +1548,11 @@
       ],
       "wave": 3,
       "category": "construction",
-      "definition": "The protocol governing exposure around a scheduled earnings date. A position entering the final five trading days is capped at three percent of portfolio value, because the event is binary and conviction does not predict it.",
+      "definition": "The rule for exposure around a scheduled earnings report: from five trading days before it (T-5), a position may hold no more than 3 percent of the portfolio, because one report can move a stock 10 to 30 percent either way and conviction predicts none of it. The dashboard flags a position above the cap in the days before its report, but it counts calendar days, so the flag can arrive a trading day or two after T-5; start the trim from the earnings calendar. It trims nothing: the trim is yours, and so is the T-21 to T-6 blackout on opening new positions.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "tripwire",
@@ -1489,11 +1573,11 @@
       ],
       "wave": 3,
       "category": "macro",
-      "definition": "A durable structural driver that capital must flow toward, identified in the macro thesis. The framework allocates by force rather than by sector, and diversifies across several expressions of the same force.",
+      "definition": "A structural force expected to run for years, backed by mathematical, physical or political necessity rather than opinion, that the macro thesis names and that capital has to flow toward. The framework allocates by force rather than by sector, and spreads each force across several economically distinct businesses.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management; Part 2 · Lineage & Macro Thesis"
       },
       "related": [
         "macro-thesis",
@@ -1513,11 +1597,11 @@
       ],
       "wave": 3,
       "category": "construction",
-      "definition": "The highest price of the past year, used as the reference for absolute momentum. Distance below it grades a position from healthy, through correction, to severe distress.",
+      "definition": "The highest price of the past 52 weeks. The framework reads a position's distance below it as one of three momentum dimensions: within 10 percent is healthy, 25 percent or more below is a correction, and 40 percent or more is severe distress (a doctrine target the dashboard does not yet measure).",
       "length": "short",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management; George & Hwang (2004), 'The 52-Week High and Momentum Investing', Journal of Finance 59(5)"
       },
       "related": [
         "momentum-filter",
@@ -1533,13 +1617,23 @@
       "id": "breadth",
       "term": "Breadth",
       "aliases": [],
+      "context": [
+        "momentum",
+        "new highs",
+        "participation",
+        "leadership",
+        "tripwire",
+        "tripwires",
+        "sector",
+        "names"
+      ],
       "wave": 3,
       "category": "construction",
-      "definition": "How widely a move is shared across related names. Broad participation supports a thesis; narrowing leadership warns that a move is thinning even while the index holds.",
+      "definition": "How widely a move is shared across related names, read in the framework's momentum test as the share of them making new highs. Broad participation supports a thesis; narrowing leadership warns that a move is thinning even while the index holds (a doctrine target the dashboard does not yet measure).",
       "length": "short",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Portfolio Construction & Position Management"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "momentum-filter",
@@ -1555,9 +1649,7 @@
       "id": "margin",
       "term": "Margin",
       "aliases": [
-        "margin borrowing",
-        "securities-backed lending",
-        "SBLOC"
+        "margin borrowing"
       ],
       "context": [
         "borrow",
@@ -1570,11 +1662,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "Borrowing against portfolio assets rather than selling them. The framework treats it as an optional overlay, revocable by the broker and repriceable under stress, never as a structural requirement.",
+      "definition": "Borrowing from your broker against the securities in your account instead of selling them. The framework treats it as an optional overlay, worth carrying only while the income it funds yields more than the borrow rate, and the broker can change its terms or call the loan under stress. A loan supplies cash without a sale, but it adds interest cost and the risk of a forced sale, which is a taxable event; Part 3's loan-to-value arithmetic shows how fast a falling market closes that gap.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 + Part 5"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy (margin overlay); Part 3 · Bitcoin: Convexity Backbone (loan-to-value arithmetic, borrow phase)"
       },
       "related": [
         "buy-borrow-die",
@@ -1604,13 +1696,15 @@
       ],
       "wave": 3,
       "category": "construction",
-      "definition": "A conscious, documented, time-bounded deviation from a default parameter, carrying the reasoning and the conditions under which it reverts. An unexamined drift is not an override; it is the framework being abandoned quietly.",
+      "definition": "A deliberate, documented and time-bounded departure from a default parameter, recorded with its reasons and the conditions under which it reverts. Drift that nobody wrote down does not count as an override; Part 5 calls it the signature of a framework being abandoned while its owner still believes in it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Change governance"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
+        "parameter",
+        "change-governance",
         "doctrine",
         "concentration-limit"
       ],
