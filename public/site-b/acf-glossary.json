@@ -193,7 +193,7 @@
       ],
       "wave": 1,
       "category": "foundations",
-      "definition": "A payoff that curves upward: a favorable move earns more than an equal adverse move costs. The framework sizes and places every position to keep that shape, and Part 6 scores how well each one holds it.",
+      "definition": "A payoff that curves upward: a favorable move earns more than an equal adverse move costs. The framework sizes and places positions to keep that shape, and Part 6 scores it.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -220,7 +220,7 @@
       ],
       "wave": 1,
       "category": "scoring",
-      "definition": "Convexity Integrity Score: a 0 to 100 score for one position at a time, built from four components: convexity and optionality, risk and fragility, macro alignment, and execution and sentiment. The dashboard computes it, and Part 6 defines it. CIS below 50 removes allocation eligibility for a position in any of the three postures; Bitcoin answers to Part 3.",
+      "definition": "Convexity Integrity Score: a 0 to 100 score for one position at a time, built from four components (convexity and optionality, risk and fragility, macro alignment, and execution and sentiment). The dashboard computes it, and Part 6 defines it. CIS below 50 removes allocation eligibility for a position in any of the three postures; Bitcoin answers to Part 3.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -364,7 +364,7 @@
       "aliases": [],
       "wave": 1,
       "category": "construction",
-      "definition": "The posture for high-upside positions in regime forces that are real, durable and capital-backed, yet still early or underowned by institutions. Torque carries the portfolio's upside and absorbs its deepest drawdowns, which can reach 50 to 70 percent in liquidity stress, so each position has to earn its size through its score.",
+      "definition": "The posture for high-upside positions in regime forces that are real, durable and capital-backed, yet still early or underowned by institutions. Torque carries the upside and takes the drawdowns, which can reach 50 to 70 percent in liquidity stress, so each position has to earn its size through its score.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -703,7 +703,7 @@
       ],
       "wave": 1,
       "category": "bitcoin",
-      "definition": "Total addressable market: how much money a market could plausibly bring to an asset. For a company it is the market it could serve, set against its current value, which CIS scores as headroom; for Bitcoin, Part 3 estimates the share of existing monetary assets it could absorb. It sizes potential; it does not forecast a price.",
+      "definition": "Total addressable market: the size of the market an asset could eventually draw on. For a company it is the market it could serve, set against its current value, which CIS scores as headroom; for Bitcoin, Part 3 estimates the share of existing monetary assets it could absorb. It sizes potential; it does not forecast a price.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -991,7 +991,7 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "An ordinary brokerage account with no contribution limit, where gains are taxed when you sell and distributions in the year they are paid. The framework places never-sold Bitcoin here, along with return-of-capital Ballast, buy-and-hold positions beyond Roth capacity, and harvesting satellites. Bitcoin belongs here by default: held to death it passes with a stepped-up basis under current law, and only a taxable holding can be pledged for a loan.",
+      "definition": "An ordinary brokerage account with no contribution limit, where gains are taxed when you sell and distributions in the year they are paid. The framework places return-of-capital Ballast, buy-and-hold positions beyond Roth capacity and harvesting satellites here, and holds never-sold Bitcoin here by default: held to death it passes with a stepped-up basis under current law, and only a taxable holding can be pledged for a loan.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -1435,7 +1435,7 @@
       "aliases": [],
       "wave": 3,
       "category": "foundations",
-      "definition": "How widely and how often a price moves, usually measured as the standard deviation of returns. The framework keeps it apart from fragility: a position can swing hard and still be robust, and what matters is whether a move can force you out.",
+      "definition": "How widely and how often a price moves, usually measured as the standard deviation of returns. The framework keeps it apart from fragility: a position can swing hard and still hold up, and what matters is whether a move can force you out.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -1720,16 +1720,25 @@
       "aliases": [
         "doctrine layer"
       ],
+      "context": [
+        "parameter",
+        "parameters",
+        "override",
+        "overrides",
+        "non-negotiable"
+      ],
       "wave": 3,
       "category": "construction",
-      "definition": "The non-negotiable layer of the framework: the principles that define what it is. Changing one means no longer implementing the framework, as distinct from tuning a parameter or logging an override.",
+      "definition": "A principle that defines the framework itself, the top of its three levels of change governance. Change one and you are no longer running the framework, a different act from tuning a parameter or logging an override. The pages also use the word more loosely for any written rule the framework sets for you to carry out, as distinct from what the dashboard computes.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Change governance"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "override",
+        "parameter",
+        "change-governance",
         "posture"
       ],
       "appearsLater": {
@@ -1744,11 +1753,11 @@
       "aliases": [],
       "wave": 3,
       "category": "construction",
-      "definition": "The strength of the evidence behind a position, as opposed to enthusiasm for it. The framework quantifies it through CIS so that size follows demonstrated evidence rather than feeling.",
+      "definition": "The strength of the evidence behind a position, which is a different thing from enthusiasm for it. The framework measures it with CIS and lets size follow the score, so a position earns a larger band only as its evidence improves. The dashboard labels the score bands as conviction tiers: core, standard, starter and avoid.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 + Part 6"
+        "ref": "Part 5 · Portfolio Construction & Position Management; Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "cis",
@@ -1770,11 +1779,11 @@
       ],
       "wave": 3,
       "category": "macro",
-      "definition": "The prevailing structural conditions that determine how assets behave and correlate. The framework is built to adapt when the regime changes rather than to optimize for the average of all regimes.",
+      "definition": "The conditions, read through growth, inflation and policy, that decide how assets behave and how they move together, often for years at a stretch. The framework is built to adapt when the regime shifts instead of optimizing for an average of all regimes. The dashboard's own regime label is narrower, set by the direction of rates, inflation and unemployment (as of September 2026).",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 manifesto; Part 2 macro thesis"
+        "ref": "Part 1 · Foundation & Philosophy; Part 2 · Lineage & Macro Thesis"
       },
       "related": [
         "macro-thesis",
@@ -1790,20 +1799,20 @@
     {
       "id": "optionality",
       "term": "Optionality",
-      "aliases": [
-        "optional"
-      ],
+      "aliases": [],
       "wave": 3,
       "category": "foundations",
-      "definition": "Holding a position whose future paths include large upside without committing to which one occurs. It is the property CIS scores first, because it is what convexity is made of.",
+      "definition": "Keeping choices open: the right, without the obligation, to act when conditions favor you, the way dry powder waits for a better entry. Inside CIS, optionality is also a 25-point sub-score of Convexity and Optionality, read from company size and sector.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — CIS components"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "convexity",
         "right-tail-outcomes",
+        "cis-convexity-optionality",
+        "dry-powder",
         "cis"
       ],
       "appearsLater": {
@@ -1820,11 +1829,11 @@
       ],
       "wave": 3,
       "category": "foundations",
-      "definition": "A payoff where the upside and downside are unequal in size or probability. The framework seeks it deliberately and treats symmetric risk measures as an incomplete description of survival.",
+      "definition": "A payoff whose upside and downside differ in size or likelihood. The framework seeks the favorable kind, where the possible gain is much larger than the possible loss, and treats symmetric measures such as standard deviation as an incomplete account of risk.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 manifesto; Part 2 lineage"
+        "ref": "Part 1 · Foundation & Philosophy; Part 2 · Lineage & Macro Thesis"
       },
       "related": [
         "convexity",
@@ -1847,15 +1856,16 @@
       ],
       "wave": 3,
       "category": "scoring",
-      "definition": "The shared four-level register both scores read: seventy and above Strong, sixty to sixty-nine Moderate, fifty to fifty-nine Caution, below fifty Weak. On FIS seventy is also the action line; on CIS it is a band boundary, not an action trigger.",
+      "definition": "The four named ranges both scores are read in: 70 and above Strong, 60 up to 70 Moderate, 50 up to 60 Caution, below 50 Weak, so a 69.9 is Moderate. On FIS 70 is also the action line; on CIS it is a band boundary, not an action trigger. In the dashboard the same bands carry numeric labels (70+, 60 to 69, 50 to 59, ≤49) and conviction tiers (core, standard, starter, avoid); the Next Dollar Score's strong, moderate and weak ladder cuts at different points, so read the two separately.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Reading the number"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "cis",
         "fis",
+        "action-line",
         "allocation-band"
       ],
       "appearsLater": {
@@ -1871,17 +1881,26 @@
         "delta clamping",
         "clamp"
       ],
+      "context": [
+        "update",
+        "updates",
+        "confidence",
+        "clamped",
+        "re-rating",
+        "re-ratings"
+      ],
       "wave": 3,
       "category": "scoring",
-      "definition": "A cap on how far a score may move in a single update, scaled by how good the underlying evidence is. It forces a large re-rating to be earned across successive updates rather than granted in one enthusiastic week.",
+      "definition": "A cap on how far a score may move in a single update, scaled by how good the underlying evidence is: 3 points at low confidence, 5 at medium, 6 for proxy-derived evidence and 8 at high. It makes re-ratings of up to 20 points arrive across successive updates; a larger move is treated as a model disagreement and passes through.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Scoring mechanics"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "cis",
-        "confidence"
+        "confidence",
+        "drift-trigger"
       ],
       "appearsLater": {
         "part": 6,
@@ -1895,13 +1914,21 @@
       "aliases": [
         "confidence level"
       ],
+      "context": [
+        "clamp",
+        "update",
+        "updates",
+        "evidence",
+        "tier",
+        "delta"
+      ],
       "wave": 3,
       "category": "scoring",
-      "definition": "How much the evidence behind a score can support, derived by the engine from the quality of each source rather than asserted by hand. It sets how far a single update is allowed to move the score.",
+      "definition": "How far the evidence behind a score can be trusted, graded low, medium or high. Nobody types it in: the dashboard derives it from the quality of the evidence behind each component, and it sets how far a single update may move the score and, for the macro component, how much weight that component carries.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Scoring mechanics"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "delta-clamp",
@@ -1921,14 +1948,16 @@
       ],
       "wave": 3,
       "category": "scoring",
-      "definition": "The structural class a position belongs to, which selects the lens CIS scores it through. It changes how the rubric is applied, never what the final number is floored at.",
+      "definition": "A structural label the dashboard attaches to each position: spot Bitcoin, ETF, levered ETF, or operating equity (the default). It does not choose how CIS scores a position, since asset class chooses the scoring route, and it puts no floor under any score. Its main effect in the software is in FIS, where the Bitcoin archetype is left out of the concentration measures.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Scoring mechanics"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "cis",
+        "fis",
+        "concentration-limit",
         "tam"
       ],
       "appearsLater": {
@@ -1945,14 +1974,15 @@
       ],
       "wave": 3,
       "category": "scoring",
-      "definition": "Starting a portfolio at one hundred and deducting a named penalty for each rule violation. Every point below one hundred is attributable to a specific departure, so the score reads as a repair list rather than a verdict.",
+      "definition": "Scoring by deduction: start at a perfect 100 and subtract a named penalty for each rule broken, so every lost point traces to a cause. FIS works this way, which turns its score into a repair list with the largest deduction at the top.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — FIS architecture"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "fis",
+        "penalty-bucket",
         "attribution"
       ],
       "appearsLater": {
@@ -1969,15 +1999,16 @@
       ],
       "wave": 3,
       "category": "scoring",
-      "definition": "The itemized account of which rule cost how many points. It is what makes a construction score actionable, because the fix is named alongside the deduction.",
+      "definition": "The itemized account of which rule cost how many points, reported with every FIS. It names the fix next to the deduction, and the points come back once the score can see the fix. As of September 2026 the dashboard's score does not yet read the thesis, distribution and override records you keep, so a documented position can still be charged.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — FIS architecture"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "fis",
         "subtractive-scoring",
+        "penalty-bucket",
         "dead-capital"
       ],
       "appearsLater": {
@@ -1992,14 +2023,16 @@
       "aliases": [],
       "wave": 3,
       "category": "scoring",
-      "definition": "Capital held without a documented thesis or on a score nobody has refreshed. It is one of the five FIS penalty buckets, and it scales with position size.",
+      "definition": "Money tied up in a position nobody can currently justify: one with no documented thesis, or one whose score is more than 90 days old. It is one of the five FIS penalty buckets, capped at 15 points; a missing thesis costs 5 base points and a stale score 2, each multiplied by the position's share of the portfolio.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — FIS penalty buckets"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "fis",
+        "penalty-bucket",
+        "score-decay",
         "attribution"
       ],
       "appearsLater": {
@@ -2016,14 +2049,15 @@
       ],
       "wave": 3,
       "category": "scoring",
-      "definition": "Scaling a penalty by how large the offending position is, within a floor and a cap. A bigger position generates a proportionally bigger charge, but no single position is allowed to dominate the score.",
+      "definition": "Scaling a penalty by the offending position's share of the portfolio, floored at 0.2 percent and capped at 12 percent: a 6-point charge on a 5 percent position costs 0.3 points. Only the governance and dead-capital buckets work this way; allocation, concentration and complexity charges are flat.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — FIS architecture"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "fis",
+        "penalty-bucket",
         "attribution"
       ],
       "appearsLater": {
@@ -2038,11 +2072,11 @@
       "aliases": [],
       "wave": 3,
       "category": "scoring",
-      "definition": "The gap between the portfolio's actual posture mix and its target, which the market can open without a single trade. It is reported as a diagnostic alongside the score rather than billed as a penalty.",
+      "definition": "The gap between the portfolio's actual mix of Torque, Ballast and Hype and its target mix, which the market can open without a single trade. It is measured in percentage points against the targets your operating thesis implies and reported alongside the score, never billed as a penalty; the dashboard warns at 10 points and fails at 20.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Failure modes"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "posture",
@@ -2062,13 +2096,14 @@
       ],
       "wave": 3,
       "category": "scoring",
-      "definition": "The record of what changed, why, and what would reverse it, written as the weekly loop closes. It is what makes the next week's pass a measurement rather than a memory.",
+      "definition": "The record each Weekly Review writes as it closes: the positions whose scores moved, how FIS changed, which recommendations were made or held back and why, or why nothing was needed. The dashboard keeps the last 52 reviews, a year at a weekly cadence. It is what makes the next pass a measurement rather than a memory.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Weekly workflow"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
+        "weekly-loop",
         "fis",
         "cis"
       ],
@@ -2084,11 +2119,11 @@
       "aliases": [],
       "wave": 4,
       "category": "foundations",
-      "definition": "Holding a deteriorating position because the story still sounds right. The framework names it as a failure mode of traditional portfolio management and answers it with quantified reassessment, so evidence rather than narrative decides whether a position stays.",
+      "definition": "Holding a deteriorating position because the story still sounds right. Part 1 lists it among six failure modes that recur in conventional portfolio management, and the framework answers it with a scored reassessment: CIS re-scores the position at each weekly review, and the core assertions written at entry say what would break the thesis, so evidence decides whether it stays.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 — the failure modes the architecture addresses"
+        "ref": "Part 1 · Foundation & Philosophy"
       },
       "related": [
         "cis",
@@ -2108,11 +2143,11 @@
       "aliases": [],
       "wave": 4,
       "category": "foundations",
-      "definition": "Missing a thesis break because there is more information than attention. The framework answers it with tripwires, which automate attention to the critical signals so a break is noticed when it happens rather than when it becomes convenient.",
+      "definition": "Missing a thesis break because there is more information than attention to read it. The framework answers with tripwires, predefined thresholds that watch the critical signals for you, so a break gets noticed when it happens instead of when it becomes convenient; the response stays yours.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 1 — the failure modes the architecture addresses"
+        "ref": "Part 1 · Foundation & Philosophy"
       },
       "related": [
         "tripwire",
@@ -2123,7 +2158,7 @@
         "part": 1,
         "topic": "The failure modes the system answers"
       },
-      "chart": "L3"
+      "chart": "dl-tripwire-loop"
     },
     {
       "id": "risk-of-ruin",
@@ -2135,11 +2170,11 @@
       ],
       "wave": 4,
       "category": "foundations",
-      "definition": "The chance of a loss large enough to end compounding, which no later gain can repair. The framework treats ruin as a boundary condition rather than a risk to be traded off: survival comes first, because nothing compounds from zero.",
+      "definition": "The chance of a loss so large that compounding stops for good, because nothing later can repair it. The framework treats ruin as a line it does not cross, never a risk to trade against return. Small odds add up when repeated: a 1 percent yearly chance of ruin, taken for 50 years, leaves about a 40 percent chance of being ruined.",
       "length": "medium",
       "source": {
         "kind": "external",
-        "ref": "Taleb, Antifragile and The Black Swan; internal Part 2 lineage"
+        "ref": "Taleb, Skin in the Game (2018), chapter 'The Logic of Risk Taking' (ruin as an absorbing barrier); Taleb, Antifragile (2012); Part 2 · Lineage & Macro Thesis"
       },
       "related": [
         "fragility",
@@ -2163,11 +2198,11 @@
       ],
       "wave": 4,
       "category": "macro",
-      "definition": "The aggregate supply of money and credit in the system, read through measures such as M2 growth, central-bank balance sheets, and real rates. The framework treats its expansion and contraction as a tide that convex assets amplify rather than merely follow.",
+      "definition": "The supply of money and credit in the system, read through M2 growth and central-bank balance sheets, with real rates as its price. Bitcoin and other long-duration assets have tended to move with it, more sensitively than traditional assets, most reliably over multi-month horizons and only weakly over short ones.",
       "length": "medium",
       "source": {
         "kind": "external",
-        "ref": "Lyn Alden, liquidity-cycle work; internal Part 2 lineage"
+        "ref": "Sam Callahan, 'Bitcoin: A Global Liquidity Barometer' (commissioned and advised by Lyn Alden), Lyn Alden Investment Strategy, September 2024; Part 2 · Lineage & Macro Thesis"
       },
       "related": [
         "macro-thesis",
@@ -2192,11 +2227,11 @@
       ],
       "wave": 4,
       "category": "bitcoin",
-      "definition": "The reserve asset and principal source of convexity: a Bitcoin position held outside the three postures, accumulated on a schedule, governed by valuation discipline, and never sold, traded, or rebalanced. Liquidity comes from elsewhere.",
+      "definition": "The portfolio's reserve asset and main source of convexity: a Bitcoin holding kept outside the three postures and the concentration limits, accumulated on a schedule at a pace set by valuation discipline, and never sold, traded or rebalanced. It is scored like every other holding, but the score does not size, gate or sell it; Part 3's rules govern it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Bitcoin as the convexity backbone"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "posture",
@@ -2217,16 +2252,15 @@
       "term": "Cold storage",
       "aliases": [
         "cold-storage",
-        "self-custody",
         "hardware wallet"
       ],
       "wave": 4,
       "category": "bitcoin",
-      "definition": "Holding the Bitcoin reserve in hardware wallets under the holder’s own keys, accumulated through payroll contributions and held rather than trimmed on valuation. A custodian enters only if and when collateralized borrowing begins.",
+      "definition": "Keeping Bitcoin's private keys offline, out of reach of internet-connected systems. The framework's default holds the whole reserve this way, on hardware wallets under the holder's own keys in a taxable account; coins pledged for a loan leave it for the lender's custody or a shared multisig for the life of the loan.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — TAM, custody, and the borrow phase"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "bitcoin-backbone",
@@ -2252,11 +2286,11 @@
       ],
       "wave": 4,
       "category": "bitcoin",
-      "definition": "The handling rule for the backbone: Bitcoin is accumulated and never sold, traded, or rebalanced. Valuation models shape the pace of buying, not entries and exits, and cash needs are met from income, other assets, or borrowing against the reserve.",
+      "definition": "The handling rule for the Bitcoin backbone: buy it, typically through payroll DCA, and never sell, trade or rebalance it. Valuation models set the pace of buying and never call an entry or an exit. Cash needs are met from income and other assets; borrowing against the reserve, when used, funds income-producing assets, and a loan adds interest cost and the risk of a forced, taxable sale if the collateral falls far enough.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Handling doctrine: accumulate, then borrow"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "bitcoin-backbone",
@@ -2279,11 +2313,11 @@
       ],
       "wave": 4,
       "category": "bitcoin",
-      "definition": "The valuation read for Bitcoin: several independent models are compared, and their agreement is the signal. Convergence on undervaluation accelerates accumulation, convergence on overvaluation slows it, and wide divergence counsels holding the range.",
+      "definition": "Reading Bitcoin's value from several independent models and changing the pace of buying only when they agree. When they agree and the price sits more than 30 percent below their combined estimate, the holder raises DCA about 50 percent or deploys dry powder; when they converge on overvaluation, discretionary buying slows; when they diverge widely, the schedule continues with no sharp changes. It is written guidance you apply, and the dashboard computes no convergence.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Why Bitcoin can be modeled"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "power-law-corridor",
@@ -2307,11 +2341,11 @@
       ],
       "wave": 4,
       "category": "bitcoin",
-      "definition": "Bitcoin’s aggregate on-chain cost basis, with each coin valued at the price it last moved. It rises with adoption and marks a historically important bear-market regime level, not a hard floor: price can trade below it for extended stretches.",
+      "definition": "Bitcoin's average on-chain cost basis: the realized cap (every coin valued at the price it last moved) divided by supply. It tends to rise as coins change hands at higher prices but can fall in a deep bear market, as it did in 2022. It marks a historically important bear-market level, not a hard floor: price traded below it for months at a time in 2018 to 2019 and again in 2022 to 2023.",
       "length": "medium",
       "source": {
-        "kind": "internal",
-        "ref": "Part 3 — Why Bitcoin can be modeled"
+        "kind": "external",
+        "ref": "Part 3 · Bitcoin: Convexity Backbone; Glassnode, realized cap and realized price"
       },
       "related": [
         "model-convergence",
@@ -2334,11 +2368,11 @@
       ],
       "wave": 4,
       "category": "bitcoin",
-      "definition": "Bitcoin’s share of the whole portfolio. A ten to fifteen percent target suits long horizons and moderate risk capacity, twenty to thirty percent suits higher conviction, and a mature thirty to fifty percent share can emerge over decades through accumulation rather than rebalancing.",
+      "definition": "Bitcoin's share of the whole portfolio. Part 3 suggests 10 to 15 percent for horizons of ten years or more and moderate risk capacity, and 20 to 30 percent at higher conviction; a mature 30 to 50 percent share may emerge after 15 to 20 years through accumulation and appreciation, never by rebalancing up to it. At setup the dashboard proposes a 15 percent baseline (10 percent under two of its theses) for you to confirm or replace, and FIS carries a 10 percent Bitcoin reference that never costs points or triggers a sale.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Reserve sizing by horizon and risk capacity"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "bitcoin-backbone",
@@ -2354,18 +2388,27 @@
     },
     {
       "id": "valuation-extension",
-      "term": "Extension",
+      "term": "Valuation extension",
       "aliases": [
-        "valuation extension",
+        "extension",
+        "extensions",
         "price extension"
+      ],
+      "context": [
+        "Bitcoin",
+        "power-law",
+        "power law",
+        "realized",
+        "DCA",
+        "dry powder"
       ],
       "wave": 4,
       "category": "bitcoin",
-      "definition": "A stretch in which Bitcoin trades well above its power-law trend and its realized-price basis. The response is to slow discretionary accumulation and build dry powder from income; an extension never prompts a sale of the reserve.",
+      "definition": "A stretch when Bitcoin trades far above its power-law trend and its realized price: at the November 2021 high it sat about 3 times the dashboard's trend line. The response is to slow discretionary buying and bank income as dry powder while the scheduled DCA continues; an extension never prompts a sale of the reserve.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 3 — Through two cycles"
+        "ref": "Part 3 · Bitcoin: Convexity Backbone"
       },
       "related": [
         "model-convergence",
@@ -2388,11 +2431,11 @@
       ],
       "wave": 4,
       "category": "tax",
-      "definition": "The gap between a gross gain and what a given wrapper lets you keep after tax. It widens as the outcome grows, which is why the largest wins are the ones where wrapper placement matters most.",
+      "definition": "The gap between a gross gain and what you keep after tax in a given account. In dollars it grows with the gain: a taxable account that sells a long-held winner typically pays 15 to 23.8 percent in federal tax, plus any state tax, while qualified Roth withdrawals pay none, so the largest wins are where account placement matters most (Part 4 works the arithmetic).",
       "length": "short",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — The tax wedge"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "tax-wrapper",
@@ -2416,11 +2459,11 @@
       ],
       "wave": 4,
       "category": "tax",
-      "definition": "The only options use permitted inside a Roth: long calls, long puts, and defined-risk spreads, never undefined-risk strategies such as naked options or short volatility. A tactical overlay for a high-conviction thesis, capped at three to five percent of the account measured as maximum loss at entry.",
+      "definition": "Buying convexity with options: a long call, a long put or a defined-risk spread, where the most you can lose is known at entry. It is the only options use the framework permits inside a Roth, a tactical overlay for a high-conviction thesis capped at 3 to 5 percent of the account measured as maximum loss at entry ($2,250 to $3,750 in a $75,000 Roth); naked options and short volatility are excluded.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 4 — Options within the Roth"
+        "ref": "Part 4 · Tax Architecture & ROC Strategy"
       },
       "related": [
         "roth",
@@ -2444,11 +2487,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "The portfolio boundary for every concentration rule: the total across all wrappers, including Roth, pre-tax, taxable, and Bitcoin cold storage. A position held in several accounts sums to one exposure, and the limits apply to that sum rather than to any single account.",
+      "definition": "The portfolio boundary for every concentration rule: the total across all accounts, Roth, pre-tax, taxable and Bitcoin cold storage. A position held in several accounts counts as one exposure, so $30,000 of a stock in a Roth plus $20,000 in a taxable account is a 10 percent position in a $500,000 household, and the limits apply to that sum.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — The portfolio boundary and single-name sleeves"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "concentration-limit",
@@ -2470,11 +2513,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "A wrapper intentionally concentrated in one position, permitted only while the household aggregate stays inside its limits. The designation is explicit and documented, drift is monitored, and trimming is required if the aggregate breaches a cap. A governance structure, not an exception.",
+      "definition": "An account deliberately concentrated in one position, such as a Roth IRA holding a single stock. It is allowed only while the household's exposure to that position stays inside the concentration limits: the designation is written down, its drift is monitored, and if the aggregate breaches a limit, the trim is yours.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — The portfolio boundary and single-name sleeves"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "household-aggregate",
@@ -2497,11 +2540,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "The truth problem, as distinct from the price problem: a core assertion behind a position has broken. Reassessment is immediate and price is irrelevant; a thesis-damaged position is downgraded or exited, and a later price recovery does not rehabilitate it.",
+      "definition": "A break in the reasons for owning a position: one of its written core assertions has stopped being true. Part 5 calls it a truth problem, as distinct from a price problem, and handles it at once: whatever the price is doing, the position is downgraded or exited, and a later rally does not rehabilitate it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Thesis drift: price problems versus truth problems"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "core-assertion",
@@ -2524,11 +2567,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "The one to three claims a position depends on, written down at entry in a form that can be checked. They are what thesis drift is measured against: when one breaks, the position is reassessed on the evidence, whatever the price is doing.",
+      "definition": "The one to three claims a position depends on, written down at entry in a form that can be checked, such as 'datacenter capex has three or more years to run'. They are what thesis drift is measured against: when one breaks, the position is reassessed on the evidence, whatever the price is doing.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Protocol 05: one to three core assertions per position"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "thesis-drift",
@@ -2550,13 +2593,19 @@
         "frozen",
         "adds and freezes"
       ],
+      "context": [
+        "cost",
+        "confirming",
+        "capital",
+        "20 percent"
+      ],
       "wave": 4,
       "category": "construction",
-      "definition": "A rule on the way in: a position down twenty percent or more from cost basis takes no new capital until a confirming signal arrives, such as a higher low, a reclaimed level, or new thesis-supporting evidence. Scaling in happens over weeks, with no more than a quarter of the target added in any one week.",
+      "definition": "A rule on the way in: a position 20 percent or more below its cost takes no new capital until a confirming signal arrives, such as a higher low, a reclaimed level or new evidence for the thesis. Scaling in then runs over weeks, never more than a quarter of the target in one week. Both the freeze and the weekly add cap are practitioner discipline; the dashboard records the trade and never blocks it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Adds and freezes: discipline on the way in"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "position-sizing",
@@ -2579,11 +2628,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "The gate a position must pass before it can be Torque, and entry is earned three ways at once: a structural tailwind from an identifiable regime force, business survivability through stress without continuous access to capital markets, and valuation headroom large enough for a convex payoff, often five times or more. Passing earns a place, not a size.",
+      "definition": "The three tests a position must pass, all at once, before it can be Torque: a structural tailwind from an identifiable regime force, a business that can survive a 12 to 24 month liquidity drought without the capital markets, and an addressable market much larger than its current value, often 5 times or more. Passing earns the position a place; its score still decides the size.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Torque: leverage on regime forces"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "torque",
@@ -2608,11 +2657,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "A checklist, not an impression: a Ballast candidate must pass at least three of five tests covering a fortress balance sheet, diversified revenue, durable cash generation, low factor correlation, and a liquidity-resilient valuation. Yield is deliberately not on the list; income follows quality rather than qualifying it.",
+      "definition": "The checklist for Ballast: a candidate must pass at least three of five tests covering a fortress balance sheet, diversified revenue, durable cash generation, low factor correlation and a liquidity-resilient valuation. Yield is not one of the five: income may come with quality, but it never qualifies a position on its own.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Ballast: five tests, three required"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "ballast",
@@ -2634,11 +2683,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "The Hype exit schedule: one third of the position is sold at a fifty percent gain, another third at one hundred percent, and the remainder runs with the stop raised to breakeven. It converts a narrative trade into banked gains without pretending to know the top.",
+      "definition": "The Hype exit schedule: sell a third of the position at a 50 percent gain, another third at 100 percent, and let the rest run with its stop raised to breakeven. It locks in gains on the way up without pretending to know the top; the sales are yours, since the dashboard places no orders.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Hype governance"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "hype",
@@ -2649,7 +2698,7 @@
         "part": 5,
         "topic": "Hype governance"
       },
-      "chart": "p5-posture-sizing"
+      "chart": null
     },
     {
       "id": "parameter",
@@ -2660,11 +2709,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "The middle layer of change governance: a threshold that may be tuned inside a documented envelope for an articulated reason, such as component weights, sizing bands, momentum thresholds, or concentration limits. Changing one adjusts the framework; changing doctrine abandons it.",
+      "definition": "A threshold the framework lets you tune, the middle level of change governance: component weights, sizing bands, momentum thresholds, the level of the earnings cap and the concentration limits, each adjustable inside a documented range for a stated reason. Changing a parameter calibrates the framework; changing doctrine abandons it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Doctrine, parameters, overrides"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "doctrine",
@@ -2687,11 +2736,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "The rule that every change to the rules is itself governed, by routing it to exactly one of three levels: doctrine, which cannot change without abandoning the framework; parameters, tunable within documented ranges; and overrides, temporary, documented, and time-bounded.",
+      "definition": "The rule that changes to the rules are themselves governed: before a change is made, it is routed to exactly one of three levels. Doctrine cannot change without abandoning the framework, parameters can be tuned within documented ranges, and overrides are temporary, documented and time-bounded.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Doctrine, parameters, overrides"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "doctrine",
@@ -2716,11 +2765,11 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "A state machine for stressed markets, when rising correlation and departing liquidity make positions that looked independent trade as one. The response is deliberately boring: pause new Torque adds, enforce posture limits strictly, consider trimming gross exposure by ten to twenty percent, and resume only after two calm weeks.",
+      "definition": "A written protocol, run like a state machine, for markets where rising correlation and draining liquidity make independent-looking positions trade as one. When the VIX holds above 25, credit spreads widen and Torque positions correlate above 0.7, you pause new Torque adds, hold posture limits strictly, consider cutting gross exposure 10 to 20 percent, and resume only after two weeks of normal readings. The dashboard flags the VIX, credit spreads and average correlation across all your holdings; the throttle itself is yours.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 5 — Liquidity and correlation: throttle the regime"
+        "ref": "Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "correlation-instability",
@@ -2744,11 +2793,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The heaviest CIS component at forty percent, because asymmetric upside is the objective. It scores TAM headroom, the optionality surface, catalyst density, and scarcity, each capped, summing to a 0 to 100 component score.",
+      "definition": "The CIS component for upside: how much room a position has to grow and how many ways it can get there. Four capped sub-scores sum to 100: headroom (35), optionality (25), catalyst density (20) and scarcity (20). It carries 40 percent of CIS at the reference weights, the largest share, because asymmetric upside is the objective; a thesis profile moves it between 30 and 45 percent, and under Capital Preservation Risk and Fragility outweighs it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — The four CIS components; Framework in Math, component C"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring; The Framework in Math (component C)"
       },
       "related": [
         "cis",
@@ -2773,11 +2822,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The CIS component, weighted twenty-five percent, that measures survivability under stress rather than price volatility: balance sheet, business-model fragility, factor correlation, and tail exposure. A higher score means lower fragility.",
+      "definition": "The CIS component for survival under stress, which is a different thing from price volatility: balance sheet (30 points), business model (30), factor correlation (20) and tail risk (20), where a higher score means less fragile. It carries 25 percent of CIS at the reference weights (20 to 35 percent across thesis profiles).",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — The four CIS components; Framework in Math, component R"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring; The Framework in Math (component R)"
       },
       "related": [
         "cis",
@@ -2800,17 +2849,17 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The CIS component, weighted twenty-five percent, that measures fit to the current regime rather than a forecast: regime sensitivity, carry direction, and policy alignment against the Part 2 thesis. A macro read may tilt a score; it is bounded so it can never determine one.",
+      "definition": "The CIS component for fit with the current regime, read against your Part 2 thesis: regime fit (40 points), carry direction (30) and policy and flow (30). It carries 25 percent of CIS at the reference weights (20 to 30 percent across thesis profiles), less when the macro evidence is thin. Your own sector preferences move it most; the dashboard's reading of rates, inflation and unemployment shifts it by a few points at most.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — The four CIS components; Framework in Math, component M"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring; The Framework in Math (component M)"
       },
       "related": [
         "cis",
         "macro-thesis",
         "regime-force",
-        "carry-vector"
+        "regime"
       ],
       "appearsLater": {
         "part": 6,
@@ -2828,11 +2877,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The lightest CIS component at ten percent: momentum, relative strength, and market acceptance. It carries the least weight because execution confirms quality and never dominates it.",
-      "length": "short",
+      "definition": "The CIS component that asks whether reality is starting to validate the thesis. On the equity route it reads execution quality from three-month price momentum with a volatility adjustment, and market acceptance from trading turnover (thirty-day dollar volume over market value), 50 points each. It is the lightest component under every thesis profile, 10 percent at the reference weights and 15 under Capital Preservation, because execution follows quality.",
+      "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — The four CIS components; Framework in Math, component E"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring; The Framework in Math (component E)"
       },
       "related": [
         "cis",
@@ -2855,11 +2904,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "How much larger the addressable market is than the company, the first and largest sub-score inside Convexity and Optionality. It is scored on a logarithmic curve capped at thirty times, so the first multiple of headroom counts for far more than the twentieth.",
+      "definition": "How much larger a company's addressable market is than the company itself: the first and largest sub-score inside Convexity and Optionality, worth up to 35 points. It is scored on a logarithmic curve capped at 30 times, so the early multiples count for far more than the late ones: 5 times scores about 18, 10 times about 24, and 30 times the full 35.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Framework in Math — Convexity and optionality; Part 5 Torque eligibility"
+        "ref": "The Framework in Math (component C); Part 5 · Portfolio Construction & Position Management"
       },
       "related": [
         "tam",
@@ -2880,18 +2929,26 @@
         "catalysts",
         "catalyst"
       ],
+      "context": [
+        "re-rating",
+        "re-ratings",
+        "Convexity",
+        "density",
+        "impact",
+        "sub-score",
+        "researched"
+      ],
       "wave": 4,
       "category": "scoring",
-      "definition": "A sub-score inside Convexity and Optionality that prices identifiable, dated reasons for a re-rating. Each catalyst earns points from its impact, probability, independence, evidence confidence, and time decay, so several versions of the same catalyst do not count twice.",
+      "definition": "A sub-score inside Convexity and Optionality, worth up to 20 points, that prices identifiable, dated reasons for a re-rating. Each catalyst's points multiply its impact tier, its probability, its independence, the confidence of its own evidence, and a time decay that halves its value a year out. A catalyst that repeats another is discounted by up to half, only the top four count, and catalysts spanning different impact tiers earn up to 3 more points.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Framework in Math — Convexity and optionality"
+        "ref": "The Framework in Math (component C)"
       },
       "related": [
         "cis-convexity-optionality",
-        "headroom",
-        "confidence"
+        "headroom"
       ],
       "appearsLater": {
         "part": 6,
@@ -2909,11 +2966,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The five named deductions FIS can take from one hundred: allocation, governance, dead capital, concentration, and complexity, each with its own cap. Because the caps sum to eighty, FIS can never fall below twenty, and every point lost names the rule that cost it.",
+      "definition": "One of the five capped categories FIS deducts from, starting the assembled portfolio at 100: allocation (25 points), governance (15), dead capital (15), concentration (15) and complexity (10, hard cap). The caps sum to 80, so a valid FIS cannot fall below 20, and every point lost names the rule that cost it.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — The five penalty buckets"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "fis",
@@ -2937,11 +2994,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The FIS reading of seventy: at or above it the portfolio holds, below it repair begins, with the attribution naming the fix. CIS reads the same four-band register, but there seventy is only the floor of the Strong band, a boundary rather than a trigger.",
+      "definition": "The FIS reading of 70: at or above it the portfolio holds; below it repair begins, starting with the top penalty the attribution names. Run the Weekly Review with FIS below 70 and the dashboard recommends fixing that penalty; it never blocks a trade. CIS reads the same four bands, but there 70 is only the floor of the Strong band, a band boundary, not an action trigger.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Reading the number"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "score-band",
@@ -2966,11 +3023,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The ten-point signal on score movement. A CIS rise of ten points flags the position for resizing toward its larger target, a fall of ten flags a downsize, and either is paced over two to four weeks. Neither changes posture, which Part 5 governs, and neither alone forces an exit.",
+      "definition": "The ten-point signal on score movement. When a position's CIS has moved 10 points or more since your last Weekly Review, the review flags it for resizing toward the size its new score earns. Pacing the resize over two to four weeks is yours; the signal never changes posture, which Part 5 governs, and never forces an exit on its own.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — How CIS feeds decisions"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "cis",
@@ -2992,11 +3049,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "All CIS sub-scores are continuous values rather than bucketed tiers: a position scores 78.3, not 75 or 80. Continuity preserves the small week-over-week movement that longitudinal tracking exists to see.",
-      "length": "short",
+      "definition": "Scoring on a smooth scale instead of in steps: CIS is carried as an unrounded float from its components to the stored score and is bucketed only for display, so a position scores 78.3, not 75 or 80. Some inputs are read off tier ladders first, momentum and turnover among them, and a sparse-data cap can limit the score, but nothing rounds it. Continuity preserves the small week-over-week movement that longitudinal tracking exists to see.",
+      "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Mechanics: floats, not tiers"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "cis",
@@ -3020,11 +3077,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The operating cadence, run Sunday evening or Monday pre-market: update CIS, calculate FIS, run the governance gates, act or deliberately hold, and log the evidence. It closes every week whether or not anything moved, which is what makes the next pass a measurement.",
+      "definition": "The framework's weekly operating pass, run Sunday evening or Monday before the open: update CIS, calculate FIS, run the governance checks, act or deliberately hold, and log the result. It closes every week whether or not anything moved, so the next pass has something to measure against. In the dashboard the Weekly Review runs these steps when you start it; nothing runs it on a schedule.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — The weekly workflow"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "decision-log",
@@ -3046,11 +3103,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The four events that interrupt the weekly cadence rather than wait for it: a position moving more than five percent in one day, material news, an earnings announcement, or a tripwire condition met. Between triggers, frequency limits keep activity from passing for diligence.",
+      "definition": "The four events that call for attention before the weekly pass comes round: a position moving more than 5 percent in a single day, material news, an earnings announcement, or a CIS update from new research (a tripwire interrupts by definition). The dashboard detects only the single-day move, at 5 percent or more, and lists it on its Governance page; recognizing the other three is yours, and tripwires show on the dashboard's tripwire pages.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — Intra-week triggers"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "weekly-loop",
@@ -3071,13 +3128,20 @@
         "the restraint principle",
         "restraint"
       ],
+      "context": [
+        "monitor",
+        "monitored",
+        "resize",
+        "resized",
+        "FIS"
+      ],
       "wave": 4,
       "category": "scoring",
-      "definition": "Discipline includes doing nothing. A CIS or FIS change under five points is monitored, a position inside its band is not resized, and a week in which every check passed and nothing moved is the system working, not the system idle.",
+      "definition": "The rule that a correct week can end in doing nothing. A CIS or FIS change under 5 points is monitored, a position whose size already sits inside the band its score earns is not resized, and when every governance check passes, the answer is hold. Part 6 counts a week in which everything was measured and nothing moved as the system working.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — The Restraint Principle"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "weekly-loop",
@@ -3095,16 +3159,15 @@
       "id": "correlation-stacking",
       "term": "Correlation stacking",
       "aliases": [
-        "stacking",
         "stacking diagnostic"
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The failure CIS cannot see because it scores one position at a time: several high-scoring positions that move together under regime stress. Average correlation above 0.7 is flagged as a diagnostic; any penalty routes through FIS and governance, never through CIS.",
+      "definition": "The failure CIS cannot see because it scores one position at a time: several high-scoring positions that move together under regime stress. The dashboard's Correlation Spike tripwire flags an average position correlation above 0.7 and prescribes adding uncorrelated assets. No FIS bucket charges for it, and CIS never does.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — How implementations quietly degrade"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "fis",
@@ -3129,11 +3192,11 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "A position whose score has quietly fallen while its sizing stayed put, because nobody recalculated: a thesis played out, a market compressed, catalysts exhausted. Scores stale past ninety days are flagged, and the dead-capital bucket bills them.",
+      "definition": "A position whose underlying quality has slipped while its recorded score and its sizing stay put, because nobody recalculated: a thesis played out, a market compressed, catalysts exhausted. The dashboard's diagnostics warn once a score is more than 60 days old and fail past 90, and the dead-capital bucket charges any score older than 90 days.",
       "length": "medium",
       "source": {
         "kind": "internal",
-        "ref": "Part 6 — How implementations quietly degrade"
+        "ref": "Part 6 · Convexity & Framework Integrity Scoring"
       },
       "related": [
         "dead-capital",

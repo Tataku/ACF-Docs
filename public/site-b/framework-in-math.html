@@ -257,7 +257,7 @@
         <h3 class="sub-title">Which CIS are we talking about?</h3>
       </div>
       <div class="measure prose">
-        <p>Six distinct objects travel under the name. Comparing one with another and calling the difference a bug is the easiest way to misread the system, so they are separated here first.</p>
+        <p>Six distinct objects travel under the name. Comparing one with another and calling the difference a bug is an easy way to misread the system, so they are separated here first.</p>
       </div>
 
       <div class="compare compare-wrap">
@@ -346,7 +346,7 @@
       </div>
       <div class="measure prose">
         <p>Regime fit, not forecasting. Three sub-scores sum to 100: regime fit (40 points), carry direction (30) and policy and flow (30), read against the macro thesis of <a class="part-ref" href="/part-2-lineage-macro-thesis#macro-thesis">Part 2</a>.</p>
-        <p>Carry has been dividend-neutral since v3.0: yield is not scored as quality. Without a supplied carry score it sits at a neutral baseline of 20 for equities and preferreds (22 for income funds), plus a fixed per-ticker offset of up to 6 points either way, a +3 for a return-of-capital preferred held as Ballast outside a known tax-advantaged account, and a macro adjustment of at most 2 points. Where the dashboard has beta or drawdown data but no yield, it supplies a stability proxy instead (10 to 27 points, from beta and one-year drawdown), and the bump and the macro adjustment do not apply.</p>
+        <p>Carry has been dividend-neutral since v3.0: yield is not scored as quality. Without a supplied carry score it sits at a neutral baseline of 20 for equities and preferreds (22 for income funds), plus a fixed per-ticker offset of up to 6 points either way, a +3 for a return-of-capital preferred held as <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">Ballast</button> outside a known tax-advantaged account, and a macro adjustment of at most 2 points. Where the dashboard has beta or drawdown data but no yield, it supplies a stability proxy instead (10 to 27 points, from beta and one-year drawdown), and the bump and the macro adjustment do not apply.</p>
         <p>Regime fit and policy are written upstream. Your sector preferences (the over, neutral or underweight tilt you set for each sector) set the base: regime fit 32, 22 or 10; policy 24, 16 or 7. Theme overlap with the thesis adds up to 6 and 4 points, and extracted policy evidence can add up to 5. The live macro regime then moves regime fit by at most 4 and policy by at most 3. A macro read can tilt these sub-scores; your own sector preferences move them much further.</p>
         <p>The live macro regime is one of four labels (hawkish, dovish, stagflationary, neutral) set by the direction of three series: the Fed funds rate, CPI inflation and the unemployment rate. At least two must show a confirmed trend, or the label stays neutral. Rates, inflation and unemployment all rising read stagflationary; rising rates, or rising inflation without falling rates, read hawkish; falling rates without rising inflation read dovish; anything else is neutral. A new label must repeat across two consecutive syncs before it replaces the old one, and data more than 48 hours old leaves scores unadjusted. The yield curve is recorded but does not enter the label, and unemployment decides only the stagflationary case; there is no direct measure of output growth. By sector group, the label moves regime fit by at most 4 points, policy by at most 3 and carry by at most 2, a few CIS points at most. A second, portfolio-level reading (risk-on, selective, transition, defensive) combines this label with the VIX, high-yield spreads, tripwire alerts and how broadly your holdings are leading; it shapes the Next Dollar Score, not CIS.</p>
       </div>
@@ -357,7 +357,7 @@
       </div>
       <div class="measure prose">
         <p>E measures whether reality is starting to validate the thesis. It carries the least weight because execution follows quality: momentum confirms a thesis, and it never gets to dominate one. Two sub-scores of 50 points each: execution quality, read from three-month price momentum with a volatility adjustment, and market acceptance, read from trading turnover. That is the equity route; funds use expense ratio and assets, and Bitcoin and crypto have their own inputs.</p>
-        <p>Momentum has a strict definition, and the engine checks it: <strong>(price now &minus; price three months ago) &divide; price three months ago</strong>, stored as a ratio and requiring at least 60 observations. Below that minimum, or when a one-month series stands in for a three-month one, the value is demoted to a proxy and loses weight. A language model may not supply it at all.</p>
+        <p>Momentum has a strict definition, and the engine checks it: <strong>(price now &minus; price three months ago) &divide; price three months ago</strong>, stored as a ratio and requiring at least 60 observations. Below that minimum, or when a one-month series stands in for a three-month one, the value is demoted to a proxy and loses weight. A language-model estimate may fill it for display, but the score refuses one (<a class="part-ref" href="#evidence-math">Evidence</a>).</p>
         <p>Market acceptance is turnover: thirty-day dollar volume over market value, clamped to a sensible range and scored on a tier ladder. It asks whether the market is actually trading the name, which is a separate question from whether the price went up.</p>
         <p>Preferred equity runs an inverted momentum ladder. For an instrument held for its carry, <em>stability</em> is the good outcome, so the flattest tape scores highest.</p>
       </div>
@@ -511,7 +511,7 @@
 
       <div class="measure prose">
         <p><strong>Allocation</strong> checks two things. The first is the dollar split across Roth, taxable and pre-tax, measured against the FIS wrapper targets of 45, 35 and 20 percent and charged only once total drift passes 10 points (worth at most about 6 points). Bitcoin held under the dashboard&rsquo;s own Bitcoin wrapper counts in the total but has no target, so it adds to the measured drift. The second is the count of positions in each score band against a target spread: up to 5 points per band, and nothing for a drift of 2 points or less. The bucket does not check whether each position sits in the wrapper <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#wrappers">Part 4</a> assigns it; that placement stays your check.</p>
-        <p><strong>Governance</strong> applies one charge per position, first match wins, each multiplied by the position&rsquo;s severity: a score below 60 carries 6 base points (50 to 59 is charged the same as below 50); a position scoring 60 to 69 that weighs more than 8 percent of the portfolio, 6; a position scoring 60 to 69, 4; a momentum breakdown, 4 (specified, but nothing in the engine sets it yet). A 5 percent position scoring 55 therefore costs 0.3 points. Governance reads the canonical CIS, not the wrapper-adjusted one.</p>
+        <p><strong>Governance</strong> applies one charge per position, first match wins, each multiplied by the position&rsquo;s severity: a score below 60 carries 6 base points (50 to 59 is charged the same as below 50); a position scoring 60 to 69 that weighs more than 8 percent of the portfolio, 6; a position scoring 60 to 69, 4; a momentum breakdown, 4 (specified, but nothing in the engine sets it yet). A 5 percent position scoring 55 therefore costs 0.3 points. This bucket reads the canonical CIS, not the wrapper-adjusted one that the dashboard&rsquo;s governance checks use.</p>
         <p><strong>Dead capital</strong> charges 5 base points, value-weighted, for a position with no documented thesis. A score older than 90 days is stale: the dead-capital bucket charges it 2 base points, value-weighted, and the dashboard&rsquo;s diagnostics warn once a score is more than 60 days old and fail past 90. A position more than 50 percent above its cost basis whose score is older than 60 days is flagged for a refresh. Both charges can fire on the same position, and a <em>missing</em> timestamp is treated as unknown rather than stale, so it draws nothing.</p>
         <p><strong>Concentration</strong> charges 8 points for each position above 15 percent, matching the default cap in <a class="part-ref" href="/part-5-portfolio-construction-position-management#torque">Part 5</a>, so a position inside its 15 to 18 percent override band is still billed. It charges 6 if the top three exceed 40 percent and 4 if the top five exceed 60, looser than Part 5&rsquo;s caps of 35 and 50. Bitcoin and its spot wrappers are excluded from all three measures by archetype, because the backbone is not a concentration failure. Equities with Bitcoin exposure are ordinary concentration.</p>
         <p><strong>Complexity</strong> charges 1 point for each position with an unclassified distribution, and 0.5 for each position scoring below 70 that is carried without documented rationale, beyond an allowance of three. By the FIS rules a documented thesis, hold rationale or remediation plan suppresses the low-score charge.</p>
@@ -536,7 +536,7 @@
         <h2 class="section-title" id="sizing-math-title">From score to size.</h2>
       </div>
       <div class="measure prose">
-        <p>A score is not a position size. The translation is governed, bounded, and posture-dependent &mdash; and every number it produces is a <em>ceiling</em>, never a target.</p>
+        <p>The translation takes three things, a <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button>, a band table and a budget, and every number it produces is a <em>ceiling</em>. The arithmetic below is what the dashboard&rsquo;s portfolio builder applies to the model portfolios it generates. On the book you actually hold, nothing resizes anything: the bands are the guidance you size against.</p>
       </div>
 
       <div class="compare compare-wrap">
@@ -553,18 +553,19 @@
             <tr><th scope="row">Ballast</th><td data-label="Score">60&ndash;69</td><td data-label="Weight">3&ndash;5%</td><td data-label="Band">Standard</td></tr>
             <tr><th scope="row">Ballast</th><td data-label="Score">50&ndash;59</td><td data-label="Weight">1&ndash;3%</td><td data-label="Band">Marginal</td></tr>
             <tr><th scope="row">Hype</th><td data-label="Score">50&ndash;100</td><td data-label="Weight">2&ndash;5%</td><td data-label="Band">Eligible</td></tr>
-            <tr><th scope="row">Any</th><td data-label="Score">below 50</td><td data-label="Weight">0</td><td data-label="Band">Not eligible</td></tr>
+            <tr><th scope="row">Torque, Ballast or Hype</th><td data-label="Score">below 50</td><td data-label="Weight">0</td><td data-label="Band">Not allocation-worthy</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="compare-key">Below 50 sizes to zero in every posture &mdash; this is where the framework declines to hold, and it is the one hard gate in the ladder</p>
+      <p class="compare-key">Below 50 sizes to zero in each of the three sized postures; this is where the framework declines to hold, and it is the one hard gate in the ladder. Bitcoin sits outside this ladder, governed by <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#backbone">Part 3</a>, and the builder sizes STRC by its own rule (see the construction row)</p>
 
       <div class="measure prose">
         <p>Within a band the ceiling moves linearly with the score:</p>
-        <p><strong>justified weight = min weight + band progress &times; (max weight &minus; min weight)</strong>, capped at 15%</p>
-        <p>So a Torque position at 70 justifies 8 percent, at 85 justifies 11.5 percent, at 100 justifies 15. A Hype position at 50 justifies 2 percent, at 100 justifies 5.</p>
-        <p><strong>The band&rsquo;s lower bound is not a floor.</strong> It is the low endpoint of that interpolation and nothing else &mdash; no part of the system enforces a minimum position size upward. What exists instead is a drop threshold: a computed weight below 2 percent is discarded rather than raised. The framework will decline to hold something. It will not top you up into it.</p>
-        <p>Capital and posture budget then size <em>below</em> the ceiling. The ceiling says how much a score justifies; it never says how much to buy.</p>
+        <p><strong>justified weight = min weight + band progress &times; (max weight &minus; min weight)</strong>, capped at 15 percent, where <strong>band progress = (score &minus; the band&rsquo;s lowest score) &divide; the band&rsquo;s width</strong></p>
+        <p>So a <button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button> position at 70 justifies 8 percent, at 85 justifies 11.5 percent, at 100 justifies 15. A <button type="button" class="gloss" data-gloss="hype" aria-expanded="false">Hype</button> position at 50 justifies 2 percent, at 100 justifies 5.</p>
+        <p>The builder then scales every ceiling by how complete the build&rsquo;s data is. A data-confidence score (machine-data coverage weighted 70 percent, analysis coverage 30) sets a multiplier: 1.0 at 80 or above, 0.85 to 0.99 from 60 to 79, 0.65 to 0.84 from 40 to 59, and 0.40 to 0.64 below 40. A Torque position at 85 with a multiplier of 0.65 is capped at 7.5 percent instead of 11.5. A Torque position at 60 with a multiplier of 0.40 computes to 1.6 percent, and it is dropped, for the reason in the next paragraph.</p>
+        <p><strong>The band&rsquo;s lower bound is not a floor.</strong> It is the low endpoint of the interpolation. In the main pass a computed weight below 2 percent is discarded, never raised. Three fallbacks then fill gaps. A wrapper less than 30 percent deployed takes candidates scoring 55 or more at Ballast ceilings. A wrapper that ends with fewer than 10 positions (8 on the fund route) is filled from admitted candidates scoring 50 or more, at no less than 1 percent each, keeping any fill of 0.5 percent or more. And a wrapper that would otherwise hold nothing takes up to three candidates at no less than 2 percent. So the builder will decline a weak name, and it will also fill a thin wrapper to a minimum count.</p>
+        <p>Capital and the posture budget size <em>below</em> the ceiling. The ceiling says how much a score justifies; it never says how much to buy.</p>
       </div>
 
       <div class="measure">
@@ -572,7 +573,7 @@
         <h3 class="sub-title">The same percentages mean different things.</h3>
       </div>
       <div class="measure prose">
-        <p>Concentration appears three times in the framework at three different thresholds, and conflating them is a genuine source of confusion. They are separate systems with separate consumers.</p>
+        <p>Concentration appears in three places, at three sets of thresholds, and each has a different consumer. The doctrine is <a class="part-ref" href="/part-5-portfolio-construction-position-management#torque">Part 5</a>&rsquo;s: a single position capped at 15 percent by default, with an 18% absolute maximum under a documented override, the top three at 35 percent and the top five at 50. Bitcoin sits outside all three layers below, and STRC sits outside the builder&rsquo;s caps.</p>
       </div>
 
       <div class="compare compare-wrap">
@@ -582,29 +583,33 @@
             <tr><th scope="col">Layer</th><th scope="col">Single</th><th scope="col">Top 3</th><th scope="col">Top 5</th><th scope="col">What happens</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">Construction</th><td data-label="Single">15%</td><td data-label="Top 3">35%</td><td data-label="Top 5">50%</td><td data-label="Effect">The 15% cap is actively enforced during a build &mdash; excess is redistributed by headroom, and anything unabsorbable becomes cash rather than being dropped. The top-three and top-five figures warn only.</td></tr>
-            <tr><th scope="row">Scoring</th><td data-label="Single">15%</td><td data-label="Top 3">40%</td><td data-label="Top 5">60%</td><td data-label="Effect">FIS penalties: 8 points per breaching position, 6, and 4.</td></tr>
-            <tr><th scope="row">Emergency</th><td data-label="Single">&mdash;</td><td data-label="Top 3">&mdash;</td><td data-label="Top 5">65%</td><td data-label="Effect">Doctrine. A written instruction to trim the largest positions &mdash; followed by a human, not executed by the software.</td></tr>
+            <tr><th scope="row" class="col-primary">Construction</th><td data-label="Single">15%</td><td data-label="Top 3">35%</td><td data-label="Top 5">50%</td><td data-label="Effect">The 15 percent cap is applied during a build, with two exceptions. On the fund route the per-fund cap rises to 18 percent for a fund scoring 80 or more. And the pinned structured-carry position (STRC), placed in the taxable account of any build that has one, is exempt: it is targeted at 12 percent of the portfolio, raised to a quarter of the taxable account when that is larger (outside sample builds), and allowed up to 25 percent. Excess elsewhere is redistributed by headroom, and anything unabsorbable becomes cash. The top-three and top-five figures warn only.</td></tr>
+            <tr><th scope="row">Scoring</th><td data-label="Single">15%</td><td data-label="Top 3">40%</td><td data-label="Top 5">60%</td><td data-label="Effect">FIS penalties: 8 points for each position above 15 percent, 6 for the top three, 4 for the top five.</td></tr>
+            <tr><th scope="row">Emergency</th><td data-label="Single">none</td><td data-label="Top 3">none</td><td data-label="Top 5">65%</td><td data-label="Effect">Detected. A Concentration Breach tripwire flags a top five above 65 percent, excluding Bitcoin, and shows the doctrine&rsquo;s instruction to trim the largest positions. A human does the trimming.</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="compare-key">Two of the three rungs are live code; the third is written doctrine. Describing all three as enforcement would be false, so this page does not</p>
+      <p class="compare-key">All three rungs now have live consumers: the first shapes a build, the second changes a score, the third raises a tripwire. None trims a holding, so describing any of them as automatic enforcement would be false, and this page does not</p>
 
       <div class="measure">
         <p class="sub-meta">Breadth &middot; how many positions</p>
         <h3 class="sub-title">Position count is an output, never an input.</h3>
       </div>
       <div class="measure prose">
-        <p>You do not tell the framework to hold eighteen names. It tells you how many the available conviction supports. The admitted candidate pool is classified by its own density:</p>
-        <p><strong>High</strong> &mdash; average score at least 75, with at least six names above 70. <strong>Moderate</strong> &mdash; average at least 67, with at least ten above 65. <strong>Low</strong> &mdash; average at least 60, with at least eight above 60. <strong>Scarce</strong> &mdash; anything else.</p>
-        <p>Density then sets both the target count and how much capital deploys. Denser conviction concentrates into fewer names: High targets 14 down to 10 positions and deploys fully; Moderate targets 18 to 13 and deploys 95 percent; Low and Scarce widen the count and deploy less, on a formula rather than a judgement call. Counts are bounded to between 10 and 25 names.</p>
-        <p><strong>The undeployed remainder is an intentional cash reserve, and it is held as cash.</strong> The invariant on every build is that position weights plus cash equal exactly 1.0 &mdash; unallocated capital appears as an explicit position rather than being quietly redistributed into whatever was ranked next.</p>
+        <p>You do not tell the builder to hold eighteen names. It works out how many the available conviction supports, starting from the density of the admitted candidate pool:</p>
+        <p><strong>High</strong>: average score at least 75, with at least six names at 70 or above. <strong>Moderate</strong>: average at least 67, with at least ten at 65 or above. <strong>Low</strong>: average at least 60, with at least eight at 60 or above. <strong>Scarce</strong>: anything else.</p>
+        <p>Density sets both the target count and how much capital deploys, each by formula. Denser conviction concentrates into fewer names: High targets 14 down to 10 positions and deploys fully; Moderate targets 18 down to 13 and deploys 95 percent; Low targets 16 to 22 and deploys 75 to 90 percent; Scarce targets 20 to 25 and deploys 60 to 75 percent. Counts stay between 10 and 25 names (8 and 15 on the fund route), but never exceed the number of candidates scoring 60 or more.</p>
+        <p><strong>The undeployed remainder is held as cash, on purpose.</strong> On every build, position weights plus cash sum to exactly 1.0, so unallocated capital shows up as an explicit cash position instead of being spread over whatever ranked next.</p>
       </div>
 
       <aside class="callout callout-insight">
         <p class="callout-label">The admission gate does not widen to fill slots</p>
-        <p>When conviction is scarce, the framework returns fewer positions and more cash. It does not lower the bar until the target count is met. A candidate is admitted on its score multiplied by the completeness of the evidence behind it &mdash; and that product, not the raw score, must clear 50.</p>
+        <p>When conviction is scarce, the build deploys less and holds the rest as cash, and the admission bar stays where it is. A candidate is admitted on its score multiplied by the completeness of the evidence behind it, and that product, not the raw score, must clear 50. (Bitcoin-class holdings, STRC and return-of-capital income holdings are exempt from this gate.) The minimum-count fill above draws only on candidates that already cleared it.</p>
       </aside>
+
+      <div class="measure prose">
+        <p>A build is one moment. Governance is what watches the book you hold afterward.</p>
+      </div>
     </section>
 
     <section class="section" id="governance-math" aria-labelledby="governance-math-title">
@@ -613,16 +618,16 @@
         <h2 class="section-title" id="governance-math-title">What fires, and what it does.</h2>
       </div>
       <div class="measure prose">
-        <p>The framework watches a defined set of conditions and escalates when they cluster. What it does on escalation is the part most worth being precise about, so the vocabulary comes first &mdash; these terms are not interchangeable.</p>
+        <p>Governance watches a defined set of conditions and speaks up when they cluster. What it does when it speaks up is the part worth being exact about, and these six terms are not interchangeable.</p>
       </div>
 
       <div class="measure-feature">
         <div class="failure-modes">
           <div><span class="name">Trigger</span><p>A threshold crossing inside one watched condition.</p></div>
-          <div><span class="name">Event</span><p>A logged <em>transition</em> &mdash; a state that changed. An unchanged state logs nothing, so the record is signal rather than noise.</p></div>
+          <div><span class="name">Event</span><p>A logged <em>transition</em>, a state that changed. An unchanged state logs nothing, which keeps the record short enough to read.</p></div>
           <div><span class="name">Recommendation</span><p>A described action with a priority and a deadline. Displayed. Never executed.</p></div>
-          <div><span class="name">Proposal</span><p>A draft change requiring explicit human acceptance &mdash; and acceptance still applies nothing automatically.</p></div>
-          <div><span class="name">Acknowledgement</span><p>A record that you saw it. Suppresses no arithmetic.</p></div>
+          <div><span class="name">Proposal</span><p>A draft change that needs your explicit acceptance, and accepting it still applies nothing by itself.</p></div>
+          <div><span class="name">Acknowledgment</span><p>A record that you saw it. It changes no arithmetic.</p></div>
           <div><span class="name">Automated mutation</span><p>Does not exist in this system.</p></div>
         </div>
       </div>
@@ -632,18 +637,29 @@
         <h3 class="sub-title">One signal is noise. Several at once is a regime.</h3>
       </div>
       <div class="measure prose">
-        <p>A registered set of conditions is evaluated against the live cohort &mdash; your own positions, not a generic index. The set is extended as new measurable conditions are added, and each one declares whether it is measured directly or approximated. Among those in place: an equal-weighted one-day advance of 7 percent or more with at least five names up more than 4; four or more names at a two-period relative-strength reading of 98 or higher; a five-day liquidity drain of 100 billion dollars or more across the Fed&rsquo;s balance-sheet components; three or more names gapping up 8 percent then reversing 5 percent from the high on two-and-a-half times median volume; a three-session decline of 4 percent or more with 60 percent of names at five-day lows.</p>
-        <p>Escalation is not a raw count. Thresholds &mdash; two signals for level one, three for level two, four for level three &mdash; are <em>normalised by how many signals are actually evaluable</em>, and each firing signal is weighted by how directly it is measured: a fully implemented signal counts 1.0, an approximation built from free data counts 0.6. A level requires both the count and the weighted score to clear the bar.</p>
-        <p>That normalisation is the honest part. When a data source is unavailable, the system does not pretend the signal is quiet &mdash; it lowers the denominator and discloses that the reading rests on a proxy.</p>
+        <p>Start with what is not measured. The dashboard does not yet measure the three momentum dimensions of <a class="part-ref" href="/part-5-portfolio-construction-position-management#management">Part 5</a> (distance from the 52-week high, relative strength and breadth). Its Momentum Death tripwire reports unavailable rather than guessing. A coded screen of price against the 200-day and 50-day moving averages with an RSI band of 30 to 70 receives no data, so it reports every position as unavailable, and it is not treated as a stand-in for the three dimensions.</p>
+        <p>What the dashboard does watch is stress across your holdings as a group. Its cohort confluence tripwire tracks ten registered signals, read from your non-cash positions (a fixed eight-name reference list stands in when you hold fewer than three) and from market-wide liquidity and volatility data. Eight have evaluators of their own, two of which fall back to rougher approximations when better data is missing; the other two slots, rates-volatility stress and market breadth, are filled by approximations built from free data. A signal read by approximation counts for 0.6 of a signal in the weighted score. Two signals within 48 hours raise level one, flag only; three raise level two, hedging only; four, or three including an intraday reversal, raise level three, which displays a pre-set playbook to trim the Torque cohort by 25 percent. The dashboard shows the playbook; it does not queue, propose or execute it.</p>
+        <p>Four of the signals, as examples: an equal-weighted cohort gain of 12 percent or more over three sessions, or of 7 percent in one session with at least five names up more than 4 percent; four or more names at a two-day RSI of 98 or higher; three or more names trading 8 percent or more above the prior close and then closing at least 5 percent below the session high, on two and a half times their 20-day median volume; and a three-session decline of 4 percent or more with at least 60 percent of names at five-day lows.</p>
+        <p>Escalation is not a raw count. The thresholds (two, three and four signals) scale with how many signals the system can read at all, directly or by a labeled approximation. Levels two and three need both the count and the weighted score; level one can be reached on count alone. A signal counts for 48 hours after it fires. A signal that cannot be evaluated on a run cannot fire, and it is reported unavailable rather than quiet. Most such signals still count toward the thresholds, but a few (the dealer-positioning index without a fresh reading, the leadership flip without data, an approximation short of data) drop out of the count, which can lower the thresholds.</p>
       </div>
 
       <aside class="callout callout-info">
         <p class="callout-label">Missing data fails closed</p>
-        <p>A condition with missing inputs returns <em>clear, data missing</em> &mdash; it does not fire, and it does not count as zero. Treating an absent reading as a benign one is explicitly forbidden and is tested for.</p>
+        <p>A watched condition that cannot read its inputs reports <em>unavailable</em>, or <em>stale</em> when its data is old. It does not fire, and it is never read as calm. A set of conditions that cannot support an all-clear reports <em>unknown</em> instead of quiet.</p>
       </aside>
 
       <div class="measure prose">
-        <p>A core set of macro conditions is watched alongside the cohort, each with a three-step ladder of watch, caution and critical: liquidity contraction, volatility regime shift at a VIX of 20, 25 and 35, credit stress at 1.0, 1.5 and 2.5 standard deviations of high-yield spreads, yield-curve inversion, a dollar spike of 2, 3 and 5 percent over ten days, bond-volatility acceleration, and a compound condition requiring both an elevated VIX and a sharp rise in it.</p>
+        <p>A core set of macro conditions is watched alongside the cohort, each with a watch, caution and critical step: liquidity contraction (net liquidity, the Fed balance sheet less the Treasury account and reverse repo), a volatility regime shift at a VIX of 20, 25 and 35, credit stress at 1.0, 1.5 and 2.5 standard deviations of high-yield spreads, yield-curve inversion, a dollar spike of 2, 3 and 5 percent over ten days, bond-volatility acceleration (defined, but reported unavailable until a genuine MOVE feed exists), and a compound condition that needs both a VIX above 20 and a sharp five-day rise in it.</p>
+        <p>Earnings proximity is checked position by position. The dashboard&rsquo;s Framework Rule Register flags a position above 3 percent of the book once its report is five calendar days away or less, and the positions table&rsquo;s status column starts marking the report six calendar days out. Because both count calendar days, the flag can open a trading day or two after the doctrine&rsquo;s T-5. It trims nothing; the trim is yours.</p>
+      </div>
+
+      <div class="measure">
+        <p class="sub-meta">Recommendations &middot; in order of precedence</p>
+        <h3 class="sub-title">What the Weekly Review asks of you.</h3>
+      </div>
+      <div class="measure prose">
+        <p>The weekly loop itself is set out in <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#weekly">Part 6</a>. In the dashboard you run it from the Weekly Review, which recommends actions in a fixed precedence: a finding from the dashboard&rsquo;s three-level check first, then an earnings window above the 3 percent cap, then FIS below 70 (fix the top penalty), then a CIS move of 10 points or more (resize); no trigger means hold. The review cannot yet raise the earnings step, because it receives no earnings dates; the Framework Rule Register flags that case instead.</p>
+        <p>The three-level check also runs with every portfolio recompute. Level one flags any position whose wrapper-adjusted CIS is below 75, level two a sector where more than half the scored positions sit below 80, and level three a FIS below 60 (on a recompute, also three or more of its broader rule checks failing at once). Their deadlines are 7 days, 14 days and 24 hours. None is an exit signal and none trades. Level one sits inside the Strong band, so a holding whose wrapper-adjusted score is between 70 and 75 draws a recommendation every time you run the review, even though on CIS 70 is a band boundary, not an action trigger.</p>
       </div>
 
       <div class="measure">
@@ -651,9 +667,11 @@
         <h3 class="sub-title">Nothing here touches your positions.</h3>
       </div>
       <div class="measure prose">
-        <p>At the highest escalation the framework displays an instruction to trim a quarter of the torque cohort. That instruction is <strong>advisory and displayed</strong>. It is not queued, not proposed for approval, and not executed. No governance path in the system can modify a position, write a trade, alter an allocation weight, trigger a rebalance, or change how CIS or FIS is computed.</p>
-        <p>The complete set of things governance writes is: evaluation proofs, transition events, acknowledgements, watch-list selections, override records, and single-day-move flags. That is the entire list.</p>
-        <p>This is a design decision rather than an unfinished feature, and it is the reason the distinction between doctrine and code is drawn so carefully throughout this page. Of the twelve emergency conditions the governance doctrine describes, one runs as live code &mdash; a construction score below 60 raises a review recommendation. The other eleven are written instructions for a human. <strong>Saying otherwise would describe a system that does not exist.</strong></p>
+        <p>The dashboard records every trade and never blocks one. When a tripwire breaches, the Add Position screen recommends pausing additions and still records the trade. No governance path in the system can modify a position, write a trade, alter an allocation weight, trigger a rebalance, or change how CIS or FIS is computed.</p>
+        <p>The complete set of things governance writes is: evaluation proofs, transition events, acknowledgments and other issue-lifecycle records, watch-list selections, change proposals and their changelog, override records, single-day-move flags, the advisor notices it raises, and the Weekly Review&rsquo;s own record (the review, its decision log, the recommendations it made and the trigger queue it consumed). A Weekly Review may also ask the scoring pipeline to refresh up to ten stale scores, which rewrites those scores the normal way. Nothing else.</p>
+        <p>That short list is a design decision, and it is why this page keeps doctrine and code apart. Of the twelve emergency conditions the Governance Protocol names, five are detected live and shown with the doctrine&rsquo;s response: a construction score below 60, a CIS drop of 15 points or more in 30 days, a Hype position 25 percent or more below cost, average correlation above 0.70 when price history allows, and a top five above 65 percent excluding Bitcoin. Two more are coded but report unavailable until their inputs exist: all three momentum dimensions turning negative, and a portfolio 20 percent below its peak. None executes its response. The other five are written instructions for a human: a broken position thesis, a regime change, credit spreads above 500 basis points, a broken macro thesis, and a market fall of more than 10 percent in a week.</p>
+        <p>The correlation condition is the Correlation Spike tripwire. It fires when the average pairwise correlation of all your non-cash holdings, not Torque alone, rises above 0.70, and it reports unavailable rather than calm unless every holding has at least 60 daily returns of history.</p>
+        <p>One holding sits outside most of this machinery. Bitcoin is left out of every concentration layer and every Next Dollar addition, and it is scored on a route of its own, which comes next.</p>
       </div>
     </section>
 
@@ -663,20 +681,20 @@
         <h2 class="section-title" id="bitcoin-math-title">Bitcoin: identity, headroom, accumulation.</h2>
       </div>
       <div class="measure prose">
-        <p>Bitcoin is scored by a different model from everything else, so the first question the system answers is what actually counts as Bitcoin. Four categories, and they are not interchangeable.</p>
+        <p>Because Bitcoin has a scoring model of its own, the first question the system answers is what counts as Bitcoin. There are four categories, and they are not interchangeable.</p>
       </div>
 
       <div class="measure-feature">
         <div class="failure-modes">
-          <div><span class="name">Native</span><p>The asset itself. Quoted on its own lane, valued in Bitcoin units, displayed to eight decimal places.</p></div>
-          <div><span class="name">Spot wrapper</span><p>A maintained allowlist of spot funds, checked <em>before</em> the fund branch so they score through the monetary model rather than as generic funds. Membership is explicit: a newly launched wrapper is an ordinary fund until it is registered.</p></div>
+          <div><span class="name">Native</span><p>The asset itself. Quoted on its own lane, held in Bitcoin units and valued in dollars, shown to eight decimal places.</p></div>
+          <div><span class="name">Spot wrapper</span><p>A maintained list of spot funds, checked <em>before</em> the fund branch so they score through the monetary model instead of as generic funds. Membership is explicit: a newly launched wrapper is an ordinary fund until it is added.</p></div>
           <div><span class="name">Futures product</span><p>Never treated as Bitcoin-class. A futures-based product is a different instrument with a different risk.</p></div>
-          <div><span class="name">Proxy equity</span><p>Companies with Bitcoin exposure are ordinary operating equities. There is no proxy archetype, and they are not exempt from anything.</p></div>
+          <div><span class="name">Proxy equity</span><p>Companies with Bitcoin exposure are ordinary operating equities. There is no proxy archetype, and they are exempt from nothing.</p></div>
         </div>
       </div>
 
       <div class="measure prose">
-        <p>Market capitalisation resolves down a chain, and the last rung is worth seeing: network data, then a quoted figure, then <strong>price &times; 21,000,000</strong>. The protocol cap, not circulating supply, is the denominator &mdash; and a stale fundamental is never substituted for a missing one. Null is preferred to wrong.</p>
+        <p>Market capitalization resolves down a chain: network data, then a quoted figure, and only when both are missing, the last known <strong>price &times; 21,000,000</strong>. That last rung uses the protocol cap, not the roughly 20.1 million coins in circulation (as of September 2026), so it reads about 4.5 percent high. A stale fundamental is never substituted for a missing one: the chain prefers null to wrong.</p>
       </div>
 
       <div class="measure">
@@ -684,13 +702,14 @@
         <h3 class="sub-title">What the scoring engine actually uses.</h3>
       </div>
       <div class="measure prose">
-        <p>Bitcoin runs through the same logarithmic headroom curve as everything else &mdash; the difference is what goes in the numerator. Absent a live research profile, the baseline is a <em>conservative</em> monetary total of roughly 11.5 trillion dollars, deliberately below the headline figures the doctrine discusses:</p>
+        <p>Bitcoin runs through the same logarithmic <a class="part-ref" href="#cis-math">headroom curve</a> as every equity; only the addressable market differs. Absent a research profile, the baseline is a <em>conservative</em> monetary total of roughly 11.5 trillion dollars, well below the estimate the doctrine works with in <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#tam">Part 3</a>:</p>
         <p><strong>headroom = 35 &times; ln(1 + H) / ln(31)</strong>, where <strong>H = min(TAM &divide; market cap, 30)</strong></p>
-        <p>At a market capitalisation of 1.4 trillion dollars that is about 8.2&times; of headroom, scoring roughly 22.6 out of 35 &mdash; a strong reading, not a maximal one. At 2 trillion it is about 5.8&times;, scoring roughly 19.5, because a rising price consumes the headroom it is measured against. Choosing the conservative pool is the point: the score should not depend on the most optimistic version of the thesis being right.</p>
+        <p>On September 29, 2026 Bitcoin&rsquo;s market capitalization was about $1.68 trillion. At 1.68 trillion it is about 6.8&times; of headroom, scoring roughly 21.0 out of 35: a strong reading, not a maximal one. At 3 trillion it is about 3.8&times;, scoring roughly 16.1, because a rising price uses up the headroom it is measured against. The small pool is chosen on purpose: the default score should not depend on the most optimistic version of the thesis being right. When a research profile supplies its own addressable market, headroom uses that figure, and convexity stops paying the 2-point baseline penalty in the CIS cascade.</p>
         <p>Network convexity decays as adoption progresses:</p>
-        <p><strong>network convexity = 18 &times; max(0, 1 &minus; penetration<sup>0.6</sup>)</strong>, where <strong>penetration = market cap &divide; TAM</strong></p>
-        <p>Separately, the software displays a scenario that builds a total addressable market from three pools &mdash; a share of above-ground gold, a small share of global real estate, and a small share of emerging-market broad money &mdash; and divides by the 21 million cap to imply a price. <strong>That panel is a display scenario, not the scoring input</strong>, it is labelled as such, and its only live input is the gold price.</p>
-        <p>The power-law overlay on the price chart is also modelling rather than scoring: a trend of <strong>2.88 &times; (days &divide; 1000)<sup>5.82</sup></strong> and a floor of <strong>1.2828 &times; (days &divide; 1000)<sup>5.928</sup></strong>. The accumulation doctrine built on top of it &mdash; reduce buying above convergence, deploy reserves below it &mdash; is written guidance. No code triggers on it.</p>
+        <p><strong>network convexity = 18 &times; max(0, 1 &minus; penetration<sup>0.6</sup>)</strong>, where <strong>penetration = market cap &divide; $11.5 trillion</strong></p>
+        <p>Penetration always divides by the $11.5 trillion pool, even when a research profile supplies the headroom figure. At $1.68 trillion network convexity is about 12.3 of 18. A fixed monetary-convexity score (5 to 7 points, and 7 for Bitcoin) completes the 25-point optionality sub-score.</p>
+        <p>Separately, the dashboard displays a scenario that builds an addressable market from three pools (40 percent of above-ground gold, 5 percent of global real estate, and 5 percent of emerging-market broad money, taken as 40 percent of the world&rsquo;s) and divides by the 21 million cap to imply a price. <strong>That panel is a display scenario, not the scoring input.</strong> It is labeled as one, and its only live input is the gold price.</p>
+        <p>The power-law overlay on the price chart is modeling, not scoring: a trend of <strong>2.88 &times; (days &divide; 1000)<sup>5.82</sup></strong> and a floor of <strong>1.2828 &times; (days &divide; 1000)<sup>5.928</sup></strong>, where days count from the genesis block on January 3, 2009. On September 29, 2026 (day 6,478) the trend read about $152,000 and the floor about $82,900, so Bitcoin, at about $83,600, sat just above the floor and about 45 percent below trend. The floor is not a hard floor: closing prices have fallen below it several times, most recently for most of February to mid-September 2026. The dashboard draws only these two lines, with no euphoria band. The accumulation pace in <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#valuation">Part 3</a>, set by its valuation models, is written guidance you apply; no code triggers on either line, and nothing in the software paces purchases.</p>
       </div>
 
       <div class="measure">
@@ -698,20 +717,21 @@
         <h3 class="sub-title">A plan is not a purchase.</h3>
       </div>
       <div class="measure prose">
-        <p>Scheduled contributions are simulated as a daily flow. The engine has no concept of weekly or monthly at all:</p>
+        <p>The projection model is held back (<a class="part-ref" href="#scope">Scope</a>), but one rule of its contribution accounting is published, because it keeps added money from posing as performance. Scheduled contributions are simulated as a daily flow, with no weekly or monthly step at all:</p>
         <p><strong>daily contribution = monthly amount &times; 12 &divide; 365</strong></p>
-        <p>Contributions are added <em>after</em> each day&rsquo;s return, and they consume no randomness &mdash; the same simulation with and without contributions draws identical market paths. That is what makes the two headline numbers separable and honest:</p>
+        <p>Contributions land <em>after</em> each day&rsquo;s return and consume no randomness, so the same simulation run with and without contributions draws identical market paths. That keeps the two headline numbers separate:</p>
         <p><strong>contribution effect = wealth growth &minus; market gain</strong></p>
-        <p>Expected compound return and probability of loss are computed on the <em>market-only</em> path. Money you added is not performance, and the framework refuses to let it flatter a return figure. A simulation with zero market return and active contributions shows wealth rising and market gain at exactly zero.</p>
+        <p>Expected compound return and probability of loss are computed on the <em>market-only</em> path. Money you added is not performance, and it is never allowed to flatter a return figure: a simulation with zero market return and steady contributions shows wealth rising and market gain at exactly zero.</p>
       </div>
 
       <aside class="callout callout-insight">
         <p class="callout-label">A projection never becomes a holding</p>
-        <p>Configuring a purchase schedule writes a projection setting and nothing else &mdash; no contribution event, no trade, no change to cost basis or net asset value. The only path that creates a real record is a purchase <em>you confirm</em>, which writes exactly one contribution event and one buy, and refuses a fill where the entered price and the received amount disagree by more than one percent. Simulated accumulation is never rendered as Bitcoin you own.</p>
+        <p>Setting a contribution for a projection writes a projection setting and nothing else. Setting up a real purchase schedule writes the schedule, and each due purchase waits for you: no contribution event, no trade and no change to cost basis or net asset value until you confirm it. A confirmed purchase writes exactly one contribution event and one buy, with any recorded fee as the buy&rsquo;s commission, and a fill whose entered price and received amount disagree by more than 1 percent is refused. Simulated accumulation is never shown as Bitcoin you own.</p>
       </aside>
 
       <div class="measure prose">
-        <p>Allocation is measured against the canonical portfolio balance &mdash; <strong>Bitcoin value &divide; total portfolio balance &times; 100</strong> &mdash; counting native holdings only by default. The mode that also counts spot wrappers requires the wrapper set to resolve, and fails closed to native-only if it cannot. Bitcoin is excluded from every concentration measure, and carries its own posture target of 10 percent within a 5 to 15 percent range.</p>
+        <p>Allocation is measured against the portfolio&rsquo;s total balance, <strong>Bitcoin value &divide; total portfolio balance &times; 100</strong>, counting native holdings only by default. The mode that also counts spot wrappers needs the wrapper list to resolve, and falls back to native-only when it cannot. Bitcoin is excluded from every concentration measure. At setup the dashboard proposes a 15 percent Bitcoin baseline (10 percent under the Conflict Economy and Re-industrialization theses), which you confirm or replace with your own conviction. Its construction score carries a 10 percent Bitcoin posture reference within a 5 to 15 percent band as reference metadata; it costs no points and never triggers a sale. The reserve ranges themselves are doctrine, set out in <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#tam">Part 3</a>.</p>
+        <p>Wherever Bitcoin and everything else is held, the ledger has to say what it cost and what a sale realized. That is the next chapter.</p>
       </div>
     </section>
 
@@ -721,20 +741,20 @@
         <h2 class="section-title" id="tax-math-title">What the system computes about tax, and what it does not.</h2>
       </div>
       <div class="measure prose">
-        <p>This section is unusual because the most important thing in it is an absence, and stating it plainly is the whole point.</p>
+        <p>Wrappers decide what you keep, so it pays to be exact about what the dashboard computes here and what it leaves to you and your tax preparer. Most of what it computes is ledger accounting. The rest of this chapter is a list of things it does not do.</p>
       </div>
 
       <aside class="callout callout-info">
-        <p class="callout-label">There is no tax rate anywhere in this system</p>
-        <p>No ordinary rate, no short- or long-term capital-gains rate, no qualified-dividend rate, no net investment income tax, no state or bracket table, no user-entered rate. Nothing computes or displays an estimated tax liability, because there is nothing to compute it from. Every percentage the framework discusses about tax is written doctrine, carried in prose, with no consumer in code.</p>
+        <p class="callout-label">The engine holds no tax rate</p>
+        <p>No ordinary rate, short- or long-term capital-gains rate, qualified-dividend rate, net investment income tax, state or bracket table, or user-entered rate feeds any score, ledger entry or report, and nothing estimates your tax liability. One display surface does use fixed rates: the Tax page illustrates after-tax outcomes at 23.8 percent on gains and qualified dividends and 24 percent on ordinary income, and an after-tax STRC yield at 23.8 percent. Read those as worked illustrations, not a calculation about your account.</p>
       </aside>
 
       <div class="measure prose">
-        <p>What <em>is</em> computed is accounting: cost basis, realised gain, holding period, and the effect of a return of capital. Those are facts about your ledger, not statements about your return.</p>
-        <p><strong>Wrappers</strong> are Roth, Taxable, Pre-tax, Bitcoin, and Unknown. The last one matters: no normaliser anywhere defaults an unrecognised account to Taxable. An unknown wrapper stays unknown and is reported as such, because guessing the wrapper is guessing the entire tax character of everything in it.</p>
-        <p><strong>Cost basis is total dollars</strong> at the position layer, and per-share only inside a lot &mdash; where it is not even stored at purchase but recomputed at disposal from what remains. Fees never enter basis; they are recorded as audit fields and kept out of the arithmetic.</p>
-        <p><strong>Lot ordering</strong> is a property of the account, not of the sale: oldest first for first-in-first-out and average cost, newest first for last-in-first-out, highest basis first for highest-in-first-out with ties broken by the older acquisition date.</p>
-        <p><strong>Holding period</strong> uses a threshold of 365 days, compared strictly &mdash; day 365 is short, day 366 is long. Where an acquisition date cannot be established the term is reported as unknown rather than assumed. Every surface carrying it says the same thing: this is advisory, and it is not tax advice.</p>
+        <p>What <em>is</em> computed is accounting: cost basis, realized gain, holding period and the effect of a return of capital. Those are facts about your ledger, not statements about your tax return.</p>
+        <p><strong>Wrappers</strong> are Roth, Taxable, Pre-tax, Bitcoin and Unknown. The canonical normalizers return Unknown for an account they do not recognize rather than guessing Taxable, because guessing the wrapper is guessing the tax character of everything in it. Not every path meets that bar yet: a few older paths still default a missing wrapper to Taxable (the positions table&rsquo;s local normalizer, for example), and a trade record has no Unknown value.</p>
+        <p><strong>Cost basis is total dollars</strong> at the position level, and per-share only inside a lot, where it is recomputed at disposal from what remains instead of being stored at purchase. Since September 25, 2026 a recorded purchase commission is added to the lot&rsquo;s cost, and a recorded sale commission reduces proceeds and realized gain; a commission nobody recorded adds nothing. That follows the IRS rule that the basis of stock you buy generally includes costs of purchase such as commissions (Publication 551).</p>
+        <p><strong>Lot method</strong> is set per account, and specific identification picks lots sale by sale. First-in-first-out takes the oldest lot first, last-in-first-out the newest, highest-in-first-out the highest per-share basis (ties go to the older lot), and average cost relieves every open lot in proportion. An account can also mirror Schwab&rsquo;s Tax Lot Optimizer. With no method set, the ledger uses average cost, and a method it does not implement is refused rather than booked as average cost. The IRS allows average basis for mutual fund shares and treats unidentified shares of stock as the ones you bought first (Publication 551), so check the method against your broker&rsquo;s before comparing realized gains with a Form 1099-B.</p>
+        <p><strong>Holding period</strong> follows the calendar: a lot is short-term through the one-year anniversary of its acquisition and long-term from the day after, which is the IRS test of more than one year (Publication 550). A lot bought on January 31, 2025 turns long-term on February 1, 2026. Where an acquisition date cannot be established, the term is reported as unknown rather than assumed. One summary card on the Data page still counts elapsed days, so it can differ by a day across February 29. The trade record labels the term advisory; read it as a reading of your ledger, not tax advice.</p>
       </div>
 
       <div class="measure">
@@ -742,14 +762,15 @@
         <h3 class="sub-title">A distribution that reduces what you paid.</h3>
       </div>
       <div class="measure prose">
-        <p>A distribution is split by its return-of-capital fraction <em>p</em>. If <em>p</em> is 1 the entire gross amount is return of capital with no companion dividend. Otherwise:</p>
-        <p><strong>return of capital = round(gross &times; p)</strong> and <strong>taxable portion = gross &minus; return of capital</strong></p>
-        <p>The two sum to the gross by construction. The return-of-capital portion then reduces basis <em>per share</em> across open lots, floored at zero so a lot can never go negative. Reinvestment runs after the reduction, never before.</p>
-        <p>The accounting language here is deliberately flat &mdash; a return of capital <em>reduces cost basis and is not immediately taxable</em>. That is a mechanical statement, and it is as far as the arithmetic goes.</p>
+        <p>A distribution is split by its return-of-capital fraction <em>p</em>. If <em>p</em> is 1 the entire gross amount is return of capital, with no companion dividend. Otherwise:</p>
+        <p><strong>return of capital = gross &times; p, rounded to the cent</strong> and <strong>taxable portion = gross &minus; return of capital</strong></p>
+        <p>The two sum to the gross by construction. The return-of-capital portion then reduces basis <em>per share</em> across open lots, floored at zero so a lot never goes negative; any amount beyond zero basis is recorded as a gain on that lot, which is how the IRS treats it (Publication 550). Reinvestment runs after the reduction, never before.</p>
+        <p>The accounting stays deliberately flat: a return of capital <em>reduces cost basis and is not taxed when received</em>. Whether a distribution counts as return of capital is set each tax year and reported on Form 1099-DIV; the ledger records the fraction it is given, and the arithmetic stops there. The strategy around it is in <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#taxable">Part 4</a>.</p>
       </div>
 
       <div class="measure prose">
-        <p>Three more absences are worth naming, because their presence is often assumed. <strong>There is no wash-sale engine</strong> &mdash; no substantially-identical matching, no replacement detection, no disallowed-loss carryover. <strong>There is no Roth conversion, rollover, or required-distribution primitive.</strong> And <strong>a transfer between accounts carries no economics at all</strong>: it moves at a price of zero, preserves basis and the original acquisition date, and never realises a gain. A move that may have tax consequences is recorded as accounting motion, and the framework does not classify it.</p>
+        <p>Three more absences are worth naming, because people often assume them. <strong>There is no wash-sale engine</strong>: no substantially-identical matching, no replacement detection, no disallowed-loss carryover. (Where a broker supplies a lot&rsquo;s realized gain, the ledger uses it as given, and that figure can include the broker&rsquo;s own wash-sale adjustment.) <strong>There is no Roth conversion, rollover or required-distribution primitive.</strong> And <strong>a transfer between accounts carries no economics</strong>: it moves at a price of zero, keeps basis and the original acquisition date, and never realizes a gain. A move that may have tax consequences is recorded as accounting motion, and the dashboard does not classify it.</p>
+        <p>Every figure in this chapter is only as good as the data under it, which is where the next chapter goes.</p>
       </div>
     </section>
 
@@ -759,7 +780,7 @@
         <h2 class="section-title" id="evidence-math-title">Evidence, confidence, and the limits of both.</h2>
       </div>
       <div class="measure prose">
-        <p>Four things get called &ldquo;confidence&rdquo; in most systems. Here they are four separate quantities and are never collapsed into one number.</p>
+        <p>Every number on this page rests on inputs of uneven quality. Four different things often travel under the one word &ldquo;confidence&rdquo;; here they are separate quantities, tracked separately.</p>
       </div>
 
       <div class="measure-feature">
@@ -772,8 +793,8 @@
       </div>
 
       <div class="measure prose">
-        <p>And a fifth state sits off the ladder entirely. <strong>Unknown is not low.</strong> It is the absence of a rank, and it is carried as such rather than being quietly folded into the bottom tier &mdash; because &ldquo;we do not know&rdquo; and &ldquo;we know it is bad&rdquo; are different claims about the same position.</p>
-        <p>Confidence has exactly one channel into the score, and it is the delta clamp: how far a score may move in one update. It does not otherwise raise or lower the number. Two caps illustrate the discipline &mdash; an unclassified over-the-counter venue forces confidence to low, and a market capitalisation under fifty million dollars caps it at medium. <strong>Both change the confidence tier only. Neither touches the score.</strong></p>
+        <p>A fifth state sits off the ladder entirely. <strong>Unknown is not low.</strong> It is the absence of a rank, and it is carried that way instead of being folded into the bottom tier, because &ldquo;we do not know&rdquo; and &ldquo;we know it is bad&rdquo; are different claims about the same position.</p>
+        <p>Confidence reaches the score through two channels. The delta clamp limits how far a score may move in one update: 3 points at low confidence, 5 at medium, 6 when the evidence is proxy-derived, 8 at high. And when the macro component rests mostly on heuristics, its weight is cut to 60 percent (low) or 80 percent (medium) of its value, with the difference split evenly between convexity and risk. Beyond those two channels, confidence does not raise or lower the number. Two caps show how that works. An unclassified over-the-counter venue forces confidence to low, and a market capitalization under 50 million dollars caps it at medium. <strong>Both lower the confidence tier and leave the computed score alone. Through the clamp, the lower tier then limits how far the score can move on its next update.</strong></p>
       </div>
 
       <div class="compare compare-wrap">
@@ -793,16 +814,16 @@
           </tbody>
         </table>
       </div>
-      <p class="compare-key">These are freshness boundaries, not confidence values &mdash; crossing one marks a record stale, and never rewrites a confidence tier</p>
+      <p class="compare-key">These are freshness boundaries, not confidence values: crossing one marks a record stale and never rewrites a confidence tier</p>
 
       <div class="measure">
         <p class="sub-meta">Evidence discount</p>
         <h3 class="sub-title">Thin evidence can only subtract.</h3>
       </div>
       <div class="measure prose">
-        <p>An evidence-adjusted view of a score discounts each component by how directly its inputs were observed &mdash; nothing for company-specific direct evidence, rising through category-level and proxy evidence to half for missing:</p>
+        <p>An evidence-adjusted view of a score discounts each component by how directly its inputs were observed: nothing for direct company-specific evidence, 5 percent for direct category-level evidence, 15 percent for proxy-derived inputs, 35 percent for heuristics and 50 percent for missing data:</p>
         <p><strong>evidence-adjusted score = max(0, CIS &minus; &Sigma; points &times; weight &times; discount rate)</strong></p>
-        <p>The direction is fixed and it is one-way. <strong>The adjustment can only reduce. There is no path by which good-looking evidence inflates a score above what the components produced.</strong></p>
+        <p>The adjustment runs one way. <strong>It can only reduce, and no path lets good-looking evidence lift a score above what the components produced.</strong></p>
       </div>
 
       <div class="measure">
@@ -810,15 +831,19 @@
         <h3 class="sub-title">A language model is never the top of the ladder.</h3>
       </div>
       <div class="measure prose">
-        <p>Where a language model contributes, its own stated confidence is one factor among four and never the largest: model self-report 0.30, evidence completeness 0.30, persistence across runs 0.20, agreement with deterministic classification 0.20. The self-report is additionally passed through a compressing curve with a hard ceiling of 0.85 &mdash; <strong>a model, on its own testimony alone, can never reach full confidence.</strong></p>
-        <p>Beneath that: a model estimate never counts toward real coverage, is bounds-checked per field and rejected if implausible, expires after 30 days, and is refused outright for market data such as momentum, volatility, and volume. A classification must clear a calibrated score of 50 before it may be written at all.</p>
-        <p>Where a research claim becomes a catalyst probability, the mapping is bounded and stated as what it is: <strong>probability = clamp(confidence &divide; 100, 0.20, 0.85)</strong>. That is a heuristic translation. It has never been fitted to outcomes, and it is not a statistical probability.</p>
+        <p>Where a language model contributes to a classification, its own stated confidence is one factor among four and never the largest: model self-report 0.30, evidence completeness 0.30, persistence across runs 0.20, agreement with the deterministic classification 0.20. The self-report also passes through a compressing curve with a hard ceiling of 0.85, so <strong>a model, on its own testimony alone, can never reach full confidence.</strong> A language-model classification must clear a trust-corrected score of 50 before it may be written at all.</p>
+        <p>A model estimate of a data field is held to the same standard. It never counts as observed coverage in the confidence a score reports (it does count as present for the coverage cap under CIS, where its admission weight discounts it). It is bounds-checked per field and rejected if implausible, and it expires after 30 days. It fills a field only after every provider and derived path has come back empty, and that includes market fields such as three-month momentum, 30-day volatility and trading volume. Those fill the display; for the score, the admission weights refuse a model estimate of momentum, volatility, volume or drawdown (over-the-counter market cap and volume excepted), and the score falls back instead.</p>
+        <p>Where a research claim becomes a catalyst probability, the mapping is bounded and labeled for what it is: <strong>probability = clamp(confidence &divide; 100, 0.20, 0.85)</strong>. That is a heuristic translation. It has never been fitted to outcomes, and it is not a statistical probability.</p>
       </div>
 
       <aside class="callout callout-info">
         <p class="callout-label">Two things the framework does not claim</p>
-        <p>There is <strong>no portfolio-level confidence number</strong>. Confidence exists per position, and no surface manufactures an aggregate where no formula exists. And nothing here is <strong>calibrated, backtested, validated, or proven</strong> in the empirical sense &mdash; the scores are a designed instrument with documented reasoning, not a model fitted to realised outcomes. Where the software says &ldquo;calibrated&rdquo;, it means simulation parameters fitted to historical series, which is a different and narrower claim.</p>
+        <p>There is <strong>no portfolio-level confidence number</strong>. Confidence exists per position, and no surface manufactures an aggregate where no formula exists. And nothing here is <strong>calibrated, backtested, validated or proven</strong> in the empirical sense: the scores are a designed instrument with documented reasoning, not a model fitted to realized outcomes. Where the software says &ldquo;calibrated&rdquo;, it means one of two narrower things: simulation parameters fitted to historical series, or the designed discount applied to a language model&rsquo;s own confidence.</p>
       </aside>
+
+      <div class="measure prose">
+        <p>With the limits of the inputs on the table, the last chapter turns to a score built for one narrow question.</p>
+      </div>
     </section>
 
     <section class="section" id="nds-math" aria-labelledby="nds-math-title">
@@ -827,8 +852,8 @@
         <h2 class="section-title" id="nds-math-title">The next dollar.</h2>
       </div>
       <div class="measure prose">
-        <p>The position score asks how good a holding is. The Next Dollar Score asks a narrower question: given what you already own, where would the <em>next</em> dollar do the most work? It is a ranking instrument, and it is separate from CIS by design.</p>
-        <p>Six components, weighted:</p>
+        <p>The position score asks how good a holding is. The Next Dollar Score asks where, given what you already own, the <em>next</em> dollar would do the most work. It is a ranking instrument, kept separate from CIS by design, and it reads the wrapper-adjusted CIS rather than the canonical score.</p>
+        <p>Six components, at these base weights:</p>
       </div>
 
       <div class="compare compare-wrap">
@@ -838,22 +863,23 @@
             <tr><th scope="col">Component</th><th scope="col">Weight</th><th scope="col">What it measures</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row" class="col-primary">Position score</th><td data-label="Weight">0.30</td><td data-label="Measures">The quality of the holding itself. A missing score enters as 40, not as zero.</td></tr>
+            <tr><th scope="row" class="col-primary">Position score</th><td data-label="Weight">0.30</td><td data-label="Measures">The wrapper-adjusted CIS. A missing score enters as a neutral 40, not as zero.</td></tr>
             <tr><th scope="row">Size opportunity</th><td data-label="Weight">0.20</td><td data-label="Measures">How much room is left before the position is already large</td></tr>
             <tr><th scope="row">Expression purity</th><td data-label="Weight">0.15</td><td data-label="Measures">Whether the holding expresses the thesis cleanly or by proxy</td></tr>
-            <tr><th scope="row">Posture alignment</th><td data-label="Weight">0.15</td><td data-label="Measures">Distance from the posture budget &mdash; underweight scores higher</td></tr>
-            <tr><th scope="row">Momentum context</th><td data-label="Weight">0.10</td><td data-label="Measures">Recent price behaviour, read against whether the thesis still holds</td></tr>
-            <tr><th scope="row">P&amp;L context</th><td data-label="Weight">0.10</td><td data-label="Measures">Unrealised position, read the same way</td></tr>
+            <tr><th scope="row">Posture alignment</th><td data-label="Weight">0.15</td><td data-label="Measures">Distance from the posture budget; underweight scores higher</td></tr>
+            <tr><th scope="row">Momentum context</th><td data-label="Weight">0.10</td><td data-label="Measures">The three-month price change, read against whether the thesis still holds</td></tr>
+            <tr><th scope="row">P&amp;L context</th><td data-label="Weight">0.10</td><td data-label="Measures">The unrealized gain or loss, read the same way</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="measure prose">
+        <p>The market environment then scales expression purity and posture alignment, cuts momentum to 60 percent of its weight in a defensive environment, and renormalizes the weights to sum to one. Recompute a score from the base weights alone and you will not match the dashboard.</p>
         <p>Size opportunity decays exponentially with what you already hold:</p>
         <p><strong>size opportunity = clamp(round(90 &times; e<sup>&minus;0.18 &times; allocation%</sup>), 0, 100)</strong></p>
-        <p>An untouched name scores 90. At 5 percent it is 37. Past roughly 35 percent it approaches zero. The curve is the arithmetic form of a simple idea: the marginal dollar is worth less to a position that already has plenty.</p>
-        <p>Two components are deliberately asymmetric, and both condition on whether the thesis survives. A deep drawdown in a position whose score is still intact <em>raises</em> the next-dollar reading &mdash; that is the averaging-down case. The same drawdown where the score has broken lowers it sharply. Large unrealised gains only reduce urgency; they never make a position more attractive to add to.</p>
-        <p>Six bounded modifiers then adjust the composite &mdash; opportunity cost against the best available peer, posture throttles and boosts under a defensive regime, an expression-purity penalty, a score-trend adjustment bounded to &plusmn;8, and a readiness penalty capped at 12. A positive trend bonus requires a score of at least 40, so a weak or missing score can never be lifted by momentum in its own trend line.</p>
+        <p>An untouched name scores 90. At 5 percent it is 37. At 10 percent it is 15, at the 15 percent hard maximum 6, and it rounds to zero from about 29 percent. The curve is the arithmetic form of a plain idea: the marginal dollar is worth less to a position that already has plenty.</p>
+        <p>Two components condition on whether the thesis survives, which the engine reads as a CIS of 55 or more. A three-month pullback of 5 to 20 percent in an intact position raises the momentum reading (65 up to 95); the same pullback with a broken score drops it to 35; a fall of 20 percent or more scores 30 either way. An unrealized loss deeper than 30 percent scores 60 when the thesis is intact and 20 when it is broken. Each of these components carries a base weight of 0.10, so the swing is a few points of the final score. Large unrealized gains only lower the reading; they never make a position more attractive to add to.</p>
+        <p>Seven bounded modifiers then adjust the composite: opportunity cost against the best available peer, a Ballast throttle in risk-on and selective environments, a Ballast boost that replaces it in a defensive one, an expression-purity penalty, a score-trend adjustment bounded to &plusmn;8, a readiness penalty capped at 12, and a volatility adjustment between &minus;10 and +6 that reads each name&rsquo;s trading range against its own baseline and the room left to its invalidation level. A positive trend bonus requires a score of at least 40, so a weak or missing score can never be lifted by its own trend line.</p>
       </div>
 
       <div class="measure">
@@ -861,16 +887,16 @@
         <h3 class="sub-title">Advisory, and precisely bounded.</h3>
       </div>
       <div class="measure prose">
-        <p>Above 15 percent of the portfolio, the surface stops recommending additions. Between 10 and 15 percent it raises a caution and <em>keeps</em> recommending &mdash; <strong>the 10 percent line is advisory, not a freeze.</strong> A score below 40 blocks additions. Cash blocks. Bitcoin blocks, because it is managed at the wrapper level rather than position by position.</p>
-        <p>Trimming is never hard-blocked in any state. The framework will always let you reduce.</p>
-        <p>An ineligible position still receives a full score and still appears in the ranking. Gates annotate; they do not erase.</p>
-        <p>Bands are 75 and above for strong, 55 for moderate, 35 for weak, below that avoid &mdash; lower-bound inclusive at every edge. They order advisory copy. They size nothing.</p>
-        <p>Rotation pairs a bottom-quartile candidate with a top-quartile one, requires a score gap of at least 15, emits at most five pairs, and needs at least four eligible positions to run at all. Cash and Bitcoin are excluded from the exercise.</p>
+        <p>Above 15 percent of the portfolio, the dashboard stops recommending additions. Between 10 and 15 percent it raises a caution and <em>keeps</em> recommending: <strong>the 10 percent line is advisory, not a freeze.</strong> A score below 40 rules a position out of an add recommendation, and so does a score the engine has marked unreliable. A missing score does not: the position still receives a next-dollar reading, computed with a neutral stand-in of 40, and carries a &ldquo;cannot fully evaluate&rdquo; marker. The gate sits below the framework&rsquo;s allocation floor of 50, so a position scoring 40 to 49 can still show an add reading while the sizing ladder gives it no band. Cash is never recommended for additions, and neither is Bitcoin, which is managed at the wrapper level rather than position by position.</p>
+        <p>None of this stops a trade in either direction; the dashboard records every trade and never blocks one. On the trim side the score raises cautions only (a position above 15 percent, or a score below 40), and no state rules out a trim.</p>
+        <p>A position ruled out of additions still receives a full score and keeps its place in the ranking.</p>
+        <p>Bands are 75 and above for strong, 55 for moderate, 35 for weak and below that avoid, each lower bound inclusive. They order advisory copy and size nothing, and they cut at different points from the CIS bands.</p>
+        <p>Rotation pairs a bottom-quartile candidate with a top-quartile one, requires a score gap of at least 15, emits at most five pairs, and needs at least four scored positions after cash and Bitcoin are set aside.</p>
       </div>
 
       <aside class="callout callout-insight">
-        <p class="callout-label">The next dollar score sizes nothing</p>
-        <p>The portfolio builder contains no reference to it. Position sizing, concentration limits, and wrapper placement are decided by the position score and the construction rules, and they remain authoritative. A rotation pair carries two scores, a gap, and a sentence &mdash; no weight, no order, no execution. <strong>Advisory only, and not a trade signal.</strong></p>
+        <p class="callout-label">The Next Dollar Score sizes nothing</p>
+        <p>The portfolio builder never reads it. Position sizing, concentration limits and wrapper placement come from the position score and the construction rules, which remain authoritative. A rotation pair carries two scores, a gap and a sentence: no weight, no order, no execution. <strong>Advisory only, and not a trade signal.</strong></p>
       </aside>
     </section>
 
@@ -880,9 +906,9 @@
         <h2 class="section-title" id="scope-title">What this page does not yet cover.</h2>
       </div>
       <div class="measure prose">
-        <p>Published here: the position score, the construction score, allocation and sizing, governance, the Bitcoin backbone, wrappers and basis, evidence and confidence, and the next dollar.</p>
-        <p>Deliberately held back &mdash; forward projection and parameter estimation, earnings and forward valuation, performance accounting and net asset value, and margin mechanics. Those are modelling and accounting surfaces where a published formula reads too easily as a forecast or a claim about results. They will not appear here without a specific decision to publish them.</p>
-        <p>Within the eight, the same rule applies at a finer grain: this page carries the mathematics, not the audit apparatus that verified it. Engine locations, verification logs, and the register of places where a specification and the running code have drifted apart live in the internal reference, which is where they are useful.</p>
+        <p>Published here: the position score, the construction score, score to size, governance, the Bitcoin backbone, wrappers and basis, evidence and confidence, and the next dollar.</p>
+        <p>Held back on purpose: the projection models and their parameter estimation, earnings and forward valuation, performance accounting and net asset value, and margin mechanics. Two small pieces of projection are published because they bound what a projection may claim: the FIS scaling in the construction chapter and the contribution-accounting rule in the Bitcoin chapter. The rest are modeling and accounting surfaces where a published formula reads too easily as a forecast or a claim about results, and they will appear here only by a specific decision to publish them.</p>
+        <p>Within the eight chapters the same rule applies at a finer grain: the page publishes formulas and thresholds, not source-code locations or the logs that verified them.</p>
       </div>
     </section>
 
