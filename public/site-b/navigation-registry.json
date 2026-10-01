@@ -182,6 +182,8 @@
       "exhibit-06",
       "exhibit-dl-tripwire-loop",
       "exhibit-s1",
+      "falsifiers",
+      "falsifiers-title",
       "manifesto",
       "manifesto-title",
       "ooo-title",
@@ -1715,7 +1717,7 @@
     "volatility-clustering": {
       "later": {
         "href": "/part-1-foundation#manifesto",
-        "label": "Appears in Part 1 · The traditional portfolio playbook is failing quietly"
+        "label": "Appears in Part 1 · The traditional playbook was built for a regime that has ended"
       },
       "chart": null,
       "entry": {
@@ -1740,7 +1742,7 @@
     "survivable-compounding": {
       "later": {
         "href": "/part-1-foundation#manifesto",
-        "label": "Appears in Part 1 · The traditional portfolio playbook is failing quietly"
+        "label": "Appears in Part 1 · The traditional playbook was built for a regime that has ended"
       },
       "chart": {
         "href": "/part-1-foundation#exhibit-06",
@@ -2110,7 +2112,7 @@
     "volatility": {
       "later": {
         "href": "/part-1-foundation#manifesto",
-        "label": "Appears in Part 1 · The traditional portfolio playbook is failing quietly"
+        "label": "Appears in Part 1 · The traditional playbook was built for a regime that has ended"
       },
       "chart": {
         "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-volatility-is-the-toll",
@@ -2964,12 +2966,12 @@
   },
   "audit": {
     "pages": 11,
-    "anchors": 1240,
+    "anchors": 1246,
     "chartSpecs": 46,
     "liveChartMounts": 100,
     "glossaryTerms": 109,
-    "glossaryTermsAlreadyTagged": 33,
-    "glossaryTermsAutoTagEligible": 76,
+    "glossaryTermsAlreadyTagged": 34,
+    "glossaryTermsAutoTagEligible": 75,
     "unresolvedGlossaryCharts": [],
     "warnings": []
   }

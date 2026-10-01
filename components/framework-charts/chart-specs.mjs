@@ -979,7 +979,7 @@ export const FRAMEWORK_CHART_SPECS = [
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional portfolio playbook is failing quietly', role: 'verifies-concept', url: '/part-1-foundation#manifesto', notes: 'The payoff-shape thesis this diagram illustrates.' },
+      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional playbook was built for a regime that has ended', role: 'verifies-concept', url: '/part-1-foundation#manifesto', notes: 'The payoff-shape thesis this diagram illustrates.' },
       { provider: 'ACF · Part 2', label: 'Rule stated in Part 2 · The intellectual foundations, thesis-agnostic', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis#lineage' },
     ],
     explainerHeadline: 'The framework is a payoff shape, not a prediction.',
@@ -1034,7 +1034,7 @@ export const FRAMEWORK_CHART_SPECS = [
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional portfolio playbook is failing quietly', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
+      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional playbook was built for a regime that has ended', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
       { provider: 'ACF · Part 5', label: 'Rule stated in Part 5 · Three behaviors, one portfolio', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management#postures' }, { provider: 'ACF · Part 2', label: 'Rule stated in Part 2 · The intellectual foundations, thesis-agnostic', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis#lineage' },
     ],
     explainerHeadline: 'We reshape the tails, not the average.',
@@ -1145,7 +1145,7 @@ export const FRAMEWORK_CHART_SPECS = [
     disclosure: `${DISCLOSURE.conceptual} · Leadership labels are the framework's judgment`, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 2', label: 'Rule stated in Part 2 · Identification, evaluation, and governance', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis#macro-thesis' },
-      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional portfolio playbook is failing quietly', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
+      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional playbook was built for a regime that has ended', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
       { provider: 'ACF dashboard', label: 'Regime reading from the direction of rates, inflation and unemployment (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#cis-math' },
     ],
     explainerHeadline: 'The same portfolio behaves differently in different weather.',
@@ -1572,7 +1572,7 @@ export const FRAMEWORK_CHART_SPECS = [
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 2', label: 'Rule stated in Part 2 · The intellectual foundations, thesis-agnostic', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis#lineage' },
-      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional portfolio playbook is failing quietly', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
+      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional playbook was built for a regime that has ended', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
     ],
     explainerHeadline: 'The method is the axis; the thesis moves around it.',
     explainerBody: 'The lineage supplies the method: how to think about risk, conviction, sizing and survival. That part stays put. The macro thesis is the application, and it moves: above the axis in one regime, reassessed as it crosses at each transition, below it in the next. Mistake a turn in the thesis for a failure of the method and you abandon a sound process just when you need it.',
@@ -1616,7 +1616,7 @@ export const FRAMEWORK_CHART_SPECS = [
     chartType: 'Two outcome paths with similar volatility but different left tails: one survives, one is forced out.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional portfolio playbook is failing quietly', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
+      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional playbook was built for a regime that has ended', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
       { provider: 'ACF · Part 2', label: 'Rule stated in Part 2 · Nassim Nicholas Taleb: Antifragility & ruin avoidance', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis#lineage' },
     ],
     explainerHeadline: 'Some losses end the game.',
@@ -2041,7 +2041,7 @@ export const FRAMEWORK_CHART_SPECS = [
     sources: [
       { provider: 'CNBC · March 5, 2024', label: 'Galaxy Digital’s Alex Thorn: “bitcoin has seen four 75% [plus] drawdowns”; its record before 2024 was $68,982.20 on November 10, 2021', role: 'verifies-concept', url: 'https://www.cnbc.com/2024/03/05/bitcoin-all-time-high.html' },
       { provider: 'Author calculation', label: 'Portfolio line = Bitcoin at 15 percent (reset at each new Bitcoin high, untouched through each fall) + 85 percent held flat; the Bitcoin path is illustrative, drawn to falls of about 77 and 54 percent', role: 'methodology' },
-      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional portfolio playbook is failing quietly', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
+      { provider: 'ACF · Part 1', label: 'Rule stated in Part 1 · The traditional playbook was built for a regime that has ended', role: 'verifies-concept', url: '/part-1-foundation#manifesto' },
     ],
     explainerHeadline: 'Volatility is the toll; size decides whether you can pay it.',
     explainerBody: `Bitcoin charges for its convexity in drawdowns: every completed cycle through 2022 fell at least 77 percent. Held at 15 percent of the portfolio, a ${p3Vol.btcPct} percent fall costs about ${p3Vol.portPct} percent, and the later ${p3Vol.laterPct} percent fall here costs about ${p3Vol.laterPortPct} percent. That hurts, and a portfolio sized for it lives through it. At 100 percent Bitcoin, the same fall takes ${p3Vol.btcPct} percent of everything.`,

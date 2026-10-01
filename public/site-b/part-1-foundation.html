@@ -168,6 +168,7 @@
               <li><a href="#manifesto">Manifesto</a></li>
               <li><a href="#abstract">Abstract</a></li>
               <li><a href="#order-of-operations">Order of Operations</a></li>
+              <li><a href="#falsifiers">Falsifiers</a></li>
             </ol>
           </li>
           <li><a class="side-part" href="/part-2-lineage-macro-thesis"><span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span></a></li>
@@ -203,8 +204,9 @@
         <div class="measure">
           <div class="doc-signal" data-glyph-text>Framework Documentation</div>
           <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
-          <p class="doc-kicker">Part 1 of 6 &middot; &approx; 15 min read &middot; <a class="kicker-link" href="/framework-in-pictures#foundation">In pictures &middot; 8 exhibits &rarr;</a></p>
+          <p class="doc-kicker">Part 1 of 6 &middot; &approx; 21 min read &middot; <a class="kicker-link" href="/framework-in-pictures#foundation">In pictures &middot; 8 exhibits &rarr;</a></p>
           <h1 class="doc-title">Foundation &amp; Philosophy</h1>
+          <p class="doc-byline">By <span class="pilot-ph">[pen name]</span> &middot; Corrections and challenges: <span class="pilot-ph">[address]</span></p>
 
           <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
           <div class="part-actions" role="group" aria-label="Part actions">
@@ -240,17 +242,31 @@
     <section class="section" id="manifesto" aria-labelledby="manifesto-title">
       <div class="measure">
         <p class="section-eyebrow section-signal" data-glyph-text>Manifesto</p>
-        <h2 class="section-title" id="manifesto-title">The traditional portfolio playbook is failing quietly.</h2>
+        <h2 class="section-title" id="manifesto-title">The traditional playbook was built for a regime that has ended.</h2>
+      </div>
+
+      <aside class="callout callout-info" aria-label="Key takeaways">
+        <p class="callout-label">Key takeaways</p>
+        <ul>
+          <li>The 60/40 portfolio earned its reputation as rates fell: about 7.8 percent a year after inflation from 1982 to 2021, against about 3.3 percent from 1946 to 1974, while the last large federal debt was worked down.</li>
+          <li>Federal debt held by the public was 98 percent of GDP in fiscal 2025, and interest was back at its 1991 peak of 3.2 percent of GDP. The 1946 record of 106 percent was never paid off: growth, budget surpluses, capped interest rates and inflation worked it down, and bondholders lost about 1 percent a year after inflation.</li>
+          <li>When inflation, rather than growth, drives uncertainty, stocks and bonds tend to move together. After inflation, 2022 was one of the three worst years since 1928 for a 60/40 mix of US stocks and 10-year Treasuries.</li>
+          <li>Bitcoin is the backbone, held for a supply its protocol caps at 21 million coins. It fell about 64 percent in 2022, so it is sized so that a fall never forces a sale.</li>
+          <li>Our objective is survivable compounding: survive being wrong, keep exposure to convex payoffs, hold each position in the account that keeps the most of it, and let written rules act before emotion does.</li>
+          <li>We publish four tests that would prove this thesis wrong, and we will report against them every year.</li>
+        </ul>
+      </aside>
+
+      <div class="measure prose">
+        <p class="prose-lead">For four decades a simple portfolio worked. Ten-year Treasury yields fell from above 15 percent in September 1981 to 0.62 percent in July 2020, so bonds paid income and gained in price at the same time. Inflation stayed contained, and from about 2000 bonds also tended to rise when stocks fell. A 60/40 mix of US stocks and 10-year Treasuries returned about 7.8 percent a year after inflation from 1982 to 2021. Much of that reputation was earned by falling rates.</p>
+
+        <p>The 2020s run on different terms. Inflation has returned as a separate source of uncertainty: in 2026 the annual rise in consumer prices went from 2.4 percent in January to above 4 percent in May. Central banks now face a conflict they had not faced in forty years. A year after the Federal Reserve began raising rates from near zero, losses on bank bond portfolios helped set off the run that closed Silicon Valley Bank on March 10, 2023. Two days later the Fed announced a facility lending to banks against Treasuries, agency debt and mortgage-backed securities valued at par rather than at market. It kept raising rates that spring, but only behind a new backstop. Fighting inflation and protecting the financial system can now pull in opposite directions.</p>
+
+        <p>The post&ndash;Cold War order is splitting into competing blocs, and supply chains, reserves and payment systems are splitting with it. Technology pushes the prices of many goods down while asset prices climb, so the consumer price index and the cost of owning assets drift apart. Markets also show <button type="button" class="gloss" data-gloss="volatility-clustering" aria-expanded="false">volatility clustering</button>: calm and storm arrive in runs.</p>
       </div>
 
       <div class="measure prose">
-        <p class="prose-lead">It was built for a world where inflation came in episodes, correlations held still, bonds cushioned stocks, and volatility was an inconvenience to be averaged away. Diversification did most of the work, an advisor could rebalance on a calendar and collect a fee, and the 60/40 portfolio passed for the sensible default. It held up because the regime was cooperating.</p>
-
-        <p>The 2020s look different. Regimes shift, markets and policymakers react to each other, and <button type="button" class="gloss" data-gloss="volatility-clustering" aria-expanded="false">volatility clustering</button> means calm and storm arrive in runs rather than evenly spaced. Central banks cannot always fight inflation and keep the financial system stable at the same time. The post&ndash;Cold War order is splitting into competing blocs. Technology pushes the prices of many goods down even as asset prices climb, so the consumer price index and the cost of owning things drift apart. And public debt has become, in the framework&rsquo;s reading, a constraint on policy. Economists call it <button type="button" class="gloss" data-gloss="fiscal-dominance" aria-expanded="false">fiscal dominance</button> when the cost of carrying the debt starts to limit what a central bank can do.</p>
-      </div>
-
-      <div class="measure prose">
-        <p>Volatility is the risk everyone sees. The quieter one is falling behind while the statement says you are fine. Consumer prices rose about 88 percent from the end of 1999 to the end of 2024. Home prices more than tripled. An equal mix of stocks (with dividends), homes, and gold rose about sixfold.</p>
+        <p>Judged against consumer prices alone, a portfolio can keep pace with inflation and still fall behind the assets that store wealth. Consumer prices rose about 88 percent from the end of 1999 to the end of 2024. Home prices more than tripled. An equal mix of stocks (with dividends), homes, and gold rose about sixfold.</p>
       </div>
 
       <!-- EXHIBIT 01 · CPI vs the assets that store capital -->
@@ -265,7 +281,7 @@
       </figure>
 
       <div class="measure prose">
-        <p>Some of that gap is real growth and falling interest rates, so not all of it is inflation. It still shows how far a portfolio judged only against CPI could fall behind the assets it could have owned. Falling rates did something less visible too: they let the US government borrow more without paying more. From 1991 to 2021, federal debt held by the public more than doubled as a share of GDP (about 44 to 94 percent) while falling rates cut the interest bill by more than half (3.2 to 1.5 percent of GDP). By 2025 the bill was back at about 3.2 percent of GDP, level with its 1991 peak, on more than twice the debt.</p>
+        <p>Part of that gap reflects real growth and falling interest rates as well as inflation. Falling rates also hid the cost of debt. From 1991 to 2021, federal debt held by the public rose from about 44 to 94 percent of GDP while the interest bill fell from 3.2 to 1.5 percent of GDP. Then rates rose. By fiscal 2025 the debt stood at 98 percent of GDP and the bill was back at about 3.2 percent, level with its 1991 peak, on more than twice the debt.</p>
       </div>
 
       <!-- EXHIBIT 02 · fiscal dominance: the hidden interest cost -->
@@ -280,11 +296,13 @@
       </figure>
 
       <div class="measure prose">
-        <p>A portfolio tuned for average conditions turns <button type="button" class="gloss" data-gloss="fragility" aria-expanded="false">fragile</button> when conditions stop being average. A portfolio that drops 15 percent in a routine correction and then recovers is volatile but sound. A portfolio that takes a permanent loss when its diversifiers all fall at once, in a <button type="button" class="gloss" data-gloss="correlation-instability" aria-expanded="false">correlation breakdown</button>, is fragile. An average volatility figure cannot tell the two apart.</p>
-      </div>
+        <p>The arithmetic now runs in a loop. Deficits require new borrowing, new borrowing at higher rates raises the interest bill, and the interest bill widens the deficit. Under current law, the Congressional Budget Office projects that debt held by the public will pass its 1946 record of 106 percent of GDP around 2030 and reach 120 percent by 2036, with net interest rising to 4.6 percent of GDP (February 2026 baseline). When a government&rsquo;s debt and the cost of carrying it begin to limit what its central bank can do, economists call the condition <button type="button" class="gloss" data-gloss="fiscal-dominance" aria-expanded="false">fiscal dominance</button>; Thomas Sargent and Neil Wallace set out its arithmetic in 1981. We treat it as a governing constraint of this regime, though it has not clearly bound yet. From August 2023 to November 2025 the Federal Reserve held its policy rate at least a point above core inflation while the interest bill climbed past 3 percent of GDP. It has since cut rates with core inflation near 3 percent. Whether that is ordinary judgment or the first sign of the constraint is what the first test at the end of this Part is built to settle.</p>
 
-      <div class="measure prose">
-        <p>The hedge most portfolios leaned on belonged to one period. For about two decades, from roughly 2000 to 2021, stocks and bonds tended to move in opposite directions, so bonds cushioned equity losses. From about 1970 to the late 1990s the correlation was usually positive, and in 2021 and 2022 it turned positive again.</p>
+        <p>The United States has carried a debt this size once before, and how it came down is the most useful precedent we have. Debt held by the public peaked at 106 percent of GDP in 1946 and fell below a quarter of GDP by 1974, although in dollars it was larger in 1974 than in 1946. It was never paid off. From 1942 to 1951 the Federal Reserve held Treasury yields down at the Treasury&rsquo;s request, with an implicit cap of 2.5 percent on long-term bonds, while consumer prices rose by more than a third between the end of 1945 and the end of 1950. Carmen Reinhart and M. Belen Sbrancia (NBER, 2011) call the result the liquidation of government debt: across the advanced economies they studied, real interest rates were negative roughly half the time between 1945 and 1980, and for the United States and the United Kingdom they estimate the liquidation averaged 3 to 4 percent of GDP a year. Growth alone would not have done it. Julien Acalin and Laurence Ball attribute 51 of the 83 points of decline to primary budget surpluses and distorted interest rates together; without them, the ratio would have fallen only to about 74 percent of GDP. Bondholders carried much of the cost: in Damodaran&rsquo;s series, 10-year Treasuries lost about 1 percent a year after inflation from 1946 to 1974, while a 60/40 mix still returned about 3.3 percent, carried by its stocks. This time the budget has no surplus to share the work: the CBO baseline has a primary deficit in every year through 2036, 2.6 percent of GDP in 2026 and 2.1 percent in 2036. A portfolio that relies on government bonds for its real return is betting that this debt will be resolved more kindly to bondholders than the last one was.</p>
+
+        <p>Volatility and fragility are different risks, and a single volatility figure measures only the first. A portfolio that drops 15 percent in a routine correction and recovers is volatile but sound. A portfolio that takes a permanent loss because its diversifiers fall at the same moment, in a <button type="button" class="gloss" data-gloss="correlation-instability" aria-expanded="false">correlation breakdown</button>, is <button type="button" class="gloss" data-gloss="fragility" aria-expanded="false">fragile</button>. An average volatility figure cannot tell the two apart.</p>
+
+        <p>The hedge most portfolios rely on belonged to one period. Through the 1970s, 1980s and 1990s, US stocks and Treasuries usually moved together. From about 2000 to 2021 they tended to move in opposite directions, so bonds cushioned equity losses. In 2021 and 2022 the correlation turned positive again. Research at AQR (2023) gives the reason: stocks and bonds respond in opposite directions to news about growth and in the same direction to news about inflation, so the sign of their correlation depends on which kind of uncertainty dominates. Their model explains about 70 percent of the long-term variation in the US correlation.</p>
       </div>
 
       <!-- EXHIBIT 03 · the stock-bond diversifier is regime-dependent -->
@@ -299,11 +317,7 @@
       </figure>
 
       <div class="measure prose">
-        <p>In 2022 a 60/40 mix of US stocks and bonds fell about 16 percent: stocks lost about 18 percent with dividends, and bonds, the part meant to cushion them, lost about 13 percent. For a retiree drawing 4 percent a year, a loss like that early in retirement is worse than a bad year, because withdrawals taken from a shrunken balance leave less to recover with. That is <button type="button" class="gloss" data-gloss="sequence-of-returns-risk" aria-expanded="false">sequence-of-returns risk</button>, and in 2022 it left the textbooks and turned up in real accounts. Neither bad luck nor &ldquo;this time is different&rdquo; explains it. The portfolio was built for a regime that had ended.</p>
-      </div>
-
-      <div class="measure prose">
-        <p>Here is 2022, drawn through the year.</p>
+        <p>In 2022 a 60/40 mix of US stocks and bonds fell about 16 percent: stocks lost about 18 percent with dividends, and bonds, the part meant to cushion them, lost about 13 percent. With 10-year Treasuries as the bond half it was worse: in Damodaran&rsquo;s series the Treasuries lost 17.8 percent, in the only year since 1928 in which both fell by more than 10 percent, and after inflation the mix lost about 23 percent, matched or exceeded only in 1937 and 1974. In 2022 bondholders lost because yields rose; in the 1940s they lost because yields were held down. The second mechanism is the one this thesis expects. For a retiree drawing 4 percent a year, a loss of that size early in retirement does lasting damage, because withdrawals taken from a smaller balance leave less capital to recover with. That is <button type="button" class="gloss" data-gloss="sequence-of-returns-risk" aria-expanded="false">sequence-of-returns risk</button>.</p>
       </div>
 
       <!-- EXHIBIT 04 · 2022: stocks, bonds, and the blend fell together -->
@@ -318,11 +332,9 @@
       </figure>
 
       <div class="measure prose">
-        <p>Over the same years, some holdings that conventional advice dismisses as speculative or unsuitable built wealth for investors who could hold them. Bitcoin is the clearest case: it fell more than 70 percent twice, in 2018 and again in 2021 and 2022. The second fall, from its November 2021 high to its November 2022 low, was about 77 percent. Buying a fixed amount every month from January 2018 to December 2024, through both falls, still ended at about seven times the money put in. That only works for a position small enough that nothing forces a sale at the bottom. Among ordinary equities, the winners were the ones that matched the regime: energy was the S&amp;P 500&rsquo;s best sector in 2022, returning about 66 percent with dividends while the index lost about 18 percent, and information technology, with AI-related names leading, returned about 58 percent in 2023.</p>
+        <p>The same years showed the other kind of holding. Bitcoin fell more than 70 percent twice, in 2018 and again in 2021 and 2022; the second fall, from its November 2021 high to its November 2022 low, was about 77 percent, and in calendar 2022, with inflation at a forty-year high, it lost about 64 percent. Over short spans it has traded like the riskiest of risk assets. A fixed purchase every month from January 2018 to December 2024, made through both falls, still ended at about seven times the money put in. That result requires a position small enough that nothing forces a sale at the bottom, and it says nothing about the next seven years.</p>
 
-        <p>In hindsight, the period rewarded positions that matched the regime and were sized to survive the falls. That does not prove that regime calls can be made reliably in advance, which is why the framework spends as much effort on surviving a wrong call as on making a right one.</p>
-
-        <p>So the Adaptive Convexity Framework starts from a different premise:</p>
+        <p>Hindsight makes these results look obvious, and they do not show that regime calls can be made reliably in advance. No one knows the timing of a regime change, including us. The framework therefore spends as much effort on surviving a wrong call as on making a right one, and it starts from a different premise:</p>
       </div>
 
       <!-- PULL-QUOTE / APHORISM -->
@@ -331,11 +343,9 @@
       </blockquote>
 
       <div class="measure prose">
-        <p>A prediction names an outcome: Bitcoin at $150,000 by a set date, or the Federal Reserve cutting rates in a set sequence. Predictions are brittle: the wrong ones are expensive, and even a forecast that gets the direction right can miss on timing. Timing decides whether a position lives long enough for its thesis to be proved.</p>
-      </div>
+        <p>A forecast names an outcome and a date. A wrong forecast is expensive, and one that gets the direction right can still miss on timing, which decides whether a position survives long enough for its thesis to be proved.</p>
 
-      <div class="measure prose">
-        <p>Timing matters most once you are drawing on the portfolio, because withdrawals make the order of returns count. Take $1 million, twelve years of returns and $40,000 out at the end of every year, and run it twice: once with the gains first, once with the same returns in reverse.</p>
+        <p>Timing matters most once withdrawals begin, because they make the order of returns count. Take $1 million, twelve years of returns and $40,000 withdrawn at the end of every year, and run it twice: once with the gains first, once with the same returns in reverse.</p>
       </div>
 
       <!-- EXHIBIT 05 · same returns, opposite order, opposite survival -->
@@ -350,11 +360,9 @@
       </figure>
 
       <div class="measure prose">
-        <p><button type="button" class="gloss" data-gloss="survivable-compounding" aria-expanded="false">Survivable compounding</button> means building a portfolio that can be wrong about timing, size or specific outcomes and still be standing, while keeping enough exposure to <button type="button" class="gloss" data-gloss="convexity" aria-expanded="false">convex</button> payoffs, the kind where being right pays far more than being wrong costs. With payoffs shaped that way, being right only some of the time can still compound to far more than a risk-free return would.</p>
-      </div>
+        <p><button type="button" class="gloss" data-gloss="survivable-compounding" aria-expanded="false">Survivable compounding</button> is our name for the objective: a portfolio that can be wrong about timing, size or specific outcomes and remain intact, while keeping enough exposure to <button type="button" class="gloss" data-gloss="convexity" aria-expanded="false">convex</button> payoffs, where being right pays far more than being wrong costs. With payoffs of that shape, bought at a sensible price, being right only some of the time can compound to far more than a risk-free return.</p>
 
-      <div class="measure prose">
-        <p>Here is that shape, and it is not free: near the middle, the curved line sits a little below a plain straight-line bet. That is the price of the bend. Sizing keeps the left side survivable, and the right side is left open, within the concentration limits.</p>
+        <p>That shape has a cost. Near the middle, the curved line sits a little below a plain straight-line bet; that gap is the price of convexity. Sizing keeps the left side survivable, and the right side is left open, within the concentration limits.</p>
       </div>
 
       <!-- EXHIBIT S1 · Part opener: the payoff shape the whole framework defends -->
@@ -364,12 +372,12 @@
           <p class="fc-fallback-claim">Keep the left tail survivable and let the right tail run, within the concentration limits.</p>
           <p class="fc-fallback-body">A conceptual payoff curve. A straight symmetric reference line loses on adverse outcomes as much as it gains on favorable ones. The ACF curve runs slightly below that line near the base case, which is the cost of the structure. On the left it flattens toward a level bounded by sizing; on the right it bends upward and accelerates.</p>
           <p class="fc-fallback-note">Conceptual; the framework limits loss through sizing and exits, not a guaranteed floor. Conceptual diagram. Illustrative framework exhibit, not historical data.</p>
-          <p class="fc-fallback-src">Sources: <a href="/part-1-foundation#manifesto">Rule stated in Part 1 · The traditional portfolio playbook is failing quietly</a>; <a href="/part-2-lineage-macro-thesis#lineage">Rule stated in Part 2 · The intellectual foundations, thesis-agnostic</a>.</p>
+          <p class="fc-fallback-src">Sources: <a href="/part-1-foundation#manifesto">Rule stated in Part 1 · The traditional playbook was built for a regime that has ended</a>; <a href="/part-2-lineage-macro-thesis#lineage">Rule stated in Part 2 · The intellectual foundations, thesis-agnostic</a>.</p>
         </figcaption>
       </figure>
 
       <div class="measure prose">
-        <p>The framework treats investing as a system rather than a set of static allocations. The method carries across account types and investor profiles; the tax material is written for US accounts under current law. It is built to be audited: each decision should trace to a written rule or a recorded judgment, so you could explain it to an advisor, a client or an heir (a design goal, not a legal standard). It has seven components, each aimed at a known way traditional portfolios fail:</p>
+        <p>We built the framework to be audited: every decision should trace to a written rule or a recorded judgment that the investor could explain to an advisor, a client or an heir. It has seven components, each aimed at a known way traditional portfolios fail:</p>
       </div>
 
       <!-- ARCHITECTURE LIST · seven components (number / title / body, on the progress rail) -->
@@ -377,19 +385,19 @@
         <ol class="architecture-list" data-stepper>
           <li>
             <p class="step-title">A macro thesis</p>
-            <p class="step-body">formed and tested by the practitioner to frame the regime and inform structure. Without one, you allocate as if the regime did not matter.</p>
+            <p class="step-body">formed and tested by the practitioner, that frames the regime and informs structure. Without one, a portfolio is allocated as if the regime did not matter.</p>
           </li>
           <li>
             <p class="step-title">A Bitcoin backbone</p>
-            <p class="step-body">sized to horizon and risk capacity and paced by valuation discipline, with the <button type="button" class="gloss" data-gloss="power-law-corridor" aria-expanded="false">power-law corridor</button> as one of its lenses. Hold none and you give up the convexity; hold too much without rules and you invite ruin.</p>
+            <p class="step-body">sized to horizon and risk capacity and paced by valuation discipline, with the <button type="button" class="gloss" data-gloss="power-law-corridor" aria-expanded="false">power-law corridor</button> as one of its lenses. A portfolio that holds none gives up the convexity; one that holds too much without rules invites ruin.</p>
           </li>
           <li>
             <p class="step-title">Tax wrappers</p>
-            <p class="step-body">treated as compounding engines rather than paperwork, because careless account placement can cost a large share of terminal wealth.</p>
+            <p class="step-body">treated as compounding engines, because careless account placement can cost a large share of terminal wealth.</p>
           </li>
           <li>
             <p class="step-title">Portfolio construction</p>
-            <p class="step-body">expressed through each position&rsquo;s <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button> (<button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button>, <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">Ballast</button>, <button type="button" class="gloss" data-gloss="hype" aria-expanded="false">Hype</button>), so you ask how a holding behaves in the regime instead of stopping at its asset class.</p>
+            <p class="step-body">expressed through each position&rsquo;s <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button> (<button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button>, <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">Ballast</button>, <button type="button" class="gloss" data-gloss="hype" aria-expanded="false">Hype</button>), which classifies a holding by how it behaves in the regime.</p>
           </li>
           <li>
             <p class="step-title">Convexity</p>
@@ -397,7 +405,7 @@
           </li>
           <li>
             <p class="step-title">Momentum</p>
-            <p class="step-body">as a trend filter and a governor on drawdowns, so you are not fighting the prevailing trend or riding a position through a catastrophic fall.</p>
+            <p class="step-body">as a trend filter and a governor on drawdowns, so the portfolio neither fights the prevailing trend nor rides a position through a catastrophic fall.</p>
           </li>
           <li>
             <p class="step-title">Predefined tripwires and AI-assisted verification</p>
@@ -407,15 +415,18 @@
       </div>
 
       <div class="measure prose">
-        <p>Bitcoin is in the portfolio for what it does, not as an article of faith. It is a long-duration monetary asset that runs parallel to the dollar system, with growing institutional access and a supply capped by its protocol. It is scored like every other holding, but sized and handled under its own rules (<a class="part-ref" href="/part-3-bitcoin-convexity-backbone#backbone">Part 3</a>). Part 3 makes the full case and sets out the four valuation models that pace its buying: power-law bands, realized price, network adoption and production cost. A fifth reading, global liquidity, gives direction but sets no value.</p>
+        <p>The framework holds Bitcoin for what it does. It is a long-duration monetary asset that runs parallel to the dollar system, with a supply capped at 21 million coins by its protocol and growing institutional access. In a regime whose central risk is the erosion described above, an asset whose supply no government can expand is, in our view, the most direct answer to that risk. It is also among the most volatile assets an investor can own. It is scored like every other holding, but sized and handled under its own rules, and it is held whatever the thesis. <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#backbone">Part 3</a> makes the full case and sets out the four valuation models that pace its buying: power-law bands, realized price, network adoption and production cost. A fifth reading, global liquidity, gives direction but sets no value.</p>
 
-        <p>Account placement matters most for strategies whose returns come from a few large wins. Over decades, where a convex holding sits (Roth, taxable, or pre-tax) can change what you keep by a wide margin; <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#roth">Parts 4</a> and <a class="part-ref" href="/part-5-portfolio-construction-position-management#rebalancing">5</a> work the arithmetic and state their assumptions. At equal tax rates in and out, Roth and pre-tax end even. For convex, <button type="button" class="gloss" data-gloss="right-tail-outcomes" aria-expanded="false">right-tail</button> positions the balance tips toward Roth because the same dollar limit shelters more after-tax money in a Roth than in a pre-tax account, required distributions can push large pre-tax balances into higher brackets, and heirs generally inherit a Roth free of income tax under current law (Part 4).</p>
+        <p>Account placement matters most for strategies whose returns come from a few large wins. Over decades, where a convex holding sits (Roth, taxable, or pre-tax) can change the after-tax result by a wide margin; <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#roth">Parts 4</a> and <a class="part-ref" href="/part-5-portfolio-construction-position-management#rebalancing">5</a> work the arithmetic and state their assumptions. At equal tax rates in and out, Roth and pre-tax end even. For convex, <button type="button" class="gloss" data-gloss="right-tail-outcomes" aria-expanded="false">right-tail</button> positions the balance tips toward Roth because the same dollar limit shelters more after-tax money in a Roth than in a pre-tax account, required distributions can push large pre-tax balances into higher brackets, and heirs generally inherit a Roth free of income tax under current law (Part 4).</p>
 
-        <p>What follows is a written doctrine. It forecasts no specific outcome and guarantees no return, and some policy paths or regime changes may still invalidate parts of its positioning; the framework is built to notice when that happens and respond. If you are building wealth for your own family, it gives you a repeatable process. If you advise others, it offers a documented alternative to fee-for-beta management, though not a substitute for your own suitability process.</p>
+        <p>For an investor building wealth for a family, the framework is a repeatable process; for an advisor, a documented alternative to fee-for-beta management, though not a substitute for a suitability process. Its case rests on a thesis that can be checked: <a class="part-ref" href="/part-1-foundation#falsifiers">the last section of this Part</a> sets out the evidence that would prove it wrong.</p>
       </div>
+
     </section>
 
+
     <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
 
     <!-- ===== SECTION · ABSTRACT (denser register) ========================== -->
     <section class="section" id="abstract" aria-labelledby="abstract-title">
@@ -425,21 +436,25 @@
       </div>
 
       <div class="measure prose-abstract">
-        <p>The Adaptive Convexity Framework is built for unstable macro regimes: policy reflexivity, volatility clustering, lopsided outcomes and correlations that will not hold still. It anchors long-horizon conviction in Bitcoin. Positions are rated by the Convexity Integrity Score (<button type="button" class="gloss" data-gloss="cis" aria-expanded="false">CIS</button>), a weighted heuristic across four components (convexity and optionality, risk and fragility, macro alignment, and execution and sentiment), applied to each position at each weekly review and between reviews when a trigger fires. <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#cis">Part 6</a> sets out the method.</p>
+        <p>The Adaptive Convexity Framework is built for unstable macro regimes: policy reflexivity, volatility clustering, skewed outcomes and unstable correlations. It anchors long-horizon conviction in Bitcoin. Positions are rated by the Convexity Integrity Score (<button type="button" class="gloss" data-gloss="cis" aria-expanded="false">CIS</button>), a weighted heuristic across four components (convexity and optionality, risk and fragility, macro alignment, and execution and sentiment), applied to each position at each weekly review and between reviews when a trigger fires. <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#cis">Part 6</a> sets out the method.</p>
+
+        <p><button type="button" class="gloss" data-gloss="regime" aria-expanded="false">Regime</button> is used at several time scales in these pages. Unqualified in this Part, it means the structural regime: the conditions, read through growth, inflation and policy, that decide how assets behave for years at a time, and that a macro thesis describes (<a class="part-ref" href="/part-2-lineage-macro-thesis#macro-thesis">Part 2</a>). Three shorter readings are named for their time scale: the cyclical weather (the growth-and-inflation map on the cover), the policy stance (hawkish, dovish, stagflationary or neutral) and the risk environment (risk-on, selective, transition or defensive). The dashboard reports the last two, as the box in the next section sets out.</p>
 
         <p>Outside the Bitcoin backbone, every position carries a posture (Torque, Ballast or Hype), which lets the portfolio rotate across themes such as AI infrastructure, defense modernization, space commercialization, critical systems and biotechnology as the <button type="button" class="gloss" data-gloss="macro-thesis" aria-expanded="false">macro thesis</button> evolves.</p>
 
-        <p><button type="button" class="gloss" data-gloss="tax-wrapper" aria-expanded="false">Tax wrapper</button> placement follows what each holding is expected to do, held for good or rotated: Torque that may rotate is directed to Roth, and never-sold Bitcoin and return-of-capital Ballast sit in taxable. Step 2 below gives the full routing, and <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#wrappers">Part 4</a> works it through.</p>
+        <p><button type="button" class="gloss" data-gloss="tax-wrapper" aria-expanded="false">Tax wrapper</button> placement follows what each holding is expected to do, held for good or rotated; Step 2 below gives the routing, and <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#wrappers">Part 4</a> works it through.</p>
 
-        <p>Risk is managed through predefined <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwires</button>, set with each thesis: systemic stress indicators such as bond-market volatility (MOVE), liquidity conditions, breadth and credit spreads, and position-level signals such as CIS decay, momentum breakdown and valuation extension. The dashboard watches the ones it has data for and displays each tripwire&rsquo;s prescribed response; it never executes one (as of September 2026). Tripwires are paired with a verification step the practitioner runs, with AI-assisted research, to speed adaptation without inducing overtrading.</p>
+        <p>Risk is managed through predefined <button type="button" class="gloss" data-gloss="tripwire" aria-expanded="false">tripwires</button>, set with each thesis: systemic stress indicators such as bond-market volatility (MOVE), liquidity conditions, breadth and credit spreads, and position-level signals such as CIS decay, momentum breakdown and valuation extension. Each is paired with a verification step (Step 7 below) to speed adaptation without inducing overtrading.</p>
 
-        <p>Borrowing against appreciated assets, through securities-backed lines of credit or Bitcoin-backed loans, can supply cash instead of a sale, and under current US law assets held until death generally pass to heirs with a stepped-up basis. That is the <button type="button" class="gloss" data-gloss="buy-borrow-die" aria-expanded="false">buy-borrow-die</button> pattern, taught in <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#tam">Part 3</a>. The loan avoids the sale, but it adds interest cost and the risk of a forced sale: if the collateral falls far enough, or a payment is missed, the lender sells it, and that sale is a taxable event. Part 3 adds rules for loans against Bitcoin: optional, and only late, once the reserve has grown into a mature share of net worth and is large relative to any loan, inside conservative loan-to-value limits, and funding income-producing assets whose cash flow pays the interest, never living costs.</p>
+        <p>Borrowing against appreciated assets, through securities-backed lines of credit or Bitcoin-backed loans, can supply cash instead of a sale, and under current US law assets held until death generally pass to heirs with a stepped-up basis: the <button type="button" class="gloss" data-gloss="buy-borrow-die" aria-expanded="false">buy-borrow-die</button> pattern. A loan adds interest cost and the risk of a forced, taxable sale if the collateral falls far enough or a payment is missed. <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#tam">Part 3</a> sets the rules for loans against Bitcoin: optional and late, inside conservative loan-to-value limits, and only to fund income-producing assets whose cash flow pays the interest, never living costs.</p>
 
-        <p>The whole method is designed to be wrong gracefully, to catch thesis breaks early and to redeploy capital by rule rather than by mood. <a class="lineage-ref" href="/part-2-lineage-macro-thesis#lineage">The framework draws on Taleb&rsquo;s fragility mathematics, Druckenmiller&rsquo;s concentration discipline paired with active monitoring, Soros&rsquo;s reflexivity dynamics, and Edelman&rsquo;s longevity horizon work.</a></p>
+        <p>The method is designed to limit the cost of being wrong, catch thesis breaks early and redeploy capital by rule. <a class="lineage-ref" href="/part-2-lineage-macro-thesis#lineage">The framework draws on Taleb&rsquo;s fragility mathematics, Druckenmiller&rsquo;s concentration discipline paired with active monitoring, Soros&rsquo;s reflexivity dynamics, and Edelman&rsquo;s longevity horizon work.</a></p>
       </div>
     </section>
 
+
     <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
 
     <!-- ===== SECTION · ORDER OF OPERATIONS ================================= -->
     <section class="section" id="order-of-operations" aria-labelledby="ooo-title">
@@ -462,7 +477,7 @@
       </ol>
 
       <div class="measure prose">
-        <p>The order matters because each stage feeds the next. Positions bought without a macro thesis are exposure with no reason behind them, and a thesis with no tripwires tends to break in silence, so you hear about it last.</p>
+        <p>The order matters because each stage feeds the next. Positions bought without a macro thesis are exposure with no reason behind them, and a thesis with no tripwires tends to break in silence, so the investor hears about it last.</p>
       </div>
 
       <!-- PROCEDURAL STEPS: bold lead-in + step, on the progress rail -->
@@ -470,13 +485,13 @@
         <ol class="proc-steps" data-stepper>
           <li><p><span class="lead">Macro thesis determines structure.</span> If the operative thesis is the Fourth Turning (the crisis era in William Strauss and Neil Howe&rsquo;s generational-cycle theory), structure tilts toward defense, critical infrastructure, parallel systems and hard assets. If it is a disinflationary technology boom (AI raising productivity, goods prices falling, asset prices rising), structure tilts toward AI infrastructure, semiconductors, cloud computing and technology platforms. Real theses often blend the two, as the example thesis in <a class="part-ref" href="/part-2-lineage-macro-thesis#thought-leaders">Part 2</a> does. A thesis makes no point forecast; it is a lens for spreading probability across regime scenarios. Whatever the thesis, Bitcoin is held as the backbone, sized and paced under the rules in <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#accumulate">Part 3</a>.</p></li>
           <li><p><span class="lead">Structure determines wrapper placement.</span> Torque that may rotate is directed to Roth accounts, where right-tail outcomes (which can reach 10 to 100 times the initial position) compound and rotate tax-free. Taxable accounts hold never-sold Bitcoin, return-of-capital Ballast, buy-and-hold positions beyond Roth capacity, and smaller satellite positions kept for tax-loss harvesting. Pre-tax accounts take the employer match, a deferral in an unusually high-income year, and ordinary-income payers such as bond funds where pre-tax space exists. On the match: contribute at least enough to earn the full employer match. Your own contribution can go into a Roth 401(k) bucket if the plan has one. The match itself is pre-tax unless the plan lets you elect Roth matching contributions, which SECURE 2.0 permits if the plan adopts it (the match must be fully vested and is taxable income in the year it is made). <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#wrappers">Part 4</a> sets out the full map.</p></li>
-          <li><p><span class="lead">Wrapper placement decides what a size is worth.</span> The size itself comes from the posture&rsquo;s band table in <a class="part-ref" href="/part-5-portfolio-construction-position-management#torque">Part 5</a>, at the band the CIS selects in the next step, and concentration limits apply to the household total across every account. Placement decides how much of that size you keep: a position compounds without tax drag in a Roth, while in a taxable account tax and the cost of realizing gains shrink the result.</p></li>
-          <li><p><span class="lead">CIS selects the sizing band.</span> For every holding except the Bitcoin backbone, posture sets the band table. The score selects the posture-specific sizing band: 70 or above supports core sizing, 60 to 69 standard sizing, 50 to 59 starter sizing, and below 50 is not allocation-worthy. A material score change prompts a resizing review; at 50 and above, exits are governed by posture rules, tripwires and thesis evidence, not by the score band alone. <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#cis">Part 6</a> develops the full rubric and its weights. The step exists to stop &ldquo;I like this stock&rdquo; portfolio construction.</p></li>
-          <li><p><span class="lead">CIS scores are confirmed by momentum.</span> The <button type="button" class="gloss" data-gloss="momentum-filter" aria-expanded="false">momentum filter</button> reads the market&rsquo;s vote on the thesis on three dimensions: distance from the 52-week high, strength relative to the sector and the market, and breadth. A position with CIS 75 and one broken momentum dimension has its sizing reduced 25 to 30 percent; with two broken it goes on watch with minimal new exposure; with all three broken (extended distance below the 52-week high, negative relative strength, declining breadth) it exits despite the score, per <a class="part-ref" href="/part-5-portfolio-construction-position-management#management">Part 5</a>. CIS below 50 removes allocation eligibility at any momentum reading. The dashboard does not yet measure the three dimensions (as of September 2026); Part 5 says what it watches instead.</p></li>
-          <li><p><span class="lead">Momentum is monitored by tripwires.</span> Tripwires are written when the thesis is set, around the regime&rsquo;s dominant fragilities. For the current thesis, the systemic set watches bond-market volatility (the MOVE index), equity volatility (the VIX), market breadth and widening credit spreads; at the position level, a sharp CIS decline and a momentum breakdown. A drawdown limit completes the set. Different theses produce different tripwire sets; a deflationary thesis, for example, might monitor M2 contraction and yield-curve dynamics instead. The thresholds the dashboard watches are on the <a class="part-ref" href="/framework-in-math#governance-math">Math page</a>, and <a class="part-ref" href="/part-5-portfolio-construction-position-management#management">Part 5</a> sets the responses.</p></li>
-          <li><p><span class="lead">Tripwires trigger verification.</span> When a tripwire fires, the next step is verification: is the signal noise (temporary volatility) or information (a thesis break)? That step is the practitioner&rsquo;s, with <button type="button" class="gloss" data-gloss="agentic-verification" aria-expanded="false">AI-assisted research</button> where it helps: news flow, positioning data, sentiment indicators and historical analogs. The dashboard helps in one way today: its AI market briefing (Tape Read) reads the current tripwire states when you run it. Nothing launches research automatically when a tripwire fires. Human judgment makes the call.</p></li>
-          <li><p><span class="lead">Verification informs adaptation.</span> What verification finds sorts the response into one of four categories: watch (thesis intact, volatility normal), hedge (thesis weakening), trim (thesis breaking, reduce by 25 to 50 percent), or exit and redeploy (thesis broken, move the capital to higher-CIS opportunities). Deciding the categories in advance is what keeps a bad week from writing its own response.</p></li>
-          <li><p><span class="lead">Adaptation feeds back into the macro thesis.</span> When several positions in a theme breach CIS thresholds at the same time despite strong momentum, the thesis itself may be shifting. The framework updates its operating assumptions as that evidence accumulates.</p></li>
+          <li><p><span class="lead">Wrapper placement decides what a size is worth.</span> The size itself comes from the posture&rsquo;s band table in <a class="part-ref" href="/part-5-portfolio-construction-position-management#torque">Part 5</a>, at the band the CIS selects in the next step, and concentration limits apply to the household total across every account. A Roth compounds the position without tax drag; in a taxable account, tax and the cost of realizing gains shrink the result.</p></li>
+          <li><p><span class="lead">CIS selects the sizing band.</span> For every holding except the Bitcoin backbone, posture sets the band table. The score selects the posture-specific sizing band: 70 or above supports core sizing, 60 to 69 standard sizing, 50 to 59 starter sizing, and below 50 is not allocation-worthy. The score is a structured judgment, uncertain by a few points either way; the bands absorb most of that uncertainty, though not at their edges. A material score change prompts a resizing review; at 50 and above, exits are governed by posture rules, tripwires and thesis evidence, not by the score band alone. <a class="part-ref" href="/part-6-convexity-framework-integrity-scoring#cis">Part 6</a> develops the full rubric and its weights. The step exists to stop &ldquo;I like this stock&rdquo; portfolio construction.</p></li>
+          <li><p><span class="lead">CIS scores are confirmed by momentum.</span> The <button type="button" class="gloss" data-gloss="momentum-filter" aria-expanded="false">momentum filter</button> reads the market&rsquo;s vote on the thesis on three dimensions: distance from the 52-week high, strength relative to the sector and the market, and breadth. A position with CIS 75 and one broken momentum dimension has its sizing reduced 25 to 30 percent; with two broken it goes on watch with minimal new exposure; with all three broken (extended distance below the 52-week high, negative relative strength, declining breadth) it exits despite the score, per <a class="part-ref" href="/part-5-portfolio-construction-position-management#management">Part 5</a>. CIS below 50 removes allocation eligibility at any momentum reading.</p></li>
+          <li><p><span class="lead">Momentum is monitored by tripwires.</span> Tripwires are written when the thesis is set, around the regime&rsquo;s dominant fragilities. For the current thesis, the systemic set watches bond-market volatility (the MOVE index), equity volatility (the VIX), market breadth and widening credit spreads; at the position level, a sharp CIS decline and a momentum breakdown. A drawdown limit completes the set. Different theses produce different tripwire sets; a deflationary thesis, for example, might monitor M2 contraction and yield-curve dynamics instead. <a class="part-ref" href="/part-5-portfolio-construction-position-management#management">Part 5</a> sets the responses.</p></li>
+          <li><p><span class="lead">Tripwires trigger verification.</span> When a tripwire fires, the practitioner verifies it: is the signal noise (temporary volatility) or information (a thesis break)? <button type="button" class="gloss" data-gloss="agentic-verification" aria-expanded="false">AI-assisted research</button> can help with news flow, positioning data, sentiment indicators and historical analogs; human judgment makes the call.</p></li>
+          <li><p><span class="lead">Verification informs adaptation.</span> Verification sorts the response into one of four categories: watch (thesis intact, volatility normal), hedge (thesis weakening), trim (thesis breaking, reduce by 25 to 50 percent), or exit and redeploy (thesis broken, move the capital to higher-CIS opportunities). Deciding the categories in advance keeps a bad week from writing its own response.</p></li>
+          <li><p><span class="lead">Adaptation feeds back into the macro thesis.</span> When several positions in a theme breach CIS thresholds at the same time despite strong momentum, the thesis itself may be shifting. You refine the thesis as that evidence accumulates, or drop it if the evidence falsifies it (<a class="part-ref" href="/part-2-lineage-macro-thesis#macro-thesis">Part 2</a>), and log each change, including each decision to change nothing.</p></li>
         </ol>
       </div>
 
@@ -493,9 +508,6 @@
         <p>This is a closed loop. Rules drive most decisions, recorded judgment drives the rest, and both leave a trail: every action should trace to a trigger and be logged.</p>
       </aside>
 
-      <div class="measure prose">
-        <p>Drawn as a single picture, the loop is small enough to hold in your head: a thesis earns exposure, exposure creates risk, a tripwire stands guard, and the governed response feeds what it learns back into the thesis.</p>
-      </div>
       <figure class="fc-mount" id="exhibit-dl-tripwire-loop" data-fc-chart="dl-tripwire-loop">
         <figcaption class="fc-fallback" data-fc-fallback="dl-tripwire-loop">
           <p class="fc-fallback-title"><strong>L3 · Govern the Thesis</strong>: A thesis earns exposure, and tripwires decide when to stop and check</p>
@@ -507,7 +519,7 @@
       </figure>
 
       <div class="measure prose">
-        <p>Six failure modes recur, and each has a named answer in the framework:</p>
+        <p>Six failure modes recur, each with a named answer:</p>
       </div>
 
       <!-- FAILURE-MODE LIST (named term + description) -->
@@ -545,13 +557,18 @@
       </div>
 
       <div class="measure prose">
-        <p>A governed process takes discretion away where it does damage (emotional sizing, holding on a narrative, ignoring tax) and leaves it where it adds value (thematic rotation, tactical positioning and adaptive use of borrowing).</p>
+        <p>A governed process takes discretion away where it does damage (emotional sizing, holding on a narrative, ignoring tax) and leaves it where we think judgment can add value (thematic rotation, tactical positioning and adaptive use of borrowing).</p>
 
-        <p>None of this removes judgment. You still make every decision; the written rules mean the hardest ones were thought through on a calm day, before the selloff that tests them.</p>
+        <p>The investor still makes every decision; the written rules mean the hardest ones were thought through on a calm day, before the selloff that tests them.</p>
       </div>
 
+      <aside class="callout callout-info" aria-label="What the dashboard does today">
+        <p class="callout-label">In the dashboard, as of September 2026</p>
+        <p>The dashboard computes CIS and the Framework Integrity Score (FIS, Part 6), watches the tripwires it has data for and displays each one&rsquo;s prescribed response. It never executes a response. It records every trade and never blocks one, and it places no orders. It reports a policy-stance label (hawkish, dovish, stagflationary or neutral, set by the direction of rates, inflation and unemployment; the Math page calls it the macro regime label) and a portfolio-level risk environment (risk-on, selective, transition or defensive). It does not yet measure the three momentum dimensions; <a class="part-ref" href="/part-5-portfolio-construction-position-management#management">Part 5</a> says what it watches instead. Its AI market briefing (Tape Read) reads the current tripwire states when it runs, and nothing launches research automatically when a tripwire fires. <a class="part-ref" href="/framework-in-math#governance-math">The Math page</a> lists the thresholds the dashboard watches and marks which rules run in the software and which are written rules you carry out.</p>
+      </aside>
+
       <div class="measure prose">
-        <p>Survival comes first because only capital that survives can keep compounding. The closing picture draws a path like the Bitcoin one described earlier: a fixed amount bought every month, straight through two deep falls.</p>
+        <p>Survival comes first because only capital that survives can keep compounding.</p>
       </div>
 
       <!-- EXHIBIT 06 · the closing image: compounding through the drawdown -->
@@ -565,9 +582,51 @@
         </figcaption>
       </figure>
 
+    </section>
+
+
+    <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+
+    <!-- ===== SECTION · FALSIFIERS ========================================== -->
+    <section class="section" id="falsifiers" aria-labelledby="falsifiers-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Falsifiers</p>
+        <h2 class="section-title" id="falsifiers-title">What would prove us wrong.</h2>
+      </div>
+
+      <div class="measure prose">
+        <p class="prose-lead">These are the tests we have set for the thesis of this Part. That thesis is our reading of the structural regime; the macro thesis that sets a portfolio&rsquo;s structure belongs to the practitioner (Part 2), and the method does not change with either. Each test has public data, a window, a threshold set by our judgment with the history in view, and a stated consequence. A test that is not met is not evidence for us: most of these outcomes have causes other than the one we argue. This wording was published on <span class="pilot-ph">[date]</span> and archived at <span class="pilot-ph">[commit and Internet Archive link]</span>; if we ever change a test, we will say so and keep reporting against the original.</p>
+      </div>
+
+      <div class="measure">
+        <ol class="architecture-list" data-stepper>
+          <li>
+            <p class="step-title">The central bank stays in charge</p>
+            <p class="step-body">We would be wrong about fiscal dominance if the Federal Reserve holds its policy rate at least a point above core inflation for two years and brings core inflation to 2.5 percent or below, while federal interest costs are at least 3 percent of GDP. Not met so far: the gap held for 28 months, to November 2025, but core inflation bottomed at 2.6 percent, and in August 2026 the gap was 0.6 points. If it happens, we stop treating fiscal dominance as a constraint of this regime.</p>
+          </li>
+          <li>
+            <p class="step-title">Bondholders are not paying</p>
+            <p class="step-body">We would be wrong that bondholders will bear part of the cost of this debt if 10-year Treasuries return more than 1.5 percent a year after inflation from 2026 through 2035, about their average since 1928. In the last liquidation, 1946 to 1974, they lost about 1 percent a year. If it happens, we withdraw the claim that relying on government bonds for a real return is a bet against the precedent.</p>
+          </li>
+          <li>
+            <p class="step-title">The hedge returns</p>
+            <p class="step-body">We would be wrong about the stock-bond correlation if the 24-month correlation of monthly returns on US stocks and 10-year Treasuries stays below zero for 12 consecutive months. If it happens, the diversifier we call broken is working again, and we rewrite the correlation case in this Part.</p>
+          </li>
+          <li>
+            <p class="step-title">The old portfolio delivers</p>
+            <p class="step-body">We would be wrong about the playbook itself if a 60/40 mix of US stocks and 10-year Treasuries returns at least 4 percent a year after inflation from 2026 through 2035. The bar sits between the mix&rsquo;s 3.3 percent in the last liquidation and its 7.8 percent in the falling-rate decades, and below its 5.2 percent record since 1928. If it happens, we say so and rewrite this Part&rsquo;s case. If it does not, that alone does not prove us right: high starting valuations can hold returns down in any regime.</p>
+          </li>
+        </ol>
+      </div>
+
+      <div class="measure prose">
+        <p>The exact method, the data and the history behind each threshold are on the <span class="pilot-ph">[Evidence page]</span>, with the script that computes the readings. We will publish them each February, including the years when nothing changes. These tests check the thesis, not the framework: whether following the framework does better than a simple portfolio after costs and taxes is a separate question that nothing here answers yet. A single bad year proves nothing in either direction, and neither does a Bitcoin drawdown; <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#irreplaceability">Part 3</a> judges the backbone against ten requirements and lists what could break it.</p>
+      </div>
+
       <aside class="callout callout-info" aria-label="Scope and disclaimer">
         <p class="callout-label">Scope</p>
-        <p>The framework is a designed process, not a fitted model. Its rules and scores have not been backtested against a benchmark; where these pages describe outcomes, they describe what the design intends unless a figure is labeled as measured. Apart from Part 1&rsquo;s sequence-of-returns exhibit, the worked examples in these Parts assume you are not yet drawing on the portfolio. The framework does not yet publish a withdrawal policy for a portfolio you live on. Tax and borrowing treatments are described under current US law as of September 2026 and can change. This framework does not constitute investment, tax, or legal advice.</p>
+        <p>These pages set out a written doctrine. It makes no point forecasts and guarantees no return; it does make directional claims about this regime, and the tests above say what would prove them wrong. The framework is a designed process, not a fitted model. Its rules and scores have not been backtested against a benchmark; where these pages describe outcomes, they describe what the design intends unless a figure is labeled as measured. Apart from Part 1&rsquo;s sequence-of-returns exhibit, the worked examples in these Parts assume you are not yet drawing on the portfolio. The framework does not yet publish a withdrawal policy for a portfolio you live on. The method carries across account types and investor profiles; the tax material is written for US accounts, and tax and borrowing treatments are described under current US law as of September 2026 and can change. The audit trail is a design goal, not a legal standard. This framework does not constitute investment, tax, or legal advice.</p>
       </aside>
     </section>
 

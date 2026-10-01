@@ -609,7 +609,7 @@
       "appearsLater": {
         "part": 1,
         "anchor": "manifesto",
-        "topic": "The traditional portfolio playbook is failing quietly"
+        "topic": "The traditional playbook was built for a regime that has ended"
       },
       "chart": null
     },
@@ -662,7 +662,7 @@
       "appearsLater": {
         "part": 1,
         "anchor": "manifesto",
-        "topic": "The traditional portfolio playbook is failing quietly"
+        "topic": "The traditional playbook was built for a regime that has ended"
       },
       "chart": "p1-convexity-survival"
     },
@@ -1501,7 +1501,7 @@
       "appearsLater": {
         "part": 1,
         "anchor": "manifesto",
-        "topic": "The traditional portfolio playbook is failing quietly"
+        "topic": "The traditional playbook was built for a regime that has ended"
       },
       "chart": "p3-volatility-is-the-toll"
     },
