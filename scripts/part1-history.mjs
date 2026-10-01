@@ -86,6 +86,11 @@ export function policyGap() {
   return { longestRun: best, coreLow: { month: low, value: core[low] }, latest: { month: latest, gap: gap[latest], core: core[latest] } };
 }
 
+/** Monthly effective federal funds rate: { 'YYYY-MM': percent }. */
+export function fedFunds() {
+  return Object.fromEntries(csv('fedfunds-monthly.csv').map((r) => [r.month, Number(r.value)]));
+}
+
 export function fiscal() {
   return Object.fromEntries(csv('federal-debt-and-interest.csv').map((r) => [Number(r.fiscal_year), {
     debt: Number(r.debt_held_by_public_pct_gdp),
@@ -124,7 +129,8 @@ export function readings() {
       bothBelowMinus10: Object.entries(r).filter(([, v]) => v.stocks < -0.1 && v.bonds < -0.1).map(([y]) => Number(y)),
     },
     cpi1945to1950: pct(cpi[1950] / cpi[1945] - 1),
-    cpi2026: { january: cpiYearOverYear('2026-01'), may: cpiYearOverYear('2026-05') },
+    cpi1999to2024: pct(cpi[2024] / cpi[1999] - 1),
+    cpi2026: { january: cpiYearOverYear('2026-01'), may: cpiYearOverYear('2026-05'), august: cpiYearOverYear('2026-08') },
     policyGap: policyGap(),
     fiscal: fiscal(),
   };

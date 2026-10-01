@@ -18,7 +18,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readings } from '../scripts/part1-history.mjs';
+import { readings, fedFunds } from '../scripts/part1-history.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ENTITIES = { '&rsquo;': '’', '&ldquo;': '“', '&rdquo;': '”', '&ndash;': '–', '&amp;': '&', '&middot;': '·', '&nbsp;': ' ' };
@@ -78,9 +78,12 @@ test('part 1: the debt and interest checkpoints follow the OMB series', () => {
 test('part 1: the 1945-1950 price rise and 2026 inflation readings follow CPI-U', () => {
   find(/consumer prices rose by more than a third between the end of 1945 and the end of 1950/, '1945-1950 sentence');
   assert.ok(R.cpi1945to1950 > 100 / 3, `CPI rose ${R.cpi1945to1950.toFixed(1)} percent, not more than a third`);
-  const m = find(/went from ([\d.]+) percent in January to above (\d+) percent in May/, '2026 inflation sentence');
+  const m = find(/went from ([\d.]+) percent in January to above (\d+) percent in May, and was ([\d.]+) percent in August/, '2026 inflation sentence');
   same(m[1], R.cpi2026.january, 'CPI y/y January 2026');
   assert.ok(R.cpi2026.may > Number(m[2]), `CPI y/y May 2026 is ${R.cpi2026.may.toFixed(2)}`);
+  same(m[3], R.cpi2026.august, 'CPI y/y August 2026');
+  const c = find(/Consumer prices rose about (\d+) percent from the end of 1999 to the end of 2024/, '1999-2024 CPI sentence');
+  same(c[1], R.cpi1999to2024, 'CPI rise, end-1999 to end-2024');
 });
 
 test('part 1: bondholders in the last liquidation, and the 60/40 alongside them', () => {
@@ -90,7 +93,7 @@ test('part 1: bondholders in the last liquidation, and the 60/40 alongside them'
 });
 
 test('part 1: 2022 in Damodaran\'s series, and its rank since 1928', () => {
-  const m = find(/the Treasuries lost ([\d.]+) percent, in the only year since 1928 in which both fell by more than 10 percent, and after inflation the mix lost about (\d+) percent, matched or exceeded only in (\d{4}) and (\d{4})/, '2022 sentence');
+  const m = find(/the Treasuries lost ([\d.]+) percent, and 2022 is the only year since 1928 in which US stocks and 10-year Treasuries both fell by more than 10 percent\. After inflation the mix lost about (\d+) percent, a loss matched or exceeded only in (\d{4}) and (\d{4})/, '2022 sentence');
   same(`-${m[1]}`, R.y2022.bonds, '10-year Treasury 2022');
   assert.deepEqual(R.y2022.bothBelowMinus10, [2022], 'years since 1928 when both fell more than 10 percent');
   const y2022 = R.mix.worstRealYears.find((w) => w.year === 2022);
@@ -107,12 +110,17 @@ test('part 1: the policy-rate gap behind the first test', () => {
   assert.equal(g.longestRun.from, '2023-08');
   assert.equal(g.longestRun.to, '2025-11');
   assert.ok(R.fiscal[2024].interest >= 3 && R.fiscal[2025].interest >= 3, 'interest past 3 percent of GDP');
-  const t = find(/the gap held for (\d+) months, to November 2025, but core inflation bottomed at ([\d.]+) percent, and in August 2026 the gap was ([\d.]+) points/, 'test 1 reading');
+  const t = find(/the gap held for (\d+) months, to November 2025, and core PCE inflation bottomed at ([\d.]+) percent; in August 2026 the gap was ([\d.]+) points/, 'test 1 reading');
   assert.equal(Number(t[1]), g.longestRun.len);
   same(t[2], g.coreLow.value, 'core PCE low in the run');
   assert.equal(g.latest.month, '2026-08', 'latest month in the snapshot');
   same(t[3], g.latest.gap, 'gap in August 2026');
-  find(/It has since cut rates with core inflation near 3 percent/, 'since-cut sentence');
+  find(/It then cut three times between September and December 2025, held through the summer of 2026 while core inflation rose back to about 3 percent/, 'after-the-run sentence');
+  const ff = fedFunds();
+  const fall = ff['2025-08'] - ff['2026-01'];
+  assert.ok(fall > 0.6 && fall < 0.8, `the effective rate fell ${fall.toFixed(2)} points from August 2025 to January 2026 (three quarter-point cuts)`);
+  const summer = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08'].map((k) => ff[k]);
+  assert.ok(Math.max(...summer) - Math.min(...summer) < 0.05, 'the rate held from January to August 2026');
   assert.ok(Math.abs(g.latest.core - 3) < 0.25, `core PCE inflation is ${g.latest.core.toFixed(2)}`);
 });
 
@@ -120,7 +128,7 @@ test('part 1: the thresholds of tests 2 and 4 sit where the page says', () => {
   const b = find(/more than ([\d.]+) percent a year after inflation from 2026 through 2035, about their average since 1928\. In the last liquidation, 1946 to 1974, they lost about (\d+) percent a year/, 'test 2');
   same(b[1], R.bond.since1928, '10-year Treasury real since 1928');
   same(`-${b[2]}`, R.bond.liquidation1946to1974, '10-year Treasury real, 1946-1974');
-  const p = find(/at least (\d+) percent a year after inflation from 2026 through 2035\. The bar sits between the mix’s ([\d.]+) percent in the last liquidation and its ([\d.]+) percent in the falling-rate decades, and below its ([\d.]+) percent record since 1928/, 'test 4');
+  const p = find(/at least (\d+) percent a year after inflation, before fees and taxes, from 2026 through 2035\. The bar sits between the mix’s ([\d.]+) percent in the last liquidation and its ([\d.]+) percent in the falling-rate decades, and below its ([\d.]+) percent average since 1928/, 'test 4');
   same(p[2], R.mix.liquidation1946to1974, '60/40 real, 1946-1974');
   same(p[3], R.mix.fallingRates1982to2021, '60/40 real, 1982-2021');
   same(p[4], R.mix.since1928, '60/40 real since 1928');
