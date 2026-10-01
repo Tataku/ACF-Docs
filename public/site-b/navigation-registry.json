@@ -1773,7 +1773,7 @@
       "chart": null,
       "entry": {
         "href": "/glossary#g-agentic-verification",
-        "label": "View the glossary entry → Agentic verification"
+        "label": "View the glossary entry → AI-assisted verification"
       }
     },
     "tam": {
@@ -2964,7 +2964,7 @@
   },
   "audit": {
     "pages": 11,
-    "anchors": 1231,
+    "anchors": 1232,
     "chartSpecs": 46,
     "liveChartMounts": 100,
     "glossaryTerms": 109,

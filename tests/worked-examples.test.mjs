@@ -116,15 +116,24 @@ test('math: parity is scored by the formula, not assumed to be zero', () => {
 test('math: the Bitcoin headroom examples come from the stated baseline and market caps', () => {
   const [, tam] = find(MATH, /baseline is a conservative monetary total of roughly (\d+(?:\.\d+)?) trillion dollars/, 'Bitcoin baseline');
   const points = [
-    ...MATH.matchAll(/(?:market capitali[sz]ation (?:of|near)|At) (\d+(?:\.\d+)?) trillion(?: dollars)? (?:that is|it is) about (\d+(?:\.\d+)?)×(?: of headroom)?,? scoring roughly (\d+(?:\.\d+)?)/g),
+    ...MATH.matchAll(/(?:market capitali[sz]ation (?:of|near|was about)|At) \$?(\d+(?:\.\d+)?) trillion(?: dollars)?,? (?:that is|it is|a headroom ratio of|the ratio falls to) about (\d+(?:\.\d+)?)×(?: of headroom)?,? (?:scoring|which scores|and the score to) roughly (\d+(?:\.\d+)?)/g),
   ];
-  assert.ok(points.length >= 1, 'no Bitcoin headroom example found');
+  assert.ok(points.length >= 2, `expected the current-cap and $3 trillion Bitcoin headroom examples, found ${points.length}`);
   for (const [, cap, h, stated] of points) {
     const H = num(tam) / num(cap);
     assert.equal(num(h), round1(H), `${cap} trillion: the page says ${h}× headroom, ${tam} ÷ ${cap} is ${round1(H)}`);
     assert.equal(num(stated), round1(headroom(H)),
       `${cap} trillion: the page says ${stated}, the formula gives ${round1(headroom(H))}`);
   }
+});
+
+test('math: the Bitcoin network convexity example comes from 18 × max(0, 1 − penetration^0.6)', () => {
+  const [, pool] = find(MATH, /penetration = market cap ÷ \$(\d+(?:\.\d+)?) trillion/, 'network convexity formula');
+  find(MATH, /network convexity = 18 × max\(0, 1 − penetration 0\.6 \)/, 'network convexity formula');
+  const [, cap, stated] = find(MATH, /At \$(\d+(?:\.\d+)?) trillion network convexity is about (\d+(?:\.\d+)?) of 18/, 'network convexity example');
+  const computed = 18 * Math.max(0, 1 - (num(cap) / num(pool)) ** 0.6);
+  assert.equal(num(stated), round1(computed),
+    `$${cap} trillion: the page says ${stated} of 18, the formula gives ${round1(computed)}`);
 });
 
 // ------------------------------------------------- the other worked formulas

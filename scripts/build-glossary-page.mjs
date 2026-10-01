@@ -191,7 +191,7 @@ const main = `<main class="shell-main">
         <h1 class="doc-title">Glossary</h1>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">The terms the framework defines for itself, each grouped by the Part that teaches it. Open one for a short definition, a link to the Part that develops it, the exhibit that shows it where there is one, and the related terms worth reading next.</p>
+        <p class="prose-lead">The terms the framework defines for itself, each grouped by the Part that teaches it. Open one for a short definition, a link to the Part that develops it, the exhibit that shows it where there is one, and the related terms worth reading next. Descriptions of what the dashboard does are as of September 2026.</p>
       </div>
       <div class="measure gl-toolbar" data-gl-toolbar>
         <label class="visually-hidden" for="gl-search">Filter terms</label>

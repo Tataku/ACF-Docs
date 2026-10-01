@@ -695,8 +695,9 @@
     },
     {
       "id": "agentic-verification",
-      "term": "Agentic verification",
+      "term": "AI-assisted verification",
       "aliases": [
+        "agentic verification",
         "agentic research",
         "verification loop"
       ],
