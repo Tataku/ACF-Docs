@@ -1,42 +1,53 @@
 {
-  "note": "Written by scripts/build-social-cards.mjs. `npm run audit:social` compares these titles to the live <title> to catch art that outran its page.",
+  "note": "Written by scripts/build-social-cards.mjs. `npm run audit:social` compares these titles and descriptions to the live <title> and meta description to catch art that outran its page.",
   "themes": [
     "light",
     "dark"
   ],
   "cards": {
     "cover-docs": {
-      "title": "The Adaptive Convexity Framework"
+      "title": "The Adaptive Convexity Framework",
+      "description": "A tax-aware method for compounding through unstable markets: six Parts, from philosophy to scoring, free to read."
     },
     "part-1-foundation": {
-      "title": "Part 1 — Foundation &amp; Philosophy · The Adaptive Convexity Framework"
+      "title": "Part 1 &middot; Foundation &amp; Philosophy &middot; The Adaptive Convexity Framework",
+      "description": "Why the traditional playbook is failing, what replaces it, and the nine-step order of operations."
     },
     "part-1-pictures": {
-      "title": "Part 1 in Pictures &middot; The Adaptive Convexity Framework"
+      "title": "Part 1 in Pictures &middot; The Adaptive Convexity Framework",
+      "description": "Part 1&rsquo;s argument in charts, in the order the chapter makes it, each with its explanation and its sources."
     },
     "part-2-lineage-macro": {
-      "title": "Part 2 — Lineage &amp; Macro Thesis · The Adaptive Convexity Framework"
+      "title": "Part 2 &middot; Lineage &amp; Macro Thesis &middot; The Adaptive Convexity Framework",
+      "description": "The thinkers behind the method, and how a macro thesis is built, tested, and governed."
     },
     "part-3-bitcoin-convexity": {
-      "title": "Part 3 — Bitcoin: Convexity Backbone · The Adaptive Convexity Framework"
+      "title": "Part 3 &middot; Bitcoin: Convexity Backbone &middot; The Adaptive Convexity Framework",
+      "description": "Why Bitcoin anchors the portfolio&rsquo;s convexity, and how it is valued, accumulated, held, and borrowed against."
     },
     "part-4-tax-architecture": {
-      "title": "Part 4 — Tax Architecture and ROC Strategy · The Adaptive Convexity Framework"
+      "title": "Part 4 &middot; Tax Architecture &amp; ROC Strategy &middot; The Adaptive Convexity Framework",
+      "description": "Which account each holding belongs in: Roth for Torque, taxable for Bitcoin and ROC income, pre-tax when it pays."
     },
     "part-5-portfolio-construction": {
-      "title": "Part 5 — Portfolio Construction and Position Management · The Adaptive Convexity Framework"
+      "title": "Part 5 &middot; Portfolio Construction &amp; Position Management &middot; The Adaptive Convexity Framework",
+      "description": "Torque, Ballast, and Hype: how each is sized and capped, and which rules you are allowed to tune."
     },
     "part-6-convexity-scoring": {
-      "title": "Part 6 — Convexity and Framework Integrity Scoring · The Adaptive Convexity Framework"
+      "title": "Part 6 &middot; Convexity &amp; Framework Integrity Scoring &middot; The Adaptive Convexity Framework",
+      "description": "CIS rates each position, FIS rates how the portfolio is put together, and a weekly routine acts on both."
     },
     "glossary": {
-      "title": "Glossary &middot; The Adaptive Convexity Framework"
+      "title": "Glossary &middot; The Adaptive Convexity Framework",
+      "description": "109 terms from the six Parts, each defined where it is taught, with a link to the Part that develops it."
     },
     "framework-in-math": {
-      "title": "The Framework in Math &middot; The Adaptive Convexity Framework"
+      "title": "The Framework in Math &middot; The Adaptive Convexity Framework",
+      "description": "The formulas behind CIS and FIS, how a score becomes a position size, and what governance does and does not do."
     },
     "framework-in-pictures": {
-      "title": "The Framework in Pictures &middot; The Adaptive Convexity Framework"
+      "title": "The Framework in Pictures &middot; The Adaptive Convexity Framework",
+      "description": "All 46 charts in book order, grouped by Part, each marked as public data, representative, simulated or a diagram."
     }
   }
 }

@@ -54,7 +54,7 @@
 
     var canonical = document.querySelector('link[rel="canonical"]');
     var url = (canonical && canonical.href) || location.href;
-    var title = (document.title.split('\u00b7')[0] || '').trim() || 'The Adaptive Convexity Framework';
+    var title = document.title.replace(/\s*\u00b7\s*The Adaptive Convexity Framework\s*$/, '').trim() || 'The Adaptive Convexity Framework';
     var status = document.querySelector('[data-foot-share-status]');
     var mark = document.querySelector('[data-foot-figure] .brand-mark');
     var settle = null, unpleased = null;

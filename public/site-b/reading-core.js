@@ -820,7 +820,11 @@
        not where they are now. */
     var canonical = document.querySelector('link[rel="canonical"]');
     var url = (canonical && canonical.href) || location.href;
-    var title = (document.title.split('·')[0] || '').trim() || 'The Adaptive Convexity Framework';
+    // The title without the trailing site name: "Part 4 · Tax Architecture &
+    // ROC Strategy". Splitting on the first '·' would keep only "Part 4"; the
+    // rule matches shareText() in scripts/site-titles.mjs, which writes the
+    // static share hrefs, so the no-JS link and this upgrade send the same text.
+    var title = document.title.replace(/\s*·\s*The Adaptive Convexity Framework\s*$/, '').trim() || 'The Adaptive Convexity Framework';
     var status = bar.querySelector('.part-actions-status');
     function announce(msg) { if (status) status.textContent = msg; }
 
@@ -1034,7 +1038,7 @@
       // Deliberately NOT spoken. "Skipped" must be a decision with a reason, not
       // an accident of the selector — a glyph legend read aloud is noise, and the
       // exhibit's own index/mode chips are already carried by the exhibit handler.
-      var NARRATION_MUTE = '.compare-key, .ex-idx, .ex-mode, .ex-src, .gloss-panel, .fc-legend, figcaption, .sidebar-nav, .on-this-page, .site-footer';
+      var NARRATION_MUTE = '.compare-key, .gl-group-meta, .ex-idx, .ex-mode, .ex-src, .gloss-panel, .fc-legend, figcaption, .sidebar-nav, .on-this-page, .site-footer';
 
       // A leading ↳ marks a chart's concept chip — a jump affordance for the eye.
       var UI_GLYPH = /^\s*\u21b3/;
@@ -1922,33 +1926,33 @@
   var BUILT_PARTS = { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true }; // all six parts ship as Site B (2026-07)
 
   // chart -> built exhibit anchor, dual-keyed by inventory `idx` AND `chartId`
-  // so glossary `chart` refs in either form resolve. Generated from
-  // navigation-registry.json (the runtime patch layer supersedes this map when
-  // the registry loads; this is the no-registry fallback). Unknown ids render
-  // nothing (unchanged behavior).
+  // so glossary `chart` refs in either form resolve. Written by
+  // scripts/build-navigation-registry.mjs from each chart's registry home (the
+  // runtime patch layer supersedes this map when the registry loads; this is
+  // the no-registry fallback). Do not edit by hand. Unknown ids render nothing.
   var BUILT_CHARTS = {
-    'L1': { page: '/', hash: '#exhibit-dl-convexity-window', label: 'L1 · The Window Opens' },
-    'dl-convexity-window': { page: '/', hash: '#exhibit-dl-convexity-window', label: 'L1 · The Window Opens' },
-    'L2': { page: '/', hash: '#exhibit-dl-regime-map', label: 'L2 · Capital Has Weather' },
-    'dl-regime-map': { page: '/', hash: '#exhibit-dl-regime-map', label: 'L2 · Capital Has Weather' },
+    'L1': { page: '/', hash: '#exhibit-dl-regime-map', label: 'L1 · Capital Has Weather' },
+    'dl-regime-map': { page: '/', hash: '#exhibit-dl-regime-map', label: 'L1 · Capital Has Weather' },
+    'L2': { page: '/', hash: '#exhibit-dl-convexity-window', label: 'L2 · The Window Opens' },
+    'dl-convexity-window': { page: '/', hash: '#exhibit-dl-convexity-window', label: 'L2 · The Window Opens' },
     'S2': { page: '/', hash: '#exhibit-sig-shape', label: 'S2 · Bend the Tail' },
     'sig-shape': { page: '/', hash: '#exhibit-sig-shape', label: 'S2 · Bend the Tail' },
-    '01': { page: '/part-1-foundation', hash: '#exhibit-01', label: '01 · The Hedge Broke' },
-    'p1-hedge-broke': { page: '/part-1-foundation', hash: '#exhibit-01', label: '01 · The Hedge Broke' },
-    '02': { page: '/part-1-foundation', hash: '#exhibit-02', label: '02 · Correlation Turns' },
-    'p1-correlation': { page: '/part-1-foundation', hash: '#exhibit-02', label: '02 · Correlation Turns' },
-    '03': { page: '/part-1-foundation', hash: '#exhibit-03', label: '03 · Inflation Was Bigger' },
-    'p1-cpi-assets': { page: '/part-1-foundation', hash: '#exhibit-03', label: '03 · Inflation Was Bigger' },
-    '04': { page: '/part-1-foundation', hash: '#exhibit-04', label: '04 · The Bill Came Due' },
-    'p1-policy-constraint': { page: '/part-1-foundation', hash: '#exhibit-04', label: '04 · The Bill Came Due' },
+    '01': { page: '/part-1-foundation', hash: '#exhibit-03', label: '01 · Assets Outran CPI' },
+    'p1-cpi-assets': { page: '/part-1-foundation', hash: '#exhibit-03', label: '01 · Assets Outran CPI' },
+    '02': { page: '/part-1-foundation', hash: '#exhibit-04', label: '02 · The Bill Came Due' },
+    'p1-policy-constraint': { page: '/part-1-foundation', hash: '#exhibit-04', label: '02 · The Bill Came Due' },
+    '03': { page: '/part-1-foundation', hash: '#exhibit-02', label: '03 · Correlation Turns' },
+    'p1-correlation': { page: '/part-1-foundation', hash: '#exhibit-02', label: '03 · Correlation Turns' },
+    '04': { page: '/part-1-foundation', hash: '#exhibit-01', label: '04 · The Hedge Broke' },
+    'p1-hedge-broke': { page: '/part-1-foundation', hash: '#exhibit-01', label: '04 · The Hedge Broke' },
     '05': { page: '/part-1-foundation', hash: '#exhibit-05', label: '05 · Path Changes Everything' },
     'p1-sequence-risk': { page: '/part-1-foundation', hash: '#exhibit-05', label: '05 · Path Changes Everything' },
-    '06': { page: '/part-1-foundation', hash: '#exhibit-06', label: '06 · Survive the Path' },
-    'p1-convexity-survival': { page: '/part-1-foundation', hash: '#exhibit-06', label: '06 · Survive the Path' },
-    'L3': { page: '/part-1-foundation', hash: '#exhibit-dl-tripwire-loop', label: 'L3 · Govern the Thesis' },
-    'dl-tripwire-loop': { page: '/part-1-foundation', hash: '#exhibit-dl-tripwire-loop', label: 'L3 · Govern the Thesis' },
     'S1': { page: '/part-1-foundation', hash: '#exhibit-s1', label: 'S1 · Shape the Payoff' },
     'sig-payoff': { page: '/part-1-foundation', hash: '#exhibit-s1', label: 'S1 · Shape the Payoff' },
+    'L3': { page: '/part-1-foundation', hash: '#exhibit-dl-tripwire-loop', label: 'L3 · Govern the Thesis' },
+    'dl-tripwire-loop': { page: '/part-1-foundation', hash: '#exhibit-dl-tripwire-loop', label: 'L3 · Govern the Thesis' },
+    '06': { page: '/part-1-foundation', hash: '#exhibit-06', label: '06 · Survive the Path' },
+    'p1-convexity-survival': { page: '/part-1-foundation', hash: '#exhibit-06', label: '06 · Survive the Path' },
     'P2-01': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-method-before-macro', label: 'P2-01 · Method Before Macro' },
     'p2-method-before-macro': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-method-before-macro', label: 'P2-01 · Method Before Macro' },
     'P2-02': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-ruin-comes-first', label: 'P2-02 · Ruin Comes First' },
@@ -1959,52 +1963,54 @@
     'p2-markets-feed-back': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-markets-feed-back', label: 'P2-04 · Markets Feed Back' },
     'P2-05': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-time-changes-prudence', label: 'P2-05 · Time Changes Prudence' },
     'p2-time-changes-prudence': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-time-changes-prudence', label: 'P2-05 · Time Changes Prudence' },
-    'P2-06': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-capital-finds-bottleneck', label: 'P2-06 · Capital Finds the Bottleneck' },
-    'p2-capital-finds-bottleneck': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-capital-finds-bottleneck', label: 'P2-06 · Capital Finds the Bottleneck' },
+    'P2-06': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-liquidity-sets-tide', label: 'P2-06 · Liquidity Sets the Tide' },
+    'p2-liquidity-sets-tide': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-liquidity-sets-tide', label: 'P2-06 · Liquidity Sets the Tide' },
     'P2-07': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-narrative-not-thesis', label: 'P2-07 · Narrative Is Not Thesis' },
     'p2-narrative-not-thesis': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-narrative-not-thesis', label: 'P2-07 · Narrative Is Not Thesis' },
-    'P2-08': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-phase-changes-sizing', label: 'P2-08 · Phase Changes Sizing' },
-    'p2-phase-changes-sizing': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-phase-changes-sizing', label: 'P2-08 · Phase Changes Sizing' },
-    'P2-09': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-liquidity-sets-tide', label: 'P2-09 · Liquidity Sets the Tide' },
-    'p2-liquidity-sets-tide': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-liquidity-sets-tide', label: 'P2-09 · Liquidity Sets the Tide' },
-    'P3-01': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-power-law-holds', label: 'P3-01 · Power Law Holds' },
-    'p3-power-law-holds': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-power-law-holds', label: 'P3-01 · Power Law Holds' },
+    'P2-08': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-capital-finds-bottleneck', label: 'P2-08 · Capital Finds the Bottleneck' },
+    'p2-capital-finds-bottleneck': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-capital-finds-bottleneck', label: 'P2-08 · Capital Finds the Bottleneck' },
+    'P2-09': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-phase-changes-sizing', label: 'P2-09 · Phase Changes Sizing' },
+    'p2-phase-changes-sizing': { page: '/part-2-lineage-macro-thesis', hash: '#exhibit-p2-phase-changes-sizing', label: 'P2-09 · Phase Changes Sizing' },
+    'P3-01': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-exposure-not-control', label: 'P3-01 · Exposure Is Not Control' },
+    'p3-exposure-not-control': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-exposure-not-control', label: 'P3-01 · Exposure Is Not Control' },
+    'P3-02': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-accumulate-dont-trade', label: 'P3-02 · Accumulate, Don’t Trade' },
+    'p3-accumulate-dont-trade': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-accumulate-dont-trade', label: 'P3-02 · Accumulate, Don’t Trade' },
     'P3-03': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-volatility-is-the-toll', label: 'P3-03 · Volatility Is the Toll' },
     'p3-volatility-is-the-toll': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-volatility-is-the-toll', label: 'P3-03 · Volatility Is the Toll' },
-    'P3-04': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-exposure-not-control', label: 'P3-04 · Exposure Is Not Control' },
-    'p3-exposure-not-control': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-exposure-not-control', label: 'P3-04 · Exposure Is Not Control' },
+    'P3-04': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-power-law-holds', label: 'P3-04 · Power-Law Corridor' },
+    'p3-power-law-holds': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-power-law-holds', label: 'P3-04 · Power-Law Corridor' },
     'P3-05': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-models-must-converge', label: 'P3-05 · Models Must Converge' },
     'p3-models-must-converge': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-models-must-converge', label: 'P3-05 · Models Must Converge' },
-    'P3-06': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-accumulate-dont-trade', label: 'P3-06 · Accumulate, Don’t Trade' },
-    'p3-accumulate-dont-trade': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-accumulate-dont-trade', label: 'P3-06 · Accumulate, Don’t Trade' },
-    'P3-07': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-cold-storage-to-borrow', label: 'P3-07 · Cold Storage to Borrow' },
-    'p3-cold-storage-to-borrow': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-cold-storage-to-borrow', label: 'P3-07 · Cold Storage to Borrow' },
-    'P3-08': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-reserve-share-evolves', label: 'P3-08 · Reserve Share Evolves' },
-    'p3-reserve-share-evolves': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-reserve-share-evolves', label: 'P3-08 · Reserve Share Evolves' },
-    'P4-01': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-tax-wedge', label: 'P4-01 · The Tax Wedge' },
-    'p4-tax-wedge': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-tax-wedge', label: 'P4-01 · The Tax Wedge' },
-    'P4-02': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-gross-not-net', label: 'P4-02 · Gross Is Not Net' },
-    'p4-gross-not-net': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-gross-not-net', label: 'P4-02 · Gross Is Not Net' },
+    'P3-06': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-cold-storage-to-borrow', label: 'P3-06 · Cold Storage to Borrow' },
+    'p3-cold-storage-to-borrow': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-cold-storage-to-borrow', label: 'P3-06 · Cold Storage to Borrow' },
+    'P3-07': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-reserve-share-evolves', label: 'P3-07 · Reserve Share Evolves' },
+    'p3-reserve-share-evolves': { page: '/part-3-bitcoin-convexity-backbone', hash: '#exhibit-p3-reserve-share-evolves', label: 'P3-07 · Reserve Share Evolves' },
+    'P4-01': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-wrapper-routing', label: 'P4-01 · Routing the Dollar' },
+    'p4-wrapper-routing': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-wrapper-routing', label: 'P4-01 · Routing the Dollar' },
+    'P4-02': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-tax-wedge', label: 'P4-02 · The Tax Wedge' },
+    'p4-tax-wedge': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-tax-wedge', label: 'P4-02 · The Tax Wedge' },
     'P4-03': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-roc-yield', label: 'P4-03 · ROC Changes the Yield' },
     'p4-roc-yield': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-roc-yield', label: 'P4-03 · ROC Changes the Yield' },
+    'P4-04': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-gross-not-net', label: 'P4-04 · Gross Is Not Net' },
+    'p4-gross-not-net': { page: '/part-4-tax-architecture-roc-strategy', hash: '#exhibit-p4-gross-not-net', label: 'P4-04 · Gross Is Not Net' },
     'P5-01': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-operating-system', label: 'P5-01 · Three Jobs. One Cycle.' },
     'p5-operating-system': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-operating-system', label: 'P5-01 · Three Jobs. One Cycle.' },
     'P5-02': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-earned-size', label: 'P5-02 · Position Size Must Be Earned' },
     'p5-earned-size': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-earned-size', label: 'P5-02 · Position Size Must Be Earned' },
-    'P5-03': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-posture-sizing', label: 'P5-03 · The Same Score Does Not Create the Same Position' },
-    'p5-posture-sizing': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-posture-sizing', label: 'P5-03 · The Same Score Does Not Create the Same Position' },
-    'P5-04': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-ballast-rotation', label: 'P5-04 · Ballast Preserves the Right to Buy' },
-    'p5-ballast-rotation': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-ballast-rotation', label: 'P5-04 · Ballast Preserves the Right to Buy' },
+    'P5-03': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-ballast-rotation', label: 'P5-03 · Ballast Preserves the Right to Buy' },
+    'p5-ballast-rotation': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-ballast-rotation', label: 'P5-03 · Ballast Preserves the Right to Buy' },
+    'P5-04': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-posture-sizing', label: 'P5-04 · The Same Score Does Not Create the Same Position' },
+    'p5-posture-sizing': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-posture-sizing', label: 'P5-04 · The Same Score Does Not Create the Same Position' },
     'P5-05': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-earnings-window', label: 'P5-05 · Conviction Does Not Eliminate Binary Risk' },
     'p5-earnings-window': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-earnings-window', label: 'P5-05 · Conviction Does Not Eliminate Binary Risk' },
     'P5-06': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-momentum-gate', label: 'P5-06 · Conviction Requires Market Confirmation' },
     'p5-momentum-gate': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-momentum-gate', label: 'P5-06 · Conviction Requires Market Confirmation' },
-    'P5-07': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-force-channels', label: 'P5-07 · One Regime Force. Multiple Economic Expressions.' },
-    'p5-force-channels': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-force-channels', label: 'P5-07 · One Regime Force. Multiple Economic Expressions.' },
-    'P5-08': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-wrapper-compounding', label: 'P5-08 · Tax Drag Compounds Too' },
-    'p5-wrapper-compounding': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-wrapper-compounding', label: 'P5-08 · Tax Drag Compounds Too' },
-    'P5-09': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-liquidity-throttle', label: 'P5-09 · When Correlation Rises, Diversification Shrinks' },
-    'p5-liquidity-throttle': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-liquidity-throttle', label: 'P5-09 · When Correlation Rises, Diversification Shrinks' },
+    'P5-07': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-liquidity-throttle', label: 'P5-07 · When Correlation Rises, Diversification Shrinks' },
+    'p5-liquidity-throttle': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-liquidity-throttle', label: 'P5-07 · When Correlation Rises, Diversification Shrinks' },
+    'P5-08': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-force-channels', label: 'P5-08 · One Regime Force. Multiple Economic Expressions.' },
+    'p5-force-channels': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-force-channels', label: 'P5-08 · One Regime Force. Multiple Economic Expressions.' },
+    'P5-09': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-wrapper-compounding', label: 'P5-09 · Tax Drag Compounds Too' },
+    'p5-wrapper-compounding': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-wrapper-compounding', label: 'P5-09 · Tax Drag Compounds Too' },
     'P5-10': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-change-hierarchy', label: 'P5-10 · Know What You Are Changing' },
     'p5-change-hierarchy': { page: '/part-5-portfolio-construction-position-management', hash: '#exhibit-p5-change-hierarchy', label: 'P5-10 · Know What You Are Changing' },
     'P6-01': { page: '/part-6-convexity-framework-integrity-scoring', hash: '#exhibit-p6-cis-composition', label: 'P6-01 · CIS Measures the Position, Not the Portfolio' },
@@ -2096,7 +2102,8 @@
     if (!appears) return '';
     var label = 'Appears in Part ' + appears.part + ' · ' + esc(appears.topic);
     if (BUILT_PARTS[appears.part]) {
-      return '<a class="gloss-later" href="' + PART_FILES[appears.part] + '">' + label + '</a>';
+      var hash = appears.anchor ? '#' + encodeURIComponent(appears.anchor) : '';
+      return '<a class="gloss-later" href="' + PART_FILES[appears.part] + hash + '">' + label + '</a>';
     }
     return '<span class="gloss-later is-pending">' + label + '</span>';
   }

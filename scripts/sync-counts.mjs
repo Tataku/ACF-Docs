@@ -55,9 +55,11 @@ for (const c of Object.values(reg.charts)) charts.set(c.chartId, c);
 // source without rewriting a single page, and the correction lands where the
 // drift actually is.
 //
-// Boundary: chart exhibits are empty placeholders in the HTML and are hydrated at
-// runtime, so their labels are not counted. This measures prose, which is what a
-// reading time is about.
+// Boundary: chart exhibits are not prose. Each <figure data-fc-chart> holds a
+// fallback generated from its spec (sync-chart-fallbacks) that the live chart
+// replaces at runtime, so the contents of those figures are not counted. This
+// measures prose, which is what a reading time is about, and regenerating a
+// fallback can never move a reading time.
 const WPM = 230;
 const PART_FILES = [
   [1, 'part-1-foundation.html'],
@@ -68,6 +70,8 @@ const PART_FILES = [
   [6, 'part-6-convexity-scoring.html'],
 ];
 
+const CHART_FIGURE = /<figure\b[^>]*\bdata-fc-chart="[^"]*"[^>]*>[\s\S]*?<\/figure>/g;
+
 function readingMinutes(file) {
   const html = fs.readFileSync(path.join(SITE, file), 'utf8');
   const main = (html.match(/<main class="shell-main">([\s\S]*?)<\/main>/) || [, ''])[1];
@@ -76,6 +80,7 @@ function readingMinutes(file) {
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(CHART_FIGURE, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&[a-z]+;|&#\d+;/gi, ' ')
     .split(/\s+/).filter(Boolean).length;
@@ -102,6 +107,12 @@ const TOTAL_MINUTES = [...MINUTES.values()].reduce((a, b) => a + b, 0);
 const MINUTES_BEFORE = (n) => PART_FILES.slice(0, n - 1).reduce((a, [p]) => a + MINUTES.get(p), 0);
 
 const TERMS = glossary.terms.length;
+
+// Part 1 in Pictures states how many exhibits it carries (D-PART1-PICTURES).
+// Its exhibits are its chart mounts, so the count is read off the page itself:
+// adding or dropping a mount changes the kicker on the next sync, not by hand.
+const P1_PICTURES = (fs.readFileSync(path.join(SITE, 'part-1-pictures.html'), 'utf8')
+  .match(/<figure\b[^>]*\bdata-fc-chart="[^"]+"/g) || []).length;
 const EXHIBITS = charts.size;
 const perPart = (n) => [...charts.values()].filter((c) => c.part === n).length;
 
@@ -148,6 +159,7 @@ const RULES = [
     [new RegExp(`(Part ${n} of 6 ${DOT} &approx; )\\d+( min read)`), () => MINUTES.get(n)],
   ]]),
   ['part-1-foundation.html',             [[new RegExp(`(#foundation">In pictures ${DOT} )\\d+( exhibits)`),   () => perPart(1)]]],
+  ['part-1-pictures.html',               [[new RegExp(`(<p class="doc-kicker">Part 1 ${DOT} A visual essay ${DOT} )\\d+( exhibits</p>)`), () => P1_PICTURES]]],
   ['part-2-lineage-macro.html',          [[new RegExp(`(#lineage">In pictures ${DOT} )\\d+( exhibits)`),      () => perPart(2)]]],
   ['part-3-bitcoin-convexity.html',      [[new RegExp(`(#backbone">In pictures ${DOT} )\\d+( exhibits)`),     () => perPart(3)]]],
   ['part-4-tax-architecture.html',       [[new RegExp(`(#tax">In pictures ${DOT} )\\d+( exhibits)`),          () => perPart(4)]]],

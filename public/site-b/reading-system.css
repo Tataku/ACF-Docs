@@ -685,7 +685,7 @@ body {
 }
 
 /* ============================================================================
-   #7  SEQUENCE / FLOW STRING  (Macro thesis -> Bitcoin backbone -> ...)
+   #7  SEQUENCE / FLOW STRING  (Macro thesis -> Wrapper placement -> ...)
    Treatment: letterspaced sans tokens with accent arrows, wraps gracefully
    at the reading measure (flex-wrap — never overflows).
    ============================================================================ */
@@ -3861,7 +3861,59 @@ html[data-narrating] .shell-main { padding-bottom: var(--dock-clear); }
 /* New chart slots inserted into Part 2/3 (no static fallback): layout only, the
    React engine renders its own card. Same wide exhibit lane as live exhibits. */
 .fc-mount { max-width: min(var(--measure-feature), calc(100% - 2 * var(--feature-gutter))); margin: var(--space-8) auto; overflow-x: clip; }   /* unified feature width */
-.fc-mount:empty { min-height: 44rem; }   /* pre-hydration placeholder ≈ one exhibit card, so deep links do not land thousands of px short while islands mount */
+/* Pre-hydration placeholder ≈ one exhibit card, so deep links do not land
+   thousands of px short while islands mount. It applies only while JavaScript
+   is about to mount the chart (html.js, mount not yet .fc-live): a no-JS reader
+   gets the fallback text at its natural height, not a tall empty box. */
+html.js .fc-mount:not(.fc-live),
+html.js .exhibit[data-fc-chart]:not(.fc-live) { min-height: 44rem; }
+
+/* Chart fallback (scripts/sync-chart-fallbacks.mjs): the readable text a no-JS
+   reader, a crawler or an agent gets in place of the live chart, written from
+   the chart's spec. The island clears it on mount. With JS on, it is held back
+   briefly so readers do not see it flash before the chart; if the bundle never
+   mounts, it appears on its own after a moment. */
+.fc-fallback {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--ink-quiet);
+}
+.fc-fallback p { margin: 0 0 var(--space-3); }
+.fc-fallback p:last-child { margin-bottom: 0; }
+.fc-fallback-title { font-size: var(--text-md); line-height: var(--leading-tight); color: var(--ink); }
+.fc-fallback-title strong { font-weight: var(--weight-semibold); }
+.fc-fallback-claim {
+  color: var(--ink);
+  font-weight: var(--weight-medium);
+  border-left: 2px solid var(--accent-quiet);
+  padding-left: var(--space-3);
+}
+.fc-fallback-note,
+.fc-fallback-src { font-size: var(--text-xs); }
+.fc-fallback a { color: var(--accent-link); text-decoration: underline; text-underline-offset: 2px; }
+/* On an empty mount the fallback draws its own quiet frame; inside a Part 1
+   .exhibit card the card is the frame, so the text takes the card's ink. */
+.fc-mount > .fc-fallback {
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+}
+.exhibit > .fc-fallback,
+.exhibit > .fc-fallback .fc-fallback-note,
+.exhibit > .fc-fallback .fc-fallback-src { color: var(--feature-ink-quiet); }
+.exhibit > .fc-fallback .fc-fallback-title,
+.exhibit > .fc-fallback .fc-fallback-claim { color: var(--feature-ink); }
+.exhibit > .fc-fallback .fc-fallback-claim { border-left-color: var(--feature-accent); }
+.exhibit > .fc-fallback a { color: var(--feature-accent); }
+html.js [data-fc-chart]:not(.fc-live) > .fc-fallback {
+  visibility: hidden;
+  animation: fc-fallback-reveal 0s linear 2.5s forwards;
+}
+@keyframes fc-fallback-reveal { to { visibility: visible; } }
+@media print {
+  html.js [data-fc-chart]:not(.fc-live) > .fc-fallback { visibility: visible; animation: none; }
+}
 
 .ex-head { margin-bottom: var(--space-3); }
 .ex-eyebrow {

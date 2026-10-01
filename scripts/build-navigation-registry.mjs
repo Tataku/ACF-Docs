@@ -2,25 +2,30 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FRAMEWORK_CHART_SPECS } from '../components/framework-charts/chart-specs.mjs';
+import { PAGES as SITE_PAGES } from './site-titles.mjs';
+import { appearsLaterProblems } from './glossary-anchors.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const site = path.join(root, 'public/site-b');
 const out = path.join(site, 'navigation-registry.json');
 const origin = 'https://docs.acfdashboard.com';
 const check = process.argv.includes('--check');
-const pages = [
-  [0, '/', 'cover-docs.html', 'The Adaptive Convexity Framework'],
-  [1, '/part-1-foundation', 'part-1-foundation.html', 'Part 1 · Foundation & Philosophy'],
-  [1, '/part-1-pictures', 'part-1-pictures.html', 'Part 1 · In Pictures'],
-  [2, '/part-2-lineage-macro-thesis', 'part-2-lineage-macro.html', 'Part 2 · Lineage & Macro Thesis'],
-  [3, '/part-3-bitcoin-convexity-backbone', 'part-3-bitcoin-convexity.html', 'Part 3 · Bitcoin: Convexity Backbone'],
-  [4, '/part-4-tax-architecture-roc-strategy', 'part-4-tax-architecture.html', 'Part 4 · Tax Architecture & ROC Strategy'],
-  [5, '/part-5-portfolio-construction-position-management', 'part-5-portfolio-construction.html', 'Part 5 · Portfolio Construction & Position Management'],
-  [6, '/part-6-convexity-framework-integrity-scoring', 'part-6-convexity-scoring.html', 'Part 6 · Convexity & Framework Integrity Scoring'],
-  [7, '/glossary', 'glossary.html', 'Glossary'],
-  [7, '/framework-in-pictures', 'framework-in-pictures.html', 'The Framework in Pictures'],
-  [7, '/framework-in-math', 'framework-in-math.html', 'The Framework in Math'],
-].map(([part, route, file, title]) => ({ part, route, file, title }));
+// Titles come from scripts/site-titles.mjs, the one place they are spelled
+// (D-TITLES); this list adds only the clean route each file is served on.
+const routes = {
+  'cover-docs.html': '/',
+  'part-1-foundation.html': '/part-1-foundation',
+  'part-1-pictures.html': '/part-1-pictures',
+  'part-2-lineage-macro.html': '/part-2-lineage-macro-thesis',
+  'part-3-bitcoin-convexity.html': '/part-3-bitcoin-convexity-backbone',
+  'part-4-tax-architecture.html': '/part-4-tax-architecture-roc-strategy',
+  'part-5-portfolio-construction.html': '/part-5-portfolio-construction-position-management',
+  'part-6-convexity-scoring.html': '/part-6-convexity-framework-integrity-scoring',
+  'glossary.html': '/glossary',
+  'framework-in-pictures.html': '/framework-in-pictures',
+  'framework-in-math.html': '/framework-in-math',
+};
+const pages = SITE_PAGES.map(({ part, file, label }) => ({ part, route: routes[file], file, title: label }));
 
 const errors = [], warnings = [], byRoute = new Map(), aliases = {};
 const specById = new Map(FRAMEWORK_CHART_SPECS.map(s => [s.chartId, s]));
@@ -123,14 +128,32 @@ for (const p of byRoute.values()) for (const a of p.anchors) {
   if (u.hash && !target.ids.has(u.hash.slice(1))) errors.push(`${p.route}: ${href} targets missing ${u.hash}`);
 }
 
-const mounts = [], charts = {};
+// A chart's home is the page of its spec group, never the order pages are
+// scanned in: a Part chart lives on its Part page, a lens or signature chart on
+// the cover. A lens or signature chart the cover does not mount lives on the
+// first Part page that does (Part 1 today). Part 1 in Pictures and the
+// reference pages mount copies; they are never a home (D-EXHIBIT-NUMBERING).
+const partRoute = n => pages.find(p => p.part === n && /^\/part-\d-/.test(p.route) && p.route !== '/part-1-pictures')?.route;
+const groupHome = group => /^part-[1-6]$/.test(group) ? partRoute(Number(group.slice(5))) : (group === 'signature' || group === 'docs-landing') ? '/' : null;
+const isPartPage = route => /^\/part-[1-6]-/.test(route) && route !== '/part-1-pictures';
+const mounts = [], charts = {}, mountsById = new Map();
 for (const p of byRoute.values()) for (const f of p.figures) {
   const id = f['data-fc-chart'], spec = specById.get(id);
   if (!f.id) errors.push(`${p.route}: chart ${id} has no figure id`);
   if (!spec) { errors.push(`${p.route}: chart ${id} has no spec`); continue; }
+  if (f['data-chart'] && spec.idx && f['data-chart'] !== spec.idx) errors.push(`${p.route}: figure #${f.id} data-chart="${f['data-chart']}" but ${id} has idx ${spec.idx}`);
   const item = { chartId: id, idx: spec.idx || null, title: spec.title, part: p.part, route: p.route, hash: f.id ? `#${f.id}` : '', href: `${p.route}${f.id ? `#${f.id}` : ''}` };
   mounts.push(item);
-  [id, spec.idx, f['data-chart']].filter(Boolean).map(String).forEach(k => { specByRef.set(k, spec); if (!charts[k]) charts[k] = item; });
+  if (!mountsById.has(id)) mountsById.set(id, []);
+  mountsById.get(id).push(item);
+}
+for (const [id, list] of mountsById) {
+  const spec = specById.get(id), want = groupHome(spec.group);
+  if (!want) { errors.push(`${id}: spec group ${spec.group} has no home page`); continue; }
+  const home = list.find(m => m.route === want)
+    || (/^part-/.test(spec.group) ? null : list.find(m => isPartPage(m.route)));
+  if (!home) { errors.push(`${id}: not mounted on its home page ${want} (spec group ${spec.group})`); continue; }
+  [id, spec.idx].filter(Boolean).map(String).forEach(k => { specByRef.set(k, spec); if (charts[k] && charts[k].chartId !== id) errors.push(`chart key ${k} names both ${charts[k].chartId} and ${id}`); charts[k] = home; });
 }
 
 for (const spec of FRAMEWORK_CHART_SPECS) {
@@ -144,10 +167,13 @@ const terms = Array.isArray(glossary.terms) ? glossary.terms : [], termIds = new
 terms.forEach(t => { if (!t.id || termIds.has(t.id)) errors.push(`invalid or duplicate glossary id ${t.id || '(missing)'}`); termIds.add(t.id); });
 for (const p of byRoute.values()) p.glossary.forEach(id => { tagged.add(id); if (!termIds.has(id)) errors.push(`${p.route}: unknown glossary id ${id}`); });
 const routeByPart = new Map(); pages.forEach(p => { if (p.part && !routeByPart.has(p.part)) routeByPart.set(p.part, p.route); });
+// "Appears in Part N · topic" lands on the section that develops the term, and
+// the topic is a heading in it (D-GLOSSARY-APPEARS-LATER).
+appearsLaterProblems(terms).forEach(e => errors.push(`glossary ${e}`));
 const glossaryNav = {}, unresolvedGlossaryCharts = [];
 for (const t of terms) {
   const laterRoute = t.appearsLater && routeByPart.get(t.appearsLater.part);
-  const later = laterRoute ? { href: laterRoute, label: `Appears in Part ${t.appearsLater.part} · ${t.appearsLater.topic}` } : null;
+  const later = laterRoute ? { href: `${laterRoute}#${t.appearsLater.anchor}`, label: `Appears in Part ${t.appearsLater.part} · ${t.appearsLater.topic}` } : null;
   const live = t.chart && charts[String(t.chart)];
   const chart = live ? { href: live.href, label: `View the chart → ${live.idx || live.chartId} · ${live.title}` } : null;
   if (t.chart && !live) { const known = specByRef.has(String(t.chart)); unresolvedGlossaryCharts.push({ term: t.id, ref: String(t.chart), knownSpec: known }); if (!known) warnings.push(`${t.id}: unknown chart ref ${t.chart}`); }
@@ -177,6 +203,32 @@ const registry = {
   },
 };
 const serialized = `${JSON.stringify(registry, null, 2)}\n`;
+
+// reading-core.js carries a no-registry fallback copy of the chart map
+// (BUILT_CHARTS). It is written here, from the same homes, so its labels and
+// anchors cannot drift from the specs: '<idx> · <title>', keyed by idx and chartId.
+const coreFile = path.join(site, 'reading-core.js');
+const builtChartsBlock = () => {
+  const q = s => `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+  const seen = new Set(), lines = [];
+  for (const home of Object.values(charts)) {
+    if (seen.has(home.chartId)) continue;
+    seen.add(home.chartId);
+    const val = `{ page: ${q(home.route)}, hash: ${q(home.hash)}, label: ${q(`${home.idx || home.chartId} · ${home.title}`)} }`;
+    [home.idx, home.chartId].filter(Boolean).forEach(k => lines.push(`    ${q(k)}: ${val}`));
+  }
+  return `var BUILT_CHARTS = {\n${lines.join(',\n')}\n  };`;
+};
+if (fs.existsSync(coreFile)) {
+  const core = read(coreFile), re = /var BUILT_CHARTS = \{[\s\S]*?\n  \};/;
+  if (!re.test(core)) errors.push('reading-core.js: BUILT_CHARTS block not found');
+  else {
+    const next = core.replace(re, builtChartsBlock());
+    if (check) { if (next !== core) errors.push('reading-core.js BUILT_CHARTS is stale'); }
+    else if (!errors.length) fs.writeFileSync(coreFile, next);
+  }
+}
+
 if (errors.length) { console.error(`Navigation audit failed (${errors.length})`); errors.forEach(e => console.error(`- ${e}`)); process.exit(1); }
 if (check) { if (!fs.existsSync(out) || read(out) !== serialized) { console.error('navigation-registry.json is stale'); process.exit(1); } }
 else fs.writeFileSync(out, serialized);

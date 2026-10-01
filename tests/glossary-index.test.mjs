@@ -20,6 +20,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { appearsLaterProblems, sectionHeadings, normalizeHeading, PART_FILES } from '../scripts/glossary-anchors.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
@@ -33,19 +34,33 @@ const READING = read('public/site-b/reading.js');
 const BUILD = read('scripts/build-glossary-page.mjs');
 
 const terms = GLOSSARY.terms;
-const categories = GLOSSARY.meta.categories;
+const PART_ROUTE = Object.fromEntries(Object.entries(PART_FILES).map(([n, file]) => [n, REGISTRY.pages.find((p) => p.file === file).route]));
+// The six Part groups. meta.categories also carries a part-0 'Opening' entry,
+// shared with the Pictures page (D-PICTURES-PAGE); no term belongs to it, so the
+// glossary renders nothing for it.
+const categories = GLOSSARY.meta.categories.filter((c) => c.part >= 1);
+const opening = GLOSSARY.meta.categories.filter((c) => c.part === 0);
 const main = PAGE.slice(PAGE.indexOf('<main class="shell-main">'), PAGE.indexOf('</main>'));
 
 // ---------------------------------------------------------------------------
 // The term file
 // ---------------------------------------------------------------------------
 test('term file: every term carries a category from the closed registry, in book order', () => {
-  assert.ok(Array.isArray(categories) && categories.length === 6, 'six movements');
+  assert.ok(Array.isArray(categories) && categories.length === 6, 'six Parts');
   const parts = categories.map((c) => c.part);
   assert.deepEqual(parts, [1, 2, 3, 4, 5, 6], 'categories follow the six Parts in reading order');
   const keys = new Set(categories.map((c) => c.key));
   for (const t of terms) assert.ok(keys.has(t.category), `${t.id} has category ${t.category}`);
-  for (const c of categories) assert.ok(terms.some((t) => t.category === c.key), `${c.key} is not an empty movement`);
+  for (const c of categories) assert.ok(terms.some((t) => t.category === c.key), `${c.key} is not an empty Part`);
+});
+
+test('term file: the shared Opening group is part 0, first, empty here, and the Pictures page uses it (D-PICTURES-PAGE)', () => {
+  assert.equal(opening.length, 1, 'one part-0 entry');
+  assert.equal(GLOSSARY.meta.categories[0], opening[0], 'it comes first, in book order');
+  assert.ok(!terms.some((t) => t.category === opening[0].key), 'no glossary term is filed under it');
+  assert.ok(!PAGE.includes(`id="${opening[0].key}"`), 'the glossary renders no group for it');
+  const pictures = read('public/site-b/framework-in-pictures.html');
+  assert.ok(pictures.includes(`>${opening[0].label}</`) && pictures.includes(opening[0].title), 'the Pictures page reads its label and title');
 });
 
 test('term file: ids are unique kebab-case and every related id resolves', () => {
@@ -83,10 +98,52 @@ test('term file: every term links to the Part that develops it', () => {
   for (const t of terms) assert.ok(t.appearsLater && t.appearsLater.part >= 1 && t.appearsLater.part <= 6, `${t.id} appearsLater`);
 });
 
+test('term file: "Appears in Part N · topic" lands on a section whose heading is the topic (D-GLOSSARY-APPEARS-LATER)', () => {
+  // The link used to land at the top of a Part up to 25 minutes long, and many
+  // topics named no heading the Part had. Every entry now names a section id on
+  // its Part, and the topic is that section's h2, or an h3 or callout title in it.
+  assert.deepEqual(appearsLaterProblems(terms), []);
+  for (const t of terms) {
+    const { part, anchor, topic } = t.appearsLater;
+    const route = PART_ROUTE[part];
+    const page = read(`public/site-b/${PART_FILES[part]}`);
+    const found = sectionHeadings(page, anchor);
+    assert.ok(found, `${t.id}: Part ${part} has #${anchor}`);
+    assert.ok(found.map(normalizeHeading).includes(normalizeHeading(topic)), `${t.id}: "${topic}" in #${anchor}`);
+    // Every surface that renders the link carries the anchor.
+    assert.equal(REGISTRY.glossary[t.id].later.href, `${route}#${anchor}`, `${t.id}: registry href`);
+    assert.equal(REGISTRY.glossary[t.id].later.label, `Appears in Part ${part} · ${topic}`, `${t.id}: registry label`);
+    assert.ok(main.includes(`href="${route}#${anchor}">Part ${part} &middot; `), `${t.id}: index row links ${route}#${anchor}`);
+  }
+  // The checker rejects what it exists to reject.
+  assert.equal(appearsLaterProblems([{ id: 'x', appearsLater: { part: 5, anchor: 'no-such-section', topic: 'Hype governance' } }]).length, 1);
+  assert.equal(appearsLaterProblems([{ id: 'x', appearsLater: { part: 5, anchor: 'hype', topic: 'A heading the section lacks' } }]).length, 1);
+  assert.equal(appearsLaterProblems([{ id: 'x', appearsLater: { part: 5, topic: 'Hype governance' } }]).length, 1);
+  // The tooltip's no-registry fallback builds the same route#anchor.
+  const core = read('public/site-b/reading-core.js');
+  const partLink = core.slice(core.indexOf('function partLink'), core.indexOf('function chartLink'));
+  assert.match(partLink, /appears\.anchor/);
+  assert.match(partLink, /PART_FILES\[appears\.part\] \+ hash/);
+});
+
+test('term file: the ruled appearsLater retargets hold (D-GLOSSARY-APPEARS-LATER)', () => {
+  const byId = Object.fromEntries(terms.map((t) => [t.id, t.appearsLater]));
+  const want = {
+    'sequence-of-returns-risk': [3, 'survivability'], 'agentic-verification': [1, 'order-of-operations'],
+    'correlation-instability': [5, 'management'], barbell: [2, 'lineage'], 'buy-borrow-die': [3, 'tam'],
+    dca: [3, 'accumulate'], 'narrative-drift': [6, 'failure'], 'attention-scarcity': [6, 'weekly'],
+  };
+  for (const [id, [part, anchor]] of Object.entries(want)) {
+    assert.deepEqual([byId[id].part, byId[id].anchor], [part, anchor], id);
+  }
+  assert.match(terms.find((t) => t.id === 'buy-borrow-die').source.ref, /^Part 3\b/);
+  assert.match(terms.find((t) => t.id === 'margin').source.ref, /^Part 4 · Tax Architecture & ROC Strategy\b.*; Part 3\b.*borrow phase/);
+});
+
 test('term file: the concepts the site names are present (wave 4 is not silently dropped)', () => {
   const ids = new Set(terms.map((t) => t.id));
   for (const id of GLOSSARY.meta.rollout.wave4) assert.ok(ids.has(id), id);
-  // A representative from each movement's additions, by name.
+  // A representative from each Part's additions, by name.
   for (const id of ['risk-of-ruin', 'global-liquidity', 'bitcoin-backbone', 'tax-wedge', 'household-aggregate', 'weekly-loop']) {
     assert.ok(ids.has(id), id);
   }
@@ -135,7 +192,7 @@ test('page: groups follow the category registry in book order, each with its cou
   }
 });
 
-test('page: terms are alphabetical within a movement (a reference is scanned by name)', () => {
+test('page: terms are alphabetical within a Part (a reference is scanned by name)', () => {
   for (const c of categories) {
     const section = main.slice(main.indexOf(`id="${c.key}"`), main.indexOf('</section>', main.indexOf(`id="${c.key}"`)));
     const names = [...section.matchAll(/<span class="gl-term-name">([\s\S]*?)<\/span>/g)].map((m) => m[1]);
@@ -145,8 +202,12 @@ test('page: terms are alphabetical within a movement (a reference is scanned by 
 });
 
 test('page: the count in the kicker and the description is derived, never typed', () => {
-  assert.ok(PAGE.includes(`<p class="doc-kicker">${terms.length} terms &middot; ${categories.length} movements`), 'kicker');
-  assert.ok(PAGE.includes(`glossary: ${terms.length} terms in ${categories.length} movements`), 'meta description');
+  // 'Movement' is the cover's word for its four groups; the glossary's six are
+  // Parts (D-PARTS-NOT-MOVEMENTS). Both counts come from the term file.
+  const spelled = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][categories.length] || String(categories.length);
+  assert.ok(PAGE.includes(`<p class="doc-kicker">${terms.length} terms &middot; ${categories.length} Parts &middot; defined where they are taught</p>`), 'kicker');
+  assert.ok(PAGE.includes(`<meta name="description" content="${terms.length} terms from the ${spelled} Parts, `), 'meta description');
+  assert.doesNotMatch(PAGE, /\d+ movements/, 'the six groups are never counted as movements');
   assert.ok(PAGE.includes(`data-gl-total="${terms.length}"`), 'live count seed');
 });
 
@@ -159,7 +220,7 @@ test('page: carries the filter, the live count, expand/collapse, and the page-on
   assert.ok(PAGE.indexOf('/site-b/reading.js') < PAGE.indexOf('/site-b/glossary-index.js'), 'after the reading runtime');
 });
 
-test('page: the sidebar marks Glossary current and spies the six movements; no part chain in the dock', () => {
+test('page: the sidebar marks Glossary current and spies the six Parts; no part chain in the dock', () => {
   assert.ok(PAGE.includes('<a class="side-part current" href="/glossary" aria-current="page">'));
   const spy = PAGE.slice(PAGE.indexOf('<ol class="on-this-page" data-spy'), PAGE.indexOf('</ol>', PAGE.indexOf('<ol class="on-this-page" data-spy')));
   for (const c of categories) assert.ok(spy.includes(`href="#${c.key}"`), c.key);
