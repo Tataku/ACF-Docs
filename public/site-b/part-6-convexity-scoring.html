@@ -281,7 +281,7 @@
 
       <div class="measure prose">
         <p>The canonical CIS looks at the position alone: it scores the same whatever else you hold and however concentrated the portfolio has become. There is one narrow exception, a fixed +3 on the carry sub-score for a return-of-capital preferred held as <button type="button" class="gloss" data-gloss="ballast" aria-expanded="false">Ballast</button> outside a known tax-advantaged account (about +0.75 CIS at the reference macro weight). Any portfolio-aware logic belongs to FIS or governance, never to CIS.</p>
-        <p>The framework&rsquo;s governance rules call for a wrapper-aware version, and governance reads it. The dashboard multiplies the canonical score by a factor between 0.97 and 1.04, set by the holding&rsquo;s account and its <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button>, and rounds it. This wrapper-adjusted CIS is the number shown beside each holding, and the one the dashboard&rsquo;s governance checks and its Next Dollar Score (its score for where new money goes) read. A <button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button> position scoring 69.5 shows 72 in a Roth and 68 in a taxable account, on opposite sides of the 70 line. FIS reads the canonical score.</p>
+        <p>The number you see beside a holding in the dashboard is a second version. The framework&rsquo;s governance rules call for a wrapper-aware CIS, so the dashboard multiplies the canonical score by a factor between 0.97 and 1.04, set by the holding&rsquo;s account and its <button type="button" class="gloss" data-gloss="posture" aria-expanded="false">posture</button>, and rounds it. This wrapper-adjusted CIS is the one the dashboard&rsquo;s governance checks and its Next Dollar Score (its score for where new money goes) read. A <button type="button" class="gloss" data-gloss="torque" aria-expanded="false">Torque</button> position scoring 69.5 shows 72 in a Roth and 68 in a taxable account, on opposite sides of the 70 line. FIS reads the canonical score.</p>
         <p>The score is built from four components.</p>
       </div>
 
@@ -350,7 +350,7 @@
       </div>
       <div class="measure prose">
         <p>Score updates are confidence-weighted, and each update is clamped to a bounded move: low confidence permits &plusmn;3 points, medium &plusmn;5, high &plusmn;8, and proxy-derived evidence &plusmn;6. At medium confidence a +10 update therefore moves the score 5 points. A material thesis change widens the bound to &plusmn;15, a first score is not clamped, and a few cases skip the clamp; <a class="part-ref" href="/framework-in-math#cis-math">the Math page</a> lists them.</p>
-        <p>Why clamp at all? A score fed by the news cycle swings with it, and without a limit one enthusiastic week could rewrite months of accumulated conviction. The clamp makes moderate re-ratings, up to 20 points, earn their way across successive updates; a larger jump passes through and is logged as a model divergence for you to inspect.</p>
+        <p>Why clamp at all? A score fed by the news cycle swings with it, and without a limit one enthusiastic week could rewrite months of accumulated conviction. The clamp makes moderate re-ratings, up to 20 points, earn their way across successive updates. A larger jump is treated as the model disagreeing with its own prior score: it lands in full and is logged as a model divergence for you to inspect, because a brake built to resist mood should not be able to suppress a real correction.</p>
         <p>Nobody types in the confidence level. The dashboard derives it from the quality of the evidence behind each component, then caps it at low for an unclassified over-the-counter listing and at medium for a company worth under $50 million. The score says how sure its evidence lets it be, and you decide what to do about it.</p>
       </div>
 
@@ -645,7 +645,7 @@
       </figure>
 
       <div class="measure prose">
-        <p>The framework watches five patterns, each with a diagnostic: a threshold that turns a slow, invisible failure into an explicit flag. The Weekly Review runs all five diagnostics when you start it. Four can fire; correlation stacking has no input yet, so a portfolio tripwire watches correlation instead.</p>
+        <p>The framework watches five patterns, each with a diagnostic: a threshold that turns a slow, invisible failure into an explicit flag. The Weekly Review runs all five diagnostics when you start it. Four can fire; correlation stacking has no input yet, so a portfolio tripwire watches correlation instead. Staleness, posture drift and large unrefreshed gains are also checked outside the review by the dashboard&rsquo;s framework diagnostics, and the dashboard thresholds given below for those three are theirs.</p>
       </div>
 
       <div class="measure-feature">

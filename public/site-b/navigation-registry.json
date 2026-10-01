@@ -2275,8 +2275,8 @@
         "label": "Appears in Part 2 · Identification, evaluation, and governance"
       },
       "chart": {
-        "href": "/part-2-lineage-macro-thesis#exhibit-p2-phase-changes-sizing",
-        "label": "View the chart → P2-09 · Phase Changes Sizing"
+        "href": "/#exhibit-dl-regime-map",
+        "label": "View the chart → L1 · Capital Has Weather"
       },
       "entry": {
         "href": "/glossary#g-regime",
@@ -2964,7 +2964,7 @@
   },
   "audit": {
     "pages": 11,
-    "anchors": 1238,
+    "anchors": 1240,
     "chartSpecs": 46,
     "liveChartMounts": 100,
     "glossaryTerms": 109,

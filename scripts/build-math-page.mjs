@@ -123,7 +123,7 @@ const main = `<main class="shell-main">
           </tbody>
         </table>
       </div>
-      <p class="compare-key">When two screens show different numbers for one holding, check which object each one shows: they answer different questions, and both can be right</p>
+      <p class="compare-key">When two screens show different numbers for one holding, check which object each one shows: they answer different questions, and both can be right. The wrapper-and-posture factor is 1.04 for Torque in a Roth; 1.03 for Hype in a Roth and for Torque in a pre-tax account; 1.02 for Hype in a pre-tax account and for Ballast in taxable; 1.01 for Ballast in a Roth or pre-tax account; 0.98 for Torque and 0.97 for Hype in taxable; and 1.00 for Bitcoin, for anything in the dashboard&rsquo;s own Bitcoin wrapper, and wherever the wrapper or posture is unknown. The table is the dashboard&rsquo;s own and forks from the placement doctrine in places: it rates Torque in a pre-tax account above Torque in taxable, although <a class="part-ref" href="/part-4-tax-architecture-roc-strategy#pretax">Part 4</a> calls pre-tax accounts inferior for convex positions, and it marks down Hype in taxable, the placement Part 5&rsquo;s case study gives its Hype positions.</p>
 
       <div class="measure">
         <p class="sub-meta">Weights &middot; reference and thesis</p>
@@ -150,7 +150,7 @@ const main = `<main class="shell-main">
           </tbody>
         </table>
       </div>
-      <p class="compare-key">Every profile stays inside the envelope: no component moves more than 0.10 from its reference weight, none falls below 0.05 or rises above 0.50, and the four are renormalized so they always sum to 1.0. With no thesis selected, the software does not choose one for you; any score computed without a thesis uses the reference weighting</p>
+      <p class="compare-key">Every profile stays inside the envelope: no component moves more than 0.10 from its reference weight, none falls below 0.05 or rises above 0.50, and the four are renormalized so they always sum to 1.0. With no thesis selected, the software does not choose one for you; any score computed without a thesis uses the reference weighting.</p>
 
       <div class="measure prose">
         <p>One further adjustment is built in rather than chosen. When the macro read is low or medium confidence, the macro weight drops to 60 or 80 percent of its value, and the difference moves evenly to convexity and risk. A thinly evidenced macro view does not get to carry full weight.</p>
@@ -268,7 +268,7 @@ const main = `<main class="shell-main">
           </tbody>
         </table>
       </div>
-      <p class="compare-key">Market metrics (momentum, realized volatility, volume, drawdown) reject language-model estimates, with one exception: for over-the-counter equities, where an estimate is the expected source, estimated market cap and trading volume are admitted at 0.70. Slow-moving fundamentals such as margin and leverage take a stale reading at full weight, because they are stale by nature. This weighting applies on the equity and fund routes; the crypto and Bitcoin routes use their own validated signals</p>
+      <p class="compare-key">Market metrics (momentum, realized volatility, volume, drawdown) reject language-model estimates, with one exception: for over-the-counter equities, where an estimate is the expected source, estimated market cap and trading volume are admitted at 0.70. Slow-moving fundamentals such as margin and leverage take a stale reading at full weight, because they are stale by nature. This weighting applies on the equity and fund routes; the crypto and Bitcoin routes use their own validated signals.</p>
 
       <div class="measure prose">
         <p>Two further gates sit above the individual metrics. <strong>Coverage</strong> weighs the core fields at 0.70 and the enhancing fields at 0.30; below 70 percent the score is capped at 75, below 50 percent at 68, below 30 percent at 60. Language-model estimates count as present here; the admission weight is where they are discounted. <strong>Proxy suppression</strong> caps the score at 85 when more than 40 percent of the sub-scores rest on proxies or heuristics.</p>
@@ -404,7 +404,7 @@ const main = `<main class="shell-main">
           </tbody>
         </table>
       </div>
-      <p class="compare-key">Below 50 sizes to zero in each of the three sized postures; this is where the framework declines to hold, and it is the one hard gate in the ladder. Bitcoin sits outside this ladder, governed by <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#backbone">Part 3</a>, and the builder sizes STRC by its own rule (see the construction row)</p>
+      <p class="compare-key">Below 50 sizes to zero in each of the three sized postures; this is where the framework declines to hold, and it is the one hard gate in the ladder. Bitcoin sits outside this ladder, governed by <a class="part-ref" href="/part-3-bitcoin-convexity-backbone#backbone">Part 3</a>, and the builder sizes STRC by its own rule (see the construction row).</p>
 
       <div class="measure prose">
         <p>Within a band the ceiling moves linearly with the score:</p>
@@ -420,7 +420,7 @@ const main = `<main class="shell-main">
         <h3 class="sub-title">The same percentages mean different things.</h3>
       </div>
       <div class="measure prose">
-        <p>Concentration appears in three places, at three sets of thresholds, and each has a different consumer. The doctrine is <a class="part-ref" href="/part-5-portfolio-construction-position-management#torque">Part 5</a>&rsquo;s: a single position capped at 15 percent by default, with an 18% absolute maximum under a documented override, the top three at 35 percent and the top five at 50. Bitcoin sits outside all three layers below, and STRC sits outside the builder&rsquo;s caps.</p>
+        <p>Concentration appears in three places, at three sets of thresholds, and each has a different consumer. The doctrine is <a class="part-ref" href="/part-5-portfolio-construction-position-management#torque">Part 5</a>&rsquo;s: a single position capped at 15 percent by default, with an 18% absolute maximum under a documented override, the top three at 35 percent and the top five at 50. Bitcoin sits outside all three layers below, and STRC sits outside the builder&rsquo;s caps. Both of the builder&rsquo;s exceptions fork from that doctrine, which lets a single position past 15 percent only under a documented override, never past 18, and stops a single Ballast position at 10 percent. They describe what the software does, not the framework&rsquo;s limits.</p>
       </div>
 
       <div class="compare compare-wrap">
@@ -436,7 +436,7 @@ const main = `<main class="shell-main">
           </tbody>
         </table>
       </div>
-      <p class="compare-key">All three rungs now have live consumers: the first shapes a build, the second changes a score, the third raises a tripwire. None trims a holding, so describing any of them as automatic enforcement would be false, and this page does not</p>
+      <p class="compare-key">All three rungs now have live consumers: the first shapes a build, the second changes a score, the third raises a tripwire. None trims a holding, so describing any of them as automatic enforcement would be false, and this page does not.</p>
 
       <div class="measure">
         <p class="sub-meta">Breadth &middot; how many positions</p>
