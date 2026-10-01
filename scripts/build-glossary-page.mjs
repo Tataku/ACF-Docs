@@ -35,6 +35,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { stripSeriesChain } from './site-b-shell.mjs';
+import { stampSocialMeta } from './social-meta.mjs';
 import { appearsLaterProblems } from './glossary-anchors.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -286,6 +287,9 @@ if (!/glossary-index\.js/.test(html)) {
   console.error('Glossary build failed: could not place glossary-index.js after glyph-text.js in the donor shell.');
   process.exit(1);
 }
+
+// The donor's og/twitter block and share links say Part 6; stamp this page's own.
+html = stampSocialMeta(html, 'glossary');
 
 // ---- write, or verify -----------------------------------------------------------
 // build:social-meta rewrites the og/twitter block AFTER this script runs, so in

@@ -1459,7 +1459,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { kind: 'consequence', label: 'Same average, less than half the ending money', timing: 'late' },
     ],
     claimStack: {
-      primaryClaim: 'Same returns, same withdrawals, different order. At a 4 percent withdrawal, the losses-first path ends with less than half as much as the gains-first path; at 6 percent, the losses-first path runs out in year 12.',
+      primaryClaim: 'Same returns, same withdrawals, different order. At a 4 percent withdrawal, losses first ends with less than half what gains first ends with; at 6 percent it runs out in year 12.',
       visualProof: 'One set of 12 annual returns, in two orders, drives both portfolio paths',
       interactionRole: 'Hover the returns and the paths to tie the same numbers to different endings',
       readerAction: 'Compare the two orders of the same returns',
@@ -1507,7 +1507,7 @@ export const FRAMEWORK_CHART_SPECS = [
       visualProof: 'The value of a fixed monthly purchase along a drawn price path with two falls of more than 70 percent, against the straight line of money put in',
       interactionRole: 'Hover the value line, the money-in line and the deepest fall',
       readerAction: 'Follow the value line through both falls',
-      caution: 'A drawn price path with two falls of more than 70 percent, like those of 2018 and 2021 to 2022; it is not Bitcoin\'s price history. The dated figures in the explainer come from Coinbase prices and are not plotted.',
+      caution: 'A drawn price path with two falls of more than 70 percent, like those of 2018 and 2021 to 2022; it is not Bitcoin\'s price history. The dates and the seven-times multiple quoted above come from Coinbase prices and are not plotted.',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Survive the Path', setupLine: 'A fixed monthly purchase over seven years through two deep falls, against the total put in (100 = everything invested)',
@@ -1519,7 +1519,7 @@ export const FRAMEWORK_CHART_SPECS = [
     disclosure: DISCLOSURE.representative, footerCta: 'View sources',
     sources: [
       { provider: 'ACF · Part 3', label: 'Rule stated in Part 3 · Optimizing for multi-cycle survivability', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone#survivability' },
-      { provider: 'FRED (Coinbase)', seriesId: 'CBBTCUSD', label: 'Coinbase Bitcoin. Source of the dated falls and the monthly-purchase multiple in the explainer; not plotted', role: 'verifies-concept', url: 'https://fred.stlouisfed.org/series/CBBTCUSD' },
+      { provider: 'FRED (Coinbase)', seriesId: 'CBBTCUSD', label: 'Coinbase Bitcoin. Source of the dates and the seven-times multiple quoted with this chart; not plotted', role: 'verifies-concept', url: 'https://fred.stlouisfed.org/series/CBBTCUSD' },
       { provider: 'Author calculation', label: 'Fixed monthly purchase along the drawn price path', role: 'methodology', transform: 'Each month, units bought = contribution ÷ price; value = units held × price; 84 equal contributions summing to 100', notes: 'The price path is illustrative, not a price history.' },
     ],
     explainerHeadline: 'The gains went to whoever was still holding.',
@@ -2035,7 +2035,7 @@ export const FRAMEWORK_CHART_SPECS = [
     title: 'Volatility Is the Toll', setupLine: 'What a deep Bitcoin fall costs a portfolio that holds Bitcoin as a sized reserve',
     claimLabel: 'VOLATILITY · SIZING',
     frameworkClaim: 'Bitcoin’s volatility is the cost of its convexity; position size decides whether that cost is survivable.',
-    readerTakeaway: 'Plan for falls of 75 to 80 percent, and check what one costs at your reserve size.',
+    readerTakeaway: 'Plan for falls of 75 percent or more, and check what one costs at your reserve size.',
     chartType: 'Representative Bitcoin path with two deep falls, and a portfolio line computed from it at a 15 percent reserve.',
     visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources',
     sources: [
@@ -2106,7 +2106,7 @@ export const FRAMEWORK_CHART_SPECS = [
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone#survivability' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management#ballast' }],
     personalization: { uses: ['startingValue'], kind: 'scenario-scale', introLead: 'Representative whole-portfolio allocations', introTail: 'illustrative, not a forecast', note: 'Scales the terminal and drawdown readouts to your starting value. Control and participation are scores, not dollars. Illustrative, not a forecast.' },
     layout: 'scenario',
-    ariaSummary: 'An interactive stress test, not a time series. Three allocations run as horizontal lanes through a shock zone in the middle: maximum exposure at 100 percent Bitcoin, the framework reserve at 15 percent Bitcoin with dry powder and an income sleeve, and a stress-tested reserve at 10 percent Bitcoin with half the portfolio in dry powder. The same shock hits all three. Maximum exposure climbs steepest before the shock, then plunges; under a job-loss shock its lane breaks at a forced sale. The framework lane bends, stays whole and keeps capacity to act. The stress-tested lane dips least but climbs slowly. A readout below grades each allocation under the current shock: whether it still participates, whether it keeps a reserve, how likely it is to force a mistake such as a sale at the bottom, and whether you could stick with it. Terminal value is a small secondary figure. In the opportunity window the reserves act during the drawdown, above the exact bottom.',
+    ariaSummary: 'An interactive stress test, not a time series. Three allocations run as horizontal lanes through a shock zone in the middle: maximum exposure at 100 percent Bitcoin, the framework reserve at 15 percent Bitcoin with dry powder and an income sleeve, and a stress-tested reserve at 10 percent Bitcoin with half the portfolio in dry powder. The same shock hits all three. Maximum exposure climbs steepest before the shock, then plunges; under a job-loss shock its lane breaks at a forced sale. The framework lane bends, stays whole and keeps capacity to act. The stress-tested lane dips least but climbs slowly. A readout below grades each allocation under the current shock: whether it still participates, whether it keeps a reserve, how likely it is to force a mistake such as a sale at the bottom, and whether you could stick with it. Terminal value is a small secondary figure. In the opportunity window the reserves buy during the drawdown, though not at the exact bottom.',
     scenario: {
       zone: { partLo: 22, partHi: 60, ctrlLo: 66, ctrlHi: 94 },
       defaultPreset: 'reserve', defaultShock: 'none',
@@ -2313,7 +2313,7 @@ export const FRAMEWORK_CHART_SPECS = [
     primaryKey: 'reserve',
     hoverTargets: [
       { id: 'reserve', kind: 'series', seriesKey: 'reserve', label: 'Reserve share', name: 'Reserve share', why: 'Accumulation plus appreciation can grow the reserve from a modest slice into the largest holding in the portfolio. Nothing rebalances it up; it gets there by not being sold.', claim: 'The share is allowed to grow.', concept: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone#tam' },
-      { id: 'target', kind: 'level', label: 'Target 10–15%', name: 'Target reserve · 10–15%', why: 'The usual starting allocation, enough to matter. At a 10 to 15 percent reserve, a 75 to 80 percent Bitcoin drawdown costs the portfolio about 8 to 12 percent.', claim: 'The usual starting range.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management#torque' },
+      { id: 'target', kind: 'level', label: 'Target 10–15%', name: 'Target reserve · 10–15%', why: 'The usual starting allocation, enough to matter. At a 10 to 15 percent reserve, an 80 percent Bitcoin drawdown costs the portfolio about 8 to 12 percent.', claim: 'The usual starting range.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management#torque' },
       { id: 'mature', kind: 'level', label: 'Mature share · 30%+', name: 'Mature share', why: 'Past roughly 30 percent, the reserve is usually the largest single holding, and governing it matters more than adding to it.', claim: 'Big enough that governing it is the job.', concept: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone#tam' },
       { id: 'borrow', kind: 'marker', label: 'Borrowing becomes an option', name: 'Borrowing becomes an option', why: 'Once the reserve is large relative to any loan, you may borrow against it to fund income-producing assets, within the loan-to-value rules in Part 3. Borrowing stays optional; leverage, drawdown and liquidity now matter more than adding coins.', claim: 'The job changes from build to govern.', concept: 'Buy-borrow-die', link: '/part-3-bitcoin-convexity-backbone#tam' },
     ],
@@ -2572,7 +2572,7 @@ export const FRAMEWORK_CHART_SPECS = [
       visualProof: 'Four indexed paths through one cycle: Torque climbs hardest, falls about 60 percent in stress and finishes highest; Ballast dips about 12 percent and deploys at the trough; Hype spikes on attention and is stopped at breakeven by rule; Bitcoin, on its own lower register, falls about 75 percent and recovers without ever being sold to fund the others',
       interactionRole: 'Hover a path, the rotation moment or the stop to read the behavior that defines it',
       readerAction: 'Follow each line through the stress phase and watch what it does differently',
-      caution: 'Indexed shapes on one stylized cycle, not returns or forecasts. Bitcoin is drawn on a lower register only to keep it visually separate, and its fall of about 75 percent sits at the shallow end of the 75 to 80 percent Part 3 says to plan for',
+      caution: 'Indexed shapes on one stylized cycle, not returns or forecasts. Bitcoin is drawn on a lower register only to keep it visually separate, and its fall of about 75 percent sits at the shallow end of the falls of 75 percent or more that Part 3 says to plan for',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Three Jobs. One Cycle.', setupLine: 'How each posture behaves when the market advances, breaks, and recovers',
@@ -3295,7 +3295,7 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'cis',
     hoverTargets: [
-      { id: 'cis', kind: 'node', label: 'Update CIS', name: 'Measure position quality', why: 'For each position, refresh the evidence behind convexity, risk, macro and execution, then clamp the change by confidence (±3 low, ±5 medium, ±6 derived, ±8 high), so ordinary updates move a few points at a time; a move of more than 20 points passes through as a model disagreement. In the dashboard the review refreshes at most 10 stale scores per run, older and larger positions first, then reads every current score and records what changed.', claim: 'Every score is re-read weekly; stale ones are re-earned.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring#cis' },
+      { id: 'cis', kind: 'node', label: 'Update CIS', name: 'Measure position quality', why: 'For each position, refresh the evidence behind convexity, risk, macro and execution, then clamp the change by confidence (±3 low, ±5 medium, ±6 proxy-derived, ±8 high), so ordinary updates move a few points at a time; a move of more than 20 points passes through as a model disagreement. In the dashboard the review refreshes at most 10 stale scores per run, older and larger positions first, then reads every current score and records what changed.', claim: 'Every score is re-read weekly; stale ones are re-earned.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring#cis' },
       { id: 'fis', kind: 'node', label: 'Calculate FIS', name: 'Measure portfolio integrity', why: 'Penalties by bucket, with attribution: one hundred minus the sum. Governance and dead-capital charges scale with position size; allocation, concentration and complexity charges are flat. The output is a ranked list of what to fix.', claim: 'Attribution is the deliverable.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring#fis' },
       { id: 'gates', kind: 'node', label: 'The checks', name: 'Run the governance checks', why: 'Earnings proximity (T-5, cap 3%), momentum, tripwires and posture drift: the checkpoint every action passes through. In the dashboard these checks do not yet receive earnings dates, price trends or correlation data, so the three momentum dimensions go unmeasured and the earnings flag comes from the Framework Rule Register and the positions table instead. That flag counts calendar days, so start the trim from the earnings calendar.', claim: 'Every action passes the checks first.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management#management' },
       { id: 'act', kind: 'node', label: 'Act or hold', name: 'Act, or deliberately hold', why: 'Tripwire: respond at once. Earnings window: trim to the 3 percent cap. FIS below 70: fix the top penalty. CIS move of 10 points or more: resize. No trigger: hold, because restraint is a decision, and the frequency limits pace the review’s own recommendations. In the dashboard’s Weekly Review a finding from its three-level check comes first; the framework’s tripwires are recorded there but raise no recommendation of their own.', claim: 'Holding is an outcome, not an omission.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring#weekly' },

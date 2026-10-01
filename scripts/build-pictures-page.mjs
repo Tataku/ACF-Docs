@@ -29,6 +29,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { stripSeriesChain } from './site-b-shell.mjs';
+import { stampSocialMeta } from './social-meta.mjs';
 import { FRAMEWORK_CHART_SPECS } from '../components/framework-charts/chart-specs.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -230,6 +231,8 @@ html = html.replace(/<main class="shell-main">[\s\S]*<\/main>/, () => main);
 // A reference page is not in the six-part series: drop the donor's next-up band
 // and the dock's "← Part 5 · Series complete" chain. Shared, and fails closed.
 html = stripSeriesChain(html, 'Pictures build');
+// The donor's og/twitter block and share links say Part 6; stamp this page's own.
+html = stampSocialMeta(html, 'framework-in-pictures');
 
 fs.writeFileSync(OUT, html);
 console.log(`Pictures page built: ${total} exhibits across ${liveGroups.length} groups (${plotted.length} plotted from public data) -> public/site-b/framework-in-pictures.html`);
