@@ -68,7 +68,7 @@ export function valueAt(pts, x) {
 // ── disclosure presets (consistent, minimal, truthful) ───────────────────────
 export const DISCLOSURE = {
   representative: 'Representative framework exhibit · Sources support the underlying concept',
-  simulation: 'Representative simulation · Built to show path dependency, not a historical backtest',
+  simulation: 'Representative simulation · Computed from stated inputs, not a forecast or a historical backtest',
   conceptual: 'Conceptual diagram · Illustrative framework exhibit, not historical data',
 };
 
@@ -255,7 +255,7 @@ export function resolveMobileBehavior(spec) {
   if (L === 'dual' && spec.perspectiveSlider) return { interaction: 'snap-slider', chartHeight: 'tall', note: 'Snap the reveal to Surface / Split / Hidden cost on release.' };
   if (L === 'scenario') return { interaction: 'stacked-controls', chartHeight: 'tall', note: 'Stack the strategy + shock controls; keep stat read-outs below the chart.' };
   if (L === 'sequenceRisk') return { interaction: 'stacked', chartHeight: 'tall', note: 'Return deck stacks above the paths; keep withdrawal ticks legible.' };
-  if (L === 'heartbeat') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Unit bars need vertical room — do not shrink too far.' };
+  if (L === 'heartbeat') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Unit bars need vertical room; do not shrink too far.' };
   if (L === 'scorecard') return { interaction: 'scroll-x', chartHeight: 'auto', note: 'Matrix is content-sized; keep the asset header legible, horizontal scroll only if unavoidable.' };
   if (L === 'radial') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Keep the donut substantial on touch; tap a segment to inspect its share. Do not shrink the ring into a token.' };
   if (L === 'laneBar') return { interaction: 'tap-cycle', chartHeight: 'tall', note: 'Bars stack full-width; keep the aligned compare segment and the difference callout legible; tap a segment to inspect.' };
@@ -273,7 +273,7 @@ export function resolveTryThis(spec, coarse = false) {
   if (coarse && typeof spec.tryThisMobile === 'string') return spec.tryThisMobile || null;
   const it = resolveInteraction(spec);
   if (coarse) {
-    if (it.type === 'beforeAfterReveal') return 'Drag the divider — or tap the chart — to reveal the hidden cost';
+    if (it.type === 'beforeAfterReveal') return 'Drag the divider, or tap the chart, to reveal the hidden cost';
     if (it.type === 'scenario') return 'Tap a strategy or shock, then compare the paths';
     if (it.type === 'returnOrder') return 'Tap a path or the return deck to compare the order';
     if (it.type === 'readerContext') return 'Enter your starting value above';
@@ -337,7 +337,7 @@ export function getSimulationNote(spec, ctx) {
     if (P == null) return null;
     const alloc = isFinite(ctx.btcReserveAllocation) && ctx.btcReserveAllocation > 0 ? ctx.btcReserveAllocation : ((p.assume && p.assume.alloc) || 0.15);
     const dd = (p.assume && p.assume.drawdown) || 0.70;
-    return `At a ${formatPercent(alloc)} Bitcoin reserve, a ${formatPercent(dd)} Bitcoin drawdown is roughly a ${formatStartingValue(P * alloc * dd)} hit (~${formatPercent(alloc * dd)}) on a ${formatStartingValue(P)} portfolio — representative, not a forecast.`;
+    return `At a ${formatPercent(alloc)} Bitcoin reserve, a ${formatPercent(dd)} Bitcoin drawdown is roughly a ${formatStartingValue(P * alloc * dd)} hit (~${formatPercent(alloc * dd)}) on a ${formatStartingValue(P)} portfolio. Representative, not a forecast.`;
   }
   if (p.kind === 'horizon-scale') {
     if (P == null) return null;
@@ -347,7 +347,7 @@ export function getSimulationNote(spec, ctx) {
     if (!cx || !pr) return null;
     const cM = valueAt(cx.pts, yrs), pM = valueAt(pr.pts, yrs);
     if (!isFinite(cM) || !isFinite(pM)) return null;
-    return `At a ${formatHorizon(ctx.horizon)} horizon on a ${formatStartingValue(P)} start, the convex path reaches ≈${formatStartingValue(P * cM)} versus ≈${formatStartingValue(P * pM)} conventional — illustrative compounding, not a forecast.`;
+    return `At a ${formatHorizon(ctx.horizon)} horizon on a ${formatStartingValue(P)} start, the convex path reaches ≈${formatStartingValue(P * cM)} versus ≈${formatStartingValue(P * pM)} conventional. Illustrative compounding, not a forecast.`;
   }
   return null;
 }
@@ -381,115 +381,174 @@ export function getTooltipValueText(spec, ctx, opts = {}) {
 // DATA SHAPES (representative / conceptual — deterministic so SSR == CSR)
 // ════════════════════════════════════════════════════════════════════════════
 
-// 60/40 stopped cushioning
+// 60/40 in 2022 (representative, anchored). Exact only at the marked points:
+// Dec 2021 = 100 for all three; Sep 2022 stocks 76.1, bonds 85.4; Oct 2022 bonds
+// 84.3; Dec 2022 stocks 81.9, bonds 87.0. The other month-end knots are
+// illustrative (rounded, not the index record), smoothed with a monotone cubic.
+// The 60/40 line is a buy-and-hold 60/40 of the two drawn paths (Dec 2022 83.9,
+// matching the published -16.1%).
 const hedge = (() => {
-  const n = 100;
-  const stocks = curve(0, 100, n, (t) => (t < 0.55 ? 100 - 27 * ss(t / 0.55) : 73 + 16 * ss((t - 0.55) / 0.45)), 11, 1.3);
-  const bonds = curve(0, 100, n, (t) => 100 - 9 * t - 7 * Math.exp(-Math.pow((t - 0.42) / 0.16, 2)), 23, 0.8);
-  const p6040 = stocks.map((p, i) => ({ x: p.x, y: R(0.6 * p.y + 0.4 * bonds[i].y) }));
-  return { stocks, bonds, p6040 };
+  const mono = (k, xs) => {
+    const n = k.length, dx = [], m = [], t = [];
+    for (let i = 0; i < n - 1; i++) { dx[i] = k[i + 1][0] - k[i][0]; m[i] = (k[i + 1][1] - k[i][1]) / dx[i]; }
+    t[0] = m[0]; t[n - 1] = m[n - 2];
+    for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (dx[i - 1] + dx[i]) * 3 / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+    return xs.map((x) => { let i = 0; while (i < n - 2 && x > k[i + 1][0]) i++; const h = dx[i], s = (x - k[i][0]) / h, s2 = s * s, s3 = s2 * s; return (2 * s3 - 3 * s2 + 1) * k[i][1] + (s3 - 2 * s2 + s) * h * t[i] + (-2 * s3 + 3 * s2) * k[i + 1][1] + (s3 - s2) * h * t[i + 1]; });
+  };
+  // month 0 = Dec 2021 ... month 12 = Dec 2022
+  const sK = [100, 97, 94, 93, 89, 86, 82, 86, 84, 76.1, 80.5, 85, 81.9];
+  const bK = [100, 98.5, 96.5, 94.5, 92, 91, 90, 90.5, 88.5, 85.4, 84.3, 86, 87.0];
+  const pK = sK.map((s, i) => 0.6 * s + 0.4 * bK[i]);
+  const xs = Array.from({ length: 49 }, (_, i) => i / 4);
+  const path = (k) => mono(k.map((y, i) => [i, y]), xs).map((y, i) => ({ x: R(xs[i]), y: R(y) }));
+  const stocks = path(sK), bonds = path(bK), p6040 = path(pK);
+  return { stocks, bonds, p6040, end: { s: sK[12], b: bK[12], p: R(pK[12], 10) } };
 })();
 
-// Correlation regime change
+// Stock-Treasury correlation, 24-month rolling (representative, anchored). x is
+// months from Jan 2014 (0) to Dec 2024 (131). Knots follow the published record:
+// negative 2014 to 2021 (deepest 2020, about -0.35 at end-2021), zero crossing in
+// early 2022, +0.5 to +0.75 through 2023 and 2024. Smoothed with a monotone cubic.
 const corr = (() => {
-  const N = 132, flipStart = 78, flipEnd = 96;
-  const rng = mulberry32(11);
-  const pts = [];
-  for (let i = 0; i <= N; i++) {
-    const x = (i / N) * N;
-    let y;
-    if (x < flipStart) { const u = x / flipStart; y = -0.46 + 0.08 * Math.sin(u * 8) + 0.18 * u; }
-    else if (x < flipEnd) { const u = (x - flipStart) / (flipEnd - flipStart); y = -0.28 + 0.72 * ss(u); }
-    else { const u = (x - flipEnd) / (N - flipEnd); y = 0.44 - 0.08 * ss(u) + 0.06 * Math.sin(u * 6); }
-    y += (rng() - 0.5) * 0.04;
-    pts.push({ x: R(x), y: R(y) });
-  }
+  const mono = (k, xs) => {
+    const n = k.length, dx = [], m = [], t = [];
+    for (let i = 0; i < n - 1; i++) { dx[i] = k[i + 1][0] - k[i][0]; m[i] = (k[i + 1][1] - k[i][1]) / dx[i]; }
+    t[0] = m[0]; t[n - 1] = m[n - 2];
+    for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (dx[i - 1] + dx[i]) * 3 / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+    return xs.map((x) => { let i = 0; while (i < n - 2 && x > k[i + 1][0]) i++; const h = dx[i], s = (x - k[i][0]) / h, s2 = s * s, s3 = s2 * s; return (2 * s3 - 3 * s2 + 1) * k[i][1] + (s3 - 2 * s2 + s) * h * t[i] + (-2 * s3 + 3 * s2) * k[i + 1][1] + (s3 - s2) * h * t[i + 1]; });
+  };
+  const K = [[0, -0.30], [12, -0.38], [24, -0.25], [36, -0.20], [48, -0.28], [60, -0.30], [71, -0.36], [78, -0.52], [83, -0.50], [90, -0.45], [95, -0.35], [97, 0.0], [99, 0.25], [104, 0.57], [113, 0.65], [119, 0.68], [125, 0.74], [131, 0.72]];
+  const N = 131, flipStart = 87, flipEnd = 107;
+  const xs = Array.from({ length: N + 1 }, (_, i) => i);
+  const pts = mono(K, xs).map((y, i) => ({ x: i, y: R(y) }));
   const cross = pts.find((p) => p.y > 0) || pts[0];
   return { pts, flipStart, flipEnd, cross };
 })();
 
-// CPI vs assets
+// CPI vs assets, end-1999 = 100 (representative, anchored). x is years after the
+// end of 1999 (25 = end of 2024). Drawn through the published checkpoints: CPI 188
+// at end-2024; homes 185 at the July 2006 peak, 135 at the February 2012 low, 325
+// at end-2024; the equal-weight buy-and-hold mix of US stocks with dividends,
+// homes and gold about 617 at end-2024. Year-end knots between them are shaped to
+// the record and smoothed with a monotone cubic; they are not plotted data.
 const cpiAssets = (() => {
-  const n = 120;
-  const cpi = curve(0, 24, n, (t) => 100 * Math.pow(1.026, 24 * t), 41, 1.0);
-  const housing = curve(0, 24, n, (t) => 100 * Math.pow(1.052, 24 * t) - 22 * Math.exp(-Math.pow((t - 0.36) / 0.07, 2)), 47, 1.6);
-  const assets = curve(0, 24, n, (t) => 100 * Math.pow(1.072, 24 * t) - 34 * Math.exp(-Math.pow((t - 0.36) / 0.06, 2)) - 28 * Math.exp(-Math.pow((t - 0.83) / 0.04, 2)), 53, 2.4);
-  return { cpi, housing, assets };
+  const mono = (k, xs) => {
+    const n = k.length, dx = [], m = [], t = [];
+    for (let i = 0; i < n - 1; i++) { dx[i] = k[i + 1][0] - k[i][0]; m[i] = (k[i + 1][1] - k[i][1]) / dx[i]; }
+    t[0] = m[0]; t[n - 1] = m[n - 2];
+    for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (dx[i - 1] + dx[i]) * 3 / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+    return xs.map((x) => { let i = 0; while (i < n - 2 && x > k[i + 1][0]) i++; const h = dx[i], s = (x - k[i][0]) / h, s2 = s * s, s3 = s2 * s; return (2 * s3 - 3 * s2 + 1) * k[i][1] + (s3 - 2 * s2 + s) * h * t[i] + (-2 * s3 + 3 * s2) * k[i + 1][1] + (s3 - s2) * h * t[i + 1]; });
+  };
+  const yearly = (arr) => arr.map((y, i) => [i, y]);
+  const cpiK = yearly([100, 103.4, 105.1, 107.7, 109.9, 113.6, 117.4, 120.5, 125.2, 125.0, 128.7, 130.6, 134.6, 137.0, 139.0, 140.0, 140.9, 143.7, 146.8, 149.7, 153.4, 155.2, 166.4, 177.0, 182.9, 188]);
+  const homeK = [[0, 100], [1, 109], [2, 117], [3, 129], [4, 143], [5, 163], [6, 181], [6.58, 185], [7, 183], [8, 172], [9, 150], [10, 145], [11, 140], [12, 137], [12.17, 135], [13, 145], [14, 161], [15, 169], [16, 177], [17, 186], [18, 197], [19, 206], [20, 214], [21, 239], [22, 283], [22.5, 310], [23, 297], [24, 314], [25, 325]];
+  const mixK = yearly([100, 98, 97, 104, 123, 134, 150, 169, 191, 174, 204, 243, 256, 279, 245, 255, 242, 262, 298, 296, 352, 421, 463, 440, 509, 617]);
+  const xs = Array.from({ length: 101 }, (_, i) => i / 4);
+  const path = (k) => mono(k, xs).map((y, i) => ({ x: R(xs[i]), y: R(y) }));
+  return { cpi: path(cpiK), housing: path(homeK), assets: path(mixK), marks: { homePeak: { x: 6.58, y: 185 }, homeLow: { x: 12.17, y: 135 }, end: { cpi: 188, housing: 325, assets: 617 } } };
 })();
 
-// Fiscal pressure (dual)
+// Federal debt and interest, fiscal years 1980 to 2025 (historical). Values are
+// FRED's published annual series, retrieved 2026-09-30, plotted as published:
+//   FYPUGDA188S  Gross Federal Debt Held by the Public as Percent of Gross Domestic Product
+//   FYOIGDA188S  Federal Outlays: Interest as Percent of Gross Domestic Product
+// Source: U.S. Office of Management and Budget; Federal Reserve Bank of St. Louis.
 const fiscal = (() => {
-  const n = 120;
-  // Representative federal debt / GDP, echoing the real contour (≈34% in 1980 →
-  // gradual rise → post-2008 steepening → >120%). Sober line, low chop; the
-  // under-area reads it as an accumulating liability. NOT exact FRED data.
-  const debt = curve(0, 40, n, (t) => 34 + 58 * ss(clamp(t / 0.72, 0, 1)) + 32 * ss(clamp((t - 0.5) / 0.5, 0, 1)), 61, 0.5);
-  const interest = curve(0, 40, n, (t) => (t < 0.62 ? 3.2 - 1.6 * ss(clamp(t / 0.62, 0, 1)) : 1.6 + 2.4 * ss(clamp((t - 0.62) / 0.38, 0, 1))), 67, 0.12);
-  return { debt, interest };
+  const debtPct = [24.91507, 24.61459, 27.65127, 31.29577, 32.37061, 34.73859, 38.00743, 38.9231, 39.1793, 38.83132, 40.44175, 43.66586, 46.00536, 47.36272, 47.11114, 47.17956, 46.25348, 43.97875, 41.05898, 37.71504, 33.26325, 31.37046, 32.39423, 34.15892, 35.15946, 35.21843, 34.95328, 34.78666, 39.29014, 52.11124, 59.93034, 64.92547, 69.4052, 70.98469, 72.57951, 71.69547, 75.33989, 74.7773, 76.24519, 77.99774, 98.32245, 93.92368, 93.08678, 94.33358, 96.23144, 98.06613];
+  const interestPct = [1.83855, 2.14422, 2.54298, 2.4713, 2.75168, 2.98407, 2.97004, 2.85489, 2.89897, 2.99528, 3.09144, 3.15758, 3.05727, 2.8973, 2.78476, 3.0385, 2.98587, 2.84445, 2.66052, 2.38554, 2.17491, 1.94829, 1.56416, 1.33613, 1.31163, 1.41102, 1.6402, 1.63815, 1.7113, 1.29093, 1.3037, 1.47414, 1.35603, 1.30851, 1.30029, 1.2199, 1.27644, 1.33872, 1.57323, 1.74168, 1.61621, 1.48505, 1.8265, 2.36689, 3.0032, 3.15344];
+  const debt = debtPct.map((y, i) => ({ x: 1980 + i, y }));
+  const interest = interestPct.map((y, i) => ({ x: 1980 + i, y }));
+  return { debt, interest, retrieved: '2026-09-30', peak1991: interestPct[11], low2015: interestPct[35] };
 })();
 
-// Sequence-of-returns (simulation) — ONE shared representative return set, plotted
-// in two orders. The portfolio paths are generated FROM these returns so the deck
-// and the lines are the same math: v(i+1) = v(i) * (1 + r) − withdrawal.
+// Sequence of returns (simulation). ONE set of 12 annual returns, plotted in two
+// orders; both portfolio paths are computed from it, so the deck and the lines are
+// the same math: v(i+1) = v(i) * (1 + r) - w, with w a fixed share of the starting
+// balance withdrawn after each year's return. At w = 4%: gains first ends 1.158,
+// losses first 0.475. At 6%, losses first reaches zero in year 12.
 const sequence = (() => {
-  // representative annual-ish returns, % (good order = gains first / losses last)
+  // annual returns, % (good order = gains first / losses last)
   const good = [30, 24, 19, 15, 11, 8, 5, 1, -4, -10, -17, -25];
   const bad = [...good].reverse();                       // same set, opposite order
   const N = good.length;
-  const start = 1, withdraw = 0.04;                       // normalized: $1 start, 4% withdrawal / period
+  const start = 1, withdraw = 0.04;                       // normalized: 1 = starting balance; 4% of it withdrawn each year
   const sim = (order) => { const out = [{ x: 0, y: start }]; let v = start; order.forEach((r, i) => { v = Math.max(0, v * (1 + r / 100) - withdraw); out.push({ x: i + 1, y: R(v, 10000) }); }); return out; };
   const goodPath = sim(good), badPath = sim(bad);
   let trough = { x: 0, y: 9 }; badPath.forEach((p) => { if (p.y < trough.y) trough = p; });
   const avgPct = R(good.reduce((a, b) => a + b, 0) / N, 100);
-  return { good, bad, N, start, withdraw, goodPath, badPath, goodEnd: goodPath[N].y, badEnd: badPath[N].y, trough, avgPct, depletion: 0.35 };
+  // depletion: the renderer's threshold line. 0 puts it on the zero-balance baseline.
+  return { good, bad, N, start, withdraw, goodPath, badPath, goodEnd: goodPath[N].y, badEnd: badPath[N].y, trough, avgPct, depletion: 0 };
 })();
 
-// Convexity / survivability (DCA)
+// Fixed monthly purchase along a drawn price path (representative). 85 month-ends
+// over seven years; the drawn price falls 74% and then 73% from its peaks (depths
+// like 2018 and 2021-22, not their dates). 84 equal contributions sum to 100.
+// units += contribution / price; value = units * price. Value ends near 695 (about
+// 7x invested) after falling about 71% from its peak in the second fall.
 const survival = (() => {
-  const n = 150;
-  const invested = curve(0, 10, n, (t) => 10 + 90 * t, 83, 0);
-  const value = curve(0, 10, n, (t) => {
-    const trend = 10 * Math.pow(1.78, 10 * t * 0.55);
-    const cyc = 1 + 0.55 * Math.sin(t * Math.PI * 3.1 - 0.6);
-    const dd = 1 - 0.34 * Math.exp(-Math.pow((t - 0.46) / 0.05, 2)) - 0.3 * Math.exp(-Math.pow((t - 0.84) / 0.045, 2));
-    return Math.max(6, trend * cyc * dd * 0.5 + 8 * t);
-  }, 89, 3.0);
+  const mono = (k, xs) => {
+    const n = k.length, dx = [], m = [], t = [];
+    for (let i = 0; i < n - 1; i++) { dx[i] = k[i + 1][0] - k[i][0]; m[i] = (k[i + 1][1] - k[i][1]) / dx[i]; }
+    t[0] = m[0]; t[n - 1] = m[n - 2];
+    for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (dx[i - 1] + dx[i]) * 3 / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+    return xs.map((x) => { let i = 0; while (i < n - 2 && x > k[i + 1][0]) i++; const h = dx[i], s = (x - k[i][0]) / h, s2 = s * s, s3 = s2 * s; return (2 * s3 - 3 * s2 + 1) * k[i][1] + (s3 - 2 * s2 + s) * h * t[i] + (-2 * s3 + 3 * s2) * k[i + 1][1] + (s3 - s2) * h * t[i + 1]; });
+  };
+  const priceK = [[0, 1], [4, 0.62], [11, 0.26], [17, 0.8], [23, 0.55], [26, 0.48], [32, 0.85], [36, 2.1], [39, 4.3], [42, 2.7], [46, 4.5], [53, 2.4], [59, 1.2], [64, 2.1], [72, 3.1], [76, 5.0], [82, 4.6], [84, 7.0]];
+  const months = Array.from({ length: 85 }, (_, i) => i);
+  const price = mono(priceK, months);
+  const c = 100 / 84;
+  let units = 0;
+  const invested = [], value = [];
+  months.forEach((i) => {
+    if (i < 84) units += c / price[i];
+    invested.push({ x: R(i / 12), y: R(c * Math.min(i + 1, 84)) });
+    value.push({ x: R(i / 12), y: R(units * price[i]) });
+  });
   // deepest drawdown from running peak
   let peak = -Infinity, trough = { x: 0, dd: 0, y: 0 };
   value.forEach((p) => { peak = Math.max(peak, p.y); const dd = (peak - p.y) / peak; if (dd > trough.dd) trough = { x: p.x, dd, y: p.y }; });
   return { invested, value, trough };
 })();
 
-// Signature payoff curve (conceptual)
+// Signature payoff curve (conceptual). The shaped curve carries a 0.12 cost term
+// (-0.74 rather than -0.62), so it trails the symmetric line between x = -0.33
+// and x = 0.46 by at most about 0.12: convexity is paid for near the base case.
+// It flattens toward -0.74 on the left (-0.654 at x = -1) and accelerates on the
+// right. Both series share one x grid so the cost sliver can be drawn between them.
 const payoff = (() => {
   const n = 90;
-  const shaped = curve(-1, 1.6, n, (t, x) => 0.9 * softplus(2.3 * x) - 0.62 + 0.35 * Math.pow(Math.max(0, x), 2), 0, 0);
-  const linear = curve(-0.7, 1.5, Math.round(n * 0.7), (t, x) => 1.2 * x, 0, 0);
-  return { shaped, linear, floor: R(valueAt(shaped, -1)) };
+  const shaped = curve(-1, 1.6, n, (t, x) => 0.9 * softplus(2.3 * x) - 0.74 + 0.35 * Math.pow(Math.max(0, x), 2), 0, 0);
+  const linear = curve(-1, 1.6, n, (t, x) => 1.2 * x, 0, 0);
+  return { shaped, linear, bound: R(valueAt(shaped, -1)) };
 })();
 
-// Signature distribution reshape (conceptual)
+// Signature distribution reshape (conceptual). The ACF curve is area- and
+// mean-preserving against the unit normal over [-3, 4] (area 2.501 vs 2.503,
+// mean -0.01 vs 0.00): probability is moved, never added. It crosses the
+// reference at x = -1.17, 0.19 and 1.91, so it is thinner in the deep-loss tail,
+// heavier just below the base case, thinner through moderate gains and longer
+// in the far right tail. Peak 1.54 at x = -0.34.
 const shape = (() => {
   const n = 120;
   const symmetric = curve(-3, 4, n, (t, x) => Math.exp(-(x * x) / (2 * 1.0 * 1.0)), 0, 0);
-  const shaped = curve(-3, 4, n, (t, x) => (x < 0
-    ? Math.exp(-(x * x) / (2 * 0.5 * 0.5))
-    : Math.exp(-(x * x) / (2 * 1.7 * 1.7)) + 0.14 * Math.exp(-Math.pow((x - 2.4) / 0.5, 2))), 0, 0);
+  const shaped = curve(-3, 4, n, (t, x) => 1.522 * (Math.exp(-Math.pow(x + 0.35, 2) / (2 * 0.55 * 0.55)) + 0.107 * Math.exp(-Math.pow(x - 1.8, 2) / 2)), 0, 0);
   return { symmetric, shaped };
 })();
 
-// Convexity window (representative path)
+// Entry-patience path (conceptual, seed 37). Over x <= 50 the path ranges from
+// 97.4 to 102.6 and first clears that range at x = 57.3, so the confirmation
+// marker sits at x = 60 (about 105.7), after the break rather than inside it.
 const window_ = (() => {
   const n = 110;
   const value = curve(0, 100, n, (t) => (t < 0.5 ? 100 + 2.4 * Math.sin(t * 70) : 100 + 100 * Math.pow((t - 0.5) / 0.5, 1.8)), 37, 0.6);
   return { value };
 })();
 
-// ── Part 2 — lineage & macro thesis (representative / conceptual) ────────────
+// ── Part 2 · lineage & macro thesis (representative / conceptual) ────────────
 const p2Method = (() => {
   const n = 130;
   const spine = 50;                                            // the method is a fixed central axis
-  // The macro thesis ORBITS the method spine: expressed above it in regime A,
+  // The macro thesis moves around the method spine: expressed above it in regime A,
   // crossing through it at the transition, below it in regime B, crossing again,
   // and back above it in regime C (and staying above to the end). Two clean
   // crossings near the regime boundaries; small organic waver, never noisy.
@@ -503,35 +562,47 @@ const p2Ruin = (() => {
   const crossX = (fragile.find((p) => p.y < 30) || fragile[fragile.length - 1]).x;
   return { robust, fragile, crossX };
 })();
+// x reads as CIS (0 to 100). The framework line traces Part 5's Torque band ceilings
+// (0 below CIS 50; 2–4, 4–8 and 8–15 percent, linear within each band), scaled so
+// 15 percent sits on the cap level (y = 20). No noise, so it never crosses the cap.
 const p2Conviction = (() => {
   const n = 100;
-  const disciplined = curve(0, 100, n, (t) => 20 * ss(clamp(t / 0.7, 0, 1)), 231, 0.4);
+  const torqueCeiling = (c) => (c < 50 ? 0 : c < 60 ? 2 + (c - 50) * 0.2 : c < 70 ? 4 + (c - 60) * 0.4 : 8 + (c - 70) * (7 / 30));
+  const disciplined = curve(0, 100, n, (t, x) => (20 / 15) * torqueCeiling(x), 231, 0);
   const reckless = curve(0, 100, n, (t) => 6 + 42 * Math.pow(t, 1.6), 233, 0.5);
   return { disciplined, reckless };
 })();
+// Part 5's inputs: the same 10 percent a year, tax-free versus taxed every year at a
+// 25 percent blended rate on realized gains (7.5 percent net). Deterministic, no noise.
+// Checkpoints: year 30 17.4× vs 8.8× (about 2×) · year 70 790× vs 158× (about 5×).
 const p2Time = (() => {
   const n = 140;
-  const prudent = curve(0, 70, n, (t) => Math.pow(1.05, 70 * t), 241, 0);
-  const convex = curve(0, 70, n, (t) => Math.pow(1.08, 70 * t), 243, 0);
-  return { prudent, convex };
+  const taxed = curve(0, 70, n, (t, x) => Math.pow(1.075, x), 241, 0);
+  const taxfree = curve(0, 70, n, (t, x) => Math.pow(1.10, x), 243, 0);
+  return { taxed, taxfree };
 })();
+// Sizing peaks near 70, leaving a clear band (minimum gap about 17) under the flat
+// validity line at 88.
 const p2Phase = (() => {
   const n = 100;
   const validity = curve(0, 100, n, () => 88, 251, 0.7);
-  const sizing = curve(0, 100, n, (t) => 15 + 70 * ss(clamp(t / 0.55, 0, 1)) - 30 * ss(clamp((t - 0.7) / 0.3, 0, 1)), 253, 1.0);
+  const sizing = curve(0, 100, n, (t) => 12 + 58 * ss(clamp(t / 0.55, 0, 1)) - 22 * ss(clamp((t - 0.7) / 0.3, 0, 1)), 253, 1.0);
   return { validity, sizing };
 })();
+// Representative: one liquidity cycle, and an asset moving in phase with it on a wider
+// swing plus a faster wiggle that sometimes runs against the tide. No lag is drawn:
+// the cited study measures direction, not timing.
 const p2Liquidity = (() => {
   const n = 120;
   const liquidity = curve(0, 100, n, (t) => 50 + 14 * Math.sin(t * Math.PI * 2.0), 261, 0.8);
-  const asset = curve(0, 100, n, (t) => 55 + 34 * Math.sin(t * Math.PI * 2.0 - 0.5), 263, 2.0);
+  const asset = curve(0, 100, n, (t) => 55 + 30 * Math.sin(t * Math.PI * 2.0) + 5 * Math.sin(t * Math.PI * 14 + Math.PI), 263, 1.5);
   return { liquidity, asset };
 })();
 
-// ── Part 3 — Bitcoin convexity backbone (representative / conceptual) ─────────
+// ── Part 3 · Bitcoin convexity backbone (representative / conceptual) ─────────
 const p3Power = (() => {
   const n = 120;
-  const central = curve(0, 100, n, (t) => 3.0 + 2.65 * t, 301, 0); // log10 price, ~$1k → ~$450k
+  const central = curve(0, 100, n, (t) => 3.0 + 2.65 * t, 301, 0); // log-scale schematic: one unit = one decade; no price levels claimed
   const upper = central.map((p) => ({ x: p.x, y: R(p.y + 0.55) }));
   const lower = central.map((p) => ({ x: p.x, y: R(p.y - 0.55) }));
   const rng = mulberry32(303);
@@ -539,7 +610,7 @@ const p3Power = (() => {
     const t = i / n;
     let dev = 0.40 * Math.sin(t * Math.PI * 6.2) + 0.15 * Math.sin(t * Math.PI * 12.6);
     dev += 0.30 * Math.exp(-Math.pow((t - 0.34) / 0.028, 2)) + 0.30 * Math.exp(-Math.pow((t - 0.72) / 0.028, 2)); // euphoria
-    dev -= 0.34 * Math.exp(-Math.pow((t - 0.52) / 0.03, 2)); // capitulation
+    dev -= 0.65 * Math.exp(-Math.pow((t - 0.52) / 0.03, 2)); // capitulation: deep enough to close below the lower band once
     return { x: p.x, y: R(p.y + dev + (rng() - 0.5) * 0.05) };
   });
   let euph = { x: 0, y: 0, d: -9 }, cap = { x: 0, y: 0, d: -9 };
@@ -547,11 +618,38 @@ const p3Power = (() => {
   return { central, upper, lower, price, euph, cap, last: price[price.length - 1] };
 })();
 const p3Vol = (() => {
-  const n = 120;
-  const btc = curve(0, 100, n, (t) => Math.max(18, 40 + 150 * ss(t) + 28 * Math.sin(t * Math.PI * 3.4) - 72 * Math.exp(-Math.pow((t - 0.42) / 0.05, 2)) - 84 * Math.exp(-Math.pow((t - 0.8) / 0.05, 2))), 311, 4);
-  const portfolio = curve(0, 100, n, (t) => 100 + 24 * ss(t) + 5 * Math.sin(t * Math.PI * 3.4), 313, 0.8);
-  let peak = -9, tr = { x: 0, y: 999, dd: 0 }; btc.forEach((p) => { peak = Math.max(peak, p.y); const d = (peak - p.y) / peak; if (d > tr.dd) tr = { x: p.x, y: p.y, dd: d }; });
-  return { btc, portfolio, trough: tr };
+  // Representative Bitcoin path, indexed to 100 at the start: a rise, a fall of
+  // about 77 percent (the depth of 2021 to 2022), a new high, a fall of about
+  // 54 percent (the depth of 2025 to 2026), a partial recovery. Not plotted data.
+  const n = 120, W = 0.15;
+  const btc = curve(0, 100, n, (t) => {
+    const rise1 = 100 + 230 * ss(clamp(t / 0.3, 0, 1));
+    const fall1 = -258 * ss(clamp((t - 0.3) / 0.16, 0, 1));
+    const rise2 = 315 * ss(clamp((t - 0.48) / 0.26, 0, 1));
+    const fall2 = -211 * ss(clamp((t - 0.76) / 0.12, 0, 1));
+    const rise3 = 70 * ss(clamp((t - 0.9) / 0.1, 0, 1));
+    return rise1 + fall1 + rise2 + fall2 + rise3 + 9 * Math.sin(t * Math.PI * 14);
+  }, 311, 4);
+  // The portfolio is COMPUTED from the Bitcoin line: Bitcoin is set to W (15%) of
+  // the portfolio at each new Bitcoin high and left alone through each fall; the
+  // other 85% is held flat so the line isolates Bitcoin's effect. A reserve left
+  // to grow (the framework never trims) would enter a fall larger, and lose more.
+  let bv = W * 100, rv = (1 - W) * 100, peakB = btc[0].y;
+  const portfolio = [{ x: btc[0].x, y: 100 }];
+  for (let i = 1; i <= n; i++) {
+    bv *= btc[i].y / btc[i - 1].y;
+    const v = bv + rv;
+    if (btc[i].y >= peakB) { peakB = btc[i].y; bv = W * v; rv = (1 - W) * v; }
+    portfolio.push({ x: btc[i].x, y: R(v) });
+  }
+  const worst = (pts) => { let pk = -9, best = { x: 0, y: 0, dd: 0 }; pts.forEach((p) => { pk = Math.max(pk, p.y); const d = (pk - p.y) / pk; if (d > best.dd) best = { x: p.x, y: p.y, dd: d }; }); return best; };
+  const trough = worst(btc);
+  const portDD = worst(portfolio.filter((p) => p.x <= trough.x + 5));
+  const later = worst(btc.filter((p) => p.x >= 60));
+  const laterPort = worst(portfolio.filter((p) => p.x >= 60));
+  // Printed figures are derived from the drawn data: Bitcoin falls to the nearest
+  // percent, portfolio falls to the nearest half percent.
+  return { btc, portfolio, trough, W, btcPct: Math.round(trough.dd * 100), portPct: Math.round(portDD.dd * 200) / 2, laterPct: Math.round(later.dd * 100), laterPortPct: Math.round(laterPort.dd * 200) / 2 };
 })();
 const p3Exposure = (() => {
   const n = 120;
@@ -565,13 +663,15 @@ const p3Models = (() => {
   const spread = (t) => 22 - 18 * Math.exp(-Math.pow((t - 0.5) / 0.14, 2)) + 9 * ss(clamp((t - 0.72) / 0.28, 0, 1));
   const modelMax = curve(0, 100, n, (t) => center(t) + spread(t), 331, 0);
   const modelMin = curve(0, 100, n, (t) => center(t) - spread(t), 333, 0);
-  const price = curve(0, 100, n, (t) => center(t) + 5 * Math.sin(t * Math.PI * 5), 335, 1.4);
+  // Price swings scale with the spread, so the line stays inside the model range
+  // everywhere, including the tight waist where the models converge.
+  const price = curve(0, 100, n, (t) => center(t) + 0.6 * spread(t) * Math.sin(t * Math.PI * 5), 335, 1.4);
   return { modelMax, modelMin, price };
 })();
 const p3Heartbeat = (() => {
-  // Representative BTC PRICE / VALUATION INDEX over one cycle — starts mid, dips
-  // into an undervalued trough, recovers toward fair value, runs extended. Sober
-  // (gentle chop): a price index, not a frantic line. NOT historical, NOT a forecast.
+  // Representative BTC PRICE / VALUATION INDEX over one cycle: starts below fair
+  // value, dips into an undervalued trough, recovers toward fair value, runs
+  // extended. Gentle chop: a price index, not a frantic line. NOT historical, NOT a forecast.
   const n = 132;
   const trend = (t) => 0.5 - 0.34 * Math.exp(-Math.pow((t - 0.17) / 0.12, 2)) + 1.18 * ss(clamp((t - 0.3) / 0.7, 0, 1));
   const chop = (t) => 0.05 * Math.sin(t * Math.PI * 6) + 0.03 * Math.sin(t * Math.PI * 13 + 1);
@@ -579,28 +679,39 @@ const p3Heartbeat = (() => {
   const price = curve(0, 100, n, (t) => priceFn(t), 371, 0.008);
   // The mechanism, made explicit: units received = fixed DCA dollars / price.
   // A constant dollar amount buys MORE units when price is lower. The framework
-  // leans in (×1.7) only in the confirmed undervalued window, returns to baseline
-  // at fair value, and slows new buying (×0.5) when extended — it never sells.
+  // leans in (x1.5, Part 3's "raise DCA about 50 percent") only while price is
+  // deep in the undervalued zone, returns to baseline nearer fair value, and halves
+  // discretionary buying (x0.5) when extended, keeping the difference as dry
+  // powder. The multiplier is keyed to price, not to time. It never sells.
   const DCA = 1;                                          // representative fixed dollar amount / interval
   const bars = 26;
   const pulses = [];
-  let baseCum = 0, fwCum = 0;
+  let baseCum = 0, fwCum = 0, baseDollars = 0, fwDollars = 0;
   for (let i = 0; i < bars; i++) {
     const t = (i + 0.5) / bars;
     const p = priceFn(t);
     const baseUnits = DCA / p;                            // units = dollars / price
-    const m = t < 0.34 ? 1.7 : t > 0.7 ? 0.5 : 1.0;       // framework accumulation-pacing multiplier
+    const m = p < 0.5 ? 1.5 : p > 1.2 ? 0.5 : 1.0;        // framework accumulation-pacing multiplier, keyed to price
     const fwUnits = (DCA * m) / p;
-    baseCum += baseUnits; fwCum += fwUnits;
+    baseCum += baseUnits; fwCum += fwUnits; baseDollars += DCA; fwDollars += DCA * m;
     pulses.push({ x: R(t * 100), base: R(baseUnits), fw: R(fwUnits), boost: m > 1, slow: m < 1 });
   }
   const maxUnit = Math.max(...pulses.map((q) => q.fw));
   const pmin = Math.min(...price.map((p) => p.y)), pmax = Math.max(...price.map((p) => p.y));
-  return { price, pulses, maxUnit, pmin, pmax, windowX0: 2, windowX1: 40, troughX: 17, fwPct: Math.round((fwCum / baseCum - 1) * 100) };
+  // Like for like: the readout (fwPct) is units PER DOLLAR against the baseline,
+  // because the framework path spends a slightly different total.
+  const fwPct = Math.round(((fwCum / fwDollars) / (baseCum / baseDollars) - 1) * 100);
+  const unitsPct = Math.round((fwCum / baseCum - 1) * 100), dollarsPct = Math.round((fwDollars / baseDollars - 1) * 100);
+  return { price, pulses, maxUnit, pmin, pmax, windowX0: 2, windowX1: 34, troughX: 17, fwPct, unitsPct, dollarsPct };
 })();
 const p3Reserve = (() => {
   const n = 100;
-  const reserve = curve(0, 20, n, (t) => 12 + 30 * ss(t), 351, 0.5);
+  // Illustrative trajectory: share (percent) = 12 + 34 x (year / 20)^2.3, plus small
+  // drawn noise. It first reaches the 30 percent mature guide after year 15 and
+  // reads about 46 percent at year 20. Reaching about 45 percent in 20 years with
+  // no new contributions implies Bitcoin outgrowing the rest of the portfolio by
+  // roughly 9 to 10 percent a year on average.
+  const reserve = curve(0, 20, n, (t) => 12 + 34 * Math.pow(t, 2.3), 351, 0.5);
   return { reserve };
 })();
 const p3Scenario = (() => {
@@ -618,11 +729,12 @@ const p3Scenario = (() => {
   }
   let troughI = 0; for (let i = 1; i <= n; i++) if (market[i] < market[troughI]) troughI = i;
   const stable = (t) => 100 + 30 * t;                       // diversified, income-backed sleeve
-  // w = share that tracks Bitcoin; dp = dry powder (capacity to act); income = wage buffer.
+  // w = share that tracks Bitcoin; dp = dry powder (capacity to act); income = an
+  // income sleeve (portfolio income that keeps paying when a paycheck stops).
   // More control trades clean-path upside for a smaller drawdown and more capacity.
   const presets = {
     max: { w: 1.0, dp: 0.0, income: false },                // 100% BTC
-    reserve: { w: 0.22, dp: 0.25, income: true },           // framework reserve
+    reserve: { w: 0.15, dp: 0.15, income: true },           // framework reserve: matches Part 3's Investor B (15% BTC, 15% dry powder)
     stress: { w: 0.10, dp: 0.50, income: true },            // reserve + deliberate dry powder
   };
   // participation = clean-path upside capture vs the all-in ceiling. Underparticipation
@@ -639,7 +751,7 @@ const p3Scenario = (() => {
       const t = T(i);
       let v = p.w * market[i] + (1 - p.w) * stable(t);
       if (i >= troughI) {
-        // job loss: no wage buffer + no dry powder forces a sale into the bottom.
+        // job loss: no income sleeve + little dry powder forces a sale into the bottom.
         if (shock === 'jobloss') v -= (!p.income && p.dp < 0.2) ? 0.30 * market[i] : 2;
         // OPPORTUNITY WINDOW (not perfect bottom-timing): deploy PART of the reserve
         // during the drawdown, entering ABOVE the low; capture a modest, realistic
@@ -654,17 +766,17 @@ const p3Scenario = (() => {
     const dryPowder = Math.round(p.dp * 100);
     const integrity = forced ? 62 : 100;
     // control = operational control / balance; deploying dry powder deliberately is
-    // the point, so it is NOT penalised here. Reserves stay strong, max stays fragile.
+    // the point, so it is NOT penalized here. Reserves stay strong, max stays fragile.
     const control = Math.max(6, Math.min(100, Math.round(100 - maxDD * 72 + dryPowder * 0.32 - (forced ? 34 : 0) - (p.income ? 0 : 8))));
     // decision strain: deep drawdowns, forced sales, and no income buffer raise the
-    // behavioural load where panic-selling happens; capacity and income lower it.
-    // Acting in the window takes some nerve — a modest, non-punishing bump.
+    // behavioral load where panic-selling happens; capacity and income lower it.
+    // Acting in the window takes some nerve: a modest, non-punishing bump.
     const strainN = maxDD * 100 * 0.85 + (forced ? 40 : 0) + (p.income ? 0 : 16) + (shock === 'jobloss' ? 18 : 0) + (deployed ? 14 : 0) - dryPowder * 0.45;
     const strain = strainN >= 95 ? 'Extreme' : strainN >= 55 ? 'High' : strainN >= 26 ? 'Moderate' : 'Low';
     const strainPen = strain === 'Extreme' ? 32 : strain === 'High' ? 16 : strain === 'Moderate' ? 6 : 0;
     const part = participation[pk];
     // LIVABILITY (repeatability): the balanced posture is the reference. Drawdown,
-    // forced sale, strain, AND deviation from balanced participation all cost — under
+    // forced sale, strain, AND deviation from balanced participation all cost: under
     // = cash drag (defensive), over = fragility (all-in). Deterministic + illustrative.
     const partPen = part < partRef ? (partRef - part) * 1.25 : (part - partRef) * 0.30;
     const livability = Math.max(6, Math.min(100, Math.round(100 - maxDD * 100 * 0.30 - (forced ? 30 : 0) - strainPen - partPen)));
@@ -690,17 +802,22 @@ const p3Scenario = (() => {
   };
 })();
 
-// Tax wedge (single) — after-tax value KEPT per $1 invested, as a winning position
-// scales. Three straight retained-value lines diverging from a common origin at
-// (1×, 1×): Roth keeps ~100% of the gain, taxable ~76% (after 23.8% LTCG + NIIT on
-// the gain), pre-tax ~68% (ordinary income on withdrawal). The gap between the Roth
-// and pre-tax lines is the wedge — it widens with the size of the win. Representative
-// retained-fraction bands, not a specific investor's return.
+// Tax wedge (single): after-tax value kept per dollar inside each account, as a
+// winning position scales from 1x to 30x. One set of representative federal rates
+// is shared by every Part 4 exhibit. Roth keeps 100% (qualified withdrawal).
+// Taxable keeps the principal plus ~76.2% of the gain (23.8% = 20% long-term gains
+// rate + 3.8% NIIT, the rate a large one-time sale can reach). Pre-tax keeps ~70%
+// of the WHOLE withdrawal, principal included (about 30% blended ordinary rate on
+// withdrawals spread over years; a deducted contribution has no basis). Roth and
+// taxable start together at (1x, 1x); pre-tax starts at 0.70x. The deduction a
+// pre-tax contribution earned going in is not drawn, so the Roth-to-pre-tax gap is
+// not a win-size effect: the shaded wedge is Roth against taxable, the gap that
+// grows with the size of the win. Illustrative rates, not a specific investor.
 const taxWedge = (() => {
   const n = 60, x0 = 1, x1 = 30;
-  const roth = curve(x0, x1, n, (t, x) => x);                       // keeps 100% of the gain
-  const taxable = curve(x0, x1, n, (t, x) => 1 + (x - 1) * 0.762);  // keeps ~76.2% (100% − 23.8%)
-  const pretax = curve(x0, x1, n, (t, x) => 1 + (x - 1) * 0.68);    // keeps ~68% (ordinary income)
+  const roth = curve(x0, x1, n, (t, x) => x);                       // keeps 100%
+  const taxable = curve(x0, x1, n, (t, x) => 1 + (x - 1) * 0.762);  // principal + ~76.2% of the gain (100% − 23.8%)
+  const pretax = curve(x0, x1, n, (t, x) => x * 0.70);              // ~70% of the whole withdrawal, principal included
   return { roth, taxable, pretax };
 })();
 
@@ -708,9 +825,9 @@ const taxWedge = (() => {
 // "ROC Changes the Yield" as a laneBar COMPARISON — both carry their shares/values in
 // the spec (radial.segments / laneBar.bars), so neither needs a data generator.
 
-// Part 5 · wrapper compounding — the VERIFIED Part 5 arithmetic ($100k · 10% tax-free
-// vs ~7.5% after annual 25% blended realization · 30y). Deterministic, no noise:
-// 1.10^30 ≈ 17.449 → ≈$1,745,000 · 1.075^30 ≈ 8.755 → ≈$875,000 · Δ ≈ $870,000.
+// Part 5 · wrapper compounding: the verified Part 5 arithmetic ($100k · 10% tax-free
+// vs 7.5% after a 25% blended rate on gains realized every year · 30y). Deterministic,
+// no noise: 1.10^30 ≈ 17.449 → ≈$1,745,000 · 1.075^30 ≈ 8.755 → ≈$875,000 · Δ ≈ $870,000.
 const p5Wrapper = (() => {
   const n = 60;
   const roth = curve(0, 30, n, (t, x) => 100000 * Math.pow(1.10, x), 1, 0);
@@ -718,24 +835,30 @@ const p5Wrapper = (() => {
   return { roth, taxable };
 })();
 
-// Part 5 · earnings risk-compression window — CONCEPTUAL step path of a 10% position
-// through the canonical protocol (T-21→T-6 initiation blackout · T-5→T-1 compress to
-// the 3% cap · T+0 observe · T+1→T+5 assess · T+6+ branch). x = trading days vs event.
+// Part 5 · earnings window: CONCEPTUAL path of a 10% position through the Part 5
+// protocol (T-21→T-6 initiation blackout · one-step trim to the 3% cap at T-5, held
+// through T+0 · T+1→T+5 assess · T+6+ branch). x = trading days vs the report.
+// The x=-4 anchor keeps the Catmull-Rom hover overlay on the cap inside the window.
+// Rebuild adds at most 2.5 points (a quarter of the 10% target) per trading week:
+// eligible from T+6, 5.5% by T+10, 8% by T+15 (10% would land in week three).
 const p5Earnings = (() => {
-  const held = [{ x: -21, y: 10 }, { x: -6, y: 10 }, { x: -5, y: 9.2 }, { x: -4, y: 7.4 }, { x: -3, y: 5.6 }, { x: -2, y: 4.1 }, { x: -1, y: 3 }, { x: 0, y: 3 }, { x: 5, y: 3 }];
-  const rebuild = [{ x: 5, y: 3 }, { x: 6, y: 3.3 }, { x: 8, y: 4.4 }, { x: 10, y: 6 }, { x: 12, y: 7.8 }, { x: 14, y: 9.3 }, { x: 15, y: 10 }];
+  const held = [{ x: -21, y: 10 }, { x: -6, y: 10 }, { x: -5, y: 3 }, { x: -4, y: 3 }, { x: 0, y: 3 }, { x: 5, y: 3 }];
+  const rebuild = [{ x: 5, y: 3 }, { x: 6, y: 3 }, { x: 10, y: 5.5 }, { x: 15, y: 8 }];
   const hold = [{ x: 5, y: 3 }, { x: 10, y: 3 }, { x: 15, y: 3 }];
   const exit = [{ x: 5, y: 3 }, { x: 6, y: 2.1 }, { x: 7, y: 0.9 }, { x: 8, y: 0 }, { x: 15, y: 0 }];
   return { held, rebuild, hold, exit };
 })();
 
-// Part 5 · the posture cycle — CONCEPTUAL behavioral signatures of the three
+// Part 5 · the posture cycle: CONCEPTUAL behavioral signatures of the three
 // postures + the separately governed backbone through ONE stylized market cycle
-// (advance → stress → recovery). Indexed shapes (start = 1), not returns: the
-// exhibit teaches BEHAVIOR — what climbs and crashes and finishes highest
-// (Torque), what refuses to move (Ballast), what spikes and stops out (Hype),
-// and what compounds untouched beneath the system (Bitcoin, drawn low as its
-// own register). Catmull-Rom through waypoints + deterministic micro-noise.
+// (advance → stress → recovery). Indexed shapes (start = 1), not returns: Torque
+// climbs, falls ~60% and finishes highest; Ballast barely moves; Hype spikes and
+// is stopped at breakeven (the profit ladder raised its last stop to entry);
+// Bitcoin runs on its own lower register and falls ~75% in stress (deeper than
+// Torque, per the Part 3 planning range). Catmull-Rom through waypoints +
+// deterministic micro-noise; endpoints carry no noise, so each path starts and
+// ends exactly on its first and last waypoint (the RNG is still drawn at every
+// point, so interior noise is unchanged).
 const p5Cycle = (() => {
   const shape = (wps, n, seed, amp) => {
     const rng = mulberry32(seed);
@@ -749,7 +872,8 @@ const p5Cycle = (() => {
       const cr = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
       const p0 = P[k], p1 = P[k + 1], p2 = P[k + 2], p3 = P[k + 3];
       let y = cr(p0[1], p1[1], p2[1], p3[1]);
-      if (amp) y += (rng() - 0.5) * amp;
+      const jitter = amp ? (rng() - 0.5) * amp : 0;
+      if (i > 0 && i < n) y += jitter;
       out.push({ x: R(cr(p0[0], p1[0], p2[0], p3[0])), y: R(y) });
     }
     return out;
@@ -758,25 +882,30 @@ const p5Cycle = (() => {
     // peak 2.12 → trough 0.86 ≈ −59% (inside the stated 50–70% band); ends highest.
     torque: shape([[0, 1], [1.6, 1.3], [3.1, 1.74], [4.2, 2.12], [4.8, 2.0], [5.6, 1.26], [6.1, 0.86], [7, 1.24], [8.2, 1.9], [9.2, 2.5], [10, 2.92]], 80, 31, 0.04),
     ballast: shape([[0, 1], [2, 1.08], [4.2, 1.16], [5.2, 1.1], [6.1, 1.03], [7.2, 1.11], [8.6, 1.21], [10, 1.3]], 64, 37, 0.018),
-    // spikes on attention, collapses when the story breaks, ENDS at the stop.
-    hype: shape([[0, 1], [1.6, 1.04], [2.7, 1.24], [3.6, 1.8], [4.35, 2.5], [4.95, 2.02], [5.45, 1.48], [5.9, 1.16]], 48, 41, 0.045),
-    // quiet compounding register beneath the system (vertical position is a
-    // register separator, not a relative-performance claim — stated in caution).
-    bitcoin: shape([[0, 0.5], [2.2, 0.58], [4.2, 0.7], [5.4, 0.58], [6.2, 0.54], [7.6, 0.68], [9, 0.8], [10, 0.84]], 64, 43, 0.014),
+    // spikes on attention to +150%, collapses early in stress, ENDS at breakeven:
+    // the ladder sold a third at +50% and a third at +100% and raised the last stop to entry.
+    hype: shape([[0, 1], [1.5, 1.04], [2.5, 1.22], [3.3, 1.75], [4.0, 2.5], [4.35, 2.05], [4.6, 1.5], [4.85, 1]], 48, 41, 0.045),
+    // its own lower register (vertical position separates it; it is not a
+    // relative-performance claim, stated in the caution and hover): peak 0.72 →
+    // trough 0.18 ≈ −75%, deeper than Torque, then recovers.
+    bitcoin: shape([[0, 0.35], [2.2, 0.47], [4.2, 0.72], [5.3, 0.36], [6.2, 0.18], [7.6, 0.3], [9, 0.5], [10, 0.62]], 64, 43, 0.014),
   };
 })();
 
-// Part 6 · slow framework decay — CONCEPTUAL normalized diagnostics (100 = measured
+// Part 6 · slow framework decay. CONCEPTUAL normalized diagnostics (100 = measured
 // health at the last completed review). Five indicators erode at different tempos
-// once reviews stop; none is market data. Smoothstep easing, deterministic.
+// once reviews stop; none is market data. Ease-in power curves (100 − drop·t^bend),
+// so every line keeps steepening instead of leveling off; seeded ±0.2 texture,
+// clamped so no point rises above the measured 100. Deterministic.
 const p6Decay = (() => {
-  const mk = (drop, bend, seed) => curve(0, 12, 48, (t) => 100 - drop * ss(Math.pow(t, bend)), seed, 0.6);
+  const mk = (drop, bend, seed) => curve(0, 12, 48, (t) => 100 - drop * Math.pow(t, bend), seed, 0.4)
+    .map((p) => ({ x: p.x, y: Math.min(100, p.y) }));
   return {
-    freshness: mk(58, 0.9, 11),      // stale conviction — fastest erosion
-    evidence: mk(48, 1.15, 13),      // thesis evidence decay
-    correlation: mk(42, 1.7, 17),    // correlation stacking — accelerates late
-    posture: mk(34, 1.25, 19),       // silent posture drift
-    wrapper: mk(20, 1.05, 23),       // wrapper leakage — slow, compounding
+    freshness: mk(58, 1.2, 11),      // stale conviction: first to slide, largest total fall
+    evidence: mk(48, 1.5, 13),       // thesis evidence decay
+    correlation: mk(42, 2.2, 17),    // correlation stacking: flat for months, steepest at the end
+    posture: mk(34, 1.3, 19),        // silent posture drift: gentle steepening
+    wrapper: mk(20, 1.3, 23),        // wrapper leakage: smallest total fall
   };
 })();
 
@@ -789,18 +918,18 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'sig-payoff', idx: 'S1', group: 'signature', intendedPlacement: 'both',
     claimStack: {
-      primaryClaim: 'Cap the left tail, leave the right tail free to run',
-      visualProof: 'The ACF curve flattens to a defined-downside floor on the left and bends upward past breakeven, pulling away from a straight symmetric reference line toward the asymmetric-upside mark',
-      interactionRole: 'Hover the floor, the breakeven, or the upside mark to see where the shape caps loss and where it opens up',
-      readerAction: 'Compare the capped left against the open right',
-      caution: 'Conceptual payoff shape; illustrative, not a prediction or a specific return',
+      primaryClaim: 'Keep the left tail survivable and let the right tail run, within the concentration limits',
+      visualProof: 'The ACF curve runs a little below a straight symmetric line near the base case, flattens on the left toward a level bounded by sizing, and bends upward past breakeven toward the asymmetric-upside mark',
+      interactionRole: 'Hover the sizing bound, the cost mark or the upside mark to see what the shape costs and what it buys',
+      readerAction: 'Compare the bounded left, the small cost in the middle and the open right',
+      caution: 'Conceptual; the framework limits loss through sizing and exits, not a guaranteed floor.',
     },
-    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering the floor and the upside mark contrasts the capped loss with the open gain' },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering the sizing bound, the cost mark and the upside mark contrasts the bounded loss, the price paid near the base case and the open gain' },
     status: 'implemented', wiredPublic: true,
-    title: 'Shape the Payoff', setupLine:'The payoff shape the whole framework is built to produce',
+    title: 'Shape the Payoff', setupLine:'The payoff shape the whole framework is built to produce, and what it costs',
     claimLabel: 'PAYOFF SHAPE · SIGNATURE',
-    frameworkClaim: 'ACF shapes exposure: the left side is capped, the right side is left free to run.',
-    readerTakeaway: 'Survive the left tail; stay convex on the right tail.',
+    frameworkClaim: 'ACF sizes exposure so the left tail is survivable and leaves the right tail free to run, within the concentration limits.',
+    readerTakeaway: 'Give up a little in the middle to survive the left tail and stay convex on the right.',
     chartType: 'Conceptual payoff curve vs a symmetric reference line.',
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
@@ -809,168 +938,178 @@ export const FRAMEWORK_CHART_SPECS = [
       { provider: 'ACF · Part 6', label: 'Convexity Integrity Score', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
     ],
     explainerHeadline: 'The framework is a payoff shape, not a prediction.',
-    explainerBody: 'A symmetric position gives back on the left what it makes on the right. ACF caps the downside and keeps the upside open, so being roughly right occasionally still compounds. The whole system exists to defend that shape.',
+    explainerBody: 'A plain position loses on the left exactly what it makes on the right. The shaped payoff curves upward: a favorable move earns more than an equal adverse move costs. Sizing and exits keep a wrong call survivable, and the price is paid near the base case, where Ballast reserves and modest sizes give up a little return. In exchange, being roughly right now and then can still compound.',
     explainerConcept: 'Convexity',
     concepts: [{ label: 'Survivable compounding', link: '/part-1-foundation' }, { label: 'Convexity', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'single',
-    ariaSummary: 'A conceptual payoff curve. A straight symmetric reference line loses on adverse outcomes as much as it gains on favourable ones. The ACF curve flattens to a defined-downside floor on the left and bends upward, accelerating, on the right.',
-    domain: { xMin: -1, xMax: 1.6, yMin: -0.85, yMax: 3.8 }, yUnit: '',
-    xTicks: [{ v: -1, label: 'adverse outcome' }, { v: 0, label: 'base' }, { v: 1.6, label: 'favourable outcome' }],
+    ariaSummary: 'A conceptual payoff curve. A straight symmetric reference line loses on adverse outcomes as much as it gains on favorable ones. The ACF curve runs slightly below that line near the base case, which is the cost of the structure. On the left it flattens toward a level bounded by sizing; on the right it bends upward and accelerates.',
+    domain: { xMin: -1, xMax: 1.6, yMin: -1.3, yMax: 3.8 }, yUnit: '',
+    xTicks: [{ v: -1, label: 'adverse outcome' }, { v: 0, label: 'base' }, { v: 1.6, label: 'favorable outcome' }],
     yTicks: [],
     series: [
       { key: 'linear', tier: 'reference', label: 'Symmetric', pts: payoff.linear, labelDy: -2 },
       { key: 'shaped', tier: 'primary', label: 'ACF payoff', pts: payoff.shaped },
     ],
     guides: [{ id: 'breakeven', y: 0, kind: 'zero', label: 'breakeven' }],
-    levels: [{ id: 'floor', y: payoff.floor, kind: 'charcoal', label: 'defined downside' }],
-    markers: [{ id: 'upside', type: 'enso', x: 1.18, y: R(valueAt(payoff.shaped, 1.18)), r: 13, label: 'asymmetric upside', labelAnchor: 'end', labelDy: -18 }],
+    // the cost of the shape: the sliver where the ACF curve trails the symmetric line
+    areas: [{ id: 'costSliver', topKey: 'linear', botKey: 'shaped', xFrom: -0.327, xTo: 0.456, tone: 'muted', opacity: 0.35, label: '' }],
+    levels: [{ id: 'bound', y: payoff.bound, kind: 'charcoal', label: 'bounded by sizing' }],
+    markers: [
+      { id: 'cost', type: 'dot', x: 0.09, y: R(valueAt(payoff.shaped, 0.09)), r: 3.2, label: 'the cost of the shape', labelAnchor: 'start', labelDy: 18 },
+      { id: 'upside', type: 'enso', x: 1.18, y: R(valueAt(payoff.shaped, 1.18)), r: 13, label: 'asymmetric upside', labelAnchor: 'end', labelDy: -18 },
+    ],
     notes: [],
     primaryKey: 'shaped',
     hoverTargets: [
-      { id: 'shaped', kind: 'series', seriesKey: 'shaped', label: 'ACF payoff', name: 'ACF payoff', why: 'Flat and floored when outcomes go against you; accelerating when they go your way. That asymmetry is the entire edge.', claim: 'Exposure is shaped, not chased.', concept: 'Convexity', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'linear', kind: 'series', seriesKey: 'linear', label: 'Symmetric exposure', name: 'Symmetric exposure', why: 'A naive position: it gives back on the downside exactly what it earns on the upside. No structural edge.', claim: 'The shape ACF is built to beat.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'floor', kind: 'level', label: 'Defined downside', name: 'Defined downside', why: 'Sizing, wrappers, and tripwires exist to keep the left tail bounded so a wrong call is survivable.', claim: 'Survival is the precondition for compounding.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'upside', kind: 'marker', label: 'Asymmetric upside', name: 'Asymmetric upside', why: 'The right tail is left uncapped. Occasional convex outcomes do the heavy lifting on terminal wealth.', claim: 'Let the winners run.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'shaped', kind: 'series', seriesKey: 'shaped', label: 'ACF payoff', name: 'ACF payoff', why: 'Flatter when outcomes go against you, accelerating when they go your way, and a little behind a plain position in between. That trade is what the framework is built for.', claim: 'Exposure is shaped, not chased.', concept: 'Convexity', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'linear', kind: 'series', seriesKey: 'linear', label: 'Symmetric exposure', name: 'Symmetric exposure', why: 'A plain position: it loses on the downside exactly what it earns on the upside.', claim: 'The straight line ACF bends.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'bound', kind: 'level', label: 'Bounded by sizing', name: 'Bounded by sizing', why: 'Position sizing, exits and tripwires keep a wrong call survivable. The line marks the worst point in this picture, not a guaranteed floor: a single position can still fail outright, and the portfolio is sized to survive it.', claim: 'Survival is the precondition for compounding.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'cost', kind: 'marker', label: 'The cost of the shape', name: 'The cost of the shape', why: 'Near the base case the shaped position trails a plain one. Ballast reserves, modest position sizes and exits that sometimes fire on noise all cost a little when nothing dramatic happens.', claim: 'Convexity has a price, and this is where it is paid.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management#ballast' },
+      { id: 'upside', kind: 'marker', label: 'Asymmetric upside', name: 'Asymmetric upside', why: 'The right tail is left open, within the concentration limits. Occasional convex outcomes do the heavy lifting on terminal wealth.', claim: 'Let the winners run.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
     ],
-    mobileTapTargets: ['shaped', 'floor', 'upside', 'linear'],
-    implementationNotes: 'This replaces the existing "Defined downside. Asymmetric upside." web chart. Belongs on the landing hero AND as the Part 1 opener. Marketing should refine curve character and labels.',
+    mobileTapTargets: ['shaped', 'bound', 'cost', 'upside', 'linear'],
+    implementationNotes: 'Wired on /part-1-foundation, /part-1-pictures and /framework-in-pictures. Curve 0.9·softplus(2.3x) − 0.74 + 0.35·max(0, x)² against y = 1.2x on one shared grid: it trails the reference between x ≈ −0.33 and 0.46 (by at most about 0.12, the cost of the shape), and the sizing-bound level sits at its value at x = −1 (−0.654). The shaded sliver and the cost marker make that price visible.',
   },
 
   {
     chartId: 'sig-shape', idx: 'S2', group: 'signature', intendedPlacement: 'docs-landing',
     claimStack: {
-      primaryClaim: 'ACF reshapes the distribution of outcomes, not just the average',
-      visualProof: 'A symmetric bell against the ACF-shaped curve, with the transfer made visible: the loss mass removed on the left washed in the stress tone, the gain mass added on the right washed in the accent',
-      interactionRole: 'Hover the curves or the tail markers to read what was traded for what',
-      readerAction: 'Compare the two tails against the same base case',
-      caution: 'Conceptual outcome distributions; illustrative, not measured returns',
+      primaryClaim: 'With the average held fixed, ACF thins the deep-loss tail and lengthens the gain tail, and pays for it with more small shortfalls',
+      visualProof: 'A symmetric normal bell against an ACF-shaped curve with the same area and the same average: thinner on the far left, piled up just below the base case, thinner through moderate gains and longer on the far right, with the deep-loss difference washed in the stress tone and the right-tail difference in the accent',
+      interactionRole: 'Hover the curves or the three markers to read what was traded for what',
+      readerAction: 'Compare the two tails, then find where the shape pays for them',
+      caution: 'Conceptual outcome distributions with the same area and average; illustrative, not measured returns',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Bend the Tail', setupLine:'ACF reshapes the distribution of outcomes, it does not just chase higher returns',
+    title: 'Bend the Tail', setupLine:'Hold the average fixed and see what the framework changes around it',
     claimLabel: 'EXPOSURE SHAPING · SIGNATURE',
-    frameworkClaim: 'ACF truncates the left tail and extends the right tail of the outcome distribution.',
-    readerTakeaway: 'Same center of gravity, deliberately reshaped tails.',
-    chartType: 'Conceptual outcome-distribution reshape vs a symmetric reference.',
+    frameworkClaim: 'ACF aims to thin the left tail and lengthen the right without changing the average.',
+    readerTakeaway: 'Same average, different tails: fewer deep losses, more small shortfalls, a longer right tail.',
+    chartType: 'Conceptual outcome-distribution reshape vs a symmetric normal reference.',
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 1', label: 'Fragility is structural, not statistical', role: 'verifies-concept', url: '/part-1-foundation' },
       { provider: 'ACF · Part 5', label: 'Carry posture and barbell structure', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
     ],
-    explainerHeadline: 'We reshape the outcomes, not the average.',
-    explainerBody: 'A symmetric strategy accepts a fat left tail to earn a fat right tail. ACF spends structure to thin the left tail and thicken the right, so the same broad exposure produces a fundamentally different distribution of survival outcomes.',
+    explainerHeadline: 'We reshape the tails, not the average.',
+    explainerBody: 'A symmetric bell puts as much weight in the loss tail as in the gain tail. The framework spends structure to change that: position limits, stops and tripwires thin the deep-loss tail, and convex positions left free to run, within the concentration limits, lengthen the gain tail. The bill arrives in the middle, as more small shortfalls and fewer middling gains. The picture holds the average fixed so the trade is plain to see.',
     explainerConcept: 'Barbell structure',
     concepts: [{ label: 'Fragility', link: '/part-1-foundation' }, { label: 'Carry posture', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'single',
-    ariaSummary: 'Two outcome-distribution curves. The symmetric reference is a bell centred on the base case. The ACF distribution is compressed on the loss side and stretched, with a small extra bump, on the gain side.',
-    domain: { xMin: -3, xMax: 4, yMin: 0, yMax: 1.16 }, yUnit: '',
+    ariaSummary: 'Two outcome distributions with the same area and the same average. The symmetric reference is a normal bell centered on the base case. The ACF curve is thinner in the deep-loss tail, piles up just below the base case, is thinner through moderate gains, and runs longer into the far right tail.',
+    domain: { xMin: -3, xMax: 4, yMin: 0, yMax: 1.7 }, yUnit: '',
     xTicks: [{ v: -3, label: 'loss' }, { v: 0, label: 'base case' }, { v: 4, label: 'gain' }],
     yTicks: [],
     series: [
-      { key: 'symmetric', tier: 'reference', label: 'Symmetric', pts: shape.symmetric, labelDy: 16 },
-      { key: 'shaped', tier: 'primary', label: 'ACF shaped', pts: shape.shaped, labelDy: -10 },
+      { key: 'symmetric', tier: 'reference', label: 'Symmetric (normal)', pts: shape.symmetric, labelDy: 4 },
+      { key: 'shaped', tier: 'primary', label: 'ACF shaped', pts: shape.shaped, labelDy: -13 },
     ],
     areas: [
       { id: 'underShaped', topKey: 'shaped', kind: 'under', label: '' },
-      // the mechanism made visible: probability mass MOVES — the loss mass the
-      // structure removed (stress wash, left) becomes the gain mass added
-      // (accent wash, right); same centre of gravity, reshaped tails
-      { id: 'lossRemoved', topKey: 'symmetric', botKey: 'shaped', xTo: -0.2, tone: 'stress', opacity: 0.16, label: 'loss mass removed', labelX: -1.9 },
-      { id: 'gainAdded', topKey: 'shaped', botKey: 'symmetric', xFrom: 0.95, tone: 'accent', opacity: 0.15, label: 'gain mass added', labelX: 2.7 },
+      // the washes stop at the outer crossings (x = -1.17 and 1.91): stress on the
+      // left, where the ACF curve is thinner (fewer deep losses); accent on the
+      // right, where it runs longer. Their areas are 0.157 and 0.110; the middle
+      // trade (0.496 more small shortfalls, 0.452 fewer middling gains) balances
+      // them, and the three markers name all of it.
+      { id: 'lossThinned', topKey: 'symmetric', botKey: 'shaped', xTo: -1.168, tone: 'stress', opacity: 0.16, label: '' },
+      { id: 'tailLengthened', topKey: 'shaped', botKey: 'symmetric', xFrom: 1.908, tone: 'accent', opacity: 0.15, label: '' },
     ],
     markers: [
-      { id: 'truncated', type: 'dot', x: -1.3, y: R(valueAt(shape.shaped, -1.3)), r: 3.2, label: 'left tail truncated', labelAnchor: 'start', labelDy: -14 },
-      { id: 'extended', type: 'dot', x: 2.4, y: R(valueAt(shape.shaped, 2.4)), r: 3.2, label: 'right tail extended', labelAnchor: 'end', labelDy: -14 },
+      { id: 'leftTail', type: 'dot', x: -1.3, y: R(valueAt(shape.shaped, -1.3)), r: 3.2, label: 'fewer deep losses', labelAnchor: 'end', labelDy: -22 },
+      { id: 'middle', type: 'dot', x: -0.35, y: R(valueAt(shape.shaped, -0.35)), r: 3.2, label: 'more small shortfalls', labelAnchor: 'start', labelDy: -8 },
+      { id: 'rightTail', type: 'dot', x: 2.4, y: R(valueAt(shape.shaped, 2.4)), r: 3.2, label: 'longer right tail', labelAnchor: 'start', labelDy: -14 },
     ],
     notes: [],
     primaryKey: 'shaped',
     hoverTargets: [
-      { id: 'shaped', kind: 'series', seriesKey: 'shaped', label: 'ACF shaped', name: 'ACF shaped distribution', why: 'Thin on the loss side, heavy on the gain side. Structure is spent to buy that asymmetry.', claim: 'Outcomes are engineered, not hoped for.', concept: 'Barbell structure', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'symmetric', kind: 'series', seriesKey: 'symmetric', label: 'Symmetric', name: 'Symmetric distribution', why: 'The default risk posture: a fat left tail is the price of the right tail.', claim: 'The distribution ACF refuses to accept.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'truncated', kind: 'marker', label: 'Left tail truncated', name: 'Left tail truncated', why: 'Wrappers, sizing, and tripwires cut the worst outcomes off the table.', claim: 'Defined downside in distribution form.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'extended', kind: 'marker', label: 'Right tail extended', name: 'Right tail extended', why: 'Convex positions keep their uncapped upside, fattening the right side.', claim: 'Asymmetric upside in distribution form.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'shaped', kind: 'series', seriesKey: 'shaped', label: 'ACF shaped', name: 'ACF shaped distribution', why: 'Same average as the bell. Deep losses are rarer and big gains more common; the price is more small shortfalls and fewer middling gains.', claim: 'Structure buys the asymmetry, and the middle pays for it.', concept: 'Barbell structure', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'symmetric', kind: 'series', seriesKey: 'symmetric', label: 'Symmetric (normal) outcomes', name: 'Symmetric (normal) outcomes', why: 'The textbook bell: the left tail is as wide as the right, so a bad outcome can hurt as much as an equally likely good one helps.', claim: 'The shape ACF sets out to change.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'leftTail', kind: 'marker', label: 'Fewer deep losses', name: 'Fewer deep losses', why: 'Position limits, stops and tripwires make the deepest losses rarer and smaller. They do not make them impossible.', claim: 'Bounded by sizing, in distribution form.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'middle', kind: 'marker', label: 'More small shortfalls', name: 'More small shortfalls', why: 'The price of the shape. Ballast reserves, modest sizes and exits that sometimes fire on noise leave more outcomes a little below the base case, and fewer middling gains.', claim: 'Convexity is paid for in the middle.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management#torque' },
+      { id: 'rightTail', kind: 'marker', label: 'Longer right tail', name: 'Longer right tail', why: 'Convex positions left free to run, within the concentration limits, stretch the gain side. Under current law, a Roth keeps all of that upside on a qualified withdrawal.', claim: 'Asymmetric upside, in distribution form.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
     ],
-    mobileTapTargets: ['shaped', 'truncated', 'extended', 'symmetric'],
-    implementationNotes: 'Companion to sig-payoff. Distribution framing gives the landing page visual variety. Marketing should decide whether to ship payoff-curve, distribution, or both.',
+    mobileTapTargets: ['shaped', 'leftTail', 'middle', 'rightTail', 'symmetric'],
+    implementationNotes: 'Companion to sig-payoff. Wired on the cover (#lens) and /framework-in-pictures. The ACF curve is area- and mean-preserving against the unit normal over [-3, 4] (area 2.501 vs 2.503, mean -0.01 vs 0.00) and crosses it at x ≈ -1.17, 0.19 and 1.91; the two washes stop at the outer crossings.',
   },
 
   /* ── DOCS LANDING PAGE ─────────────────────────────────────────────────── */
   {
     chartId: 'dl-convexity-window', idx: 'L1', group: 'docs-landing', intendedPlacement: 'docs-landing',
     claimStack: {
-      primaryClaim: 'ACF waits for setups where downside is defined and upside can accelerate',
-      visualProof: 'A representative path: patient compression, then an accelerating release past a defined-risk marker',
-      interactionRole: 'Hover the compression field, confirmation, and release to read the setup',
-      readerAction: 'See where convexity actually pays',
-      caution: 'Representative exhibit, not historical data',
+      primaryClaim: 'A new position earns its full weight only after the market confirms the thesis',
+      visualProof: 'An illustrative path for one new position: a flat range inside a compression band, a confirmation marker once the path has cleared that range, then an accelerating run to a release marker',
+      interactionRole: 'Hover the compression band, the confirmation mark and the release to see when a position waits, adds and runs',
+      readerAction: 'Find where the framework adds size, and where it declines to',
+      caution: 'Conceptual path for one new position, with no price levels implied; the Bitcoin backbone and Ballast run on different clocks',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'The Window Opens', setupLine:'Compression, then confirmation, then asymmetric release',
-    claimLabel: 'CONVEXITY · WINDOW',
-    frameworkClaim: 'ACF waits for setups where downside is defined and upside can accelerate.',
-    readerTakeaway: 'Patience through compression; size into confirmation; let the release run.',
-    chartType: 'Representative regime/path chart with a compression field and release marker.',
-    visualDataMode: 'representative',
-    disclosure: DISCLOSURE.representative, footerCta: 'View sources',
+    title: 'The Window Opens', setupLine:'A new position waits out the range, adds on confirmation, then lets the move run',
+    claimLabel: 'ENTRIES · CONFIRMATION',
+    frameworkClaim: 'ACF gives a new position its full weight only once momentum confirms its CIS score, then lets it run while conviction holds.',
+    readerTakeaway: 'Wait through the range, add on confirmation, then let it run within the caps.',
+    chartType: 'Conceptual price path with a compression band, a confirmation marker and a release marker.',
+    visualDataMode: 'conceptual',
+    disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 5', label: 'Position management and entry discipline', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
       { provider: 'ACF · Part 6', label: 'Convexity windows and CIS', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
     ],
-    explainerHeadline: 'Convexity is a window, not a constant.',
-    explainerBody: 'For long stretches a setup compresses: range-bound, downside defined, nothing to do. The framework waits. When the thesis confirms, exposure is added into the break, and the position is allowed to release asymmetrically rather than being trimmed early.',
+    explainerHeadline: 'Conviction waits for the market to agree.',
+    explainerBody: 'A new position can spend a long time going nowhere, and the framework is happy to wait. Size is added in stages as the evidence arrives, and full weight comes only once momentum confirms the thesis. Two parts of the book keep a different clock: Bitcoin is bought on a schedule, faster when it is cheap, and Ballast is there to buy the drawdown.',
     explainerConcept: 'Convexity window',
     concepts: [{ label: 'Convexity window', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'single',
-    ariaSummary: 'A representative price path. It stays range-bound inside a soft compression field, breaks out at a confirmation marker, then accelerates upward into an asymmetric release.',
-    domain: { xMin: 0, xMax: 100, yMin: 90, yMax: 210 }, yUnit: 'idx',
-    xTicks: [{ v: 0, label: 'setup' }, { v: 50, label: 'confirmation' }, { v: 100, label: 'release' }],
-    yTicks: [{ v: 100, label: 'base' }, { v: 150 }, { v: 200 }],
+    ariaSummary: 'A conceptual price path for one new position. It stays range-bound inside a soft compression band, clears the range and is confirmed, then accelerates upward into an asymmetric release.',
+    domain: { xMin: 0, xMax: 100, yMin: 90, yMax: 210 }, yUnit: '',
+    xTicks: [{ v: 0, label: 'setup' }, { v: 60, label: 'confirmation' }, { v: 100, label: 'release' }],
+    yTicks: [{ v: 100, label: 'base' }],
     series: [{ key: 'v', tier: 'primary', label: 'Path', pts: window_.value }],
-    bands: [{ id: 'compression', kind: 'regime', render: 'wash', x0: 0, x1: 50, label: 'compression · downside defined', labelAnchor: 'start' }],
-    levels: [{ id: 'floor', y: 96, kind: 'charcoal', label: 'defined downside' }],
+    bands: [{ id: 'compression', kind: 'regime', render: 'wash', x0: 0, x1: 50, label: 'compression · waiting for confirmation', labelAnchor: 'start' }],
     markers: [
-      { id: 'confirm', type: 'enso', x: 51, y: R(valueAt(window_.value, 51)), r: 12, label: 'confirmation', labelAnchor: 'end', labelDy: -16 },
+      { id: 'confirm', type: 'enso', x: 60, y: R(valueAt(window_.value, 60)), r: 12, label: 'confirmation', labelAnchor: 'end', labelDy: -16 },
       { id: 'release', type: 'dot', x: 92, y: R(valueAt(window_.value, 92)), r: 3.2, label: 'asymmetric release', labelAnchor: 'end', labelDy: -14 },
     ],
     notes: [],
     primaryKey: 'v',
     hoverTargets: [
-      { id: 'compression', kind: 'band', label: 'Compression field', name: 'Compression field', why: 'Range-bound, low energy, downside defined. The framework is patient here on purpose.', claim: 'Most of the time there is nothing to do.', concept: 'Convexity window', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'confirm', kind: 'marker', label: 'Confirmation', name: 'Confirmation', why: 'Thesis and momentum align. This is where exposure is added, not at the first hope.', claim: 'Size into confirmation, not anticipation.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'release', kind: 'marker', label: 'Asymmetric release', name: 'Asymmetric release', why: 'The convex move the patience was for. The position is allowed to run rather than trimmed early.', claim: 'Let the release express.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'v', kind: 'series', seriesKey: 'v', label: 'Path', name: 'Representative path', why: 'One illustrative journey through a convexity window, from compression to release.', claim: 'Shape over forecast.', concept: 'Convexity window', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'compression', kind: 'band', label: 'Compression', name: 'Compression', why: 'Range-bound and quiet. A new position stays at the size its evidence supports, and nothing is added on hope.', claim: 'A new position waits here; the backbone keeps accumulating.', concept: 'Convexity window', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'confirm', kind: 'marker', label: 'Confirmation', name: 'Confirmation', why: 'The path clears its range and momentum turns in the thesis\'s favor. This is where the position earns more weight, in stages, rather than on the first hopeful uptick.', claim: 'Size into confirmation, not anticipation.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'release', kind: 'marker', label: 'Asymmetric release', name: 'Asymmetric release', why: 'The move the patience was for. The position runs until its thesis, momentum or the concentration caps say otherwise.', claim: 'The run ends on evidence or the caps, not on a rebalancing schedule.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'v', kind: 'series', seriesKey: 'v', label: 'Path', name: 'Illustrative path', why: 'One invented path for a single new position: a quiet range, a confirmed break, then a run.', claim: 'Patience first, size second.', concept: 'Convexity window', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['compression', 'confirm', 'release', 'v'],
-    implementationNotes: 'Compression uses a feathered ink-wash band (washRect), NOT a pressure field (that treatment is reserved for the inflation shock).',
+    implementationNotes: 'Compression uses a feathered ink-wash band (washRect), not a pressure field. The confirmation marker and tick sit at x = 60, after the path first clears its x <= 50 range (97.4 to 102.6) at x = 57.3. No numeric y ticks and no level line: the path is conceptual and its levels carry no meaning.',
   },
 
   {
     chartId: 'dl-regime-map', idx: 'L2', group: 'docs-landing', intendedPlacement: 'docs-landing',
     claimStack: {
       primaryClaim: 'The same portfolio behaves differently in different macro regimes',
-      visualProof: 'A growth × inflation quadrant — stagflation, reflation, deflation, goldilocks, each labelled with its own leadership — crossed by one representative path of capital moving disinflation boom → deflation scare → reflation → inflation shock → a live "Now" reading near the centre',
-      interactionRole: 'Hover or tap a waypoint to read that regime\'s weather and which assets led there',
-      readerAction: 'Trace the path quadrant to quadrant and end on the Now marker',
-      caution: 'Representative regime path, not measured macro history; waypoint positions are illustrative',
+      visualProof: 'A growth × inflation quadrant (stagflation, reflation, deflation, goldilocks), each labeled with the leadership the framework associates with it, crossed by one illustrative path: disinflation boom → deflation scare → reflation → inflation shock → an illustrative “Now” marker near the center',
+      interactionRole: 'Hover or tap a waypoint to read that regime\'s weather and which assets tend to lead there',
+      readerAction: 'Trace the path quadrant to quadrant and end on the illustrative Now marker',
+      caution: 'Illustrative regime path; every waypoint, including “Now”, is placed by hand. Leadership in each quadrant is the framework\'s reading of common market experience, not a measured result. Quadrant names follow common market usage, not any one published model.',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Capital Has Weather', setupLine:'Same assets, different regime, different behaviour',
+    title: 'Capital Has Weather', setupLine:'Same assets, different regime, different behavior',
     claimLabel: 'REGIME MAP · CAPITAL WEATHER',
-    frameworkClaim: 'Portfolio construction changes with the macro regime.',
+    frameworkClaim: 'The same holdings behave differently as growth and inflation shift, so where you stand gets re-read at every review.',
     readerTakeaway: 'You are not allocating in a vacuum; you are allocating into weather.',
-    chartType: 'Growth × inflation quadrant with a representative regime path.',
-    visualDataMode: 'representative',
-    disclosure: DISCLOSURE.representative, footerCta: 'View sources',
+    chartType: 'Growth × inflation quadrant with an illustrative regime path.',
+    visualDataMode: 'conceptual',
+    disclosure: `${DISCLOSURE.conceptual} · Leadership labels are the framework's judgment`, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 2', label: 'Macro thesis and regime identification', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
       { provider: 'ACF · Part 1', label: 'Regime-agnostic allocation as a failure mode', role: 'verifies-concept', url: '/part-1-foundation' },
+      { provider: 'ACF dashboard', label: 'Regime reading from the direction of rates, inflation and unemployment (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#cis-math' },
     ],
     explainerHeadline: 'The same portfolio behaves differently in different weather.',
-    explainerBody: 'Growth and inflation define four broad regimes, and the leadership that wins in one loses in another. ACF reads which quadrant capital is moving through and shapes exposure to fit it, instead of holding one static mix through every season.',
+    explainerBody: 'Growth and inflation are one common way to sort the market\'s weather, and leadership rotates across it. Read this map as context for the structural thesis in Part 2. The dashboard\'s own regime reading uses different signals (the direction of rates, inflation and unemployment, as of September 2026).',
     explainerConcept: 'Macro regime',
     concepts: [{ label: 'Macro regime', link: '/part-2-lineage-macro-thesis' }, { label: 'Regime fit', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'quadrant',
-    ariaSummary: 'A four-quadrant map of growth versus inflation. Quadrants are labelled stagflation, reflation, deflation, and goldilocks. A representative path traces capital moving from a disinflation boom through a deflation scare, reflation, an inflation shock, and back toward the centre.',
+    ariaSummary: 'A conceptual four-quadrant map of growth versus inflation, with quadrants labeled stagflation, reflation, deflation and goldilocks. An illustrative path traces capital from a disinflation boom through a deflation scare, reflation and an inflation shock, and ends at an illustrative “Now” marker near the center.',
     quadrant: {
       xAxis: { neg: 'WEAK GROWTH', pos: 'STRONG GROWTH' },
       yAxis: { neg: 'LOW INFLATION', pos: 'HIGH INFLATION' },
@@ -987,43 +1126,44 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'wp5',
     hoverTargets: [
-      { id: 'wp1', kind: 'waypoint', label: 'Disinflation boom', name: 'Disinflation boom', why: 'Strong growth, falling inflation. Growth and risk lead; the easy regime to mistake for permanent.', claim: 'Goldilocks rewards risk-on.', concept: 'Regime fit', link: '/part-2-lineage-macro-thesis' },
-      { id: 'wp2', kind: 'waypoint', label: 'Deflation scare', name: 'Deflation scare', why: 'Growth rolls over with low inflation. Duration and quality lead; convexity hides in safety.', claim: 'Different weather, different leaders.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
-      { id: 'wp3', kind: 'waypoint', label: 'Reflation', name: 'Reflation', why: 'Growth and inflation rise together. Real assets and energy lead; bonds stop helping.', claim: 'Real assets earn their keep.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
-      { id: 'wp4', kind: 'waypoint', label: 'Inflation shock', name: 'Inflation shock', why: 'Weak growth, high inflation. The stagflation corner where 60/40 broke and hard assets and defense led.', claim: 'The regime that breaks the old hedge.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'wp5', kind: 'waypoint', label: 'Now', persistentLabel: true, name: 'Where capital sits now', why: 'The framework keeps re-reading position on this map rather than assuming last season persists.', claim: 'Position is a live reading, not a constant.', concept: 'Adaptation', link: '/part-2-lineage-macro-thesis' },
+      { id: 'wp1', kind: 'waypoint', label: 'Disinflation boom', name: 'Disinflation boom', why: 'Strong growth, low inflation. Growth and risk assets tend to lead; it is the easiest regime to mistake for permanent.', claim: 'Goldilocks rewards risk-on.', concept: 'Regime fit', link: '/part-2-lineage-macro-thesis' },
+      { id: 'wp2', kind: 'waypoint', label: 'Deflation scare', name: 'Deflation scare', why: 'Weak growth, low inflation. Long-duration bonds and quality balance sheets tend to lead while riskier assets lag.', claim: 'Different weather, different leaders.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'wp3', kind: 'waypoint', label: 'Reflation', name: 'Reflation', why: 'Strong growth, high inflation. Real assets and energy tend to lead, and bonds stop helping.', claim: 'Real assets earn their keep.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'wp4', kind: 'waypoint', label: 'Inflation shock', name: 'Inflation shock', why: 'Weak growth, high inflation. Stocks and bonds can fall together here, while hard assets and defense tend to lead.', claim: 'The regime that breaks the old hedge.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'wp5', kind: 'waypoint', label: 'Now', persistentLabel: true, name: 'Where you stand (illustrative)', why: 'Illustrative position. The habit is to re-read it at every review instead of assuming last season persists.', claim: 'Where you stand gets re-read, not assumed.', concept: 'Adaptation', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['wp1', 'wp2', 'wp3', 'wp4', 'wp5'],
-    implementationNotes: 'Bespoke quadrant layout. Waypoint positions and regime copy are representative; marketing should validate the path narrative.',
+    implementationNotes: 'Bespoke quadrant layout. Every waypoint, the "Now" marker included, is a hard-coded illustrative coordinate; nothing on the page reads macro data. Quadrant leadership labels are the framework\'s judgment. The axes are levels (weak or strong growth, low or high inflation), and the waypoint copy uses the same level semantics.',
   },
 
   {
     chartId: 'dl-tripwire-loop', idx: 'L3', group: 'docs-landing', intendedPlacement: 'docs-landing',
     claimStack: {
       primaryClaim: 'ACF is a closed-loop operating system, not a fixed set of weights',
-      visualProof: 'A calm left-to-right governed path — thesis, exposure, risk, the tripwire checkpoint, adjust — closed by one complete solid return arc carrying evidence back into the thesis',
+      visualProof: 'A left-to-right path (thesis, exposure, risk, the tripwire checkpoint, the governed response) closed by one solid return arc that carries evidence back into the thesis',
       interactionRole: 'Hover or tap a step to read what it contributes and what the tripwire governs',
       readerAction: 'Follow the path to the tripwire, then trace the return back to the thesis',
-      caution: 'Conceptual governance loop; the full tripwire taxonomy lives in Part 6',
+      caution: 'Conceptual governance loop; the operating tripwires are in Part 5, and the signals the dashboard watches are on the Math page (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Govern the Thesis', setupLine:'A thesis creates exposure; tripwires keep the response disciplined.',
+    title: 'Govern the Thesis', setupLine:'A thesis earns exposure, and tripwires decide when to stop and check',
     claimLabel: 'SYSTEM · GOVERNED LOOP',
     frameworkClaim: 'ACF is a closed-loop operating system, not a fixed set of weights.',
-    readerTakeaway: 'The goal is not to avoid risk — it is to govern it.',
+    readerTakeaway: 'Take risk on purpose, then govern it.',
     chartType: 'Beginner governance loop: thesis → exposure → risk → tripwire → adjust, returning to the thesis.',
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 1', label: 'Order of operations · the closed loop', role: 'verifies-concept', url: '/part-1-foundation' },
       { provider: 'ACF · Part 6', label: 'CIS governance and tripwires', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
+      { provider: 'ACF dashboard', label: 'Tripwire signals the dashboard watches (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#governance-math' },
     ],
     explainerHeadline: 'Tripwires keep conviction from drifting.',
-    explainerBody: 'A thesis is allowed to create exposure, but exposure creates risk. Tripwires mark when the framework should watch, adjust, or revisit the thesis — before emotion takes over.',
+    explainerBody: 'A thesis earns exposure, and exposure creates risk. A tripwire marks the moment to stop and check whether a signal is noise or a broken thesis. The answer picks one of four responses, from watching to exiting, before emotion picks one for you.',
     explainerConcept: 'Governed loop',
     concepts: [{ label: 'Tripwires', link: '/part-5-portfolio-construction-position-management' }, { label: 'CIS governance', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'governanceLoop',
-    ariaSummary: 'A simple left-to-right governed path — thesis, exposure, risk, a tripwire checkpoint, and adjustment — with a return arc showing that evidence updates the thesis. The tripwire is the quiet checkpoint that governs the response.',
+    ariaSummary: 'A simple left-to-right path: thesis, exposure, risk, a tripwire checkpoint and a governed response, with a return arc showing that evidence updates the thesis. The tripwire triggers a check before any response is chosen.',
     governanceLoop: {
       governorId: 'tripwire',
       returnLabel: 'evidence updates the thesis',
@@ -1037,360 +1177,364 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'thesis',
     hoverTargets: [
-      { id: 'thesis', kind: 'node', label: 'Thesis', name: 'Thesis', why: 'The starting belief or framework view.', claim: 'Structure starts with a thesis.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'thesis', kind: 'node', label: 'Thesis', name: 'Thesis', why: 'The multi-year view of the forces shaping markets, written so that it can be proven wrong.', claim: 'Structure starts with a thesis.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
       { id: 'exposure', kind: 'node', label: 'Exposure', name: 'Exposure', why: 'Capital placed because the thesis has consequences.', claim: 'Exposure is the thesis made real.', concept: 'Exposure', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'risk', kind: 'node', label: 'Risk', name: 'Risk', why: 'Every exposure creates fragility that must be watched.', claim: 'Risk is the price of exposure.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'tripwire', kind: 'node', label: 'Tripwire', name: 'Tripwire', why: 'A pre-defined signal that forces discipline before emotion.', claim: 'Behaviour is governed, not improvised.', concept: 'Tripwires', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'adjust', kind: 'node', label: 'Adjust', name: 'Adjust', why: 'The response: watch, resize, hedge, or revisit the thesis.', claim: 'The response is disciplined, then feeds back.', concept: 'Governed response', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'risk', kind: 'node', label: 'Risk', name: 'Risk', why: 'Every exposure creates fragility that has to be watched.', claim: 'Risk is the price of exposure.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'tripwire', kind: 'node', label: 'Tripwire', name: 'Tripwire', why: 'A predefined threshold that triggers a review before denial, emotion or information overload can take over. The dashboard flags the ones it has data for; the response is yours.', claim: 'The rule is set before the stress arrives.', concept: 'Tripwires', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'adjust', kind: 'node', label: 'Adjust', name: 'Adjust', why: 'After verification, the response is one of four: watch, hedge, trim, or exit and redeploy. What it learns goes back to the thesis.', claim: 'The response follows the evidence, then feeds back.', concept: 'Governed response', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['thesis', 'exposure', 'risk', 'tripwire', 'adjust'],
-    implementationNotes: 'Beginner governanceLoop layout — an additive primitive, NOT the systemLoop ring. A calm left-to-right path with one governing checkpoint (the tripwire gate) and a subtle return arc. Teaches the smallest useful loop: thesis → exposure → risk → tripwire → adjust → updated thesis. Advanced tripwire mechanics belong in details / later docs.',
+    implementationNotes: 'Beginner governanceLoop layout, an additive primitive distinct from the systemLoop ring: a left-to-right path with one governing checkpoint (the tripwire) and a return arc. It teaches the smallest useful loop (thesis → exposure → risk → tripwire → response → updated thesis); tripwire mechanics live in Part 5 and on the Math page. Wired on /part-1-foundation, /part-1-pictures and /framework-in-pictures.',
   },
 
   /* ── PART 1 FRAMEWORK ──────────────────────────────────────────────────── */
   {
     chartId: 'p1-hedge-broke', idx: '01', group: 'part-1', intendedPlacement: 'part-1',
     claimStack: {
-      primaryClaim: 'Stocks and bonds are not always true diversifiers',
-      visualProof: 'Stocks, bonds, and the 60/40 blend indexed together through an inflation shock — bonds fall with stocks',
-      interactionRole: 'Hover each line and the shock band to watch the hedge fail',
-      readerAction: 'Watch the hedge fall with the risk',
-      caution: 'Representative indexed paths, not historical data',
+      primaryClaim: 'In 2022 the bonds in a 60/40 portfolio fell with the stocks instead of cushioning them',
+      visualProof: 'US stocks, US bonds and a 60/40 mix, indexed to 100 at December 2021, all falling through 2022',
+      interactionRole: 'Hover each line, the shaded stretch and the year-end line to see the cushion give way',
+      readerAction: 'Watch the bond line fall with the stock line',
+      caution: 'Drawn through the published figures at the marked points. The path between them is illustrative, not plotted data.',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'The Hedge Broke', setupLine:'Indexed total return through an inflation shock: stocks, bonds, and the 60/40 blend',
+    title: 'The Hedge Broke', setupLine: 'Total return of US stocks, US bonds and a 60/40 mix through 2022, indexed to 100 at December 2021',
     claimLabel: 'DIVERSIFICATION · FRAGILITY',
-    frameworkClaim: 'Stocks and bonds are not always true diversifiers.',
-    readerTakeaway: 'When inflation drives the regime, the hedge can fall with the risk.',
-    chartType: 'Indexed-return stress chart, 3 series (stocks, bonds, 60/40).',
+    frameworkClaim: 'Stocks and bonds are not always diversifiers; in an inflation shock they can fall together.',
+    readerTakeaway: 'When inflation drives the market, the hedge can fall with the risk it was bought to offset.',
+    chartType: 'Indexed total-return chart, 3 series (stocks, bonds, 60/40), December 2021 to December 2022.',
     visualDataMode: 'representative',
     disclosure: DISCLOSURE.representative, footerCta: 'View sources',
-    historicalFooter: 'Source · FRED · SP500TR + Bloomberg US Agg · monthly · 2020 to 2024 · indexed at shock onset',
     sources: [
-      { provider: 'FRED', seriesId: 'SP500TR', label: 'S&P 500 total return', role: 'target-source', dateRange: '2020 to 2024', frequency: 'Monthly', transform: 'Indexed to 100 at shock onset', url: 'https://fred.stlouisfed.org/series/SP500TR' },
-      { provider: 'FRED', seriesId: 'BAMLCC0A0CMTRIV', label: 'Bloomberg US Aggregate total return (ICE proxy)', role: 'target-source', dateRange: '2020 to 2024', frequency: 'Monthly', transform: 'Indexed to 100 at shock onset', url: 'https://fred.stlouisfed.org/series/BAMLCC0A0CMTRIV' },
-      { provider: 'Author calculation', label: '60/40 blend, monthly rebalance', role: 'methodology', transform: '0.6 × equity + 0.4 × aggregate' },
+      { provider: 'Janus Henderson Portfolio Construction and Strategy Team', label: 'Reports of the death of 60/40 have been greatly exaggerated (2023). 2022, S&P 500 TR and Bloomberg US Agg TR: 60/40 −16.1%', role: 'verifies-concept', url: 'https://cdn.janushenderson.com/webdocs/PCS_whitepaper_death-60-40-greatly-exaggerated_US.pdf' },
+      { provider: 'Aswath Damodaran (NYU Stern)', label: 'Historical Returns on Stocks, Bonds and Bills: 1928-2024 (updated January 5, 2026). 2022, S&P 500 with dividends: −18.04%', role: 'verifies-concept', url: 'https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histretSP.html' },
+      { provider: 'Bloomberg', label: 'Bloomberg US Agg Total Return Value Unhedged USD (LBUSTRUU)', role: 'verifies-concept', url: 'https://www.bloomberg.com/professional/products/indices/quote/LBUSTRUU:IND' },
     ],
-    explainerHeadline: 'The hedge can fail with the risk.',
-    explainerBody: 'Stocks and bonds are not always a true hedge. When inflation drives both sides of the book down together, the old 60/40 cushion can thin out at the exact moment you are counting on it.',
+    explainerHeadline: 'The cushion fell with the thing it was cushioning.',
+    explainerBody: 'In 2022 a 60/40 mix of US stocks and bonds fell about 16 percent: stocks lost about 18 percent with dividends, and bonds, the part meant to cushion them, lost about 13 percent. Inflation peaked above 9 percent in June, the Fed raised rates from March to December, and both halves of the portfolio answered to the same news.',
     explainerConcept: 'Correlation regime',
     concepts: [{ label: 'Fragility', link: '/part-1-foundation#manifesto' }, { label: 'Correlation regime', link: '/part-2-lineage-macro-thesis' }, { label: 'Part 6 CIS', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'single',
-    ariaSummary: 'Line chart of indexed total return through an inflation shock. Stocks fall and recover; bonds, the supposed hedge, fall with stocks through the shock window; the 60/40 blend thins to its flagged drawdown rather than cushioning.',
-    domain: { xMin: 0, xMax: 100, yMin: 68, yMax: 104 }, yUnit: 'idx',
-    xTicks: [{ v: 0, label: 'shock −1' }, { v: 42, label: 'shock' }, { v: 100, label: 'recovery' }],
-    yTicks: [{ v: 70 }, { v: 80 }, { v: 90 }, { v: 100 }],
+    ariaSummary: 'Line chart of total return through 2022, indexed to 100 at December 2021. Stocks fall to about 76 at the September low and end the year near 82. Bonds, the supposed hedge, fall alongside them to about 85 in September and 84 in October, and end near 87. The 60/40 mix falls to about 80 and ends near 84, marked by a line for its year-end loss of about 16 percent.',
+    domain: { xMin: 0, xMax: 12, yMin: 72, yMax: 104 }, yUnit: 'total return index', valueUnit: 'idx',
+    xTicks: [{ v: 0, label: 'Dec 2021 = 100' }, { v: 9, label: 'Sep 2022 low' }, { v: 12, label: 'Dec 2022' }],
+    yTicks: [{ v: 80 }, { v: 90 }, { v: 100 }],
     series: [
-      { key: 's', tier: 'secondary', label: 'Stocks', labelDy: 16, pts: hedge.stocks },
-      { key: 'b', tier: 'tertiary', label: 'Bonds', labelDy: -4, pts: hedge.bonds },
+      { key: 's', tier: 'secondary', label: 'Stocks', labelDy: 4, pts: hedge.stocks },
+      { key: 'b', tier: 'tertiary', label: 'Bonds', labelDy: -2, pts: hedge.bonds },
       { key: 'p', tier: 'primary', label: '60 / 40', pts: hedge.p6040 },
     ],
-    bands: [{ id: 'band0', kind: 'shock', x0: 28, x1: 64, render: 'pressureField', seed: 41, intensity: 0.78, asymmetric: 0.16, label: 'inflation shock · pressure enters the system', labelAnchor: 'start' }],
-    guides: [{ id: 'base', y: 100, kind: 'base', label: 'base = 100' }],
-    markers: [{ id: 'marker0', type: 'enso', x: 42, y: R(valueAt(hedge.bonds, 42)), r: 13, label: 'hedge fails · bonds fall with stocks', labelAnchor: 'end', labelDy: -20 }],
-    levels: [{ id: 'invalidation', y: 84, kind: 'charcoal', label: 'drawdown the framework flags' }],
+    bands: [{ id: 'band0', kind: 'shock', x0: 2.5, x1: 12, render: 'pressureField', seed: 41, intensity: 0.78, asymmetric: 0.16, label: 'inflation shock · the Fed raises rates', labelAnchor: 'start' }],
+    guides: [
+      { id: 'base', y: 100, kind: 'base', label: 'base = 100' },
+      { id: 'invalidation', y: 84, kind: 'reference', dash: true, label: '60/40 at year-end 2022: down about 16%' },
+    ],
+    markers: [
+      { id: 'marker0', type: 'enso', x: 9, y: R(valueAt(hedge.bonds, 9)), r: 13, label: 'Sep 2022 · bonds fell with stocks', labelAnchor: 'end', labelDy: -20 },
+      { id: 'end-s', type: 'dot', x: 12, y: hedge.end.s, r: 3 },
+      { id: 'end-b', type: 'dot', x: 12, y: hedge.end.b, r: 3 },
+      { id: 'end-p', type: 'dot', x: 12, y: hedge.end.p, r: 3 },
+    ],
+    levels: [],
     primaryKey: 'p',
     hoverTargets: [
-      { id: 'band0', kind: 'band', label: 'Inflation-shock window', name: 'Inflation-shock window', why: 'Context brushed behind the data. It frames why both legs fell together.', claim: 'Locates the failure in a regime, not an accident.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
-      { id: 'marker0', kind: 'marker', label: 'Hedge-failure inflection', name: 'Hedge-failure inflection', why: 'The exact mechanism of 60/40 fragility: the hedge correlating to the risk it was meant to offset.', claim: 'Identifies the tripwire.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'b', kind: 'series', seriesKey: 'b', label: 'Bonds', name: 'Bonds', why: 'The supposed hedge. In this regime it fell alongside stocks instead of offsetting them.', claim: 'The diversifier stopped diversifying.', concept: 'Correlation regime', link: '/part-2-lineage-macro-thesis' },
-      { id: 's', kind: 'series', seriesKey: 's', label: 'Stocks', name: 'Stocks', why: 'The risk asset, expected to fall in a shock. No surprise here.', claim: 'Baseline for the drawdown.', concept: 'Risk asset', link: '/part-2-lineage-macro-thesis' },
-      { id: 'p', kind: 'series', seriesKey: 'p', label: '60 / 40 blend', name: '60 / 40 blend', why: 'This is the portfolio most investors actually hold. Its drawdown is the lived experience of the regime.', claim: 'Proves the “balanced” cushion thinned.', concept: 'Fragility', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'invalidation', kind: 'level', label: 'Flagged drawdown', name: 'Flagged drawdown', why: 'Beyond this line, the balanced label no longer describes the risk being run.', claim: 'Turns a soft worry into a sober threshold.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'band0', kind: 'band', label: 'The 2022 inflation shock', name: 'The 2022 inflation shock', why: 'Inflation peaked above 9 percent in June 2022 and the Fed raised rates from March to December. Rising rates push bond prices down and weigh on stocks, so both legs fell together.', claim: 'Both halves answered to the same force.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'marker0', kind: 'marker', label: 'Where the hedge stopped hedging', name: 'September 2022', why: 'In the path drawn here, by the September month-end stocks are down about a quarter and bonds about 15 percent. The part of the mix meant to rise when stocks fall was falling too.', claim: 'Where the hedge stopped hedging.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'b', kind: 'series', seriesKey: 'b', label: 'Bonds', name: 'Bonds', why: 'The part meant to cushion. US bonds lost about 13 percent in 2022, on the same inflation news that sank stocks.', claim: 'The diversifier stopped diversifying.', concept: 'Correlation regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 's', kind: 'series', seriesKey: 's', label: 'Stocks', name: 'Stocks', why: 'US stocks lost about 18 percent in 2022 with dividends. A fall like that is what the bonds were there for.', claim: 'The loss the bonds were meant to offset.', concept: 'Risk asset', link: '/part-2-lineage-macro-thesis' },
+      { id: 'p', kind: 'series', seriesKey: 'p', label: '60 / 40 mix', name: '60 / 40 mix', why: 'Sixty percent stocks, forty percent bonds: the textbook balanced portfolio. It lost about 16 percent in 2022 because neither half held up.', claim: 'Balanced, and still down about 16 percent.', concept: 'Fragility', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'invalidation', kind: 'level', label: 'Year-end 2022', name: 'Year-end 2022', why: 'Where the 60/40 mix finished 2022: down about 16 percent. A dated fact from the record, not a framework threshold.', claim: 'What a balanced year looked like in 2022.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['band0', 'marker0', 'b', 'p', 'invalidation'],
-    implementationNotes: 'Canonical Part 1 hero. Handoff-only for now; unwired from the public page pending explicit placement. Production swaps primary index series behind this spec without touching the engine.',
+    implementationNotes: 'Wired on /part-1-foundation (#exhibit-01), /part-1-pictures and /framework-in-pictures. Representative, anchored to 2022: exact only at the marked points (Dec 2021 = 100; Sep 2022 stocks 76.1, bonds 85.4; Oct 2022 bonds 84.3; Dec 2022 stocks 81.9, bonds 87.0), with rounded illustrative month-end knots between them, smoothed with a monotone cubic. The 60/40 line is a buy-and-hold 60/40 of the two drawn paths (79.8 in Sep, 83.9 in Dec, matching the published -16.1%). Dots at the right edge; year-end guide at 84. The licensed index records (S&P 500 TR, Bloomberg US Agg) are not plotted month by month.',
   },
 
   {
     chartId: 'p1-correlation', idx: '02', group: 'part-1', intendedPlacement: 'part-1',
     claimStack: {
-      primaryClaim: 'Stock–bond correlation changes when inflation becomes the dominant stress',
-      visualProof: 'A rolling correlation line crossing from negative to positive through an inflation-shock field',
-      interactionRole: 'Hover the line and the shock field to see the regime flip',
-      readerAction: 'Watch the diversifier sign flip',
-      caution: 'Representative rolling correlation, not historical data',
+      primaryClaim: 'The stock-bond correlation turned positive when inflation became the main stress',
+      visualProof: 'A 24-month rolling correlation, below zero from 2014 through 2021, crossing zero in early 2022 and staying positive through 2024',
+      interactionRole: 'Hover the line, the shaded stretch and the crossing to see when the sign changed',
+      readerAction: 'Find where the line crosses zero',
+      caution: 'Drawn through the published figures at the marked points. The path between them is illustrative, not plotted data. Shorter windows turned positive in mid-2021; the 24-month window drawn here crosses in early 2022.',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Correlation Turns', setupLine:'Rolling 24-month stock–bond correlation across an inflation-shock window',
+    title: 'Correlation Turns', setupLine: 'How US stocks and 10-year Treasuries moved together, 2014 to 2024. Below zero, bonds tended to cushion stocks; above it, they tended to fall together.',
     claimLabel: 'CORRELATION · REGIME',
-    frameworkClaim: 'Stock–bond correlation changes when inflation becomes the dominant stress.',
-    readerTakeaway: 'The diversifier did not disappear. The regime that produced it did.',
-    chartType: 'Rolling 24-month stock–bond correlation with a non-rectangular inflation-shock background.',
+    frameworkClaim: 'The stock-bond correlation tends to turn positive when inflation becomes the dominant stress.',
+    readerTakeaway: 'Bonds cushioned stocks because of the regime they were in. When the regime changed, so did the cushion.',
+    chartType: 'Rolling 24-month correlation of monthly stock and 10-year Treasury returns, with a drawn inflation-shock field.',
     visualDataMode: 'representative',
     disclosure: DISCLOSURE.representative, footerCta: 'View sources',
-    historicalFooter: 'Source · FRED · SP500TR + Bloomberg US Agg · monthly returns · 2014 to 2024 · 24-month rolling Pearson',
     sources: [
-      { provider: 'FRED', seriesId: 'SP500TR', label: 'S&P 500 total return', role: 'target-source', dateRange: '2014 to 2024', frequency: 'Monthly', url: 'https://fred.stlouisfed.org/series/SP500TR' },
-      { provider: 'FRED', seriesId: 'BAMLCC0A0CMTRIV', label: 'Bloomberg US Aggregate total return (ICE proxy)', role: 'target-source', dateRange: '2014 to 2024', frequency: 'Monthly', url: 'https://fred.stlouisfed.org/series/BAMLCC0A0CMTRIV' },
-      { provider: 'Author calculation', label: 'Rolling 24-month Pearson correlation', role: 'methodology', transform: 'Pearson ρ of monthly returns, 24-month window' },
+      { provider: 'Brixton, Brooks, Hecht, Ilmanen, Maloney and McQuinn (AQR)', label: 'A Changing Stock–Bond Correlation: Drivers and Implications. The Journal of Portfolio Management 49(4), 64–80 (2023)', role: 'verifies-concept', url: 'https://www.aqr.com/Insights/Research/Journal-Article/A-Changing-Stock-Bond-Correlation' },
+      { provider: 'Marco Lombardi and Vladyslav Sushko (BIS)', label: 'The correlation of equity and bond returns. BIS Quarterly Review, December 2023, Box A', role: 'verifies-concept', url: 'https://www.bis.org/publ/qtrpdf/r_qt2312v.htm' },
     ],
-    explainerHeadline: 'When inflation runs the regime, correlations flip.',
-    explainerBody: 'Stock–bond correlation was deeply negative for two decades. When inflation became the dominant stress, the correlation flipped positive — and the diversification both sides relied on quietly stopped working together.',
+    explainerHeadline: 'When inflation runs the market, the correlation flips.',
+    explainerBody: 'For about two decades, from roughly 2000 to 2021, stocks and bonds tended to move in opposite directions, so bonds cushioned equity losses. From about 1970 to the late 1990s the correlation was usually positive, and in 2021 and 2022 it turned positive again. The line here is the most recent turn, measured over a 24-month window.',
     explainerConcept: 'Macro regime',
     concepts: [{ label: '60/40 failure', link: '/part-1-foundation#manifesto' }, { label: 'Correlation regime', link: '/part-2-lineage-macro-thesis' }, { label: 'Fragility', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'single',
-    ariaSummary: 'Line chart of rolling 24-month stock–bond correlation. The correlation sits deeply negative through the low-inflation regime, then climbs through zero inside a feathered inflation-shock pressure field and settles positive in the high-inflation regime.',
-    domain: { xMin: 0, xMax: 132, yMin: -0.65, yMax: 0.65 }, yUnit: 'ρ',
-    xTicks: [{ v: 0, label: 'low-inflation regime' }, { v: 132, label: 'high-inflation regime' }],
+    ariaSummary: 'Line chart of the 24-month rolling correlation of monthly returns on US stocks and 10-year Treasuries, 2014 to 2024. The line stays below zero from 2014 through 2021, between about minus 0.2 and minus 0.55, deepest in 2020 and near minus 0.35 at the end of 2021. It crosses zero in early 2022, inside a shaded inflation-shock stretch, and stays between about plus 0.5 and plus 0.75 through 2023 and 2024.',
+    domain: { xMin: 0, xMax: 131, yMin: -0.65, yMax: 0.85 }, yUnit: '24-month rolling correlation of monthly returns, US stocks and 10-year Treasuries', valueUnit: 'ρ',
+    xTicks: [{ v: 0, label: '2014' }, { v: 48, label: '2018' }, { v: 96, label: '2022' }, { v: 120, label: '2024' }],
     yTicks: [{ v: -0.5, label: '−0.5' }, { v: 0, label: '0' }, { v: 0.5, label: '+0.5' }],
     series: [{ key: 'c', tier: 'primary', label: 'ρ', pts: corr.pts }],
-    bands: [{ id: 'band0', kind: 'shock', x0: corr.flipStart, x1: corr.flipEnd, render: 'pressureField', spanScale: 0.95, seed: 41, intensity: 0.78, asymmetric: 0.16, label: 'inflation shock · pressure enters the system', labelAnchor: 'peak' }],
+    bands: [{ id: 'band0', kind: 'shock', x0: corr.flipStart, x1: corr.flipEnd, render: 'pressureField', spanScale: 0.95, seed: 41, intensity: 0.78, asymmetric: 0.16, label: 'inflation shock · 2021 to 2022', labelAnchor: 'peak' }],
     guides: [{ id: 'zero', y: 0, kind: 'zero', label: 'zero correlation' }],
-    markers: [{ id: 'marker0', type: 'enso', x: corr.cross.x, y: corr.cross.y, r: 13, label: 'correlation regime flips', labelAnchor: 'end', labelDy: -28 }],
+    markers: [{ id: 'marker0', type: 'enso', x: corr.cross.x, y: corr.cross.y, r: 13, label: 'early 2022 · the sign flips', labelAnchor: 'end', labelDy: -28 }],
     levels: [],
     primaryKey: 'c',
     hoverTargets: [
-      { id: 'band0', kind: 'band', label: 'Inflation-shock pressure field', name: 'Inflation-shock pressure field', why: 'A rendering treatment, not a date range. It marks where inflation became the dominant stress; it never widens or narrows the real window.', claim: 'The regime, not an accident, flipped the sign.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
-      { id: 'marker0', kind: 'marker', label: 'Correlation regime flips', name: 'Correlation regime flips', why: 'The zero-crossing: the point the hedge inverted from offsetting risk to amplifying it.', claim: 'The mechanism that made 60/40 work inverted.', concept: 'Correlation regime', link: '/part-2-lineage-macro-thesis' },
-      { id: 'c', kind: 'series', seriesKey: 'c', label: 'Stock–bond ρ', name: 'Stock–bond ρ', why: 'Two decades negative, then sticky-positive. The diversifier did not vanish; the regime that produced it changed.', claim: 'Correlation is regime-dependent.', concept: 'Correlation regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'band0', kind: 'band', label: 'Inflation shock, 2021 to 2022', name: 'Inflation shock, 2021 to 2022', why: 'Marks roughly 2021 to 2022, when inflation became the main force moving both stocks and bonds. Shaded for emphasis; the edges are approximate.', claim: 'Inflation, not chance, changed the sign.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'marker0', kind: 'marker', label: 'The sign flips', name: 'The sign flips', why: 'The zero crossing. Below it, bonds tended to rise when stocks fell; above it, they tended to fall together.', claim: 'The mechanism that made 60/40 work turned around.', concept: 'Correlation regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'c', kind: 'series', seriesKey: 'c', label: 'Stock-Treasury correlation', name: '24-month rolling correlation', why: 'Monthly returns on US stocks and 10-year Treasuries, correlated over the trailing 24 months. Negative through 2021, positive from early 2022 through 2024.', claim: 'Correlation depends on the regime.', concept: 'Correlation regime', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['band0', 'marker0', 'c'],
-    implementationNotes: 'Handoff-only for now; unwired from the public page pending explicit placement. Pressure field is bespoke geometry (brush.pressureField) — never a rectangle, never alters the true stress window.',
+    implementationNotes: 'Wired on /part-1-foundation (#exhibit-02), /part-1-pictures and /framework-in-pictures. Representative, anchored: knots follow the published record (negative 2014 to 2021, deepest 2020, about -0.35 at end-2021, zero crossing in early 2022, +0.5 to +0.75 in 2023 and 2024), smoothed with a monotone cubic. The series end label stays short (the long description is the yUnit) so the right margin does not swell. The pressure field is drawn geometry (brush.pressureField), never a rectangle.',
   },
 
   {
     chartId: 'p1-cpi-assets', idx: '03', group: 'part-1', intendedPlacement: 'part-1',
     experienceRole: 'comparison',
     claimStack: {
-      primaryClaim: 'CPI alone does not capture the full inflation story',
-      visualProof: 'Assets vs CPI as indexed lines; the widening gap between them is the claim',
-      interactionRole: 'Hover the asset, housing, and CPI lines to compare',
-      readerAction: 'See how far assets outran CPI',
-      caution: 'Representative indexed series, not historical data',
+      primaryClaim: 'From the end of 1999 to the end of 2024, US homes and an equal mix of stocks, homes and gold outran consumer prices by a wide margin',
+      visualProof: 'CPI, US home prices and an equal mix of stocks, homes and gold, each indexed to 100 at the end of 1999; the shaded gap shows how far the assets outran CPI',
+      interactionRole: 'Hover the three lines to compare where each ended',
+      readerAction: 'See how far the assets outran CPI',
+      caution: 'Drawn through the published figures at the marked points. The path between them is illustrative, not plotted data.',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Inflation Was Bigger', setupLine:'CPI, housing, and a broad-asset proxy, each indexed to 100',
+    title: 'Assets Outran CPI', setupLine: 'Consumer prices, US home prices and an equal mix of stocks, homes and gold, end of 1999 = 100',
     claimLabel: 'INFLATION · MEASUREMENT',
-    frameworkClaim: 'CPI alone does not capture the full inflation story.',
-    readerTakeaway: 'Consumer prices roughly doubled. The assets that store capital did far more.',
-    chartType: 'Three normalized index lines with a gap area between assets and CPI.',
+    frameworkClaim: 'Judged only against CPI, a portfolio can fall far behind the assets it could have owned.',
+    readerTakeaway: 'CPI measures what households pay for goods and services. As a yardstick for capital, it sets the bar too low.',
+    chartType: 'Three indexed lines (end of 1999 = 100) with a shaded gap between the asset mix and CPI.',
     visualDataMode: 'representative',
     disclosure: DISCLOSURE.representative, footerCta: 'View sources',
-    historicalFooter: 'Source · BLS · CPIAUCSL + S&P · CSUSHPISA + author broad-asset blend · monthly · 2000 to 2024 · indexed to 100',
     sources: [
-      { provider: 'FRED (BLS)', seriesId: 'CPIAUCSL', label: 'CPI-U, all items', role: 'target-source', dateRange: '2000 to 2024', frequency: 'Monthly', transform: 'Indexed to 100', url: 'https://fred.stlouisfed.org/series/CPIAUCSL' },
-      { provider: 'FRED (S&P)', seriesId: 'CSUSHPISA', label: 'S&P/Case-Shiller US National Home Price Index', role: 'target-source', dateRange: '2000 to 2024', frequency: 'Monthly', transform: 'Indexed to 100', url: 'https://fred.stlouisfed.org/series/CSUSHPISA' },
-      { provider: 'Author calculation', label: 'Broad-asset blend (equity + housing + gold)', role: 'methodology', transform: 'Equal-weighted, indexed to 100' },
+      { provider: 'FRED (BLS)', seriesId: 'CPIAUCSL', label: 'Consumer Price Index for All Urban Consumers: All Items in U.S. City Average', role: 'verifies-concept', url: 'https://fred.stlouisfed.org/series/CPIAUCSL' },
+      { provider: 'FRED (S&P Dow Jones Indices)', seriesId: 'CSUSHPINSA', label: 'S&P Cotality Case-Shiller U.S. National Home Price Index', role: 'verifies-concept', url: 'https://fred.stlouisfed.org/series/CSUSHPINSA' },
+      { provider: 'Aswath Damodaran (NYU Stern)', label: 'Historical Returns on Stocks, Bonds and Bills: 1928-2024 (updated January 5, 2026): S&P 500 with dividends and gold', role: 'verifies-concept', url: 'https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histretSP.html' },
     ],
-    explainerHeadline: 'The CPI tells one story; capital saw another.',
-    explainerBody: 'Consumer prices roughly doubled over the window. Housing tripled. Broad assets did more. The inflation that matters for whether capital survives was never in the CPI print, and that gap is the whole reason the framework prices inflation in real-asset terms.',
+    explainerHeadline: 'Prices rose. The assets rose a lot faster.',
+    explainerBody: 'Consumer prices rose about 88 percent from the end of 1999 to the end of 2024. Home prices more than tripled. An equal mix of stocks (with dividends), homes, and gold rose about sixfold. Some of that gap is real growth and falling interest rates, so not all of it is inflation. It still shows how far a portfolio judged only against CPI could fall behind the assets it could have owned.',
     explainerConcept: 'Survivable compounding',
     concepts: [{ label: 'Survivable compounding', link: '/part-1-foundation' }, { label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }],
     layout: 'single',
-    ariaSummary: 'Three index lines based at 100. CPI rises gently; housing roughly triples; a broad-asset proxy rises most. A shaded gap between the broad-asset line and CPI is labelled the inflation the CPI misses.',
-    domain: { xMin: 0, xMax: 24, yMin: 90, yMax: 470 }, yUnit: 'idx',
-    xTicks: [{ v: 0, label: 'yr 0' }, { v: 12, label: 'yr 12' }, { v: 24, label: 'yr 24' }],
-    yTicks: [{ v: 100, label: '100' }, { v: 200 }, { v: 300 }, { v: 400 }],
+    ariaSummary: 'Three lines indexed to 100 at the end of 1999. Consumer prices rise steadily to about 188 by the end of 2024. US home prices climb to about 185 at the July 2006 peak, fall to about 135 at the February 2012 low, and reach about 325. An equal mix of stocks with dividends, homes and gold reaches about 617. The shaded area between that mix and CPI shows how far these assets outran CPI.',
+    domain: { xMin: 0, xMax: 25, yMin: 50, yMax: 660 }, yUnit: 'index, end of 1999 = 100', valueUnit: 'idx',
+    xTicks: [{ v: 0, label: 'end 1999 = 100' }, { v: 12.17, label: '2012' }, { v: 25, label: '2024' }],
+    yTicks: [{ v: 100, label: '100' }, { v: 200 }, { v: 300 }, { v: 400 }, { v: 500 }, { v: 600 }],
     series: [
       { key: 'cpi', tier: 'secondary', label: 'CPI', pts: cpiAssets.cpi, labelDy: 4 },
-      { key: 'housing', tier: 'tertiary', label: 'Housing', pts: cpiAssets.housing, labelDy: 2 },
-      { key: 'assets', tier: 'primary', label: 'Broad assets', pts: cpiAssets.assets },
+      { key: 'housing', tier: 'tertiary', label: 'Homes', pts: cpiAssets.housing, labelDy: 2 },
+      { key: 'assets', tier: 'primary', label: 'Stocks, homes, gold', pts: cpiAssets.assets },
     ],
-    areas: [{ id: 'gap', topKey: 'assets', botKey: 'cpi', kind: 'gap', xFrom: 9, label: 'inflation the CPI misses' }],
+    areas: [{ id: 'gap', topKey: 'assets', botKey: 'cpi', kind: 'gap', xFrom: 9, label: 'how far these assets outran CPI' }],
     guides: [{ id: 'base', y: 100, kind: 'base', label: 'base = 100' }],
-    markers: [],
+    markers: [
+      { id: 'home-peak', type: 'dot', x: cpiAssets.marks.homePeak.x, y: cpiAssets.marks.homePeak.y, r: 3 },
+      { id: 'home-low', type: 'dot', x: cpiAssets.marks.homeLow.x, y: cpiAssets.marks.homeLow.y, r: 3 },
+      { id: 'end-cpi', type: 'dot', x: 25, y: cpiAssets.marks.end.cpi, r: 3 },
+      { id: 'end-home', type: 'dot', x: 25, y: cpiAssets.marks.end.housing, r: 3 },
+      { id: 'end-mix', type: 'dot', x: 25, y: cpiAssets.marks.end.assets, r: 3 },
+    ],
     levels: [],
     notes: [],
     primaryKey: 'assets',
     hoverTargets: [
-      { id: 'assets', kind: 'series', seriesKey: 'assets', label: 'Broad assets', name: 'Broad-asset proxy', why: 'Equity, housing, and gold together. This is what capital actually had to outrun, and it left CPI far behind.', claim: 'Asset inflation is the real benchmark.', concept: 'Survivable compounding', link: '/part-1-foundation' },
-      { id: 'housing', kind: 'series', seriesKey: 'housing', label: 'Housing', name: 'Housing', why: 'Roughly tripled over the window, dip and all. The largest real asset most households hold.', claim: 'Even housing alone outran CPI.', concept: 'Real assets', link: '/part-2-lineage-macro-thesis' },
-      { id: 'cpi', kind: 'series', seriesKey: 'cpi', label: 'CPI', name: 'CPI-U', why: 'The official print. It roughly doubled, which sounds large until you compare it to what stores of capital did.', claim: 'CPI understates the inflation that matters.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'assets', kind: 'series', seriesKey: 'assets', label: 'Stocks, homes, gold', name: 'Equal mix of stocks, homes and gold', why: 'One third each in US stocks with dividends reinvested, US homes and gold, bought at the end of 1999 and held. It ended 2024 at about six times its start.', claim: 'Asset prices, not CPI, set the bar capital had to clear.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'housing', kind: 'series', seriesKey: 'housing', label: 'Homes', name: 'US home prices', why: 'The Case-Shiller national index. Up to a peak in July 2006, down about 27 percent to February 2012, and more than tripled over the whole stretch.', claim: 'Even homes alone outran CPI.', concept: 'Real assets', link: '/part-2-lineage-macro-thesis' },
+      { id: 'cpi', kind: 'series', seriesKey: 'cpi', label: 'CPI', name: 'Consumer prices (CPI-U)', why: 'Up about 88 percent from the end of 1999 to the end of 2024. CPI tracks what households pay for goods and services, rent included, not the price of owning assets.', claim: 'The lowest bar on the chart.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['assets', 'housing', 'cpi'],
-    implementationNotes: 'Three-line composition; direct end-labels, no inline legend. The gap area between assets and CPI is the visual claim. Broad-asset blend is author calculation, disclosed.',
+    implementationNotes: 'Wired on /part-1-foundation (#exhibit-03), /part-1-pictures and /framework-in-pictures. Representative, anchored: year-end knots shaped to the record and smoothed with a monotone cubic, drawn through the checkpoints (CPI 188 at end-2024; homes 185 at the July 2006 peak, 135 at the February 2012 low, 325 at end-2024; the equal-weight buy-and-hold mix about 617 at end-2024), which carry dots. Equity, gold and Case-Shiller data are licensed and are not plotted. yMax 660 keeps every line inside the plot. Three-line composition with direct end labels.',
   },
 
   {
     chartId: 'p1-policy-constraint', idx: '04', group: 'part-1', intendedPlacement: 'part-1',
-    experienceRole: 'reveal',
+    experienceRole: 'evidence',
     storyBeats: [
-      { kind: 'context', label: 'The debt/GDP backdrop rises in both states', timing: 'early' },
-      { kind: 'mechanism', label: 'The interest cost sits hidden beneath the same backdrop', timing: 'middle' },
-      { kind: 'action', label: 'Drag the divider to wipe the surface and expose the cost', timing: 'middle' },
-      { kind: 'consequence', label: 'The bill surfaces; policy room narrows', timing: 'late' },
+      { kind: 'context', label: 'Debt held by the public climbs from about 25 to 98 percent of GDP', timing: 'early' },
+      { kind: 'mechanism', label: 'Falling rates push the interest bill down to a 2015 low', timing: 'middle' },
+      { kind: 'consequence', label: 'By 2025 the bill is back at its 1991 peak, on more than twice the debt', timing: 'late' },
     ],
     claimStack: {
-      primaryClaim: 'Debt rose for decades while falling rates hid the cost',
-      visualProof: 'The same debt/GDP backdrop in both states; the interest-burden cost is revealed beneath it',
-      interactionRole: 'Drag the divider to pull back the calm surface and expose the hidden cost',
-      readerAction: 'Reveal what the surface was hiding',
-      caution: 'Representative exhibit (FRED target series), not exact historical data',
+      primaryClaim: 'From 1991 to 2021 federal debt held by the public more than doubled as a share of GDP while falling rates cut the interest bill by more than half. By 2025 the bill was back at its 1991 peak, on more than twice the debt',
+      visualProof: 'Two panels on one 1980 to 2025 timeline: federal debt held by the public and federal interest outlays, both as a percent of GDP',
+      interactionRole: 'Hover either line for that year\'s value, and the reference line for the 1991 peak',
+      readerAction: 'Compare the two lines in 1991, 2015 and 2025',
+      caution: 'Fiscal years 1980 to 2025, plotted as published by OMB via FRED (retrieved September 30, 2026). FRED divides each fiscal-year figure by calendar-year GDP.',
     },
-    interaction: { type: 'beforeAfterReveal', gesture: 'drag', conceptMatch: 'Dragging spatially pulls back the surface to reveal the hidden interest cost beneath the same debt backdrop' },
-    beforeAfterLabels: { before: 'Surface', after: 'Hidden cost' }, revealDefault: 0.5,
-    motionProfile: { type: 'reveal', duration: 'calm', relatedElements: [['debt', 'int']] },
     status: 'implemented', wiredPublic: true,
-    title: 'The Bill Came Due', setupLine:'Debt rose for decades. The cost returned when rates normalized.',
+    title: 'The Bill Came Due', setupLine: 'Federal debt held by the public and federal interest outlays, as a percent of GDP, fiscal years 1980 to 2025',
     claimLabel: 'POLICY · CONSTRAINT',
-    frameworkClaim: 'Debt and interest burden reduce policy freedom.',
-    readerTakeaway: 'For decades, debt rose while falling rates hid the cost. The cost is no longer hidden.',
-    chartType: 'Before/after clipped reveal on one canvas: a shared debt/GDP backdrop; dragging a divider wipes the calm surface to expose the net-interest cost beneath.',
-    visualDataMode: 'representative',
-    disclosure: DISCLOSURE.representative, footerCta: 'View sources',
-    historicalFooter: 'Source · FRED · GFDEGDQ188S + BEA net interest / GDP · annual · 1980 to 2024 · share of GDP',
+    frameworkClaim: 'Debt and the interest bill on it narrow the room policy has to respond.',
+    readerTakeaway: 'For three decades falling rates kept a growing debt cheap to carry. By 2025 they no longer did.',
+    chartType: 'Two stacked historical line panels on a shared 1980 to 2025 axis: debt held by the public, and interest outlays, as percent of GDP.',
+    visualDataMode: 'historical',
+    footerCta: 'View sources',
+    historicalFooter: 'Source · FRED (OMB) · FYPUGDA188S and FYOIGDA188S · annual · 1980 to 2025 · percent of GDP',
     sources: [
-      { provider: 'FRED', seriesId: 'GFDEGDQ188S', label: 'Federal debt held by the public / GDP', role: 'target-source', dateRange: '1980 to 2024', frequency: 'Annual', url: 'https://fred.stlouisfed.org/series/GFDEGDQ188S' },
-      { provider: 'BEA (via FRED)', seriesId: 'A091RC1Q027SBEA', label: 'Federal net interest outlays', role: 'target-source', dateRange: '1980 to 2024', frequency: 'Annual', transform: 'Divided by GDP', url: 'https://fred.stlouisfed.org/series/A091RC1Q027SBEA' },
-      { provider: 'FRED', seriesId: 'GDP', label: 'Gross domestic product (denominator)', role: 'target-source', url: 'https://fred.stlouisfed.org/series/GDP' },
+      { provider: 'FRED (OMB)', seriesId: 'FYPUGDA188S', label: 'Gross Federal Debt Held by the Public as Percent of Gross Domestic Product', role: 'backs-series', dateRange: '1980 to 2025', frequency: 'Annual (fiscal year)', transform: 'None; plotted as published, percent of GDP', units: 'Percent of GDP', retrieved: '2026-09-30', notes: 'U.S. Office of Management and Budget; Federal Reserve Bank of St. Louis. Units: percent of GDP. Retrieved 2026-09-30.', url: 'https://fred.stlouisfed.org/series/FYPUGDA188S' },
+      { provider: 'FRED (OMB)', seriesId: 'FYOIGDA188S', label: 'Federal Outlays: Interest as Percent of Gross Domestic Product', role: 'backs-series', dateRange: '1980 to 2025', frequency: 'Annual (fiscal year)', transform: 'None; plotted as published, percent of GDP', units: 'Percent of GDP', retrieved: '2026-09-30', notes: 'U.S. Office of Management and Budget; Federal Reserve Bank of St. Louis. Units: percent of GDP. Retrieved 2026-09-30.', url: 'https://fred.stlouisfed.org/series/FYOIGDA188S' },
     ],
-    explainerHeadline: 'The cost of debt stopped being free.',
-    explainerBody: 'Debt rose for forty years while rates fell, hiding the burden. As rates normalize, that bill compounds — and the room for fiscal support in the next downturn narrows. Policy freedom is no longer a free option.',
+    explainerHeadline: 'The interest bill came back.',
+    explainerBody: 'From 1991 to 2021, federal debt held by the public more than doubled as a share of GDP (about 44 to 94 percent) while falling rates cut the interest bill by more than half (3.2 to 1.5 percent of GDP). By 2025 the bill was back at about 3.2 percent of GDP, level with its 1991 peak, on more than twice the debt. The framework reads that as a constraint: the more of the budget that goes to interest, the less room policy has to cushion the next downturn.',
     explainerConcept: 'Policy constraint',
     concepts: [{ label: 'Policy constraint', link: '/part-1-foundation#manifesto' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Fragility', link: '/part-6-convexity-framework-integrity-scoring' }],
-    layout: 'dual', perspectiveSlider: true, perspectiveDefault: 0.25,
-    perspectiveCopy: { surface: 'rates fell for decades and hid the cost', hidden: 'the cost returns as rates normalize' },
-    ariaSummary: 'A single before/after reveal on a shared 1980-to-2024 timeline. One backdrop — federal debt as a share of GDP, rising steeply past 100 percent with the area beneath it shaded as an accumulating liability — is present in both states. Dragging a vertical divider wipes away the calm surface view, where falling rates kept the interest cost faint, to expose on the same backdrop beneath it the hidden-cost view: net interest as a share of GDP easing as rates fall, troughing at the rate trough, then inflecting upward through an interest-burden threshold into a pressure zone as rates normalize. Surface is on the left, hidden cost on the right; drag the divider, use the arrow keys, or tap to move it.',
-    xDomain: { xMin: 0, xMax: 40 },
-    xTicks: [{ v: 0, label: '1980' }, { v: 25, label: 'rate trough' }, { v: 40, label: '2024' }],
-    connective: 'rates fell for decades and hid the cost',
+    layout: 'dual',
+    ariaSummary: 'Two stacked line charts on a shared timeline, fiscal years 1980 to 2025, both in percent of GDP. Top: federal debt held by the public, about 25 percent in 1980 and 44 percent in 1991, down to about 31 percent in 2001, then up to 98 percent in 2020, 94 percent in 2021 and 98 percent in 2025. Bottom: federal interest outlays, 1.8 percent in 1980, rising to a 3.2 percent peak in 1991, falling to a 1.2 percent low in 2015 and 1.5 percent in 2021, then climbing to 3.0 percent in 2024 and 3.2 percent in 2025, level with the 1991 peak marked by a reference line.',
+    xDomain: { xMin: 1980, xMax: 2025 },
+    xTicks: [{ v: 1980, label: '1980' }, { v: 1991, label: '1991' }, { v: 2015, label: '2015' }, { v: 2025, label: '2025' }],
+    connective: 'the debt rose; the bill fell, then came back',
     panels: [
-      { id: 'debtPanel', label: 'Federal debt / GDP · the backdrop', yUnit: '', valueUnit: '% of GDP', domain: { yMin: 30, yMax: 130 }, yTicks: [{ v: 50, label: '50%' }, { v: 90, label: '90%' }, { v: 120, label: '120%' }], series: [{ key: 'debt', tier: 'reference', pts: fiscal.debt }], areas: [{ id: 'debtFill', topKey: 'debt', kind: 'under', tone: 'muted', opacity: 0.12, label: '' }] },
-      { id: 'intPanel', label: 'Net interest / GDP · the cost returns', yUnit: '', valueUnit: '% of GDP', domain: { yMin: 1, yMax: 4.4 }, yTicks: [{ v: 2, label: '2%' }, { v: 3, label: '3%' }, { v: 4, label: '4%' }], series: [{ key: 'int', tier: 'primary', pts: fiscal.interest }], guides: [{ id: 'threshold', y: 3, kind: 'threshold', dash: true, label: 'interest-burden pressure' }], bands: [{ id: 'pressure', kind: 'shock', render: 'pressureField', x0: 32, x1: 40, seed: 53, intensity: 0.5, asymmetric: 0.1 }], markers: [{ id: 'burden', type: 'enso', x: 25, y: R(valueAt(fiscal.interest, 25)), r: 11, label: 'burden inflects', labelAnchor: 'middle', labelDy: -16 }] },
+      { id: 'debtPanel', label: 'Federal debt held by the public', yUnit: 'percent of GDP', valueUnit: '% of GDP', domain: { yMin: 20, yMax: 105 }, yTicks: [{ v: 25, label: '25%' }, { v: 50, label: '50%' }, { v: 75, label: '75%' }, { v: 100, label: '100%' }], series: [{ key: 'debt', tier: 'reference', pts: fiscal.debt }], areas: [{ id: 'debtFill', topKey: 'debt', kind: 'under', tone: 'muted', opacity: 0.12, label: '' }] },
+      { id: 'intPanel', label: 'Federal interest outlays', yUnit: 'percent of GDP', valueUnit: '% of GDP', domain: { yMin: 0.5, yMax: 3.6 }, yTicks: [{ v: 1, label: '1%' }, { v: 2, label: '2%' }, { v: 3, label: '3%' }], series: [{ key: 'int', tier: 'primary', pts: fiscal.interest }], guides: [{ id: 'threshold', y: fiscal.peak1991, kind: 'reference', dash: true, label: '1991 peak · 3.2%' }], markers: [{ id: 'burden', type: 'enso', x: 2015, y: fiscal.low2015, r: 11, label: '2015 low · 1.2%', labelAnchor: 'middle', labelDy: 26 }] },
     ],
     primaryKey: 'int',
     hoverTargets: [
-      { id: 'debt', kind: 'series', panel: 'debtPanel', seriesKey: 'debt', label: 'Debt / GDP', name: 'Federal debt / GDP', why: 'Four decades of accumulation. On its own it looks survivable because the cost of carrying it kept falling.', claim: 'The denominator of the constraint.', concept: 'Policy constraint', link: '/part-1-foundation#manifesto' },
-      { id: 'int', kind: 'series', panel: 'intPanel', seriesKey: 'int', label: 'Net interest / GDP', name: 'Net interest / GDP', why: 'The bill. It eased for decades as rates fell; as rates normalize it compounds and crowds out everything else.', claim: 'The cost of debt stopped being free.', concept: 'Policy constraint', link: '/part-1-foundation#manifesto' },
-      { id: 'threshold', kind: 'level', panel: 'intPanel', label: 'Interest-burden pressure', name: 'Interest-burden pressure', why: 'Past this share of GDP, debt service starts competing directly with the room for fiscal support.', claim: 'A sober threshold, not a forecast.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'burden', kind: 'marker', panel: 'intPanel', label: 'Burden inflects', name: 'Burden inflects', why: 'The rate trough. From here, normalizing rates turn a falling burden into a rising one.', claim: 'Identifies where the free option expires.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'pressure', kind: 'band', panel: 'intPanel', label: 'Interest-burden pressure', name: 'Pressure zone', why: 'As rates normalize the interest bill rises into this zone, where debt service competes directly with the room for fiscal support.', claim: 'Policy constraint tightens here.', concept: 'Policy constraint', link: '/part-1-foundation#manifesto' },
+      { id: 'debt', kind: 'series', panel: 'debtPanel', seriesKey: 'debt', label: 'Debt held by the public', name: 'Federal debt held by the public', why: 'Debt held outside the government, as a share of GDP: about 44 percent in 1991, 94 percent in 2021 and 98 percent in 2025. It leaves out what the government owes its own trust funds.', claim: 'The stock the bill is charged on.', concept: 'Policy constraint', link: '/part-1-foundation#manifesto' },
+      { id: 'int', kind: 'series', panel: 'intPanel', seriesKey: 'int', label: 'Interest outlays', name: 'Federal interest outlays', why: 'What the government paid in interest each fiscal year, as a share of GDP. It peaked at 3.2 percent in 1991, fell to 1.2 percent in 2015 as rates fell, and was back at 3.2 percent in 2025.', claim: 'The bill, back where it was in 1991.', concept: 'Policy constraint', link: '/part-1-foundation#manifesto' },
+      { id: 'threshold', kind: 'level', panel: 'intPanel', label: '1991 peak · 3.2%', name: '1991 peak', why: 'The highest interest bill in this record, about 3.2 percent of GDP. In 2025 the bill matched it, this time on more than twice the debt.', claim: 'A reference point from the record, not a forecast.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'burden', kind: 'marker', panel: 'intPanel', label: '2015 low · 1.2%', name: '2015 low', why: 'The cheapest year to carry the debt in this record: 1.2 percent of GDP, with debt at about 72 percent of GDP and short-term rates near zero.', claim: 'Low rates made a large debt look cheap.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
     ],
-    mobileTapTargets: ['debt', 'int', 'threshold', 'burden', 'pressure'],
-    implementationNotes: 'Handoff-only for now; unwired from the public page pending explicit placement. BeforeAfterRevealSvg: ONE canvas, two registers (debt backdrop over net-interest cost), with two full chart STATES layered in the same SVG coordinate space. The surface state (debt prominent, cost faint) is the base; the hidden-cost state (same backdrop + rising interest line, burden inflection, interest-burden threshold, pressure zone) is drawn inside an SVG clipPath revealed to the RIGHT of a draggable vertical divider — a true spatial reveal, never an opacity toggle. Backdrop identical in both layers for continuity. revealDefault 0.5; drag / arrows / Home-End / touch-snap; reduced-motion + print safe.',
+    mobileTapTargets: ['debt', 'int', 'threshold', 'burden'],
+    implementationNotes: 'Wired on /part-1-foundation (#exhibit-04), /part-1-pictures and /framework-in-pictures. Historical: every plotted value is FRED\'s published annual value (FYPUGDA188S, FYOIGDA188S; OMB; fiscal years 1980 to 2025; retrieved 2026-09-30), embedded in the fiscal const. Rendered as two stacked PlotSvg panels (perspectiveSlider off). The before/after reveal was retired here because BeforeAfterRevealSvg hard-codes an "interest-burden pressure" threshold line (default 3%) and a "burden inflects" label that the record does not support. Checkpoints the data reproduces: interest 1980 1.84, 1991 3.16, 2015 1.22, 2021 1.49, 2024 3.00, 2025 3.15; debt 1991 43.7, 2021 93.9, 2025 98.1.',
   },
 
   {
     chartId: 'p1-sequence-risk', idx: '05', group: 'part-1', intendedPlacement: 'part-1',
     experienceRole: 'mechanism',
     storyBeats: [
-      { kind: 'context', label: 'One shared return deck, shown in two orders', timing: 'early' },
-      { kind: 'mechanism', label: 'The same returns generate both portfolio paths', timing: 'middle' },
-      { kind: 'action', label: 'Compare the deck in reverse and watch the paths', timing: 'middle' },
-      { kind: 'consequence', label: 'Identical average, opposite surviving capital', timing: 'late' },
+      { kind: 'context', label: 'One set of 12 annual returns, shown in two orders', timing: 'early' },
+      { kind: 'mechanism', label: 'Both portfolio paths are computed from those returns, with the same withdrawals', timing: 'middle' },
+      { kind: 'action', label: 'Compare the two orders of the same returns', timing: 'middle' },
+      { kind: 'consequence', label: 'Same average, less than half the ending money', timing: 'late' },
     ],
     claimStack: {
-      primaryClaim: 'Same returns, same withdrawals — different order, opposite survival',
-      visualProof: 'A shared return deck (same blocks, two orders) drives both portfolio paths',
-      interactionRole: 'Hover the deck and paths to tie the identical returns to opposite outcomes',
-      readerAction: 'Compare the two orders of the same deck',
-      caution: 'Representative simulation, not a forecast or backtest',
+      primaryClaim: 'Same returns, same withdrawals, different order. At a 4 percent withdrawal, losses first ends with less than half what gains first ends with; at 6 percent it runs out in year 12.',
+      visualProof: 'One set of 12 annual returns, in two orders, drives both portfolio paths',
+      interactionRole: 'Hover the returns and the paths to tie the same numbers to different endings',
+      readerAction: 'Compare the two orders of the same returns',
+      caution: 'A 12-year simulation from stated inputs, not a forecast or a backtest.',
     },
-    interaction: { type: 'returnOrder', gesture: 'hover', conceptMatch: 'The same return deck is shown in two orders; the paths are generated from those exact returns' },
+    interaction: { type: 'returnOrder', gesture: 'hover', conceptMatch: 'The same returns are shown in two orders; the paths are computed from those exact returns' },
     motionProfile: { type: 'rowSweep', duration: 'slow', relatedElements: [['good', 'bad']] },
     status: 'implemented', wiredPublic: true,
-    title: 'Path Changes Everything', setupLine:'Same returns, same withdrawals — different order',
+    title: 'Path Changes Everything', setupLine: 'The same 12 annual returns and the same withdrawals, in two orders: gains first or losses first',
     claimLabel: 'PATH DEPENDENCY · WITHDRAWALS',
-    frameworkClaim: 'Same average return, opposite sequence, opposite survival outcome.',
+    frameworkClaim: 'Same returns, same withdrawals, different order: at a 4 percent withdrawal, losses first ends with less than half what gains first ends with.',
     readerTakeaway: 'Withdrawal-phase capital does not care about the average. It cares about the order.',
-    chartType: 'Shared return-set proof: one set of returns in two orders, with the portfolio paths generated from them.',
+    chartType: 'Shared return-set proof: one set of 12 annual returns in two orders, with the portfolio paths computed from them.',
     visualDataMode: 'simulation',
     disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
     sources: [
-      { provider: 'Author simulation', label: 'One return set, opposite order; paths generated from the returns', role: 'methodology', transform: 'v(i+1) = v(i)·(1+r) − withdrawal · $1.0M start · 4% level withdrawal', notes: 'No real-data transform. Pure deterministic simulation; the deck and the paths use the same returns.' },
+      { provider: 'Author simulation', label: 'Twelve annual returns in two orders; both paths computed from them', role: 'methodology', transform: 'v(next) = v × (1 + r) − w, where w is a fixed share of the starting balance withdrawn after each year\'s return · $1,000,000 start · 4% default', notes: 'Returns, gains-first order: +30, +24, +19, +15, +11, +8, +5, +1, −4, −10, −17, −25 percent (arithmetic mean 4.75 percent). Losses first is the same list reversed. A deterministic simulation, not historical data.' },
     ],
-    personalization: { uses: ['startingValue', 'withdrawalRate'], kind: 'sequence-scale', introLead: 'Representative withdrawal simulation', note: 'Scales start and ending values to the starting value, and re-simulates both paths at the chosen withdrawal rate (clamped to a representative band). Representative simulation, not a forecast.' },
+    personalization: { uses: ['startingValue', 'withdrawalRate'], kind: 'sequence-scale', introLead: 'Withdrawal simulation', note: 'Scales the start and ending values to your starting value and re-runs both paths at your withdrawal rate, held between 2 and 8 percent. A simulation, not a forecast.' },
     explainerHeadline: 'Same returns. Same withdrawals. Different order.',
-    explainerBody: 'Both paths use the same annual returns and the same withdrawals — the deck above proves it, the same blocks in opposite order. The only difference is sequence. Early losses force withdrawals from a smaller capital base, so later gains compound on less money. Average return did not change; surviving capital did.',
+    explainerBody: 'Both paths take the same 12 annual returns, from +30 percent down to −25 percent, and the same withdrawal every year; the two rows above are the same blocks in opposite order. Early losses force withdrawals from a smaller base, so the later gains compound on less money. At 4 percent of the starting balance a year, losses first ends at about 47 percent of where it began and gains first at about 116 percent. At 6 percent, losses first runs out in year 12.',
     explainerConcept: 'Sequence risk',
     concepts: [{ label: 'Sequence risk', link: '/part-1-foundation' }, { label: 'Survivable compounding', link: '/part-1-foundation' }, { label: 'Withdrawal policy', link: '/part-4-tax-architecture-roc-strategy' }],
     layout: 'sequenceRisk',
-    ariaSummary: 'A shared return-set proof. A deck of return blocks is shown twice: a good order (gains first) and a bad order (the same blocks reversed, losses first). Below, two portfolio-value paths are generated from those exact returns, starting from the same value with the same level withdrawals marked as ticks. The good order compounds before withdrawing, ending far higher; the bad order withdraws from a base impaired by early losses, falling through the depletion line at its trough and recovering only partially. Same average return, opposite surviving capital.',
-    domain: { xMin: 0, xMax: 12, yMin: 0, yMax: 2.5 }, yUnit: '$M',
-    xTicks: [{ v: 0, label: 'retire' }, { v: 6, label: 'yr 15' }, { v: 12, label: 'yr 30' }],
+    ariaSummary: 'A 12-year withdrawal simulation. A row of 12 annual returns is shown twice: gains first, and the same returns reversed, losses first. Below, two portfolio paths are computed from those returns, each starting at $1,000,000 and withdrawing $40,000 at the end of every year. Gains first rises to about $2.39 million in year 7 and ends near $1.16 million. Losses first falls to a low near $321,000 in year 8 and ends near $475,000, less than half as much. A line at zero marks where the money would run out.',
+    domain: { xMin: 0, xMax: 12, yMin: 0, yMax: 2.5 },
+    xTicks: [{ v: 0, label: 'retire' }, { v: 6, label: 'yr 6' }, { v: 12, label: 'yr 12' }],
     yTicks: [{ v: 0.5, label: '0.5×' }, { v: 1.0, label: '1.0×' }, { v: 2.0, label: '2.0×' }],
     sequence,
     primaryKey: 'good',
     hoverTargets: [
-      { id: 'deck', kind: 'deck', label: 'Same return set', name: 'Same return set, opposite order', why: 'Both rows are the identical set of representative returns — the top in a good order (gains first), the bottom the same blocks reversed (losses first). The portfolio paths below are generated from exactly these returns.', claim: 'Same deck, shuffled differently.', concept: 'Sequence risk', link: '/part-1-foundation' },
-      { id: 'good', kind: 'series', seriesKey: 'good', label: 'Good sequence', name: 'Good sequence', why: 'Gains arrive first, so withdrawals come out of a growing base. It still takes the same later losses — but ends far ahead because it compounded first.', claim: 'Order, not average, did the work.', concept: 'Sequence risk', link: '/part-1-foundation' },
-      { id: 'bad', kind: 'series', seriesKey: 'bad', label: 'Bad sequence', name: 'Bad sequence', why: 'The same returns in reverse. Early losses plus ongoing withdrawals hollow out the base, so the identical later gains compound on far less money.', claim: 'Identical average, opposite survival.', concept: 'Sequence risk', link: '/part-1-foundation' },
-      { id: 'depletion', kind: 'level', label: 'Depletion risk', name: 'Depletion risk', why: 'Below this line the portfolio can no longer sustain the withdrawal. The bad order falls through it at the trough; the good order never approaches it.', claim: 'Survival is a floor, not an average.', concept: 'Withdrawal policy', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'deck', kind: 'deck', label: 'Same return set', name: 'Same returns, opposite order', why: 'Both rows hold the same 12 annual returns: the top in gains-first order, the bottom reversed. The portfolio paths below are computed from exactly these numbers.', claim: 'Same returns, different order.', concept: 'Sequence risk', link: '/part-1-foundation' },
+      { id: 'good', kind: 'series', seriesKey: 'good', label: 'Good sequence', name: 'Gains first', why: 'Gains arrive first, so withdrawals come out of a growing balance. It takes the same losses later, but from a much larger base.', claim: 'Order, not average, did the work.', concept: 'Sequence risk', link: '/part-1-foundation' },
+      { id: 'bad', kind: 'series', seriesKey: 'bad', label: 'Bad sequence', name: 'Losses first', why: 'The same returns in reverse. Early losses plus the same withdrawals shrink the base, so the identical later gains compound on far less money.', claim: 'Same average, less than half the ending money.', concept: 'Sequence risk', link: '/part-1-foundation' },
+      { id: 'depletion', kind: 'level', label: 'Zero balance', name: 'Zero balance', why: 'Where withdrawals would use up the portfolio. At 4 percent neither order gets here. At 6 percent losses first hits zero in year 12, while gains first still ends near its starting value.', claim: 'The order decides who runs out.', concept: 'Withdrawal policy', link: '/part-4-tax-architecture-roc-strategy' },
     ],
     mobileTapTargets: ['deck', 'bad', 'good', 'depletion'],
-    implementationNotes: 'SIMULATION — the honesty footer is non-negotiable; most likely to be misread as a backtest. New sequenceRisk layout: a shared return DECK (same blocks, two orders, shape- and tone-coded) above two portfolio paths GENERATED from those returns, with level-withdrawal ticks on both. Bad path uses the stress tier (muted clay). Scales to reader-context portfolio value.',
+    implementationNotes: 'Wired on /part-1-foundation (#exhibit-05), /part-1-pictures and /framework-in-pictures. Simulation, the exhibit most likely to be misread as a backtest, so its disclosure stays. sequenceRisk layout: a shared return deck above two paths computed from it, with withdrawal ticks on both; the renderer re-simulates at the reader\'s withdrawal rate, clamped to 2 to 8 percent. sequence.depletion is 0, so the renderer\'s threshold line sits on the zero-balance baseline; its visible label text ("depletion risk") is fixed in FrameworkChart.jsx. Checked: at 4% gains first ends 1.158 and losses first 0.475 (trough 0.321 in year 8); at 6% losses first reaches 0 in year 12 and gains first ends 0.982.',
   },
 
   {
     chartId: 'p1-convexity-survival', idx: '06', group: 'part-1', intendedPlacement: 'part-1',
     claimStack: {
-      primaryClaim: 'Upside only matters if sizing lets you survive the path',
-      visualProof: 'A representative portfolio path that compounds through a shaded drawdown rather than around it',
-      interactionRole: 'Hover the value / invested lines and the drawdown to see survival',
-      readerAction: 'See compounding survive the drawdown',
-      caution: 'Representative simulation path, not historical data',
+      primaryClaim: 'Buying a fixed amount of Bitcoin every month from January 2018 to December 2024, through two falls of more than 70 percent, still ended at about seven times the money put in',
+      visualProof: 'The value of a fixed monthly purchase along a drawn price path with two falls of more than 70 percent, against the straight line of money put in',
+      interactionRole: 'Hover the value line, the money-in line and the deepest fall',
+      readerAction: 'Follow the value line through both falls',
+      caution: 'A drawn price path with two falls of more than 70 percent, like those of 2018 and 2021 to 2022; it is not Bitcoin\'s price history. The dated figures in the explainer come from Coinbase prices and are not plotted.',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Survive the Path', setupLine:'Cumulative invested versus portfolio value, with drawdown-from-peak shaded',
+    title: 'Survive the Path', setupLine: 'A fixed monthly purchase over seven years through two deep falls, against the total put in (100 = everything invested)',
     claimLabel: 'CONVEXITY · ENDURANCE',
-    frameworkClaim: 'Upside only matters if sizing lets you survive the path.',
-    readerTakeaway: 'Volatile assets can still compound — through, not around, the drawdown.',
-    chartType: 'Invested-vs-value representative path with drawdown shading.',
+    frameworkClaim: 'Upside only pays if nothing forces you to sell on the way down.',
+    readerTakeaway: 'What made both falls survivable here was that nothing forced a sale. Keeping it that way is the job of position sizing.',
+    chartType: 'Value of a fixed monthly purchase along a representative price path, against cumulative money invested, with falls from the running peak shaded.',
     visualDataMode: 'representative',
     disclosure: DISCLOSURE.representative, footerCta: 'View sources',
     sources: [
       { provider: 'ACF · Part 3', label: 'Bitcoin convexity and multi-cycle drawdowns', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
-      { provider: 'Author calculation', label: 'Constant DCA, no rebalancing, no leverage', role: 'methodology', notes: 'Representative path; production would wire a provider price series (e.g., CoinGecko / Nasdaq Data Link).' },
+      { provider: 'FRED (Coinbase)', seriesId: 'CBBTCUSD', label: 'Coinbase Bitcoin. Source of the dated falls and the monthly-purchase multiple in the explainer; not plotted', role: 'verifies-concept', url: 'https://fred.stlouisfed.org/series/CBBTCUSD' },
+      { provider: 'Author calculation', label: 'Fixed monthly purchase along the drawn price path', role: 'methodology', transform: 'Each month, units bought = contribution ÷ price; value = units held × price; 84 equal contributions summing to 100', notes: 'The price path is illustrative, not a price history.' },
     ],
-    explainerHeadline: 'Compounding happens through the drawdown.',
-    explainerBody: 'A constant, disciplined position absorbed two drawdowns over fifty percent and still finished well above the contribution line. Survival, not timing, did the work. The framework treats sizing as the gate that lets convexity actually compound.',
+    explainerHeadline: 'The gains went to whoever was still holding.',
+    explainerBody: 'Bitcoin fell more than 70 percent twice, in 2018 and again in 2021 and 2022. Buying a fixed amount every month from January 2018 to December 2024, through both falls, still ended at about seven times the money put in. That only works for a position small enough that nothing forces a sale at the bottom.',
     explainerConcept: 'Position sizing',
     concepts: [{ label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
     layout: 'single',
-    ariaSummary: 'Two lines over ten years: a straight cumulative-invested ramp and a volatile portfolio-value line. The value line suffers two deep drawdowns, shaded from its prior peak, but ends well above the invested line.',
-    domain: { xMin: 0, xMax: 10, yMin: 0, yMax: 330 }, yUnit: 'idx',
-    xTicks: [{ v: 0, label: 'yr 0' }, { v: 5, label: 'yr 5' }, { v: 10, label: 'yr 10' }],
-    yTicks: [{ v: 100 }, { v: 200 }, { v: 300 }],
+    ariaSummary: 'Two lines over seven years. A straight line climbs to 100, the total put in by a fixed monthly purchase. The value of those purchases, drawn along a price path with two falls of more than 70 percent, starts at the first contribution, rises, drops about 70 percent from its peak in the second fall, and ends near 700, about seven times the money put in. Falls from the running peak are shaded.',
+    domain: { xMin: 0, xMax: 7, yMin: 0, yMax: 760 }, yUnit: 'index · total invested = 100', valueUnit: 'idx',
+    xTicks: [{ v: 0, label: 'start' }, { v: 7, label: 'year 7' }],
+    yTicks: [{ v: 100 }, { v: 300 }, { v: 500 }, { v: 700 }],
     series: [
-      { key: 'invested', tier: 'reference', label: 'Invested', pts: survival.invested },
-      { key: 'value', tier: 'primary', label: 'Portfolio value', pts: survival.value },
+      { key: 'invested', tier: 'reference', label: 'Money in', pts: survival.invested },
+      { key: 'value', tier: 'primary', label: 'Value', pts: survival.value },
     ],
     areas: [{ id: 'drawdown', topKey: 'value', kind: 'peak', label: '' }],
     markers: [
-      { id: 'survived', type: 'dot', x: survival.trough.x, y: R(survival.trough.y), r: 3.2, label: 'drawdown survived', labelAnchor: 'start', labelDy: 22 },
-      { id: 'endpoint', type: 'dot', x: 10, y: R(valueAt(survival.value, 10)), r: 3.4, label: 'compounds through the cycle', labelAnchor: 'end', labelDy: -14 },
+      { id: 'survived', type: 'dot', x: survival.trough.x, y: R(survival.trough.y), r: 3.2, label: 'down about 70% from its peak', labelAnchor: 'start', labelDy: 22 },
+      { id: 'endpoint', type: 'dot', x: 7, y: R(valueAt(survival.value, 7)), r: 3.4, label: 'about 7× the money put in', labelAnchor: 'end', labelDy: -14 },
     ],
     notes: [],
     levels: [],
     primaryKey: 'value',
     hoverTargets: [
-      { id: 'value', kind: 'series', seriesKey: 'value', label: 'Portfolio value', name: 'Portfolio value', why: 'Volatile and convex. It compounds through the cycle precisely because the position was sized to survive the drawdowns.', claim: 'Survival is the precondition for convexity.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'invested', kind: 'series', seriesKey: 'invested', label: 'Invested', name: 'Cumulative invested', why: 'The disciplined contribution line. Finishing above it is the only thing that matters.', claim: 'The baseline survival must beat.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'survived', kind: 'marker', label: 'Drawdown survived', name: 'Drawdown survived', why: 'The deepest peak-to-trough decline the position absorbed without being forced out.', claim: 'Sizing is what made this survivable.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'endpoint', kind: 'marker', label: 'Compounds through', name: 'Compounds through the cycle', why: 'Two 50%+ drawdowns later, the value line ends well above contributions. Endurance, not timing, did it.', claim: 'Through the drawdown, not around it.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'value', kind: 'series', seriesKey: 'value', label: 'Value', name: 'Value of the purchases', why: 'What the monthly purchases are worth along the drawn path. It falls about 70 percent from its peak in the second fall and ends near seven times the money put in.', claim: 'Both falls hurt. Neither ended it.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'invested', kind: 'series', seriesKey: 'invested', label: 'Money in', name: 'Money put in', why: 'The same amount every month for seven years, scaled so the total is 100. Ending above it is the test.', claim: 'The line the value has to beat.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'survived', kind: 'marker', label: 'Deepest fall', name: 'Deepest fall', why: 'The value line\'s deepest drop, about 70 percent from its peak. A buyer with no loan against the position and no need for the cash is never forced to sell here; an oversized or borrowed-against position can be.', claim: 'Survivable only if nothing forces the sale.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'endpoint', kind: 'marker', label: 'Year 7', name: 'Year 7', why: 'After both falls the value ends near 700, about seven times the 100 put in.', claim: 'Through the falls, not around them.', concept: 'Survivable compounding', link: '/part-1-foundation' },
     ],
     mobileTapTargets: ['value', 'survived', 'endpoint', 'invested'],
-    implementationNotes: 'Completes the Part 1 arc. Drawdown-from-peak shaded behind the value line. Representative path; production would wire a provider price series.',
+    implementationNotes: 'Wired on /part-1-foundation (#exhibit-06), /part-1-pictures and /framework-in-pictures. Representative: the value line is computed (fixed monthly purchase) along a drawn price path whose two falls are 74% and 73% from their peaks; value starts at the first contribution, falls about 71% from its peak in the second fall and ends near 695 against 100 invested. Coinbase data is not plotted; the dated figures in the explainer (falls of 84% and 77%, about 7.0x for monthly purchases Jan 2018 to Dec 2024) were checked against FRED CBBTCUSD. Falls from the running peak are shaded behind the value line.',
   },
 
   /* ── PART 2 · LINEAGE & MACRO THESIS ────────────────────────────────────── */
   {
     chartId: 'p2-method-before-macro', idx: 'P2-01', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
-      primaryClaim: 'The method stays fixed while the macro thesis rotates with each regime',
-      visualProof: 'A flat method-lineage axis through the centre with the macro-thesis line arcing above it, crossing at two regime-transition dots, then below and back above across regimes A, B and C',
-      interactionRole: 'Hover the thesis, the axis, or a transition to read what moves, what holds fixed, and what gets reassessed',
-      readerAction: 'Trace the thesis as it orbits the unmoving axis',
-      caution: 'Conceptual field from the Part 2 lineage argument; illustrative, not measured data',
+      primaryClaim: 'The method stays fixed while the macro thesis is revisited as regimes change',
+      visualProof: 'A flat method axis through the center, with the macro-thesis line running above it in regime A, crossing at a transition, running below it in regime B and crossing back above in regime C',
+      interactionRole: 'Hover the thesis, the axis or a transition to read what moves, what holds and what gets reassessed',
+      readerAction: 'Follow the thesis line as it crosses an axis that never moves',
+      caution: 'Regimes A, B and C are placeholders, not dated periods, and the line has no scale',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Method Before Macro', setupLine: 'The method is the axis; the macro thesis rotates around it as the regime changes',
+    title: 'Method Before Macro', setupLine: 'One fixed axis for the method and one moving line for the macro thesis, across three regimes',
     claimLabel: 'LINEAGE · METHOD',
-    frameworkClaim: 'The framework’s method persists across regimes; the macro thesis changes with the environment.',
-    readerTakeaway: 'Keep the method fixed; let the thesis move.',
-    chartType: 'One field: a fixed central method/lineage axis with the macro-thesis line orbiting above, through, and below it across three regimes.',
+    frameworkClaim: 'The framework’s method persists across regimes; the macro thesis changes with them.',
+    readerTakeaway: 'Hold the method still; change the thesis when the evidence does.',
+    chartType: 'One field: a fixed central method axis with the macro-thesis line moving above, through and below it across three regimes.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 2', label: 'Lineage and macro thesis identification', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
       { provider: 'ACF · Part 1', label: 'Survivable compounding doctrine', role: 'verifies-concept', url: '/part-1-foundation' },
     ],
-    explainerHeadline: 'The method is the axis; the thesis rotates around it.',
-    explainerBody: 'The lineage — survival first, convexity, regime awareness, governance — is the fixed spine. The macro thesis is the expression that rotates around it: above the axis in one regime, reassessed as it crosses at each transition, below it in the next. Confusing the two is how investors abandon a sound method the moment the regime turns.',
+    explainerHeadline: 'The method is the axis; the thesis moves around it.',
+    explainerBody: 'The lineage supplies the method: how to think about risk, conviction, sizing and survival. That part stays put. The macro thesis is the application, and it moves: above the axis in one regime, reassessed as it crosses at each transition, below it in the next. Mistake a turn in the thesis for a failure of the method and you abandon a sound process just when you need it.',
     explainerConcept: 'Method vs application',
     concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
     layout: 'single',
-    ariaSummary: 'A single conceptual field. A calm horizontal method / lineage axis runs through the centre; the macro-thesis line orbits it — expressed above the axis in regime A, crossing through the axis at each regime transition, below it in regime B, and back above it in regime C. The axis never moves; only the thesis rotates around it.',
+    ariaSummary: 'A single conceptual field. A flat horizontal axis for the method runs through the center. The macro-thesis line runs above it in regime A, crosses it at the first regime transition, runs below it in regime B, and crosses back above it in regime C. The axis never moves; only the thesis does.',
     domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 100 }, yUnit: '', yTicks: [],
     xTicks: [{ v: 15, label: 'regime A' }, { v: 50, label: 'regime B' }, { v: 85, label: 'regime C' }],
     series: [{ key: 'thesis', tier: 'primary', label: 'Macro thesis', pts: p2Method.thesis }],
@@ -1399,130 +1543,130 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'transition', type: 'dot', x: p2Method.cross1, y: p2Method.spine, r: 3.2, label: 'regime transition', labelAnchor: 'middle', labelDy: 16 },
       { id: 'transition2', type: 'dot', x: p2Method.cross2, y: p2Method.spine, r: 3.2 },
     ],
-    notes: [{ x: 15, y: 86, text: 'the thesis rotates around the method', anchor: 'middle' }],
+    notes: [{ x: 15, y: 86, text: 'the thesis moves around a fixed method', anchor: 'middle' }],
     primaryKey: 'thesis',
     hoverTargets: [
-      { id: 'thesis', kind: 'series', seriesKey: 'thesis', label: 'Macro thesis', name: 'Macro thesis', why: 'The application layer — it swings above and below the method as growth, inflation and liquidity rotate. It is supposed to move.', claim: 'The thesis rotates around the method.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
-      { id: 'method', kind: 'level', label: 'Method · lineage', name: 'The method (the axis)', why: 'Survival first, convexity, regime awareness, governance — the fixed spine the thesis rotates around. It does not move when the regime does.', claim: 'The method is the constant axis.', concept: 'Method vs application', link: '/part-1-foundation' },
-      { id: 'transition', kind: 'marker', label: 'Regime transition', name: 'Regime transition', why: 'Where the thesis crosses the method and is reassessed for the new regime — the process that reassesses it does not change.', claim: 'Reassess the thesis, not the method.', concept: 'Method vs application', link: '/part-2-lineage-macro-thesis' },
+      { id: 'thesis', kind: 'series', seriesKey: 'thesis', label: 'Macro thesis', name: 'Macro thesis', why: 'The application layer. It changes when the regime does, because a new structural force takes over or the current thesis is falsified. It should not move with every data release.', claim: 'Revise the thesis when the evidence changes.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'method', kind: 'level', label: 'Method · lineage', name: 'The method (the axis)', why: 'Risk, conviction, sizing and survival: the axis the thesis moves around. It stays where it is when the regime changes.', claim: 'The method is the constant.', concept: 'Method vs application', link: '/part-1-foundation' },
+      { id: 'transition', kind: 'marker', label: 'Regime transition', name: 'Regime transition', why: 'The thesis crosses the axis here and is reassessed for the new regime. The process doing the reassessing does not change.', claim: 'Reassess the thesis, not the method.', concept: 'Method vs application', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['thesis', 'method', 'transition'],
-    implementationNotes: 'Conceptual single field (was a stacked dual): the method is a fixed central axis (guide) and the macro thesis orbits it — above in A, crossing at transitions, below in B, above in C. No numeric axes by design.',
+    implementationNotes: 'Conceptual single field (was a stacked dual): the method is a fixed central axis (guide) and the macro thesis moves around it, above in A, crossing at transitions, below in B, above in C. No numeric axes by design.',
   },
 
   {
     chartId: 'p2-ruin-comes-first', idx: 'P2-02', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
-      primaryClaim: 'You cannot compound from zero, so survival must come first',
-      visualProof: 'Two similarly volatile paths: one oscillates and recovers, the other crosses a charcoal point-of-no-return line at the ruin mark and flatlines near zero',
-      interactionRole: 'Hover the ruin mark or either path to read why matched volatility hid one twin’s fatal fragility',
-      readerAction: 'Trace the path that crosses the line and never recovers',
-      caution: 'Conceptual paths from the Part 2 lineage; illustrative, not measured',
+      primaryClaim: 'Survival comes before optimization, because ruin cannot be undone',
+      visualProof: 'Two paths with similar early volatility: one draws down and recovers; the other falls through a charcoal point-of-no-return line at the ruin mark, is forced out and flatlines',
+      interactionRole: 'Hover the ruin mark, the line or either path to read why matched volatility hid one book’s fragility',
+      readerAction: 'Follow the path that crosses the line and never recovers',
+      caution: 'The paths have no scale; the line marks the idea of a forced exit, not a particular percentage loss',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Ruin Comes First', setupLine: 'Two portfolios, similar volatility, very different left tails',
+    title: 'Ruin Comes First', setupLine: 'Two portfolios with similar volatility and very different worst cases',
     claimLabel: 'FRAGILITY · SURVIVAL',
     frameworkClaim: 'Fragility is nonlinear and ruin is irreversible; survival must precede optimization.',
-    readerTakeaway: 'You cannot compound from zero.',
-    chartType: 'Two outcome paths with similar volatility but different left-tail ruin.',
+    readerTakeaway: 'Nothing compounds once you are forced out.',
+    chartType: 'Two outcome paths with similar volatility but different left tails: one survives, one is forced out.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 1', label: 'Fragility is structural, not statistical', role: 'verifies-concept', url: '/part-1-foundation' },
       { provider: 'ACF · Part 2', label: 'Taleb lineage · ruin and nonlinearity', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
     ],
-    explainerHeadline: 'Survival is not one goal among many.',
-    explainerBody: 'Two books can share the same volatility and look equally lively — until one crosses the line it cannot come back from. Ruin is absorbing: there is no compounding after zero. The framework optimizes only inside the set of paths that survive.',
+    explainerHeadline: 'Some losses end the game.',
+    explainerBody: 'Two books can share the same volatility and look equally lively until one of them crosses a line it cannot come back from: leverage gets called, withdrawals force sales, or the loss is too deep to rebuild. The recovery then happens without it. The framework optimizes only among the paths that survive, and it keeps the whole book away from that line even while single positions draw down hard.',
     explainerConcept: 'Ruin',
     concepts: [{ label: 'Fragility', link: '/part-1-foundation' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
     layout: 'single',
-    ariaSummary: 'Two value paths with similar early volatility. One oscillates and recovers; the other crosses a point-of-no-return line and flatlines near zero, never recovering.',
+    ariaSummary: 'Two value paths with similar early volatility. One draws down and recovers. The other falls through a point-of-no-return line, is forced out, and flatlines well below where it started, never recovering.',
     domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 120 }, yUnit: '',
     xTicks: [{ v: 0, label: 'today' }, { v: 100, label: 'horizon' }], yTicks: [],
     series: [
       { key: 'robust', tier: 'primary', label: 'Survives', pts: p2Ruin.robust },
       { key: 'fragile', tier: 'stress', label: 'Ruined', pts: p2Ruin.fragile, labelDy: 2 },
     ],
-    levels: [{ id: 'ruin', y: 30, kind: 'charcoal', label: 'point of no return' }],
+    levels: [{ id: 'ruin', y: 30, kind: 'charcoal', label: 'forced out · point of no return' }],
     markers: [{ id: 'cross', type: 'enso', x: p2Ruin.crossX, y: R(valueAt(p2Ruin.fragile, p2Ruin.crossX)), r: 12, label: 'ruin · irreversible', labelAnchor: 'end', labelDy: -16 }],
     primaryKey: 'robust',
     hoverTargets: [
-      { id: 'cross', kind: 'marker', label: 'Ruin', name: 'The absorbing barrier', why: 'Once a path crosses here it does not return. The math of compounding ends at zero.', claim: 'Ruin is irreversible.', concept: 'Ruin', link: '/part-1-foundation' },
-      { id: 'fragile', kind: 'series', seriesKey: 'fragile', label: 'Ruined path', name: 'Ruined path', why: 'Same volatility as its twin, but one shock past the line and it never compounds again.', claim: 'Volatility hid the fragility.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'robust', kind: 'series', seriesKey: 'robust', label: 'Surviving path', name: 'Surviving path', why: 'It draws down and recovers because it was never allowed near the absorbing barrier.', claim: 'Survival keeps the option open.', concept: 'Survivable compounding', link: '/part-1-foundation' },
-      { id: 'ruin', kind: 'level', label: 'Point of no return', name: 'Point of no return', why: 'The threshold the framework refuses to let a position approach, whatever the upside.', claim: 'Bound the left tail first.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'cross', kind: 'marker', label: 'Ruin', name: 'The absorbing barrier', why: 'Once a book is forced out here, it cannot ride the recovery that follows. Compounding stops.', claim: 'Ruin is irreversible.', concept: 'Ruin', link: '/part-1-foundation' },
+      { id: 'fragile', kind: 'series', seriesKey: 'fragile', label: 'Ruined path', name: 'Ruined path', why: 'Same early volatility as its twin. One shock past the line and it never compounds again.', claim: 'Volatility hid the fragility.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'robust', kind: 'series', seriesKey: 'robust', label: 'Surviving path', name: 'Surviving path', why: 'It draws down hard and recovers, because nothing forced it to sell at the bottom.', claim: 'Survival keeps the option open.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'ruin', kind: 'level', label: 'Point of no return', name: 'Point of no return', why: 'Where a portfolio can no longer stay invested: leverage is called, withdrawals force sales, or the loss is too large to rebuild. The framework keeps the whole book away from it; single positions may still fall a long way.', claim: 'Keep the book away from the line.', concept: 'Invalidation', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['cross', 'fragile', 'robust', 'ruin'],
-    implementationNotes: 'Conceptual; no numeric axes. The two paths share early volatility on purpose — the difference is only the left tail.',
+    implementationNotes: 'Conceptual; no numeric axes. The two paths share early volatility on purpose, so the difference is only the left tail. The ruined path flatlines at 12 (forced out), not at zero; the barrier is a portfolio-level event, not a position drawdown limit.',
   },
 
   {
     chartId: 'p2-conviction-needs-exit', idx: 'P2-03', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
-      primaryClaim: 'Conviction earns a large position only when an exit caps the loss',
-      visualProof: 'Two conviction-vs-size lines: the with-exits line flattens at a charcoal sizing-cap while the no-exit line climbs past it to an unbounded-risk dot',
-      interactionRole: 'Hover either line, the cap level, or the runaway dot to read how the exit sets the ceiling',
-      readerAction: 'See the with-exits line flatten where the no-exit line runs on',
-      caution: 'Conceptual sizing-versus-conviction shapes; illustrative, not measured data',
+      primaryClaim: 'Conviction earns a larger position only inside the concentration limits, and only with an exit set in advance',
+      visualProof: 'Two size-versus-conviction lines: the framework line sits at zero below CIS 50, climbs through Part 5’s Torque bands and meets the concentration cap only at the top; the conviction-alone line starts above zero, cuts through the cap near the middle and runs on to an unbounded-risk dot',
+      interactionRole: 'Hover either line, the cap or the runaway dot to read what sets the ceiling and what the exit adds',
+      readerAction: 'Find where conviction alone breaks through the cap',
+      caution: 'Sizes follow Part 5’s Torque bands with no scale shown. The cap and the exit are written rules you carry out; the dashboard flags a position above the cap, records every trade and never blocks one (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Conviction Needs an Exit', setupLine: 'Position size can scale with conviction only because an exit caps the downside',
+    title: 'Conviction Needs an Exit', setupLine: 'Size may rise with conviction, but only inside the concentration cap and with an exit written in advance',
     claimLabel: 'CONCENTRATION · DISCIPLINE',
-    frameworkClaim: 'Concentration only works when paired with monitoring and disciplined exits.',
-    readerTakeaway: 'Size up on conviction, but keep the exit.',
-    chartType: 'Position size versus conviction, with and without an enforced exit cap.',
+    frameworkClaim: 'Concentration works only when it is paired with close monitoring and exits set in advance.',
+    readerTakeaway: 'Size up on conviction, inside the cap, with the exit already written.',
+    chartType: 'Position size versus conviction: sized within bands and a cap, versus conviction alone.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 2', label: 'Druckenmiller lineage · concentration with exits', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
       { provider: 'ACF · Part 5', label: 'Position sizing and tripwires', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
     ],
-    explainerHeadline: 'Concentration is earned by the exit.',
-    explainerBody: 'High conviction justifies a large position only when a monitored, pre-committed exit bounds the loss. Without that exit, the same concentration that compounds in your favour is the thing that ruins you. Sizing and invalidation are one decision, not two.',
+    explainerHeadline: 'Conviction earns size inside limits set in advance.',
+    explainerBody: 'High conviction earns a larger band, but only inside the concentration limits and only with an exit standard written before the position turns emotional. Those are two separate decisions: the score, its band and the concentration limits decide how big, and posture rules, tripwires and thesis evidence decide when to leave. Skip either one and the concentration that compounds in your favor is the same concentration that can ruin you.',
     explainerConcept: 'Tripwire',
     concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Tripwire', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'single',
-    ariaSummary: 'Position size rising with conviction. The disciplined line plateaus at a sizing cap enforced by exits; the no-exit line keeps rising without bound into ruin risk.',
+    ariaSummary: 'Position size against conviction. The framework line stays at zero below a CIS of 50, then rises through the sizing bands and reaches the concentration cap only at the highest conviction. The conviction-alone line starts above zero, crosses the cap near the middle and keeps rising into unbounded risk.',
     domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 50 }, yUnit: '',
-    xTicks: [{ v: 0, label: 'low conviction' }, { v: 100, label: 'high conviction' }], yTicks: [],
+    xTicks: [{ v: 0, label: 'low conviction' }, { v: 50, label: 'CIS 50' }, { v: 100, label: 'high conviction' }], yTicks: [],
     series: [
-      { key: 'disciplined', tier: 'primary', label: 'With exits', pts: p2Conviction.disciplined },
-      { key: 'reckless', tier: 'stress', label: 'No exit', pts: p2Conviction.reckless, labelDy: -2 },
+      { key: 'disciplined', tier: 'primary', label: 'Within the cap', pts: p2Conviction.disciplined },
+      { key: 'reckless', tier: 'stress', label: 'Conviction alone', pts: p2Conviction.reckless, labelDy: -2 },
     ],
-    levels: [{ id: 'cap', y: 20, kind: 'charcoal', label: 'sizing cap · exits enforce it' }],
-    markers: [{ id: 'unbounded', type: 'dot', x: 78, y: R(valueAt(p2Conviction.reckless, 78)), r: 3.2, label: 'no exit → unbounded risk', labelAnchor: 'end', labelDy: -12 }],
+    levels: [{ id: 'cap', y: 20, kind: 'charcoal', label: 'concentration cap · 15% default' }],
+    markers: [{ id: 'unbounded', type: 'dot', x: 78, y: R(valueAt(p2Conviction.reckless, 78)), r: 3.2, label: 'no cap, no exit → unbounded risk', labelAnchor: 'end', labelDy: -12 }],
     primaryKey: 'disciplined',
     hoverTargets: [
-      { id: 'disciplined', kind: 'series', seriesKey: 'disciplined', label: 'With exits', name: 'Sized with exits', why: 'Conviction scales the position up to a cap. The cap exists because a monitored exit makes the loss bounded.', claim: 'Concentration the framework allows.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'reckless', kind: 'series', seriesKey: 'reckless', label: 'No exit', name: 'Sized without exits', why: 'Same conviction, no invalidation. Size keeps climbing and the left tail goes with it.', claim: 'Conviction without an exit is ruin risk.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'cap', kind: 'level', label: 'Sizing cap', name: 'The sizing cap', why: 'The maximum the framework will run, set by what the exit can defend, not by how good the story feels.', claim: 'The exit sets the cap.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'unbounded', kind: 'marker', label: 'Unbounded risk', name: 'Unbounded risk', why: 'Past the cap, with no exit, the position is one regime turn from a hole it cannot climb out of.', claim: 'This is where conviction becomes danger.', concept: 'Ruin', link: '/part-1-foundation' },
+      { id: 'disciplined', kind: 'series', seriesKey: 'disciplined', label: 'Within the cap', name: 'Sized within the bands', why: 'CIS below 50 removes allocation eligibility, so the line starts at zero. Above that, each score can justify at most the top of its band (drawn for Torque, the only posture that can reach the cap), and the exit standard is defined before the position becomes emotional.', claim: 'Size is earned, and limited.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'reckless', kind: 'series', seriesKey: 'reckless', label: 'Conviction alone', name: 'Sized on conviction alone', why: 'Same conviction with no bands, no cap and no exit. Size keeps climbing, and the left tail climbs with it.', claim: 'Conviction without limits is ruin risk.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'cap', kind: 'level', label: 'Concentration cap', name: 'The concentration cap', why: 'The most one position may carry across the household: 15% by default, with the 18% absolute maximum reachable only under a documented override. Bitcoin sits outside these limits under Part 3’s rules. The exit decides when you leave, not how big you get.', claim: 'The cap is set before conviction runs.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'unbounded', kind: 'marker', label: 'Unbounded risk', name: 'Unbounded risk', why: 'Past the cap, with no exit, one regime turn can leave the position in a hole it cannot climb out of.', claim: 'This is where conviction becomes danger.', concept: 'Ruin', link: '/part-1-foundation' },
     ],
     mobileTapTargets: ['disciplined', 'cap', 'reckless', 'unbounded'],
-    implementationNotes: 'Conceptual; x is conviction, y is position size. The cap (level) is the point — concentration is licensed by the exit.',
+    implementationNotes: 'Conceptual; x reads as CIS (0 to 100), y is position size with no scale shown. The framework line traces Part 5’s Torque band ceilings (0 below 50; 2–4, 4–8 and 8–15 percent, linear within each band) scaled so 15 percent sits on the cap level, with no noise, so it never crosses the cap. The cap is the concentration limit and does not depend on the exit; the exit governs when a position is closed.',
   },
 
   {
     chartId: 'p2-markets-feed-back', idx: 'P2-04', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
-      primaryClaim: 'Price does not just reflect fundamentals — it can change them',
-      visualProof: 'One horizontal row of five shared stage cards — price, capital, buildout, fundamentals, validation — each split into its reinforcing and reversing state, a teal ribbon through the top states, a clay ribbon through the bottom states, and two complete return arcs closing validation back into price above and below the row',
-      interactionRole: 'Hover a stage to see why it drives the next, and how the same mechanism runs either direction',
+      primaryClaim: 'Price can change the fundamentals it is supposed to reflect',
+      visualProof: 'One horizontal row of five shared stage cards (price, capital, buildout, fundamentals, validation), each split into a reinforcing and a reversing state, with a teal ribbon through the top states, a clay ribbon through the bottom states, and two return arcs that close validation back into price above and below the row',
+      interactionRole: 'Hover a stage to see why it drives the next, and how the same mechanism runs in either direction',
       readerAction: 'Trace either path back into price',
-      caution: 'Conceptual reflexivity diagram; illustrative, not measured data',
+      caution: 'A diagram of Soros’s reflexivity loop; it says nothing about how fast or how far any loop runs',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Markets Feed Back', setupLine: 'Price changes capital behavior; capital changes fundamentals; fundamentals feed back into price.',
     claimLabel: 'REFLEXIVITY · FEEDBACK',
-    frameworkClaim: 'Prices do not only reflect fundamentals; they can change fundamentals.',
+    frameworkClaim: 'Prices can change the fundamentals they are supposed to reflect.',
     readerTakeaway: 'Price is an input, not just an output.',
     chartType: 'Reflexivity circuit: five shared stages split into reinforcing and reversing states, both paths closing back into price.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 2', label: 'Soros lineage · reflexivity', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
     explainerHeadline: 'Price can write the fundamentals it claims to read.',
-    explainerBody: 'A rising price can attract capital; capital funds the buildout; the buildout improves the fundamentals; better fundamentals validate the price. The same loop can run in reverse when capital leaves or validation fails.',
+    explainerBody: 'A rising share price lets a company raise money cheaply; the money builds capacity; the capacity shows up as revenue, which seems to justify the price. Run it backward, with capital leaving or results disappointing, and the same loop that built the story takes it apart.',
     explainerConcept: 'Reflexivity',
     concepts: [{ label: 'Reflexivity', link: '/part-2-lineage-macro-thesis' }, { label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }],
     layout: 'feedbackLoop',
-    ariaSummary: 'Reflexivity as one shared mechanism in a single row of five stages: price, capital, buildout, fundamentals, validation. Each stage holds two states. A reinforcing path runs left to right through the top states — price rises, capital flows in, buildout expands, fundamentals improve, validation confirms — then arcs back above the row into price. A reversing path runs through the bottom states — price falls, capital tightens, buildout slows, fundamentals weaken, validation breaks — then arcs back below the row into the same price. Both loops are complete and both feed back into price.',
+    ariaSummary: 'Reflexivity as one mechanism in a single row of five stages: price, capital, buildout, fundamentals and validation. Each stage holds two states. A reinforcing path runs left to right through the top states (price rises, capital flows in, buildout expands, fundamentals improve, validation confirms) and arcs back above the row into price. A reversing path runs through the bottom states (price falls, capital tightens, buildout slows, fundamentals weaken, validation breaks) and arcs back below the row into the same price. Both loops close back into price.',
     feedbackLoop: {
       centerLabel: 'reflexivity',
       returnLabel: 'evidence feeds back into price',
@@ -1542,87 +1686,90 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'price',
     hoverTargets: [
-      { id: 'price', kind: 'node', label: 'Price', name: 'Price', why: 'Not just a readout of value — a signal that pulls capital toward it, or away. Both directions of the loop start and end here.', claim: 'Price moves first.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'price', kind: 'node', label: 'Price', name: 'Price', why: 'A readout of value, and also a signal that pulls capital in or pushes it away. Both directions of the loop start and end here.', claim: 'Price moves first.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
       { id: 'capital', kind: 'node', label: 'Capital', name: 'Capital', why: 'Follows the price signal: it flows in on the way up and tightens on the way down, funding or starving the buildout.', claim: 'Capital chases the signal.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
-      { id: 'buildout', kind: 'node', label: 'Buildout', name: 'Buildout', why: 'Capital arriving is not yet fundamentals — it becomes rigs, plants, networks, teams. The buildout is where financing turns into real capacity, or quietly stalls.', claim: 'Financing changes capacity.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
-      { id: 'fundamentals', kind: 'node', label: 'Fundamentals', name: 'Fundamentals', why: 'Genuinely change because the buildout ran — or slowed. The story becomes partly true, or quietly hollows out.', claim: 'The narrative funds itself.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
-      { id: 'validation', kind: 'node', label: 'Validation', name: 'Validation', why: 'Improved fundamentals ratify the price and the loop reinforces; disappointment breaks it and the same loop reverses, fast.', claim: 'Confirmation feeds the next move — either way.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'buildout', kind: 'node', label: 'Buildout', name: 'Buildout', why: 'Money raised is not yet a fundamental. It has to become rigs, plants, networks and teams. The buildout is where financing turns into real capacity, or stalls.', claim: 'Financing changes capacity.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'fundamentals', kind: 'node', label: 'Fundamentals', name: 'Fundamentals', why: 'They change because the buildout ran, or because it slowed. The story becomes partly true, or hollows out.', claim: 'The narrative funds itself.', concept: 'Reflexivity', link: '/part-2-lineage-macro-thesis' },
+      { id: 'validation', kind: 'node', label: 'Validation', name: 'Validation', why: 'Better fundamentals ratify the price and the loop reinforces. Disappointment breaks it, and the same loop reverses, fast.', claim: 'Confirmation feeds the next move, in either direction.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['price', 'capital', 'buildout', 'fundamentals', 'validation'],
-    implementationNotes: 'feedbackLoop layout — linear reflexivity circuit (NOT the systemLoop ring, which is reserved for true circular systems). ONE clean horizontal row of five shared stage cards (price · capital · buildout · fundamentals · validation), each vertically split into its reinforcing state (top) and reversing state (bottom). A teal ribbon runs left→right through the top states; a clay ribbon runs through the bottom states; BOTH close from validation back into price — teal return arc above the system, clay below — complete, solid, equally weighted, directionally obvious. No staggered cards, no braiding, no path overlap: the causal structure stays linear; artistry lives in the brush strokes and asymmetric return-arc curvature. Three persistent transition annotations. Desktop-first; mobile adaptation follows visual approval.',
+    implementationNotes: 'feedbackLoop layout: a linear reflexivity circuit (NOT the systemLoop ring, which is reserved for true circular systems). ONE clean horizontal row of five shared stage cards (price · capital · buildout · fundamentals · validation), each vertically split into its reinforcing state (top) and reversing state (bottom). A teal ribbon runs left→right through the top states; a clay ribbon runs through the bottom states; BOTH close from validation back into price, teal return arc above the system and clay below: complete, solid, equally weighted, directionally obvious. No staggered cards, no braiding, no path overlap: the causal structure stays linear; artistry lives in the brush strokes and asymmetric return-arc curvature. Three persistent transition annotations. Desktop-first; mobile adaptation follows visual approval.',
   },
 
   {
     chartId: 'p2-time-changes-prudence', idx: 'P2-05', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
-      primaryClaim: 'A long enough horizon makes convex, tax-free compounding the prudent choice',
-      visualProof: 'Two compounding lines — convex tax-free and conventional — hug early then split wide in the final decades, with an ensō marker where prudence flips',
-      interactionRole: 'Hover either path or the flip mark for why it matters; the intro scales both multiples to your starting value and horizon',
-      readerAction: 'Trace the split that only opens late',
-      caution: 'Representative simulation of illustrative compounding, not a forecast or backtest',
+      primaryClaim: 'A long horizon magnifies tax drag',
+      visualProof: 'Two compounding lines from the same start, one at 10 percent tax-free and one at 7.5 percent after yearly tax, sit close together for decades on a linear scale and then split: about 2× apart at year 30 and about 5× apart at year 70',
+      interactionRole: 'Hover either line or a checkpoint to read the multiples at 30 and 70 years',
+      readerAction: 'Compare the gap at year 30 with the gap at year 70',
+      caution: 'Tax-free means qualified Roth growth under current law. The taxed line assumes every year’s gain is realized, the costly case; a gain realized once costs less (Part 4)',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Time Changes Prudence', setupLine: 'Conventional versus convex, tax-free compounding over a 70-year horizon',
+    title: 'Time Changes Prudence', setupLine: 'The same 10 percent a year for 70 years, compounded tax-free or taxed every year',
     claimLabel: 'HORIZON · PRUDENCE',
-    frameworkClaim: 'Longer horizons change what counts as prudent; tax-free compounding and convex exposure become more important.',
-    readerTakeaway: 'A long horizon rewrites the prudent choice.',
-    chartType: 'Two compounding paths diverging at long horizon (simulation).',
-    visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
+    frameworkClaim: 'Longer horizons change what counts as prudent: the same return, taxed every year, falls further behind the longer it compounds.',
+    readerTakeaway: 'The drag is the same every year; the horizon decides what it costs.',
+    chartType: 'Two compounding multiples from the same 10 percent return, tax-free versus taxed every year, over 70 years (simulation).',
+    visualDataMode: 'simulation', disclosure: 'Representative simulation · The same 10 percent a year, tax-free versus taxed every year at a 25 percent blended rate; no volatility, fees or withdrawals; not a forecast', footerCta: 'View methodology',
     sources: [
-      { provider: 'Author simulation', label: 'Constant-rate compounding, conventional vs convex/tax-free', role: 'methodology', transform: '70-year horizon, illustrative rates', notes: 'No real-data transform; illustrative compounding only.' },
+      { provider: 'Author calculation', label: '1.10^t tax-free vs 1.075^t (10% a year less a 25% blended tax on gains realized every year) · year 30: 17.4× vs 8.8× · year 70: 790× vs 158×', role: 'methodology', notes: 'The same inputs as Part 5’s wrapper-compounding example, where $100,000 becomes about $1,745,000 tax-free and about $875,000 taxed every year over 30 years. No volatility, fees or withdrawals.' },
       { provider: 'ACF · Part 2', label: 'Edelman / longevity-horizon lineage', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
     ],
-    explainerHeadline: 'Prudence is a function of horizon.',
-    explainerBody: 'Over ten years the cautious path and the convex path look close enough to call the cautious one prudent. Stretch the horizon toward a lifetime and the gap stops being a gap — it becomes the whole outcome. Longevity makes tax-free convexity the conservative choice.',
+    explainerHeadline: 'The horizon sets the price of tax drag.',
+    explainerBody: 'Both lines earn the same 10 percent a year. One compounds tax-free; the other pays a 25 percent blended rate on its gains every year, so it compounds at 7.5 percent. After 30 years the taxed line holds about half of the tax-free result, and after 70 about a fifth. Part 4 works the case of a gain realized once, and Part 5 works this annual case in dollars.',
     explainerConcept: 'Survivable compounding',
     concepts: [{ label: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'single',
-    ariaSummary: 'Two compounding multiples over seventy years. The conventional path grows modestly; the convex, tax-free path hugs it early then pulls dramatically away in the final decades.',
-    domain: { xMin: 0, xMax: 70, yMin: 0, yMax: 230 }, yUnit: '', valueUnit: '× start',
-    xTicks: [{ v: 0, label: 'yr 0' }, { v: 35, label: 'yr 35' }, { v: 70, label: 'yr 70' }],
-    yTicks: [{ v: 50, label: '50×' }, { v: 150, label: '150×' }],
+    ariaSummary: 'Two growth multiples over seventy years from the same ten percent annual return. The tax-free line reaches about 17 times its start at year thirty and about 790 times at year seventy. The line taxed every year compounds at seven and a half percent and reaches about 9 times its start at year thirty and about 158 times at year seventy. On this linear scale the two look close for decades, then split wide.',
+    domain: { xMin: 0, xMax: 70, yMin: 0, yMax: 880 }, yUnit: '', valueUnit: '× start',
+    xTicks: [{ v: 0, label: 'yr 0' }, { v: 30, label: 'yr 30' }, { v: 70, label: 'yr 70' }],
+    yTicks: [{ v: 200, label: '200×' }, { v: 400, label: '400×' }, { v: 600, label: '600×' }],
     series: [
-      { key: 'convex', tier: 'primary', label: 'Convex · tax-free', pts: p2Time.convex },
-      { key: 'prudent', tier: 'reference', label: 'Conventional', pts: p2Time.prudent, labelDy: 12 },
+      { key: 'taxfree', tier: 'primary', label: 'Tax-free · 10% a year', pts: p2Time.taxfree },
+      { key: 'taxed', tier: 'reference', label: 'Taxed yearly · 7.5% net', pts: p2Time.taxed, labelDy: 12 },
     ],
-    markers: [{ id: 'flip', type: 'enso', x: 52, y: R(valueAt(p2Time.convex, 52)), r: 12, label: 'horizon reshapes prudence', labelAnchor: 'end', labelDy: -16 }],
-    primaryKey: 'convex',
+    markers: [
+      { id: 'y30', type: 'dot', x: 30, y: R(valueAt(p2Time.taxfree, 30)), r: 3.2, label: '30 yrs · 17.4× vs 8.8×', labelAnchor: 'end', labelDy: -12 },
+      { id: 'y70', type: 'dot', x: 70, y: R(valueAt(p2Time.taxfree, 70)), r: 3.2, label: '70 yrs · 790× vs 158×', labelAnchor: 'end', labelDy: -10 },
+    ],
+    primaryKey: 'taxfree',
     hoverTargets: [
-      { id: 'convex', kind: 'series', seriesKey: 'convex', label: 'Convex · tax-free', name: 'Convex, tax-free path', why: 'Quiet for years, then the compounding and the tax-free wrapper do the work the horizon was always going to reward.', claim: 'Long horizons favour convexity.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'prudent', kind: 'series', seriesKey: 'prudent', label: 'Conventional', name: 'Conventional path', why: 'The “safe” default. Over a lifetime its caution is what costs the most.', claim: 'Caution has a long-horizon price.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'flip', kind: 'marker', label: 'Prudence reshaped', name: 'Where prudence flips', why: 'Past here the convex path is no longer the risky one — the horizon has made it the conservative choice.', claim: 'Time changes the definition.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'taxfree', kind: 'series', seriesKey: 'taxfree', label: 'Tax-free · 10% a year', name: 'Tax-free path', why: 'Every year compounds the full 10 percent, because nothing is paid along the way. Tax-free here means qualified Roth growth under current law.', claim: 'Nothing leaks, so everything compounds.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'taxed', kind: 'series', seriesKey: 'taxed', label: 'Taxed yearly · 7.5% net', name: 'Taxed every year', why: 'The same 10 percent, less a 25 percent blended tax on gains realized each year, compounds at 7.5 percent. A 2.5-point haircut looks small in any one year.', claim: 'Small annual drag, large lifetime cost.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'y30', kind: 'marker', label: 'Year 30', name: 'Year 30 · 17.4× vs 8.8×', why: 'Part 5’s case: $100,000 grows to about $1,745,000 tax-free and about $875,000 taxed every year. The taxed path ends with about half.', claim: 'At 30 years, about 2× apart.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'y70', kind: 'marker', label: 'Year 70', name: 'Year 70 · 790× vs 158×', why: 'Forty more years at the same rates and the taxed path ends with about a fifth of the tax-free result. That is the 60-to-80-year horizon of Edelman’s longevity argument in Part 2.', claim: 'At 70 years, about 5× apart.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
     ],
-    mobileTapTargets: ['convex', 'prudent', 'flip'],
-    personalization: { uses: ['startingValue', 'horizon'], kind: 'horizon-scale', introLead: 'Illustrative compounding', note: 'Reads the two compounding multiples at the chosen horizon and scales them to the starting value. Illustrative compounding, not a forecast.' },
-    implementationNotes: 'SIMULATION — illustrative compounding, footer-disclosed. Linear y is bottom-heavy by nature; the late divergence is the message.',
+    mobileTapTargets: ['taxfree', 'taxed', 'y30', 'y70'],
+    implementationNotes: 'SIMULATION: deterministic compounding from Part 5’s inputs (1.10^t vs 1.075^t over 70 years, no noise). Linear y on purpose: the late split is the message. Checkpoint markers at 30 and 70 years reproduce 17.4× vs 8.8× and 790× vs 158×. No personalization block: the site island passes no reader context, so the block only produced a "Try this" cue pointing at an input the page does not have.',
   },
 
   {
     chartId: 'p2-capital-finds-bottleneck', idx: 'P2-06', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
-      primaryClaim: 'Capital concentrates where structural force hits its binding constraint',
-      visualProof: 'Five descending stage-nodes — force, required buildout, bottleneck, capital pathway, investable exposure — each transforming the prior and narrowing into the emphasised final node',
+      primaryClaim: 'Capital concentrates where a structural force hits its binding constraint',
+      visualProof: 'Five descending stage nodes (force, required buildout, bottleneck, capital pathway, investable exposure), each transforming the one before and narrowing into the emphasized final node',
       interactionRole: 'Hover any stage to read why it matters and the claim it carries, ending where the thesis becomes ownable',
       readerAction: 'Trace the cascade down to the ownable exposure',
-      caution: 'Conceptual capital-flow cascade; illustrative, not measured data',
+      caution: 'A reasoning sequence from Part 2’s thesis-construction steps; it names no assets and measures no flows',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Capital Finds the Bottleneck', setupLine: 'A structural force only matters where it is constrained — that is where capital lands',
+    title: 'Capital Finds the Bottleneck', setupLine: 'A structural force becomes investable where it runs into a constraint, because that is where capital has to flow',
     claimLabel: 'THESIS · CAPITAL FLOW',
     frameworkClaim: 'A valid thesis must map structural force into capital-flow pathways.',
-    readerTakeaway: 'Trace the force to its bottleneck to its instruments.',
+    readerTakeaway: 'Follow the force to its bottleneck, then to the assets that own it.',
     chartType: 'Flow map: structural force → bottlenecks → where capital lands.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 2', label: 'Macro thesis construction', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
-    explainerHeadline: 'Force is not a trade; the bottleneck is.',
-    explainerBody: 'Everyone can see the structural force. The edge is mapping it to the constraint it runs into, and the specific assets that own that constraint. A thesis that stops at the theme never reaches the capital-flow pathway where the return actually accrues.',
+    explainerHeadline: 'The return collects at the bottleneck.',
+    explainerBody: 'Naming the structural force is the start. The edge is mapping it to the constraint it runs into and to the specific assets that own that constraint. In Part 2’s worked example, AI needs data centers, data centers need power, and power generation is one of the places capital has to flow. A thesis that stops at the theme never reaches the pathway where the return accrues.',
     explainerConcept: 'Capital pathways',
     concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'bridge',
-    ariaSummary: 'A five-stage descending cascade: structural force, required buildout, bottleneck, capital pathway, and investable exposure — each stage transforming the previous until the thesis becomes something ownable.',
+    ariaSummary: 'A five-stage descending cascade: structural force, required buildout, bottleneck, capital pathway and investable exposure. Each stage transforms the one before it until the thesis becomes something you can own.',
     bridge: {
       stages: [
-        { id: 'force', label: 'Structural force', sub: 'the driver everyone sees' },
+        { id: 'force', label: 'Structural force', sub: 'the driver you can name' },
         { id: 'buildout', label: 'Required buildout', sub: 'what it forces to be built' },
         { id: 'bottleneck', label: 'Bottleneck', sub: 'the binding constraint' },
         { id: 'pathway', label: 'Capital pathway', sub: 'where money must flow' },
@@ -1631,27 +1778,27 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'exposure',
     hoverTargets: [
-      { id: 'force', kind: 'node', label: 'Structural force', name: 'Structural force', why: 'The macro driver everyone already agrees on. On its own it is a theme, not a position.', claim: 'The force is the easy part.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
-      { id: 'buildout', kind: 'node', label: 'Required buildout', name: 'Required buildout', why: 'What the force actually forces into existence — the physical and financial work it demands.', claim: 'Force becomes spending.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'force', kind: 'node', label: 'Structural force', name: 'Structural force', why: 'The macro driver. You have to name it, but on its own it is a theme, not a position.', claim: 'Naming the force is step one.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'buildout', kind: 'node', label: 'Required buildout', name: 'Required buildout', why: 'What the force requires to be built: the physical and financial work it demands.', claim: 'Force becomes spending.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
       { id: 'bottleneck', kind: 'node', label: 'Bottleneck', name: 'The bottleneck', why: 'The binding constraint the buildout runs into. Scarcity here is what concentrates the return.', claim: 'Constraints, not themes, pay.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
-      { id: 'pathway', kind: 'node', label: 'Capital pathway', name: 'Capital pathway', why: 'The route money must travel to relieve the constraint — the pathway a real thesis predicts.', claim: 'Follow where capital must go.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
-      { id: 'exposure', kind: 'node', label: 'Investable exposure', name: 'Investable exposure', why: 'The specific assets that own the constraint. This is the point a thesis becomes ownable.', claim: 'A thesis is not investable until here.', concept: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'pathway', kind: 'node', label: 'Capital pathway', name: 'Capital pathway', why: 'The route money must travel to relieve the constraint. A real thesis predicts it.', claim: 'Follow where capital must go.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
+      { id: 'exposure', kind: 'node', label: 'Investable exposure', name: 'Investable exposure', why: 'The specific assets that own the constraint. This is where a thesis becomes something you can hold.', claim: 'A thesis is not investable until here.', concept: 'Thematic engine', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['force', 'buildout', 'bottleneck', 'pathway', 'exposure'],
-    implementationNotes: 'Uses the bridge layout: a descending five-stage cascade where each stage transforms the prior and capital concentrates into the emphasised final investable node.',
+    implementationNotes: 'Uses the bridge layout: a descending five-stage cascade where each stage transforms the prior and capital concentrates into the emphasized final investable node.',
   },
 
   {
     chartId: 'p2-narrative-not-thesis', idx: 'P2-07', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
       primaryClaim: 'A narrative earns thesis status only by surviving four gates',
-      visualProof: 'An entry narrative node feeding four vertical gates — persistence, capital flow, falsifiable, conviction — with a survivor band that thins at each into the lone thesis node',
+      visualProof: 'An entry narrative node feeding four vertical gates (persistence, capital flow, falsifiable, runway), with a survivor band that thins at each into the lone thesis node',
       interactionRole: 'Hover any gate to read what it tests and which threads fall away there',
       readerAction: 'Trace the survivor band as it thins gate by gate',
-      caution: 'Conceptual validation gauntlet from Part 2; illustrative, not measured',
+      caution: 'The gates are Part 2’s four tests for a valid thesis; how many stories fail at each is drawn, not counted',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Narrative Is Not Thesis', setupLine: 'A story becomes a thesis only after it survives four gates',
+    title: 'Narrative Is Not Thesis', setupLine: 'Four tests stand between a good story and a thesis: persistence, a capital-flow path, falsifiability and a multi-year runway',
     claimLabel: 'THESIS · VALIDATION',
     frameworkClaim: 'A valid macro thesis needs persistence, capital-flow implications, falsifiability, and multi-year runway.',
     readerTakeaway: 'Most narratives never make it through the gates.',
@@ -1659,29 +1806,29 @@ export const FRAMEWORK_CHART_SPECS = [
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 2', label: 'Valid macro thesis filter', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' }],
     explainerHeadline: 'A narrative is a candidate, not a conclusion.',
-    explainerBody: 'Compelling stories are cheap. A thesis has to persist beyond the headline, imply a real capital-flow path, be falsifiable enough to break, and run for years. Anything that fails a gate is a trade idea at best — never a structure to build on.',
+    explainerBody: 'Compelling stories are cheap. A thesis has to outlast the headline, say where capital must flow, be specific enough to be proven wrong, and hold up for years. A story that fails a gate is a trade idea at best, and nothing to build a portfolio on.',
     explainerConcept: 'Valid thesis',
     concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Falsifiability', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'gate',
-    ariaSummary: 'A validation gauntlet. A narrative enters and must pass four gates — structural persistence, capital-flow implication, falsifiable indicators, and multi-year conviction — and only what survives all four emerges as a thesis. A survivor band thins at each gate.',
+    ariaSummary: 'A validation gauntlet. A narrative enters and must pass four gates (structural persistence, a capital-flow implication, falsifiable indicators and a multi-year runway), and only what survives all four emerges as a thesis. A survivor band thins at each gate.',
     gate: {
       nodes: [
         { id: 'narrative', kind: 'entry', label: 'Narrative', sub: 'a compelling story' },
         { id: 'persist', kind: 'gate', label: 'Persistence', sub: 'structural, not a headline' },
         { id: 'flow', kind: 'gate', label: 'Capital flow', sub: 'a real pathway' },
         { id: 'falsify', kind: 'gate', label: 'Falsifiable', sub: 'measurable signals' },
-        { id: 'runway', kind: 'gate', label: 'Conviction', sub: 'multi-year runway' },
+        { id: 'runway', kind: 'gate', label: 'Runway', sub: 'multi-year conviction' },
         { id: 'thesis', kind: 'exit', label: 'Thesis', sub: 'survived all four' },
       ],
     },
     primaryKey: 'thesis',
     hoverTargets: [
-      { id: 'narrative', kind: 'node', label: 'Narrative', name: 'Narrative', why: 'A compelling story. Necessary, abundant, and on its own worth nothing to allocate against.', claim: 'Stories are the input, not the output.', concept: 'Valid thesis', link: '/part-2-lineage-macro-thesis' },
-      { id: 'persist', kind: 'node', label: 'Persistent?', name: 'Gate 1 · persistence', why: 'Does the story persist beyond the headline, or fade in a quarter? The threads ending here are stories that never had structure.', claim: 'Survive the headline.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
-      { id: 'flow', kind: 'node', label: 'Capital flow?', name: 'Gate 2 · capital flow', why: 'Does capital have a real pathway through the thesis, or just a vibe? Stories with no pathway stall and fall away here.', claim: 'No pathway, no thesis.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
-      { id: 'falsify', kind: 'node', label: 'Falsifiable?', name: 'Gate 3 · falsifiability', why: 'Can the thesis be proven wrong? If it cannot break, it cannot be governed — and it drops at this gate.', claim: 'If it cannot break, it cannot be governed.', concept: 'Falsifiability', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'runway', kind: 'node', label: 'Runway?', name: 'Gate 4 · runway', why: 'Can it run for years without a new story every week? The last weak narratives end here, just short of becoming structure.', claim: 'Theses need years, not weeks.', concept: 'Macro thesis phase', link: '/part-2-lineage-macro-thesis' },
-      { id: 'thesis', kind: 'node', label: 'Thesis', name: 'A thesis', why: 'Only the few threads that survive all four gates arrive here — they earn the right to shape structure and sizing.', claim: 'This is what you build on.', concept: 'Valid thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'narrative', kind: 'node', label: 'Narrative', name: 'Narrative', why: 'Every thesis starts as a story. Stories are abundant, and on their own they are nothing to allocate against.', claim: 'Stories are the raw material.', concept: 'Valid thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'persist', kind: 'node', label: 'Persistent?', name: 'Gate 1 · persistence', why: 'Does the story outlast the headline, or fade in a quarter? The threads that end here never had structure.', claim: 'Survive the headline.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'flow', kind: 'node', label: 'Capital flow?', name: 'Gate 2 · capital flow', why: 'Does the thesis say where capital must go? “The world is changing” names no destination, so it stalls here.', claim: 'No pathway, no thesis.', concept: 'Capital pathways', link: '/part-2-lineage-macro-thesis' },
+      { id: 'falsify', kind: 'node', label: 'Falsifiable?', name: 'Gate 3 · falsifiability', why: 'Could a measurable event prove it wrong? A price drawdown does not count; the test is structural. A story nothing could refute gives you nothing to monitor, so it drops out here.', claim: 'If it cannot break, it cannot be governed.', concept: 'Falsifiability', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'runway', kind: 'node', label: 'Runway?', name: 'Gate 4 · runway', why: 'Can it hold for years, through the volatility of a transition, without a new story every week? The last weak narratives end here.', claim: 'Theses need years, not weeks.', concept: 'Macro thesis phase', link: '/part-2-lineage-macro-thesis' },
+      { id: 'thesis', kind: 'node', label: 'Thesis', name: 'A thesis', why: 'Only the threads that pass all four gates arrive here. They earn the right to shape the portfolio; each position in it still earns its size through its score.', claim: 'This is what you build on.', concept: 'Valid thesis', link: '/part-2-lineage-macro-thesis' },
     ],
     mobileTapTargets: ['narrative', 'persist', 'flow', 'falsify', 'runway', 'thesis'],
     implementationNotes: 'Uses the gate layout: a survivor band that thins through four vertical gates into the thesis node. Sober gauntlet, not a marketing funnel.',
@@ -1690,239 +1837,244 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'p2-phase-changes-sizing', idx: 'P2-08', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
-      primaryClaim: 'One valid thesis still wants a different size at each phase',
-      visualProof: 'A flat, high validity line above a sizing curve that starts small, peaks through the mid-cycle buildout, and trims into the late phase, with an ensō mark at the crowded trim',
-      interactionRole: 'Hover the sizing curve, the flat validity line, or the trim mark to see why size moves while validity holds',
-      readerAction: 'Trace the sizing curve rise and fall beneath the flat validity line',
-      caution: 'Conceptual sizing across a thesis lifecycle; illustrative, not measured data',
+      primaryClaim: 'A thesis can stay valid while the right size for it changes with its phase',
+      visualProof: 'A flat, high validity line above a sizing curve that starts small, rises through the mid-cycle buildout and eases in the late phase, with a circled mark where the late phase begins',
+      interactionRole: 'Hover the sizing curve, the validity line or the late-phase mark to see why size moves while validity holds',
+      readerAction: 'Follow the sizing curve up and down beneath the flat validity line',
+      caution: 'Phase is a judgment recorded with the thesis. The dashboard stores it and does not size positions by it (as of September 2026); the curve shows the idea, not a sizing rule',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Phase Changes Sizing', setupLine: 'The same valid thesis carries different sizing early, mid, and late',
+    title: 'Phase Changes Sizing', setupLine: 'One valid thesis through three phases: early structural, mid-cycle buildout, late expression',
     claimLabel: 'PHASE · SIZING',
-    frameworkClaim: 'A thesis can remain structurally valid while its deployment phase changes sizing and risk posture.',
-    readerTakeaway: 'Right thesis, wrong size, still a loss.',
-    chartType: 'Thesis validity held constant while sizing rises then trims across phases.',
+    frameworkClaim: 'A thesis can stay structurally valid while its phase informs sizing, entry and risk controls.',
+    readerTakeaway: 'A right thesis can still be sized wrong.',
+    chartType: 'Thesis validity held constant while sizing rises, then eases, across phases.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 2', label: 'Macro thesis phase / governance', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
-      { provider: 'ACF · Part 5', label: 'Position management across the cycle', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF · Part 5', label: 'CIS sizing bands', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
     ],
     explainerHeadline: 'Validity is not a sizing instruction.',
-    explainerBody: 'A thesis can be right for a decade and still demand different risk at each stage: small while it is unproven, largest through the buildout, trimmed once it is crowded and priced. Separating thesis validity from deployment phase is what keeps conviction from becoming complacency.',
+    explainerBody: 'A thesis can stay valid for a decade and still call for different handling at each stage: small while it is unproven, fuller through the buildout, more guarded once the move is priced. The score still selects the band; the phase, recorded with the thesis, informs how you use it. Keeping validity and phase apart is what stops conviction from turning into complacency.',
     explainerConcept: 'Macro thesis phase',
     concepts: [{ label: 'Macro thesis phase', link: '/part-2-lineage-macro-thesis' }, { label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'single',
-    ariaSummary: 'Across a thesis lifecycle — early structural, mid-cycle buildout, late expression — validity stays high and flat while sizing starts small, ramps to a peak, then trims into the late phase.',
+    ariaSummary: 'Across a thesis lifecycle (early structural, mid-cycle buildout, late expression), validity stays high and flat while sizing starts small, rises to a peak through the buildout, then eases into the late phase.',
     domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 100 }, yUnit: '',
     xTicks: [{ v: 0, label: 'early structural' }, { v: 50, label: 'mid-cycle' }, { v: 100, label: 'late expression' }], yTicks: [],
     series: [
       { key: 'sizing', tier: 'primary', label: 'Sizing', pts: p2Phase.sizing },
       { key: 'validity', tier: 'reference', label: 'Thesis validity', pts: p2Phase.validity, labelDy: -4 },
     ],
-    markers: [{ id: 'trim', type: 'enso', x: 78, y: R(valueAt(p2Phase.sizing, 78)), r: 12, label: 'trim as it gets crowded', labelAnchor: 'end', labelDy: -16 }],
+    markers: [{ id: 'trim', type: 'enso', x: 78, y: R(valueAt(p2Phase.sizing, 78)), r: 12, label: 'late phase · recheck the score', labelAnchor: 'end', labelDy: -16 }],
     primaryKey: 'sizing',
     hoverTargets: [
-      { id: 'sizing', kind: 'series', seriesKey: 'sizing', label: 'Sizing', name: 'Sizing', why: 'Small while unproven, largest through the buildout, trimmed once the move is crowded and priced.', claim: 'Size tracks the phase, not the conviction.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'validity', kind: 'series', seriesKey: 'validity', label: 'Thesis validity', name: 'Thesis validity', why: 'Flat and high throughout — the thesis stays right even as the correct size changes underneath it.', claim: 'Validity is constant; sizing is not.', concept: 'Macro thesis phase', link: '/part-2-lineage-macro-thesis' },
-      { id: 'trim', kind: 'marker', label: 'Late-phase trim', name: 'Late-phase trim', why: 'The thesis is still valid here, but it is crowded and priced — so risk comes down even as conviction stays.', claim: 'Trim a winner that is now consensus.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'sizing', kind: 'series', seriesKey: 'sizing', label: 'Sizing', name: 'Sizing', why: 'The score selects the band. The phase informs how you use it: small while the thesis is unproven, fuller through the buildout, more guarded in late expression.', claim: 'Phase informs the size the score allows.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'validity', kind: 'series', seriesKey: 'validity', label: 'Thesis validity', name: 'Thesis validity', why: 'Flat and high throughout. The thesis stays valid while the right size changes beneath it.', claim: 'Validity holds; size moves.', concept: 'Macro thesis phase', link: '/part-2-lineage-macro-thesis' },
+      { id: 'trim', kind: 'marker', label: 'Late-phase recheck', name: 'Late phase', why: 'The thesis is still valid here. What has changed is the price: as the move gets priced in, its remaining headroom narrows, and the score with it. Part 5’s rule for a winner that has grown: recalculate the score, let it run if conviction held, and trim if it fell.', claim: 'Recheck the score before you trim.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['sizing', 'validity', 'trim'],
-    implementationNotes: 'Conceptual; phases live on the x-axis. Validity is a flat reference; sizing is the moving primary.',
+    implementationNotes: 'Conceptual; phases on the x-axis. Validity is a flat reference; sizing is the moving primary, peaking near 70 so it stays well clear of the validity line (minimum gap about 17). The late-phase mark sits at x = 78.',
   },
 
   {
     chartId: 'p2-liquidity-sets-tide', idx: 'P2-09', group: 'part-2', intendedPlacement: 'part-2',
     claimStack: {
-      primaryClaim: 'Convex assets amplify the liquidity tide rather than merely track it',
-      visualProof: 'A gently oscillating liquidity line beside a same-rhythm convex-asset line that follows with a lag and swings far wider, plus a lead dot where liquidity turns first',
-      interactionRole: 'Hover the liquidity, asset, or lead-dot marks to see which line is the driver and which amplifies and lags',
-      readerAction: 'Trace the liquidity turn, then the asset’s wider follow',
-      caution: 'Representative shapes, not historical liquidity or Bitcoin; illustrative, not a forecast',
+      primaryClaim: 'Bitcoin has tended to move in the same direction as global liquidity over multi-month windows',
+      visualProof: 'A gently rising and falling liquidity line beside an asset line that moves the same way on a much wider swing, with short wiggles that sometimes run against it, and a dot where the tide turns',
+      interactionRole: 'Hover the liquidity line, the asset line or the turning point to read what the relationship does and does not show',
+      readerAction: 'Compare the long swings, where the lines agree, with the short wiggles, where they often do not',
+      caution: 'Drawn shapes, not plotted liquidity or Bitcoin prices. Swing sizes and wiggles are illustrative; the cited study measures direction, not a fixed multiple',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Liquidity Sets the Tide', setupLine: 'A representative liquidity impulse and the convex asset that amplifies it',
+    title: 'Liquidity Sets the Tide', setupLine: 'One drawn liquidity cycle, and an asset like Bitcoin moving with it on a wider swing',
     claimLabel: 'LIQUIDITY · SENSITIVITY',
-    frameworkClaim: 'In the current thesis, liquidity cycles shape Bitcoin and long-duration asset sensitivity.',
-    readerTakeaway: 'Convex assets ride the liquidity tide, magnified.',
-    chartType: 'Representative liquidity impulse versus convex-asset sensitivity.',
+    frameworkClaim: 'In the current thesis, the liquidity cycle is the tide that Bitcoin and other long-duration assets tend to move with.',
+    readerTakeaway: 'Read the tide for direction over months, not for next week.',
+    chartType: 'Representative liquidity cycle versus a more sensitive long-duration asset.',
     visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources',
     sources: [
-      { provider: 'ACF · Part 2', label: 'Liquidity-cycle lineage (Alden)', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
+      { provider: 'Lyn Alden Investment Strategy', label: 'Bitcoin: A Global Liquidity Barometer (written by Sam Callahan, commissioned by Lyn Alden), September 2024', role: 'verifies-concept', url: 'https://www.lynalden.com/bitcoin-a-global-liquidity-barometer' },
+      { provider: 'ACF · Part 2', label: 'Current-thesis input · Alden on liquidity cycles', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
       { provider: 'ACF · Part 3', label: 'Bitcoin liquidity sensitivity', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
-      { provider: 'Author calculation', label: 'Representative liquidity impulse vs convex sensitivity', role: 'methodology' },
+      { provider: 'Author illustration', label: 'Method the shape illustrates: one liquidity cycle drawn as a smooth wave; the asset moves in the same direction on a wider swing, plus a faster wiggle that sometimes runs against it. No lag is drawn, and heights and widths are drawn, not measured.', role: 'methodology' },
     ],
-    explainerHeadline: 'Convex assets trade the tide, not the weather.',
-    explainerBody: 'Global liquidity sets the level of the water; long-duration and convex assets like Bitcoin ride it with amplification. Read the liquidity impulse and you read most of the swing — which is why the current thesis treats liquidity as the tide, not background noise.',
+    explainerHeadline: 'Bitcoin tends to move with the tide, not the weather.',
+    explainerBody: 'Global liquidity, the supply of money and credit, sets the level of the water. From 2013 to mid-2024 Bitcoin moved in the same direction as global liquidity in 83 percent of 12-month periods and 74 percent of 6-month periods, according to a September 2024 study written by Sam Callahan and commissioned by Lyn Alden. It measures direction, not a fixed multiple; the link weakens over short windows, and it decoupled as prices fell from the bull-market peaks of 2013, 2017 and 2021. The current thesis reads liquidity as the tide: a guide to the regime over months, and no help with next week.',
     explainerConcept: 'Liquidity cycle',
     concepts: [{ label: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' }, { label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'single',
-    ariaSummary: 'Two lines over time. A liquidity impulse oscillates gently around mid-range; a convex asset traces the same rhythm with a lag and a much larger amplitude.',
+    ariaSummary: 'Two lines over one drawn cycle. A global-liquidity line rises and falls gently around the middle. An asset line moves the same way on a much wider swing, with short wiggles that sometimes run against the liquidity line. A dot marks where liquidity peaks and turns.',
     domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 100 }, yUnit: '', valueUnit: 'index',
-    xTicks: [{ v: 0, label: 'tide out' }, { v: 100, label: 'tide in' }], yTicks: [{ v: 25 }, { v: 50 }, { v: 75 }],
+    xTicks: [{ v: 0, label: 'cycle start' }, { v: 100, label: 'cycle end' }], yTicks: [{ v: 25 }, { v: 50 }, { v: 75 }],
     series: [
-      { key: 'asset', tier: 'primary', label: 'Convex asset', pts: p2Liquidity.asset },
-      { key: 'liquidity', tier: 'secondary', label: 'Liquidity', pts: p2Liquidity.liquidity, labelDy: 14 },
+      { key: 'asset', tier: 'primary', label: 'Bitcoin-like asset', pts: p2Liquidity.asset },
+      { key: 'liquidity', tier: 'secondary', label: 'Global liquidity', pts: p2Liquidity.liquidity, labelDy: 14 },
     ],
-    markers: [{ id: 'lead', type: 'dot', x: 30, y: R(valueAt(p2Liquidity.liquidity, 30)), r: 3.2, label: 'liquidity turns, asset follows', labelAnchor: 'start', labelDy: -12 }],
+    markers: [{ id: 'turn', type: 'dot', x: 25, y: R(valueAt(p2Liquidity.liquidity, 25)), r: 3.2, label: 'the tide turns', labelAnchor: 'start', labelDy: -12 }],
     primaryKey: 'asset',
     hoverTargets: [
-      { id: 'asset', kind: 'series', seriesKey: 'asset', label: 'Convex asset', name: 'Convex asset', why: 'Long-duration and convex, so it amplifies the liquidity swing rather than merely tracking it.', claim: 'Convexity magnifies the tide.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'liquidity', kind: 'series', seriesKey: 'liquidity', label: 'Liquidity', name: 'Liquidity impulse', why: 'The level of the water. Most of the asset’s swing is just this, magnified and lagged.', claim: 'Liquidity is the driver.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
-      { id: 'lead', kind: 'marker', label: 'Liquidity leads', name: 'Liquidity leads', why: 'The impulse turns first; the convex asset follows and overshoots.', claim: 'Read the tide before the asset.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'asset', kind: 'series', seriesKey: 'asset', label: 'Bitcoin-like asset', name: 'Bitcoin-like asset', why: 'Tends to move the same way as the tide over months. The study found Bitcoin more sensitive to liquidity than traditional assets, particularly over longer time frames; the wider swing here is drawn, not measured. Over a few weeks it can wander either way.', claim: 'It tends to move with the tide.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'liquidity', kind: 'series', seriesKey: 'liquidity', label: 'Global liquidity', name: 'Global liquidity', why: 'The level of the water: money and credit in the system, read through M2 growth and central-bank balance sheets. Over multi-month windows the asset has usually moved with it.', claim: 'Likely a key driver over the long run.', concept: 'Liquidity cycle', link: '/part-2-lineage-macro-thesis' },
+      { id: 'turn', kind: 'marker', label: 'The tide turns', name: 'The tide turns', why: 'Liquidity peaks here and starts to ebb. Over months the asset has tended to turn with it; over weeks it can go either way.', claim: 'Context for risk over months; no timing signal.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
     ],
-    mobileTapTargets: ['asset', 'liquidity', 'lead'],
-    implementationNotes: 'Representative shapes (not historical series). Production could wire a real global-liquidity proxy vs BTC behind the same spec.',
+    mobileTapTargets: ['asset', 'liquidity', 'turn'],
+    implementationNotes: 'Representative shapes, not historical series. Liquidity is one sine cycle; the asset is in phase with it at a wider amplitude plus a faster wiggle, so the two agree on direction over most long windows (about 92 to 95 percent of 10-to-30-step windows) and less often over short ones (about 73 to 78 percent of 2-to-5-step windows). No lag is drawn because the cited study measures direction, not timing. Plotting real data would need a public-domain global-liquidity series under the chart data policy.',
   },
 
   /* ── PART 3 · BITCOIN — CONVEXITY BACKBONE ──────────────────────────────── */
   {
     chartId: 'p3-power-law-holds', idx: 'P3-01', group: 'part-3', intendedPlacement: 'part-3',
     claimStack: {
-      primaryClaim: 'Bitcoin has mostly stayed inside a rising power-law corridor',
-      visualProof: 'On a log scale, a rising power-law corridor and fair-value midline; the price line oscillates inside — twice into the euphoria band above, once below capitulation, now back within',
-      interactionRole: 'Hover the price, either band, or the current-regime dot to read what each excursion signals',
+      primaryClaim: 'On log-log axes, Bitcoin’s price has clustered around a rising power-law trend, with swings above and below it',
+      visualProof: 'On log-log axes, a rising corridor around a power-law trend line; a representative price path swings through it, spiking above the upper band twice and closing below the lower band once',
+      interactionRole: 'Hover the price, the trend, either band mark or the end dot to read what each excursion means',
       readerAction: 'Trace the price against the corridor bands',
-      caution: 'Representative power-law shape, not historical price; illustrative, not a forecast',
+      caution: 'Representative schematic, not plotted prices: the axes carry no price levels or dates, and the path is drawn. The fitted constants move with the data window, and no band is a hard floor: price has spent months below power-law floor lines, most recently in 2026',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Power Law Holds', setupLine: 'Price against a log power-law corridor — central tendency, with euphoria and capitulation bands',
+    title: 'Power-Law Corridor', setupLine: 'Price against a log power-law corridor: a trend line with euphoria and capitulation bands',
     claimLabel: 'VALUATION · POWER LAW',
-    frameworkClaim: 'Bitcoin’s long-term path can be contextualized by power-law behavior — a regime heuristic, not a prediction.',
-    readerTakeaway: 'A map of where Bitcoin sits on its adoption curve, not a forecast.',
-    chartType: 'Log power-law corridor with price oscillating between euphoria and capitulation bands.',
+    frameworkClaim: 'The power law gives Bitcoin’s long-run path a regime context; it is a heuristic and makes no prediction.',
+    readerTakeaway: 'A rough map of where a cycle stands.',
+    chartType: 'Log-log power-law corridor with a representative price path swinging between euphoria and capitulation bands.',
     visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources', suppressValues: true,
     sources: [
-      { provider: 'Santostasi · power-law model', label: 'Bitcoin power-law (log-log regression)', role: 'verifies-concept', url: 'https://giovannisantostasi.medium.com/the-bitcoin-power-law-theory-962dfaf99ee9' },
+      { provider: 'Giovanni Santostasi · Medium, March 2024', label: 'The Bitcoin Power Law Theory: price as a power law of days since the genesis block (first posted on Reddit, 2018)', role: 'verifies-concept', url: 'https://giovannisantostasi.medium.com/the-bitcoin-power-law-theory-962dfaf99ee9' },
+      { provider: 'Harold Christopher Burger · Medium, September 2019', label: 'Bitcoin’s natural long-term power-law corridor of growth: the corridor with support and resistance bands', role: 'verifies-concept', url: 'https://medium.com/quantodian-publications/bitcoins-natural-long-term-power-law-corridor-of-growth-649d0e9b3c94' },
       { provider: 'ACF · Part 3', label: 'Power-law bands as a regime heuristic', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+      { provider: 'Author illustration', label: 'Method the shape illustrates: a straight power-law trend on log-log axes, with bands a fixed distance above and below it; the price path is drawn, not fitted', role: 'methodology' },
     ],
-    explainerHeadline: 'Power-law bands map the regime; they do not predict it.',
-    explainerBody: 'Plotted on a log scale, Bitcoin has spent most of its history inside a power-law corridor, with briefer stretches into euphoria above and capitulation below. The exact bands are model-dependent; the framework reads the corridor as a map of where price sits on the adoption curve, never as a forecast.',
+    explainerHeadline: 'Power-law bands map the regime. They do not call the next move.',
+    explainerBody: 'Since 2010 Bitcoin’s price has clustered around a power-law trend, running far above it in manias and below it in capitulations. This sketch draws a representative price path through such a corridor: two spikes above the upper band and one close below the lower band. The fitted constants shift with the data window, and their stability is debated, so the framework reads the corridor as multi-year context for where a cycle stands. Fair value is something else: the estimate the independent valuation models converge on, shown next.',
     explainerConcept: 'Power law',
     concepts: [{ label: 'Power law', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'single',
-    ariaSummary: 'A log-scale chart. A power-law corridor rises across the plot; Bitcoin’s price oscillates inside it, spiking into an upper euphoria band twice and dropping below the lower capitulation band once, currently sitting back inside the corridor.',
-    domain: { xMin: 0, xMax: 100, yMin: 2.8, yMax: 6.4 }, yUnit: '',
-    xTicks: [{ v: 0, label: 'early adoption' }, { v: 50, label: 'mid cycle' }, { v: 100, label: 'now' }],
-    yTicks: [{ v: 3, label: '$1k' }, { v: 4, label: '$10k' }, { v: 5, label: '$100k' }, { v: 6, label: '$1M' }],
+    ariaSummary: 'A log-log schematic with no price levels or dates. A rising power-law trend line runs through a shaded corridor. A representative price path swings through it, spiking above the upper euphoria band twice and closing below the lower capitulation band once, and ends back inside the corridor at a later reading.',
+    domain: { xMin: 0, xMax: 100, yMin: 2.4, yMax: 6.4 }, yUnit: 'log scale · ×10 per gridline',
+    xTicks: [{ v: 0, label: 'early adoption' }, { v: 100, label: 'later' }],
+    yTicks: [{ v: 3, label: '' }, { v: 4, label: '' }, { v: 5, label: '' }, { v: 6, label: '' }],
     series: [
       { key: 'upper', tier: 'reference', hidden: true, pts: p3Power.upper },
       { key: 'lower', tier: 'reference', hidden: true, pts: p3Power.lower },
-      { key: 'central', tier: 'reference', label: 'fair value', pts: p3Power.central },
+      { key: 'central', tier: 'reference', label: 'trend', pts: p3Power.central },
       { key: 'price', tier: 'primary', label: 'price', pts: p3Power.price },
     ],
     areas: [{ id: 'corridor', topKey: 'upper', botKey: 'lower', kind: 'gap', label: 'power-law corridor' }],
     markers: [
       { id: 'euphoria', type: 'enso', x: p3Power.euph.x, y: p3Power.euph.y, r: 12, label: 'euphoria · upper band', labelAnchor: 'end', labelDy: -16 },
       { id: 'capitulation', type: 'enso', x: p3Power.cap.x, y: p3Power.cap.y, r: 12, label: 'capitulation · lower band', labelAnchor: 'start', labelDy: 20 },
-      { id: 'now', type: 'dot', x: p3Power.last.x, y: p3Power.last.y, r: 3.4, label: 'current regime', labelAnchor: 'end', labelDy: -12 },
+      { id: 'now', type: 'dot', x: p3Power.last.x, y: p3Power.last.y, r: 3.4, label: 'a later reading', labelAnchor: 'end', labelDy: -12 },
     ],
     primaryKey: 'price',
     hoverTargets: [
-      { id: 'price', kind: 'series', seriesKey: 'price', label: 'Price', name: 'Bitcoin price', why: 'Most of the time it lives inside the corridor; the excursions out are the regime signal, not the trend.', claim: 'Price is read against the band, not in isolation.', concept: 'Power law', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'central', kind: 'series', seriesKey: 'central', label: 'Fair value', name: 'Power-law central tendency', why: 'The corridor midline — the framework’s rough sense of fair value on the adoption curve.', claim: 'A heuristic centre, not a target.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'euphoria', kind: 'marker', label: 'Euphoria', name: 'Euphoria · upper band', why: 'Price stretched above the corridor. Historically rare and brief — a signal to slow discretionary accumulation, not to predict a top.', claim: 'Above the band: caution.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'capitulation', kind: 'marker', label: 'Capitulation', name: 'Capitulation · lower band', why: 'Price below the corridor. Rare and short — where the framework leans into accumulation.', claim: 'Below the band: opportunity.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'now', kind: 'marker', label: 'Current regime', name: 'Where it sits now', why: 'The map keeps re-reading position in the corridor rather than forecasting the next move.', claim: 'Position is a reading, not a prediction.', concept: 'Power law', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'price', kind: 'series', seriesKey: 'price', label: 'Price', name: 'Price (representative path)', why: 'Most of the time the path stays inside the corridor. The trips outside it carry the regime signal; the trend itself moves slowly.', claim: 'Read price against the bands, never alone.', concept: 'Power law', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'central', kind: 'series', seriesKey: 'central', label: 'Trend', name: 'Power-law trend', why: 'The corridor’s midline. Part 3 treats it as regime context. Fair value is the estimate several independent models agree on, and never this line on its own.', claim: 'A trend, not a target.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'euphoria', kind: 'marker', label: 'Euphoria', name: 'Euphoria · upper band', why: 'Price stretched above the corridor, which has been rare and brief so far. The framework slows discretionary buying and banks income as dry powder; it makes no attempt to call the top.', claim: 'Above the band: slow down.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'capitulation', kind: 'marker', label: 'Capitulation', name: 'Capitulation · lower band', why: 'Price below the corridor. Spells below a power-law floor have lasted months, most recently in 2026. If the valuation models agree on a discount of more than 30 percent, the framework raises DCA about 50 percent or deploys dry powder. It never sells.', claim: 'Below the band: lean in, if the models agree.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'now', kind: 'marker', label: 'A later reading', name: 'A later reading', why: 'The schematic’s last point. Each new price is placed in the corridor and read again; the reading describes the regime and carries no forecast.', claim: 'Read the position again with each new price.', concept: 'Power law', link: '/part-3-bitcoin-convexity-backbone' },
     ],
     mobileTapTargets: ['now', 'euphoria', 'capitulation', 'price', 'central'],
-    implementationNotes: 'Signature Part 3 visual. Baked in log space (y = log10 price; ticks are decades) so the corridor reads straight and calm. Representative shape — production can wire a real log-log fit behind the same spec. Restrained green thesis line, no orange/neon.',
+    implementationNotes: 'Part 3 signature visual: a representative schematic. Baked in log space (y = log10 of a unitless price index; gridlines are decades and carry no price labels) with x read as log time, so the power law draws as a straight trend. The capitulation dip is deep enough that the path closes below the lower band exactly once; it spikes above the upper band twice. The dashboard draws only a trend (2.88 × (days ÷ 1000)^5.82) and a floor (1.2828 × (days ÷ 1000)^5.928) and no euphoria band; the dated reading lives in Part 3 prose, never in this chart. Restrained green thesis line, no orange or neon.',
   },
 
   {
     chartId: 'p3-volatility-is-the-toll', idx: 'P3-03', group: 'part-3', intendedPlacement: 'part-3',
     claimStack: {
-      primaryClaim: 'Big Bitcoin drawdowns are small portfolio hits at a managed size',
-      visualProof: 'A volatile Bitcoin line beside a calm total-portfolio line at a managed reserve',
-      interactionRole: 'Hover the toll / calm marks; the intro scales the hit to your starting value',
+      primaryClaim: `At a 15 percent reserve, a ${p3Vol.btcPct} percent Bitcoin fall costs the portfolio about ${p3Vol.portPct} percent: painful, and survivable`,
+      visualProof: `A volatile Bitcoin line with two deep falls, beside a portfolio line computed from it at a 15 percent reserve, which dips about ${p3Vol.portPct} percent at the worst point`,
+      interactionRole: 'Hover the toll and portfolio marks; enter a starting value to see the hit in dollars',
       readerAction: 'See the drawdown sized to your portfolio',
-      caution: 'Representative paths, not historical Bitcoin; illustrative, not a forecast',
+      caution: 'Representative Bitcoin path, not historical prices. The portfolio line is computed from it, with Bitcoin reset to 15 percent at each new high and the rest held flat. The reset is a simplification: the framework never trims the reserve, so a reserve left to grow goes into the next fall as a larger share and loses more',
     },
-    interaction: { type: 'readerContext', gesture: 'type', conceptMatch: 'Entering a starting value scales the representative drawdown into a portfolio-impact figure' },
+    interaction: { type: 'readerContext', gesture: 'type', conceptMatch: 'Entering a starting value turns the drawn Bitcoin fall into a portfolio-impact figure in dollars' },
     status: 'implemented', wiredPublic: true,
-    title: 'Volatility Is the Toll', setupLine: 'Large Bitcoin drawdowns, small total-portfolio impact at a managed allocation',
+    title: 'Volatility Is the Toll', setupLine: 'What a deep Bitcoin fall costs a portfolio that holds Bitcoin as a sized reserve',
     claimLabel: 'VOLATILITY · SIZING',
-    frameworkClaim: 'Bitcoin volatility is the cost of convexity; sizing decides whether it is survivable.',
-    readerTakeaway: 'The drawdown is the price of admission, not a reason to avoid it.',
-    chartType: 'Representative Bitcoin path with deep drawdowns vs the calmer total-portfolio line at managed size.',
+    frameworkClaim: 'Bitcoin’s volatility is the cost of its convexity; position size decides whether that cost is survivable.',
+    readerTakeaway: 'Plan for falls of 75 to 80 percent, and check what one costs at your reserve size.',
+    chartType: 'Representative Bitcoin path with two deep falls, and a portfolio line computed from it at a 15 percent reserve.',
     visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources',
     sources: [
+      { provider: 'CNBC · March 5, 2024', label: 'Galaxy Digital’s Alex Thorn: “bitcoin has seen four 75% [plus] drawdowns”; its record before 2024 was $68,982.20 on November 10, 2021', role: 'verifies-concept', url: 'https://www.cnbc.com/2024/03/05/bitcoin-all-time-high.html' },
+      { provider: 'Author calculation', label: 'Portfolio line = Bitcoin at 15 percent (reset at each new Bitcoin high, untouched through each fall) + 85 percent held flat; the Bitcoin path is illustrative, drawn to falls of about 77 and 54 percent', role: 'methodology' },
       { provider: 'ACF · Part 3', label: 'Volatility as the cost of convexity; sizing for survivability', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
       { provider: 'ACF · Part 1', label: 'Survivable compounding', role: 'verifies-concept', url: '/part-1-foundation' },
     ],
-    explainerHeadline: 'The volatility is the toll, not the risk.',
-    explainerBody: 'Bitcoin pays in volatility for its convexity, with repeated drawdowns over fifty percent. Held at a managed reserve size, those drawdowns barely move the total portfolio. Sizing — not avoidance — is what makes the volatility survivable.',
+    explainerHeadline: 'Volatility is the toll; size decides whether you can pay it.',
+    explainerBody: `Bitcoin charges for its convexity in drawdowns: every completed cycle through 2022 fell at least 77 percent. Held at 15 percent of the portfolio, a ${p3Vol.btcPct} percent fall costs about ${p3Vol.portPct} percent, and the later ${p3Vol.laterPct} percent fall here costs about ${p3Vol.laterPortPct} percent. That hurts, and a portfolio sized for it lives through it. At 100 percent Bitcoin, the same fall takes ${p3Vol.btcPct} percent of everything.`,
     explainerConcept: 'Position sizing',
     concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' }],
-    personalization: { uses: ['startingValue', 'btcReserveAllocation'], kind: 'vol-impact', assume: { alloc: 0.15, drawdown: 0.70 }, introLead: 'Portfolio impact example', note: 'Translates the representative drawdown into a portfolio-impact figure at the chosen Bitcoin reserve size. Illustrative, not a forecast.' },
+    personalization: { uses: ['startingValue', 'btcReserveAllocation'], kind: 'vol-impact', assume: { alloc: 0.15, drawdown: p3Vol.btcPct / 100 }, introLead: 'Portfolio impact example', note: 'Turns the drawn Bitcoin fall into a portfolio-impact figure at the Bitcoin reserve size you choose (15 percent if you leave it blank). Illustrative, not a forecast.' },
     layout: 'single',
-    ariaSummary: 'Two lines indexed to 100. A volatile Bitcoin line rises overall but suffers two deep drawdowns; the total-portfolio line, holding Bitcoin at a managed size, rises gently and stays calm through both.',
-    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 230 }, yUnit: 'idx',
-    xTicks: [{ v: 0, label: 'start' }, { v: 50, label: 'mid' }, { v: 100, label: 'now' }],
-    yTicks: [{ v: 50 }, { v: 100 }, { v: 200 }],
+    ariaSummary: `Two representative lines, both starting at 100. Bitcoin rises, falls about ${p3Vol.btcPct} percent, climbs to a new high, falls about ${p3Vol.laterPct} percent and partly recovers. The portfolio line, computed from it with Bitcoin at 15 percent, dips about ${p3Vol.portPct} percent in the first fall and about ${p3Vol.laterPortPct} percent in the second.`,
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 430 }, yUnit: 'idx',
+    xTicks: [{ v: 0, label: 'start' }, { v: 100, label: 'later' }],
+    yTicks: [{ v: 100 }, { v: 200 }, { v: 300 }, { v: 400 }],
     series: [
       { key: 'btc', tier: 'primary', label: 'Bitcoin', pts: p3Vol.btc },
       { key: 'portfolio', tier: 'reference', label: 'Portfolio', pts: p3Vol.portfolio },
     ],
     areas: [{ id: 'dd', topKey: 'btc', kind: 'peak', label: '' }],
     markers: [
-      { id: 'toll', type: 'enso', x: p3Vol.trough.x, y: R(p3Vol.trough.y), r: 12, label: 'the toll · 50%+ drawdown', labelAnchor: 'start', labelDy: 22 },
-      { id: 'calm', type: 'dot', x: p3Vol.trough.x, y: R(valueAt(p3Vol.portfolio, p3Vol.trough.x)), r: 3.2, label: 'portfolio barely moves', labelAnchor: 'start', labelDy: -12 },
+      { id: 'toll', type: 'enso', x: p3Vol.trough.x, y: R(p3Vol.trough.y), r: 12, label: `the toll · Bitcoin down ${p3Vol.btcPct}%`, labelAnchor: 'start', labelDy: 22 },
+      { id: 'calm', type: 'dot', x: p3Vol.trough.x, y: R(valueAt(p3Vol.portfolio, p3Vol.trough.x)), r: 3.2, label: `portfolio down about ${p3Vol.portPct}%`, labelAnchor: 'start', labelDy: -12 },
     ],
     primaryKey: 'btc',
     hoverTargets: [
-      { id: 'btc', kind: 'series', seriesKey: 'btc', label: 'Bitcoin', name: 'Bitcoin', why: 'Convex and volatile. The deep drawdowns are the cost of the upside, paid in full, repeatedly.', claim: 'Volatility is the toll for convexity.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'portfolio', kind: 'series', seriesKey: 'portfolio', label: 'Portfolio', name: 'Total portfolio', why: 'Holding Bitcoin at a managed reserve size, the same 50%+ drawdowns barely register at the portfolio level.', claim: 'Sizing converts toll into something survivable.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'toll', kind: 'marker', label: 'The toll', name: 'The toll', why: 'A 50%+ Bitcoin drawdown. Unavoidable, and not the thing that ruins you if you are sized for it.', claim: 'Pay the toll; do not get ruined by it.', concept: 'Survivable compounding', link: '/part-1-foundation' },
-      { id: 'calm', kind: 'marker', label: 'Portfolio holds', name: 'Portfolio holds', why: 'At the same moment Bitcoin is halved, the total portfolio is nearly flat — because the position was sized to survive it.', claim: 'Size is the shock absorber.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'btc', kind: 'series', seriesKey: 'btc', label: 'Bitcoin', name: 'Bitcoin', why: 'Convex and volatile. The deep falls are what the upside costs, and they recur.', claim: 'Volatility is the toll for convexity.', concept: 'Convexity', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'portfolio', kind: 'series', seriesKey: 'portfolio', label: 'Portfolio', name: 'Total portfolio', why: `Computed from the Bitcoin line, with Bitcoin at 15 percent of the portfolio. The ${p3Vol.btcPct} percent fall costs it about ${p3Vol.portPct} percent: a real loss, and one a sized portfolio can carry.`, claim: 'Size turns the toll into a survivable cost.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'toll', kind: 'marker', label: 'The toll', name: 'The toll', why: `A ${p3Vol.btcPct} percent Bitcoin fall, about the depth of 2021 to 2022. Expect another; what matters is whether your position size lets you sit through it.`, claim: 'Pay the toll without being ruined by it.', concept: 'Survivable compounding', link: '/part-1-foundation' },
+      { id: 'calm', kind: 'marker', label: 'Portfolio at the trough', name: 'Portfolio at the trough', why: `At the moment Bitcoin is down ${p3Vol.btcPct} percent, the portfolio is down about ${p3Vol.portPct} percent, and nothing had to be sold.`, claim: 'Size is the shock absorber.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['toll', 'calm', 'btc', 'portfolio'],
-    implementationNotes: 'Representative paths, not historical BTC. Drawdown-from-peak shaded behind the Bitcoin line; the portfolio line stays calm at managed size.',
+    implementationNotes: 'Representative Bitcoin path (not historical) drawn to the record’s depths: a fall of about 77 percent and a later one of about 54 percent. The portfolio line is computed from it (Bitcoin set to 15 percent at each new Bitcoin high, untouched through each fall, the other 85 percent flat), so every printed percent derives from the drawn data. Drawdown from peak shaded behind the Bitcoin line.',
   },
 
   {
     chartId: 'p3-exposure-not-control', idx: 'P3-04', group: 'part-3', intendedPlacement: 'part-3',
     experienceRole: 'comparison',
     storyBeats: [
-      { kind: 'context', label: 'Three postures enter a shock tunnel as three lanes', timing: 'early' },
-      { kind: 'mechanism', label: 'The same shock hits all three; each lane breaks, bends, or barely flinches', timing: 'middle' },
-      { kind: 'action', label: 'Choose a posture, then change the shock and watch what happens to it', timing: 'middle' },
-      { kind: 'consequence', label: 'Max breaks, stress drags, the framework stays usable — the survivable posture', timing: 'late' },
+      { kind: 'context', label: 'Three allocations enter a shock zone as three lanes', timing: 'early' },
+      { kind: 'mechanism', label: 'The same shock hits all three; one lane breaks, one bends, one dips least', timing: 'middle' },
+      { kind: 'action', label: 'Choose an allocation, then change the shock and watch what happens to it', timing: 'middle' },
+      { kind: 'consequence', label: 'Max exposure breaks, the stress-tested reserve lags, the framework stays usable and keeps participating', timing: 'late' },
     ],
     claimStack: {
-      primaryClaim: 'Exposure is not control; the framework is the posture that stays usable when reality hits',
-      visualProof: 'Three posture lanes through a shock zone — break vs bend vs barely-flinch — plus a survival readout',
-      interactionRole: 'Choose a posture, then change the shock and watch what happens to each lane',
-      readerAction: 'Pick a posture, then stress it',
-      caution: 'Representative simulation of total-portfolio strategies (not Bitcoin price); not a forecast',
+      primaryClaim: 'Maximum exposure breaks under a messy path; the framework allocation survives it and still participates',
+      visualProof: 'Three allocation lanes pass through one shock zone (one breaks, one bends, one dips least), with a readout grading each',
+      interactionRole: 'Choose an allocation, then change the shock and watch each lane',
+      readerAction: 'Pick an allocation, then stress it',
+      caution: 'Representative simulation of three whole-portfolio allocations on one made-up market path; the scores are illustrative and nothing here is a forecast',
     },
-    interaction: { type: 'scenario', gesture: 'choose', conceptMatch: 'Selecting a posture and a shock re-shapes the three lanes through the shock zone and updates the survival readout' },
+    interaction: { type: 'scenario', gesture: 'choose', conceptMatch: 'Selecting an allocation and a shock reshapes the three lanes through the shock zone and updates the survival readout' },
     motionProfile: { type: 'scenarioUpdate', duration: 'calm' },
     status: 'implemented', wiredPublic: true,
-    title: 'Exposure Is Not Control', setupLine: 'The question is not which posture wins cleanly. It is which one survives the path.',
+    title: 'Exposure Is Not Control', setupLine: 'Three allocations meet the same shock. The one that counts is the one you can still follow afterward.',
     claimLabel: 'CONTROL · INTERACTIVE',
-    tryThis: 'Change the shock and watch which posture stays usable.',
-    frameworkClaim: '100% Bitcoin can win one favorable cycle; the framework optimizes for control and repeatability across many.',
-    readerTakeaway: 'The strategy that survives behaviorally is the strategy that can compound.',
-    chartType: 'Interactive path-aware comparison of representative portfolio paths through a drawdown, with an optional shock.',
+    tryThis: 'Change the shock and watch which allocation stays usable.',
+    frameworkClaim: '100 percent Bitcoin can win one favorable cycle; the framework aims for control it can repeat across many.',
+    readerTakeaway: 'A strategy you abandon in the drawdown stops compounding there.',
+    chartType: 'Interactive comparison of three representative allocations through a drawdown, with an optional shock.',
     visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
-    sources: [{ provider: 'Author simulation', label: 'Max-exposure vs architected reserve across a cycle', role: 'methodology', notes: 'Illustrative representative portfolio paths; a deterministic livability/repeatability score, disclosed as illustrative — no historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
-    explainerHeadline: 'Same shock — three postures, one stays usable.',
-    explainerBody: 'Max exposure can win the clean path, but it has no buffer when life and markets hit together — it breaks under stress. Stress-tested reserve survives the shock but can underparticipate (cash drag). The framework is the usable middle: enough exposure to matter, enough reserve to act, and low enough strain to keep following the plan. The chart shows what happens to each posture when reality hits — because a strategy that cannot be lived through is not robust.',
+    sources: [{ provider: 'Author simulation', label: 'Three allocations on one shared market path: 100% Bitcoin; 15% Bitcoin with 15% dry powder and an income sleeve; 10% Bitcoin with 50% dry powder and an income sleeve', role: 'methodology', notes: 'Shocks: a job loss at the market trough, which forces an allocation with no income sleeve and under 20 percent dry powder to sell into the bottom; and an opportunity window, where dry powder is deployed above the low. Control, strain, participation and livability are illustrative scores computed from each path. No historical claim.' }, { provider: 'ACF · Part 3', label: 'Operational control across cycles and life events', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    explainerHeadline: 'One shock breaks one allocation, slows another, and leaves the framework usable.',
+    explainerBody: 'Maximum exposure wins the clean path, but with no income sleeve and no dry powder, a job loss in the drawdown forces it to sell at the bottom. The stress-tested reserve absorbs every shock and pays for it in cash drag for the rest of the cycle. The framework allocation is Part 3’s Investor B: 15 percent Bitcoin, 15 percent dry powder and an income sleeve. That is enough Bitcoin to matter, and enough cash flow that a lost paycheck does not force a sale.',
     explainerConcept: 'Operational control',
     concepts: [{ label: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
-    personalization: { uses: ['startingValue'], kind: 'scenario-scale', introLead: 'Representative total-portfolio strategies', introTail: 'illustrative, not a forecast', note: 'Scales the subordinate outcome read-outs (terminal, drawdown) to the starting value. The control/participation axes are scores, not dollars. Illustrative, not a forecast.' },
+    personalization: { uses: ['startingValue'], kind: 'scenario-scale', introLead: 'Representative whole-portfolio allocations', introTail: 'illustrative, not a forecast', note: 'Scales the terminal and drawdown readouts to your starting value. Control and participation are scores, not dollars. Illustrative, not a forecast.' },
     layout: 'scenario',
-    ariaSummary: 'An interactive stress test, not a time series. Three postures are shown as three horizontal lanes — maximum exposure, framework reserve, stress-tested reserve — passing through a shock zone in the middle (before, shock, after). The same shock hits all three, and each lane reacts differently from its own stats. Maximum exposure climbs steepest before the shock, then plunges; under a job-loss shock its lane breaks (a forced sale, drawn as a discontinuity). The framework lane bends but stays whole and keeps a capacity marker — it can still act. The stress-tested lane barely flinches but climbs slowly (cash drag). Below the lanes, a survival readout grades each posture under the current shock on participation, reserve, forced-error risk and followability; terminal value is a small subordinate outcome. The opportunity window lets reserves act during the drawdown, not at the exact bottom.',
+    ariaSummary: 'An interactive stress test, not a time series. Three allocations run as horizontal lanes through a shock zone in the middle: maximum exposure at 100 percent Bitcoin, the framework reserve at 15 percent Bitcoin with dry powder and an income sleeve, and a stress-tested reserve at 10 percent Bitcoin with half the portfolio in dry powder. The same shock hits all three. Maximum exposure climbs steepest before the shock, then plunges; under a job-loss shock its lane breaks at a forced sale. The framework lane bends, stays whole and keeps capacity to act. The stress-tested lane dips least but climbs slowly. A readout below grades each allocation under the current shock on participation, reserve, forced-error risk and followability, with terminal value as a small secondary figure. In the opportunity window the reserves act during the drawdown, above the exact bottom.',
     scenario: {
-      zone: { partLo: 27, partHi: 60, ctrlLo: 66, ctrlHi: 94 },
+      zone: { partLo: 22, partHi: 60, ctrlLo: 66, ctrlHi: 94 },
       defaultPreset: 'reserve', defaultShock: 'none',
       domain: { yMin: p3Scenario.yMin, yMax: p3Scenario.yMax }, troughX: p3Scenario.troughX, peakX: p3Scenario.peakX,
       band: p3Scenario.band,
-      tradeoff: 'Framework = balanced, repeatable · stress-tested = defensive, more cash drag · max exposure = high upside, fragile when messy',
+      tradeoff: 'Framework = balanced, repeatable · stress-tested = defensive, more cash drag · max exposure = high upside, fragile when the path is messy',
       presets: [
         { id: 'max', label: 'Maximum exposure', short: 'Max exposure', sub: '100% BTC', axis: 'upside' },
-        { id: 'reserve', label: 'Framework reserve', short: 'Framework', sub: '~20% BTC + income', axis: 'control' },
-        { id: 'stress', label: 'Stress-tested reserve', short: 'Stress-tested', sub: 'reserve + dry powder', axis: 'control' },
+        { id: 'reserve', label: 'Framework reserve', short: 'Framework', sub: '~15% BTC + income', axis: 'control' },
+        { id: 'stress', label: 'Stress-tested reserve', short: 'Stress-tested', sub: '~10% BTC + 50% dry powder', axis: 'control' },
       ],
       shocks: [
         { id: 'none', label: 'Clean path' },
@@ -1931,48 +2083,48 @@ export const FRAMEWORK_CHART_SPECS = [
       ],
       // annotation shown under the chart; keyed by shock, with a per-strategy nuance.
       notes: {
-        none: { lead: 'Clean bull case rewards exposure.', max: 'Maximum exposure wins the upside — but it still rides the full cycle drawdown; the strain only shows once the path stops being clean.', reserve: 'The reserve gives up some clean-path upside to stay governable — and keeps participating.', stress: 'The most defensive: high control, but it underparticipates in a clean market — cash drag.' },
-        jobloss: { lead: 'Messy path rewards control.', max: 'No wage buffer, no dry powder: maximum exposure is forced to sell at the bottom — the deepest drawdown and the highest decision strain.', reserve: 'Income covers the gap — the reserve is never a forced seller, so the strain stays bearable.', stress: 'Income plus dry powder: the shock is absorbed, the reserve stays intact, and the strain stays low.' },
-        deploy: { lead: 'Opportunity rewards the capacity to act.', max: 'All-in and never sold, so it rides the rebound — the highest terminal, at the deepest drawdown and the highest strain. It only works if no shock forces a sale.', reserve: 'Deploys some reserve in the window — not the exact bottom — and stays diversified. Enough capacity to act without betting the cycle on timing.', stress: 'Deploys the most because it began most defensive — but it gave up participation the rest of the cycle to hold that cash.' },
+        none: { lead: 'A clean bull path rewards exposure.', max: 'Maximum exposure wins the upside, and still rides the full cycle drawdown; the strain shows once the path stops being clean.', reserve: 'The framework gives up some clean-path upside to stay governable, and keeps participating.', stress: 'The most defensive: high control, but it lags in a clean market (cash drag).' },
+        jobloss: { lead: 'A messy path rewards control.', max: 'No income sleeve and no dry powder: maximum exposure is forced to sell at the bottom, with the deepest drawdown and the highest strain.', reserve: 'Portfolio income covers the gap, so the framework is never a forced seller and the strain stays bearable.', stress: 'Income plus dry powder: the shock is absorbed, the reserve stays intact, and the strain stays low.' },
+        deploy: { lead: 'Opportunity rewards the capacity to act.', max: 'All in and never sold, so it rides the rebound to the highest terminal value, through the deepest drawdown and the highest strain. It works only if no shock forces a sale.', reserve: 'Deploys some dry powder in the window, above the exact bottom, and stays diversified: enough capacity to act without betting the cycle on timing.', stress: 'Deploys the most because it held the most cash, and gave up participation for the rest of the cycle to hold it.' },
       },
       variants: p3Scenario.variants,
     },
     primaryKey: 'reserve',
     hoverTargets: [
-      { id: 'max', kind: 'strategy', label: 'Maximum exposure', name: 'Maximum exposure', why: 'Highest terminal when the path is clean — all-in even rides the rebound. But no wage buffer and no dry powder means a drawdown plus an income shock forces a sale at the worst price, and the deepest drawdowns carry the highest decision strain, where panic-selling and abandoned theses happen. High upside, low livability.', claim: 'Highest upside, highest behaviour risk.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'reserve', kind: 'strategy', label: 'Framework reserve', name: 'Framework reserve', why: 'The balanced posture: enough exposure to participate, enough reserve to act in a drawdown, and low enough strain to keep following the plan — without ever becoming a forced seller. It does not win every scenario; it stays inside the governable band across all of them. The framework’s normal target.', claim: 'Balanced, repeatable participation.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'stress', kind: 'strategy', label: 'Stress-tested reserve', name: 'Stress-tested reserve', why: 'The defensive posture: the most capacity to act in a drawdown, at the cost of cash drag — it underparticipates the rest of the cycle. Best for extreme defense, not the default. Deployed capacity is governed and rebuilt over time, not a one-time timing bet.', claim: 'Maximum defense; underparticipates otherwise.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'max', kind: 'strategy', label: 'Maximum exposure', name: 'Maximum exposure', why: 'The highest terminal value on a clean path; all in, it even rides the rebound. With no income sleeve and no dry powder, though, a drawdown plus a lost paycheck forces a sale at the worst price, and the deepest drawdowns carry the highest strain, which is where panic selling and abandoned theses happen.', claim: 'Highest upside, highest behavior risk.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'reserve', kind: 'strategy', label: 'Framework reserve', name: 'Framework reserve', why: 'The framework allocation, matching Part 3’s Investor B: 15 percent Bitcoin, 15 percent dry powder and an income sleeve. Enough exposure to participate, enough reserve to act in a drawdown, and never a forced seller. It does not win every scenario; it stays inside the governable band in all of them. Its 15 percent sits at the top of the framework’s normal 10 to 15 percent target.', claim: 'Balanced, repeatable participation.', concept: 'Operational control', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'stress', kind: 'strategy', label: 'Stress-tested reserve', name: 'Stress-tested reserve', why: 'The defensive allocation: the most capacity to act in a drawdown, paid for in cash drag for the rest of the cycle. Suited to extreme defense, and not the default. Dry powder it deploys is rebuilt over time, so it is never a one-time timing bet.', claim: 'Maximum defense; lags otherwise.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['max', 'reserve', 'stress'],
-    implementationNotes: 'INTERACTIVE SIMULATION — the headline Part 3 exhibit. All three strategy paths are drawn together under the selected shock; the chosen strategy is emphasised and the others stay as muted context. Click a path to select it. A capacity-to-act gauge, a trough/intervention zone, a forced-sale mark, and an annotation that updates with the shock carry the story; the stat strip (split into UPSIDE and CONTROL) is subordinate. Precomputed, deterministic representative paths — no live calc.',
+    implementationNotes: 'INTERACTIVE SIMULATION, the headline Part 3 exhibit. All three allocation lanes are drawn together under the selected shock; the chosen one is emphasized and the others stay as muted context. Click a lane to select it. A capacity-to-act marker, the shock zone, a forced-sale break and a shock-specific annotation carry the story; the readout table is secondary. Precomputed, deterministic representative paths; the framework preset (15% BTC, 15% dry powder) matches Part 3’s Investor B. The renderer hard-codes some copy (the "three postures enter · one stays usable" line and the POSTURE tooltip label) in FrameworkChart.jsx. scenario.zone and scenario.tradeoff are not rendered.',
   },
 
   {
     chartId: 'p3-models-must-converge', idx: 'P3-05', group: 'part-3', intendedPlacement: 'part-3',
     claimStack: {
-      primaryClaim: 'The valuation models earn conviction only where they converge',
-      visualProof: 'A shaded model-range envelope that starts wide, pinches to a tight waist at mid-chart convergence, then fans wide again into divergence, with the price line threading its middle and a ring marking the narrow point',
-      interactionRole: 'Hover the convergence mark or the price line to read why the envelope’s width, not the price level, is the signal',
+      primaryClaim: 'The valuation models earn trust where they converge, and the discount to that converged estimate sets the pace of buying',
+      visualProof: 'A shaded range between the highest and lowest model estimates starts wide, pinches to a tight waist mid-chart, then fans wide again, with a price line moving inside it and a ring at the narrow point',
+      interactionRole: 'Hover the convergence mark or the price line to read what the width says and what the level says',
       readerAction: 'Watch the band pinch tight, then fan apart',
-      caution: 'Representative envelope from four models, not historical; illustrative, not a forecast',
+      caution: 'The envelope spans four valuation models. The dashboard computes no model convergence; you read it yourself (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Models Must Converge', setupLine: 'The valuation models are most useful where they agree; divergence signals caution',
+    title: 'Models Must Converge', setupLine: 'The valuation models are most useful where they agree; when they fan apart, caution rises',
     claimLabel: 'VALUATION · CONVERGENCE',
-    frameworkClaim: 'Power-law, realized price, production cost, and liquidity models are most useful when they converge.',
-    readerTakeaway: 'Agreement strengthens conviction; disagreement is the signal.',
-    chartType: 'Valuation envelope — the spread between models narrows on convergence, widens on divergence.',
-    visualDataMode: 'representative', disclosure: DISCLOSURE.representative, footerCta: 'View sources',
+    frameworkClaim: 'Power-law, realized-price, network-adoption and production-cost estimates earn conviction when they converge.',
+    readerTakeaway: 'Agreement earns trust; disagreement says wait.',
+    chartType: 'Valuation envelope: the spread between model estimates narrows on convergence and widens on divergence.',
+    visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 3', label: 'Multi-model valuation: power-law, realized price, production cost, liquidity', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
     explainerHeadline: 'Conviction lives where the models agree.',
-    explainerBody: 'Power-law, realized price, production cost, and liquidity-adjusted models each see Bitcoin differently. When their estimates converge, conviction is highest; when they fan apart, the framework reads uncertainty and steps back. The spread itself is the signal.',
+    explainerBody: 'Power law, realized price, network adoption and production cost each estimate Bitcoin’s value a different way, and the liquidity reading adds a direction without a level. Where their estimates converge, the range is tight and deserves trust; where they fan apart, the framework holds its range and waits. Width tells you how much to trust the estimate. Price against a tight estimate tells you what to do: a discount of more than 30 percent is the cue to raise DCA about 50 percent or deploy dry powder.',
     explainerConcept: 'Model confluence',
     concepts: [{ label: 'Model confluence', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'CIS scoring', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'single',
-    ariaSummary: 'A valuation index with a shaded envelope between the highest and lowest model estimates. The envelope starts wide, narrows to a tight convergence mid-chart, then widens again into divergence; the price line tracks through the middle.',
-    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 95 }, yUnit: 'idx',
+    ariaSummary: 'A conceptual valuation index with a shaded range between the highest and lowest model estimates. The range starts wide, narrows to a tight convergence mid-chart, then widens again into divergence. The price line moves inside the range throughout and sits near its top where the models converge.',
+    domain: { xMin: 0, xMax: 100, yMin: 0, yMax: 120 }, yUnit: 'idx',
     xTicks: [{ v: 0, label: 'divergent' }, { v: 50, label: 'convergence' }, { v: 100, label: 'divergent' }],
-    yTicks: [{ v: 25 }, { v: 50 }, { v: 75 }],
+    yTicks: [{ v: 25 }, { v: 50 }, { v: 75 }, { v: 100 }],
     series: [
       { key: 'modelMax', tier: 'reference', hidden: true, pts: p3Models.modelMax },
       { key: 'modelMin', tier: 'reference', hidden: true, pts: p3Models.modelMin },
@@ -1985,11 +2137,11 @@ export const FRAMEWORK_CHART_SPECS = [
     notes: [{ x: 86, y: 30, text: 'divergence · caution', anchor: 'middle' }],
     primaryKey: 'price',
     hoverTargets: [
-      { id: 'price', kind: 'series', seriesKey: 'price', label: 'Price', name: 'Price vs models', why: 'Where price sits inside the envelope matters less than how wide the envelope is.', claim: 'The spread, not the level, is the signal.', concept: 'Model confluence', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'converge', kind: 'marker', label: 'Convergence', name: 'Convergence', why: 'The four models agree here — the envelope is tight. This is where the framework holds its highest conviction.', claim: 'Agreement is conviction.', concept: 'CIS scoring', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'price', kind: 'series', seriesKey: 'price', label: 'Price', name: 'Price against the models', why: 'How far price sits below a tight estimate sets the pace of buying: a discount of more than 30 percent to the converged models is the framework’s cue to accumulate faster. A wide range says hold your range and wait.', claim: 'Spread sets confidence; the discount sets the pace.', concept: 'Model confluence', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'converge', kind: 'marker', label: 'Convergence', name: 'Convergence', why: 'The four models agree here and the range is tight, so the estimate deserves the most trust. You judge this convergence yourself; the dashboard does not compute it (as of September 2026).', claim: 'Agreement earns conviction.', concept: 'CIS scoring', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['converge', 'price'],
-    implementationNotes: 'Representative envelope (min–max of four models), not historical. The band width is the message; avoid drawing four spaghetti lines.',
+    implementationNotes: 'Conceptual envelope (min and max of four valuation models: power law, realized price, network adoption, production cost), not historical. The band width is the message; do not draw four spaghetti lines. Price swings scale with the spread, so the line stays inside the range everywhere (minimum margin about one index point). yMax 120 keeps the divergence fan inside the plot.',
   },
 
   {
@@ -1998,133 +2150,133 @@ export const FRAMEWORK_CHART_SPECS = [
     storyBeats: [
       { kind: 'context', label: 'A representative BTC price index over a cycle', timing: 'early' },
       { kind: 'mechanism', label: 'Units = fixed dollars ÷ price, so a lower price buys more', timing: 'middle' },
-      { kind: 'consequence', label: 'The framework leans in only when undervalued; never sells', timing: 'late' },
+      { kind: 'consequence', label: 'The framework leans in only when deeply undervalued, slows when extended, and never sells', timing: 'late' },
     ],
     claimStack: {
-      primaryClaim: 'Fixed-dollar DCA buys more units when price is lower',
-      visualProof: 'Unit bars whose height = dollars ÷ price; the framework boost stacks only in the undervalued window',
-      interactionRole: 'Hover the price index and bars to see the conversion and the lean-in window',
+      primaryClaim: 'Fixed-dollar DCA buys more units when price is lower, and the framework leans in further only when Bitcoin is deeply undervalued',
+      visualProof: 'Unit bars whose height is dollars ÷ price; the framework bar rises above the baseline in the undervalued window and drops below it when price is extended',
+      interactionRole: 'Hover the price index and the bars to see the conversion and the lean-in window',
       readerAction: 'Watch units rise as price falls',
-      caution: 'Representative/conceptual — no historical price, no exact units; never sells the reserve',
+      caution: 'A representative price index, not historical prices, so the bars show relative units only. The readout compares units per dollar, and the reserve is never sold',
     },
-    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'The price index drives the DCA unit bars by default: units = dollars ÷ price; hover adds the lean-in / slow detail' },
+    interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'The price index drives the DCA unit bars: units = dollars ÷ price; hover adds the lean-in and slow-down detail' },
     motionProfile: { type: 'timeSweep', duration: 'calm', relatedElements: [['priceIndex', 'unitBars']] },
     formula: 'DCA $ ÷ price = units',
     status: 'implemented', wiredPublic: true,
     title: 'Accumulate, Don’t Trade', setupLine: 'Fixed-dollar DCA buys more units when Bitcoin is lower',
     claimLabel: 'DISCIPLINE · ACCUMULATION',
-    frameworkClaim: 'Valuation models guide accumulation pacing and conviction, not selling the reserve.',
-    readerTakeaway: 'For an accumulator, drawdowns become unit-capture windows — if the plan survives them.',
-    chartType: 'Representative BTC price index with DCA unit bars: units = dollars ÷ price; the framework leans in only when undervalued and never sells.',
+    frameworkClaim: 'Valuation models set the pace of buying; they never trigger a sale of the reserve.',
+    readerTakeaway: 'For an accumulator, drawdowns are when the most units arrive, provided the plan survives them.',
+    chartType: 'Representative BTC price index above DCA unit bars (units = dollars ÷ price); the framework leans in when deeply undervalued, slows when extended, and never sells.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 3', label: 'Accumulation pacing and the never-sell reserve', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
-    explainerHeadline: 'Same dollars, more units — when price is lower.',
-    explainerBody: 'A fixed DCA amount already buys more units when Bitcoin falls — units received = dollars ÷ price. The framework adds discipline: increase accumulation only when valuation confirms an undervalued window, return to baseline at fair value, and slow new buying when extended. The reserve itself is not traded.',
+    explainerHeadline: 'Same dollars, more units, when price is lower.',
+    explainerBody: `A fixed DCA amount already buys more units when Bitcoin falls, because units received equal dollars divided by price. The framework adds pacing: it buys about 50 percent more while the valuation models agree on a deep discount, the usual amount nearer fair value, and half the discretionary amount once price runs extended, banking the difference as dry powder. On this representative path that pacing collects about ${p3Heartbeat.fwPct} percent more units per dollar than plain DCA, which is what the +${p3Heartbeat.fwPct}% readout measures. Nothing in the reserve is ever sold.`,
     explainerConcept: 'Valuation discipline',
     concepts: [{ label: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'heartbeat',
-    ariaSummary: 'A representative Bitcoin price/valuation index over a cycle — starting mid, dipping into an undervalued trough, recovering toward fair value, then running extended — drawn above a row of dollar-cost-averaging unit bars. Because units received equal fixed dollars divided by price, the bars grow taller when price is lower and shorter when it is higher. During the undervalued window the framework adds an accent boost above the baseline bars; at fair value it returns to baseline; when extended it slows new buying. The reserve is never sold.',
+    ariaSummary: `A representative Bitcoin price index over one cycle, drawn above a row of dollar-cost-averaging unit bars. Price starts below fair value, dips into a deep undervalued trough, recovers toward fair value, then runs extended. Because units received equal fixed dollars divided by price, the bars are taller when price is lower. While price is deeply undervalued the framework buys about 50 percent more, so its accent bars rise above the baseline; nearer fair value it buys the baseline; once price is extended it halves discretionary buying and banks the difference as dry powder. The readout, +${p3Heartbeat.fwPct}%, is the framework's units per dollar against plain DCA (${p3Heartbeat.unitsPct} percent more units for ${p3Heartbeat.dollarsPct} percent more dollars). The reserve is never sold.`,
     domain: { xMin: 0, xMax: 100 },
     xTicks: [{ v: 0, label: 'cycle start' }, { v: 17, label: 'undervalued' }, { v: 100, label: 'extended' }],
     heartbeat: p3Heartbeat,
     primaryKey: 'cheap',
     hoverTargets: [
-      { id: 'heartbeat', kind: 'series', label: 'BTC price index', name: 'BTC price index', why: 'A representative Bitcoin valuation path. A lower price increases the units a fixed-dollar DCA receives — units = dollars ÷ price. Representative, not historical price, not a forecast.', claim: 'Price is the input; units are the output.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'cheap', kind: 'marker', label: 'Same dollars, more units', name: 'Same dollars, more units', why: 'The same DCA dollars buy more representative units here because price is lower; in a confirmed undervalued window the framework leans in further, so the accent bars rise above the baseline bars.', claim: 'Lower price → more units captured.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'slows', kind: 'marker', label: 'Slows when extended', name: 'Slows new buying', why: 'When price is extended each dollar buys few units, so the framework slows discretionary new buying — the accent bars fall below baseline. Existing reserve is held, never sold.', claim: 'Slow new buying when dear; never sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'heartbeat', kind: 'series', label: 'BTC price index', name: 'BTC price index', why: 'A representative Bitcoin valuation path, not historical prices. The lower the price, the more units a fixed-dollar DCA receives: units = dollars ÷ price.', claim: 'Price is the input; units are the output.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'cheap', kind: 'marker', label: 'Same dollars, more units', name: 'Same dollars, more units', why: 'The same DCA dollars buy more units here because price is lower. While the valuation models agree on a discount of more than 30 percent, the framework raises DCA about 50 percent, so the accent bars rise above the baseline.', claim: 'Lower price, more units captured.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'slows', kind: 'marker', label: 'Slows when extended', name: 'Slows new buying', why: 'When price is extended each dollar buys few units, so the framework halves discretionary buying and banks the difference as dry powder; the accent bars fall below the baseline. The systematic DCA from income continues, and existing holdings are never sold.', claim: 'Slow new buying when dear; never sell.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
     ],
     mobileTapTargets: ['cheap', 'heartbeat', 'slows'],
-    personalization: { uses: ['monthlyDca'], kind: 'dca-note', introLead: 'Representative DCA example', note: 'Names the fixed DCA dollar amount in the units = dollars ÷ price relationship. Representative units on a representative price index, not historical price.' },
-    implementationNotes: 'Math-grounded accumulation layout (HeartbeatSvg, internal name): a representative BTC price index above DCA unit bars where bar height = fixed dollars ÷ price, so lower price = taller bars. The accent (framework) bar stacks above the muted baseline bar only in the undervalued window and falls below it when extended (slows, never sells). A small "DCA $ ÷ price = units" formula anchors the conversion; the relational unit-capture field is kept faint/secondary. Representative/conceptual — no historical price, no exact sats; "heartbeat" is not used as visible copy.',
+    personalization: { uses: ['monthlyDca'], kind: 'dca-note', introLead: 'Representative DCA example', note: 'Names the fixed DCA dollar amount in the units = dollars ÷ price relationship. Representative units on a representative price index, not historical prices.' },
+    implementationNotes: 'Accumulation layout (HeartbeatSvg is the internal name): a representative BTC price index above DCA unit bars where bar height = fixed dollars ÷ price, so a lower price draws a taller bar. The framework multiplier is keyed to price, not time (×1.5 below 0.5 on the index, ×0.5 above 1.2, otherwise ×1.0), matching Part 3’s "raise DCA about 50 percent"; the ×0.5 stands for halved discretionary buying with the difference kept as dry powder. The accent bar stacks above the muted baseline bar in the undervalued window and falls below it when extended. The end readout (fwPct) is units per dollar against plain DCA, so it compares like for like; the renderer still labels it FRAMEWORK UNITS. "heartbeat" is not used as visible copy.',
   },
 
   {
     chartId: 'p3-cold-storage-to-borrow', idx: 'P3-07', group: 'part-3', intendedPlacement: 'part-3',
     claimStack: {
-      primaryClaim: 'A matured reserve can fund liquidity without a forced sale',
-      visualProof: 'A five-stage lifecycle reading left to right — accumulate, self-custody, mature reserve, collateralized loan — terminating in a highlighted liquidity node that carries no sale and no taxable event',
-      interactionRole: 'Hover any stage to see what it contributes to reaching liquidity without selling the reserve',
+      primaryClaim: 'A mature reserve can supply cash by borrowing against it instead of selling it, if you choose to borrow at all',
+      visualProof: 'A five-stage lifecycle read left to right (accumulate, self-custody, mature reserve, collateralized loan) ending in a highlighted liquidity node: cash with no sale while the loan holds',
+      interactionRole: 'Hover any stage to see what it adds, and what it risks, on the way to cash without selling the reserve',
       readerAction: 'Follow the lifecycle left to right to the highlighted liquidity node',
-      caution: 'Conceptual lifecycle; borrowing introduces leverage, counterparty, and liquidation risk, and depends on tax treatment that can change',
+      caution: 'Borrowing is optional. A loan supplies cash without a sale, but it adds interest cost and the risk of a forced sale: if the collateral falls far enough, or a payment is missed, the lender sells it, and that sale is a taxable event. Tax treatment can change',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Cold Storage to Borrow', setupLine: 'The reserve lifecycle: accumulate, self-custody, mature, borrow — without a forced sale',
+    title: 'Cold Storage to Borrow', setupLine: 'The reserve lifecycle: accumulate, self-custody, mature, and optionally borrow instead of selling',
     claimLabel: 'LIFECYCLE · RESERVE',
-    frameworkClaim: 'The Bitcoin reserve moves from accumulation to collateralized borrowing without forced sale.',
-    readerTakeaway: 'Liquidity comes from borrowing against the reserve, not selling it.',
+    frameworkClaim: 'A mature reserve can fund income-producing assets by borrowing against it instead of selling it, if you choose to borrow at all.',
+    readerTakeaway: 'Borrowing against the reserve avoids a sale and adds leverage risk; it is a choice, never a requirement.',
     chartType: 'Reserve lifecycle flow: accumulate → self-custody → mature → collateralized loan → liquidity.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [{ provider: 'ACF · Part 3', label: 'Accumulation-to-borrowing reserve lifecycle', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }, { provider: 'ACF · Part 4', label: 'Buy-borrow-die and collateral', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' }],
-    explainerHeadline: 'Liquidity without selling the reserve.',
-    explainerBody: 'The reserve is accumulated, moved to self-custody, and allowed to mature. Once mature, it becomes collateral: a loan against it provides liquidity without a sale, without a taxable event, and without giving up the long-duration exposure. The asset keeps working while it funds life.',
+    explainerHeadline: 'Liquidity without selling the reserve, at a price.',
+    explainerBody: 'The reserve is accumulated, held in self-custody and left to mature. Once it is large relative to any loan, borrowing against it becomes an option, and the loan funds income-producing assets whose cash flow pays the interest, never living costs. A loan supplies cash without a sale, but it adds interest cost and the risk of a forced sale: if the collateral falls far enough, or a payment is missed, the lender sells it, and that sale is a taxable event. Pledged coins leave your keys for the life of the loan, and every loan stays inside the loan-to-value rules in Part 3.',
     explainerConcept: 'Buy-borrow-die',
     concepts: [{ label: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'flow',
-    ariaSummary: 'A five-stage reserve lifecycle, left to right: accumulate, self-custody, mature reserve, collateralized loan, and liquidity without a sale.',
+    ariaSummary: 'A five-stage reserve lifecycle, left to right: accumulate, self-custody, mature reserve, an optional collateralized loan, and liquidity with no sale while the loan holds.',
     flow: {
       stages: [
         { id: 's1', label: 'Accumulate', nodes: [{ id: 'accumulate', label: 'Accumulate', sub: 'paced by valuation' }] },
-        { id: 's2', label: 'Custody', nodes: [{ id: 'custody', label: 'Self-custody', sub: 'sovereign control' }] },
+        { id: 's2', label: 'Custody', nodes: [{ id: 'custody', label: 'Self-custody', sub: 'your own keys' }] },
         { id: 's3', label: 'Mature', nodes: [{ id: 'mature', label: 'Mature reserve', sub: 'long-duration hold' }] },
-        { id: 's4', label: 'Collateral', nodes: [{ id: 'loan', label: 'Collateralized loan', sub: 'borrow, do not sell' }] },
-        { id: 's5', label: 'Liquidity', nodes: [{ id: 'liquidity', label: 'Liquidity', sub: 'no sale, no tax event' }] },
+        { id: 's4', label: 'Collateral', nodes: [{ id: 'loan', label: 'Collateralized loan', sub: 'optional · coins pledged' }] },
+        { id: 's5', label: 'Liquidity', nodes: [{ id: 'liquidity', label: 'Liquidity', sub: 'no sale while the loan holds' }] },
       ],
     },
     primaryKey: 'liquidity',
     hoverTargets: [
-      { id: 'accumulate', kind: 'node', label: 'Accumulate', name: 'Accumulate', why: 'Build the reserve steadily, paced by valuation rather than timing.', claim: 'Start by stacking.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'custody', kind: 'node', label: 'Self-custody', name: 'Self-custody', why: 'Move it to sovereign cold storage — bearer control, no intermediary.', claim: 'Hold your own keys.', concept: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'mature', kind: 'node', label: 'Mature reserve', name: 'Mature reserve', why: 'Let the position age into a long-duration reserve large enough to borrow against.', claim: 'Time turns it into collateral.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'loan', kind: 'node', label: 'Collateralized loan', name: 'Collateralized loan', why: 'Borrow against the reserve for liquidity instead of selling it.', claim: 'Borrow, do not sell.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'liquidity', kind: 'node', label: 'Liquidity', name: 'Liquidity without sale', why: 'Cash to use, with no taxable event and no loss of the long-duration exposure.', claim: 'Liquidity while still holding.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'accumulate', kind: 'node', label: 'Accumulate', name: 'Accumulate', why: 'Build the reserve steadily from income, paced by valuation rather than timing.', claim: 'Start by stacking.', concept: 'Valuation discipline', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'custody', kind: 'node', label: 'Self-custody', name: 'Self-custody', why: 'Hold it in cold storage under your own keys, with no intermediary between you and the coins.', claim: 'Hold your own keys.', concept: 'Cold storage', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'mature', kind: 'node', label: 'Mature reserve', name: 'Mature reserve', why: 'Let the position grow, through 15 to 20 years of accumulation and appreciation, into a reserve that is large relative to any loan you might take.', claim: 'Scale first; borrowing stays optional.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'loan', kind: 'node', label: 'Collateralized loan', name: 'Collateralized loan', why: 'Borrow against the reserve instead of selling it, within the loan-to-value rules in Part 3. Pledged coins leave self-custody for the lender’s custody or a shared multisig for the life of the loan, and if the collateral falls far enough the lender sells it.', claim: 'Pledged, not sold, while the loan holds.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'liquidity', kind: 'node', label: 'Liquidity', name: 'Liquidity without a sale', why: 'Cash to put into income-producing assets, with no sale while the loan holds and the long-duration exposure kept. A forced sale would be taxable; staying inside the loan-to-value rules lowers the odds of one without removing them.', claim: 'Liquidity while still holding.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
     ],
     mobileTapTargets: ['accumulate', 'custody', 'mature', 'loan', 'liquidity'],
-    implementationNotes: 'Lifecycle flow (linear stages). Conceptual diagram; the final liquidity node is the emphasised output.',
+    implementationNotes: 'Lifecycle flow (linear stages). Conceptual diagram; the final liquidity node is the emphasized output. The leverage caveat sits in the explainer as well as claimStack.caution, because the caution reaches only the static fallback.',
   },
 
   {
     chartId: 'p3-reserve-share-evolves', idx: 'P3-08', group: 'part-3', intendedPlacement: 'part-3',
     claimStack: {
-      primaryClaim: 'A starting reserve can mature into a share large enough that governing it replaces building it',
-      visualProof: 'A reserve-share line rising over twenty years from about twelve percent, crossing a target band near fifteen percent and a mature threshold near thirty percent into a thirty-to-fifty-percent zone marked where borrow-phase governance begins',
-      interactionRole: 'Hover the rising line, the target and mature thresholds, or the governance mark to see why the job changes as the share grows',
-      readerAction: 'Trace the line up through the target band and the mature threshold to the governance mark',
-      caution: 'Illustrative simulation; ranges follow the Part 3 allocation guidance and are not a forecast for any specific portfolio',
+      primaryClaim: 'A starting reserve can grow into a share large enough that governing it matters more than building it',
+      visualProof: 'A reserve-share line rising over twenty years from about 12 percent, past the 15 percent top of the target range near year 7 and across the 30 percent mature guide just after year 15, to about 46 percent, with a mark where borrowing becomes an option',
+      interactionRole: 'Hover the line, the target and mature guides, or the borrowing mark to see why the job changes as the share grows',
+      readerAction: 'Trace the line up through the target and mature guides to the borrowing mark',
+      caution: 'Illustrative trajectory, not a forecast for any portfolio. These percentages describe outcomes under given conditions, not rebalanced targets.',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Reserve Share Evolves', setupLine: 'A 10–15% reserve can mature into a 30–50% share, where borrow-phase governance begins',
+    title: 'Reserve Share Evolves', setupLine: 'A 10–15% reserve can grow into a 30–50% share over 15 to 20 years, and borrowing against it then becomes an option',
     claimLabel: 'ALLOCATION · PHASE',
-    frameworkClaim: 'A 10–15% reserve can evolve into a 30–50% mature share, at which point borrow-phase governance matters.',
-    readerTakeaway: 'Success changes the job: from accumulating to governing the reserve.',
-    chartType: 'Reserve share as a percent of net worth, rising through target, elevated, and mature phases.',
+    frameworkClaim: 'A 10–15% reserve can grow, through accumulation and appreciation, into a 30–50% mature share, where borrowing against it becomes an option.',
+    readerTakeaway: 'Success changes the job, from accumulating the reserve to governing it.',
+    chartType: 'Reserve share as a percent of net worth, rising through the target range toward a mature share.',
     visualDataMode: 'simulation', disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
-    sources: [{ provider: 'Author simulation', label: 'Reserve share evolving via accumulation + appreciation', role: 'methodology', notes: 'Illustrative trajectory; ranges from the Part 3 allocation guidance.' }, { provider: 'ACF · Part 3', label: 'Reserve ranges and borrow-phase governance', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
-    explainerHeadline: 'The reserve outgrows its target — on purpose.',
-    explainerBody: 'A starting reserve of 10–15 percent, left to accumulate and appreciate, can grow into 30–50 percent of net worth over fifteen to twenty years. At that point the problem changes from building the reserve to governing it: this is where the borrow phase and its discipline begin.',
+    sources: [{ provider: 'Author calculation', label: 'Illustrative trajectory: share = 12 + 34 × (year ÷ 20)^2.3 percent, with small drawn noise', role: 'methodology', notes: 'Reaching about 45 percent in 20 years with no new contributions implies Bitcoin outgrowing the rest of the portfolio by roughly 9 to 10 percent a year on average; ongoing accumulation lowers that.' }, { provider: 'ACF · Part 3', label: 'Reserve ranges and borrow-phase governance', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' }],
+    explainerHeadline: 'A reserve that is never sold can outgrow its target.',
+    explainerBody: 'A starting reserve of 10 to 15 percent, accumulated and never sold, can grow into 30 to 50 percent of net worth after 15 to 20 years if Bitcoin keeps outgrowing the rest of the portfolio. At that point the job can change from building the reserve to governing it, and borrowing against it becomes an option, within the loan-to-value rules in Part 3.',
     explainerConcept: 'Reserve governance',
     concepts: [{ label: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone' }, { label: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' }],
     layout: 'single',
-    ariaSummary: 'Reserve share as a percent of net worth rising over twenty years from about twelve percent, through a target ceiling near fifteen percent and an elevated band, into a mature thirty-to-fifty-percent zone where the borrow phase begins.',
+    ariaSummary: 'Reserve share as a percent of net worth, rising over twenty years from about 12 percent, past the 15 percent top of the target range near year 7, across the 30 percent mature guide just after year 15, to about 46 percent at year 20. A mark at year 17 shows where borrowing against the reserve becomes an option.',
     domain: { xMin: 0, xMax: 20, yMin: 0, yMax: 55 }, yUnit: '', valueUnit: '% of net worth',
     xTicks: [{ v: 0, label: 'yr 0' }, { v: 10, label: 'yr 10' }, { v: 20, label: 'yr 20' }],
     yTicks: [{ v: 15, label: '15%' }, { v: 30, label: '30%' }, { v: 45, label: '45%' }],
     series: [{ key: 'reserve', tier: 'primary', label: 'Reserve share', pts: p3Reserve.reserve }],
     guides: [
       { id: 'target', y: 15, kind: 'base', label: 'target 10–15%' },
-      { id: 'mature', y: 30, kind: 'threshold', dash: true, label: 'mature · borrow phase' },
+      { id: 'mature', y: 30, kind: 'threshold', dash: true, label: 'mature share · 30%+' },
     ],
     markers: [
-      { id: 'borrow', type: 'enso', x: 17, y: R(valueAt(p3Reserve.reserve, 17)), r: 12, label: 'borrow-phase governance', labelAnchor: 'end', labelDy: -16 },
+      { id: 'borrow', type: 'enso', x: 17, y: R(valueAt(p3Reserve.reserve, 17)), r: 12, label: 'borrowing becomes an option', labelAnchor: 'end', labelDy: -16 },
     ],
     primaryKey: 'reserve',
     hoverTargets: [
-      { id: 'reserve', kind: 'series', seriesKey: 'reserve', label: 'Reserve share', name: 'Reserve share', why: 'Accumulation plus appreciation grows the reserve from a target sliver into a dominant share of net worth.', claim: 'The share is meant to grow.', concept: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'target', kind: 'level', label: 'Target 10–15%', name: 'Target reserve · 10–15%', why: 'The conservative starting allocation: enough to matter, sized to survive a 30–50% drawdown.', claim: 'Where most should begin.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'mature', kind: 'level', label: 'Mature · borrow phase', name: 'Mature · borrow phase', why: 'Past roughly 30 percent, the reserve dominates net worth and the discipline shifts to borrow-phase governance.', claim: 'Big enough to govern, not just hold.', concept: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'borrow', kind: 'marker', label: 'Borrow phase', name: 'Borrow-phase governance', why: 'A mature reserve becomes collateral; managing leverage, drawdown, and liquidity now matters more than adding to it.', claim: 'The job changes from build to govern.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'reserve', kind: 'series', seriesKey: 'reserve', label: 'Reserve share', name: 'Reserve share', why: 'Accumulation plus appreciation can grow the reserve from a modest slice into the largest holding in the portfolio. Nothing rebalances it up; it gets there by not being sold.', claim: 'The share is allowed to grow.', concept: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'target', kind: 'level', label: 'Target 10–15%', name: 'Target reserve · 10–15%', why: 'The usual starting allocation, enough to matter. At a 10 to 15 percent reserve, a 75 to 80 percent Bitcoin drawdown costs the portfolio about 8 to 12 percent.', claim: 'The usual starting range.', concept: 'Position sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'mature', kind: 'level', label: 'Mature share · 30%+', name: 'Mature share', why: 'Past roughly 30 percent, the reserve is usually the largest single holding, and governing it matters more than adding to it.', claim: 'Big enough that governing it is the job.', concept: 'Reserve governance', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'borrow', kind: 'marker', label: 'Borrowing becomes an option', name: 'Borrowing becomes an option', why: 'Once the reserve is large relative to any loan, you may borrow against it to fund income-producing assets, within the loan-to-value rules in Part 3. Borrowing stays optional; leverage, drawdown and liquidity now matter more than adding coins.', claim: 'The job changes from build to govern.', concept: 'Buy-borrow-die', link: '/part-4-tax-architecture-roc-strategy' },
     ],
     mobileTapTargets: ['borrow', 'mature', 'target', 'reserve'],
-    implementationNotes: 'SIMULATION — illustrative trajectory; ranges (10–15% / 30–50%) from Part 3 allocation guidance. Phase thresholds shown as guides.',
+    implementationNotes: 'SIMULATION of an illustrative trajectory: share = 12 + 34 × (year ÷ 20)^2.3 plus small noise. As drawn it first reaches the 15 percent guide at year 7 and the 30 percent guide at year 15.2, reads about 35.6 at the year-17 mark and 46 at year 20. Ranges (10–15% target, 30–50% mature) from Part 3 #tam. Phase thresholds shown as guides.',
   },
 
   /* ── PART 4 · TAX ARCHITECTURE ─────────────────────────────────────────── */
@@ -2132,72 +2284,74 @@ export const FRAMEWORK_CHART_SPECS = [
     chartId: 'p4-tax-wedge', idx: 'P4-01', group: 'part-4', intendedPlacement: 'part-4',
     experienceRole: 'comparison',
     claimStack: {
-      primaryClaim: 'The after-tax wedge between wrappers widens as the win grows',
-      visualProof: 'Three retained-value lines diverge from a common origin as the gross outcome scales; the shaded gap is the tax wedge',
-      interactionRole: 'Hover a wrapper line to see how much of the gain it keeps and why',
-      readerAction: 'Follow the gap between Roth and pre-tax as the outcome scales right',
-      caution: 'Representative retained-fraction bands, not a specific investor’s return',
+      primaryClaim: 'The after-tax gap between a Roth and a taxable account that sells widens as the win grows',
+      visualProof: 'Roth and taxable start together at 1× and pull apart as the gross outcome scales; the shaded gap between them is the tax wedge. Pre-tax starts lower, at 0.70×, because its whole withdrawal is taxed and the deduction it earned going in is not drawn',
+      interactionRole: 'Hover a wrapper line to see how much it keeps and why',
+      readerAction: 'Follow the shaded gap between Roth and taxable as the outcome scales right',
+      caution: 'Per dollar inside each account, at representative federal rates: 23.8 percent on a large one-time sale and about 30 percent blended on pre-tax withdrawals spread over years. The deduction a pre-tax contribution earns going in is not drawn; at the same tax rate going in and coming out, pre-tax and Roth leave the same after-tax money. Illustrative; the numbers depend on income, filing status, state tax and the rules in force',
     },
     interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a wrapper line ties its retained share to the tax that produces it' },
     status: 'implemented', wiredPublic: true,
-    title: 'The Tax Wedge', setupLine: 'After-tax value kept per dollar invested, as a winning position scales',
+    title: 'The Tax Wedge', setupLine: 'What each account lets you keep of every dollar inside it, as a winning position grows',
     claimLabel: 'WRAPPER · RETENTION',
-    frameworkClaim: 'Wrapper placement is a dominant structural return multiplier: the after-tax wedge between wrappers widens as the win grows.',
-    readerTakeaway: 'Roth keeps essentially the whole win; taxable and pre-tax each surrender a slice that grows with the size of the outcome.',
-    chartType: 'Three diverging retained-value lines (Roth, taxable, pre-tax) with a shaded wedge between the best and worst wrapper.',
+    frameworkClaim: 'Where a winning position sits decides how much of the win you keep: a Roth keeps all of it, and its lead over a taxable account that sells grows with the size of the win.',
+    readerTakeaway: 'Where you hold a position matters most for the winners you may one day sell at many times their cost.',
+    chartType: 'Three retained-value lines (Roth, taxable, pre-tax) with the gap between Roth and taxable shaded as the tax wedge.',
     visualDataMode: 'representative',
     disclosure: DISCLOSURE.representative, footerCta: 'View sources',
     sources: [
-      { provider: 'IRS', label: '2026 Roth IRA contribution limit and eligibility ($7,500 per person)', role: 'verifies-concept', url: 'https://www.irs.gov/retirement-plans/roth-iras' },
-      { provider: 'IRC · 26 U.S.C. §1(h) + §1411', label: 'Long-term capital gains rates and the 3.8% net investment income tax', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/1411' },
-      { provider: 'Author calculation', label: 'Retained-fraction bands by wrapper (Roth ~100% · taxable ~76% · pre-tax ~68%) applied to a scaling gross outcome', role: 'methodology' },
+      { provider: 'IRS · Publication 590-B', label: 'Traditional IRA distributions are taxed as ordinary income; qualified Roth IRA distributions are not taxed', role: 'verifies-concept', url: 'https://www.irs.gov/publications/p590b' },
+      { provider: 'IRC · 26 U.S.C. §1(h)', label: 'Long-term capital gains rates (top rate 20 percent)', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/1' },
+      { provider: 'IRC · 26 U.S.C. §1411', label: 'The 3.8 percent net investment income tax', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/1411' },
+      { provider: 'IRS', label: '2026 IRA contribution limit ($7,500; $1,100 catch-up at 50+), shared across traditional and Roth IRAs', role: 'verifies-concept', url: 'https://www.irs.gov/newsroom/401k-limit-increases-to-24500-for-2026-ira-limit-increases-to-7500' },
+      { provider: 'Author calculation', label: 'Roth 100% · taxable keeps the principal plus ~76% of the gain (23.8% on a large one-time sale) · pre-tax ~70% of the whole withdrawal at a representative 30% blended ordinary rate (withdrawals spread over years) · illustrative; depends on income, filing status and state', role: 'methodology' },
     ],
     explainerHeadline: 'The bigger the win, the more wrapper choice decides what you keep.',
-    explainerBody: 'Roth keeps essentially the whole gain. Taxable surrenders capital-gains tax on the way out, keeping most of it; pre-tax is taxed as ordinary income, keeping the least. That surrendered slice is trivial on a small gain and large on a right-tail win — which is why the wrapper matters most exactly where convexity is largest. Bands are illustrative.',
+    explainerBody: 'A Roth keeps the whole gain. A taxable account that sells pays capital-gains tax on the way out: at 23.8 percent it keeps the principal plus about 76 percent of the gain, so at 10× the Roth ends about 27 percent ahead of it, and never more than about 31 percent ahead however large the win. That shaded gap is small on a modest gain and wide on a right-tail one. Pre-tax pays ordinary-income tax on everything that comes out, which is why its line starts at 0.70×. What the picture leaves out is the deduction a pre-tax contribution earned going in: at the same rate going in and coming out, pre-tax and Roth end even. Convex positions tip toward Roth for three reasons: contribution limits are set in dollars, so a full Roth contribution shelters more after-tax money; required distributions can push a large pre-tax balance into higher brackets; and heirs generally inherit a Roth free of income tax under current law.',
     explainerConcept: 'Wrapper edge',
     concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Right-tail outcomes', link: '/part-1-foundation' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
     layout: 'single',
-    ariaSummary: 'Three lines rise from a common origin at a one-times outcome. The Roth line tracks the full gross outcome up to thirty times; the taxable line rises less steeply, keeping roughly three-quarters of each additional unit of gain; the pre-tax line is shallowest. The gap between the Roth line and the pre-tax line is shaded as the tax wedge and grows steadily wider toward the right.',
-    domain: { xMin: 1, xMax: 30, yMin: 1, yMax: 30 }, yUnit: '×',
+    ariaSummary: 'Three lines show what each account keeps of every dollar inside it as a winning position grows from one times to thirty times. The Roth line keeps the full outcome and reaches thirty times. The taxable line starts with it at one times and rises less steeply, keeping the principal plus about 76 percent of each unit of gain, to about 23 times at the right edge; the widening gap between the Roth and taxable lines is shaded as the tax wedge. The pre-tax line starts lower, at 0.7 times, because its whole withdrawal, principal included, is taxed as ordinary income; it keeps about 70 percent all the way and reaches about 21 times. The chart does not show the deduction a pre-tax contribution earned going in.',
+    domain: { xMin: 1, xMax: 30, yMin: 0, yMax: 30 }, yUnit: '×',
     xTicks: [{ v: 1, label: '1×' }, { v: 10, label: '10×' }, { v: 20, label: '20×' }, { v: 30, label: '30× gross' }],
-    yTicks: [{ v: 1, label: '1×' }, { v: 10, label: '10×' }, { v: 20, label: '20×' }, { v: 30, label: '30× kept' }],
+    yTicks: [{ v: 0, label: '0' }, { v: 10, label: '10×' }, { v: 20, label: '20×' }, { v: 30, label: '30× kept' }],
     series: [
-      { key: 'pretax', tier: 'tertiary', label: 'Pre-tax · ~68%', pts: taxWedge.pretax, labelDy: 4 },
+      { key: 'pretax', tier: 'tertiary', label: 'Pre-tax · ~70%', pts: taxWedge.pretax, labelDy: 4 },
       { key: 'taxable', tier: 'secondary', label: 'Taxable · ~76%', pts: taxWedge.taxable, labelDy: 2 },
-      { key: 'roth', tier: 'primary', label: 'Roth · ~100%', pts: taxWedge.roth },
+      { key: 'roth', tier: 'primary', label: 'Roth · 100%', pts: taxWedge.roth },
     ],
-    areas: [{ id: 'wedge', topKey: 'roth', botKey: 'pretax', kind: 'gap', xFrom: 1, label: 'tax friction · widens with the win' }],
+    areas: [{ id: 'wedge', topKey: 'roth', botKey: 'taxable', kind: 'gap', xFrom: 1, label: 'tax on the sale · widens with the win' }],
     guides: [],
     markers: [],
     levels: [],
     notes: [],
     primaryKey: 'roth',
     hoverTargets: [
-      { id: 'roth', kind: 'series', seriesKey: 'roth', label: 'Roth', name: 'Roth · keeps ~100%', why: 'Qualified withdrawals are not taxed, so essentially the entire gain is retained. This line is the ceiling the other wrappers are measured against.', claim: 'Roth keeps the whole win.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'taxable', kind: 'series', seriesKey: 'taxable', label: 'Taxable', name: 'Taxable · keeps ~75 to 85%', why: 'After long-term capital gains and the net investment income tax on the gain, roughly three-quarters to five-sixths survives, depending on income and state.', claim: 'Taxable surrenders a slice to realized-gain tax.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'pretax', kind: 'series', seriesKey: 'pretax', label: 'Pre-tax', name: 'Pre-tax · keeps ~60 to 80%', why: 'Ordinary-income tax applies to the withdrawal, so the smallest share of a large win is retained. The wedge is widest here.', claim: 'Pre-tax keeps the least of a large win.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'roth', kind: 'series', seriesKey: 'roth', label: 'Roth', name: 'Roth · keeps 100%', why: 'Qualified withdrawals are not taxed, so the whole outcome is yours. The other two lines are measured against this one.', claim: 'Roth keeps the whole win.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'taxable', kind: 'series', seriesKey: 'taxable', label: 'Taxable', name: 'Taxable · keeps ~75 to 85% of the gain', why: 'Sell a long-held winner and federal capital-gains tax takes its cut of the gain, not of the principal. The line uses 23.8 percent, the 20 percent top rate plus the 3.8 percent net investment income tax, which a large one-time sale can reach. You keep about 75 to 85 percent of the gain, depending on income (all of it in the 0 percent bracket); state tax comes on top.', claim: 'The wedge is the tax on the sale.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'pretax', kind: 'series', seriesKey: 'pretax', label: 'Pre-tax', name: 'Pre-tax · keeps ~60 to 80% of each withdrawal', why: 'The contribution was deducted going in, so every dollar that comes out, principal included, is ordinary income. The line uses a 30 percent blended rate; depending on your rate when the money comes out, you keep roughly 60 to 80 percent. The deduction you took going in is not drawn: at the same rate in and out, pre-tax and Roth end even.', claim: 'Taxed on all of it, after a deduction going in.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
     ],
     mobileTapTargets: ['roth', 'taxable', 'pretax'],
-    implementationNotes: 'Signature Part 4 exhibit. Three straight retained-value lines diverging from a common origin at (1×, 1×); the Roth↔pre-tax gap is the shaded wedge and is the visual claim, mirroring the p1-cpi-assets gap composition. Representative retained-fraction bands (Roth ~100% · taxable ~76% via 23.8% LTCG+NIIT · pre-tax ~68% ordinary income) — not a specific investor’s return. Restrained green thesis line on Roth; taxable and pre-tax recede.',
+    implementationNotes: 'Signature Part 4 exhibit. Three straight retained-value lines per dollar inside each account: Roth 100%; taxable the principal plus ~76.2% of the gain (23.8% on a large one-time sale); pre-tax ~70% of the whole withdrawal (about 30% blended ordinary rate, zero basis). Roth and taxable start together at (1×, 1×); pre-tax starts at 0.70×. The shaded wedge is Roth against taxable, the gap that grows with the size of the win; the Roth-to-pre-tax gap comes from counting dollars inside the account and leaving out the deduction, which the explainer, caution and pre-tax hover state. Rates are shared with p4-gross-not-net (70/30) and p4-roc-yield (76/24). Restrained green thesis line on Roth; taxable and pre-tax recede.',
   },
 
   {
     chartId: 'p4-gross-not-net', idx: 'P4-02', group: 'part-4', intendedPlacement: 'part-4',
     experienceRole: 'evidence', visualRelationship: 'composition',
     claimStack: {
-      primaryClaim: 'A pre-tax statement says 100 percent, but you do not own 100 percent',
-      visualProof: 'One donut splits the gross balance into the net you keep and the deferred tax claim; a horizon control grows the balance while the 70/30 split never moves, so the claim is seen compounding in step',
-      interactionRole: 'Step the horizon to watch every dollar grow while the ownership split holds; hover a share for its why',
-      readerAction: 'Read the split first, then step the horizon and watch the claim grow in step',
-      caution: 'Conceptual composition at a representative blended rate; tax is deferred, not eliminated, under current law',
+      primaryClaim: 'A pre-tax statement shows 100 percent, and part of it is tax you have not paid yet',
+      visualProof: 'One donut splits the gross balance into the net you keep and the deferred tax claim; a horizon control grows the balance while the 70/30 split holds at a steady rate, so the claim grows in dollars alongside the net',
+      interactionRole: 'Step the horizon to watch both shares grow while the split holds; hover a share for its why',
+      readerAction: 'Read the split first, then step the horizon and watch the claim grow in dollars',
+      caution: 'Conceptual composition at a representative 30 percent blended rate on withdrawals, with the balance growing about 9 percent a year. The claim’s final size is set by your rate when the money comes out. Tax is deferred, not eliminated, under current law',
     },
     interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a share ties the deferred claim to the balance it is a fraction of' },
     status: 'implemented', wiredPublic: true,
     title: 'Gross Is Not Net', setupLine: 'One gross balance, split into the part you keep and the part you owe',
     claimLabel: 'PRE-TAX · OWNERSHIP',
-    frameworkClaim: 'A pre-tax balance is a joint claim between the investor and the tax authority; the deferred obligation holds its share and compounds alongside the balance rather than disappearing.',
-    readerTakeaway: 'Only the net is yours, and the part you owe grows as you do.',
-    chartType: 'A composition donut splitting one gross pre-tax balance into the retained net (~70%) and the deferred tax claim (~30%), with a horizon control that grows the magnitude while the share holds.',
+    frameworkClaim: 'A pre-tax balance is shared with the tax authority: the deferred tax grows with the balance, and your rate when the money comes out sets how large its share ends up.',
+    readerTakeaway: 'Only the net is yours, and your rate when you withdraw decides how big the rest is.',
+    chartType: 'A composition donut splitting one gross pre-tax balance into the retained net (~70%) and the deferred tax claim (~30%), with a horizon control that grows the balance while the share holds at a steady rate.',
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
@@ -2205,18 +2359,18 @@ export const FRAMEWORK_CHART_SPECS = [
       { provider: 'IRC · 26 U.S.C. §72', label: 'Ordinary-income tax on qualified-plan and annuity withdrawals', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/72' },
     ],
     explainerHeadline: 'The statement says 100 percent. You do not own 100 percent.',
-    explainerBody: 'A pre-tax dollar went in untaxed, so from day one a share of the balance is a deferred claim the tax authority owns — not you. Step the horizon and the balance grows, but the split holds: the claim keeps its ~30% share and compounds in step, never shrinking. A Roth pays that tax upfront and removes the claim, so later growth is fully yours.',
+    explainerBody: 'A pre-tax dollar went in untaxed, so part of the balance is tax you have not paid yet. Step the horizon: at a steady rate the split holds, and the claim grows in dollars right alongside your share. Its final size is set by your rate when the money comes out. A larger balance withdrawn at higher brackets, or forced out by required distributions, owes a bigger share; a conversion in a low-income year owes a smaller one. At the same rate going in and coming out, a Roth, which pays the tax up front, ends even with pre-tax. What tips convex positions toward Roth is the dollar limit on contributions, required distributions and what heirs inherit.',
     explainerConcept: 'Wrapper edge',
     concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' }],
     layout: 'radial',
-    ariaSummary: 'A donut divides one gross pre-tax balance into two shares: about seventy percent is the net you keep, drawn in the framework accent, and about thirty percent is the deferred tax claim, drawn muted. A horizon control — today, plus twelve years, plus twenty-five years — grows the balance from one times to about nine times while the seventy-thirty split never moves, so the deferred claim compounds from about a third of a unit to nearly three units in step with the balance.',
+    ariaSummary: 'A donut divides one gross pre-tax balance into two shares: about 70 percent is the net you keep, drawn in the framework accent, and about 30 percent is the deferred tax claim, drawn muted. A horizon control (today, plus 12 years, plus 25 years) grows the balance from one times to about nine times, at about 9 percent a year, while the 70/30 split holds, so the claim grows from 0.3 of a unit to about 2.7 units. The split assumes a steady 30 percent rate; the claim’s final size is set by the rate when the money comes out.',
     radial: {
       variant: 'donut',
       centerLabel: 'Gross balance',
-      caption: 'Only the net is yours — and the claim compounds as you do.',
+      caption: 'Only the net is yours. At a steady rate, the claim grows with it.',
       segments: [
         { id: 'net', label: 'Net · yours', value: 0.70, tier: 'primary', sub: 'after the tax that comes due' },
-        { id: 'claim', label: 'Deferred tax claim', value: 0.30, tier: 'secondary', sub: 'owed — never yours' },
+        { id: 'claim', label: 'Deferred tax claim', value: 0.30, tier: 'secondary', sub: 'owed at your future rate' },
       ],
       scales: [
         { id: 'today', label: 'Today', center: '1×', seg: { net: '0.70×', claim: '0.30×' } },
@@ -2227,11 +2381,11 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'net',
     hoverTargets: [
-      { id: 'net', kind: 'segment', label: 'Net', name: 'Net · what you actually own', why: 'The share left after the ordinary-income tax that eventually comes due. This is the only part that is truly yours to compound.', claim: 'Only the net is yours.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'claim', kind: 'segment', label: 'Claim', name: 'The deferred tax claim', why: 'Deferral moves the tax into the future; it does not remove it. The claim holds its roughly thirty percent share and grows in dollars in exactly the same step as the balance — a co-owner that grows with you and was never yours.', claim: 'The claim compounds in step.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'net', kind: 'segment', label: 'Net', name: 'Net · what you actually own', why: 'What is left after the ordinary-income tax due on withdrawal, at the representative 30 percent rate. It is the part you can spend.', claim: 'Only the net is yours.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'claim', kind: 'segment', label: 'Claim', name: 'The deferred tax claim', why: 'Deferral moves the tax into the future; it does not remove it. At a steady rate the claim keeps its roughly 30 percent share and grows in dollars with the balance. Its final size is set by your rate when the money comes out, which is why the framework converts pre-tax balances to Roth in low-income years.', claim: 'The claim grows with the balance.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy' },
     ],
     mobileTapTargets: ['net', 'claim'],
-    implementationNotes: 'Conceptual Part 4 exhibit for the "Gross Is Not Net" callout. Authored as a COMPOSITION donut (radial layout — distinct from p4-tax-wedge single fan and p4-roc-yield laneBar comparison): one gross balance split into retained net (accent, ~70%) + the deferred tax claim (muted slate, ~30%). The quiet HORIZON control (today / +12 / +25) grows the centre magnitude 1×→~9× and the per-segment magnitudes while the arcs never move — so the share holds and the claim is seen compounding in step. ~70/30 representative blended ordinary rate. Conceptual — deferral not elimination; under current law.',
+    implementationNotes: 'Conceptual Part 4 exhibit for the "Gross Is Not Net" callout. Composition donut (radial layout): one gross balance split into retained net (accent, ~70%) and the deferred tax claim (muted, ~30%) at the representative 30% blended withdrawal rate shared with p4-tax-wedge. The horizon control (today / +12 / +25 years, at about 9% a year: ≈3× and ≈9×) grows the center and segment magnitudes while the arcs stay fixed, which holds only at a constant rate; the copy says the final share is set by the rate at withdrawal or conversion. Deferral, not elimination, under current law.',
   },
 
   {
@@ -2239,42 +2393,45 @@ export const FRAMEWORK_CHART_SPECS = [
     experienceRole: 'comparison', visualRelationship: 'comparison',
     claimStack: {
       primaryClaim: 'Return of capital defers the tax, so more of each distribution goes back to work now',
-      visualProof: 'Two aligned bars split the same 100-unit distribution: return of capital sends the whole 100 back to work now with its tax deferred below the line, while a taxed dividend loses 24 to tax on receipt and redeploys only 76 — the surplus is the visible edge',
+      visualProof: 'Two aligned bars split the same 100-unit distribution: return of capital sends all 100 back to work now, with its deferred tax shown below the bar, while a qualified dividend taxed at the top federal rate gives up 24 and redeploys 76; the surplus is the visible edge',
       interactionRole: 'Hover a bar segment to see how its tax treatment changes what redeploys',
       readerAction: 'Compare how far each bar’s working segment reaches; the gap is the tax taken now',
-      caution: 'Conceptual comparison; return of capital defers tax by reducing basis, it is not tax-free, and the deferral ends at basis exhaustion or sale — under current law',
+      caution: 'Conceptual comparison at the top federal rate on qualified dividends (23.8 percent). Return of capital is not tax-free: it lowers your basis, the deferred gain is taxed when you sell unless a step-up at death resets the basis first, and once basis reaches zero further distributions are taxed as capital gain when received. Under current law; characterization is set each tax year and can change',
     },
     interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a segment ties its tax treatment to how much of the distribution redeploys' },
     status: 'implemented', wiredPublic: true,
     title: 'ROC Changes the Yield', setupLine: 'One distribution, two tax treatments, and how much of it goes back to work',
     claimLabel: 'RETURN OF CAPITAL · DEFERRAL',
     frameworkClaim: 'A return-of-capital distribution defers tax by reducing basis, so more of each distribution stays available to redeploy than an equivalent distribution taxed on receipt.',
-    readerTakeaway: 'Deferring the tax keeps more of the distribution working during the deployment years.',
-    chartType: 'Two aligned 100-unit bars comparing how much of the same distribution redeploys now: return of capital (100, tax deferred below the line) versus a taxed dividend (76 redeployed, 24 taxed now).',
+    readerTakeaway: 'Deferring the tax keeps more of each distribution working during the years you are still deploying.',
+    chartType: 'Two aligned 100-unit bars comparing how much of the same distribution redeploys now: return of capital (100, tax deferred below the bar) versus a qualified dividend taxed at the top federal rate (76 redeployed, 24 taxed).',
     visualDataMode: 'conceptual',
     disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 4', label: 'Return-of-capital ballast; basis reduction defers the liability', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' },
-      { provider: 'IRS · Publication 550', label: 'Return of capital reduces cost basis rather than being taxed on receipt', role: 'verifies-concept', url: 'https://www.irs.gov/forms-pubs/about-publication-550' },
+      { provider: 'IRS · Publication 550', label: 'A nondividend distribution (return of capital) reduces basis and is not taxed until basis is fully recovered; after that it is capital gain', role: 'verifies-concept', url: 'https://www.irs.gov/publications/p550' },
+      { provider: 'IRC · 26 U.S.C. §301(c)', label: 'The part of a distribution that is not a dividend reduces the stock’s basis; any excess over basis is treated as gain', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/301' },
+      { provider: 'IRC · 26 U.S.C. §1(h)', label: 'Qualified dividends are taxed at the long-term capital gains rates (top rate 20 percent)', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/1' },
+      { provider: 'IRC · 26 U.S.C. §1411', label: 'The 3.8 percent net investment income tax', role: 'verifies-concept', url: 'https://www.law.cornell.edu/uscode/text/26/1411' },
     ],
     explainerHeadline: 'Return of capital defers the tax, so more of the distribution keeps working.',
-    explainerBody: 'Return of capital is not taxed on receipt — it reduces your cost basis, deferring the tax to a later sale. So the whole distribution goes back to work now, with the deferred tax shown below the bar as reduced basis. A taxed dividend loses its cut on receipt, redeploying only 76 of every 100. Deferral is not elimination: the tax comes due at sale, or once basis runs out.',
+    explainerBody: 'A return-of-capital distribution is not taxed when you receive it; it lowers your cost basis instead. All of it can go back to work now, and the tax waits, drawn below the bar, until you sell. A qualified dividend taxed at the top federal rate (20 percent plus the 3.8 percent net investment income tax) gives up about 24 of every 100 first. On a 12 percent yield, that is 12 points a year back to work against about 9.1. The tax still comes due: on the deferred gain when you sell, unless a step-up at death resets the basis first, and on receipt once basis reaches zero.',
     explainerConcept: 'Return of capital',
     concepts: [{ label: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' }],
     layout: 'laneBar',
-    ariaSummary: 'Two aligned bars split the same one-hundred-unit distribution. The return-of-capital bar sends the full one hundred back to work now, with a hatched strip below it marking about twenty-four units of tax deferred into a reduced basis, due at a later sale. The taxed-dividend bar redeploys about seventy-six units now and gives up about twenty-four units to tax on receipt. A dashed line marks the seventy-six point; the return-of-capital bar reaches past it to one hundred, and that surplus of about twenty-four units is the capital still working now under return of capital.',
+    ariaSummary: 'Two aligned bars split the same 100-unit distribution. The return-of-capital bar sends the full 100 back to work now, with a hatched strip below it marking about 24 units of tax deferred into a lower cost basis, due at a later sale. The taxed-dividend bar, taxed at the top federal rate, redeploys about 76 units now and gives up about 24 to tax. A dashed line marks the 76 point; the return-of-capital bar reaches past it to 100, and that surplus of about 24 units is the capital still working now under return of capital.',
     laneBar: {
-      total: 100, unit: 'units', totalLabel: 'The same $100 distribution, two tax treatments',
+      total: 100, unit: 'units', totalLabel: 'What goes back to work now',
       surplusLabel: '+24 still working now under ROC',
       compareKey: 'deploy',                                  // the shared "capital back to work" dimension, compared across lanes
       bars: [
         {
           id: 'roc', label: 'Return of capital', sublabel: 'not taxed on receipt',
           segments: [{ id: 'roc-deploy', key: 'deploy', label: 'redeploys now', value: 100, tier: 'primary', valueLabel: '100' }],
-          deferred: { id: 'roc-defer', value: 24, label: 'tax deferred to basis · due at a later sale (not taken now)' },
+          deferred: { id: 'roc-defer', value: 24, label: 'tax deferred into a lower basis · due at a later sale' },
         },
         {
-          id: 'div', label: 'Taxed dividend', sublabel: 'taxed on receipt each year',
+          id: 'div', label: 'Taxed dividend', sublabel: 'qualified, at the top federal rate',
           segments: [
             { id: 'div-deploy', key: 'deploy', label: 'redeploys now', value: 76, tier: 'secondary', valueLabel: '76' },
             { id: 'div-tax', label: 'taxed now', value: 24, tier: 'stress', valueLabel: '24' },
@@ -2284,49 +2441,52 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'roc-deploy',
     hoverTargets: [
-      { id: 'roc-deploy', kind: 'segment', label: 'Return of capital', name: 'Return of capital · redeploys now', why: 'Not taxed on receipt; it reduces cost basis instead, deferring the liability to a later sale. The full amount goes back to work now.', claim: 'The whole distribution redeploys.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'roc-defer', kind: 'segment', label: 'Deferred to basis', name: 'The deferred tax', why: 'Return of capital is not tax-free — the tax it will owe is folded into a reduced basis and comes due at sale unless a step-up erases it. It is deferred, not gone.', claim: 'Deferred, not eliminated.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'div-deploy', kind: 'segment', label: 'Taxed dividend', name: 'Taxed dividend · redeploys now', why: 'A share is taken on receipt before anything can be redeployed, so only the remainder — about seventy-six of every hundred — goes back to work, compounding from a smaller base.', claim: 'Tax on receipt shrinks what redeploys.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'div-tax', kind: 'segment', label: 'Taxed now', name: 'Tax taken on receipt', why: 'Roughly the long-term capital gains rate plus the net investment income tax, taken the year the dividend is received — this is the slice that never gets to redeploy now.', claim: 'This slice is taken up front.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'roc-deploy', kind: 'segment', label: 'Return of capital', name: 'Return of capital · redeploys now', why: 'Not taxed when received; it lowers your cost basis instead, deferring the tax to a later sale. The full amount goes back to work now.', claim: 'The whole distribution redeploys.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'roc-defer', kind: 'segment', label: 'Deferred to basis', name: 'The deferred tax', why: 'Return of capital is not tax-free. Each distribution lowers your basis, so the tax arrives as a larger capital gain when you sell, unless a step-up at death resets the basis first. Once basis reaches zero, further distributions are taxed as capital gain when received.', claim: 'Deferred until you sell.', concept: 'Return of capital', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'div-deploy', kind: 'segment', label: 'Taxed dividend', name: 'Taxed dividend · redeploys now', why: 'The tax is owed for the year the dividend is paid, so only about 76 of every 100 can go back to work, and the next distribution is earned on a smaller base.', claim: 'Tax on receipt shrinks what redeploys.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'div-tax', kind: 'segment', label: 'Taxed now', name: 'Tax on receipt', why: 'Qualified dividends are taxed at the long-term capital gains rates. At the top federal rate that is 20 percent plus the 3.8 percent net investment income tax, about 24 of every 100; at lower incomes the cut is smaller. This slice never goes back to work.', claim: 'This slice is taken up front.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
     ],
     mobileTapTargets: ['roc-deploy', 'div-deploy', 'div-tax', 'roc-defer'],
-    implementationNotes: 'Conceptual Part 4 exhibit for the taxable/ROC section, authored as a laneBar COMPARISON (multi-lane family seed — distinct from p4-tax-wedge single fan and p4-gross-not-net radial donut): two aligned 100-unit bars over one shared scale. ROC redeploys the full 100 now (accent), with the ~24 of deferred tax shown as a hatched strip BELOW the bar (exists, not taken now — honest, not eliminated). Taxed dividend redeploys 76 (secondary) + 24 taxed now (stress). A dashed reference line at 76 + the surplus callout make the +24 "still working" the visual claim. ROC ~11% distribution; dividend after ~23.8% LTCG+NIIT on receipt. Conceptual — deferral not elimination; caution + explainer state basis exhaustion + tax-at-sale; under current law.',
+    implementationNotes: 'Conceptual Part 4 exhibit for the taxable / return-of-capital section, authored as a laneBar comparison: two aligned 100-unit bars over one shared scale. Return of capital redeploys the full 100 now (accent), with ~24 of deferred tax drawn as a hatched strip below the bar (it exists but is not taken now). The taxed dividend redeploys 76 (secondary) and loses 24 to tax now (stress), at 23.8% on qualified dividends, the rate shared with p4-tax-wedge. A dashed reference line at 76 and the surplus callout make the +24 still working the visual claim. The explainer translates it into yield (12% → 12 points working against ~9.1). Caution and explainer state the zero-basis rule, tax at sale and step-up; under current law.',
   },
   {
     chartId: 'p4-wrapper-routing', idx: 'P4-04', group: 'part-4', intendedPlacement: 'part-4',
     experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'New capital is routed by what the dollar is, not split by a fixed percentage',
-      visualProof: 'Five kinds of dollar on the left each connect to exactly the wrapper the framework sends them to on the right — Torque to Roth, never-sold Bitcoin and income to taxable, the match and the high-income deduction to pre-tax — so the routing reads as a map rather than a rule of thumb',
+      primaryClaim: 'New money is routed by the kind of position it buys, in a set order, with no fixed split between accounts',
+      visualProof: 'Six kinds of new money on the left each connect to the wrapper the framework sends them to on the right: Torque that may rotate to Roth; never-sold Bitcoin and return-of-capital Ballast to taxable; ordinary-income payers and the high-income-year deferral to pre-tax. The match draws two lines, because your own contribution can go Roth while the match itself usually lands pre-tax',
       interactionRole: 'Hover a dollar to light its route, or a wrapper to see everything the framework sends there',
       readerAction: 'Find the dollar you are about to deploy and follow its line before you choose the account',
-      caution: 'A conceptual routing map under current United States rules; the sequence — match first, Roth IRA next, then route by type — is in the steps above, not in the diagram',
+      caution: 'A conceptual map under current US federal rules. The order (match first, Roth IRA next, then by position type) is Part 4’s routing sequence; the diagram shows only where each kind of dollar lands',
     },
     interaction: { type: 'hover', gesture: 'hover', conceptMatch: 'Hovering a node lights only the routes it belongs to, so one dollar can be followed without losing the map' },
     status: 'implemented', wiredPublic: true,
     title: 'Routing the Dollar', setupLine: 'Where each kind of new capital goes, and why that wrapper',
-    claimLabel: 'PART 4 · WRAPPER ROUTING',
-    frameworkClaim: 'Capital is routed to the wrapper that minimizes lifetime friction for its payoff profile: rotating convexity to Roth, never-sold and income-producing holdings to taxable, pre-tax reserved for the match and for tactical bracket arbitrage.',
+    claimLabel: 'WRAPPER · ROUTING',
+    frameworkClaim: 'After the match, each dollar goes to the wrapper that costs its position the least tax over its life: Torque that may rotate to Roth; never-sold Bitcoin, return-of-capital Ballast and harvesting satellites to taxable; a high-income-year deferral and ordinary-income payers to pre-tax.',
     readerTakeaway: 'The wrapper is chosen by the position, not by the contribution limit that happens to be open.',
-    chartType: 'Routing diagram: five kinds of new capital on the left, each connected only to the wrapper the framework assigns it on the right.',
+    chartType: 'Routing diagram: six kinds of new money on the left, each connected to the wrapper the framework assigns it on the right; the match connects to two.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 4', label: 'The three-wrapper architecture and the routing sequence for new capital', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' },
-      { provider: 'IRS', label: '2026 Roth IRA contribution limit and eligibility ($7,500 per person)', role: 'verifies-concept', url: 'https://www.irs.gov/retirement-plans/roth-iras' },
+      { provider: 'IRS', label: '2026 IRA contribution limit ($7,500; $1,100 catch-up at 50+), shared across traditional and Roth IRAs', role: 'verifies-concept', url: 'https://www.irs.gov/newsroom/401k-limit-increases-to-24500-for-2026-ira-limit-increases-to-7500' },
+      { provider: 'IRS · Notice 2025-67', label: '2026 traditional IRA deduction phase-outs for workplace-plan participants ($81,000–$91,000 single; $129,000–$149,000 joint when the contributor is covered)', role: 'verifies-concept', url: 'https://www.irs.gov/pub/irs-drop/n-25-67.pdf' },
+      { provider: 'IRS · Notice 2024-2', label: 'SECURE 2.0 Roth matching contributions: the plan may permit them, only for fully vested matches, taxable in the year allocated', role: 'verifies-concept', url: 'https://www.irs.gov/pub/irs-drop/n-24-02.pdf' },
     ],
     explainerHeadline: 'Route by what the dollar is. The sequence only decides which question you ask first.',
-    explainerBody: 'An employer match is captured first, in a Roth 401(k) bucket if the plan offers one and otherwise pre-tax, because a dollar-for-dollar match dominates any wrapper argument. The Roth IRA is funded next, backdoor if income requires. Everything after that routes by position type: Torque that may be rotated goes to Roth, where trading is frictionless; Bitcoin held never-to-sell goes to taxable cold storage, where step-up and borrow-against preserve optionality without spending Roth capacity; income and ballast go to taxable too. Pre-tax is tactical — the match, and a deductible contribution in an unusually high-income year intended for later conversion.',
+    explainerBody: 'Start with the match: contribute enough to earn all of it, in a Roth 401(k) bucket if the plan has one (the match itself lands pre-tax unless the plan offers Roth matching). Fund the Roth IRA next, by the backdoor if your income requires it (subject to the pro-rata rule if you hold other pre-tax IRA money). After that the position decides. Torque that may rotate goes to Roth, where selling is tax-free; never-sold Bitcoin sits in taxable cold storage by default; return-of-capital Ballast and harvesting satellites go to taxable; ordinary-income payers go to pre-tax where there is room. Beyond that, pre-tax is tactical: deferrals in an unusually high-income year, converted to Roth in a later low one. The sequence sets no target mix. The dashboard’s Framework Integrity Score (Part 6) does: it measures your split against the FIS wrapper targets of 45 percent Roth, 35 taxable and 20 pre-tax, and charges a small penalty once drift passes 10 points (as of September 2026).',
     explainerConcept: 'Wrapper edge',
     concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Torque', link: '/part-5-portfolio-construction-position-management' }, { label: 'Bitcoin backbone', link: '/part-3-bitcoin-convexity-backbone' }],
-    layout: 'flow', flowHeight: 470,
-    ariaSummary: 'A routing diagram. Five nodes on the left name kinds of new capital: an employer match, rotating Torque, never-sold Bitcoin, income and ballast, and a high-income year. Three nodes on the right name wrappers: Roth, taxable, and pre-tax. Lines connect each kind of capital only to its wrapper. Rotating Torque connects to Roth. Never-sold Bitcoin and income and ballast both connect to taxable. The high-income year connects to pre-tax. The employer match connects to both Roth, where a Roth 401(k) bucket is offered, and pre-tax.',
+    layout: 'flow', flowHeight: 520,
+    ariaSummary: 'A routing diagram. Six nodes on the left name kinds of new money: contributions up to the employer match, Torque that may rotate, never-sold Bitcoin, return-of-capital Ballast with harvesting satellites, ordinary-income payers, and a high-income year. Three nodes on the right name wrappers: Roth, taxable and pre-tax. Torque connects to Roth. Never-sold Bitcoin and return-of-capital Ballast connect to taxable. Ordinary-income payers and the high-income year connect to pre-tax. The match connects to both Roth and pre-tax: your own contribution can go into a Roth 401(k) bucket, and the match itself lands pre-tax unless the plan offers Roth matching.',
     flow: {
       stages: [
         { id: 'dollar', label: 'The dollar', nodes: [
-          { id: 'match', label: 'Employer match', sub: 'first, in either bucket' },
-          { id: 'torque', label: 'Rotating Torque', sub: 'right tail · may be sold' },
-          { id: 'bitcoin', label: 'Never-sold Bitcoin', sub: 'cold storage · never sold' },
-          { id: 'ballast', label: 'Income & ballast', sub: 'ROC income · satellites' },
+          { id: 'match', label: 'Up to the match', sub: 'first · Roth or pre-tax' },
+          { id: 'torque', label: 'Torque', sub: 'may rotate · right tail' },
+          { id: 'bitcoin', label: 'Never-sold Bitcoin', sub: 'cold storage · by default' },
+          { id: 'ballast', label: 'ROC Ballast', sub: 'and harvesting satellites' },
+          { id: 'ordinary', label: 'Ordinary income', sub: 'bonds · REITs · if room' },
           { id: 'highIncome', label: 'High-income year', sub: 'deduct now, convert later' },
         ] },
         { id: 'wrapper', label: 'Its wrapper', nodes: [
@@ -2341,109 +2501,111 @@ export const FRAMEWORK_CHART_SPECS = [
         { from: 'torque', to: 'roth' },
         { from: 'bitcoin', to: 'taxable' },
         { from: 'ballast', to: 'taxable' },
+        { from: 'ordinary', to: 'pretax' },
         { from: 'highIncome', to: 'pretax' },
       ],
     },
     primaryKey: 'roth',
     hoverTargets: [
-      { id: 'match', kind: 'node', label: 'Employer match', name: 'The employer match · captured first', why: 'A dollar-for-dollar match is an immediate return that dominates any wrapper suboptimality, so it is captured before anything else — in a Roth 401(k) bucket if the plan offers one, otherwise pre-tax.', claim: 'Free money outranks wrapper purity.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'torque', kind: 'node', label: 'Rotating Torque', name: 'Rotating Torque · to Roth', why: 'A right-tail position that may be sold or rebalanced. Tax-free compounding and frictionless trading turn its appreciation into durable wealth, and the Tax Wedge is widest exactly where its convexity is largest.', claim: 'Rotate where rotation is free.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'bitcoin', kind: 'node', label: 'Never-sold Bitcoin', name: 'Never-sold Bitcoin · to taxable', why: 'Held under a never-sell discipline, Bitcoin needs no tax-free trading. In taxable it keeps a step-up in basis under current law and can be borrowed against — optionality preserved without spending scarce Roth capacity.', claim: 'Never sold, so Roth would be wasted on it.', concept: 'Bitcoin backbone', link: '/part-3-bitcoin-convexity-backbone' },
-      { id: 'ballast', kind: 'node', label: 'Income & ballast', name: 'Income and ballast · to taxable', why: 'Return-of-capital distributions defer tax by reducing basis, and harvesting satellites turn losses into durable tax assets. Both mechanisms only exist in a taxable account.', claim: 'The ballast mechanics live in taxable.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'highIncome', kind: 'node', label: 'High-income year', name: 'A high-income year · to pre-tax', why: 'In an unusually high-income year a deductible contribution takes the deduction at a high bracket, intended for conversion to Roth in a later low-income year. Tactical bracket arbitrage, not a structural home.', claim: 'Pre-tax is a timing move.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'roth', kind: 'node', label: 'Roth', name: 'Roth · the scarce wrapper', why: 'Roth capacity is bounded by the annual limit, so it is reserved for what benefits most: convexity that will be rotated. Filling it with never-sold positions spends the scarcest capacity on the holdings that need it least.', claim: 'Reserve Roth for Torque.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'taxable', kind: 'node', label: 'Taxable', name: 'Taxable · the never-sold home', why: 'Step-up in basis, borrow-against, return-of-capital deferral, and tax-loss harvesting — every mechanism the framework uses for holdings that are never sold or that produce income lives here.', claim: 'Taxable does the structural work.', concept: 'Taxable account', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'pretax', kind: 'node', label: 'Pre-tax', name: 'Pre-tax · tactical only', why: 'A pre-tax balance is a joint claim with the tax authority. The framework uses it for the match and for bracket arbitrage, then converts when income allows — never as the structural home for convexity.', claim: 'Occasionally useful, never structural.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'match', kind: 'node', label: 'Up to the match', name: 'The employer match · captured first', why: 'Once it vests, a match is an immediate return (100 percent on a dollar-for-dollar match) that outranks any wrapper argument, so contribute at least enough to earn all of it before anything else. Your own contribution can go into a Roth 401(k) bucket if the plan has one. The match itself is pre-tax unless the plan lets you elect Roth matching, which SECURE 2.0 permits if the plan adopts it; the match must be fully vested and is taxable income in the year it is made.', claim: 'Free money outranks wrapper purity.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'torque', kind: 'node', label: 'Torque', name: 'Torque that may rotate · to Roth', why: 'A right-tail position you may trim, sell or rotate as theses change. In a Roth each sale is tax-free, so the whole gain keeps compounding; the Tax Wedge shows that advantage growing with the size of the win.', claim: 'Tax-free trading is the reason it lives here, never a reason to trade more.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'bitcoin', kind: 'node', label: 'Never-sold Bitcoin', name: 'Never-sold Bitcoin · to taxable', why: 'Bitcoin is held under a never-sell discipline, so it gains nothing from tax-free trading. In taxable cold storage it can pass to heirs with a stepped-up basis under current law, and only a taxable holding can be pledged for a loan without counting as a distribution. Keeping it there leaves scarce Roth space for Torque that may rotate.', claim: 'Never sold, so Roth space would be wasted on it.', concept: 'Bitcoin backbone', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'ballast', kind: 'node', label: 'ROC Ballast', name: 'Return-of-capital Ballast and satellites · to taxable', why: 'Return-of-capital distributions defer tax by lowering basis, and harvesting satellites turn losses into tax assets. Neither does anything inside a Roth or pre-tax account. Yield alone never makes a position Ballast; among positions that already qualify, taxable favors those whose distributions are return of capital.', claim: 'The deferral and the harvest only work in taxable.', concept: 'Ballast', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'ordinary', kind: 'node', label: 'Ordinary income', name: 'Ordinary-income payers · to pre-tax', why: 'Bond funds, and REITs whose distributions are not return of capital, pay income taxed at ordinary rates every year in a taxable account. Inside a pre-tax account that tax waits until withdrawal, when the money is ordinary income anyway, so this is where they go when pre-tax space exists.', claim: 'Defer what is taxed at ordinary rates anyway.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'highIncome', kind: 'node', label: 'High-income year', name: 'A high-income year · to pre-tax', why: 'In an unusually high-income year, switching your 401(k) or 403(b) deferrals to pre-tax takes the deduction at a high rate; converting to Roth in a later low-income year pays the tax at a lower one. A traditional IRA usually cannot do this job: if you are covered by a workplace plan, the 2026 deduction phases out at $81,000–$91,000 single or $129,000–$149,000 joint; it shares the $7,500 IRA limit the Roth IRA already used; and a year-end balance brings the pro-rata rule into a backdoor Roth.', claim: 'Pre-tax is a timing move.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'roth', kind: 'node', label: 'Roth', name: 'Roth · the scarce wrapper', why: 'Roth space is capped in dollars each year (the 2026 IRA limit is $7,500, or $8,600 at 50 or older, shared with any traditional IRA), so it goes to what gains most from tax-free selling: Torque that may rotate. A never-sold holding would spend that space on a benefit it never uses.', claim: 'Reserve Roth for Torque.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'taxable', kind: 'node', label: 'Taxable', name: 'Taxable · the never-sold home', why: 'Step-up at death, pledging a holding for a loan, return-of-capital deferral and loss harvesting all work only in a taxable account, under current law. It also takes buy-and-hold positions once Roth space is full.', claim: 'Taxable does the work the other two cannot.', concept: 'Taxable account', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'pretax', kind: 'node', label: 'Pre-tax', name: 'Pre-tax · tactical', why: 'The framework uses pre-tax for the match, for deferrals in an unusually high-income year and for ordinary-income payers where there is room, and converts to Roth in low-income years when it can. It is not a home for convex positions.', claim: 'Pre-tax is for the match, timing and ordinary income.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
     ],
-    mobileTapTargets: ['torque', 'bitcoin', 'ballast', 'match', 'highIncome', 'roth', 'taxable', 'pretax'],
-    implementationNotes: 'Part 4 routing exhibit (the plan\'s P4-02 "Routing the Dollar"), replacing the prose-only routing map beside the three-step sequence. Authored on the flow layout with EXPLICIT flow.edges — the first routed (many→few) flow; the existing fan flows (p5-change-hierarchy 1→3, p5-force-channels 1→7) stay fully connected because they carry no edges. Hover lights only the focused node\'s routes and recedes the rest, so one dollar can be followed. Roth is the primary node (the scarce wrapper the section is about). The match is the one dollar with two routes — Roth 401(k) if offered, else pre-tax — drawn as two lines rather than collapsed, because collapsing it would state a rule the text does not. Conceptual; under current United States law.',
+    mobileTapTargets: ['torque', 'bitcoin', 'ballast', 'ordinary', 'match', 'highIncome', 'roth', 'taxable', 'pretax'],
+    implementationNotes: 'Part 4 routing exhibit beside the three-step routing sequence. Flow layout with explicit flow.edges, so each node connects only where the spec says; hover lights the focused node’s routes and recedes the rest. Roth is the primary node. The match is the one dollar with two routes: the employee’s own contribution can go to a Roth 401(k) bucket, while the employer match lands pre-tax unless the plan offers SECURE 2.0 Roth matching. Ordinary-income payers route to pre-tax where space exists, per the canonical wrapper map. The explainer carries the one-line FIS wrapper-target note (45/35/20, 10-point dead zone, as of September 2026). Conceptual; under current US federal law.',
   },
   /* ── PART 5 · PORTFOLIO CONSTRUCTION & POSITION MANAGEMENT ─────────────── */
   {
     chartId: 'p5-operating-system', idx: 'P5-01', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'mechanism',
     claimStack: {
-      primaryClaim: 'Each posture is a distinct behavior through the same market cycle — that behavior, not the ticker, is what the framework classifies',
+      primaryClaim: 'Each posture behaves differently through the same market cycle, and that behavior is what the framework classifies',
       primaryClaimNote: 'one stylized cycle: advance, stress, recovery',
-      visualProof: 'Four indexed paths through one cycle: Torque climbs hardest, draws down deepest, and finishes highest; Ballast barely moves and deploys reserves at the trough; Hype spikes on attention and is stopped out by rule; Bitcoin compounds quietly beneath the system on its own register',
-      interactionRole: 'Hover a path, the rotation moment, or the stop-out to read the behavior that defines it',
+      visualProof: 'Four indexed paths through one cycle: Torque climbs hardest, falls about 60 percent in stress and finishes highest; Ballast dips about 12 percent and deploys at the trough; Hype spikes on attention and is stopped at breakeven by rule; Bitcoin, on its own lower register, falls about 75 percent and recovers without ever being sold to fund the others',
+      interactionRole: 'Hover a path, the rotation moment or the stop to read the behavior that defines it',
       readerAction: 'Follow each line through the stress phase and watch what it does differently',
-      caution: 'Conceptual behavioral signatures on one stylized cycle — indexed shapes, not returns or forecasts; the backbone is drawn low to mark its separate register, not as a relative-performance claim',
+      caution: 'Indexed shapes on one stylized cycle, not returns or forecasts. Bitcoin is drawn on a lower register only to keep it visually separate, and its fall of about 75 percent sits at the shallow end of the 75 to 80 percent Part 3 says to plan for',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Three Jobs. One Cycle.', setupLine: 'How each posture behaves when the market advances, breaks, and recovers',
-    claimLabel: 'PART 5 \u00b7 THE THREE POSTURES',
-    frameworkClaim: 'Posture is assigned by expected behavior: Torque carries the upside and absorbs the drawdown, Ballast holds steady and funds the buy, Hype is capped and pre-committed to exit, and Bitcoin compounds beneath the system under its own Part 3 rules.',
-    readerTakeaway: 'Classify positions by how they will behave under stress \u2014 the cycle reveals the posture.',
-    chartType: 'Behavioral-signature plot: four indexed paths through one stylized market cycle (advance \u00b7 stress \u00b7 recovery), with the rotation moment and the Hype stop-out marked.',
+    claimLabel: 'PART 5 · THE THREE POSTURES',
+    frameworkClaim: 'Posture is assigned by expected behavior: Torque carries the upside and absorbs the drawdown, Ballast holds steady and funds the buying, Hype is capped and committed to its exits at entry, and Bitcoin sits outside all three under its own Part 3 rules.',
+    readerTakeaway: 'Classify a position by how it will behave under stress.',
+    chartType: 'Behavioral-signature plot: four indexed paths through one stylized market cycle (advance · stress · recovery), with the rotation moment and the Hype stop marked.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF \u00b7 Part 5', label: 'Three-posture classification, rotation governance, and Hype exit rules', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
-      { provider: 'ACF \u00b7 Part 3', label: 'Bitcoin as the separately governed convexity backbone', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+      { provider: 'ACF · Part 5', label: 'Three-posture classification, rotation governance, and Hype exit rules', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF · Part 3', label: 'Bitcoin as the separately governed convexity backbone', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
     ],
     explainerHeadline: 'The cycle is the classifier.',
-    explainerBody: 'Run any position through a full cycle in your head and its posture declares itself. If it climbs with the thesis, collapses hard in stress, and recovers to new highs because the structural force persists \u2014 that is Torque. If it barely moves and is liquid exactly when everything else is on sale \u2014 that is Ballast, and the trough is where it earns its keep. If it spikes on attention and has no floor when the story breaks \u2014 that is Hype, and the stop was decided at entry. Bitcoin does none of these jobs: it compounds beneath the system under Part 3 rules and is never rotation capital.',
+    explainerBody: 'Run any position through a full cycle in your head and its posture declares itself. If it climbs with the thesis, falls hard in stress and recovers to new highs because the force behind it persists, it is Torque. If it holds steady and has cash to spend when Torque is on sale, it is Ballast, and the trough is where it earns its keep. If it spikes on attention and has nothing underneath when the story breaks, it is Hype, and its exits were set on the day it was bought. Bitcoin does none of these jobs. It takes its own deep drawdowns under Part 3’s rules and is never sold to fund the others.',
     explainerConcept: 'Posture',
     concepts: [{ label: 'Posture', link: '/part-5-portfolio-construction-position-management' }, { label: 'Ballast', link: '/part-5-portfolio-construction-position-management' }, { label: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' }],
     layout: 'single',
-    ariaSummary: 'Four indexed value paths cross one stylized market cycle divided into advance, stress, and recovery phases. Torque climbs steepest, falls roughly sixty percent through the stress phase, and recovers to finish highest. Ballast stays nearly flat the whole way, dipping slightly in stress; an enso ring at the trough marks the rotation moment where reserves deploy into Torque. Hype spikes fastest during the advance, collapses in stress, and terminates at a dot marked stopped out by rule \u2014 it has no recovery path. A low dashed Bitcoin line compounds quietly beneath the whole system, labelled separately governed.',
-    domain: { xMin: 0, xMax: 10, yMin: 0.3, yMax: 3.05 }, yUnit: 'indexed \u00b7 conceptual',
+    ariaSummary: 'Four indexed value paths cross one stylized market cycle divided into advance, stress and recovery phases. Torque climbs steepest, falls roughly sixty percent through the stress phase and recovers to finish highest. Ballast stays close to flat, dipping about twelve percent in stress; an enso ring at the trough marks the rotation moment where reserves deploy into Torque. Hype spikes fastest, collapses early in the stress phase and ends at a dot marked stopped at breakeven, with no recovery path. A dashed Bitcoin line on its own lower register falls about seventy-five percent in the stress phase, deeper than Torque, and recovers; a note marks it as never rotation capital.',
+    domain: { xMin: 0, xMax: 10, yMin: 0.08, yMax: 3.05 }, yUnit: 'indexed · conceptual',
     xTicks: [{ v: 2.1, label: 'advance' }, { v: 5.5, label: 'stress' }, { v: 8.4, label: 'recovery' }],
     yTicks: [{ v: 1, label: 'start' }],
     bands: [
-      { id: 'stress', kind: 'shock', x0: 4.2, x1: 6.8, seed: 47, intensity: 0.72, label: 'liquidity leaves \u00b7 correlation rises', labelAnchor: 'peak' },
+      { id: 'stress', kind: 'shock', x0: 4.2, x1: 6.8, seed: 47, intensity: 0.72, label: 'liquidity leaves · correlation rises', labelAnchor: 'peak' },
     ],
     markers: [
       { id: 'deploy', type: 'enso', x: 6.1, y: 0.86, r: 11, label: 'Ballast deploys here', labelAnchor: 'start', labelDy: 26 },
-      { id: 'stop', type: 'dot', x: 5.9, y: 1.16, r: 4.5, label: 'Hype \u00b7 stopped out by rule', labelAnchor: 'middle', labelDy: -14 },
+      { id: 'stop', type: 'dot', x: 4.85, y: 1, r: 4.5, label: 'Hype · stopped at breakeven', labelAnchor: 'end', labelDy: 20 },
     ],
-    notes: [{ x: 8.3, y: 0.52, text: 'backbone \u00b7 never rotation capital', anchor: 'middle' }],
+    notes: [{ x: 8.75, y: 0.72, text: 'backbone · never rotation capital', anchor: 'middle' }],
     series: [
       { key: 'torque', tier: 'primary', label: 'Torque', pts: p5Cycle.torque },
       { key: 'ballast', tier: 'secondary', label: 'Ballast', pts: p5Cycle.ballast, labelDy: -2 },
       { key: 'hype', tier: 'stress', pts: p5Cycle.hype },
-      { key: 'bitcoin', tier: 'tertiary', label: 'Bitcoin \u00b7 Part 3', pts: p5Cycle.bitcoin, labelDy: 2 },
+      { key: 'bitcoin', tier: 'tertiary', label: 'Bitcoin · Part 3', pts: p5Cycle.bitcoin, labelDy: 2 },
     ],
     primaryKey: 'torque',
     hoverTargets: [
-      { id: 'torque', kind: 'series', seriesKey: 'torque', label: 'Torque', name: 'Torque \u00b7 carries the upside', why: 'Climbs hardest, falls hardest, finishes highest. The drawdown through stress \u2014 50 to 70 percent is normal \u2014 is the price of convexity; sizing and Ballast exist to make that price payable.', claim: 'Torque compounds the thesis.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'ballast', kind: 'series', seriesKey: 'ballast', label: 'Ballast', name: 'Ballast \u00b7 refuses to move', why: 'Engineered to hold steady while Torque swings: fortress balance sheets, durable cash flow, low correlation. Its flatness is not a lack of ambition \u2014 it is the reserve that makes holding Torque possible.', claim: 'Ballast preserves the ability to act.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'deploy', kind: 'marker', label: 'The rotation moment', name: 'The trough \u00b7 reserves deploy', why: 'This is where Ballast earns its space: at the bottom of the stress phase, reserves buy Torque while it is temporarily mispriced \u2014 no forced selling, no outside cash, and Bitcoin untouched.', claim: 'Reserves exist for this moment.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'hype', kind: 'series', seriesKey: 'hype', label: 'Hype', name: 'Hype \u00b7 rides the narrative', why: 'Spikes fastest because attention is reflexive \u2014 price drives interest drives price. There is no floor underneath when the loop breaks, which is why Hype is capped at 5 percent per position and 10 percent in aggregate.', claim: 'Hype is never load-bearing.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'stop', kind: 'marker', label: 'The stop-out', name: 'Stopped out \u00b7 by rule', why: 'Hype does not get a recovery arc. A pre-committed stop ends the position mechanically \u2014 no widening, no averaging down, no reclassifying it to Torque to avoid taking the loss.', claim: 'The exit was decided at entry.', concept: 'Stop-loss', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'bitcoin', kind: 'series', seriesKey: 'bitcoin', label: 'Bitcoin', name: 'Bitcoin \u00b7 separately governed', why: 'The backbone compounds beneath the system under Part 3 rules. It is not a posture, it is excluded from rotation and concentration limits, and nothing in the cycle above is allowed to touch it.', claim: 'The backbone is never rotation capital.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
+      { id: 'torque', kind: 'series', seriesKey: 'torque', label: 'Torque', name: 'Torque · carries the upside', why: 'Climbs hardest, falls hardest, finishes highest. Torque can fall 50 to 70 percent in liquidity stress; that drawdown is the price of convexity, and sizing and Ballast exist to make it payable.', claim: 'Torque compounds the thesis.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'ballast', kind: 'series', seriesKey: 'ballast', label: 'Ballast', name: 'Ballast · refuses to fall with it', why: 'Built to hold steady while Torque swings: fortress balance sheets, durable cash flow, low correlation to the rest of the book. That steadier line is the reserve that makes holding Torque possible.', claim: 'Ballast preserves the ability to act.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'deploy', kind: 'marker', label: 'The rotation moment', name: 'The trough · reserves deploy', why: 'This is where Ballast earns its space. In the drawdown, reserves buy Torque positions whose thesis and momentum still hold, with no forced selling, no outside cash, and Bitcoin untouched.', claim: 'Reserves exist for this moment.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'hype', kind: 'series', seriesKey: 'hype', label: 'Hype', name: 'Hype · rides the narrative', why: 'Spikes fastest because attention is reflexive: price drives interest, which drives price. Nothing sits underneath when the loop breaks, which is why Hype is capped at 5 percent a position and 10 percent in aggregate.', claim: 'Hype is never load-bearing.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'stop', kind: 'marker', label: 'The stop', name: 'Stopped at breakeven · by rule', why: 'The profit ladder sold two-thirds on the way up, a third at +50 percent and a third at +100 percent. The last third rode a stop raised to breakeven, and the rule ended it there: no widening, no averaging down, no reclassifying it as Torque.', claim: 'The exit was decided at entry.', concept: 'Stop-loss', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'bitcoin', kind: 'series', seriesKey: 'bitcoin', label: 'Bitcoin', name: 'Bitcoin · separately governed', why: 'The backbone runs on Part 3’s rules. It is not a posture, it sits outside rotation and the concentration limits, and it takes its own drawdowns: about 75 percent here, deeper than Torque’s. It is drawn on a lower register only to keep it visually separate.', claim: 'The backbone is never rotation capital.', concept: 'Convexity backbone', link: '/part-3-bitcoin-convexity-backbone' },
     ],
     mobileTapTargets: ['torque', 'ballast', 'deploy', 'hype', 'stop', 'bitcoin'],
-    implementationNotes: 'REWORKED (owner review, 2026-07-13): replaced the postureSystem block diagram \u2014 which labelled the postures without showing them \u2014 with a single-layout behavioral-signature plot. Four p5Cycle paths through one stylized cycle: Torque (primary/accent) peak-to-trough \u2248\u221259% inside the stated 50\u201370% band; Ballast (secondary) near-flat with the trough enso marking the rotation moment; Hype (stress tier) spike-and-collapse TERMINATING at an ink-dot stop-out (no recovery path \u2014 the terminal dot IS the claim); Bitcoin (tertiary dashed) as a quiet low register with the never-rotation-capital note. Stress phase carries the engine pressure-field band. Zero engine changes \u2014 pure PlotSvg reuse; the dead postureSystem layout was removed engine-wide in the same slice.',
+    implementationNotes: 'Single-layout behavioral-signature plot (replaced the postureSystem block diagram, owner review 2026-07-13). Four p5Cycle paths through one stylized cycle: Torque (primary) peak-to-trough ≈−59% inside the stated 50–70% band; Ballast (secondary) near-flat with the trough enso marking the rotation moment; Hype (stress tier) spikes to +150% and ends at an ink dot at breakeven (1.0): the ladder sold at +50% and +100% and raised the last stop to entry, so no documented stop fires anywhere else on this path; Bitcoin (tertiary dashed) on a lower register falling ≈−75% peak to trough, deeper than Torque (register rule: a Bitcoin stress path falls 50% or more and never shallower than Torque). The Hype label sits left of and below its dot to clear the Ballast and Torque lines, and the backbone note sits right of the deploy label. Stress phase carries the pressure-field band. Pure PlotSvg reuse, no engine changes.',
   },
 
   {
     chartId: 'p5-earned-size', idx: 'P5-02', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'Position size must be earned through evidence — maximum justified size is not currently earned size',
-      visualProof: 'Six evidence stages step upward — thesis exposure, commercial validation, initial execution, scale execution, economic proof, exceptional platform quality — an ascending progression that deliberately carries no percentages and no score bands',
+      primaryClaim: 'Position size is earned through evidence: the most a thesis could justify is not what the evidence supports today',
+      visualProof: 'Six evidence stages step upward (thesis exposure, commercial validation, initial execution, scale execution, economic proof, exceptional platform quality), an ascending progression that carries no percentages and no score bands on purpose',
       interactionRole: 'Hover a stage to read the evidence that defines it and what advancing past it requires',
       readerAction: 'Climb the ladder stage by stage and name where your position actually sits',
-      caution: 'Owner-defined doctrine (the Earned Conviction Ladder) awaiting repository canonicalization; the numeric translation of evidence into size lives in the posture sizing architecture, not on this exhibit',
+      caution: 'The ladder carries no sizing numbers. Percentages come from the score, through Part 5’s posture sizing tables and under its concentration caps',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Position Size Must Be Earned', setupLine: 'Maximum justified size is not the same as currently earned size',
+    title: 'Position Size Must Be Earned', setupLine: 'Six stages of evidence, from an idea worth investigating to a proven platform',
     claimLabel: 'PART 5 · EARNED CONVICTION',
-    frameworkClaim: 'Capital should advance only as evidence advances. A high theoretical upside does not immediately earn a maximum position.',
+    frameworkClaim: 'Capital should advance only as evidence advances. A large theoretical upside does not earn a maximum position on day one.',
     readerTakeaway: 'Conviction is built through evidence. It is not declared through enthusiasm.',
-    chartType: 'Ascending six-stage evidence ladder — the Earned Conviction Ladder — with no numeric axis, no percentages, and no score-band assignments.',
-    visualDataMode: 'conceptual', disclosure: 'Conceptual doctrine exhibit · Owner-defined evidence progression awaiting repository canonicalization; carries no sizing numbers', footerCta: 'View framework basis',
+    chartType: 'Ascending six-stage evidence ladder (the Earned Conviction Ladder) with no numeric axis, no percentages, and no score-band assignments.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual exhibit · The six evidence stages are the framework’s written sizing ladder and carry no sizing numbers', footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF · Owner doctrine', label: 'The Earned Conviction Ladder — six-stage evidence progression (2026-07, awaiting canonical spec)', role: 'verifies-concept' },
+      { provider: 'ACF · Part 5', label: 'Rule stated in Part 5 · Torque: size is earned in stages', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management#torque' },
       { provider: 'ACF · Part 5', label: 'Position sizing governance and add-cadence discipline', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
     ],
-    explainerHeadline: 'Evidence advances; size follows — never the other way around.',
-    explainerBody: 'A position begins as thesis exposure: real enough to investigate, not yet proven enough to size aggressively. Commercial validation, initial execution, scale execution, and economic proof each add a different kind of evidence, and exceptional platform quality is the rare final stage. The ladder deliberately shows no percentages: how much capital any stage justifies is decided by the posture sizing architecture and its caps, scored and governed separately. Scaling in happens over weeks, never in one move.',
+    explainerHeadline: 'Evidence moves first. Size follows.',
+    explainerBody: 'A position starts as thesis exposure: real enough to research, not yet proven enough to size up. Commercial validation, initial execution, scale execution and economic proof each add a different kind of evidence, and exceptional platform quality is a final stage few positions reach. The ladder shows no percentages on purpose. The percentages come from the score, through the posture sizing tables and under the concentration caps, and scaling in takes weeks, with no more than a quarter of the target added in any one week.',
     explainerConcept: 'Earned sizing',
     concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'rangeSteps',
-    ariaSummary: 'An ascending ladder of six evidence stages with no numeric axis. Stage one, thesis exposure: the opportunity is real enough to investigate. Stage two, commercial validation: customers, contracts, backlog, or adoption begin confirming demand. Stage three, initial execution: management converts opportunity into measurable delivery. Stage four, scale execution: success repeats without breaking the model. Stage five, economic proof: margins, cash generation, and operating leverage validate the business. Stage six, exceptional platform quality: durability, scarcity, execution, and optionality justify the highest tier. The exhibit carries no percentages and assigns no score bands.',
+    ariaSummary: 'An ascending ladder of six evidence stages with no numeric axis. Stage one, thesis exposure: the opportunity is real enough to investigate. Stage two, commercial validation: customers, contracts, backlog or adoption begin confirming demand. Stage three, initial execution: management turns opportunity into measurable delivery. Stage four, scale execution: success repeats without breaking the model. Stage five, economic proof: margins, cash generation and operating leverage validate the business. Stage six, exceptional platform quality: durability, scarcity, execution and optionality together, the strongest evidence a position can show. The exhibit carries no percentages and assigns no score bands.',
     rangeSteps: {
       yUnit: '', yMin: 0, yMax: 20, variant: 'stair', hideScale: true,
       columns: [
@@ -2458,15 +2620,15 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 's6',
     hoverTargets: [
-      { id: 's1', kind: 'node', label: 'Thesis exposure', name: 'Stage 1 · Thesis exposure', why: 'The opportunity is real enough to investigate, not yet proven enough to size aggressively. The work at this stage is research, not accumulation.', claim: 'Interesting is not yet investable.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 's2', kind: 'node', label: 'Commercial validation', name: 'Stage 2 · Commercial validation', why: 'Customers, contracts, backlog, or adoption begin confirming demand. The market is starting to agree that the problem is real and this company is being paid to solve it.', claim: 'Demand evidence arrives first.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 's3', kind: 'node', label: 'Initial execution', name: 'Stage 3 · Initial execution', why: 'Management converts opportunity into measurable delivery — shipped product, recognized revenue, kept promises. Execution evidence is different in kind from demand evidence.', claim: 'Delivery is its own proof.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 's4', kind: 'node', label: 'Scale execution', name: 'Stage 4 · Scale execution', why: 'The company demonstrates that success can repeat without breaking the model — growth that compounds operations instead of straining them.', claim: 'Repetition separates skill from luck.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 's5', kind: 'node', label: 'Economic proof', name: 'Stage 5 · Economic proof', why: 'Margins, cash generation, and operating leverage validate the business itself — the thesis stops depending on the future arriving on schedule.', claim: 'The economics finally testify.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
-      { id: 's6', kind: 'node', label: 'Platform quality', name: 'Stage 6 · Exceptional platform quality', why: 'Durability, scarcity, execution, and optionality together justify the framework\u2019s highest sizing tier — a stage most positions never reach, and none begins at.', claim: 'The top of the ladder is rare by design.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's1', kind: 'node', label: 'Thesis exposure', name: 'Stage 1 · Thesis exposure', why: 'The opportunity is real enough to investigate and not yet proven. The work at this stage is research.', claim: 'Research comes first.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's2', kind: 'node', label: 'Commercial validation', name: 'Stage 2 · Commercial validation', why: 'Customers, contracts, backlog or adoption begin confirming demand. The market is starting to agree that the problem is real and that this company is being paid to solve it.', claim: 'Demand evidence arrives first.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's3', kind: 'node', label: 'Initial execution', name: 'Stage 3 · Initial execution', why: 'Management turns opportunity into measurable delivery: shipped product, recognized revenue, kept promises. Demand showed that customers want it; execution shows that this team can deliver it.', claim: 'Delivery is its own proof.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's4', kind: 'node', label: 'Scale execution', name: 'Stage 4 · Scale execution', why: 'The company shows that success can repeat without breaking the model: growth that strengthens its operations instead of straining them.', claim: 'Repetition separates skill from luck.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's5', kind: 'node', label: 'Economic proof', name: 'Stage 5 · Economic proof', why: 'Margins, cash generation and operating leverage validate the business itself. The thesis no longer depends on the future arriving on schedule.', claim: 'The business now pays its own way.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
+      { id: 's6', kind: 'node', label: 'Platform quality', name: 'Stage 6 · Exceptional platform quality', why: 'Durability, scarcity, execution and optionality together: the strongest evidence a position can show. Most positions never reach it, and none begins there.', claim: 'The top of the ladder is rare by design.', concept: 'Earned sizing', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['s1', 's2', 's3', 's4', 's5', 's6'],
-    implementationNotes: 'rangeSteps stair variant in hideScale mode: six ascending evidence rungs, no y-axis, no value labels, no cap rules. The Earned Conviction Ladder is OWNER-DEFINED DOCTRINE awaiting repository canonicalization (review decision on PR #137, 2026-07-13): the stages are doctrine, the exhibit deliberately asserts no stage-to-percentage or stage-to-CIS-band mapping, and all numeric sizing lives in p5-posture-sizing and the adjacent canonical tables.',
+    implementationNotes: 'rangeSteps stair variant in hideScale mode: six ascending evidence rungs, no y-axis, no value labels, no cap rules. The stages are the framework’s written sizing ladder (Part 5 #torque). The exhibit deliberately asserts no stage-to-percentage or stage-to-CIS-band mapping; all numeric sizing lives in p5-posture-sizing and the Part 5 sizing tables.',
   },
 
   {
@@ -2474,37 +2636,38 @@ export const FRAMEWORK_CHART_SPECS = [
     experienceRole: 'comparison',
     claimStack: {
       primaryClaim: 'The same CIS score earns a different position size in each posture',
-      visualProof: 'Three aligned columns on one percent scale — Torque ranges reaching eight-to-fifteen under its fifteen percent ceiling, Ballast reserve ranges topping at five-to-eight with an exceptional single-position maximum of ten, Hype a single two-to-five band under its hard five percent cap — with the eighteen percent portfolio outer bound drawn quietly above all three',
+      visualProof: 'Three aligned columns on one percent scale: Torque bands reaching 8 to 15 percent under its 15 percent ceiling, Ballast bands topping out at 5 to 8 percent with a 10 percent exceptional maximum, and Hype as a single 2 to 5 percent range under its hard 5 percent cap, with the 18 percent portfolio outer bound drawn as a dashed rule above all three',
       interactionRole: 'Hover any band or ceiling mark to read the score that earns it and the cap that binds it first',
-      readerAction: 'Compare the 70+ band across the three columns — same score, three different ceilings',
-      caution: 'Band values, posture ceilings, and the outer bound are the canonical CIS v2.1 sizing parameters; posture ceilings bind before the portfolio outer bound',
+      readerAction: 'Compare the 70+ band across the three columns: same score, three different ceilings',
+      caution: 'Hype has no score bands: it is eligible from CIS 50 and sized within Part 5’s 2–5% range under hard caps of 5% a position and 10% in aggregate. Each posture’s own ceiling binds before the 18% maximum, and the 15% Ballast floor is Part 5 doctrine',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'The Same Score Does Not Create the Same Position', setupLine: 'CIS measures quality; governance translates it into capital by the job the position performs',
+    title: 'The Same Score Does Not Create the Same Position', setupLine: 'The score measures quality; the posture decides what that quality is worth in capital',
     claimLabel: 'PART 5 · POSTURE SIZING',
-    frameworkClaim: 'CIS measures position quality. Governance translates that quality into capital according to the job the position performs — Torque, Ballast, and Hype each map the same bands to different ranges.',
-    readerTakeaway: 'Score the asset first. Size the behavior second.',
+    frameworkClaim: 'CIS measures a position’s quality, and its posture decides what that quality is worth in capital. Torque and Ballast map the same score bands to different ranges; Hype has a single range from CIS 50.',
+    readerTakeaway: 'The posture picks the table; the score picks the row.',
     chartType: 'Three aligned posture columns of CIS-band allocation ranges on one shared percent scale, with the single-position cap rules overlaid.',
-    visualDataMode: 'conceptual', disclosure: 'Conceptual comparison · All ranges and caps are canonical CIS v2.1 sizing parameters', footerCta: 'View framework basis',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual comparison · Ranges and caps are the framework’s sizing parameters (Part 5 tables)', footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF · CIS Specification v2.1', label: 'Posture sizing bands and concentration limits (§10.2–10.3)', role: 'verifies-concept' },
+      { provider: 'ACF · Part 5', label: 'Rule stated in Part 5 · posture sizing tables', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management#torque' },
       { provider: 'ACF · Part 5', label: 'Torque, Ballast, and Hype sizing governance', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF dashboard', label: 'The portfolio builder sizes Hype from CIS 50 at no more than 5 percent a position and 10 percent in aggregate; on the book you hold it flags a Hype position above 5 percent or a sleeve above 10 percent (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#sizing-math' },
     ],
     explainerHeadline: 'Quality is scored once; capital is assigned by role.',
-    explainerBody: 'Torque earns size through convexity, survivability, and execution — up to eight-to-fifteen percent at full conviction, under a fifteen percent posture ceiling that only a documented override can extend to eighteen. Ballast earns size through resilience, liquidity, and rotation utility: ordinarily up to eight percent, ten percent as the exceptional single-position maximum, inside a fifteen-to-forty percent aggregate register. Hype is eligible from a CIS of fifty, sized two-to-five percent, hard-capped at five per position and ten in aggregate, because momentum is both the thesis and the exit signal. Each posture\u2019s own ceiling binds first; the eighteen percent absolute is the portfolio outer bound, not an operative ceiling for Ballast or Hype. Concentration guardrails: thirty-five percent for the top three positions, fifty for the top five.',
+    explainerBody: 'Torque earns size through convexity, survivability and execution: 8 to 15 percent at a score of 70 or more, under a 15 percent cap that only a documented override can stretch to 18. Ballast earns size through resilience, liquidity and its usefulness in rotation: up to 8 percent ordinarily and 10 percent for one position of exceptional stability, with the sleeve working between 20 and 35 percent of the book, above a 15 percent floor and below a 40 percent ceiling. Hype has no score bands. It is eligible from a CIS of 50 and sized 2 to 5 percent, never more than 5 percent a position or 10 percent in aggregate, because momentum is both its thesis and its exit signal. The top of each band is the most a score in it can justify. Each posture’s own ceiling binds first, so the 18 percent maximum only ever matters for Torque, and across the book the top three positions stay within 35 percent and the top five within 50.',
     explainerConcept: 'Posture sizing',
     concepts: [{ label: 'Position sizing', link: '/part-5-portfolio-construction-position-management' }, { label: 'Posture', link: '/part-5-portfolio-construction-position-management' }, { label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'rangeSteps',
-    ariaSummary: 'Three columns on one shared percent scale, each with its own ceiling mark. Torque stacks three ranges — two to four percent for scores in the fifties, four to eight for the sixties, eight to fifteen at seventy and above — under a posture ceiling at fifteen percent, extendable to eighteen only by documented override. Ballast stacks one to three, three to five, and five to eight percent for the same score bands, under an exceptional single-position maximum of ten percent, with aggregate Ballast between fifteen and forty percent. Hype shows a single two to five percent band under a hard five percent cap, eligible from a CIS of fifty, with a ten percent aggregate cap. A single quiet dashed rule above all three columns marks the eighteen percent portfolio outer bound; each posture ceiling binds before it.',
+    ariaSummary: 'Three columns on one shared percent scale, each with its own ceiling mark. Torque stacks three ranges, two to four percent for scores in the fifties, four to eight for the sixties and eight to fifteen at seventy and above, under a posture ceiling at fifteen percent that only a documented override extends to eighteen. Ballast stacks one to three, three to five and five to eight percent for the same score bands, under an exceptional single-position maximum of ten percent, with aggregate Ballast working between twenty and thirty-five percent above a fifteen percent floor and below a forty percent ceiling. Hype shows a single two to five percent range under a hard five percent cap, eligible from a CIS of fifty, with a ten percent aggregate cap. A single dashed rule above all three columns marks the eighteen percent portfolio outer bound; each posture ceiling binds before it.',
     rangeSteps: {
       yUnit: '%', yMin: 0, yMax: 20,
       columns: [
-        { id: 'torque', label: 'Torque', sub: 'convexity engine', capNote: 'top-3 ≤35% · top-5 ≤50%', cap: { id: 'cap-torque', v: 15, label: 'ceiling 15% · override to 18%' }, steps: [
+        { id: 'torque', label: 'Torque', sub: 'convex upside', capNote: 'top-3 ≤35% · top-5 ≤50%', cap: { id: 'cap-torque', v: 15, label: 'ceiling 15% · override to 18%' }, steps: [
           { id: 't-starter', from: 2, to: 4, tier: 'tertiary', valueLabel: '50s · 2–4%' },
           { id: 't-standard', from: 4, to: 8, tier: 'secondary', valueLabel: '60s · 4–8%' },
           { id: 't-core', from: 8, to: 15, tier: 'primary', valueLabel: '70+ · 8–15%' },
         ] },
-        { id: 'ballast', label: 'Ballast', sub: 'strategic reserves', capNote: 'aggregate 15–40%', cap: { id: 'cap-ballast', v: 10, label: 'exceptional max 10%' }, steps: [
+        { id: 'ballast', label: 'Ballast', sub: 'strategic reserves', capNote: 'aggregate 20–35% working · 15% floor · 40% ceiling', cap: { id: 'cap-ballast', v: 10, label: 'exceptional max 10%' }, steps: [
           { id: 'b-marginal', from: 1, to: 3, tier: 'tertiary', valueLabel: '50s · 1–3%' },
           { id: 'b-standard', from: 3, to: 5, tier: 'secondary', valueLabel: '60s · 3–5%' },
           { id: 'b-core', from: 5, to: 8, tier: 'primary', valueLabel: '70+ · 5–8%' },
@@ -2519,55 +2682,55 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 't-core',
     hoverTargets: [
-      { id: 't-starter', kind: 'node', label: 'Torque 50s', name: 'Torque · CIS 50–59 · 2–4%', why: 'A probe-intent starter in the convexity engine — the thesis is incomplete or fragile, and size says so.', claim: 'Starters stay small.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
-      { id: 't-standard', kind: 'node', label: 'Torque 60s', name: 'Torque · CIS 60–69 · 4–8%', why: 'Allocation-worthy but constrained until conviction strengthens across convexity, risk, macro, and execution.', claim: 'The middle band waits for evidence.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
-      { id: 't-core', kind: 'node', label: 'Torque 70+', name: 'Torque · CIS 70+ · 8–15%', why: 'Core Torque at full conviction sizing, still subject to the fifteen percent default cap and the concentration guardrails.', claim: 'Torque earns the widest range.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'b-marginal', kind: 'node', label: 'Ballast 50s', name: 'Ballast · CIS 50–59 · 1–3%', why: 'Marginal Ballast must meet the eligibility criteria and demonstrate improving quality — or face replacement by a superior survivor.', claim: 'Weak Ballast gets replaced, not excused.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'b-standard', kind: 'node', label: 'Ballast 60s', name: 'Ballast · CIS 60–69 · 3–5%', why: 'Standard reserve sizing — capital preservation and rotation utility, not upside, set the range.', claim: 'Reserves are sized for the job.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'b-core', kind: 'node', label: 'Ballast 70+', name: 'Ballast · CIS 70+ · 5–8%', why: 'Core Ballast — survivability and macro alignment strong enough to overcome the structural convexity headwind in its score. Exceptional stability can reach ten percent.', claim: 'Even the best Ballast stays a reserve.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'h-band', kind: 'node', label: 'Hype band', name: 'Hype · 2–5% · 10% aggregate', why: 'Eligible from a CIS of fifty, sized two-to-five percent. Momentum is the thesis and the exit signal, so Hype never earns load-bearing size: the engine enforces the five percent hard per-position max and ten percent aggregate; the fifteen-to-twenty-five percent stops are practitioner protocol.', claim: 'Hype is capped because it has no floor.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'cap-torque', kind: 'node', label: 'Torque ceiling', name: 'Torque ceiling · 15%, override to 18%', why: 'No Torque position exceeds fifteen percent without a documented override; eighteen percent is the absolute maximum even then. This is the only posture whose ceiling approaches the portfolio outer bound.', claim: 'Torque\u2019s ceiling is the tallest — and still a ceiling.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'cap-ballast', kind: 'node', label: 'Ballast max', name: 'Ballast · exceptional single-position max 10%', why: 'Ordinary Ballast sizing tops out at eight percent; ten percent is reserved for exceptional stability. The reserve role, not the score, sets this ceiling — Ballast never sizes toward the outer bound.', claim: 'Reserves are capped by role, not by score.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'cap-hype', kind: 'node', label: 'Hype cap', name: 'Hype · hard max 5%', why: 'No Hype position exceeds five percent under any circumstances — no override mechanism exists for this cap, because a narrative with no floor can never be load-bearing.', claim: 'Five percent, no exceptions, no override.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'outer18', kind: 'node', label: 'Outer bound', name: 'Portfolio outer bound · 18% absolute', why: 'The absolute single-position limit at the portfolio level, reachable only through Torque\u2019s documented-override path. It is not an operative sizing ceiling for Ballast or Hype — their posture ceilings bind first.', claim: 'The outer bound backstops; posture ceilings govern.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
+      { id: 't-starter', kind: 'node', label: 'Torque 50s', name: 'Torque · CIS 50–59 · 2–4%', why: 'A starter position: the thesis is incomplete or fragile, and the size says so.', claim: 'Starters stay small.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 't-standard', kind: 'node', label: 'Torque 60s', name: 'Torque · CIS 60–69 · 4–8%', why: 'Standard sizing, constrained until conviction strengthens across convexity, risk, macro and execution.', claim: 'The middle band waits for evidence.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 't-core', kind: 'node', label: 'Torque 70+', name: 'Torque · CIS 70+ · 8–15%', why: 'Core Torque. The top of the band is the most a score of 70 or more can justify, and it still sits under the 15 percent default cap and the top-three and top-five limits.', claim: 'Torque earns the widest range.', concept: 'Torque', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'b-marginal', kind: 'node', label: 'Ballast 50s', name: 'Ballast · CIS 50–59 · 1–3%', why: 'Marginal Ballast must still pass three of the five Ballast tests and show improving quality, or a stronger candidate replaces it.', claim: 'Weak Ballast gets replaced, not excused.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'b-standard', kind: 'node', label: 'Ballast 60s', name: 'Ballast · CIS 60–69 · 3–5%', why: 'Standard reserve sizing, set by capital preservation and usefulness in rotation rather than by upside.', claim: 'Reserves are sized for the job.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'b-core', kind: 'node', label: 'Ballast 70+', name: 'Ballast · CIS 70+ · 5–8%', why: 'Core Ballast: survivability and macro alignment strong enough to offset the lower Convexity score that reserve assets tend to carry. One position of exceptional stability may reach 10 percent.', claim: 'Even the best Ballast stays a reserve.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'h-band', kind: 'node', label: 'Hype band', name: 'Hype · 2–5% · 10% aggregate', why: 'Eligible from a CIS of 50 and sized 2 to 5 percent. Momentum is both the thesis and the exit signal, so Hype never carries load: the dashboard flags any Hype position above five percent and a Hype sleeve above ten, and its builder never sizes past them (as of September 2026). The 15 to 25 percent stops are yours to set and to execute.', claim: 'Hype is capped because it has no floor.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cap-torque', kind: 'node', label: 'Torque ceiling', name: 'Torque ceiling · 15%, override to 18%', why: 'No Torque position exceeds 15 percent without a documented override, and 18 percent is the absolute maximum even then. Torque is the only posture that can reach the portfolio-wide cap.', claim: 'The tallest ceiling is still a ceiling.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cap-ballast', kind: 'node', label: 'Ballast max', name: 'Ballast · exceptional single-position max 10%', why: 'Ordinary Ballast tops out at 8 percent, and one position of exceptional stability may reach 10. The reserve’s role sets this ceiling, which is why Ballast never approaches the 18 percent bound.', claim: 'Reserves are capped by role, not by score.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cap-hype', kind: 'node', label: 'Hype cap', name: 'Hype · hard max 5%', why: 'No Hype position exceeds 5 percent, and no override exists for this cap. A narrative with no floor never carries load.', claim: 'Five percent, no exceptions, no override.', concept: 'Hype', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'outer18', kind: 'node', label: 'Outer bound', name: 'Portfolio outer bound · 18% absolute', why: 'The absolute single-position limit across the whole book, reachable only by a Torque position under a documented override. Ballast stops at 10 percent and Hype at 5 long before it.', claim: 'The outer bound backstops; posture ceilings govern.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['t-core', 'b-core', 'h-band', 'cap-torque', 'cap-hype'],
-    implementationNotes: 'rangeSteps columns mode, revised per owner review of PR #137: each posture carries its OWN ceiling mark (Torque 15 w/ override note · Ballast exceptional 10 · Hype hard 5) drawn at the column so posture ceilings visibly bind first; the 18% absolute is a single quiet full-width rule labelled as the portfolio outer bound. Hype band corrected to the coded 2–5% (CIS ≥50 eligibility). The visual claim remains the 70+ row asymmetry.',
+    implementationNotes: 'rangeSteps columns mode, revised per owner review (2026-07-13): each posture carries its own ceiling mark (Torque 15 with the override note, Ballast exceptional 10, Hype hard 5) drawn at the column so posture ceilings visibly bind first; the 18% absolute is a single dashed full-width rule labeled as the portfolio outer bound. Hype is one 2–5% range from CIS 50 (Part 5’s sizing range; the scoring rules set only the Hype caps). Ballast capNote carries the 20–35% working range, 15% floor and 40% ceiling. The visual claim remains the 70+ row asymmetry.',
   },
 
   {
     chartId: 'p5-ballast-rotation', idx: 'P5-04', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'Ballast is rotation capital — the reserve that converts drawdowns into allocation decisions',
-      visualProof: 'A five-station governed cycle — harvest strength, rebuild reserves, wait without urgency, deploy into validated weakness, participate in recovery — closed by a return arc, with the deploy station as the governed checkpoint',
-      interactionRole: 'Hover a station to read its discipline; the deploy checkpoint carries the eligibility test',
-      readerAction: 'Follow the cycle to the deploy gate, then trace the recovery back to harvest',
-      caution: 'Conceptual rotation cycle; Bitcoin is outside this loop by rule — the backbone is never a funding source',
+      primaryClaim: 'Ballast is rotation capital: the reserve that turns a drawdown into an allocation decision',
+      visualProof: 'A five-station governed cycle (harvest strength, rebuild reserves, wait without urgency, deploy into validated weakness, participate in recovery) closed by a return arc, with the deploy station as the governed checkpoint',
+      interactionRole: 'Hover a station to read its rule; the deploy checkpoint carries the eligibility test',
+      readerAction: 'Follow the cycle to the deploy checkpoint, then trace the recovery back to the next harvest',
+      caution: 'Bitcoin sits outside this loop by rule and never funds it',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Ballast Preserves the Right to Buy', setupLine: 'Not the opposite of growth — the reserve that makes disciplined buying possible',
+    title: 'Ballast Preserves the Right to Buy', setupLine: 'The reserve that does the buying when Torque goes on sale',
     claimLabel: 'PART 5 · ROTATION',
-    frameworkClaim: 'Ballast is not defensive dead weight. It is the reserve that prevents forced selling and makes disciplined buying possible when convex assets become temporarily mispriced.',
+    frameworkClaim: 'Ballast is the reserve that prevents forced selling and pays for disciplined buying when convex assets are temporarily mispriced.',
     readerTakeaway: 'Without Ballast, every drawdown is a test of endurance. With Ballast, it is a capital-allocation decision.',
     chartType: 'Five-station rotation cycle with a governed deploy checkpoint and a recovery return arc.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 5', label: 'Ballast rotation triggers and minimum-reserve governance', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
-      { provider: 'ACF · Part 3', label: 'Bitcoin excluded from rotation — separate governance', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
+      { provider: 'ACF · Part 3', label: 'Bitcoin excluded from rotation: separate governance', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone' },
     ],
-    explainerHeadline: 'The reserve exists to be spent — at the right moment, on the right names.',
-    explainerBody: 'After Torque runs, a controlled trim rebuilds reserves; the fifteen percent minimum Ballast floor is restored before the next dislocation, not during it. Then the framework waits without urgency — reserves remove the need to call the exact bottom. Deployment is gated: only positions whose thesis, survivability, and confirmation remain intact receive capital. Recovery converts resilience back into convexity, and the cycle repeats. Bitcoin never funds any of it.',
+    explainerHeadline: 'The reserve exists to be spent, on the right names at the right moment.',
+    explainerBody: 'After Torque runs, a controlled trim refills reserves toward their working range before the next dislocation; deployment never takes aggregate Ballast below the 15 percent floor. Then you wait, and because the reserve is already funded you never have to call the bottom. Deployment passes one checkpoint: capital goes only to positions whose thesis, survivability and momentum still hold, and a position 20 percent or more below cost waits for the confirming signal the freeze requires. Recovery turns the reserve back into upside, and the next run starts the loop again. Bitcoin never funds any of it.',
     explainerConcept: 'Rotation',
     concepts: [{ label: 'Ballast', link: '/part-5-portfolio-construction-position-management' }, { label: 'Dry powder', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'governanceLoop',
-    ariaSummary: 'A governed cycle of five stations: harvest strength by trimming concentration, rebuild reserves toward the minimum floor, wait without urgency, deploy into validated weakness at a governed checkpoint, and participate in recovery. A return arc closes the cycle back to harvesting the next run.',
+    ariaSummary: 'A governed cycle of five stations: harvest strength by trimming Torque that has outgrown its limits, rebuild reserves toward their working range, wait without urgency, deploy into validated weakness at a governed checkpoint, and participate in recovery. A return arc closes the cycle back to harvesting the next run.',
     governanceLoop: {
       governorId: 'deploy',
       returnLabel: 'recovery restores convexity · the cycle repeats',
       nodes: [
         { id: 'harvest', label: 'Harvest', sub: 'trim concentration, not conviction' },
-        { id: 'rebuild', label: 'Rebuild', sub: 'restore the reserve floor' },
+        { id: 'rebuild', label: 'Rebuild', sub: 'refill the reserve' },
         { id: 'wait', label: 'Wait', sub: 'no urgency, no prediction' },
         { id: 'deploy', label: 'Deploy', sub: 'the eligibility gate' },
         { id: 'recover', label: 'Participate', sub: 'resilience back to convexity' },
@@ -2575,133 +2738,135 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'deploy',
     hoverTargets: [
-      { id: 'harvest', kind: 'node', label: 'Harvest strength', name: 'Harvest strength', why: 'After Torque appreciates, trim a controlled portion. Concentration is what gets trimmed — the thesis and the core position stay.', claim: 'Trim concentration, not conviction.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'rebuild', kind: 'node', label: 'Rebuild reserves', name: 'Rebuild reserves', why: 'Proceeds restore liquidity before the next dislocation. Aggregate Ballast holds a fifteen percent minimum floor even in high-conviction regimes — complete depletion creates fragility.', claim: 'Reserves are rebuilt early, not in the storm.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'wait', kind: 'node', label: 'Wait without urgency', name: 'Wait without urgency', why: 'Holding reserves removes the need to predict the exact bottom. The framework does not forecast; it waits for validated weakness.', claim: 'Patience is a funded position.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'deploy', kind: 'node', label: 'Deploy', name: 'Deploy into validated weakness', why: 'The checkpoint: capital moves only into names whose thesis, survivability, and confirmation remain intact. A drawdown alone is not an invitation.', claim: 'Weakness must be validated before it is bought.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'recover', kind: 'node', label: 'Participate in recovery', name: 'Participate in recovery', why: 'Rotation converts resilience back into convexity — the reserve becomes upside participation, and the next harvest begins.', claim: 'The cycle pays in both directions.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'harvest', kind: 'node', label: 'Harvest strength', name: 'Harvest strength', why: 'After Torque runs, trim any position that has grown past its concentration limit or past the size its score justifies, and move the proceeds into Ballast. The thesis and the core position stay.', claim: 'Trim concentration, not conviction.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'rebuild', kind: 'node', label: 'Rebuild reserves', name: 'Rebuild reserves', why: 'Proceeds refill the reserve before the next dislocation. Aggregate Ballast stays at or above 15 percent at all times; deployment spends only what sits above the floor, and the post-run trim rebuilds the reserve toward its working range.', claim: 'Reserves are rebuilt before the storm.', concept: 'Ballast', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'wait', kind: 'node', label: 'Wait without urgency', name: 'Wait without urgency', why: 'With the reserve already funded, you never have to call the bottom. The framework waits for weakness it can validate.', claim: 'Patience is a funded position.', concept: 'Dry powder', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'deploy', kind: 'node', label: 'Deploy', name: 'Deploy into validated weakness', why: 'The checkpoint. Ballast deploys into Torque during drawdowns that momentum and the thesis still support, subject to the −20 percent freeze: a position 20 percent or more below cost gets new capital only after a confirming signal. Deployment spends only what sits above the 15 percent floor.', claim: 'Weakness must be validated before it is bought.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'recover', kind: 'node', label: 'Participate in recovery', name: 'Participate in recovery', why: 'The reserve that bought the drawdown now rides the recovery, and the next run sets up the next harvest.', claim: 'The cycle pays in both directions.', concept: 'Rotation', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['harvest', 'rebuild', 'wait', 'deploy', 'recover'],
-    implementationNotes: 'governanceLoop reuse (dl-tripwire-loop pattern) with the deploy station as the governed checkpoint. Bitcoin deliberately absent from the loop — stated in caution + explainer, mirroring Part 3 doctrine.',
+    implementationNotes: 'governanceLoop reuse (dl-tripwire-loop pattern) with the deploy station as the governed checkpoint. Rotation runs Torque → Ballast on the harvest and Ballast → Torque on the deploy; the 15% floor is never breached, so the rebuild refills toward the 20–35% working range. Bitcoin deliberately absent from the loop, stated in the caution and explainer, mirroring Part 3.',
   },
 
   {
     chartId: 'p5-earnings-window', idx: 'P5-05', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'mechanism',
     claimStack: {
-      primaryClaim: 'The framework compresses exposure before a binary event and re-earns it afterward',
-      primaryClaimNote: 'earnings are idiosyncratic risk, not a thesis referendum',
-      visualProof: 'A position path holding ten percent, compressing to the three percent cap through the T-minus-five window, holding flat through the event and assessment days, then splitting into three governed branches — rebuild, stay reduced, or exit',
+      primaryClaim: 'The framework cuts exposure before a binary event, and the position earns its size back afterward',
+      primaryClaimNote: 'earnings are idiosyncratic risk, not a verdict on the thesis',
+      visualProof: 'A 10 percent position held through the blackout, trimmed to the 3 percent cap in one step at T-5, held there through the report and the assessment days, then splitting into three branches: rebuild, stay reduced, or exit',
       interactionRole: 'Hover the path or a branch to read the rule that governs that segment',
-      readerAction: 'Follow the compression into T+0, then compare the three exits from the assessment window',
-      caution: 'Conceptual position path; the T-5 trim to 3% is live engine behavior — the T-21 initiation blackout is doctrine, executed by the practitioner',
+      readerAction: 'Follow the trim at T-5 into the report, then compare the three paths out of the assessment window',
+      caution: 'The dashboard flags a position above the 3% cap in the days before its report. It counts calendar days, not trading days, so the flag can arrive a trading day or two after T-5; start the trim from the earnings calendar instead of waiting for the flag. It trims nothing: the trim is yours, and so is the T-21 to T-6 initiation blackout (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Conviction Does Not Eliminate Binary Risk', setupLine: 'A 10% position walks the earnings protocol: compress · observe · assess · re-earn',
+    title: 'Conviction Does Not Eliminate Binary Risk', setupLine: 'A 10% position walks the earnings protocol: trim · observe · assess · re-earn',
     claimLabel: 'PART 5 · EARNINGS WINDOW',
-    frameworkClaim: 'Earnings can move a position 10–30% without changing the long-term thesis. The framework compresses exposure before the event, preserves optionality during uncertainty, and rebuilds only after evidence arrives.',
+    frameworkClaim: 'Earnings can move a position 10–30% without changing the long-term thesis. The framework cuts exposure before the report and lets the position earn its size back after the evidence arrives.',
     readerTakeaway: 'Trim the event risk. Re-underwrite the thesis. Then earn the size again.',
-    chartType: 'Event timeline: allocation compressing to the 3% cap ahead of T+0, then branching into rebuild, hold-reduced, or exit after the assessment window.',
-    visualDataMode: 'conceptual', disclosure: 'Conceptual protocol path · The 3% cap, window boundaries, and branch rules are canonical; the 10% starting position is illustrative', footerCta: 'View framework basis',
+    chartType: 'Event timeline: allocation trimmed to the 3% cap in one step at T-5 and held through T+0, then branching into rebuild, hold-reduced, or exit after the assessment window.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual protocol path · The 3% cap, the window boundaries and the branch rules are Part 5 doctrine; the 10% starting position is illustrative', footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 5', label: 'Earnings proximity protocol and post-earnings decision tree', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
-      { provider: 'ACF · Governance Protocol v1', label: 'Earnings risk windows (§3)', role: 'verifies-concept' },
+      { provider: 'ACF · Part 5', label: 'Rule stated in Part 5 · Earnings proximity: cap the binary event', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management#management' },
+      { provider: 'ACF dashboard', label: 'Earnings flag on a position above the 3 percent cap as its report nears, counted in calendar days; it trims nothing (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#governance-math' },
     ],
-    explainerHeadline: 'The protocol is a timeline, not a judgment call.',
-    explainerBody: 'From T-21 to T-6, initiation is blacked out for names priced for perfection. From T-5, any position entering earnings is compressed to the three percent cap — non-negotiable, position-specific. T+0 is observed, not traded. Days one through five are the assessment window. From T+6 the position re-earns its size: rebuild deliberately if the thesis is confirmed, stay reduced while it is uncertain, exit if the evidence broke — price weakness is not the reason; broken evidence is. Bitcoin, broad index ETFs, and small non-thesis-critical Ballast are exempt.',
+    explainerHeadline: 'The calendar sets the trim; the evidence sets the rebuild.',
+    explainerBody: 'From T-21 to T-6, no new position opens in a name priced for perfection. At T-5, a position above 3 percent is trimmed to the cap in one step, and the cap holds through the report. T+0 is for watching. T+1 to T+5 is the assessment. From T+6 the position earns its size back: rebuild if the thesis is confirmed, stay at the cap while it is uncertain, exit if the evidence broke. Bitcoin, broad index ETFs, and Ballast at or below 5 percent whose earnings are not thesis-critical are exempt, although the dashboard flags any position above the cap that has a report date on file, exempt or not, and trims none of them (as of September 2026).',
     explainerConcept: 'Event risk',
     concepts: [{ label: 'Earnings protocol', link: '/part-5-portfolio-construction-position-management' }, { label: 'Tripwire', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'single',
-    ariaSummary: 'A timeline from twenty-one trading days before earnings to fifteen days after. The position holds ten percent through the initiation-blackout window, compresses to the three percent cap across the five days before the event, and holds the cap through the announcement and the five-day assessment window. From day six it splits into three branches: thesis confirmed rebuilds toward ten percent over weeks; thesis uncertain stays at three percent; thesis damaged exits to zero. A dashed rule marks the three percent cap.',
+    ariaSummary: 'A timeline from twenty-one trading days before earnings to fifteen days after. The position holds ten percent through the initiation-blackout window, is trimmed to the three percent cap in one step at T-5, and holds the cap through the announcement and the five-day assessment window. From day six it splits into three branches: thesis confirmed rebuilds toward ten percent, adding no more than a quarter of the target a week and reaching eight percent by day fifteen; thesis uncertain stays at three percent; thesis damaged exits to zero. A dashed rule marks the three percent cap.',
     domain: { xMin: -21, xMax: 15, yMin: 0, yMax: 12 }, yUnit: '%',
     xTicks: [{ v: -21, label: 'T−21' }, { v: -5, label: 'T−5' }, { v: 0, label: 'T+0' }, { v: 5, label: 'T+5' }, { v: 15, label: 'T+15' }],
     yTicks: [{ v: 0, label: '0%' }, { v: 3, label: '3%' }, { v: 10, label: '10%' }],
     bands: [
       { id: 'blackout', kind: 'regime', render: 'wash', x0: -21, x1: -6, label: 'initiation blackout · priced for perfection', labelAnchor: 'start' },
-      { id: 'compress', kind: 'shock', render: 'pressureField', x0: -5, x1: 0, seed: 47, intensity: 0.55, label: 'compress' },
+      { id: 'compress', kind: 'shock', render: 'pressureField', x0: -5, x1: 0, seed: 47, intensity: 0.55, label: 'cap holds' },
       { id: 'assess', kind: 'regime', render: 'wash', x0: 1, x1: 5, label: 'assess', labelAnchor: 'start' },
     ],
     guides: [{ id: 'cap', y: 3, kind: 'threshold', dash: true, label: '3% earnings cap' }],
     markers: [{ id: 'event', type: 'enso', x: 0, y: 3, r: 11, label: 'results land', labelAnchor: 'middle', labelDy: -16 }],
     series: [
       { key: 'held', tier: 'primary', label: 'Position', pts: p5Earnings.held },
-      { key: 'rebuild', tier: 'secondary', label: 'Confirmed · rebuild', pts: p5Earnings.rebuild, labelDy: -4 },
+      { key: 'rebuild', tier: 'secondary', label: 'Confirmed · rebuild toward 10%', pts: p5Earnings.rebuild, labelDy: -4 },
       { key: 'hold', tier: 'reference', label: 'Uncertain · stay reduced', pts: p5Earnings.hold, labelDy: 10 },
       { key: 'exit', tier: 'stress', label: 'Damaged · exit', pts: p5Earnings.exit, labelDy: 4 },
     ],
     primaryKey: 'held',
     hoverTargets: [
-      { id: 'held', kind: 'series', seriesKey: 'held', label: 'The position', name: 'The governed position', why: 'Ten percent through the blackout window, compressed to the three percent cap across T-5 to T-1, held flat through the event and the assessment days. Proceeds park in the liquidity sleeve.', claim: 'Compression is mechanical, not emotional.', concept: 'Event risk', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'rebuild', kind: 'series', seriesKey: 'rebuild', label: 'Rebuild', name: 'Thesis confirmed · rebuild', why: 'Results support the thesis, so the position re-earns its size deliberately — restored toward target over two to four weeks, never in one day.', claim: 'Rebuild deliberately.', concept: 'Earnings protocol', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'hold', kind: 'series', seriesKey: 'hold', label: 'Stay reduced', name: 'Thesis uncertain · stay reduced', why: 'Mixed results keep exposure at the cap until clarity emerges. Reduced is a position, not a failure.', claim: 'Uncertainty holds the cap.', concept: 'Earnings protocol', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'exit', kind: 'series', seriesKey: 'exit', label: 'Exit', name: 'Thesis damaged · exit', why: 'Results reveal fundamental problems: complete exit irrespective of loss size. Price weakness is not the reason; broken evidence is. No averaging down.', claim: 'Broken evidence ends the position.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'event', kind: 'marker', label: 'T+0', name: 'T+0 · observe', why: 'No action on the announcement itself — the market processes the information first. Reaction is not evidence.', claim: 'Observe, then assess.', concept: 'Event risk', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'held', kind: 'series', seriesKey: 'held', label: 'The position', name: 'The governed position', why: 'Ten percent through the blackout window, trimmed to the 3 percent cap in one step at T-5, and held there through the report and the assessment days. Proceeds park in cash or Ballast inside the same account until the rebuild.', claim: 'The trim is on the calendar.', concept: 'Event risk', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'rebuild', kind: 'series', seriesKey: 'rebuild', label: 'Rebuild', name: 'Thesis confirmed · rebuild', why: 'Results support the thesis, so from T+6 the position earns its size back. Under Part 5’s weekly add cap of a quarter of the target, a rebuild takes two to four weeks for positions sized between about 5 and 15 percent (three weeks for a 10 percent position: 5.5, 8, then 10 percent).', claim: 'A quarter of the target a week.', concept: 'Earnings protocol', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'hold', kind: 'series', seriesKey: 'hold', label: 'Stay reduced', name: 'Thesis uncertain · stay reduced', why: 'Mixed results keep the position at the cap until the picture clears. Reduced is a position, not a failure.', claim: 'Uncertainty holds the cap.', concept: 'Earnings protocol', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'exit', kind: 'series', seriesKey: 'exit', label: 'Exit', name: 'Thesis damaged · exit', why: 'The results broke a core assertion of the thesis, so the position goes in full, whatever the loss, with no averaging down. A falling price alone would not trigger this; broken evidence does.', claim: 'Broken evidence ends the position.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'event', kind: 'marker', label: 'T+0', name: 'T+0 · observe', why: 'No action on the announcement itself. The market needs time to process the news, and a first-day reaction is not yet evidence.', claim: 'Observe, then assess.', concept: 'Event risk', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['held', 'rebuild', 'hold', 'exit', 'event'],
-    implementationNotes: 'single-layout reuse: a step path with regime/pressure window bands and three post-assessment branch series. The 3% cap guide + T window boundaries are canonical (Part 5 protocol table stays adjacent as the exact-value companion).',
+    implementationNotes: 'single-layout reuse: a step path with regime/pressure window bands and three post-assessment branch series. The trim to the 3% cap is one step at T-5 (x=-5), with an x=-4 anchor so the smoothed hover overlay stays on the cap. The rebuild adds at most 2.5 points per trading week from T+6 (5.5% at T+10, 8% at T+15). The 3% cap guide and the T-window boundaries are Part 5 doctrine; the Part 5 protocol table stays adjacent as the exact-value companion.',
   },
 
   {
     chartId: 'p5-momentum-gate', idx: 'P5-06', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'Full sizing must survive three momentum confirmations — and losing all three is an exit, not an opinion',
-      visualProof: 'A high-conviction position enters a gauntlet of three gates — absolute trend, relative performance, breadth — with the surviving band thinning at each break until only fully confirmed positions reach full sizing',
-      interactionRole: 'Hover a gate to read its question and the capital action when it is the one that breaks',
-      readerAction: 'Trace the band through the three gates and read the action ladder gate by gate',
-      caution: 'Doctrine gauntlet — the action ladder is the Part 5 protocol; the live dashboard gates momentum today via trend and RSI checks plus a cohort tripwire (flag · hedge · trim), with this three-dimension model as its doctrine target',
+      primaryClaim: 'Full size needs three momentum confirmations, and losing all three is an exit even at a high score',
+      visualProof: 'A high-conviction position enters a gauntlet of three gates (absolute trend, relative performance, breadth), with the surviving band thinning at each break until only fully confirmed positions reach full sizing',
+      interactionRole: 'Hover a gate to read its question; hover the entering position to read the count-based action ladder',
+      readerAction: 'Trace the band through the three gates, then count the breaks to read the action',
+      caution: 'Doctrine gauntlet; the action ladder is the Part 5 protocol. The dashboard does not yet measure the three dimensions; it watches stress across your holdings through a confluence tripwire: flag, hedge, then a displayed 25% Torque-trim playbook it does not execute (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'Conviction Requires Market Confirmation', setupLine: 'Absolute trend, relative performance, and breadth gate the sizing a thesis can carry',
+    title: 'Conviction Requires Market Confirmation', setupLine: 'Absolute trend, relative performance, and breadth decide how much size a thesis can carry',
     claimLabel: 'PART 5 · MOMENTUM GATE',
-    frameworkClaim: 'A strong thesis can remain fundamentally correct while becoming a poor current allocation. The framework requires confirmation across price, relative performance, and participation.',
+    frameworkClaim: 'A thesis can be right and still be a poor allocation today. Full size needs the market to confirm it in three places: the position’s own trend, its performance against the alternatives, and the breadth of the names around it.',
     readerTakeaway: 'Re-entry is allowed. Unbounded opportunity cost is not.',
-    chartType: 'Three-gate momentum gauntlet: conviction enters, each broken dimension thins eligible sizing, all-three-broken is the exit tripwire.',
+    chartType: 'Three-gate momentum gauntlet: conviction enters, each broken dimension thins eligible sizing, and all three broken is the exit tripwire. The action depends on the count of breaks, not on which gate breaks.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 5', label: 'Momentum dimensions and the alignment action ladder', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF dashboard', label: 'Momentum Death tripwire reports unavailable; the cohort confluence tripwire escalates from a flag to hedging only to a displayed 25 percent Torque-trim playbook it does not execute (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#governance-math' },
     ],
-    explainerHeadline: 'The tripwire is the last row of a ladder, not a mood.',
-    explainerBody: 'All three dimensions positive: full sizing per the CIS allocation bands. One breaks: reduce twenty-five to thirty percent and monitor closely. Two break: watch status — minimal new exposure. All three negative: exit, even if CIS remains high — capital preservation overrides conviction, and re-entry is explicitly permitted once momentum repairs. The exit acknowledges the market is not currently validating the thesis; holding anyway is opportunity cost the framework refuses to accept.',
+    explainerHeadline: 'The exit is the last rung of a ladder.',
+    explainerBody: 'None broken: full sizing per the CIS band. One broken: reduce sizing 25 to 30 percent and monitor closely. Two broken: watch status, minimal new exposure. All three broken: exit, even if the CIS score is still high. Gate order is illustrative; the action depends on how many dimensions break. The exit records that the market is not validating the thesis today, and re-entry is permitted once momentum repairs. The dashboard does not yet measure these three dimensions (as of September 2026), so for now the count is yours to keep.',
     explainerConcept: 'Momentum gate',
     concepts: [{ label: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' }, { label: 'Tripwire', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'gate',
-    ariaSummary: 'A validation gauntlet. A high-conviction position enters from the left and must pass three gates: absolute momentum, its own trend measured from the fifty-two-week high; relative momentum, performance against the alternatives competing for capital; and breadth, participation across the surrounding ecosystem. The surviving band thins at each gate. Only a position confirmed on all three reaches full eligible sizing; losing all three is the exit tripwire.',
+    ariaSummary: 'A validation gauntlet. A high-conviction position enters from the left and passes three gates: absolute momentum, its own trend measured from the fifty-two-week high; relative momentum, its performance against the sector and the market; and breadth, participation across related names. The surviving band thins at each gate, and only a position confirmed on all three reaches full sizing. Gate order is illustrative; the action depends on how many dimensions break: one broken reduces sizing twenty-five to thirty percent, two put the position on watch with minimal new exposure, and all three are an exit even at a high score.',
     gate: {
       nodes: [
         { id: 'conviction', kind: 'entry', label: 'High-CIS position', sub: 'conviction, unconfirmed' },
         { id: 'absolute', kind: 'gate', label: 'Absolute', sub: 'holding its own trend?' },
         { id: 'relative', kind: 'gate', label: 'Relative', sub: 'beating the alternatives?' },
-        { id: 'breadth', kind: 'gate', label: 'Breadth', sub: 'ecosystem participating?' },
+        { id: 'breadth', kind: 'gate', label: 'Breadth', sub: 'related names joining in?' },
         { id: 'confirmed', kind: 'exit', label: 'Full sizing', sub: 'all three confirmed' },
       ],
     },
     primaryKey: 'confirmed',
     hoverTargets: [
-      { id: 'conviction', kind: 'node', label: 'The position', name: 'A high-CIS position', why: 'Quality is already scored — this gauntlet does not re-litigate the thesis. It asks whether the market is currently validating it.', claim: 'Conviction without confirmation is speculation.', concept: 'Momentum gate', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'absolute', kind: 'node', label: 'Absolute', name: 'Gate 1 · absolute momentum', why: 'Is the position holding its own trend? Within ten percent of the fifty-two-week high is healthy; twenty-five percent below is correction; forty percent is severe distress. One broken dimension: reduce sizing twenty-five to thirty percent.', claim: 'One break reduces; it does not exit.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'relative', kind: 'node', label: 'Relative', name: 'Gate 2 · relative momentum', why: 'Is it outperforming the sector and market alternatives competing for the same capital? Two broken dimensions: watch status — minimal new exposure.', claim: 'Two breaks freeze new capital.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'breadth', kind: 'node', label: 'Breadth', name: 'Gate 3 · breadth', why: 'Is the move supported by the surrounding ecosystem, or carried by one isolated name? Narrow leadership warns of exhaustion. All three broken: the exit tripwire fires even at high CIS.', claim: 'All three broken is an exit, not a debate.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'confirmed', kind: 'node', label: 'Full sizing', name: 'Full eligible sizing', why: 'All three dimensions confirmed: the position carries its full CIS-band allocation. Confirmation is re-checked weekly — this is a state, not a promotion.', claim: 'Full size is a confirmed state.', concept: 'Momentum gate', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'conviction', kind: 'node', label: 'The position', name: 'A high-CIS position · the action ladder', why: 'The score has already judged quality; the gates ask whether the market is confirming it today. The action counts broken dimensions, whichever they are. None broken: full sizing per the CIS band. One broken: reduce sizing 25 to 30 percent and monitor closely. Two broken: watch status, minimal new exposure. All three broken: exit, even if the CIS score is still high.', claim: 'Count the breaks.', concept: 'Momentum gate', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'absolute', kind: 'node', label: 'Absolute', name: 'Gate 1 · absolute momentum', why: 'Is the position holding its own trend? Within 10 percent of its 52-week high is healthy, 25 percent or more below is a correction, and 40 percent or more below is severe distress.', claim: 'Measured from the 52-week high.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'relative', kind: 'node', label: 'Relative', name: 'Gate 2 · relative momentum', why: 'Is it keeping up with its sector and with the market? This gate separates a problem with the company from a problem with the tape.', claim: 'Company or tape?', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'breadth', kind: 'node', label: 'Breadth', name: 'Gate 3 · breadth', why: 'Are related names making new highs too, or is one name carrying the move alone? Broad participation confirms fundamental support; narrowing leadership warns of exhaustion.', claim: 'Narrow leadership is a warning.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'confirmed', kind: 'node', label: 'Full sizing', name: 'Full eligible sizing', why: 'All three dimensions confirmed: the position carries its full CIS-band allocation. You check the three again at every weekly review, so full size is a state the position keeps earning.', claim: 'Full size is a confirmed state.', concept: 'Momentum gate', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['conviction', 'absolute', 'relative', 'breadth', 'confirmed'],
-    implementationNotes: 'gate-layout reuse with three gates (renderer generalized from the fixed four-gate death map; the p2 six-node chart is byte-preserved via the legacy branch). The four-state action ladder rides the gate hover copy; the Part 5 alignment table remains adjacent as the exact-value companion.',
+    implementationNotes: 'gate-layout reuse with three gates (renderer generalized from the fixed four-gate death map; the p2 six-node chart is byte-preserved via the legacy branch). The action ladder is count-based, so it rides the entry node’s hover, never a gate; each gate hover carries only its question and thresholds. The renderer draws threads ending at gates, so the explainer and ariaSummary carry the line "Gate order is illustrative; the action depends on how many dimensions break." The Part 5 action-ladder table stays adjacent as the exact-value companion.',
   },
 
   {
     chartId: 'p5-force-channels', idx: 'P5-07', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'High conviction in one regime force still diversifies — across the force’s distinct economic channels',
-      visualProof: 'One structural force fanning into seven channels — compute, memory and networking, power generation, grid equipment, cooling, datacenter construction, physical security — each a different bottleneck with different customers, revenue models, and failure modes',
+      primaryClaim: 'High conviction in one regime force can still be diversified, across the force’s distinct economic channels',
+      visualProof: 'One structural force fanning into seven channels (compute, memory and networking, power generation, grid equipment, cooling, datacenter owners and builders, physical security), each a different bottleneck with different customers, revenue models and failure modes',
       interactionRole: 'Hover a channel to read the bottleneck it owns and how its failure mode differs',
       readerAction: 'Compare any two channels and name what fails in one but not the other',
-      caution: 'A methodology illustration using AI infrastructure as the example force — not a standing recommendation',
+      caution: 'The seven channels are examples of how one force can be expressed; the list is illustrative, not exhaustive',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'One Regime Force. Multiple Economic Expressions.', setupLine: 'Diversify the pathway; preserve the thesis',
+    title: 'One Regime Force. Multiple Economic Expressions.', setupLine: 'One thesis, seven businesses that fail in different ways',
     claimLabel: 'PART 5 · REGIME CHANNELS',
-    frameworkClaim: 'Diversification does not require abandoning the thesis. It requires owning different bottlenecks, customers, revenue models, and failure modes within the same structural force.',
+    frameworkClaim: 'You can diversify without abandoning the thesis: own different bottlenecks, customers, revenue models and failure modes inside the same regime force.',
     readerTakeaway: 'Diversify the pathway. Preserve the thesis.',
     chartType: 'One-force fan: a single regime force expressed through seven economically distinct channels.',
     visualDataMode: 'conceptual', disclosure: 'Conceptual methodology illustration · AI infrastructure is the example force, not a recommendation', footerCta: 'View framework basis',
@@ -2710,11 +2875,11 @@ export const FRAMEWORK_CHART_SPECS = [
       { provider: 'ACF · Part 2', label: 'Regime-force identification methodology', role: 'verifies-concept', url: '/part-2-lineage-macro-thesis' },
     ],
     explainerHeadline: 'Seven tickers in one industry is one trade wearing seven names.',
-    explainerBody: 'A portfolio of seven semiconductor names looks diversified by ticker and remains concentrated in one liquidity factor. The same thesis expressed through compute, power, grid equipment, cooling, construction, and security owns genuinely different bottlenecks — different customers, different revenue models, different ways to fail. The sector caps in the adjacent table still bind: thirty percent per sector, fifty percent for the top two.',
+    explainerBody: 'Seven semiconductor names look diversified by ticker and still ride one industry’s cycle. The same thesis expressed through compute, memory and networking, power, grid equipment, cooling, datacenter owners and builders, and security owns different bottlenecks, with different customers, revenue models and ways to fail. Part 5’s sector caps still bind: 30 percent for any one sector, 50 percent for the top two combined.',
     explainerConcept: 'Regime channels',
     concepts: [{ label: 'Macro thesis', link: '/part-2-lineage-macro-thesis' }, { label: 'Sector limits', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'flow', flowHeight: 560,
-    ariaSummary: 'A fan diagram. One node on the left, an illustrative regime force labelled AI infrastructure, connects to seven channel nodes on the right: compute, memory and networking, power generation, grid equipment, cooling, datacenter construction, and physical security and defense. Each channel is a distinct bottleneck within the same structural force.',
+    ariaSummary: 'A fan diagram. One node on the left, an illustrative regime force labeled AI infrastructure, connects to seven channel nodes on the right: compute, memory and networking, power generation, grid equipment, cooling, datacenter owners and builders, and physical security and defense. Each channel is a distinct bottleneck within the same regime force.',
     flow: {
       stages: [
         { id: 'f', label: 'Regime force', nodes: [{ id: 'force', label: 'AI infrastructure', sub: 'illustrative regime force' }] },
@@ -2724,54 +2889,54 @@ export const FRAMEWORK_CHART_SPECS = [
           { id: 'power', label: 'Power generation', sub: 'electrons as constraint' },
           { id: 'grid', label: 'Grid equipment', sub: 'transmission & transformers' },
           { id: 'cooling', label: 'Cooling', sub: 'thermal density' },
-          { id: 'build', label: 'Datacenter construction', sub: 'shells & services' },
+          { id: 'build', label: 'Datacenters', sub: 'REITs & builders' },
           { id: 'security', label: 'Security & defense', sub: 'hardening the buildout' },
         ] },
       ],
     },
     primaryKey: 'force',
     hoverTargets: [
-      { id: 'force', kind: 'node', label: 'The force', name: 'The structural force', why: 'One identified regime force — here, the AI infrastructure buildout, as an illustration of method. The thesis is held once; the expression is distributed.', claim: 'One thesis, many pathways.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
-      { id: 'compute', kind: 'node', label: 'Compute', name: 'Compute', why: 'Accelerators and the fabs behind them — the most crowded expression, priced first, and exposed to design-cycle and competition risk the other channels do not share.', claim: 'The obvious channel is the crowded one.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'memory', kind: 'node', label: 'Memory & networking', name: 'Memory & networking', why: 'Bandwidth between processors is its own bottleneck with its own pricing cycle — correlated to compute demand, not to compute margins.', claim: 'Adjacent is not identical.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'power', kind: 'node', label: 'Power generation', name: 'Power generation', why: 'Datacenters are ultimately constrained by electrons. Generation assets sell to utilities and hyperscalers on multi-year contracts — a different customer and duration than chip buyers.', claim: 'The constraint migrates to power.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'grid', kind: 'node', label: 'Grid equipment', name: 'Grid equipment', why: 'Transformers and transmission gear carry multi-year backlogs and regulated demand — slower, stickier economics than anything upstream.', claim: 'Backlogs fail differently than benchmarks.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'cooling', kind: 'node', label: 'Cooling', name: 'Cooling', why: 'Thermal density rises with every accelerator generation. Cooling wins on engineering spec, not on model quality — a supplier economy, not a platform economy.', claim: 'Heat is a business model.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'build', kind: 'node', label: 'Construction', name: 'Datacenter construction', why: 'Shells, services, and the firms that pour them — project-based revenue tied to capex commitments already announced, with construction-cycle rather than silicon-cycle risk.', claim: 'Someone has to build the buildings.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'security', kind: 'node', label: 'Security & defense', name: 'Physical security & defense', why: 'Critical infrastructure gets hardened — physical security and defense applications monetize the same buildout through government-adjacent budgets with their own cycle.', claim: 'The same force, a different payer.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'force', kind: 'node', label: 'The force', name: 'The regime force', why: 'One regime force, here the AI infrastructure buildout, used to illustrate the method. You hold the thesis once and spread its expression across businesses that fail in different ways.', claim: 'One thesis, many pathways.', concept: 'Macro thesis', link: '/part-2-lineage-macro-thesis' },
+      { id: 'compute', kind: 'node', label: 'Compute', name: 'Compute', why: 'Accelerators and the fabs behind them: usually the most crowded expression and the first to be priced, with design-cycle and competition risk the other channels do not share.', claim: 'The obvious channel is the crowded one.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'memory', kind: 'node', label: 'Memory & networking', name: 'Memory & networking', why: 'Moving data between processors is its own bottleneck with its own pricing cycle. Its demand tracks compute; its margins follow a cycle of their own.', claim: 'Adjacent is not identical.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'power', kind: 'node', label: 'Power generation', name: 'Power generation', why: 'Datacenters run on electricity, and power is increasingly the binding constraint. Generators sell to utilities and hyperscalers, often on multi-year contracts: a different customer and a longer duration than chip buyers.', claim: 'The constraint migrates to power.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'grid', kind: 'node', label: 'Grid equipment', name: 'Grid equipment', why: 'Transformers and transmission gear sell into utility budgets with long lead times and multi-year backlogs: slower, stickier economics than anything upstream.', claim: 'Backlogs fail differently than benchmarks.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'cooling', kind: 'node', label: 'Cooling', name: 'Cooling', why: 'Each accelerator generation packs more heat into the same rack, and cooling suppliers win contracts on engineering specification. It is a supplier business with its own customers and its own ways to fail.', claim: 'More heat per rack, more demand for cooling.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'build', kind: 'node', label: 'Datacenters', name: 'Datacenter owners & builders', why: 'The buildings and the firms that own them: datacenter REITs lease capacity to hyperscalers on multi-year leases, and builders pour the shells. Real-estate and construction-cycle risk rather than silicon-cycle risk.', claim: 'Someone has to own and build the buildings.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'security', kind: 'node', label: 'Security & defense', name: 'Physical security & defense', why: 'Operators pay to harden what they build, and defense applications of the same technology answer to government budgets with their own cycle.', claim: 'The same force, two different payers.', concept: 'Regime channels', link: '/part-5-portfolio-construction-position-management' },
     ],
-    mobileTapTargets: ['force', 'compute', 'power', 'grid', 'cooling', 'build', 'security'],
-    implementationNotes: 'flow-layout reuse (1→7 fan) with a spec-driven flowHeight (560) so seven channel nodes breathe. Explicitly framed as methodology illustration; sector caps stay in the adjacent table.',
+    mobileTapTargets: ['force', 'compute', 'memory', 'power', 'grid', 'cooling', 'build', 'security'],
+    implementationNotes: 'flow-layout reuse (1→7 fan) with a spec-driven flowHeight (560) so seven channel nodes breathe. The build node covers datacenter owners (REITs) and builders, matching the Part 5 prose and the case study’s datacenter REIT. Framed as a methodology illustration; the sector caps stay in the adjacent Part 5 table.',
   },
 
   {
     chartId: 'p5-wrapper-compounding', idx: 'P5-08', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'comparison',
     claimStack: {
-      primaryClaim: 'The same asset and the same trades end roughly 2× apart after 30 years of wrapper friction',
-      visualProof: 'Two compounding curves from the same $100,000 origin — 10% tax-free against roughly 7.5% after annual realization at a 25% blended rate — separating slowly at first, then structurally: about $875,000 versus about $1,745,000 at year 30',
+      primaryClaim: 'The same asset earning the same return ends about 2× apart after 30 years, depending only on the wrapper',
+      visualProof: 'Two compounding curves from the same $100,000: 10% a year tax-free against 7.5% after gains are realized every year at a 25% blended rate. They separate slowly, then widely: about $875,000 against about $1,745,000 at year 30',
       interactionRole: 'Hover a curve or a checkpoint to read the values at 10, 20, and 30 years',
-      readerAction: 'Watch how small the gap is at year 10 and how structural it is by year 30',
-      caution: 'Deterministic arithmetic from the stated assumptions — a constant-return illustration of tax drag, not a market projection',
+      readerAction: 'Compare the gap at year 10 with the gap at year 30',
+      caution: 'A constant-return illustration of tax drag at federal, illustrative rates: the taxable account realizes every gain every year, and Roth withdrawals are assumed qualified, which makes them tax-free under current law',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Tax Drag Compounds Too', setupLine: 'Identical asset, identical return, different wrapper: $100,000 over 30 years',
     claimLabel: 'PART 5 · WRAPPER FRICTION',
-    frameworkClaim: 'The asset and return can be identical while the wrapper produces a radically different outcome. Small annual friction becomes a structural divergence over decades.',
-    readerTakeaway: 'Wrapper placement is not administrative housekeeping. It is portfolio construction.',
-    chartType: 'Two verified compounding curves ($100k at 10% tax-free vs ~7.5% after-tax) with 10/20/30-year checkpoints and the terminal wedge labelled.',
-    visualDataMode: 'representative',
-    disclosure: 'Representative arithmetic · Constant-return illustration from stated assumptions; not a market outcome', footerCta: 'View methodology',
+    frameworkClaim: 'Hold the same asset at the same return in two wrappers and the outcomes can end far apart. A 2.5-point annual drag, compounded for thirty years, roughly halves the result.',
+    readerTakeaway: 'Wrapper placement is portfolio construction.',
+    chartType: 'Two computed compounding curves ($100k at 10% tax-free vs 7.5% after tax) with 10/20/30-year checkpoints and the terminal wedge labeled.',
+    visualDataMode: 'simulation',
+    disclosure: DISCLOSURE.simulation, footerCta: 'View methodology',
     sources: [
-      { provider: 'Author calculation', label: '$100,000 × 1.10^t (tax-free) vs × 1.075^t (10% pre-tax, 25% blended annual realization); 10y $259k vs $206k · 20y $673k vs $425k · 30y ≈$1,745k vs ≈$875k', role: 'methodology' },
-      { provider: 'ACF · Part 4', label: 'The Tax Wedge — the canonical wrapper-retention exhibit this example applies over time', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' },
+      { provider: 'Author calculation', label: '$100,000 × 1.10^t (tax-free) vs × 1.075^t (10% pre-tax return, all gains realized every year at a 25% blended rate); 10y $259k vs $206k · 20y $673k vs $425k · 30y ≈$1,745k vs ≈$875k', role: 'methodology' },
+      { provider: 'ACF · Part 4', label: 'The Tax Wedge: the case of a gain realized once, which this example extends to gains realized every year', role: 'verifies-concept', url: '/part-4-tax-architecture-roc-strategy' },
     ],
     explainerHeadline: 'A 2.5-point annual haircut becomes an $870,000 wedge.',
-    explainerBody: 'Both paths hold the identical asset earning ten percent before tax. The taxable path realizes gains annually at a twenty-five percent blended rate, compounding at roughly seven and a half percent; the tax-advantaged path compounds the full ten. At year ten the gap is about $53,000. At year twenty it is about $248,000. At year thirty the taxable path reaches about $875,000 while the tax-free path reaches about $1,745,000 — a difference of roughly $870,000 created by wrapper placement alone. Arithmetic, not opinion.',
+    explainerBody: 'Both paths hold the same asset earning 10 percent a year before tax. The taxable path realizes its gains every year at a 25 percent blended rate, so it compounds at 7.5 percent; the Roth path compounds the full 10. The gap is about $53,000 at year 10 and about $248,000 at year 20. At year 30 the taxable path reaches about $875,000 and the Roth about $1,745,000, a difference of roughly $870,000 from wrapper placement alone. Part 4 works the other case, a gain realized once at sale.',
     explainerConcept: 'Wrapper edge',
     concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' }, { label: 'Survivable compounding', link: '/part-1-foundation' }],
     layout: 'single',
-    ariaSummary: 'Two curves start together at one hundred thousand dollars in year zero. The tax-free curve compounds at ten percent and reaches about one point seven four five million dollars by year thirty. The after-tax curve compounds at roughly seven and a half percent and reaches about eight hundred seventy-five thousand dollars. Checkpoints mark both values at years ten and twenty; the shaded gap between the curves is the wrapper drag, roughly eight hundred seventy thousand dollars at year thirty.',
+    ariaSummary: 'Two curves start together at one hundred thousand dollars in year zero. The tax-free curve compounds at ten percent and reaches about one point seven four five million dollars by year thirty. The after-tax curve compounds at seven and a half percent and reaches about eight hundred seventy-five thousand dollars. Checkpoints mark both values at years ten and twenty; the shaded gap between the curves is the wrapper drag, roughly eight hundred seventy thousand dollars at year thirty.',
     domain: { xMin: 0, xMax: 30, yMin: 0, yMax: 1850000 }, yUnit: '$',
     xTicks: [{ v: 0, label: 'year 0' }, { v: 10, label: '10y' }, { v: 20, label: '20y' }, { v: 30, label: '30y' }],
     yTicks: [{ v: 0, label: '$0' }, { v: 500000, label: '$0.5M' }, { v: 1000000, label: '$1.0M' }, { v: 1500000, label: '$1.5M' }],
@@ -2787,92 +2952,93 @@ export const FRAMEWORK_CHART_SPECS = [
     guides: [], levels: [], notes: [],
     primaryKey: 'roth',
     hoverTargets: [
-      { id: 'roth', kind: 'series', seriesKey: 'roth', label: 'Tax-free', name: 'Tax-advantaged · full 10% compounds', why: 'Nothing is surrendered along the way, so every year compounds the full return. Terminal value ≈ $1,745,000 — about two times the taxable outcome from the identical asset.', claim: 'The wrapper keeps the whole engine running.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'taxable', kind: 'series', seriesKey: 'taxable', label: 'Taxable', name: 'Taxable · ~7.5% after annual realization', why: 'Realizing gains each year at a twenty-five percent blended rate trims the compounding rate by two and a half points — small annually, structural over thirty years. Terminal value ≈ $875,000.', claim: 'Annual friction is the quiet cost.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'y10', kind: 'marker', label: '10-year checkpoint', name: 'Year 10 · $259k vs $206k', why: 'A decade in, the gap is real but modest — about $53,000. This is the window where wrapper placement still looks like housekeeping.', claim: 'Early, the drag hides.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'y20', kind: 'marker', label: '20-year checkpoint', name: 'Year 20 · $673k vs $425k', why: 'Two decades in, the gap is about $248,000 and widening every year — the divergence is now structural, not incremental.', claim: 'By year 20 the wedge is structural.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'roth', kind: 'series', seriesKey: 'roth', label: 'Tax-free', name: 'Tax-free (Roth) · full 10% compounds', why: 'Nothing is paid along the way, so every year compounds the full return. With qualified withdrawals, the ≈$1,745,000 at year 30 is all yours: about twice the taxable result from the same asset.', claim: 'Every year compounds in full.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'taxable', kind: 'series', seriesKey: 'taxable', label: 'Taxable', name: 'Taxable · 7.5% after tax on yearly gains', why: 'Paying a 25 percent blended rate on each year’s gains cuts the compounding rate by 2.5 points, from 10 to 7.5 percent. Small in any one year, it costs about $870,000 by year 30, when the taxable account ends near $875,000.', claim: 'The drag compounds against you.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'y10', kind: 'marker', label: '10-year checkpoint', name: 'Year 10 · $259k vs $206k', why: 'A decade in, the gap is real but modest: about $53,000. At this point wrapper placement still looks like housekeeping.', claim: 'Early, the drag hides.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'y20', kind: 'marker', label: '20-year checkpoint', name: 'Year 20 · $673k vs $425k', why: 'Two decades in, the gap is about $248,000 and widening every year; the taxable account now holds about 63 percent of the Roth result.', claim: 'By year 20 the gap is a quarter of a million dollars.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
     ],
     mobileTapTargets: ['roth', 'taxable', 'y10', 'y20'],
-    implementationNotes: 'single-layout reuse; deterministic generator (no noise). The verified Part 5 arithmetic; honest linear axis from $0; the terminal wedge is the gap area label. Cross-referenced to Part 4’s canonical retention exhibit (p4-tax-wedge) rather than duplicating its argument.',
+    implementationNotes: 'single-layout reuse; deterministic generator (no noise), so the exhibit is a simulation computed from stated inputs (visualDataMode simulation, methodology source states the inputs). Linear axis from $0; the terminal wedge is the gap area label. Cross-referenced to Part 4’s Tax Wedge exhibit (p4-tax-wedge, the gain-realized-once case) rather than duplicating its argument.',
   },
 
   {
     chartId: 'p5-liquidity-throttle', idx: 'P5-09', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'When correlation rises, the framework reduces exposure to the shared failure mode — it does not predict direction',
-      visualProof: 'A four-station governed cycle — normal rules, stress recognized, throttle applied, repair confirmed — with the throttle as the governed checkpoint and a return arc that resumes standard positioning only after two-plus stable weeks',
-      interactionRole: 'Hover a station to read its indicators and the capital response it triggers',
+      primaryClaim: 'When correlation rises, the framework reduces exposure to the shared failure mode and makes no call on direction',
+      visualProof: 'A four-station governed cycle (normal rules, stress recognized, throttle applied, repair confirmed) with the throttle as the governed checkpoint and a return arc that resumes standard positioning only after two or more stable weeks',
+      interactionRole: 'Hover a station to read its indicators and the capital response it calls for',
       readerAction: 'Follow the cycle from the stress signals through the throttle to the confirmation-gated return',
-      caution: 'Doctrine protocol, not market timing — the live dashboard supplies the stress diagnostics (correlation above 0.7 is flagged); the throttle actions are practitioner-executed today',
+      caution: 'Doctrine protocol, not market timing. The dashboard watches the VIX and credit spreads through its macro tripwires and flags average pairwise correlation above 0.7 across all non-cash holdings; the Torque-only reading and the throttle actions are yours (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'When Correlation Rises, Diversification Shrinks', setupLine: 'Positions that looked independent can become one trade during liquidity withdrawal',
+    title: 'When Correlation Rises, Diversification Shrinks', setupLine: 'Positions that looked independent can become one trade when liquidity drains',
     claimLabel: 'PART 5 · REGIME THROTTLE',
-    frameworkClaim: 'During liquidity withdrawal, positions that appeared independent can begin moving as one trade. The framework responds by reducing exposure to the shared failure mode, not by predicting the next market direction.',
-    readerTakeaway: 'This is regime-aware throttling. It is not market timing.',
-    chartType: 'Three-state throttle cycle: normal → stressed → throttle → repair, with a confirmation-gated return to standard rules.',
+    frameworkClaim: 'When liquidity drains, positions that looked independent can start moving as one trade. The framework responds by reducing exposure to what they share, without calling the market’s next move.',
+    readerTakeaway: 'When your positions start moving as one, size them as one.',
+    chartType: 'Four-state throttle cycle: normal → stressed → throttle → repair, with a confirmation-gated return to standard rules.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 5', label: 'Liquidity & correlation regime monitoring protocol', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
+      { provider: 'ACF dashboard', label: 'Macro tripwires on the VIX (watch 20, caution 25, critical 35) and high-yield credit spreads; the Correlation Spike tripwire flags average pairwise correlation above 0.70 across non-cash holdings and reports unavailable until every holding has 60 daily returns (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#governance-math' },
     ],
     explainerHeadline: 'The stress state has thresholds; the return has a waiting period.',
-    explainerBody: 'Stress is recognized by indicators, not by mood: VIX sustained above twenty-five, credit spreads widening, Torque correlations rising above zero point seven. The throttle pauses new Torque adds, enforces posture limits strictly, and reduces gross exposure by ten to twenty percent where required. Standard positioning resumes only after the indicators normalize and stay normal for two or more weeks — the confirmation period is part of the rule, not an option.',
+    explainerBody: 'Three indicators mark the stressed state: the VIX sustained above 25, credit spreads widening, and Torque positions correlating above 0.7. In the throttle you pause new Torque adds, hold posture limits strictly and consider cutting gross exposure by 10 to 20 percent. Standard positioning resumes only after the indicators have been normal for two weeks or more; the waiting period is part of the rule. The dashboard watches the VIX and credit spreads and flags average correlation above 0.7 across all your non-cash holdings, a broader reading than Torque alone; the throttle itself is yours to run (as of September 2026).',
     explainerConcept: 'Regime throttle',
     concepts: [{ label: 'Correlation instability', link: '/part-1-foundation' }, { label: 'Tripwire', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'governanceLoop',
-    ariaSummary: 'A governed cycle of four stations. Normal: correlations contained, liquidity functioning, standard sizing rules. Stressed: VIX sustained above twenty-five, credit spreads widening, Torque correlation above zero point seven. Throttle, the governed checkpoint: pause new adds, enforce limits, reduce gross exposure ten to twenty percent. Repair: indicators normalize. A return arc labelled stable two-plus weeks closes the cycle back to normal rules.',
+    ariaSummary: 'A governed cycle of four stations. Normal: correlations contained, liquidity functioning, standard sizing rules. Stressed: the VIX sustained above twenty-five, credit spreads widening, Torque correlation above zero point seven. Throttle, the governed checkpoint: pause new adds, hold posture limits strictly, and consider cutting gross exposure ten to twenty percent. Repair: indicators normalize. A return arc labeled stable two-plus weeks closes the cycle back to normal rules.',
     governanceLoop: {
       governorId: 'throttle',
       returnLabel: 'stable 2+ weeks → resume standard positioning',
       nodes: [
         { id: 'normal', label: 'Normal', sub: 'standard sizing rules' },
         { id: 'stressed', label: 'Stressed', sub: 'VIX >25 · spreads · corr >0.7' },
-        { id: 'throttle', label: 'Throttle', sub: 'pause adds · cut gross 10–20%' },
+        { id: 'throttle', label: 'Throttle', sub: 'pause adds · consider −10–20%' },
         { id: 'repair', label: 'Repair', sub: 'indicators normalize' },
       ],
     },
     primaryKey: 'throttle',
     hoverTargets: [
-      { id: 'normal', kind: 'node', label: 'Normal', name: 'Normal · standard rules', why: 'Correlations contained, liquidity functioning. Position-level diversification is doing its job, so the standard sizing rules apply unchanged.', claim: 'Normal is a measured state, not a default mood.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'stressed', kind: 'node', label: 'Stressed', name: 'Stressed · the indicators fire', why: 'Volatility sustained above twenty-five on the VIX, credit spreads widening, Torque correlations rising above zero point seven — diversification is quietly failing while every individual thesis still looks intact.', claim: 'Stress is declared by thresholds.', concept: 'Correlation instability', link: '/part-1-foundation' },
-      { id: 'throttle', kind: 'node', label: 'Throttle', name: 'Throttle · the governed response', why: 'Pause new Torque adds, enforce posture limits strictly, reduce gross exposure ten to twenty percent where required. The response targets the shared failure mode, not a market call.', claim: 'Cut the shared exposure, not the thesis.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'repair', kind: 'node', label: 'Repair', name: 'Repair · confirmation-gated', why: 'Indicators normalizing is necessary but not sufficient — they must stay normal for two or more weeks before deployment resumes. Patience is the rule’s last clause.', claim: 'The return waits for confirmation.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'normal', kind: 'node', label: 'Normal', name: 'Normal · standard rules', why: 'Correlations contained, liquidity functioning. Diversification across positions is doing its job, so the standard sizing rules apply unchanged.', claim: 'Normal is a measured state.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'stressed', kind: 'node', label: 'Stressed', name: 'Stressed · the indicators fire', why: 'The VIX sustained above 25, credit spreads widening, Torque positions correlating above 0.7. Diversification is failing while every individual thesis still looks intact.', claim: 'Stress is declared by thresholds.', concept: 'Correlation instability', link: '/part-1-foundation' },
+      { id: 'throttle', kind: 'node', label: 'Throttle', name: 'Throttle · the governed response', why: 'Pause new Torque adds, hold posture limits strictly, and consider cutting gross exposure 10 to 20 percent. The response targets the exposure your positions share and makes no call on market direction.', claim: 'Cut the shared exposure; keep the theses.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'repair', kind: 'node', label: 'Repair', name: 'Repair · confirmation-gated', why: 'Normal readings are not enough on their own. They must stay normal for two weeks or more before standard positioning resumes.', claim: 'The return waits for confirmation.', concept: 'Regime throttle', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['normal', 'stressed', 'throttle', 'repair'],
-    implementationNotes: 'governanceLoop reuse with the throttle station as checkpoint and the 2+-week confirmation carried on the return arc label. All thresholds canonical (Part 5 monitoring protocol).',
+    implementationNotes: 'governanceLoop reuse with the throttle station as checkpoint and the 2+ week confirmation carried on the return arc label. Thresholds are the Part 5 monitoring protocol. The gross cut is optional in doctrine ("consider"), so the node and hovers say "consider".',
   },
 
   {
     chartId: 'p5-change-hierarchy', idx: 'P5-10', group: 'part-5', intendedPlacement: 'part-5',
     experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'Not every adjustment has the same meaning: calibrating a parameter, documenting an override, and touching doctrine are different acts',
-      visualProof: 'A proposed change routing to exactly one of three levels — doctrine, whose change means the framework is abandoned; parameters, tunable within documented ranges; overrides, temporary and time-bounded with reversion conditions',
+      primaryClaim: 'Calibrating a parameter, documenting an override and touching doctrine are three different acts with three different meanings',
+      visualProof: 'A proposed change routing to exactly one of three levels: doctrine, whose change means the framework is abandoned; parameters, adjustable from their documented defaults for stated reasons; overrides, temporary and time-bounded with reversion conditions',
       interactionRole: 'Hover a level to read what lives there and what changing it means',
       readerAction: 'Route a change you are considering to its level before making it',
-      caution: 'Conceptual governance hierarchy; the level definitions and examples are the canonical Part 5 register',
+      caution: 'The three levels and their examples are stated in Part 5’s change-governance section',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Know What You Are Changing', setupLine: 'Some changes calibrate the system; some suspend a rule; some abandon the framework',
     claimLabel: 'PART 5 · CHANGE GOVERNANCE',
-    frameworkClaim: 'Doctrine changes mean framework abandonment. Parameter changes mean calibration. Override decisions mean temporary deviation for articulated reasons.',
+    frameworkClaim: 'A doctrine change means abandoning the framework. A parameter change means calibrating it. An override means a temporary, documented deviation for stated reasons.',
     readerTakeaway: 'Silent drift is not an override.',
-    chartType: 'Change-routing diagram: one proposed change classified into doctrine, parameters, or overrides — each with a different meaning.',
+    chartType: 'Change-routing diagram: one proposed change classified into doctrine, parameters, or overrides, each with a different meaning.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 5', label: 'Doctrine, parameters, and overrides register', role: 'verifies-concept', url: '/part-5-portfolio-construction-position-management' },
     ],
     explainerHeadline: 'The hierarchy exists so drift has nowhere to hide.',
-    explainerBody: 'Doctrine defines what the framework is — three-posture classification, the Bitcoin backbone, momentum-overrides-conviction. Violating it means you are no longer implementing ACF. Parameters calibrate implementation — sizing bands, momentum thresholds, the earnings cap — tunable within documented ranges for articulated reasons. Overrides are conscious, temporary deviations: intentional, documented, time-bounded, with the conditions for reversion stated up front. Anything else is drift.',
+    explainerBody: 'Doctrine defines what the framework is: three-posture classification, the Bitcoin backbone, momentum overriding conviction. Break it and you are no longer running ACF. Parameters calibrate it: sizing bands, momentum thresholds, the level of the earnings cap, each adjustable from its documented default for a reason you can state. Overrides are deliberate, temporary deviations, written down and time-bounded, with the conditions for reversion stated up front. Anything else is drift.',
     explainerConcept: 'Change governance',
     concepts: [{ label: 'Doctrine', link: '/part-5-portfolio-construction-position-management' }, { label: 'Governance', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'flow',
-    ariaSummary: 'A routing diagram. One node on the left, a proposed change, connects to three levels on the right. Doctrine: defines the framework; changing it means you are no longer implementing ACF. Parameters: calibrate implementation; tunable within documented ranges without changing framework identity. Overrides: temporary, explicit, reasoned, time-bounded, with reversion conditions.',
+    ariaSummary: 'A routing diagram. One node on the left, a proposed change, connects to three levels on the right. Doctrine: defines the framework; changing it means you are no longer implementing ACF. Parameters: calibrate implementation; adjustable from their documented defaults, with a stated reason, without changing what the framework is. Overrides: temporary, explicit, reasoned, time-bounded, with reversion conditions.',
     flow: {
       stages: [
         { id: 's1', label: 'The adjustment', nodes: [{ id: 'change', label: 'A proposed change', sub: 'name what it touches' }] },
-        { id: 's2', label: 'Its level — and its meaning', nodes: [
+        { id: 's2', label: 'Its level and its meaning', nodes: [
           { id: 'doctrine', label: 'Doctrine', sub: 'change = abandonment' },
           { id: 'parameters', label: 'Parameters', sub: 'change = calibration' },
           { id: 'overrides', label: 'Overrides', sub: 'change = documented deviation' },
@@ -2882,12 +3048,12 @@ export const FRAMEWORK_CHART_SPECS = [
     primaryKey: 'doctrine',
     hoverTargets: [
       { id: 'change', kind: 'node', label: 'The change', name: 'A proposed change', why: 'Every adjustment routes to exactly one level before it is made. Classifying it first is what separates governance from improvisation.', claim: 'Classify before you change.', concept: 'Change governance', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'doctrine', kind: 'node', label: 'Doctrine', name: 'Doctrine · non-negotiable', why: 'Three-posture classification, wrapper engineering, the separately governed Bitcoin backbone, momentum-overrides-conviction, Hype stop-losses. Changing these does not adjust ACF — it abandons it.', claim: 'You are no longer implementing ACF.', concept: 'Doctrine', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'parameters', kind: 'node', label: 'Parameters', name: 'Parameters · tunable in range', why: 'CIS component weights, sizing bands, momentum thresholds, the earnings cap, concentration limits, the Ballast ceiling — adjustable within documented ranges, with rationale, without changing what the framework is.', claim: 'You are calibrating ACF.', concept: 'Change governance', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'overrides', kind: 'node', label: 'Overrides', name: 'Overrides · temporary and documented', why: 'Conscious deviations from default parameters: intentional, documented, time-bounded, consistent with framework objectives, with explicit conditions for reversion. The framework remains the baseline.', claim: 'You are temporarily deviating — on the record.', concept: 'Change governance', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'doctrine', kind: 'node', label: 'Doctrine', name: 'Doctrine · non-negotiable', why: 'Three-posture classification, tax-wrapper placement, the separately governed Bitcoin backbone, momentum overriding conviction, Hype stop-losses that no reclassification can dodge, and hard Ballast criteria. Changing any of these abandons ACF.', claim: 'You are no longer implementing ACF.', concept: 'Doctrine', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'parameters', kind: 'node', label: 'Parameters', name: 'Parameters · adjustable with a reason', why: 'CIS component weights, sizing bands, momentum thresholds, the level of the earnings cap (the cap itself is doctrine), concentration limits, the Ballast aggregate ceiling: each adjustable from its documented default, with a stated reason, without changing what the framework is.', claim: 'You are calibrating ACF.', concept: 'Change governance', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'overrides', kind: 'node', label: 'Overrides', name: 'Overrides · temporary and documented', why: 'Conscious deviations from default parameters: intentional, documented, time-bounded, consistent with the framework’s objectives, with explicit conditions for reversion. The framework remains the baseline.', claim: 'You are deviating, temporarily and on the record.', concept: 'Change governance', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['change', 'doctrine', 'parameters', 'overrides'],
-    implementationNotes: 'flow-layout reuse (1→3 routing). The three levels are peers on the routing stage; meaning is carried in the sub-labels so the distinction survives without hover.',
+    implementationNotes: 'flow-layout reuse (1→3 routing). The three levels are peers on the routing stage; meaning is carried in the sub-labels so the distinction survives without hover. Parameters are described as adjustable from documented defaults because Part 5 documents defaults, not ranges, for most of them.',
   },
 
   /* ── PART 6 · CONVEXITY & FRAMEWORK INTEGRITY SCORING ──────────────────── */
@@ -2895,87 +3061,88 @@ export const FRAMEWORK_CHART_SPECS = [
     chartId: 'p6-cis-composition', idx: 'P6-01', group: 'part-6', intendedPlacement: 'part-6',
     experienceRole: 'evidence',
     claimStack: {
-      primaryClaim: 'CIS weighs four components, and convexity carries the most weight because it is the objective function',
-      visualProof: 'A weighted donut: Convexity & Optionality at forty percent dominates; Risk & Fragility and Macro Alignment at twenty-five each; Execution & Sentiment at ten — the composition of a 0–100 position score',
-      interactionRole: 'Hover a segment to read what it measures — and, for Risk, which direction is good',
+      primaryClaim: 'CIS weighs four components, and at the reference weights convexity carries the most because it is the objective function',
+      visualProof: 'A weighted donut at the reference weights: Convexity & Optionality at 40 percent, Risk & Fragility and Macro Alignment at 25 each, Execution & Sentiment at 10, together making one 0–100 position score',
+      interactionRole: 'Hover a segment to read what it measures and, for Risk, which direction is good',
       readerAction: 'Note that the largest slice is upside structure, and that a higher Risk score means lower fragility',
-      caution: 'Weights are live engine parameters read from the framework SSOT — thesis profiles may shift them within a bounded ±0.10 before renormalization; the four-component structure is Doctrine',
+      caution: 'The weights move with the thesis you select: under the Capital Preservation profile, Risk (35 percent) outweighs Convexity (30), and under Conflict Economy the first three tie at 30 (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
     title: 'CIS Measures the Position, Not the Portfolio', setupLine: 'One asset, four components, no portfolio context',
     claimLabel: 'PART 6 · CIS COMPOSITION',
-    frameworkClaim: 'CIS asks whether an asset is attractive as a convex opportunity under radical uncertainty: upside structure, survivability, regime fit, and execution — deliberately ignoring portfolio context.',
+    frameworkClaim: 'CIS asks how attractive an asset is as a convex opportunity under radical uncertainty, judged on upside structure, survivability, regime fit and execution, and blind to whatever else you hold.',
     readerTakeaway: 'Quality first. Portfolio construction later.',
-    chartType: 'Weighted composition donut of the four CIS components (C 40 · R 25 · M 25 · E 10).',
-    visualDataMode: 'conceptual', disclosure: 'Conceptual composition · Component weights are the live engine defaults (thesis-adaptive Parameters, bounded ±0.10; the structure is Doctrine)', footerCta: 'View framework basis',
+    chartType: 'Weighted composition donut of the four CIS components at the reference weights (C 40 · R 25 · M 25 · E 10).',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual composition · The reference weighting. The dashboard’s scores use the active thesis profile’s weights (each within 0.10 of these, renormalized) and move weight from Macro to Convexity and Risk when macro evidence is thin. The four-component structure is doctrine', footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF Dashboard · frameworkDocService.js', label: 'Live component weights C40/R25/M25/E10 with thesis-adaptive bounds (±0.10, renormalized)', role: 'verifies-concept' },
+      { provider: 'ACF dashboard', label: 'Reference weights C40/R25/M25/E10; thesis-profile bounds ±0.10, floor 0.05, ceiling 0.50, renormalized; macro weight cut to 60 or 80 percent at low or medium macro confidence (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#cis-math' },
       { provider: 'ACF · Part 6', label: 'CIS scope: position-level, portfolio-context-free', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
     ],
-    explainerHeadline: 'The score is built from upside structure — everything else supports it.',
-    explainerBody: 'Convexity and optionality dominate at forty percent because convexity is what the framework selects for. Risk and fragility score survivability, not volatility — a higher component score means lower fragility. Macro alignment reads whether the current regime reinforces or resists the opportunity. Execution and sentiment carry the least weight because execution follows quality. Diversification, correlation, concentration, and wrappers are deliberately excluded: they belong to FIS and governance.',
+    explainerHeadline: 'Upside structure carries the score. The other three keep it honest.',
+    explainerBody: 'At the reference weights, convexity and optionality take 40 percent, because convexity is what the framework selects for. Risk and fragility score survivability rather than volatility, so a higher score means a sturdier position. Macro alignment reads whether the current regime reinforces or resists the opportunity, against your Part 2 thesis. Execution and sentiment weigh least because execution follows quality. A thesis profile can move each weight by up to 0.10, and when macro evidence is thin the dashboard shifts weight from Macro to Convexity and Risk. Diversification, concentration and correlation with your other holdings are left out on purpose: FIS scores concentration, a portfolio tripwire watches correlation, and Parts 4 and 5 govern the rest.',
     explainerConcept: 'CIS',
     concepts: [{ label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Convexity', link: '/part-1-foundation' }],
     layout: 'radial',
-    ariaSummary: 'A composition donut of the Convexity Integrity Score. Convexity and optionality fill forty percent of the ring; risk and fragility twenty-five percent, where a higher score means greater survivability; macro alignment twenty-five percent; execution and sentiment ten percent. The center is labelled CIS, a zero-to-one-hundred position-level score.',
+    ariaSummary: 'A composition donut of the Convexity Integrity Score at its reference weights. Convexity and optionality fill 40 percent of the ring; risk and fragility 25 percent, where a higher score means greater survivability; macro alignment 25 percent; execution and sentiment 10 percent. The center is labeled CIS, a position-level score from 0 to 100.',
     radial: {
       variant: 'donut', centerLabel: 'CIS · 0–100',
-      caption: 'Position quality only — the portfolio is scored elsewhere.',
+      caption: 'Position quality only. FIS scores the portfolio.',
       segments: [
         { id: 'c', label: 'Convexity & Optionality', value: 0.40, tier: 'primary', sub: 'TAM headroom · optionality · catalysts · scarcity' },
-        { id: 'r', label: 'Risk & Fragility', value: 0.25, tier: 'secondary', sub: 'survivability — higher score = lower fragility' },
-        { id: 'm', label: 'Macro Alignment', value: 0.25, tier: 'tertiary', sub: 'regime fit per the Part 2 thesis' },
-        { id: 'e', label: 'Execution & Sentiment', value: 0.10, tier: 'reference', sub: 'is reality validating now?' },
+        { id: 'r', label: 'Risk & Fragility', value: 0.25, tier: 'secondary', sub: 'survivability: higher score, lower fragility' },
+        { id: 'm', label: 'Macro Alignment', value: 0.25, tier: 'tertiary', sub: 'regime fit · carry · policy, vs your thesis' },
+        { id: 'e', label: 'Execution & Sentiment', value: 0.10, tier: 'reference', sub: 'is reality validating the thesis?' },
       ],
     },
     primaryKey: 'c',
     hoverTargets: [
-      { id: 'c', kind: 'segment', label: 'Convexity', name: 'Convexity & Optionality · 40%', why: 'How large can the opportunity become, and how many credible paths lead there? TAM headroom, optionality surface, catalyst density, scarcity. Dominates because convexity is the objective function.', claim: 'The biggest slice is the point of the score.', concept: 'Convexity', link: '/part-1-foundation' },
-      { id: 'r', kind: 'segment', label: 'Risk & Fragility', name: 'Risk & Fragility · 25%', why: 'Can the business survive long enough for the thesis to matter? Balance sheet, business-model fragility, factor correlation, tail exposure. Scored as survivability: higher is safer.', claim: 'Higher R means lower fragility.', concept: 'Fragility', link: '/part-1-foundation' },
-      { id: 'm', kind: 'segment', label: 'Macro Alignment', name: 'Macro Alignment · 25%', why: 'Does the current regime reinforce or resist the opportunity? Regime sensitivity, carry direction, policy alignment against the practitioner’s Part 2 thesis.', claim: 'The regime is a scored input.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
-      { id: 'e', kind: 'segment', label: 'Execution', name: 'Execution & Sentiment · 10%', why: 'Momentum, relative strength, technical positioning — is reality beginning to validate the thesis now? Lowest weight because execution follows quality.', claim: 'Execution confirms; it does not lead.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'c', kind: 'segment', label: 'Convexity', name: 'Convexity & Optionality · 40%', why: 'How large can the opportunity become, and how many credible paths lead there? Four sub-scores: TAM headroom (35 points, the largest), optionality (25), catalyst density (20) and scarcity (20). It carries the most weight at the reference split because convexity is the objective function; across thesis profiles it runs from 30 to 45 percent.', claim: 'The biggest slice is the point of the score.', concept: 'Convexity', link: '/part-1-foundation' },
+      { id: 'r', kind: 'segment', label: 'Risk & Fragility', name: 'Risk & Fragility · 25%', why: 'Can the business survive long enough for the thesis to matter? Balance sheet (30 points), business-model fragility (30), correlation with macro factors (20) and tail exposure (20). Scored as survivability, so higher is safer.', claim: 'Higher R means lower fragility.', concept: 'Fragility', link: '/part-1-foundation' },
+      { id: 'm', kind: 'segment', label: 'Macro Alignment', name: 'Macro Alignment · 25%', why: 'Does the current regime reinforce or resist the opportunity? Regime fit (40 points), carry direction (30) and policy and flow (30), read against your Part 2 thesis. The dashboard’s score also applies small bounded adjustments (at most 4 points on regime fit, 3 on policy, 2 on carry) from current trends in rates, inflation and unemployment.', claim: 'The regime is a scored input.', concept: 'Macro regime', link: '/part-2-lineage-macro-thesis' },
+      { id: 'e', kind: 'segment', label: 'Execution', name: 'Execution & Sentiment · 10%', why: 'Is reality starting to validate the thesis? Execution quality, read from three-month price momentum with a volatility adjustment, and market acceptance, read from trading turnover (thirty-day dollar volume over market value), fifty points each. That is the equity route; funds use expense ratio and assets, and Bitcoin and crypto have their own inputs. It carries the least weight because execution follows quality.', claim: 'Execution confirms; it does not lead.', concept: 'Momentum filter', link: '/part-5-portfolio-construction-position-management' },
     ],
     mobileTapTargets: ['c', 'r', 'm', 'e'],
-    implementationNotes: 'radial donut reuse (p4-gross-not-net pattern). Weights canonical CIS v2.1; the R-direction clarification (higher = safer) rides the segment sub + hover. Delta clamps and archetype awareness stay in the page prose.',
+    implementationNotes: 'radial donut reuse (p4-gross-not-net pattern), drawn at the reference weights C40/R25/M25/E10; thesis-profile weights and the macro-confidence downweight are disclosed in the caution, disclosure, explainer and hovers. The R-direction clarification (higher = safer) rides the segment sub and hover. Delta clamps and scoring routes stay in the page prose.',
   },
 
   {
     chartId: 'p6-fis-waterfall', idx: 'P6-02', group: 'part-6', intendedPlacement: 'part-6',
     experienceRole: 'mechanism',
     claimStack: {
-      primaryClaim: 'FIS is subtractive: every point below 100 is a named, repairable violation scored by the live engine',
-      visualProof: 'A waterfall starting at one hundred and stepping down through the live engine\u2019s five bucket deductions — allocation the largest cap, complexity the smallest — landing on an 83, in the Strong band above the 70 line',
-      interactionRole: 'Hover a deduction to read its bucket, its live cap, and what the engine actually detects there',
+      primaryClaim: 'FIS is subtractive: every point below 100 is a named, repairable violation',
+      visualProof: 'A waterfall from 100 down through five bucket deductions for one example book (allocation 4, governance 1, dead capital 1, concentration 10, complexity 1), landing at 83 in the Strong band above the 70 line',
+      interactionRole: 'Hover a deduction to read its bucket, its cap and what it charges for',
       readerAction: 'Follow the score down step by step, then read the band it lands in',
-      caution: 'An illustrative portfolio — the deductions are examples inside the live FIS v2.1 bucket caps, not universal values',
+      caution: 'The deductions belong to one example book scored under the framework’s FIS rules. The dashboard’s score does not yet see all of its inputs: nothing sets the momentum-breakdown flag, and the thesis, distribution-type, remediation-plan and override flags on a holding are not passed to it, so a holding can be charged as undocumented or unclassified even when those flags are set (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
-    title: 'FIS Starts at 100', setupLine: 'Five live buckets; every deduction names its violation, and repairing it recovers the points',
+    title: 'FIS Starts at 100', setupLine: 'Five capped penalty buckets, and every deduction names the rule it breaks',
     claimLabel: 'PART 6 · FIS ATTRIBUTION',
-    frameworkClaim: 'FIS does not reward vague portfolio quality. It identifies where construction has departed from the framework and shows exactly how much each failure costs.',
-    readerTakeaway: 'Fix the violation. Recover the points.',
-    chartType: 'Subtractive waterfall from 100 through the live engine\u2019s five bucket penalties to the resulting score and status band.',
-    visualDataMode: 'conceptual', disclosure: 'Conceptual diagram · Illustrative example portfolio; bucket caps, thresholds, and bands are the live FIS v2.1 engine values, penalty sizes are not', footerCta: 'View framework basis',
+    frameworkClaim: 'FIS starts every portfolio at 100 and charges for each departure from the framework’s construction rules, so every lost point has a name and a price.',
+    readerTakeaway: 'Fix the violation, and the points come back once the score can see the fix.',
+    chartType: 'Subtractive waterfall from 100 through the five FIS bucket penalties to the resulting score and band.',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual diagram · Bucket caps, thresholds and bands follow the FIS rules; the deduction sizes belong to this example only', footerCta: 'View framework basis',
     sources: [
-      { provider: 'ACF Dashboard · fisCalculator.js', label: 'Live FIS v2.1 kernel — five buckets (25/15/15/15/10), severity clamp 0.2–12%, shared four-band register', role: 'verifies-concept' },
+      { provider: 'ACF dashboard', label: 'Five FIS buckets capped at 25/15/15/15/10; governance and dead capital weighted by position share between 0.2 and 12 percent; concentration charges 8/6/4 (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#fis-math' },
+      { provider: 'ACF · worked example', label: 'Author calculation under the FIS rules: 11 positions, 80 percent taxable and 20 percent Roth; top three 41.5 percent and top five 61.5, none above 15; four documented names scoring in the 60s at 6.25 percent each; a fifth of value without a thesis; one unclassified distribution. Allocation 3.9, governance 1.0, dead capital 1.0, concentration 10, complexity 1, FIS 83.2, drawn rounded', role: 'methodology' },
       { provider: 'ACF · Part 6', label: 'Subtractive scoring and attribution doctrine', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
     ],
-    explainerHeadline: 'A penalty must be attributable, proportional, repairable, and linked to a rule.',
-    explainerBody: 'The portfolio shown loses seven points to allocation — wrapper drift and score-band compliance live in this bucket — four to governance, three to dead capital, two to concentration, and one to complexity, landing at eighty-three: inside the Strong band, with the attribution ranked for repair. Each bucket carries the live engine\u2019s cap (allocation twenty-five at most; complexity hard-capped at ten), governance and dead-capital penalties are value-weighted with a 0.2 percent floor and a 12 percent cap, and the caps sum to eighty — the score cannot fall below twenty.',
+    explainerHeadline: 'Every penalty must be attributable, proportional, repairable and tied to a rule.',
+    explainerBody: 'This example book loses 4 points to allocation, because 80 percent of it sits in taxable accounts and more of its positions score in the 60s than the band targets allow. Governance takes 1: a quarter of the book sits in documented names scoring in the 60s. Dead capital takes 1: a fifth of it has no written thesis. Concentration takes 10, the biggest bill, because the top three holdings pass 40 percent and the top five pass 60 even though no single name tops 15. Complexity takes 1, for a distribution nobody classified. The book lands at 83, in the Strong band, with concentration first on the repair list. Governance and dead-capital charges scale with each position’s share of the portfolio, counted between 0.2 and 12 percent; the other three buckets charge flat amounts. The caps sum to 80, so no score can fall below 20, but that floor is only a bound: in any book of fewer than 200 positions, governance and dead capital each stay under 10 points.',
     explainerConcept: 'FIS',
     concepts: [{ label: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Posture', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'waterfall',
-    ariaSummary: 'A waterfall chart. The score begins at one hundred and steps down through five illustrative deductions matching the live engine\u2019s buckets: allocation minus seven, governance minus four, dead capital minus three, concentration minus two, complexity minus one. The result lands at eighty-three, inside the Strong band. Horizontal guides mark the shared band boundaries at seventy, sixty, and fifty.',
+    ariaSummary: 'A waterfall chart. The score starts at 100 and steps down through five deductions for one example book: allocation minus 4, governance minus 1, dead capital minus 1, concentration minus 10, complexity minus 1. It lands at 83, inside the Strong band. Horizontal guides mark the band boundaries at 70, 60 and 50.',
     waterfall: {
       start: 100, startLabel: 'Start', unit: 'pts',
       steps: [
-        { id: 'alloc', label: 'Allocation', value: -7, cap: 25, capLabel: 'cap 25 · wrapper drift + band compliance' },
-        { id: 'gov', label: 'Governance', value: -4, cap: 15, capLabel: 'cap 15 · band + momentum violations' },
-        { id: 'dead', label: 'Dead capital', value: -3, cap: 15, capLabel: 'cap 15 · no thesis · stale >90d' },
-        { id: 'conc', label: 'Concentration', value: -2, cap: 15, capLabel: 'cap 15 · beyond-cap breaches' },
-        { id: 'complex', label: 'Complexity', value: -1, cap: 10, capLabel: 'hard cap 10 · unresolved clutter' },
+        { id: 'alloc', label: 'Allocation', value: -4, cap: 25, capLabel: 'cap 25 · account split + score bands' },
+        { id: 'gov', label: 'Governance', value: -1, cap: 15, capLabel: 'cap 15 · scores below 70, size-weighted' },
+        { id: 'dead', label: 'Dead capital', value: -1, cap: 15, capLabel: 'cap 15 · no thesis · score >90 days old' },
+        { id: 'conc', label: 'Concentration', value: -10, cap: 15, capLabel: 'cap 15 · >15% · top 3 >40% · top 5 >60%' },
+        { id: 'complex', label: 'Complexity', value: -1, cap: 10, capLabel: 'hard cap 10 · unclassified · undocumented' },
       ],
-      result: { id: 'fis', label: 'FIS 83', sub: 'Strong band · attribution ranked' },
+      result: { id: 'fis', label: 'FIS 83', sub: 'Strong band · repair list ranked' },
       bandGuides: [
         { v: 70, label: '70 · Strong' },
         { v: 60, label: '60 · Moderate' },
@@ -2984,44 +3151,44 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'fis',
     hoverTargets: [
-      { id: 'alloc', kind: 'node', label: 'Allocation', name: 'Allocation · −7 of 25 max', why: 'The largest bucket, and where wrapper placement now lives: the engine scores wrapper drift against the routing targets and checks that capital sits in the score bands the framework prescribes.', claim: 'Structure — including wrappers — earns the biggest cap.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
-      { id: 'gov', kind: 'node', label: 'Governance', name: 'Governance · −4 of 15 max', why: 'One penalty per position by strict precedence: a critical score band first, then an oversized position sitting in the sixties, then the band itself, then momentum breakdown. Value-weighted by position size, floored at 0.2 percent and capped at 12 percent.', claim: 'Rules are scored, not remembered.', concept: 'Governance', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'dead', kind: 'node', label: 'Dead capital', name: 'Dead capital · −3 of 15 max', why: 'Positions with no documented thesis, and scores left unrefreshed past ninety days. Capital that is neither working nor watched is quietly rotting — and the engine bills for it.', claim: 'Idle capital is a scored failure.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'conc', kind: 'node', label: 'Concentration', name: 'Concentration · −2 of 15 max', why: 'Trips at deliberately looser levels than the Part 5 sizing caps of thirty-five and fifty: a single position past fifteen percent, the top three past forty, the top five past sixty — Bitcoin excluded by design. A documented override is acknowledged in the attribution but the points still apply.', claim: 'The score bills breaches, not brushes.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'complex', kind: 'node', label: 'Complexity', name: 'Complexity · −1 · hard cap 10', why: 'Unresolved clutter: distributions the ledger cannot classify, and low-scoring positions carried without a documented rationale beyond a small allowance. A written thesis or remediation plan suppresses the charge.', claim: 'Complexity has a price and a ceiling.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'fis', kind: 'node', label: 'The result', name: 'FIS 83 · Strong', why: 'Eighty-three sits in the Strong band on the shared four-band register — above seventy, below it remediation begins. Every point of the gap to one hundred has a name and a repair path; the caps sum to eighty, so the score never falls below twenty.', claim: 'The score is a to-do list.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'alloc', kind: 'node', label: 'Allocation', name: 'Allocation · −4 of 25 max', why: 'The largest bucket, with two checks: how your capital splits across Roth, taxable and pre-tax accounts against the FIS wrapper targets of 45, 35 and 20 percent (drift under 10 points is ignored), and how many positions sit in each score band. It does not check which asset sits in which account. Here, a book that is 80 percent taxable with a crowded 60s band costs about 4 points.', claim: 'Structure gets the biggest cap.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'gov', kind: 'node', label: 'Governance', name: 'Governance · −1 of 15 max', why: 'One charge per position, first match wins: a score below 60 (6 points), a score of 60 to 69 on a position above 8 percent of the portfolio (6), any other score in the 60s (4). Each charge is multiplied by the position’s share of the portfolio, counted between 0.2 and 12 percent, so a 6-point charge on a 5 percent position costs 0.3. Here a quarter of the book sits in documented 60s names of 8 percent or less: 4 × 0.25 = 1. A momentum-breakdown charge (4 points) is specified too, but nothing in the dashboard sets it yet.', claim: 'Bigger positions, bigger charges.', concept: 'Governance', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'dead', kind: 'node', label: 'Dead capital', name: 'Dead capital · −1 of 15 max', why: 'Positions with no documented thesis (5 points) and scores older than 90 days (2), each scaled by position size the way governance is. Here a fifth of the book has no written thesis: 5 × 0.20 = 1. Capital that is neither working nor watched gets billed.', claim: 'Idle capital is a scored failure.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'conc', kind: 'node', label: 'Concentration', name: 'Concentration · −10 of 15 max', why: 'Trips at the Part 5 single-position cap of 15 percent, so a position inside the 15 to 18 percent override band is still billed, and at looser levels than Part 5’s top-three and top-five caps of 35 and 50: the top three past 40 percent, the top five past 60. Bitcoin is excluded by design. The charges are flat (8 for each name above 15 percent, 6 for the top three, 4 for the top five), and a documented override does not waive them. Here the top three hold 41.5 percent and the top five 61.5: 6 + 4 = 10.', claim: 'The score bills breaches, not brushes.', concept: 'Concentration limits', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'complex', kind: 'node', label: 'Complexity', name: 'Complexity · −1 · hard cap 10', why: 'Loose ends: 1 point for each distribution nobody has classified, and half a point for each position scoring below 70 with no documented rationale, beyond an allowance of three. Under the FIS rules a documented thesis, hold rationale or remediation plan lifts the low-score charge, though not the unclassified one; the dashboard’s score does not yet read hold rationales or remediation plans. Here, one unclassified distribution.', claim: 'Complexity has a price and a ceiling.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'fis', kind: 'node', label: 'The result', name: 'FIS 83 · Strong', why: '83 sits in the Strong band of the shared four-band register; below 70, remediation begins. Every point of the gap to 100 has a name and a repair path, and for this book the first repair is concentration.', claim: 'The score is a to-do list.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['alloc', 'gov', 'dead', 'conc', 'complex', 'fis'],
-    implementationNotes: 'waterfall layout aligned to the LIVE FIS v2.1 kernel (continuity pass 2026-07-13, live math trumps spec v1.1.1): five buckets 25/15/15/15/10, shared four-band guides at 70/60/50, concentration fires beyond-cap at 15/40/60 with Bitcoin excluded by archetype, governance + dead-capital value-weighted 0.2–12%, max total penalty 80 (floor 20). Explicitly illustrative penalties inside live caps; the bucket table remains adjacent as the exact-value companion.',
+    implementationNotes: 'waterfall layout on the FIS rules the dashboard computes: five buckets capped 25/15/15/15/10, band guides at 70/60/50, concentration flat 8/6/4 at 15/40/60 with Bitcoin excluded, governance and dead capital value-weighted between 0.2% and 12%, caps summing to 80. The example book (11 positions; 80% taxable, 20% Roth; top three 41.5%, top five 61.5%, none above 15%; four documented names scoring 60–69 at 6.25% each; 20% of value without a thesis; one unclassified distribution) computes to allocation 3.85, governance 1.00, dead capital 1.00, concentration 10, complexity 1, FIS 83.15, drawn rounded as −4/−1/−1/−10/−1 = 83. The Part 6 bucket table is the exact-value companion.',
   },
 
   {
     chartId: 'p6-cis-fis-matrix', idx: 'P6-03', group: 'part-6', intendedPlacement: 'part-6',
     experienceRole: 'matrix',
     claimStack: {
-      primaryClaim: 'Position quality and construction integrity are independent — neither score can rescue the other',
-      visualProof: 'A two-by-two of CIS against FIS with a named action in every cell, and a repair path that moves a both-below-70 portfolio right — construction first — before it moves up to conviction',
+      primaryClaim: 'CIS never reads FIS, and FIS reads CIS only through its four bands; neither score can stand in for the other',
+      visualProof: 'A two-by-two of CIS against FIS with an action in every cell, and a repair path that moves a both-below-70 portfolio right first (construction) and then up (conviction)',
       interactionRole: 'Hover a waypoint to read the diagnosis and the action for that cell',
       readerAction: 'Find your quadrant, read its action, and note the order of the repair path',
-      caution: 'Conceptual diagnosis matrix; the boundary is the shared band line at 70 — the Strong band’s floor on both scores, and on FIS also the action threshold',
+      caution: 'Conceptual diagnosis matrix. Both axes split at 70, the Strong band’s floor on each score and, on FIS only, the action line. In the dashboard, FIS below 70 produces a fix-the-top-penalty recommendation when you run the Weekly Review (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Good Assets Can Still Form a Bad Portfolio', setupLine: 'CIS grades what you own; FIS grades what it becomes when assembled',
     claimLabel: 'PART 6 · TWO-SCORE DIAGNOSIS',
-    frameworkClaim: 'CIS evaluates what you own. FIS evaluates what those positions become when assembled together. Neither score can rescue failure in the other.',
-    readerTakeaway: 'A portfolio is healthy only when both dimensions are healthy.',
-    chartType: 'CIS × FIS two-by-two diagnosis matrix with the canonical repair path crossing it.',
+    frameworkClaim: 'CIS never reads FIS, and FIS reads CIS only through its four bands; neither score can stand in for the other.',
+    readerTakeaway: 'A portfolio is healthy only when both scores are.',
+    chartType: 'CIS × FIS two-by-two diagnosis matrix with the repair path crossing it.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 6', label: 'CIS × FIS interaction and repair order', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
-      { provider: 'ACF Dashboard · cisBands.js', label: 'The shared four-band register — 70 is the Strong band’s floor on both scores; on FIS it is also the action line', role: 'verifies-concept' },
+      { provider: 'ACF dashboard', label: 'The shared four-band register (70 is the Strong floor on both scores); FIS below 70 raises a fix-the-top-penalty recommendation in the Weekly Review (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#fis-math' },
     ],
-    explainerHeadline: 'Two scores, one diagnosis — and a fixed repair order.',
-    explainerBody: 'Strong CIS with healthy FIS: maintain. Strong CIS with FIS below seventy is a construction issue — repair wrappers, sizing, concentration, or posture allocation, and keep the positions. CIS below Strong with healthy FIS is sub-core conviction — honor each position’s posture-specific band, strengthen evidence, resize, or replace only where warranted. Both below seventy: repair construction first, because construction failures compound faster, then reassess and size each position according to its CIS band. Exits stay reserved for scores below fifty or separately triggered governance. Position quality times construction integrity — the product is what has to be healthy.',
+    explainerHeadline: 'Two scores, one diagnosis, and a fixed repair order.',
+    explainerBody: 'Strong CIS with healthy FIS: maintain. Strong CIS with FIS below 70 is a construction problem: repair wrappers, sizing and concentration, and keep the positions. CIS below Strong with healthy FIS is sub-core conviction: honor each position’s posture-specific band, strengthen the evidence, and resize or replace only where warranted. Both below 70: repair construction first, because construction failures compound faster, then reassess each position and size it by its CIS band. Exits stay reserved for scores below fifty or separately triggered governance. Both scores have to be healthy; neither can carry the other.',
     explainerConcept: 'Two-score kernel',
     concepts: [{ label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'quadrant',
-    ariaSummary: 'A two-by-two matrix. The horizontal axis is construction integrity, FIS, split at seventy — the action line. The vertical axis is position quality, CIS, split at the Strong band’s floor at seventy — a band boundary, not an action trigger. Top-right: maintain — strong positions, well assembled. Top-left: repair construction — strong positions, poorly assembled; keep the positions. Bottom-right: sub-core conviction — honor the posture-specific sizing bands; strengthen, resize, or replace only as warranted. Bottom-left: construction first, then reassess and size each position by its CIS band. A path crosses from the bottom-left through the bottom-right to the top-right, showing the canonical repair order.',
+    ariaSummary: 'A two-by-two matrix. The horizontal axis is construction integrity, FIS, split at 70, the action line. The vertical axis is position quality, CIS, split at the Strong band’s floor of 70, a band boundary, not an action trigger. Top right: maintain, strong positions well assembled. Top left: repair construction and keep the positions. Bottom right: sub-core conviction; honor the posture-specific sizing bands and strengthen, resize or replace only as warranted. Bottom left: construction first, then reassess and size each position by its CIS band. A path runs from the bottom left through the bottom right to the top right, showing the repair order.',
     quadrant: {
       xAxis: { neg: 'FIS BELOW 70', pos: 'FIS 70+' },
       yAxis: { neg: 'CIS BELOW STRONG', pos: 'CIS STRONG (70+)' },
@@ -3038,62 +3205,63 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'healthy',
     hoverTargets: [
-      { id: 'weak', kind: 'waypoint', label: 'Both below 70', name: 'Below Strong, construction failing', why: 'Comprehensive repair — and a fixed order: repair construction first because FIS failures compound faster, then reassess and size each position according to its CIS band. Exits stay reserved for scores below fifty or separately triggered governance.', claim: 'Repair has an order.', concept: 'Two-score kernel', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'construction', kind: 'waypoint', label: 'Construction repaired', name: 'CIS below Strong, FIS healthy · sub-core conviction', why: 'Clean assembly of sub-core conviction. Wrappers, sizing, and allocation are right — each position holds its posture-specific band, constrained in the sixties, starter in the fifties; strengthen evidence, resize, or replace only where warranted.', claim: 'Construction cannot add conviction.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'healthy', kind: 'waypoint', label: 'Both healthy', name: 'Strong CIS, healthy FIS · maintain', why: 'Strong positions, well assembled. The only cell where the weekly answer is simply: hold and keep measuring.', claim: 'Health is the product of both scores.', concept: 'Two-score kernel', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'positions', kind: 'waypoint', label: 'Strong CIS / FIS below 70', name: 'Strong positions, poorly assembled', why: 'A ninety-five CIS position in the wrong wrapper still bleeds FIS points. Repair wrappers, sizing, concentration, or posture allocation — and keep the positions.', claim: 'Great assets do not excuse bad assembly.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'weak', kind: 'waypoint', label: 'Both below 70', name: 'Below Strong, construction failing', why: 'Comprehensive repair, in a fixed order: construction first, because construction failures compound faster, then reassess each position and size it by its CIS band. Exits stay reserved for scores below fifty or separately triggered governance.', claim: 'Repair has an order.', concept: 'Two-score kernel', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'construction', kind: 'waypoint', label: 'Construction repaired', name: 'CIS below Strong, FIS healthy · sub-core conviction', why: 'Clean assembly of sub-core conviction. Wrappers, sizing and allocation are right, and each position holds its posture-specific band: standard sizing in the 60s, a starter position in the 50s. Strengthen the evidence, and resize or replace only where warranted.', claim: 'Construction cannot add conviction.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'healthy', kind: 'waypoint', label: 'Both healthy', name: 'Strong CIS, healthy FIS · maintain', why: 'Strong positions, well assembled. The only cell where the weekly answer is to hold and keep measuring.', claim: 'Both scores have to be healthy; neither can carry the other.', concept: 'Two-score kernel', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'positions', kind: 'waypoint', label: 'Strong CIS / FIS below 70', name: 'Strong positions, poorly assembled', why: 'Strong positions can still be poorly assembled: accounts out of balance, sizing off, concentration past the caps. Repair wrappers, sizing and concentration, and keep the positions.', claim: 'Great assets do not excuse bad assembly.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['weak', 'construction', 'healthy', 'positions'],
-    implementationNotes: 'quadrant reuse with two small engine extensions: off-path waypoints render as hoverable dots (the High-CIS/Low-FIS cell), and the path carries the canonical repair order (construction first, then quality). The interaction table remains adjacent as the exact-wording companion.',
+    implementationNotes: 'quadrant reuse with two small engine extensions: off-path waypoints render as hoverable dots (the High-CIS/Low-FIS cell), and the path carries the repair order (construction first, then quality). The Part 6 interaction table remains adjacent as the exact-wording companion.',
   },
 
   {
     chartId: 'p6-weekly-loop', idx: 'P6-04', group: 'part-6', intendedPlacement: 'part-6',
     experienceRole: 'diagram',
     claimStack: {
-      primaryClaim: 'The framework runs on a weekly evidence loop: measure, gate, act or hold, record — repeat',
-      visualProof: 'Five stations on a governed path — update CIS, calculate FIS, run the governance gates, act or deliberately hold, log the evidence — closed by a weekly return arc, with the gates as the checkpoint',
-      interactionRole: 'Hover a station to read what it produces; the gates carry the trigger list',
+      primaryClaim: 'The framework runs on a weekly evidence loop: measure, check, act or hold, record, repeat',
+      visualProof: 'Five stations on one path (update CIS, calculate FIS, run the governance checks, act or deliberately hold, log the evidence), closed by a weekly return arc, with the checks as the checkpoint',
+      interactionRole: 'Hover a station to read what it produces; the checks station carries the trigger list',
       readerAction: 'Walk the five stations, then note that the loop closes weekly whether or not anything traded',
-      caution: 'The live weekly governance engine runs this exact sequence — ingest, CIS updates, FIS, governance checks, action determination, decision logging',
+      caution: 'The dashboard’s Weekly Review runs the same order when you start it: a budgeted refresh of stale scores, then ingest, read CIS and FIS, governance checks, action determination, decision log. Its governance checks do not yet receive earnings dates, price trends or correlation data, so the earnings flag comes from the Daily Review and the positions table instead (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
     title: 'The Weekly Evidence Loop', setupLine: 'Regular measurement, explicit attribution, action only on a governing threshold',
     claimLabel: 'PART 6 · OPERATING CADENCE',
-    frameworkClaim: 'The framework does not require constant trading. It requires regular measurement, explicit attribution, and action only when evidence crosses a governing threshold.',
-    readerTakeaway: 'No trigger is also a result. When the system remains healthy, hold.',
-    chartType: 'Five-station weekly operating loop: CIS → FIS → governance gates → act-or-hold → log, returning weekly.',
+    frameworkClaim: 'The framework asks for regular measurement, explicit attribution, and action only when evidence crosses a governing threshold. Constant trading is not on the list.',
+    readerTakeaway: 'No trigger is also a result: when everything checks out, hold.',
+    chartType: 'Five-station weekly operating loop: CIS → FIS → governance checks → act or hold → log, returning weekly.',
     visualDataMode: 'conceptual', disclosure: DISCLOSURE.conceptual, footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 6', label: 'Weekly execution sequence and action-frequency limits', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
+      { provider: 'ACF dashboard', label: 'Weekly Review order and trigger precedence: three-level check, earnings, FIS below 70, CIS drift (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#governance-math' },
     ],
     explainerHeadline: 'Decay only shows up week over week.',
-    explainerBody: 'Each week: update the evidence behind C, R, M, and E, with delta clamps keeping any single update honest. Calculate FIS and read its attribution. Run the gates — earnings proximity, the live momentum gates (the 200-day and 50-day trend checks and the RSI band), tripwires, posture drift. Then act, or deliberately hold: a tripwire forces an immediate response, an earnings window trims to the cap, an FIS below seventy fixes its top penalty; nothing triggered means hold. Last, the record: what changed, why, and what would reverse the decision. The log is what makes next week’s loop a measurement instead of a memory.',
+    explainerBody: 'Each week: update the evidence behind C, R, M and E, with delta clamps bounding ordinary updates. Calculate FIS and read its attribution. Run the checks: earnings proximity, momentum, tripwires, posture drift. Then act, or deliberately hold: a tripwire demands a response, an earnings window means trimming to the 3 percent cap, FIS below 70 means fixing the top penalty, and a CIS move of 10 points or more means resizing; with no trigger, you hold. Last comes the record of what changed and why. The log is what makes next week’s loop a measurement instead of a memory.',
     explainerConcept: 'Weekly loop',
     concepts: [{ label: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Tripwires', link: '/part-5-portfolio-construction-position-management' }],
     layout: 'governanceLoop',
-    ariaSummary: 'A weekly operating loop of five stations: update CIS for every position, calculate FIS for the portfolio, run the governance gates — earnings, momentum, tripwires, posture drift — then act or deliberately hold, and log what changed, why, and what would reverse it. A return arc labelled weekly closes the loop back to the first station.',
+    ariaSummary: 'A weekly operating loop of five stations: update CIS for every position, calculate FIS for the portfolio, run the governance checks (earnings, momentum, tripwires, posture drift), then act or deliberately hold, and log what changed and why. A return arc labeled weekly closes the loop back to the first station.',
     governanceLoop: {
       governorId: 'gates',
       returnLabel: 'weekly · the loop is the framework',
       nodes: [
         { id: 'cis', label: 'Update CIS', sub: 'C·R·M·E → clamp → log' },
         { id: 'fis', label: 'Calculate FIS', sub: '100 − Σ penalties' },
-        { id: 'gates', label: 'Run the gates', sub: 'earnings · momentum · drift' },
-        { id: 'act', label: 'Act — or hold', sub: 'no trigger is a result' },
+        { id: 'gates', label: 'Run the checks', sub: 'earnings · momentum · drift' },
+        { id: 'act', label: 'Act or hold', sub: 'no trigger is a result' },
         { id: 'log', label: 'Preserve the record', sub: 'what changed · why' },
       ],
     },
     primaryKey: 'cis',
     hoverTargets: [
-      { id: 'cis', kind: 'node', label: 'Update CIS', name: 'Measure position quality', why: 'For each position: refresh the evidence behind convexity, risk, macro, and execution; clamp the delta by confidence (±3 low, ±5 medium, ±6 derived, ±8 high) so one week cannot rewrite conviction; log the result. The live weekly engine runs exactly this station first.', claim: 'Scores are re-earned weekly.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'fis', kind: 'node', label: 'Calculate FIS', name: 'Measure portfolio integrity', why: 'Penalties by bucket, value-weighted, with attribution: one hundred minus the sum. The output is not just a number — it is the ranked list of what to fix.', claim: 'Attribution is the deliverable.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'gates', kind: 'node', label: 'The gates', name: 'Run the governance gates', why: 'Earnings proximity (T-5, cap 3%), the live momentum gates (200/50-day trend and the RSI band), tripwires, posture drift, concentration, wrappers. The checkpoint every action must pass through — in both directions.', claim: 'Nothing moves without passing the gates.', concept: 'Tripwires', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'act', kind: 'node', label: 'Act or hold', name: 'Act — or deliberately hold', why: 'Tripwire: immediate response. Earnings window: trim to the cap. FIS below seventy: fix the top penalty. CIS drift beyond ten: resize. No trigger: hold — restraint is a decision, and the action-frequency limits enforce it.', claim: 'Holding is an outcome, not an omission.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'log', kind: 'node', label: 'The record', name: 'Preserve the record', why: 'What changed, why it changed, and what evidence would reverse the decision. Longitudinal health is only visible against a written record — the log is what next week measures against.', claim: 'Unrecorded decisions decay into stories.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'cis', kind: 'node', label: 'Update CIS', name: 'Measure position quality', why: 'For each position, refresh the evidence behind convexity, risk, macro and execution, then clamp the change by confidence (±3 low, ±5 medium, ±6 derived, ±8 high), so ordinary updates move a few points at a time; a move of more than 20 points passes through as a model disagreement. In the dashboard the review refreshes at most 10 stale scores per run, older and larger positions first, then reads every current score and records what changed.', claim: 'Every score is re-read weekly; stale ones are re-earned.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'fis', kind: 'node', label: 'Calculate FIS', name: 'Measure portfolio integrity', why: 'Penalties by bucket, with attribution: one hundred minus the sum. Governance and dead-capital charges scale with position size; allocation, concentration and complexity charges are flat. The output is a ranked list of what to fix.', claim: 'Attribution is the deliverable.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'gates', kind: 'node', label: 'The checks', name: 'Run the governance checks', why: 'Earnings proximity (T-5, cap 3%), momentum, tripwires and posture drift: the checkpoint every action passes through. In the dashboard these checks do not yet receive earnings dates, price trends or correlation data, so the three momentum dimensions go unmeasured and the earnings flag comes from the Daily Review and the positions table instead. That flag counts calendar days, so start the trim from the earnings calendar.', claim: 'Every action passes the checks first.', concept: 'Tripwires', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'act', kind: 'node', label: 'Act or hold', name: 'Act, or deliberately hold', why: 'Tripwire: respond at once. Earnings window: trim to the 3 percent cap. FIS below 70: fix the top penalty. CIS move of 10 points or more: resize. No trigger: hold, because restraint is a decision, and the frequency limits pace the review’s own recommendations. In the dashboard’s Weekly Review a finding from its three-level check comes first; the framework’s tripwires are recorded there but raise no recommendation of their own.', claim: 'Holding is an outcome, not an omission.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'log', kind: 'node', label: 'The record', name: 'Preserve the record', why: 'What changed and why. The dashboard’s decision log keeps the last 52 reviews, a year at a weekly cadence: the positions whose scores changed, the FIS reading, and the recommendations made or held back, with the reason. Noting what evidence would reverse a decision is good practice, but it is yours to write; the log has no field for it. Longitudinal health is only visible against a written record.', claim: 'Unrecorded decisions decay into stories.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['cis', 'fis', 'gates', 'act', 'log'],
-    implementationNotes: 'governanceLoop reuse per the approved P6-04 signature spec, extended to five stations with the evidence log as the closing operational step (supported by the canonical step 01 “→ log” and the record-keeping doctrine). The gates station is the checkpoint.',
+    implementationNotes: 'governanceLoop reuse per the approved P6-04 signature spec, extended to five stations with the evidence log as the closing operational step (the page’s weekly pass ends in decision logging). The checks station (node id gates) is the checkpoint. The caution and hovers describe the dashboard’s Weekly Review as of September 2026.',
   },
 
   {
@@ -3101,27 +3269,28 @@ export const FRAMEWORK_CHART_SPECS = [
     experienceRole: 'mechanism',
     claimStack: {
       primaryClaim: 'Framework failure is usually slow: small tolerable deviations compound while they go unmeasured',
-      visualProof: 'Five normalized health indicators eroding at different tempos across twelve unmeasured months — stale conviction fastest, wrapper leakage slowest — while the dashed line of assumed health holds flat at one hundred',
-      interactionRole: 'Hover an indicator to read the failure mode it tracks and its canonical diagnostic',
+      visualProof: 'Five normalized health indicators eroding at different tempos across twelve unmeasured months, each steepening as it goes (stale conviction falls furthest, wrapper leakage least), while the dashed line of assumed health holds flat at 100',
+      interactionRole: 'Hover an indicator to read the failure mode it tracks and how the dashboard flags it',
       readerAction: 'Compare the flat assumed-health line against every eroding indicator beneath it',
-      caution: 'Conceptual diagnostic with normalized values — no market data; tempos are illustrative, the diagnostics are canonical',
+      caution: 'The erosion tempos are illustrative; the diagnostic thresholds cited for the lines are the dashboard’s (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Failure Rarely Arrives All at Once', setupLine: 'What happens to a healthy portfolio in the twelve months after reviews stop',
     claimLabel: 'PART 6 · LONGITUDINAL DECAY',
-    frameworkClaim: 'Most implementation failures begin as small, individually tolerable deviations: a stale score, an oversized winner, a misplaced asset, one more correlated position. Left unmeasured, they compound into structural fragility.',
+    frameworkClaim: 'Most implementation failures begin as small, individually tolerable deviations: a stale score, an oversized winner, a misplaced asset, one more correlated position. Left unmeasured, they compound into real fragility.',
     readerTakeaway: 'Framework health is longitudinal. What is not remeasured eventually becomes assumed.',
     chartType: 'Five normalized decay indicators over twelve unmeasured months against a flat assumed-health reference.',
-    visualDataMode: 'conceptual', disclosure: 'Conceptual diagnostic · Normalized values, no market data; erosion tempos illustrative, the diagnostics canonical', footerCta: 'View framework basis',
+    visualDataMode: 'conceptual', disclosure: 'Conceptual diagnostic · Normalized health indicators, no market data', footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF · Part 6', label: 'Failure modes and longitudinal diagnostics', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring' },
+      { provider: 'ACF dashboard', label: 'Stale-score warning at 60 days and failure past 90; refresh flag at 50 percent above cost on a score older than 60 days; posture drift warning at 10 points and failure at 20; Correlation Spike tripwire above 0.70 average pairwise correlation (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#governance-math' },
     ],
-    explainerHeadline: 'Every line has a diagnostic; none of them fires on its own.',
-    explainerBody: 'Stale conviction: the position changes while its score stays frozen — flag anything unrecalculated past ninety days. Thesis evidence decays as the story substitutes for current analysis — recalculate after any fifty percent appreciation. Correlation stacking accelerates late: different tickers become one trade under stress — alert above zero point seven average correlation. Posture drift moves the portfolio without a decision — alert beyond ten percent from target. Wrapper leakage is the slowest and costs fifteen to twenty-five percent of terminal wealth over twenty years. A point-in-time audit catches none of the slopes — only week-over-week measurement does.',
+    explainerHeadline: 'Each line has a diagnostic. None of them helps if nobody reads it.',
+    explainerBody: 'Stale conviction: the position changes while its score stays frozen; the dashboard warns once a score is more than 60 days old and fails it past 90, when the dead-capital bucket starts billing it. Thesis evidence decays as the story stands in for current analysis; a position more than 50 percent above its cost basis whose score is older than 60 days is flagged for a refresh. Correlation stacking arrives late, as different tickers turn into one trade under stress; the Correlation Spike tripwire flags average pairwise correlation above 0.70. Posture drift moves the portfolio without a decision; the dashboard warns at 10 percentage points from target and fails at 20. Wrapper leakage is the slowest, and Parts 4 and 5 work out what it costs. A single audit samples the level; only week-over-week measurement sees the slope.',
     explainerConcept: 'Longitudinal health',
     concepts: [{ label: 'Failure modes', link: '/part-6-convexity-framework-integrity-scoring' }, { label: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring' }],
     layout: 'single',
-    ariaSummary: 'A conceptual time series over twelve months without reviews. A dashed reference line holds flat at one hundred, labelled still assumed healthy. Beneath it five normalized indicators erode at different speeds: stale conviction falls fastest, thesis evidence and correlation stacking follow — correlation accelerating late — posture drift declines steadily, and wrapper leakage erodes slowest. An early marker notes that a point-in-time audit two to three months in still looks acceptable.',
+    ariaSummary: 'A conceptual chart of twelve months without reviews. A dashed reference line holds flat at 100, labeled still assumed healthy. Beneath it five normalized indicators erode, each steepening as the months pass: stale conviction slides first and falls furthest, thesis evidence follows, correlation stacking holds up for months and then drops fastest of all, posture drift steepens gently, and wrapper leakage loses least. An early marker notes that a point-in-time audit two to three months in still looks acceptable.',
     domain: { xMin: 0, xMax: 12, yMin: 0, yMax: 112 }, yUnit: '',
     xTicks: [{ v: 0, label: 'last review' }, { v: 3, label: '+3 mo' }, { v: 6, label: '+6 mo' }, { v: 12, label: '+12 months' }],
     yTicks: [{ v: 100, label: '100 · measured' }, { v: 50, label: '50' }],
@@ -3136,15 +3305,15 @@ export const FRAMEWORK_CHART_SPECS = [
     ],
     primaryKey: 'freshness',
     hoverTargets: [
-      { id: 'freshness', kind: 'series', seriesKey: 'freshness', label: 'Stale conviction', name: 'Stale conviction — the fastest decay', why: 'The position changes while the score remains frozen; sizing keeps obeying a number that no longer describes the asset. Live diagnostic: the dead-capital bucket bills any score older than ninety days.', claim: 'A frozen score is a silent resize.', concept: 'Failure modes', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'evidence', kind: 'series', seriesKey: 'evidence', label: 'Thesis evidence', name: 'Narrative reinforcement', why: 'Past performance substitutes for current evidence — the thesis may already be realized. Live diagnostic: the dashboard flags any position up fifty percent on a stale score.', claim: 'Winners need re-scoring most.', concept: 'Failure modes', link: '/part-6-convexity-framework-integrity-scoring' },
-      { id: 'correlation', kind: 'series', seriesKey: 'correlation', label: 'Correlation stacking', name: 'Correlation stacking — accelerates late', why: 'Positions scored individually converge under regime stress; different tickers become the same trade. Live diagnostic: the dashboard flags average correlation above zero point seven.', claim: 'Stress is when diversification is audited.', concept: 'Correlation instability', link: '/part-1-foundation' },
-      { id: 'posture', kind: 'series', seriesKey: 'posture', label: 'Posture drift', name: 'Silent posture drift', why: 'Price movement re-weights the portfolio without a single decision being made — Torque appreciates from target to overweight while Ballast quietly thins. Live diagnostic: the dashboard warns beyond ten percent from target and fails beyond twenty.', claim: 'Markets rebalance you unless you notice.', concept: 'Posture', link: '/part-5-portfolio-construction-position-management' },
-      { id: 'wrapper', kind: 'series', seriesKey: 'wrapper', label: 'Wrapper leakage', name: 'Wrapper leakage — slow and compounding', why: 'Small tax inefficiencies accumulate over long horizons; systematic misplacement costs fifteen to twenty-five percent of terminal wealth over twenty years. Live accounting: wrapper drift is billed inside the FIS Allocation bucket as one aggregate line.', claim: 'The slowest leak is the largest bill.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
+      { id: 'freshness', kind: 'series', seriesKey: 'freshness', label: 'Stale conviction', name: 'Stale conviction · the first to slide', why: 'The position changes while the score stays frozen, and sizing keeps obeying a number that no longer describes the asset. In the dashboard, a score older than 90 days is stale: the dead-capital bucket charges it 2 base points, value-weighted, and the diagnostics warn once a score is more than 60 days old and fail past 90.', claim: 'A frozen score is a silent resize.', concept: 'Failure modes', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'evidence', kind: 'series', seriesKey: 'evidence', label: 'Thesis evidence', name: 'Narrative reinforcement', why: 'Past performance stands in for current evidence, and the thesis may already be realized. In the dashboard, a position more than 50 percent above its cost basis whose score is older than 60 days is flagged for a refresh.', claim: 'Winners need re-scoring most.', concept: 'Failure modes', link: '/part-6-convexity-framework-integrity-scoring' },
+      { id: 'correlation', kind: 'series', seriesKey: 'correlation', label: 'Correlation stacking', name: 'Correlation stacking · accelerates late', why: 'Positions scored one at a time converge under regime stress, and different tickers become the same trade. In the dashboard, the Correlation Spike tripwire flags average pairwise correlation above 0.70 across your non-cash holdings, computed from daily closes once every holding has at least 60 daily returns. The flag is informational: no FIS bucket charges for correlation, and CIS never does.', claim: 'Stress is when diversification is audited.', concept: 'Correlation instability', link: '/part-1-foundation' },
+      { id: 'posture', kind: 'series', seriesKey: 'posture', label: 'Posture drift', name: 'Silent posture drift', why: 'Price moves re-weight the portfolio without a single decision: Torque appreciates past its target while Ballast thins. The dashboard warns at 10 percentage points from target and fails at 20, measured against the targets your thesis implies and reported beside the score, never billed as a penalty.', claim: 'Markets rebalance you unless you notice.', concept: 'Posture', link: '/part-5-portfolio-construction-position-management' },
+      { id: 'wrapper', kind: 'series', seriesKey: 'wrapper', label: 'Wrapper leakage', name: 'Wrapper leakage · slow and compounding', why: 'Small tax inefficiencies accumulate over long horizons; Parts 4 and 5 work the arithmetic and state their assumptions. In the dashboard, the FIS Allocation bucket bills the account-level split against its targets as one aggregate line; it does not flag a single asset held in the wrong wrapper, so naming misplaced positions stays your job.', claim: 'Small leaks compound over decades.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy' },
       { id: 'audit', kind: 'marker', label: 'Point-in-time audit', name: 'The one-time audit trap', why: 'Two or three months in, every indicator still rounds to healthy. A single audit samples the level; only longitudinal measurement sees the slope.', claim: 'Levels lie; slopes tell.', concept: 'Longitudinal health', link: '/part-6-convexity-framework-integrity-scoring' },
     ],
     mobileTapTargets: ['freshness', 'evidence', 'correlation', 'posture', 'wrapper', 'audit'],
-    implementationNotes: 'single-layout reuse; five deterministic normalized decay curves (smoothstep tempos, seeded ±0.6 texture) against a dashed assumed-health guide at 100. Explicitly conceptual — no market data; each hover carries its canonical diagnostic threshold. End labels spaced via labelDy to avoid collision at narrow widths.',
+    implementationNotes: 'single-layout reuse; five deterministic normalized decay curves (ease-in power curves 100 − drop·t^bend, seeded ±0.2 texture, clamped at 100) against a dashed assumed-health guide at 100. Explicitly conceptual, with no market data; each hover carries the dashboard’s diagnostic threshold as of September 2026. End values (80/66/58/52/42) are unchanged from the earlier smoothstep version, so the labelDy spacing still holds at narrow widths.',
   },
 
 ];
@@ -3184,12 +3353,12 @@ export function getDataModeMarker(spec) {
   const glyph = mode === 'historical' ? 'square' : mode === 'conceptual' ? 'circle' : 'diamond';
   const label = { conceptual: 'Conceptual', representative: 'Representative', simulation: 'Simulation', historical: 'Historical', mixed: 'Mixed' }[mode] || 'Representative';
   const explain = {
-    conceptual: 'Conceptual exhibit — illustrates framework logic, not historical data.',
-    representative: 'Representative exhibit — sources support the concept; the shape is illustrative.',
-    simulation: 'Representative simulation — built to show path dependency, not a forecast.',
-    historical: 'Historical data — a sourced record.',
-    mixed: 'Mixed exhibit — combines sourced data with representative framework elements.',
-  }[mode] || 'Representative exhibit — sources support the concept; the shape is illustrative.';
+    conceptual: 'Conceptual exhibit: illustrates framework logic, not historical data.',
+    representative: 'Representative exhibit: sources support the concept; the shape is illustrative.',
+    simulation: 'Simulation: computed from stated inputs, not a forecast or a historical backtest.',
+    historical: 'Historical data: plotted from a named public series.',
+    mixed: 'Mixed exhibit: combines sourced data with representative framework elements.',
+  }[mode] || 'Representative exhibit: sources support the concept; the shape is illustrative.';
   return { mode, glyph, label, explain };
 }
 
