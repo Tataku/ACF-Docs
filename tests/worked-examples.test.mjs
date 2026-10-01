@@ -185,7 +185,7 @@ test('math: size-opportunity examples come from round(90 × e^(−0.18 × alloca
   assert.equal(num(untouched), score(0));
   assert.equal(num(at5), score(5));
   const [, at10, cap, atCap, zeroFrom] = find(MATH,
-    /At 10 percent it is (\d+), at the (\d+) percent hard maximum (\d+), and it rounds to zero from about (\d+) percent/,
+    /At 10 percent it is (\d+), at the (\d+) percent default cap (\d+), and it rounds to zero from about (\d+) percent/,
     'size-opportunity continuation');
   assert.equal(num(at10), score(10));
   assert.equal(num(atCap), score(num(cap)));
@@ -225,7 +225,7 @@ test('part 3: the case study prints position values beside the prices that produ
 });
 
 test('part 3: Investor B\'s Bitcoin drawdown is priced from its own sleeve, and its ending book adds up', () => {
-  const [, sleeve] = find(PART3, /\$(\d+)K Bitcoin, \$\d+K regime equities/, 'Investor B Bitcoin sleeve');
+  const [, sleeve] = find(PART3, /\$(\d+)K Bitcoin, \$\d+K in stocks chosen for the current regime/, 'Investor B Bitcoin sleeve');
   const [, entry] = find(PART3, /\d+\.\d+ BTC at \$([\d,]+)\./, 'entry price');
   const [, , peakPx, , troughPx] = find(PART3, INVESTOR_A_CYCLE, 'cycle prices');
   const [, lost] = find(PART3, /BTC drawdown costs ~\$([\d,]+), under a quarter of the starting portfolio/, 'Investor B drawdown');

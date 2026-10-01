@@ -1518,8 +1518,8 @@
   "glossary": {
     "convexity": {
       "later": {
-        "href": "/part-5-portfolio-construction-position-management#postures",
-        "label": "Appears in Part 5 · Three behaviors, one portfolio"
+        "href": "/part-2-lineage-macro-thesis#lineage",
+        "label": "Appears in Part 2 · The intellectual foundations, thesis-agnostic"
       },
       "chart": {
         "href": "/part-1-foundation#exhibit-s1",
@@ -2029,7 +2029,7 @@
     "bracket-arbitrage": {
       "later": {
         "href": "/part-4-tax-architecture-roc-strategy#pretax",
-        "label": "Appears in Part 4 · Gross is not net"
+        "label": "Appears in Part 4 · Pre-tax accounts: inferior, occasionally useful"
       },
       "chart": null,
       "entry": {
@@ -2582,7 +2582,7 @@
     "valuation-extension": {
       "later": {
         "href": "/part-3-bitcoin-convexity-backbone#valuation",
-        "label": "Appears in Part 3 · Through three cycles"
+        "label": "Appears in Part 3 · Through two cycles"
       },
       "chart": {
         "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-power-law-holds",
@@ -2964,12 +2964,12 @@
   },
   "audit": {
     "pages": 11,
-    "anchors": 1223,
+    "anchors": 1231,
     "chartSpecs": 46,
     "liveChartMounts": 100,
     "glossaryTerms": 109,
-    "glossaryTermsAlreadyTagged": 34,
-    "glossaryTermsAutoTagEligible": 75,
+    "glossaryTermsAlreadyTagged": 33,
+    "glossaryTermsAutoTagEligible": 76,
     "unresolvedGlossaryCharts": [],
     "warnings": []
   }

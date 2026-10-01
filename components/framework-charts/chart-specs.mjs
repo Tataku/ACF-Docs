@@ -1019,7 +1019,7 @@ export const FRAMEWORK_CHART_SPECS = [
   {
     chartId: 'sig-shape', idx: 'S2', group: 'signature', intendedPlacement: 'docs-landing',
     claimStack: {
-      primaryClaim: 'With the average held fixed, ACF thins the deep-loss tail and lengthens the gain tail, and pays for it with more small shortfalls',
+      primaryClaim: 'With the average held fixed, ACF is designed to thin the deep-loss tail and lengthen the gain tail, paying for it with more small shortfalls',
       visualProof: 'A symmetric normal bell against an ACF-shaped curve with the same area and the same average: thinner on the far left, piled up just below the base case, thinner through moderate gains and longer on the far right, with the deep-loss difference washed in the stress tone and the right-tail difference in the accent',
       interactionRole: 'Hover the curves or the three markers to read what was traded for what',
       readerAction: 'Compare the two tails, then find where the shape pays for them',
@@ -1290,7 +1290,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'invalidation', kind: 'level', label: 'Year-end 2022', name: 'Year-end 2022', why: 'Where the 60/40 mix finished 2022: down about 16 percent. A dated fact from the record, not a framework threshold.', claim: 'What a balanced year looked like in 2022.', concept: '60/40 failure', link: '/part-1-foundation#manifesto' },
     ],
     mobileTapTargets: ['band0', 'marker0', 'b', 'p', 'invalidation'],
-    implementationNotes: 'Wired on /part-1-foundation (#exhibit-01), /part-1-pictures and /framework-in-pictures. Representative, anchored to 2022: exact only at the marked points (Dec 2021 = 100; Sep 2022 stocks 76.1, bonds 85.4; Oct 2022 bonds 84.3; Dec 2022 stocks 81.9, bonds 87.0), with rounded illustrative month-end knots between them, smoothed with a monotone cubic. The 60/40 line is a buy-and-hold 60/40 of the two drawn paths (79.8 in Sep, 83.9 in Dec, matching the published -16.1%). Dots at the right edge; year-end guide at 84. The licensed index records (S&P 500 TR, Bloomberg US Agg) are not plotted month by month.',
+    implementationNotes: 'Wired on /part-1-foundation (#exhibit-01), /part-1-pictures and /framework-in-pictures. Representative, anchored to 2022: the marked points are the published year-end figures (Dec 2021 = 100; Dec 2022 stocks 81.9, bonds 87.0, 60/40 83.9). The September and October knots are rounded month-end index readings (Sep 2022 stocks 76.1, bonds 85.4; Oct 2022 bonds 84.3) that shape the illustrative path, with rounded month-end knots between them, smoothed with a monotone cubic. The 60/40 line is a buy-and-hold 60/40 of the two drawn paths (79.8 in Sep, 83.9 in Dec, matching the published -16.1%). Dots at the right edge; year-end guide at 84. The licensed index records (S&P 500 TR, Bloomberg US Agg) are not plotted month by month.',
   },
 
   {
@@ -1300,7 +1300,7 @@ export const FRAMEWORK_CHART_SPECS = [
       visualProof: 'A 24-month rolling correlation, below zero from 2014 through 2021, crossing zero in early 2022 and staying positive through 2024',
       interactionRole: 'Hover the line, the shaded stretch and the crossing to see when the sign changed',
       readerAction: 'Find where the line crosses zero',
-      caution: 'Drawn through the published figures at the marked points. The path between them is illustrative, not plotted data. Shorter windows turned positive in mid-2021; the 24-month window drawn here crosses in early 2022.',
+      caution: 'Drawn through the published figures at the marked points. The path between them is illustrative, not plotted data. Shorter windows turned positive in mid-2021; the 24-month window drawn here crosses in early 2022. The 2023 and 2024 levels are drawn, bracketed by published 12-month and 36-month readings for 2024.',
     },
     status: 'implemented', wiredPublic: true,
     title: 'Correlation Turns', setupLine: 'How US stocks and 10-year Treasuries moved together, 2014 to 2024. Below zero, bonds tended to cushion stocks; above it, they tended to fall together.',
@@ -1313,6 +1313,7 @@ export const FRAMEWORK_CHART_SPECS = [
     sources: [
       { provider: 'Brixton, Brooks, Hecht, Ilmanen, Maloney and McQuinn (AQR)', label: 'A Changing Stock–Bond Correlation: Drivers and Implications. The Journal of Portfolio Management 49(4), 64–80 (2023)', role: 'basis', url: 'https://www.aqr.com/Insights/Research/Journal-Article/A-Changing-Stock-Bond-Correlation' },
       { provider: 'Marco Lombardi and Vladyslav Sushko (BIS)', label: 'The correlation of equity and bond returns. BIS Quarterly Review, December 2023, Box A', role: 'basis', url: 'https://www.bis.org/publ/qtrpdf/r_qt2312v.htm' },
+      { provider: 'State Street Investment Management', label: 'Mind on the Market, Chart of the Week (October 2, 2025). S&P 500 and Bloomberg US Treasury Index, monthly: the 12-month stock-bond correlation peaked at 0.80 in July 2024, the 36-month at 0.66 in December 2024', role: 'basis', url: 'https://www.ssga.com/library-content/assets/pdf/global/wmu/2025/mom-20251003.pdf' },
     ],
     explainerHeadline: 'When inflation runs the market, the correlation flips.',
     explainerBody: 'For about two decades, from roughly 2000 to 2021, stocks and bonds tended to move in opposite directions, so bonds cushioned equity losses. From about 1970 to the late 1990s the correlation was usually positive, and in 2021 and 2022 it turned positive again. The line here is the most recent turn, measured over a 24-month window.',
@@ -1335,7 +1336,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'c', kind: 'series', seriesKey: 'c', label: 'Stock-Treasury correlation', name: '24-month rolling correlation', why: 'Monthly returns on US stocks and 10-year Treasuries, correlated over the trailing 24 months. Negative through 2021, positive from early 2022 through 2024.', claim: 'Correlation depends on the regime.', concept: 'Correlation regime', link: '/part-1-foundation#manifesto' },
     ],
     mobileTapTargets: ['band0', 'marker0', 'c'],
-    implementationNotes: 'Wired on /part-1-foundation (#exhibit-02), /part-1-pictures and /framework-in-pictures. Representative, anchored: knots follow the published record (negative 2014 to 2021, deepest 2020, about -0.35 at end-2021, zero crossing in early 2022, +0.5 to +0.75 in 2023 and 2024), smoothed with a monotone cubic. The series end label stays short (the long description is the yUnit) so the right margin does not swell. The pressure field is drawn geometry (brush.pressureField), never a rectangle.',
+    implementationNotes: 'Wired on /part-1-foundation (#exhibit-02), /part-1-pictures and /framework-in-pictures. Representative, anchored: knots follow the pattern the cited studies report (negative 2014 to 2021, deepest 2020, about -0.35 at end-2021, zero crossing in early 2022); the +0.5 to +0.75 levels in 2023 and 2024 are drawn between State Street’s published 12-month (0.80, July 2024) and 36-month (0.66, December 2024) readings, not plotted from a 24-month series. Smoothed with a monotone cubic. The series end label stays short (the long description is the yUnit) so the right margin does not swell. The pressure field is drawn geometry (brush.pressureField), never a rectangle.',
   },
 
   {
@@ -1458,7 +1459,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { kind: 'consequence', label: 'Same average, less than half the ending money', timing: 'late' },
     ],
     claimStack: {
-      primaryClaim: 'Same returns, same withdrawals, different order. At a 4 percent withdrawal, losses first ends with less than half what gains first ends with; at 6 percent it runs out in year 12.',
+      primaryClaim: 'Same returns, same withdrawals, different order. At a 4 percent withdrawal, the losses-first path ends with less than half as much as the gains-first path; at 6 percent, the losses-first path runs out in year 12.',
       visualProof: 'One set of 12 annual returns, in two orders, drives both portfolio paths',
       interactionRole: 'Hover the returns and the paths to tie the same numbers to different endings',
       readerAction: 'Compare the two orders of the same returns',
@@ -1469,7 +1470,7 @@ export const FRAMEWORK_CHART_SPECS = [
     status: 'implemented', wiredPublic: true,
     title: 'Path Changes Everything', setupLine: 'The same 12 annual returns and the same withdrawals, in two orders: gains first or losses first',
     claimLabel: 'PATH DEPENDENCY · WITHDRAWALS',
-    frameworkClaim: 'Same returns, same withdrawals, different order: at a 4 percent withdrawal, losses first ends with less than half what gains first ends with.',
+    frameworkClaim: 'Same returns, same withdrawals, different order: at a 4 percent withdrawal, the losses-first path ends with less than half as much as the gains-first path.',
     readerTakeaway: 'Withdrawal-phase capital does not care about the average. It cares about the order.',
     chartType: 'Shared return-set proof: one set of 12 annual returns in two orders, with the portfolio paths computed from them.',
     visualDataMode: 'simulation',
@@ -1940,7 +1941,7 @@ export const FRAMEWORK_CHART_SPECS = [
     sources: [
       { provider: 'Lyn Alden Investment Strategy', label: 'Bitcoin: A Global Liquidity Barometer (written by Sam Callahan, commissioned by Lyn Alden), September 2024', role: 'verifies-concept', url: 'https://www.lynalden.com/bitcoin-a-global-liquidity-barometer' },
       { provider: 'ACF · Part 3', label: 'Rule stated in Part 3 · Why Bitcoin can be modeled', role: 'verifies-concept', url: '/part-3-bitcoin-convexity-backbone#valuation' },
-      { provider: 'Author illustration', label: 'Method the shape illustrates: one liquidity cycle drawn as a smooth wave; the asset moves in the same direction on a wider swing, plus a faster wiggle that sometimes runs against it. No lag is drawn, and heights and widths are drawn, not measured.', role: 'methodology' },
+      { provider: 'Author illustration', label: 'Method the shape illustrates: one liquidity cycle drawn as a smooth wave; the asset moves in the same direction on a wider swing, plus a faster wiggle that sometimes runs against it. No lag is drawn, and heights and widths are drawn, not measured', role: 'methodology' },
     ],
     explainerHeadline: 'Bitcoin tends to move with the tide, not the weather.',
     explainerBody: 'Global liquidity, the supply of money and credit, sets the level of the water. From 2013 to mid-2024 Bitcoin moved in the same direction as global liquidity in 83 percent of 12-month periods and 74 percent of 6-month periods, according to a September 2024 study written by Sam Callahan and commissioned by Lyn Alden. It measures direction, not a fixed multiple; the link weakens over short windows, and it decoupled as prices fell from the bull-market peaks of 2013, 2017 and 2021. The current thesis reads liquidity as the tide: a guide to the regime over months, and no help with next week.',
@@ -2086,7 +2087,7 @@ export const FRAMEWORK_CHART_SPECS = [
       visualProof: 'Three allocation lanes pass through one shock zone (one breaks, one bends, one dips least), with a readout grading each',
       interactionRole: 'Choose an allocation, then change the shock and watch each lane',
       readerAction: 'Pick an allocation, then stress it',
-      caution: 'Representative simulation of three whole-portfolio allocations on one made-up market path; the scores are illustrative and nothing here is a forecast',
+      caution: 'Three whole-portfolio allocations on one made-up market path; the control and participation scores are illustrative',
     },
     interaction: { type: 'scenario', gesture: 'choose', conceptMatch: 'Selecting an allocation and a shock reshapes the three lanes through the shock zone and updates the survival readout' },
     motionProfile: { type: 'scenarioUpdate', duration: 'calm' },
@@ -2404,7 +2405,7 @@ export const FRAMEWORK_CHART_SPECS = [
     explainerConcept: 'Wrapper edge',
     concepts: [{ label: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy#edge' }, { label: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy#edge' }],
     layout: 'radial',
-    ariaSummary: 'A donut divides one gross pre-tax balance into two shares: about 70 percent is the net you keep, drawn in the framework accent, and about 30 percent is the deferred tax claim, drawn muted. A horizon control (today, plus 12 years, plus 25 years) grows the balance from one times to about nine times, at about 9 percent a year, while the 70/30 split holds, so the claim grows from 0.3 of a unit to about 2.7 units. The split assumes a steady 30 percent rate; the claim’s final size is set by the rate when the money comes out.',
+    ariaSummary: 'A donut divides one gross pre-tax balance into two shares: about 70 percent is the net you keep, drawn in the framework accent, and about 30 percent is the deferred tax claim, drawn muted. A horizon control (today, plus 12 years, plus 25 years) grows the balance from one times to about 8.6 times, at about 9 percent a year, while the 70/30 split holds, so the claim grows from 0.3 of a unit to about 2.6 units. The split assumes a steady 30 percent rate; the claim’s final size is set by the rate when the money comes out.',
     radial: {
       variant: 'donut',
       centerLabel: 'Gross balance',
@@ -2415,8 +2416,8 @@ export const FRAMEWORK_CHART_SPECS = [
       ],
       scales: [
         { id: 'today', label: 'Today', center: '1×', seg: { net: '0.70×', claim: '0.30×' } },
-        { id: 'y12', label: '+12 yrs', center: '≈ 3×', seg: { net: '≈ 2.1×', claim: '≈ 0.9×' } },
-        { id: 'y25', label: '+25 yrs', center: '≈ 9×', seg: { net: '≈ 6.3×', claim: '≈ 2.7×' } },
+        { id: 'y12', label: '+12 yrs', center: '≈ 2.8×', seg: { net: '≈ 2.0×', claim: '≈ 0.8×' } },
+        { id: 'y25', label: '+25 yrs', center: '≈ 8.6×', seg: { net: '≈ 6.0×', claim: '≈ 2.6×' } },
       ],
       defaultScale: 'today',
     },
@@ -2426,7 +2427,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'claim', kind: 'segment', label: 'Claim', name: 'The deferred tax claim', why: 'Deferral moves the tax into the future; it does not remove it. At a steady rate the claim keeps its roughly 30 percent share and grows in dollars with the balance. Its final size is set by your rate when the money comes out, which is why the framework converts pre-tax balances to Roth in low-income years.', claim: 'The claim grows with the balance.', concept: 'Tax architecture', link: '/part-4-tax-architecture-roc-strategy#edge' },
     ],
     mobileTapTargets: ['net', 'claim'],
-    implementationNotes: 'Conceptual Part 4 exhibit for the "Gross Is Not Net" callout. Composition donut (radial layout): one gross balance split into retained net (accent, ~70%) and the deferred tax claim (muted, ~30%) at the representative 30% blended withdrawal rate shared with p4-tax-wedge. The horizon control (today / +12 / +25 years, at about 9% a year: ≈3× and ≈9×) grows the center and segment magnitudes while the arcs stay fixed, which holds only at a constant rate; the copy says the final share is set by the rate at withdrawal or conversion. Deferral, not elimination, under current law.',
+    implementationNotes: 'Conceptual Part 4 exhibit for the "Gross Is Not Net" callout. Composition donut (radial layout): one gross balance split into retained net (accent, ~70%) and the deferred tax claim (muted, ~30%) at the representative 30% blended withdrawal rate shared with p4-tax-wedge. The horizon control (today / +12 / +25 years, at about 9% a year: 1.09^12 ≈ 2.8× and 1.09^25 ≈ 8.6×) grows the center and segment magnitudes while the arcs stay fixed, which holds only at a constant rate; the copy says the final share is set by the rate at withdrawal or conversion. Deferral, not elimination, under current law.',
   },
 
   {
@@ -3101,7 +3102,7 @@ export const FRAMEWORK_CHART_SPECS = [
     chartId: 'p6-cis-composition', idx: 'P6-01', group: 'part-6', intendedPlacement: 'part-6',
     experienceRole: 'evidence',
     claimStack: {
-      primaryClaim: 'CIS weighs four components, and at the reference weights convexity carries the most because it is the objective function',
+      primaryClaim: 'CIS weighs four components, and at the reference weights convexity carries the most because it is what the framework is built to capture',
       visualProof: 'A weighted donut at the reference weights: Convexity & Optionality at 40 percent, Risk & Fragility and Macro Alignment at 25 each, Execution & Sentiment at 10, together making one 0–100 position score',
       interactionRole: 'Hover a segment to read what it measures and, for Risk, which direction is good',
       readerAction: 'Note that the largest slice is upside structure, and that a higher Risk score means lower fragility',
@@ -3136,7 +3137,7 @@ export const FRAMEWORK_CHART_SPECS = [
     },
     primaryKey: 'c',
     hoverTargets: [
-      { id: 'c', kind: 'segment', label: 'Convexity', name: 'Convexity & Optionality · 40%', why: 'How large can the opportunity become, and how many credible paths lead there? Four sub-scores: TAM headroom (35 points, the largest), optionality (25), catalyst density (20) and scarcity (20). It carries the most weight at the reference split because convexity is the objective function; across thesis profiles it runs from 30 to 45 percent.', claim: 'The biggest slice is the point of the score.', concept: 'Convexity', link: '/part-2-lineage-macro-thesis#lineage' },
+      { id: 'c', kind: 'segment', label: 'Convexity', name: 'Convexity & Optionality · 40%', why: 'How large can the opportunity become, and how many credible paths lead there? Four sub-scores: TAM headroom (35 points, the largest), optionality (25), catalyst density (20) and scarcity (20). It carries the most weight at the reference split because convexity is what the framework is built to capture; across thesis profiles it runs from 30 to 45 percent.', claim: 'The biggest slice is the point of the score.', concept: 'Convexity', link: '/part-2-lineage-macro-thesis#lineage' },
       { id: 'r', kind: 'segment', label: 'Risk & Fragility', name: 'Risk & Fragility · 25%', why: 'Can the business survive long enough for the thesis to matter? Balance sheet (30 points), business-model fragility (30), correlation with macro factors (20) and tail exposure (20). Scored as survivability, so higher is safer.', claim: 'Higher R means lower fragility.', concept: 'Fragility', link: '/part-1-foundation#manifesto' },
       { id: 'm', kind: 'segment', label: 'Macro Alignment', name: 'Macro Alignment · 25%', why: 'Does the current regime reinforce or resist the opportunity? Regime fit (40 points), carry direction (30) and policy and flow (30), read against your Part 2 thesis. The dashboard’s score also applies small bounded adjustments (at most 4 points on regime fit, 3 on policy, 2 on carry) from current trends in rates, inflation and unemployment.', claim: 'The regime is a scored input.', concept: 'Macro regime', link: '/part-1-foundation#manifesto' },
       { id: 'e', kind: 'segment', label: 'Execution', name: 'Execution & Sentiment · 10%', why: 'Is reality starting to validate the thesis? Execution quality, read from three-month price momentum with a volatility adjustment, and market acceptance, read from trading turnover (thirty-day dollar volume over market value), fifty points each. That is the equity route; funds use expense ratio and assets, and Bitcoin and crypto have their own inputs. It carries the least weight because execution follows quality.', claim: 'Execution confirms; it does not lead.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring#cis' },
@@ -3153,7 +3154,7 @@ export const FRAMEWORK_CHART_SPECS = [
       visualProof: 'A waterfall from 100 down through five bucket deductions for one example book (allocation 4, governance 1, dead capital 1, concentration 10, complexity 1), landing at 83 in the Strong band above the 70 line',
       interactionRole: 'Hover a deduction to read its bucket, its cap and what it charges for',
       readerAction: 'Follow the score down step by step, then read the band it lands in',
-      caution: 'The deductions belong to one example book scored under the framework’s FIS rules. The dashboard’s score does not yet see all of its inputs: nothing sets the momentum-breakdown flag, and the thesis, distribution-type, remediation-plan and override flags on a holding are not passed to it, so a holding can be charged as undocumented or unclassified even when those flags are set (as of September 2026)',
+      caution: 'The deductions belong to one example book scored under the framework’s FIS rules. The dashboard’s score does not yet see all of its inputs: nothing sets the momentum-breakdown flag, and the thesis, distribution-type, hold-rationale, remediation-plan and override records you keep on a holding are not passed to it, which in the current build bills every position as undocumented and unclassified (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
     title: 'FIS Starts at 100', setupLine: 'Five capped penalty buckets, and every deduction names the rule it breaks',
@@ -3164,7 +3165,7 @@ export const FRAMEWORK_CHART_SPECS = [
     visualDataMode: 'conceptual', disclosure: 'Conceptual diagram · Bucket caps, thresholds and bands follow the FIS rules; the deduction sizes belong to this example only', footerCta: 'View framework basis',
     sources: [
       { provider: 'ACF dashboard', label: 'Five FIS buckets capped at 25/15/15/15/10; governance and dead capital weighted by position share between 0.2 and 12 percent; concentration charges 8/6/4 (software behavior as of September 2026)', role: 'verifies-concept', url: '/framework-in-math#fis-math' },
-      { provider: 'ACF · worked example', label: 'Author calculation under the FIS rules: 11 positions, 80 percent taxable and 20 percent Roth; top three 41.5 percent and top five 61.5, none above 15; four documented names scoring in the 60s at 6.25 percent each; a fifth of value without a thesis; one unclassified distribution. Allocation 3.9, governance 1.0, dead capital 1.0, concentration 10, complexity 1, FIS 83.2, drawn rounded', role: 'methodology' },
+      { provider: 'ACF · worked example', label: 'Author calculation under the FIS rules: 11 positions, 80 percent taxable and 20 percent Roth; top three 41.5 percent and top five 61.5, none above 15; four documented names scoring in the 60s at 6.25 percent each; a fifth of value without a thesis; one unclassified distribution. Allocation 3.85, governance 1.00, dead capital 1.00, concentration 10, complexity 1, FIS 83.15, drawn rounded', role: 'methodology' },
       { provider: 'ACF · Part 6', label: 'Rule stated in Part 6 · Subtractive scoring: every lost point has an owner', role: 'verifies-concept', url: '/part-6-convexity-framework-integrity-scoring#fis' },
     ],
     explainerHeadline: 'Every penalty must be attributable, proportional, repairable and tied to a rule.',
@@ -3262,7 +3263,7 @@ export const FRAMEWORK_CHART_SPECS = [
       visualProof: 'Five stations on one path (update CIS, calculate FIS, run the governance checks, act or deliberately hold, log the evidence), closed by a weekly return arc, with the checks as the checkpoint',
       interactionRole: 'Hover a station to read what it produces; the checks station carries the trigger list',
       readerAction: 'Walk the five stations, then note that the loop closes weekly whether or not anything traded',
-      caution: 'The dashboard’s Weekly Review runs the same order when you start it: a budgeted refresh of stale scores, then ingest, read CIS and FIS, governance checks, action determination, decision log. Its governance checks do not yet receive earnings dates, price trends or correlation data, so the earnings flag comes from the Daily Review and the positions table instead (as of September 2026)',
+      caution: 'The dashboard’s Weekly Review runs the same order when you start it: a budgeted refresh of stale scores, then ingest, read CIS and FIS, governance checks, action determination, decision log. Its governance checks do not yet receive earnings dates, price trends or correlation data, so the earnings flag comes from the Framework Rule Register and the positions table instead (as of September 2026)',
     },
     status: 'implemented', wiredPublic: true,
     title: 'The Weekly Evidence Loop', setupLine: 'Regular measurement, explicit attribution, action only on a governing threshold',
@@ -3296,7 +3297,7 @@ export const FRAMEWORK_CHART_SPECS = [
     hoverTargets: [
       { id: 'cis', kind: 'node', label: 'Update CIS', name: 'Measure position quality', why: 'For each position, refresh the evidence behind convexity, risk, macro and execution, then clamp the change by confidence (±3 low, ±5 medium, ±6 derived, ±8 high), so ordinary updates move a few points at a time; a move of more than 20 points passes through as a model disagreement. In the dashboard the review refreshes at most 10 stale scores per run, older and larger positions first, then reads every current score and records what changed.', claim: 'Every score is re-read weekly; stale ones are re-earned.', concept: 'CIS', link: '/part-6-convexity-framework-integrity-scoring#cis' },
       { id: 'fis', kind: 'node', label: 'Calculate FIS', name: 'Measure portfolio integrity', why: 'Penalties by bucket, with attribution: one hundred minus the sum. Governance and dead-capital charges scale with position size; allocation, concentration and complexity charges are flat. The output is a ranked list of what to fix.', claim: 'Attribution is the deliverable.', concept: 'FIS', link: '/part-6-convexity-framework-integrity-scoring#fis' },
-      { id: 'gates', kind: 'node', label: 'The checks', name: 'Run the governance checks', why: 'Earnings proximity (T-5, cap 3%), momentum, tripwires and posture drift: the checkpoint every action passes through. In the dashboard these checks do not yet receive earnings dates, price trends or correlation data, so the three momentum dimensions go unmeasured and the earnings flag comes from the Daily Review and the positions table instead. That flag counts calendar days, so start the trim from the earnings calendar.', claim: 'Every action passes the checks first.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management#management' },
+      { id: 'gates', kind: 'node', label: 'The checks', name: 'Run the governance checks', why: 'Earnings proximity (T-5, cap 3%), momentum, tripwires and posture drift: the checkpoint every action passes through. In the dashboard these checks do not yet receive earnings dates, price trends or correlation data, so the three momentum dimensions go unmeasured and the earnings flag comes from the Framework Rule Register and the positions table instead. That flag counts calendar days, so start the trim from the earnings calendar.', claim: 'Every action passes the checks first.', concept: 'Tripwire', link: '/part-5-portfolio-construction-position-management#management' },
       { id: 'act', kind: 'node', label: 'Act or hold', name: 'Act, or deliberately hold', why: 'Tripwire: respond at once. Earnings window: trim to the 3 percent cap. FIS below 70: fix the top penalty. CIS move of 10 points or more: resize. No trigger: hold, because restraint is a decision, and the frequency limits pace the review’s own recommendations. In the dashboard’s Weekly Review a finding from its three-level check comes first; the framework’s tripwires are recorded there but raise no recommendation of their own.', claim: 'Holding is an outcome, not an omission.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring#weekly' },
       { id: 'log', kind: 'node', label: 'The record', name: 'Preserve the record', why: 'What changed and why. The dashboard’s decision log keeps the last 52 reviews, a year at a weekly cadence: the positions whose scores changed, the FIS reading, and the recommendations made or held back, with the reason. Noting what evidence would reverse a decision is good practice, but it is yours to write; the log has no field for it. Longitudinal health is only visible against a written record.', claim: 'Unrecorded decisions decay into stories.', concept: 'Weekly loop', link: '/part-6-convexity-framework-integrity-scoring#weekly' },
     ],
@@ -3318,7 +3319,7 @@ export const FRAMEWORK_CHART_SPECS = [
     title: 'Failure Rarely Arrives All at Once', setupLine: 'What happens to a healthy portfolio in the twelve months after reviews stop',
     claimLabel: 'PART 6 · LONGITUDINAL DECAY',
     frameworkClaim: 'Most implementation failures begin as small, individually tolerable deviations: a stale score, an oversized winner, a misplaced asset, one more correlated position. Left unmeasured, they compound into real fragility.',
-    readerTakeaway: 'Framework health is longitudinal. What is not remeasured eventually becomes assumed.',
+    readerTakeaway: 'Framework health is a trend. What is not remeasured eventually becomes assumed.',
     chartType: 'Five normalized decay indicators over twelve unmeasured months against a flat assumed-health reference.',
     visualDataMode: 'conceptual', disclosure: 'Conceptual diagnostic · Normalized health indicators, no market data', footerCta: 'View framework basis',
     sources: [
@@ -3350,7 +3351,7 @@ export const FRAMEWORK_CHART_SPECS = [
       { id: 'correlation', kind: 'series', seriesKey: 'correlation', label: 'Correlation stacking', name: 'Correlation stacking · accelerates late', why: 'Positions scored one at a time converge under regime stress, and different tickers become the same trade. In the dashboard, the Correlation Spike tripwire flags average pairwise correlation above 0.70 across your non-cash holdings, computed from daily closes once every holding has at least 60 daily returns. The flag is informational: no FIS bucket charges for correlation, and CIS never does.', claim: 'Stress is when diversification is audited.', concept: 'Correlation instability', link: '/part-5-portfolio-construction-position-management#management' },
       { id: 'posture', kind: 'series', seriesKey: 'posture', label: 'Posture drift', name: 'Silent posture drift', why: 'Price moves re-weight the portfolio without a single decision: Torque appreciates past its target while Ballast thins. The dashboard warns at 10 percentage points from target and fails at 20, measured against the targets your thesis implies and reported beside the score, never billed as a penalty.', claim: 'Markets rebalance you unless you notice.', concept: 'Posture', link: '/part-5-portfolio-construction-position-management#postures' },
       { id: 'wrapper', kind: 'series', seriesKey: 'wrapper', label: 'Wrapper leakage', name: 'Wrapper leakage · slow and compounding', why: 'Small tax inefficiencies accumulate over long horizons; Parts 4 and 5 work the arithmetic and state their assumptions. In the dashboard, the FIS Allocation bucket bills the account-level split against its targets as one aggregate line; it does not flag a single asset held in the wrong wrapper, so naming misplaced positions stays your job.', claim: 'Small leaks compound over decades.', concept: 'Wrapper edge', link: '/part-4-tax-architecture-roc-strategy#edge' },
-      { id: 'audit', kind: 'marker', label: 'Point-in-time audit', name: 'The one-time audit trap', why: 'Two or three months in, every indicator still rounds to healthy. A single audit samples the level; only longitudinal measurement sees the slope.', claim: 'Levels lie; slopes tell.', concept: 'Longitudinal health', link: '/part-6-convexity-framework-integrity-scoring#failure' },
+      { id: 'audit', kind: 'marker', label: 'Point-in-time audit', name: 'The one-time audit trap', why: 'Two or three months in, every indicator still rounds to healthy. A single audit samples the level; only week-over-week measurement sees the slope.', claim: 'Levels lie; slopes tell.', concept: 'Longitudinal health', link: '/part-6-convexity-framework-integrity-scoring#failure' },
     ],
     mobileTapTargets: ['freshness', 'evidence', 'correlation', 'posture', 'wrapper', 'audit'],
     implementationNotes: 'single-layout reuse; five deterministic normalized decay curves (ease-in power curves 100 − drop·t^bend, seeded ±0.2 texture, clamped at 100) against a dashed assumed-health guide at 100. Explicitly conceptual, with no market data; each hover carries the dashboard’s diagnostic threshold as of September 2026. End values (80/66/58/52/42) are unchanged from the earlier smoothstep version, so the labelDy spacing still holds at narrow widths.',

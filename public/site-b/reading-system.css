@@ -685,7 +685,7 @@ body {
 }
 
 /* ============================================================================
-   #7  SEQUENCE / FLOW STRING  (Macro thesis -> Bitcoin backbone -> ...)
+   #7  SEQUENCE / FLOW STRING  (Macro thesis -> Wrapper placement -> ...)
    Treatment: letterspaced sans tokens with accent arrows, wraps gracefully
    at the reading measure (flex-wrap — never overflows).
    ============================================================================ */

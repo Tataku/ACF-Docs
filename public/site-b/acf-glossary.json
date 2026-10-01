@@ -182,7 +182,7 @@
       {
         "key": "scoring",
         "label": "Scoring",
-        "title": "The two-score execution kernel and its cadence.",
+        "title": "Two scores, and the weekly workflow that reads them.",
         "part": 6
       }
     ],
@@ -213,9 +213,9 @@
         "power-law-corridor"
       ],
       "appearsLater": {
-        "part": 5,
-        "anchor": "postures",
-        "topic": "Three behaviors, one portfolio"
+        "part": 2,
+        "anchor": "lineage",
+        "topic": "The intellectual foundations, thesis-agnostic"
       },
       "chart": "sig-payoff"
     },
@@ -959,7 +959,7 @@
       ],
       "wave": 2,
       "category": "construction",
-      "definition": "The closed structure label every position carries: Long Carry (pro-liquidity, duration-sensitive growth that works when financial conditions ease), Short Carry (hard assets, defense and inflation or geopolitical stress plays that work when carry breaks), or Barbell (small positions with fat-tail optionality and discontinuous upside). Separately, the CIS Macro component has a carry-direction sub-score; the label is not an input to it.",
+      "definition": "The structure label every position carries, one of three: Long Carry (pro-liquidity, duration-sensitive growth that works when financial conditions ease), Short Carry (hard assets, defense and inflation or geopolitical stress plays that work when carry breaks), or Barbell (small positions with fat-tail optionality and discontinuous upside). Separately, the CIS Macro component has a carry-direction sub-score; the label is not an input to it.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -1294,11 +1294,11 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "A rule that disallows a loss on stock or securities if you buy substantially identical ones within 30 days before or after the sale, in any of your accounts. The disallowed loss is normally added to the replacement's basis, so it is deferred, but a repurchase inside an IRA or Roth IRA loses it for good. Directly held Bitcoin is not covered under current law; H.R. 10357, advanced by the House Ways and Means Committee on September 16, 2026, would extend the rule to digital assets if enacted, and it is not law.",
+      "definition": "A rule that disallows a loss on stock or securities if you buy substantially identical ones within 30 days before or after the sale, in any of your accounts. The disallowed loss is normally added to the replacement's basis, so it is deferred, but a repurchase inside an IRA or Roth IRA loses it for good. Directly held Bitcoin is not covered under current law; H.R. 10357, advanced by the House Ways and Means Committee on September 16, 2026, would extend the rule to digital assets sold after September 14, 2026 if enacted as approved, and it is not law.",
       "length": "short",
       "source": {
         "kind": "external",
-        "ref": "IRC 26 U.S.C. §1091; Rev. Rul. 2008-5; IRS Publication 550; H.R. 10357, Digital Asset Tax Certainty Act (committee vote 38 to 5, September 16, 2026)"
+        "ref": "IRC 26 U.S.C. §1091; Rev. Rul. 2008-5; IRS Publication 550; H.R. 10357, Digital Asset Tax Certainty Act (introduced September 14, 2026; committee vote 38 to 5, September 16, 2026); Joint Committee on Taxation, Description of H.R. 10357 (effective date: dispositions after the date of introduction)"
       },
       "related": [
         "tax-loss-harvesting",
@@ -1332,7 +1332,7 @@
       "appearsLater": {
         "part": 4,
         "anchor": "pretax",
-        "topic": "Gross is not net"
+        "topic": "Pre-tax accounts: inferior, occasionally useful"
       },
       "chart": null
     },
@@ -1721,7 +1721,7 @@
       ],
       "wave": 3,
       "category": "tax",
-      "definition": "Borrowing from your broker against the securities in your account instead of selling them. The framework treats it as an optional overlay, worth carrying only while the income it funds yields more than the borrow rate, and the broker can change its terms or call the loan under stress. A loan supplies cash without a sale, but it adds interest cost and the risk of a forced sale, which is a taxable event; Part 3's loan-to-value arithmetic shows how fast a falling market closes that gap.",
+      "definition": "Borrowing from your broker against the securities in your account instead of selling them. The framework treats it as an optional overlay, worth carrying only while the income it funds yields more than the borrow rate, and the broker can change its terms or call the loan under stress. A loan supplies cash without a sale, but it adds interest cost and the risk of a forced sale, which is a taxable event; Part 3's loan-to-value arithmetic shows how fast falling collateral closes the gap to a forced sale.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -2070,7 +2070,7 @@
       ],
       "wave": 3,
       "category": "scoring",
-      "definition": "The itemized account of which rule cost how many points, reported with every FIS. It names the fix next to the deduction, and the points come back once the score can see the fix. As of September 2026 the dashboard's score does not yet read the thesis, distribution and override records you keep, so a documented position can still be charged.",
+      "definition": "The itemized account of which rule cost how many points, reported with every FIS. It names the fix next to the deduction, and the points come back once the score can see the fix. As of September 2026 the dashboard's score does not yet read the thesis, distribution and override records you keep, so in the current build it bills every position as undocumented and unclassified.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -2453,7 +2453,7 @@
       ],
       "wave": 4,
       "category": "bitcoin",
-      "definition": "Bitcoin's share of the whole portfolio. Part 3 suggests 10 to 15 percent for horizons of ten years or more and moderate risk capacity, and 20 to 30 percent at higher conviction; a mature 30 to 50 percent share may emerge after 15 to 20 years through accumulation and appreciation, never by rebalancing up to it. At setup the dashboard proposes a 15 percent baseline (10 percent under two of its theses) for you to confirm or replace, and FIS carries a 10 percent Bitcoin reference that never costs points or triggers a sale.",
+      "definition": "Bitcoin's share of the whole portfolio. Part 3 suggests 10 to 15 percent for horizons of ten years or more and moderate risk capacity, and 20 to 30 percent at higher conviction; a mature 30 to 50 percent share may emerge after 15 to 20 years through accumulation and appreciation, never by rebalancing up to it. At setup the dashboard proposes a 15 percent baseline (10 percent under two of its theses) for you to confirm or replace, and FIS carries a 10 percent Bitcoin reference that never costs points or triggers a sale, though Bitcoin held under the dashboard’s own Bitcoin wrapper adds to FIS wrapper drift.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -2505,7 +2505,7 @@
       "appearsLater": {
         "part": 3,
         "anchor": "valuation",
-        "topic": "Through three cycles"
+        "topic": "Through two cycles"
       },
       "chart": "p3-power-law-holds"
     },
@@ -2659,7 +2659,7 @@
       ],
       "wave": 4,
       "category": "construction",
-      "definition": "The one to three claims a position depends on, written down at entry in a form that can be checked, such as 'datacenter capex has three or more years to run'. They are what thesis drift is measured against: when one breaks, the position is reassessed on the evidence, whatever the price is doing.",
+      "definition": "The one to three claims a position depends on, written down at entry in a form that can be checked, such as “datacenter capex has three or more years to run.” They are what thesis drift is measured against: when one breaks, the position is reassessed on the evidence, whatever the price is doing.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -3158,7 +3158,7 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "Scoring on a smooth scale instead of in steps: CIS is carried as an unrounded float from its components to the stored score and is bucketed only for display, so a position scores 78.3, not 75 or 80. Some inputs are read off tier ladders first, momentum and turnover among them, and a sparse-data cap can limit the score, but nothing rounds it. Continuity preserves the small week-over-week movement that longitudinal tracking exists to see.",
+      "definition": "Scoring on a smooth scale instead of in steps: CIS is carried as an unrounded float from its components to the stored score and is bucketed only for display, so a position scores 78.3, not 75 or 80. Some inputs are read off tier ladders first, momentum and turnover among them, and a sparse-data cap can limit the score, but nothing rounds it. Continuity preserves the small week-over-week movement that weekly tracking exists to see.",
       "length": "medium",
       "source": {
         "kind": "internal",
@@ -3276,7 +3276,7 @@
       ],
       "wave": 4,
       "category": "scoring",
-      "definition": "The failure CIS cannot see because it scores one position at a time: several high-scoring positions that move together under regime stress. The dashboard's Correlation Spike tripwire flags an average position correlation above 0.7 and prescribes adding uncorrelated assets. No FIS bucket charges for it, and CIS never does.",
+      "definition": "The failure CIS cannot see because it scores one position at a time: several high-scoring positions that move together under regime stress. The dashboard's Correlation Spike tripwire flags an average pairwise correlation above 0.7 across your non-cash holdings, once each has at least 60 daily returns; the doctrine's response, adding uncorrelated assets, is yours. No FIS bucket charges for it, and CIS never does.",
       "length": "medium",
       "source": {
         "kind": "internal",
