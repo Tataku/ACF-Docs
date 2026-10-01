@@ -52,6 +52,7 @@ export const PAGES = Object.freeze([
   { file: 'glossary.html', part: 7, h1: 'Glossary', label: 'Glossary' },
   { file: 'framework-in-pictures.html', part: 7, h1: 'The Framework in Pictures', label: 'The Framework in Pictures' },
   { file: 'framework-in-math.html', part: 7, h1: 'The Framework in Math', label: 'The Framework in Math' },
+  { file: 'evidence.html', part: 7, h1: 'Evidence', label: 'Evidence' },
 ].map(Object.freeze));
 
 /** The full <title> text (plain, unescaped) for a page label. */

@@ -24,6 +24,7 @@ const routes = {
   'glossary.html': '/glossary',
   'framework-in-pictures.html': '/framework-in-pictures',
   'framework-in-math.html': '/framework-in-math',
+  'evidence.html': '/evidence',
 };
 const pages = SITE_PAGES.map(({ part, file, label }) => ({ part, route: routes[file], file, title: label }));
 

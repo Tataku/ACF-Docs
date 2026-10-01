@@ -4014,6 +4014,32 @@ html.js [data-fc-chart]:not(.fc-live) > .fc-fallback {
 }
 .doc-kicker .kicker-link:hover { border-bottom-color: var(--accent-link); }
 
+/* Byline under a title: the pen name and where corrections go. Its link, and the
+   source links inside table cells, sit outside .prose, so without these they fall
+   back to the browser's default blue. */
+.doc-byline {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  margin: var(--space-4) 0 0;
+}
+.doc-byline a,
+.compare td a:not(.part-ref) {
+  color: var(--accent-link);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-quiet);
+}
+.doc-byline a:hover, .doc-byline a:focus-visible,
+.compare td a:not(.part-ref):hover, .compare td a:not(.part-ref):focus-visible { border-bottom-color: var(--accent-link); }
+
+/* Prose tables: every column carries sentences, so every column reads left-aligned,
+   and on phones each label sits on its own line above its value. */
+.compare-prose th, .compare-prose td { text-align: left; }
+@media (max-width: 560px) {
+  .compare-prose td { text-align: left; }
+  .compare-prose td::before { float: none; display: block; margin: 0 0 2px; }
+}
+
 /* --- pictures page (part-N-pictures): chrome-free visual essay ------------- */
 .pictures-head {
   max-width: calc(var(--measure) + 2 * var(--page-gutter));
