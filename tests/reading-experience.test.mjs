@@ -180,6 +180,13 @@ test('reading time: it is derived from the prose, at a rate that is written down
   assert.match(SYNC, /Part \$\{n\} of 6/, 'the page rule is anchored per page');
 });
 
+test('reading time: chart fallbacks are not counted as prose', () => {
+  // A regenerated chart fallback must never move a reading time: the minutes
+  // measure the prose, and the figure's contents are replaced by the live chart.
+  assert.match(SYNC, /const CHART_FIGURE = .*data-fc-chart/, 'the figure boundary is named');
+  assert.match(SYNC, /\.replace\(CHART_FIGURE, ' '\)/, 'and removed before words are counted');
+});
+
 test('reading time: the audit fails on drift (sync:counts --check)', () => {
   const r = spawnSync(process.execPath, ['scripts/sync-counts.mjs', '--check'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr || r.stdout);
@@ -190,9 +197,12 @@ test('reading time: every stated value matches the word count at the stated rate
   for (const [n, file] of PARTS) {
     const html = read(`public/site-b/${file}`);
     const main = (html.match(/<main class="shell-main">([\s\S]*?)<\/main>/) || [, ''])[1];
+    // Chart figures hold generated fallback text, not prose (D-CHART-FALLBACKS).
     const words = main
       .replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
-      .replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;|&#\d+;/gi, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+      .replace(/<figure\b[^>]*\bdata-fc-chart="[^"]*"[^>]*>[\s\S]*?<\/figure>/g, ' ')
+      .replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;|&#\d+;/gi, ' ')
       .split(/\s+/).filter(Boolean).length;
     const stated = Number(html.match(/Part \d of 6 &middot; &approx; (\d+) min read/)[1]);
     assert.equal(stated, Math.round(words / wpm), `Part ${n}: ${words} words at ${wpm} wpm`);
@@ -214,9 +224,13 @@ test('charts: the built bundle carries the repaired links, not just the spec', (
   // A spec edit that never reaches public/site-b/site-b-charts.js changes nothing
   // a visitor can see; the bundle is a committed artifact built separately from
   // prebuild (npm run build:site-b-charts).
+  // The count is computed from the spec, not typed: every link the spec writes to
+  // the anchor must reach the bundle (D-CONCEPT-LINKS moved many concepts there).
+  const want = (SPECS.match(/'\/part-1-foundation#manifesto'/g) || []).length;
   const abs = (BUNDLE.match(/\/part-1-foundation#manifesto/g) || []).length;
   const stale = (BUNDLE.match(/"#manifesto"|'#manifesto'/g) || []).length;
-  assert.equal(abs, 6, `bundle carries all six repaired links (found ${abs})`);
+  assert.ok(want > 0, 'the spec links concepts to Part 1 #manifesto');
+  assert.equal(abs, want, `bundle carries every link the spec writes (spec ${want}, bundle ${abs})`);
   assert.equal(stale, 0, 'and no page-relative survivor');
 });
 

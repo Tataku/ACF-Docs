@@ -29,6 +29,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { PAGES, THEMES, CARD_THEME, CARD_DIR, cardFile } from './social-cards.config.mjs';
+import { decodeEntities, descriptionProblems, shareText } from './site-titles.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SITE = path.join(ROOT, 'public', 'site-b');
@@ -103,13 +104,34 @@ ${BEGIN}
 ${END}`;
 }
 
+/**
+ * The share bar's static hrefs (D-TITLES). With JS on, reading-core.js rewrites
+ * them from document.title and the canonical; with JS off, these are what a
+ * reader gets. They are written here, from the same two fields and the same
+ * rule (shareText), so the two can never send different text, and nobody types
+ * a share link by hand.
+ */
+function shareLinks(html, { title, url }) {
+  const text = encodeURIComponent(shareText(decodeEntities(title)));
+  const link = encodeURIComponent(decodeEntities(url));
+  return html
+    .replace(/(<a class="part-action" data-share="x" href=")[^"]*(")/, `$1https://x.com/intent/post?text=${text}&amp;url=${link}$2`)
+    .replace(/(<a class="part-action" data-share="email" href=")[^"]*(")/, `$1mailto:?subject=${text}&amp;body=${link}$2`);
+}
+
 const problems = [];
 let written = 0;
 
 for (const page of PAGES) {
   const meta = readPage(page);
+  // A description is part of what a share shows, so it is held to D-TITLES
+  // here, where it is copied into og and twitter: 115 characters at most, no
+  // em dash, and not a restatement of the title.
+  for (const why of descriptionProblems(decodeEntities(meta.description), shareText(decodeEntities(meta.title)))) {
+    problems.push(`${page}: meta ${why}`);
+  }
   const block = render(meta);
-  const stripped = meta.html.replace(BLOCK, '');
+  const stripped = shareLinks(meta.html.replace(BLOCK, ''), meta);
 
   // Anchor after the canonical link: the og:url derives from it, so keeping
   // them adjacent makes a mismatch visible in review rather than 40 lines apart.
@@ -143,7 +165,13 @@ if (fs.existsSync(MANIFEST)) {
       }
     }
     if (live !== recorded.title) {
-      problems.push(`${page}: card art was rendered from a different title — re-run \`npm run build:social-cards\`\n      card: ${recorded.title}\n      page: ${live}`);
+      problems.push(`${page}: card art was rendered from a different title. Re-run \`npm run build:social-cards\`\n      card: ${recorded.title}\n      page: ${live}`);
+    }
+    // The card sets the description too, so a re-described page outruns its art
+    // exactly as a retitled one does (x-visuals#20).
+    const liveDescription = readPage(page).description;
+    if (liveDescription !== recorded.description) {
+      problems.push(`${page}: card art was rendered from a different description. Re-run \`npm run build:social-cards\`\n      card: ${recorded.description}\n      page: ${liveDescription}`);
     }
   }
 } else if (CHECK) {
@@ -156,5 +184,5 @@ if (problems.length) {
 }
 
 console.log(CHECK
-  ? `Social audit passed: ${PAGES.length} pages carry derived og/twitter metadata; ${Object.keys(THEMES).length} appearances present for each, serving "${CARD_THEME}"; every card matches its page title.`
+  ? `Social audit passed: ${PAGES.length} pages carry derived og/twitter metadata; ${Object.keys(THEMES).length} appearances present for each, serving "${CARD_THEME}"; every card matches its page title and description.`
   : `Social meta built: ${PAGES.length} pages checked, ${written} updated.`);

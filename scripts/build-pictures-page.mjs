@@ -197,7 +197,7 @@ html = html.replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical
 html = html.replace(/<title>[\s\S]*?<\/title>/, '<title>The Framework in Pictures &middot; The Adaptive Convexity Framework</title>');
 html = html.replace(
   /<meta name="description" content="[^"]*">/,
-  `<meta name="description" content="All ${total} exhibits of the Adaptive Convexity Framework in one gallery, grouped by the part of the book each belongs to. Every chart makes one claim and shows its mechanism.">`
+  `<meta name="description" content="All ${total} charts in book order, grouped by Part, each marked as public data, representative, simulated or a diagram.">`
 );
 html = html.replace(/<a class="skip-link" href="#[^"]*">/, `<a class="skip-link" href="#${liveGroups[0].anchor}">`);
 
@@ -215,11 +215,11 @@ const sidebarInsert = `
         <ul class="side-parts">
           <li>
             <a class="side-part current" href="/framework-in-pictures" aria-current="page">
-              <span class="spnum">&mdash;</span><span>In Pictures</span>
+              <span class="spnum">&middot;</span><span>In Pictures</span>
             </a>
           </li>
-          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&mdash;</span><span>In Math</span></a></li>
-          <li><a class="side-part" href="/glossary"><span class="spnum">&mdash;</span><span>Glossary</span></a></li>
+          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&middot;</span><span>In Math</span></a></li>
+          <li><a class="side-part" href="/glossary"><span class="spnum">&middot;</span><span>Glossary</span></a></li>
         </ul>
       </div>`;
 const navEnd = html.indexOf('</nav>', html.indexOf('<nav class="sidebar"'));

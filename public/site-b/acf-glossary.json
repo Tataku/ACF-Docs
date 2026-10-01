@@ -17,7 +17,7 @@
         "ref": "internal -> 'Part N · <Title>' of the Part that teaches it; external -> primary or academic citation"
       },
       "related": "layer-two: sibling concept ids whose roots should wake on hover (the mycelium adjacency)",
-      "appearsLater": "layer-two: the part where this term becomes operational ('see where this appears later')",
+      "appearsLater": "layer-two: where this term becomes operational ('see where this appears later'). {part, anchor, topic}: anchor is a section id on that Part's page; topic is that section's h2, or an h3 or callout title inside it, as the page reads (case, entities, curly apostrophes and a trailing period ignored). The build fails on a missing anchor or a topic that matches no heading in the section.",
       "chart": "id of the chart in the chart-handoff inventory that substantiates this term, if any"
     },
     "usage": "Tooltip layer one shows 'definition'. Layer two ('see where this appears later') is built from 'appearsLater' + 'related'. The 'related' and 'chart' ids share vocabulary with the chart-handoff CONNECTS-TO network so the glossary and the charts form one cross-reference graph. Internal sources cite the framework's own Parts; external sources cite primary/academic references.",
@@ -144,6 +144,12 @@
     "harmonizeNote": "Carry vectors harmonized 2026-07-26 and corrected 2026-09-30: the carry-vector entry defines the closed structure label (Long Carry | Short Carry | Barbell), which is not an input to the carry-direction sub-score inside the CIS macro component (Part 6). Power-law corridor was harmonized against Part 3 earlier.",
     "categories": [
       {
+        "key": "opening",
+        "label": "Opening",
+        "title": "The shape of the whole system.",
+        "part": 0
+      },
+      {
         "key": "foundations",
         "label": "Foundation",
         "title": "Why the traditional playbook is failing.",
@@ -208,7 +214,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "How convexity is expressed through Posture"
+        "anchor": "postures",
+        "topic": "Three behaviors, one portfolio"
       },
       "chart": "sig-payoff"
     },
@@ -234,7 +241,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The formal scoring definition"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -261,7 +269,8 @@
       ],
       "appearsLater": {
         "part": 2,
-        "topic": "The lineage and the full regime thesis"
+        "anchor": "macro-thesis",
+        "topic": "Identification, evaluation, and governance"
       },
       "chart": "p2-narrative-not-thesis"
     },
@@ -287,7 +296,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "Tripwires as position-management gates"
+        "anchor": "management",
+        "topic": "Governance through the cycle"
       },
       "chart": "dl-tripwire-loop"
     },
@@ -313,7 +323,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "Momentum as the sizing gate"
+        "anchor": "management",
+        "topic": "Momentum: conviction requires confirmation"
       },
       "chart": "p5-momentum-gate"
     },
@@ -354,7 +365,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "Wrapper engineering as structural edge"
+        "anchor": "edge",
+        "topic": "Wrapper engineering as a structural edge"
       },
       "chart": "p4-tax-wedge"
     },
@@ -378,7 +390,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "The Torque posture"
+        "anchor": "torque",
+        "topic": "Torque: leverage on regime forces"
       },
       "chart": "p5-operating-system"
     },
@@ -404,7 +417,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "The Ballast posture"
+        "anchor": "ballast",
+        "topic": "Ballast: the reserve that buys the drawdown"
       },
       "chart": "p5-ballast-rotation"
     },
@@ -429,7 +443,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "The Hype posture and its limits"
+        "anchor": "hype",
+        "topic": "Hype: quarantined, capped, and pre-committed to exit"
       },
       "chart": "p5-posture-sizing"
     },
@@ -453,7 +468,8 @@
       ],
       "appearsLater": {
         "part": 2,
-        "topic": "The macro thesis and policy backdrop"
+        "anchor": "thought-leaders",
+        "topic": "Macro thesis thought leaders"
       },
       "chart": "p1-policy-constraint"
     },
@@ -479,8 +495,9 @@
         "right-tail-outcomes"
       ],
       "appearsLater": {
-        "part": 4,
-        "topic": "Realization deferral mechanics"
+        "part": 3,
+        "anchor": "tam",
+        "topic": "TAM, custody, and the borrow phase"
       },
       "chart": "p3-cold-storage-to-borrow"
     },
@@ -507,7 +524,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Fragility inside the CIS score"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p1-hedge-broke"
     },
@@ -539,7 +557,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "The three postures in full"
+        "anchor": "postures",
+        "topic": "Three behaviors, one portfolio"
       },
       "chart": "p5-operating-system"
     },
@@ -563,7 +582,8 @@
       ],
       "appearsLater": {
         "part": 2,
-        "topic": "The intellectual lineage"
+        "anchor": "lineage",
+        "topic": "George Soros: Reflexivity & regime feedback loops"
       },
       "chart": "p2-markets-feed-back"
     },
@@ -588,7 +608,8 @@
       ],
       "appearsLater": {
         "part": 1,
-        "topic": "The traditional playbook is failing quietly"
+        "anchor": "manifesto",
+        "topic": "The traditional portfolio playbook is failing quietly"
       },
       "chart": null
     },
@@ -612,8 +633,9 @@
         "fragility"
       ],
       "appearsLater": {
-        "part": 2,
-        "topic": "Why the diversification regime changed"
+        "part": 5,
+        "anchor": "management",
+        "topic": "Liquidity and correlation: throttle the regime"
       },
       "chart": "p1-correlation"
     },
@@ -639,7 +661,8 @@
       ],
       "appearsLater": {
         "part": 1,
-        "topic": "Survivable compounding under uncertainty"
+        "anchor": "manifesto",
+        "topic": "The traditional portfolio playbook is failing quietly"
       },
       "chart": "p1-convexity-survival"
     },
@@ -665,7 +688,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "Taxing the right tail"
+        "anchor": "roth",
+        "topic": "Reserving Roth for Torque"
       },
       "chart": "p4-tax-wedge"
     },
@@ -689,8 +713,9 @@
         "cis"
       ],
       "appearsLater": {
-        "part": 5,
-        "topic": "Verification inside position management"
+        "part": 1,
+        "anchor": "order-of-operations",
+        "topic": "The system at a glance"
       },
       "chart": null
     },
@@ -717,7 +742,8 @@
       ],
       "appearsLater": {
         "part": 3,
-        "topic": "The conservative addressable-market estimate for the Bitcoin reserve"
+        "anchor": "tam",
+        "topic": "TAM, custody, and the borrow phase"
       },
       "chart": null
     },
@@ -749,7 +775,8 @@
       ],
       "appearsLater": {
         "part": 3,
-        "topic": "Power-law bands and model convergence"
+        "anchor": "valuation",
+        "topic": "Why Bitcoin can be modeled"
       },
       "chart": "p3-power-law-holds"
     },
@@ -775,8 +802,9 @@
         "posture"
       ],
       "appearsLater": {
-        "part": 5,
-        "topic": "Position sizing against sequence risk"
+        "part": 3,
+        "anchor": "survivability",
+        "topic": "Optimizing for multi-cycle survivability"
       },
       "chart": "p1-sequence-risk"
     },
@@ -803,8 +831,9 @@
         "carry-vector"
       ],
       "appearsLater": {
-        "part": 5,
-        "topic": "Portfolio construction and posture expression"
+        "part": 2,
+        "anchor": "lineage",
+        "topic": "The intellectual foundations, thesis-agnostic"
       },
       "chart": null
     },
@@ -829,8 +858,9 @@
         "sequence-of-returns-risk"
       ],
       "appearsLater": {
-        "part": 5,
-        "topic": "Accumulation discipline and position management"
+        "part": 3,
+        "anchor": "accumulate",
+        "topic": "Accumulate, don't trade"
       },
       "chart": "p3-accumulate-dont-trade"
     },
@@ -854,8 +884,9 @@
         "sequence-of-returns-risk"
       ],
       "appearsLater": {
-        "part": 5,
-        "topic": "Reserve capital and redeployment rules"
+        "part": 3,
+        "anchor": "accumulate",
+        "topic": "Accumulate, don't trade"
       },
       "chart": null
     },
@@ -883,8 +914,9 @@
         "ballast"
       ],
       "appearsLater": {
-        "part": 5,
-        "topic": "The Ballast posture"
+        "part": 4,
+        "anchor": "taxable",
+        "topic": "The work taxable accounts do"
       },
       "chart": "p4-roc-yield"
     },
@@ -912,7 +944,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The subtractive construction score"
+        "anchor": "fis",
+        "topic": "FIS: good positions can create bad portfolios"
       },
       "chart": "p6-fis-waterfall"
     },
@@ -940,7 +973,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Carry direction inside the CIS macro component"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": null
     },
@@ -968,6 +1002,7 @@
       ],
       "appearsLater": {
         "part": 4,
+        "anchor": "roth",
         "topic": "Reserving Roth for Torque"
       },
       "chart": "p4-tax-wedge"
@@ -1005,6 +1040,7 @@
       ],
       "appearsLater": {
         "part": 4,
+        "anchor": "taxable",
         "topic": "The work taxable accounts do"
       },
       "chart": "p4-roc-yield"
@@ -1034,6 +1070,7 @@
       ],
       "appearsLater": {
         "part": 4,
+        "anchor": "pretax",
         "topic": "Pre-tax accounts: inferior, occasionally useful"
       },
       "chart": "p4-gross-not-net"
@@ -1058,7 +1095,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "Roth allocation discipline"
+        "anchor": "wrappers",
+        "topic": "Three wrappers, three roles"
       },
       "chart": null
     },
@@ -1084,6 +1122,7 @@
       ],
       "appearsLater": {
         "part": 4,
+        "anchor": "pretax",
         "topic": "Pre-tax accounts: inferior, occasionally useful"
       },
       "chart": null
@@ -1109,7 +1148,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "The tax wedge"
+        "anchor": "edge",
+        "topic": "Wrapper engineering as a structural edge"
       },
       "chart": "p4-tax-wedge"
     },
@@ -1137,7 +1177,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "The tax wedge"
+        "anchor": "taxable",
+        "topic": "The work taxable accounts do"
       },
       "chart": "p4-tax-wedge"
     },
@@ -1178,7 +1219,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "Return of capital and basis"
+        "anchor": "taxable",
+        "topic": "The work taxable accounts do"
       },
       "chart": null
     },
@@ -1203,7 +1245,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "Why Bitcoin sits in taxable"
+        "anchor": "taxable",
+        "topic": "The work taxable accounts do"
       },
       "chart": null
     },
@@ -1238,6 +1281,7 @@
       ],
       "appearsLater": {
         "part": 4,
+        "anchor": "taxable",
         "topic": "Tax-loss harvesting"
       },
       "chart": null
@@ -1262,6 +1306,7 @@
       ],
       "appearsLater": {
         "part": 4,
+        "anchor": "taxable",
         "topic": "Tax-loss harvesting"
       },
       "chart": null
@@ -1286,7 +1331,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "Pre-tax accounts: inferior, occasionally useful"
+        "anchor": "pretax",
+        "topic": "Gross is not net"
       },
       "chart": null
     },
@@ -1311,6 +1357,7 @@
       ],
       "appearsLater": {
         "part": 4,
+        "anchor": "edge",
         "topic": "Wrapper engineering as a structural edge"
       },
       "chart": "p4-tax-wedge"
@@ -1346,7 +1393,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "Sizing by posture"
+        "anchor": "torque",
+        "topic": "Torque: leverage on regime forces"
       },
       "chart": "p5-posture-sizing"
     },
@@ -1374,7 +1422,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "The sizing tables"
+        "anchor": "torque",
+        "topic": "Torque: leverage on regime forces"
       },
       "chart": "p5-posture-sizing"
     },
@@ -1401,7 +1450,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "Concentration limits"
+        "anchor": "torque",
+        "topic": "Torque: leverage on regime forces"
       },
       "chart": "p5-posture-sizing"
     },
@@ -1425,7 +1475,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "Drawdown tolerance"
+        "anchor": "ballast",
+        "topic": "Ballast: the reserve that buys the drawdown"
       },
       "chart": "p5-operating-system"
     },
@@ -1448,7 +1499,8 @@
       ],
       "appearsLater": {
         "part": 1,
-        "topic": "Fragility is not volatility"
+        "anchor": "manifesto",
+        "topic": "The traditional portfolio playbook is failing quietly"
       },
       "chart": "p3-volatility-is-the-toll"
     },
@@ -1475,7 +1527,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Risk and Fragility inside CIS"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -1510,7 +1563,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "The rotation function"
+        "anchor": "ballast",
+        "topic": "Ballast: the reserve that buys the drawdown"
       },
       "chart": "p5-ballast-rotation"
     },
@@ -1535,6 +1589,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "hype",
         "topic": "Hype governance"
       },
       "chart": null
@@ -1560,6 +1615,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "management",
         "topic": "Earnings proximity: cap the binary event"
       },
       "chart": "p5-earnings-window"
@@ -1585,6 +1641,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "forces",
         "topic": "Allocate by force, not by sector"
       },
       "chart": "p5-force-channels"
@@ -1609,6 +1666,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "management",
         "topic": "Momentum: conviction requires confirmation"
       },
       "chart": "p5-momentum-gate"
@@ -1641,6 +1699,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "management",
         "topic": "Momentum: conviction requires confirmation"
       },
       "chart": "p5-momentum-gate"
@@ -1674,7 +1733,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "Margin as an optional overlay"
+        "anchor": "taxable",
+        "topic": "Margin: an optional overlay"
       },
       "chart": null
     },
@@ -1710,6 +1770,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "governance",
         "topic": "Doctrine, parameters, overrides"
       },
       "chart": "p5-change-hierarchy"
@@ -1743,6 +1804,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "governance",
         "topic": "Doctrine, parameters, overrides"
       },
       "chart": "p5-change-hierarchy"
@@ -1766,7 +1828,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "Earned size"
+        "anchor": "rebalancing",
+        "topic": "Rebalancing as conviction expression"
       },
       "chart": "p5-earned-size"
     },
@@ -1792,7 +1855,8 @@
       ],
       "appearsLater": {
         "part": 2,
-        "topic": "Identifying the macro thesis"
+        "anchor": "macro-thesis",
+        "topic": "Identification, evaluation, and governance"
       },
       "chart": "p2-phase-changes-sizing"
     },
@@ -1817,7 +1881,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Convexity and Optionality inside CIS"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -1841,8 +1906,9 @@
         "fragility"
       ],
       "appearsLater": {
-        "part": 1,
-        "topic": "Shape the payoff"
+        "part": 2,
+        "anchor": "lineage",
+        "topic": "Stanley Druckenmiller: Conviction & asymmetric positioning"
       },
       "chart": "sig-payoff"
     },
@@ -1870,6 +1936,7 @@
       ],
       "appearsLater": {
         "part": 6,
+        "anchor": "cis",
         "topic": "Reading the number"
       },
       "chart": null
@@ -1904,7 +1971,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Delta clamping"
+        "anchor": "cis",
+        "topic": "Delta clamping: how far a score may move"
       },
       "chart": "p6-weekly-loop"
     },
@@ -1936,7 +2004,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Confidence is derived, not asserted"
+        "anchor": "cis",
+        "topic": "Delta clamping: how far a score may move"
       },
       "chart": null
     },
@@ -1962,7 +2031,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Archetype awareness"
+        "anchor": "cis",
+        "topic": "Scoring routes: the lens fits the asset"
       },
       "chart": "p6-cis-composition"
     },
@@ -1987,7 +2057,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Subtractive scoring"
+        "anchor": "fis",
+        "topic": "Subtractive scoring: every lost point has an owner"
       },
       "chart": "p6-fis-waterfall"
     },
@@ -2013,7 +2084,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The five penalty buckets"
+        "anchor": "fis",
+        "topic": "Subtractive scoring: every lost point has an owner"
       },
       "chart": "p6-fis-waterfall"
     },
@@ -2037,7 +2109,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The five penalty buckets"
+        "anchor": "fis",
+        "topic": "Subtractive scoring: every lost point has an owner"
       },
       "chart": "p6-fis-waterfall"
     },
@@ -2062,7 +2135,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Value-weighting is scoped precisely"
+        "anchor": "fis",
+        "topic": "FIS: good positions can create bad portfolios"
       },
       "chart": null
     },
@@ -2084,7 +2158,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "How implementations quietly degrade"
+        "anchor": "failure",
+        "topic": "How implementations decay unnoticed"
       },
       "chart": "p6-decay-drift"
     },
@@ -2109,6 +2184,7 @@
       ],
       "appearsLater": {
         "part": 6,
+        "anchor": "weekly",
         "topic": "The weekly workflow"
       },
       "chart": "p6-weekly-loop"
@@ -2132,8 +2208,9 @@
         "decision-log"
       ],
       "appearsLater": {
-        "part": 1,
-        "topic": "The failure modes the system answers"
+        "part": 6,
+        "anchor": "failure",
+        "topic": "How implementations decay unnoticed"
       },
       "chart": null
     },
@@ -2155,8 +2232,9 @@
         "intra-week-trigger"
       ],
       "appearsLater": {
-        "part": 1,
-        "topic": "The failure modes the system answers"
+        "part": 6,
+        "anchor": "weekly",
+        "topic": "The weekly workflow"
       },
       "chart": "dl-tripwire-loop"
     },
@@ -2184,7 +2262,8 @@
       ],
       "appearsLater": {
         "part": 2,
-        "topic": "Taleb: antifragility and ruin avoidance"
+        "anchor": "lineage",
+        "topic": "Nassim Nicholas Taleb: Antifragility & ruin avoidance"
       },
       "chart": "p2-ruin-comes-first"
     },
@@ -2212,7 +2291,8 @@
       ],
       "appearsLater": {
         "part": 2,
-        "topic": "Lyn Alden: liquidity cycles"
+        "anchor": "thought-leaders",
+        "topic": "Macro thesis thought leaders"
       },
       "chart": "p2-liquidity-sets-tide"
     },
@@ -2243,6 +2323,7 @@
       ],
       "appearsLater": {
         "part": 3,
+        "anchor": "backbone",
         "topic": "Bitcoin as the convexity backbone"
       },
       "chart": "p3-volatility-is-the-toll"
@@ -2270,7 +2351,8 @@
       ],
       "appearsLater": {
         "part": 3,
-        "topic": "Cold-storage architecture and the borrow phase"
+        "anchor": "tam",
+        "topic": "TAM, custody, and the borrow phase"
       },
       "chart": "p3-cold-storage-to-borrow"
     },
@@ -2300,7 +2382,8 @@
       ],
       "appearsLater": {
         "part": 3,
-        "topic": "Handling doctrine: accumulate, then borrow"
+        "anchor": "accumulate",
+        "topic": "Accumulate, don't trade"
       },
       "chart": "p3-accumulate-dont-trade"
     },
@@ -2328,7 +2411,8 @@
       ],
       "appearsLater": {
         "part": 3,
-        "topic": "Power-law bands and model convergence"
+        "anchor": "valuation",
+        "topic": "Why Bitcoin can be modeled"
       },
       "chart": "p3-models-must-converge"
     },
@@ -2354,7 +2438,8 @@
       ],
       "appearsLater": {
         "part": 3,
-        "topic": "Valuation models: realized price"
+        "anchor": "valuation",
+        "topic": "Why Bitcoin can be modeled"
       },
       "chart": "p3-models-must-converge"
     },
@@ -2382,7 +2467,8 @@
       ],
       "appearsLater": {
         "part": 3,
-        "topic": "Reserve sizing by horizon and risk capacity"
+        "anchor": "tam",
+        "topic": "TAM, custody, and the borrow phase"
       },
       "chart": "p3-reserve-share-evolves"
     },
@@ -2418,7 +2504,8 @@
       ],
       "appearsLater": {
         "part": 3,
-        "topic": "Through two cycles: extension and convergence"
+        "anchor": "valuation",
+        "topic": "Through three cycles"
       },
       "chart": "p3-power-law-holds"
     },
@@ -2446,7 +2533,8 @@
       ],
       "appearsLater": {
         "part": 4,
-        "topic": "The tax wedge"
+        "anchor": "roth",
+        "topic": "Reserving Roth for Torque"
       },
       "chart": "p4-tax-wedge"
     },
@@ -2473,6 +2561,7 @@
       ],
       "appearsLater": {
         "part": 4,
+        "anchor": "roth",
         "topic": "Options within the Roth: purchased convexity only"
       },
       "chart": null
@@ -2501,6 +2590,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "governance",
         "topic": "The portfolio boundary and single-name sleeves"
       },
       "chart": null
@@ -2527,6 +2617,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "governance",
         "topic": "The portfolio boundary and single-name sleeves"
       },
       "chart": null
@@ -2554,6 +2645,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "management",
         "topic": "Thesis drift: price problems versus truth problems"
       },
       "chart": null
@@ -2581,7 +2673,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "Protocol 05: one to three core assertions per position"
+        "anchor": "management",
+        "topic": "Thesis drift: price problems versus truth problems"
       },
       "chart": null
     },
@@ -2615,6 +2708,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "management",
         "topic": "Adds and freezes: discipline on the way in"
       },
       "chart": null
@@ -2643,6 +2737,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "torque",
         "topic": "Torque: leverage on regime forces"
       },
       "chart": "p5-earned-size"
@@ -2670,7 +2765,8 @@
       ],
       "appearsLater": {
         "part": 5,
-        "topic": "Ballast: five tests, three required"
+        "anchor": "ballast",
+        "topic": "Five tests, three required"
       },
       "chart": "p5-ballast-rotation"
     },
@@ -2696,6 +2792,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "hype",
         "topic": "Hype governance"
       },
       "chart": null
@@ -2723,6 +2820,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "governance",
         "topic": "Doctrine, parameters, overrides"
       },
       "chart": "p5-change-hierarchy"
@@ -2750,6 +2848,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "governance",
         "topic": "Doctrine, parameters, overrides"
       },
       "chart": "p5-change-hierarchy"
@@ -2779,6 +2878,7 @@
       ],
       "appearsLater": {
         "part": 5,
+        "anchor": "management",
         "topic": "Liquidity and correlation: throttle the regime"
       },
       "chart": "p5-liquidity-throttle"
@@ -2808,7 +2908,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The four CIS components"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -2836,7 +2937,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The four CIS components"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -2863,7 +2965,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The four CIS components"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -2891,7 +2994,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The four CIS components"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -2918,7 +3022,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The four CIS components"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -2952,7 +3057,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The four CIS components"
+        "anchor": "cis",
+        "topic": "CIS: scoring the position, not the portfolio"
       },
       "chart": "p6-cis-composition"
     },
@@ -2981,7 +3087,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "The five penalty buckets"
+        "anchor": "fis",
+        "topic": "Subtractive scoring: every lost point has an owner"
       },
       "chart": "p6-fis-waterfall"
     },
@@ -3008,6 +3115,7 @@
       ],
       "appearsLater": {
         "part": 6,
+        "anchor": "cis",
         "topic": "Reading the number"
       },
       "chart": "p6-fis-waterfall"
@@ -3037,6 +3145,7 @@
       ],
       "appearsLater": {
         "part": 6,
+        "anchor": "interaction",
         "topic": "How CIS feeds decisions"
       },
       "chart": "p6-weekly-loop"
@@ -3062,7 +3171,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "Mechanics: floats, not tiers"
+        "anchor": "cis",
+        "topic": "Continuous scoring"
       },
       "chart": null
     },
@@ -3091,6 +3201,7 @@
       ],
       "appearsLater": {
         "part": 6,
+        "anchor": "weekly",
         "topic": "The weekly workflow"
       },
       "chart": "p6-weekly-loop"
@@ -3117,6 +3228,7 @@
       ],
       "appearsLater": {
         "part": 6,
+        "anchor": "weekly",
         "topic": "Intra-week triggers"
       },
       "chart": "p6-weekly-loop"
@@ -3151,6 +3263,7 @@
       ],
       "appearsLater": {
         "part": 6,
+        "anchor": "weekly",
         "topic": "The Restraint Principle"
       },
       "chart": "p6-weekly-loop"
@@ -3177,7 +3290,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "How implementations quietly degrade"
+        "anchor": "failure",
+        "topic": "How implementations decay unnoticed"
       },
       "chart": "p6-decay-drift"
     },
@@ -3206,7 +3320,8 @@
       ],
       "appearsLater": {
         "part": 6,
-        "topic": "How implementations quietly degrade"
+        "anchor": "failure",
+        "topic": "How implementations decay unnoticed"
       },
       "chart": "p6-decay-drift"
     }

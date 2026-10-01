@@ -35,6 +35,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { stripSeriesChain } from './site-b-shell.mjs';
+import { appearsLaterProblems } from './glossary-anchors.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SITE = path.join(ROOT, 'public', 'site-b');
@@ -62,6 +63,7 @@ const PART_ROUTES = {
 // the calibration standard forbids in user-visible copy.
 const problems = [];
 if (!CATEGORIES || !CATEGORIES.length) problems.push('meta.categories is missing — the index has nothing to group by');
+for (const c of CATEGORIES || []) if (/ - /.test(String(c.title))) problems.push(`category ${c.key}: spaced hyphen used as a dash in its title`);
 const catKeys = new Set((CATEGORIES || []).map((c) => c.key));
 const ids = new Set();
 const names = new Map();
@@ -72,6 +74,11 @@ for (const t of terms) {
   if (!catKeys.has(t.category)) problems.push(`${t.id}: category ${JSON.stringify(t.category)} is not in meta.categories`);
   if (!t.term || !t.definition) problems.push(`${t.id}: term and definition are required`);
   if (/[\u2014\u2013]/.test(`${t.term} ${t.definition}`)) problems.push(`${t.id}: em/en dash in user-visible copy`);
+  // A spaced hyphen is a dash typed by hand. It is rejected rather than turned
+  // into an em dash, which the house style forbids in reader-facing text.
+  for (const v of [t.term, t.definition, t.appearsLater && t.appearsLater.topic]) {
+    if (v && / - /.test(v)) problems.push(`${t.id}: spaced hyphen used as a dash in ${JSON.stringify(v)}`);
+  }
   for (const label of [t.term, ...(t.aliases || [])]) {
     const key = String(label).trim().toLowerCase();
     if (names.has(key) && names.get(key) !== t.id) problems.push(`"${label}" is claimed by both ${names.get(key)} and ${t.id}`);
@@ -83,6 +90,9 @@ for (const t of terms) {
   const p = t.appearsLater && t.appearsLater.part;
   if (p != null && !PART_ROUTES[p]) problems.push(`${t.id}: appearsLater.part ${p} has no route`);
 }
+// The "Part N · topic" link lands on a section, and its topic is a heading in
+// that section as the Part reads now (D-GLOSSARY-APPEARS-LATER).
+problems.push(...appearsLaterProblems(terms));
 if (problems.length) {
   console.error(`Glossary term file rejected (${problems.length}):`);
   for (const p of problems) console.error(`  - ${p}`);
@@ -93,8 +103,9 @@ const esc = (s) => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
 
-// Reuse the book's typographic register: real dashes and curly quotes.
-const typo = (s) => esc(s).replace(/ - /g, ' &mdash; ').replace(/'/g, '&rsquo;');
+// Reuse the book's typographic register: curly quotes. Dashes are never
+// manufactured here; a spaced hyphen is rejected by the term-file check above.
+const typo = (s) => esc(s).replace(/'/g, '&rsquo;');
 
 const registryPath = path.join(SITE, 'navigation-registry.json');
 const registry = fs.existsSync(registryPath) ? JSON.parse(fs.readFileSync(registryPath, 'utf8')) : null;
@@ -112,7 +123,7 @@ function row(term) {
   const links = [];
   const later = term.appearsLater;
   if (later && PART_ROUTES[later.part]) {
-    links.push(`<a class="part-ref" href="${PART_ROUTES[later.part]}">Part ${later.part} &middot; ${typo(later.topic)}</a>`);
+    links.push(`<a class="part-ref" href="${PART_ROUTES[later.part]}#${esc(later.anchor)}">Part ${later.part} &middot; ${typo(later.topic)}</a>`);
   }
   const chart = term.chart ? chartHref(term.chart) : null;
   if (chart) links.push(`<a class="part-ref" href="${chart.href}">Exhibit ${chart.label}</a>`);
@@ -240,11 +251,11 @@ const onThisPage = liveGroups
 const sidebarInsert = `
         <p class="side-movement">Reference</p>
         <ul class="side-parts">
-          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&mdash;</span><span>In Pictures</span></a></li>
-          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&mdash;</span><span>In Math</span></a></li>
+          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&middot;</span><span>In Pictures</span></a></li>
+          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&middot;</span><span>In Math</span></a></li>
           <li>
             <a class="side-part current" href="/glossary" aria-current="page">
-              <span class="spnum">&mdash;</span><span>Glossary</span>
+              <span class="spnum">&middot;</span><span>Glossary</span>
             </a>
             <ol class="on-this-page" data-spy aria-label="On this page">
 ${onThisPage}

@@ -325,7 +325,7 @@ const main = `<main class="shell-main">
       <div class="measure prose">
         <p>Twelve good positions can still make a bad portfolio. Where CIS judges one holding, the <button type="button" class="gloss" data-gloss="fis" aria-expanded="false">Framework Integrity Score</button> judges the book as assembled. FIS starts the assembled portfolio at 100 and deducts capped, named penalties in five buckets: allocation (25), governance (15), dead capital (15), concentration (15) and complexity (10, hard cap).</p>
         <p><strong>FIS = max(0, 100 &minus; &Sigma; min(bucket penalty, bucket cap))</strong></p>
-        <p>Because the five caps sum to 80, a valid computation can never emit below 20. That floor is <em>derived</em>, not declared: it falls out of the caps. It is also only a bound. Governance and dead capital are value-weighted (below), so for any book of fewer than 200 positions each of those buckets stays under 10 points, and FIS stays above 30 even with every other bucket full. A zero on a screen therefore means a broken input.</p>
+        <p>The caps sum to 80, so a valid FIS cannot fall below 20. That floor is <em>derived</em>, not declared: it falls out of the caps. It is also only a bound. Governance and dead capital are value-weighted (below), so for any book of fewer than 200 positions each of those buckets stays under 10 points, and FIS stays above 30 even with every other bucket full. A zero on a screen therefore means a broken input.</p>
         <p>An invalid portfolio (no positions, no capital, malformed input) returns <em>null</em>, never 100. An empty portfolio is not a perfect one.</p>
       </div>
 
@@ -771,7 +771,7 @@ html = html.replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical
 html = html.replace(/<title>[\s\S]*?<\/title>/, '<title>The Framework in Math &middot; The Adaptive Convexity Framework</title>');
 html = html.replace(
   /<meta name="description" content="[^"]*">/,
-  '<meta name="description" content="The Adaptive Convexity Framework stated as mathematics: the position score and its four components, the subtractive construction score, the translation from score to position size, and what the governance layer does and does not do.">'
+  '<meta name="description" content="The formulas behind CIS and FIS, how a score becomes a position size, and what governance does and does not do.">'
 );
 html = html.replace(/<a class="skip-link" href="#[^"]*">/, '<a class="skip-link" href="#reading">');
 
@@ -787,13 +787,13 @@ html = html.replace(/\s*aria-current="page"/g, '');
 const sidebarInsert = `
         <p class="side-movement">Reference</p>
         <ul class="side-parts">
-          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&mdash;</span><span>In Pictures</span></a></li>
+          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&middot;</span><span>In Pictures</span></a></li>
           <li>
             <a class="side-part current" href="/framework-in-math" aria-current="page">
-              <span class="spnum">&mdash;</span><span>In Math</span>
+              <span class="spnum">&middot;</span><span>In Math</span>
             </a>
           </li>
-          <li><a class="side-part" href="/glossary"><span class="spnum">&mdash;</span><span>Glossary</span></a></li>
+          <li><a class="side-part" href="/glossary"><span class="spnum">&middot;</span><span>Glossary</span></a></li>
         </ul>
       </div>`;
 const navEnd = html.indexOf('</nav>', html.indexOf('<nav class="sidebar"'));

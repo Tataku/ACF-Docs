@@ -7,16 +7,16 @@
   <!-- BEGIN generated social meta — build-social-meta.mjs. Do not edit by hand. -->
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="The Adaptive Convexity Framework">
-  <meta property="og:title" content="Part 3 — Bitcoin: Convexity Backbone · The Adaptive Convexity Framework">
-  <meta property="og:description" content="Bitcoin as the framework's reserve asset and principal source of convexity: structural requirements, valuation discipline, total addressable market, and a taxable cold-storage holding strategy.">
+  <meta property="og:title" content="Part 3 &middot; Bitcoin: Convexity Backbone &middot; The Adaptive Convexity Framework">
+  <meta property="og:description" content="Why Bitcoin anchors the portfolio&rsquo;s convexity, and how it is valued, accumulated, held, and borrowed against.">
   <meta property="og:url" content="https://docs.acfdashboard.com/part-3-bitcoin-convexity-backbone">
   <meta property="og:image" content="https://docs.acfdashboard.com/site-b/brand/social/part-3-bitcoin-convexity-light.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Part 3 — Bitcoin: Convexity Backbone · The Adaptive Convexity Framework">
+  <meta property="og:image:alt" content="Part 3 &middot; Bitcoin: Convexity Backbone &middot; The Adaptive Convexity Framework">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Part 3 — Bitcoin: Convexity Backbone · The Adaptive Convexity Framework">
-  <meta name="twitter:description" content="Bitcoin as the framework's reserve asset and principal source of convexity: structural requirements, valuation discipline, total addressable market, and a taxable cold-storage holding strategy.">
+  <meta name="twitter:title" content="Part 3 &middot; Bitcoin: Convexity Backbone &middot; The Adaptive Convexity Framework">
+  <meta name="twitter:description" content="Why Bitcoin anchors the portfolio&rsquo;s convexity, and how it is valued, accumulated, held, and borrowed against.">
   <meta name="twitter:image" content="https://docs.acfdashboard.com/site-b/brand/social/part-3-bitcoin-convexity-light.png">
   <!-- END generated social meta -->
   <!-- Brand / icon identity. The SVG is the mark browsers scale; it carries its
@@ -27,8 +27,8 @@
   <link rel="icon" href="/site-b/brand/favicon.svg" type="image/svg+xml">
   <link rel="shortcut icon" href="/site-b/brand/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/site-b/brand/apple-touch-icon.png">
-  <title>Part 3 — Bitcoin: Convexity Backbone · The Adaptive Convexity Framework</title>
-  <meta name="description" content="Bitcoin as the framework's reserve asset and principal source of convexity: structural requirements, valuation discipline, total addressable market, and a taxable cold-storage holding strategy.">
+  <title>Part 3 &middot; Bitcoin: Convexity Backbone &middot; The Adaptive Convexity Framework</title>
+  <meta name="description" content="Why Bitcoin anchors the portfolio&rsquo;s convexity, and how it is valued, accumulated, held, and borrowed against.">
 
   <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
   <script>
@@ -120,7 +120,7 @@
         </button>
       </div>
       <div class="sidebar-head">
-        <a class="brand" href="/" aria-label="Adaptive Convexity Framework — home">
+        <a class="brand" href="/" aria-label="Adaptive Convexity Framework, home">
           <svg class="brand-mark" viewBox="45.8 0 164.4 226.6" aria-hidden="true" focusable="false"
                fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <g stroke-width="8.4">
@@ -168,15 +168,16 @@
         <ul class="side-parts">
           <li>
             <a class="side-part current" href="/part-3-bitcoin-convexity-backbone" aria-current="page">
-              <span class="spnum">03</span><span>Bitcoin &mdash; Convexity Backbone</span>
+              <span class="spnum">03</span><span>Bitcoin: Convexity Backbone</span>
             </a>
             <ol class="on-this-page" data-spy aria-label="On this page">
               <li><a href="#backbone">The Backbone</a></li>
               <li><a href="#irreplaceability">Structural Fit</a></li>
               <li><a href="#survivability">Multi-Cycle Survivability</a></li>
+              <li><a href="#accumulate">Accumulation</a></li>
               <li><a href="#risks">Risk Register</a></li>
               <li><a href="#valuation">Valuation Models</a></li>
-              <li><a href="#tam">TAM &amp; Implementation</a></li>
+              <li><a href="#tam">TAM, Custody &amp; Borrowing</a></li>
             </ol>
           </li>
           <li><a class="side-part" href="/part-4-tax-architecture-roc-strategy"><span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy</span></a></li>
@@ -194,9 +195,9 @@
 
         <p class="side-movement">Reference</p>
         <ul class="side-parts">
-          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&mdash;</span><span>In Pictures</span></a></li>
-          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&mdash;</span><span>In Math</span></a></li>
-          <li><a class="side-part" href="/glossary"><span class="spnum">&mdash;</span><span>Glossary</span></a></li>
+          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&middot;</span><span>In Pictures</span></a></li>
+          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&middot;</span><span>In Math</span></a></li>
+          <li><a class="side-part" href="/glossary"><span class="spnum">&middot;</span><span>Glossary</span></a></li>
         </ul>
       </div>
     </nav>
@@ -206,7 +207,7 @@
         <div class="measure">
           <div class="doc-signal" data-glyph-text>Framework Documentation</div>
           <a class="doc-breadcrumb" href="/">The Adaptive Convexity Framework</a>
-          <p class="doc-kicker">Part 3 of 6 &middot; &approx; 13 min read &middot; <a class="kicker-link" href="/framework-in-pictures#backbone">In pictures &middot; 7 exhibits &rarr;</a></p>
+          <p class="doc-kicker">Part 3 of 6 &middot; &approx; 21 min read &middot; <a class="kicker-link" href="/framework-in-pictures#backbone">In pictures &middot; 7 exhibits &rarr;</a></p>
           <h1 class="doc-title">Bitcoin: Convexity Backbone</h1>
 
           <!-- Part action bar: Listen (convenience, JS-only) + Share. Shared component, identical on every part. -->
@@ -218,10 +219,10 @@
             </button>
 
             <div class="part-share">
-              <a class="part-action" data-share="x" href="https://x.com/intent/post" target="_blank" rel="noopener noreferrer" aria-label="Share on X">
+              <a class="part-action" data-share="x" href="https://x.com/intent/post?text=Part%203%20%C2%B7%20Bitcoin%3A%20Convexity%20Backbone&amp;url=https%3A%2F%2Fdocs.acfdashboard.com%2Fpart-3-bitcoin-convexity-backbone" target="_blank" rel="noopener noreferrer" aria-label="Share on X">
                 <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4l16 16M20 4L4 20"></path></svg>
               </a>
-              <a class="part-action" data-share="email" href="mailto:" aria-label="Share by email">
+              <a class="part-action" data-share="email" href="mailto:?subject=Part%203%20%C2%B7%20Bitcoin%3A%20Convexity%20Backbone&amp;body=https%3A%2F%2Fdocs.acfdashboard.com%2Fpart-3-bitcoin-convexity-backbone" aria-label="Share by email">
                 <svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M4 7l8 6 8-6"></path></svg>
               </a>
               <button type="button" class="part-action" data-copy-link aria-label="Copy link to this part">
@@ -379,7 +380,15 @@
       </div>
 
       <!-- Chart island: p3-exposure-not-control "Exposure Is Not Control": the three-posture stress tunnel. -->
-      <figure class="fc-mount" id="exhibit-p3-exposure-not-control" data-fc-chart="p3-exposure-not-control"></figure>
+      <figure class="fc-mount" id="exhibit-p3-exposure-not-control" data-fc-chart="p3-exposure-not-control">
+        <figcaption class="fc-fallback" data-fc-fallback="p3-exposure-not-control">
+          <p class="fc-fallback-title"><strong>P3-01 · Exposure Is Not Control</strong>: Three allocations meet the same shock. The one that counts is the one you can still follow afterward.</p>
+          <p class="fc-fallback-claim">Maximum exposure breaks under a messy path; the framework allocation survives it and still participates.</p>
+          <p class="fc-fallback-body">An interactive stress test, not a time series. Three allocations run as horizontal lanes through a shock zone in the middle: maximum exposure at 100 percent Bitcoin, the framework reserve at 15 percent Bitcoin with dry powder and an income sleeve, and a stress-tested reserve at 10 percent Bitcoin with half the portfolio in dry powder. The same shock hits all three. Maximum exposure climbs steepest before the shock, then plunges; under a job-loss shock its lane breaks at a forced sale. The framework lane bends, stays whole and keeps capacity to act. The stress-tested lane dips least but climbs slowly. A readout below grades each allocation under the current shock on participation, reserve, forced-error risk and followability, with terminal value as a small secondary figure. In the opportunity window the reserves act during the drawdown, above the exact bottom.</p>
+          <p class="fc-fallback-note">Representative simulation of three whole-portfolio allocations on one made-up market path; the scores are illustrative and nothing here is a forecast. Representative simulation. Computed from stated inputs, not a forecast or a historical backtest.</p>
+          <p class="fc-fallback-src">Sources: Author simulation · Three allocations on one shared market path: 100% Bitcoin; 15% Bitcoin with 15% dry powder and an income sleeve; 10% Bitcoin with 50% dry powder and an income sleeve; <a href="/part-3-bitcoin-convexity-backbone#survivability">Rule stated in Part 3 · Optimizing for multi-cycle survivability</a>.</p>
+        </figcaption>
+      </figure>
     </section>
 
     <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -396,7 +405,15 @@
       </div>
 
       <!-- Chart island: p3-accumulate-dont-trade "Accumulate, Don't Trade": DCA units = dollars ÷ price. -->
-      <figure class="fc-mount" id="exhibit-p3-accumulate-dont-trade" data-fc-chart="p3-accumulate-dont-trade"></figure>
+      <figure class="fc-mount" id="exhibit-p3-accumulate-dont-trade" data-fc-chart="p3-accumulate-dont-trade">
+        <figcaption class="fc-fallback" data-fc-fallback="p3-accumulate-dont-trade">
+          <p class="fc-fallback-title"><strong>P3-02 · Accumulate, Don’t Trade</strong>: Fixed-dollar DCA buys more units when Bitcoin is lower</p>
+          <p class="fc-fallback-claim">Fixed-dollar DCA buys more units when price is lower, and the framework leans in further only when Bitcoin is deeply undervalued.</p>
+          <p class="fc-fallback-body">A representative Bitcoin price index over one cycle, drawn above a row of dollar-cost-averaging unit bars. Price starts below fair value, dips into a deep undervalued trough, recovers toward fair value, then runs extended. Because units received equal fixed dollars divided by price, the bars are taller when price is lower. While price is deeply undervalued the framework buys about 50 percent more, so its accent bars rise above the baseline; nearer fair value it buys the baseline; once price is extended it halves discretionary buying and banks the difference as dry powder. The readout, +26%, is the framework's units per dollar against plain DCA (28 percent more units for 2 percent more dollars). The reserve is never sold.</p>
+          <p class="fc-fallback-note">A representative price index, not historical prices, so the bars show relative units only. The readout compares units per dollar, and the reserve is never sold. Conceptual diagram. Illustrative framework exhibit, not historical data.</p>
+          <p class="fc-fallback-src">Sources: <a href="/part-3-bitcoin-convexity-backbone#accumulate">Rule stated in Part 3 · Accumulate, don’t trade</a>.</p>
+        </figcaption>
+      </figure>
 
       <div class="measure prose">
         <p>Valuation discipline, developed under Valuation Models below, sets the <em>pace</em>. When the independent models agree that price is more than 30 percent below their combined estimate, you raise contributions by about half or deploy dry powder. When price runs well above them, you slow discretionary buying and bank income as dry powder, while the systematic income-funded purchases continue. Neither case ever calls for selling the core reserve. Selling would bring back the three failures the design exists to avoid: <button type="button" class="gloss" data-gloss="sequence-of-returns-risk" aria-expanded="false">sequencing risk</button> from a mistimed exit, a tax bill on a realized gain, and the behavioral error of selling into weakness. An accumulator never has to pick an exit, so none of the three ever comes up.</p>
@@ -437,7 +454,15 @@
       </div>
 
       <!-- Chart island: p3-volatility-is-the-toll "Volatility Is the Toll": big drawdown, small hit at a managed size. -->
-      <figure class="fc-mount" id="exhibit-p3-volatility-is-the-toll" data-fc-chart="p3-volatility-is-the-toll"></figure>
+      <figure class="fc-mount" id="exhibit-p3-volatility-is-the-toll" data-fc-chart="p3-volatility-is-the-toll">
+        <figcaption class="fc-fallback" data-fc-fallback="p3-volatility-is-the-toll">
+          <p class="fc-fallback-title"><strong>P3-03 · Volatility Is the Toll</strong>: What a deep Bitcoin fall costs a portfolio that holds Bitcoin as a sized reserve</p>
+          <p class="fc-fallback-claim">At a 15 percent reserve, a 77 percent Bitcoin fall costs the portfolio about 11.5 percent: painful, and survivable.</p>
+          <p class="fc-fallback-body">Two representative lines, both starting at 100. Bitcoin rises, falls about 77 percent, climbs to a new high, falls about 54 percent and partly recovers. The portfolio line, computed from it with Bitcoin at 15 percent, dips about 11.5 percent in the first fall and about 8 percent in the second.</p>
+          <p class="fc-fallback-note">Representative Bitcoin path, not historical prices. The portfolio line is computed from it, with Bitcoin reset to 15 percent at each new high and the rest held flat. The reset is a simplification: the framework never trims the reserve, so a reserve left to grow goes into the next fall as a larger share and loses more. Representative framework exhibit. Sources support the underlying concept.</p>
+          <p class="fc-fallback-src">Sources: <a href="https://www.cnbc.com/2024/03/05/bitcoin-all-time-high.html">CNBC · March 5, 2024 · Galaxy Digital’s Alex Thorn: “bitcoin has seen four 75% [plus] drawdowns”; its record before 2024 was $68,982.20 on November 10, 2021</a>; Author calculation · Portfolio line = Bitcoin at 15 percent (reset at each new Bitcoin high, untouched through each fall) + 85 percent held flat; the Bitcoin path is illustrative, drawn to falls of about 77 and 54 percent; <a href="/part-1-foundation#manifesto">Rule stated in Part 1 · The traditional portfolio playbook is failing quietly</a>.</p>
+        </figcaption>
+      </figure>
     </section>
 
     <div class="rule-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -453,7 +478,15 @@
       </div>
 
       <!-- Chart island: p3-power-law-holds "Power-Law Corridor": the log power-law corridor exhibit. -->
-      <figure class="fc-mount" id="exhibit-p3-power-law-holds" data-fc-chart="p3-power-law-holds"></figure>
+      <figure class="fc-mount" id="exhibit-p3-power-law-holds" data-fc-chart="p3-power-law-holds">
+        <figcaption class="fc-fallback" data-fc-fallback="p3-power-law-holds">
+          <p class="fc-fallback-title"><strong>P3-04 · Power-Law Corridor</strong>: Price against a log power-law corridor: a trend line with euphoria and capitulation bands</p>
+          <p class="fc-fallback-claim">On log-log axes, Bitcoin’s price has clustered around a rising power-law trend, with swings above and below it.</p>
+          <p class="fc-fallback-body">A log-log schematic with no price levels or dates. A rising power-law trend line runs through a shaded corridor. A representative price path swings through it, spiking above the upper euphoria band twice and closing below the lower capitulation band once, and ends back inside the corridor at a later reading.</p>
+          <p class="fc-fallback-note">Representative schematic, not plotted prices: the axes carry no price levels or dates, and the path is drawn. The fitted constants move with the data window, and no band is a hard floor: price has spent months below power-law floor lines, most recently in 2026. Representative framework exhibit. Sources support the underlying concept.</p>
+          <p class="fc-fallback-src">Sources: <a href="https://giovannisantostasi.medium.com/the-bitcoin-power-law-theory-962dfaf99ee9">Giovanni Santostasi · Medium, March 2024 · The Bitcoin Power Law Theory: price as a power law of days since the genesis block (first posted on Reddit, 2018)</a>; <a href="https://medium.com/quantodian-publications/bitcoins-natural-long-term-power-law-corridor-of-growth-649d0e9b3c94">Harold Christopher Burger · Medium, September 2019 · Bitcoin’s natural long-term power-law corridor of growth: the corridor with support and resistance bands</a>; Author illustration · Method the shape illustrates: a straight power-law trend on log-log axes, with bands a fixed distance above and below it; the price path is drawn, not fitted.</p>
+        </figcaption>
+      </figure>
 
       <div class="measure prose">
         <p>No single model is enough on its own, so the framework reads five: four valuation models and one directional reading of liquidity. When they agree, confidence rises; when they pull apart, so does caution.</p>
@@ -474,7 +507,15 @@
       </div>
 
       <!-- Chart island: p3-models-must-converge "Models Must Converge": the multi-model convergence envelope. -->
-      <figure class="fc-mount" id="exhibit-p3-models-must-converge" data-fc-chart="p3-models-must-converge"></figure>
+      <figure class="fc-mount" id="exhibit-p3-models-must-converge" data-fc-chart="p3-models-must-converge">
+        <figcaption class="fc-fallback" data-fc-fallback="p3-models-must-converge">
+          <p class="fc-fallback-title"><strong>P3-05 · Models Must Converge</strong>: The valuation models are most useful where they agree; when they fan apart, caution rises</p>
+          <p class="fc-fallback-claim">The valuation models earn trust where they converge, and the discount to that converged estimate sets the pace of buying.</p>
+          <p class="fc-fallback-body">A conceptual valuation index with a shaded range between the highest and lowest model estimates. The range starts wide, narrows to a tight convergence mid-chart, then widens again into divergence. The price line moves inside the range throughout and sits near its top where the models converge.</p>
+          <p class="fc-fallback-note">The envelope spans four valuation models. The dashboard computes no model convergence; you read it yourself (as of September 2026). Conceptual diagram. Illustrative framework exhibit, not historical data.</p>
+          <p class="fc-fallback-src">Sources: <a href="/part-3-bitcoin-convexity-backbone#valuation">Rule stated in Part 3 · Why Bitcoin can be modeled</a>.</p>
+        </figcaption>
+      </figure>
 
       <div class="measure-feature">
         <div class="failure-modes" data-kind="state">
@@ -523,7 +564,15 @@
       </div>
 
       <!-- Chart island: p3-cold-storage-to-borrow "Cold Storage to Borrow": the reserve lifecycle flow (accumulate → self-custody → mature → collateralized loan → liquidity without a sale). -->
-      <figure class="fc-mount" id="exhibit-p3-cold-storage-to-borrow" data-fc-chart="p3-cold-storage-to-borrow"></figure>
+      <figure class="fc-mount" id="exhibit-p3-cold-storage-to-borrow" data-fc-chart="p3-cold-storage-to-borrow">
+        <figcaption class="fc-fallback" data-fc-fallback="p3-cold-storage-to-borrow">
+          <p class="fc-fallback-title"><strong>P3-06 · Cold Storage to Borrow</strong>: The reserve lifecycle: accumulate, self-custody, mature, and optionally borrow instead of selling</p>
+          <p class="fc-fallback-claim">A mature reserve can supply cash by borrowing against it instead of selling it, if you choose to borrow at all.</p>
+          <p class="fc-fallback-body">A five-stage reserve lifecycle, left to right: accumulate, self-custody, mature reserve, an optional collateralized loan, and liquidity with no sale while the loan holds.</p>
+          <p class="fc-fallback-note">Borrowing is optional. A loan supplies cash without a sale, but it adds interest cost and the risk of a forced sale: if the collateral falls far enough, or a payment is missed, the lender sells it, and that sale is a taxable event. Tax treatment can change. Conceptual diagram. Illustrative framework exhibit, not historical data.</p>
+          <p class="fc-fallback-src">Sources: <a href="/part-3-bitcoin-convexity-backbone#tam">Rule stated in Part 3 · TAM, custody, and the borrow phase</a>.</p>
+        </figcaption>
+      </figure>
 
       <div class="measure">
         <ol class="proc-steps" data-stepper>
@@ -541,7 +590,15 @@
       </div>
 
       <!-- Chart island: p3-reserve-share-evolves "Reserve Share Evolves": allocation share rising through the target band and mature threshold into the borrow-phase governance zone. -->
-      <figure class="fc-mount" id="exhibit-p3-reserve-share-evolves" data-fc-chart="p3-reserve-share-evolves"></figure>
+      <figure class="fc-mount" id="exhibit-p3-reserve-share-evolves" data-fc-chart="p3-reserve-share-evolves">
+        <figcaption class="fc-fallback" data-fc-fallback="p3-reserve-share-evolves">
+          <p class="fc-fallback-title"><strong>P3-07 · Reserve Share Evolves</strong>: A 10–15% reserve can grow into a 30–50% share over 15 to 20 years, and borrowing against it then becomes an option</p>
+          <p class="fc-fallback-claim">A starting reserve can grow into a share large enough that governing it matters more than building it.</p>
+          <p class="fc-fallback-body">Reserve share as a percent of net worth, rising over twenty years from about 12 percent, past the 15 percent top of the target range near year 7, across the 30 percent mature guide just after year 15, to about 46 percent at year 20. A mark at year 17 shows where borrowing against the reserve becomes an option.</p>
+          <p class="fc-fallback-note">Illustrative trajectory, not a forecast for any portfolio. These percentages describe outcomes under given conditions, not rebalanced targets. Representative simulation. Computed from stated inputs, not a forecast or a historical backtest.</p>
+          <p class="fc-fallback-src">Sources: Author calculation · Illustrative trajectory: share = 12 + 34 × (year ÷ 20)^2.3 percent, with small drawn noise; <a href="/part-3-bitcoin-convexity-backbone#tam">Rule stated in Part 3 · TAM, custody, and the borrow phase</a>.</p>
+        </figcaption>
+      </figure>
 
       <aside class="callout callout-insight" aria-label="Key insight">
         <div class="ci-head">

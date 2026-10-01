@@ -7,7 +7,8 @@
  *   · stable, unique chartId · intendedPlacement · group · status
  *   · claim + explainer copy + a disclosed footer statement
  *   · visualDataMode is one of the allowed modes and is disclosed truthfully
- *       - historical  → at least one verifiable (url) backing/target source
+ *       - historical  → a 'backs-series' source with a url (series id, frequency,
+ *                       date range, transform and retrieval date on every such row)
  *       - representative → discloses; sources support the concept
  *       - simulation  → discloses; carries a methodology source
  *       - conceptual  → discloses; any sources carry a role
@@ -24,6 +25,7 @@ import {
   VISUAL_RELATIONSHIPS, LAYOUT_RELATIONSHIPS,
   resolveClaimStack, resolveInteraction, resolveMotionProfile, resolveBackgroundRoles, getSimulationIntro,
   resolveExperienceRole, resolveStoryBeats, resolveMobileBehavior, resolveTryThis, resolveMotionTiming, resolveVisualRelationship,
+  CONCEPT_LINKS, RETIRED_CONCEPT_LABELS, PART_ROUTES,
 } from '../components/framework-charts/chart-specs.mjs';
 import { validateMultiLaneSpec } from '../components/framework-charts/chart-core/multilane.mjs';
 
@@ -74,15 +76,64 @@ for (const s of FRAMEWORK_CHART_SPECS) {
     ok(src.provider, `${w} source[${i}] missing provider`);
     ok(ROLES.has(src.role), `${w} source[${i}] bad/missing role: ${src.role}`);
   });
+  // D-CHART-DATA-POLICY: a plotted series is backed by a 'backs-series' row that
+  // a reader can reproduce: series id, frequency, date range, transform, url and
+  // retrieval date. 'target-source' (a series the chart only aims at) is retired.
+  sources.forEach((src, i) => {
+    ok(src.role !== 'target-source', `${w} source[${i}] uses the retired role 'target-source' (use 'backs-series' for a plotted series)`);
+  });
   if (s.visualDataMode === 'historical') {
-    ok(sources.some((src) => (src.role === 'backs-series' || src.role === 'target-source') && src.url), `${w} historical chart needs a verifiable backing source (url)`);
+    ok(sources.some((src) => src.role === 'backs-series' && src.url), `${w} historical chart needs a 'backs-series' source with a url`);
+    sources.filter((src) => src.role === 'backs-series').forEach((src) => {
+      for (const k of ['url', 'seriesId', 'frequency', 'dateRange', 'transform', 'retrieved']) {
+        ok(src[k] && String(src[k]).trim(), `${w} backs-series row '${src.seriesId || src.label}' missing ${k}`);
+      }
+    });
   }
   if (s.visualDataMode === 'representative') {
     ok(sources.length >= 1, `${w} representative chart should cite supporting sources`);
   }
+  // A 'basis' row names the published figure an illustrative exhibit is drawn
+  // through, so it is always an external source; an exhibit that says it is
+  // drawn through published figures names them in at least one basis row.
+  sources.filter((src) => src.role === 'basis').forEach((src) => {
+    ok(/^https?:\/\//.test(src.url || ''), `${w} basis row '${src.label}' needs an external url`);
+    ok(s.visualDataMode === 'representative', `${w} only a representative chart carries basis rows (it is ${s.visualDataMode})`);
+  });
+  if (/Drawn through the published figures at the marked points/.test(s.claimStack?.caution || '')) {
+    ok(sources.some((src) => src.role === 'basis'), `${w} is drawn through published figures but names none in a basis row`);
+  }
   if (s.visualDataMode === 'simulation') {
     ok(sources.some((src) => src.role === 'methodology'), `${w} simulation needs a methodology source`);
   }
+
+  // sources that cite a Part (D-CONCEPT-LINKS, D-CHART-DATA-POLICY): 'Rule stated in Part N · <heading>',
+  // a section anchor on that Part, never the chart's own Part as evidence for data, and a
+  // Part 1 chart never cites Part 1 alone.
+  const partRows = sources.filter((src) => /^\/part-\d-/.test(src.url || ''));
+  partRows.forEach((src) => {
+    const n = Number((src.url.match(/^\/part-(\d)-/) || [])[1]);
+    ok(src.url.startsWith(`${PART_ROUTES[n]}#`) && src.url.length > PART_ROUTES[n].length + 1, `${w} Part source needs a section anchor: ${src.url}`);
+    ok(src.role === 'verifies-concept', `${w} Part source must be verifies-concept: ${src.label}`);
+    ok(src.provider === `ACF · Part ${n}`, `${w} Part source provider must be 'ACF · Part ${n}': ${src.provider}`);
+    ok(new RegExp(`^Rule stated in Part ${n} · \\S`).test(src.label || ''), `${w} Part source label must read 'Rule stated in Part ${n} · <section heading>': ${src.label}`);
+    if (s.visualDataMode === 'representative' || s.visualDataMode === 'historical') {
+      ok(s.group !== `part-${n}`, `${w} a ${s.visualDataMode} chart may not cite its own Part as evidence`);
+    }
+  });
+  if (s.group === 'part-1' && sources.length) {
+    ok(!sources.every((src) => /^\/part-1-/.test(src.url || '')), `${w} a Part 1 chart may not cite only Part 1`);
+  }
+
+  // concept labels: one label, one target (D-CONCEPT-LINKS)
+  const conceptOk = (label, link, where) => {
+    ok(!RETIRED_CONCEPT_LABELS.includes(label), `${w} ${where} uses retired concept label '${label}'`);
+    ok(Object.prototype.hasOwnProperty.call(CONCEPT_LINKS, label), `${w} ${where} concept '${label}' is not on the concept map`);
+    if (link !== undefined) ok(link === CONCEPT_LINKS[label], `${w} ${where} concept '${label}' links ${link}, map says ${CONCEPT_LINKS[label]}`);
+  };
+  conceptOk(s.explainerConcept, undefined, 'explainerConcept');
+  (s.concepts || []).forEach((c, i) => conceptOk(c.label, c.link, `concepts[${i}]`));
+  (s.hoverTargets || []).forEach((t) => { if (t.concept !== undefined || t.link !== undefined) conceptOk(t.concept, t.link, `hover ${t.id}`); });
 
   // optional reader-context personalization
   if (s.personalization) {

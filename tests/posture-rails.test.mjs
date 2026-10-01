@@ -60,10 +60,14 @@ test('sync: in the prebuild chain, with its own audit script', () => {
 
 test('source: the rail’s numbers are the stat line’s numbers, read from the same markup', () => {
   const torque = vars('torque'), ballast = vars('ballast'), hype = vars('hype');
-  assert.deepEqual(torque, { lo: 40, hi: 60, plo: 3, phi: 15 });
-  assert.deepEqual(ballast, { lo: 20, hi: 35, plo: 2, phi: 8 });
+  // D-POSTURE-RANGES: the per-position range follows the band tables (Torque
+  // 2–4 / 4–8 / 8–15, Ballast 1–3 / 3–5 / 5–8), so the rails start at 2 and 1.
+  assert.deepEqual(torque, { lo: 40, hi: 60, plo: 2, phi: 15 });
+  assert.deepEqual(ballast, { lo: 20, hi: 35, plo: 1, phi: 8 });
   assert.deepEqual(hype, { lo: 0, hi: 10, plo: 2, phi: 5, cap: 10 });
   assert.match(card('torque'), /<em>40&ndash;60%<\/em>aggregate/);
+  assert.match(card('torque'), /<em>2&ndash;15%<\/em>per position/);
+  assert.match(card('ballast'), /<em>1&ndash;8%<\/em>per position/);
   assert.match(card('hype'), /<em>&le;10%<\/em>hard cap/);
   // no label and no text nodes in a rail: the stat line already says the number, and
   // the reading time counts words — a decoration is not one

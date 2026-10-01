@@ -14,8 +14,9 @@
  * Playwright to a site whose entire dependency set is next + react + esbuild
  * would put a ~300MB download in the deploy path for art that changes when a
  * Part is retitled — which is roughly never. So the PNGs are committed, and
- * `npm run audit:social` catches the case where a title moved out from under
- * its card by comparing cards.json against the live <title>. The browser is
+ * `npm run audit:social` catches the case where a title or description moved
+ * out from under its card by comparing cards.json against the live <title> and
+ * meta description. The browser is
  * needed to FIX that drift, never to DETECT it.
  *
  * WHY A PLATE, WHEN THE FAVICON DROPPED ITS PLATE. Opposite problems. A favicon
@@ -35,6 +36,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { PAGES, THEMES, CARD_DIR, cardFile } from './social-cards.config.mjs';
+import { shareText, splitLabel } from './site-titles.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SITE = path.join(ROOT, 'public', 'site-b');
@@ -53,16 +55,16 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, 
 
 /**
  * Split a page title into the eyebrow and the headline the card sets.
- * "Part 3 — Bitcoin: Convexity Backbone · The Adaptive Convexity Framework"
+ * "Part 3 · Bitcoin: Convexity Backbone · The Adaptive Convexity Framework"
  *   -> eyebrow "Part 3", headline "Bitcoin: Convexity Backbone"
- * The cover has no separators, so it becomes the headline whole.
+ * The trailing site name is stripped and the rest is split on the FIRST " · "
+ * (scripts/site-titles.mjs, the same rule the share links use). A title with no
+ * separator left (the cover, the reference pages, Part 1 in Pictures) is the
+ * headline whole.
  */
 function split(rawTitle) {
-  const title = decode(rawTitle);
-  const lead = title.split('·')[0].trim();
-  const dash = lead.match(/^(Part\s+\d+)\s*[—–-]\s*(.+)$/);
-  if (dash) return { eyebrow: dash[1], headline: dash[2].trim() };
-  return { eyebrow: 'Framework Documentation', headline: lead };
+  const { eyebrow, headline } = splitLabel(shareText(decode(rawTitle)));
+  return { eyebrow: eyebrow || 'Framework Documentation', headline };
 }
 
 function read(page) {
@@ -144,8 +146,9 @@ for (const page of PAGES) {
     await pg.screenshot({ path: path.join(OUT, cardFile(page, theme)) });
     await pg.close();
   }
-  // Recorded so audit:social can tell that a retitled page outran its art.
-  cards[page] = { title };
+  // Recorded so audit:social can tell that a retitled or re-described page
+  // outran its art: the card sets both the title and the description in pixels.
+  cards[page] = { title, description };
   console.log(`  ${page}  ${parts.eyebrow} / ${parts.headline}`);
 }
 
@@ -157,7 +160,7 @@ for (const theme of Object.keys(THEMES)) {
 await browser.close();
 
 fs.writeFileSync(path.join(OUT, 'cards.json'), `${JSON.stringify({
-  note: 'Written by scripts/build-social-cards.mjs. `npm run audit:social` compares these titles to the live <title> to catch art that outran its page.',
+  note: 'Written by scripts/build-social-cards.mjs. `npm run audit:social` compares these titles and descriptions to the live <title> and meta description to catch art that outran its page.',
   themes: Object.keys(THEMES),
   cards,
 }, null, 2)}\n`);

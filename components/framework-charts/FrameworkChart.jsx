@@ -19,7 +19,7 @@ import React from 'react';
 import * as Brush from './brush';
 import { BrushX, BrushChevron, BrushFrame } from './icons';
 import { getPalette, getAccent } from './palette';
-import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming } from './chart-specs.mjs';
+import { getChartSpec, footerModel, getDataModeMarker, valueAt, getSimulationIntro, getSimulationNote, getTooltipValueText, readStartingValue, resolveMobileBehavior, resolveTryThis, resolveMotionProfile, resolveMotionTiming, CONCEPT_LINKS } from './chart-specs.mjs';
 import { layoutMultiLane } from './chart-core/multilane.mjs';   // shared, framework-agnostic multi-lane model
 import { formatIllustrativeMoney } from './chart-core/format.mjs';   // docs illustrative money policy (chart-core facade)
 
@@ -683,7 +683,7 @@ function LoopSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Governed loop diagram" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || spec.title} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="none" stroke={pal.grid} strokeWidth="1" strokeDasharray="2 7" />
         <text x={cx} y={cy + 4} textAnchor="middle" style={halo(pal, 9, pal.text4)}>{spec.loop.centerLabel?.toUpperCase()}</text>
         {/* arrows */}
@@ -762,7 +762,7 @@ function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Staged flow diagram" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || spec.title} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {stages.map((st, i) => st.label ? <text key={`sl${i}`} x={pad.l + colW * (i + 0.5)} y={pad.t - 18} textAnchor="middle" style={halo(pal, 8.5, pal.text4)}>{st.label.toUpperCase()}</text> : null)}
         <g style={{ opacity: entered ? 0.5 : 0, transition: reduce ? 'opacity 320ms ease' : 'opacity 800ms ease 200ms' }}>
           {connectors.map((c, i) => {
@@ -779,7 +779,8 @@ function FlowSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
             <g key={n.id} style={{ opacity: entered ? (focusId && !on ? 0.4 : 1) : 0, transformOrigin: `${n.x}px ${n.y}px`, transform: entered ? 'none' : 'scale(0.92)', transition: reduce ? 'opacity 300ms ease' : `opacity 460ms ease ${100 + n.stageIdx * 90}ms, transform 460ms cubic-bezier(0.2,0.7,0.2,1) ${100 + n.stageIdx * 90}ms` }}>
               <rect x={n.x - NW / 2} y={n.y - NH / 2} width={NW} height={NH} rx={8} fill={pal.surface} stroke={on || isP ? accent : pal.borderHi} strokeWidth={on ? 1.6 : 1} style={{ transition: trans('stroke') }} />
               <text x={n.x} y={n.y - 3} textAnchor="middle" style={haloSans(pal, 12.5, isP ? accent : pal.text1, 600)}>{n.label}</text>
-              {n.sub && <text x={n.x} y={n.y + 13} textAnchor="middle" style={halo(pal, 8, pal.text4)}>{n.sub}</text>}
+              {/* a sub wider than the card is fitted to it (mono advances ~0.7em a glyph) rather than running onto the connectors */}
+              {n.sub && <text x={n.x} y={n.y + 13} textAnchor="middle" style={halo(pal, 8, pal.text4)} {...(n.sub.length * 8 * 0.7 > NW - 10 ? { textLength: NW - 10, lengthAdjust: 'spacingAndGlyphs' } : {})}>{n.sub}</text>}
             </g>
           );
         })}
@@ -881,7 +882,7 @@ function SystemLoopSvg({ spec, width, height, pal, accent, reduce, entered, coar
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Reflexive feedback flywheel" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || spec.title} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 80ms' }}>
           {/* pressure grain (reinforcement building) */}
           {geom.grain.map((gr, i) => <circle key={`gr${i}`} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op} />)}
@@ -943,10 +944,26 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
   const pad = { l: 24, r: 24, t: 26, b: 24 };
   const innerW = VW - pad.l - pad.r;
   const rowY = pad.t + 52;
-  const NH = M ? 54 : 44, NHg = M ? 64 : 54;     // the checkpoint sits a touch taller
   const colW = innerW / N;
   const NW = Math.min(colW - 16, M ? 150 : 128);
-  const pos = nodes.map((nd, i) => ({ ...nd, i, x: pad.l + colW * (i + 0.5), W: NW, y: rowY, gov: i === govIdx, h: i === govIdx ? NHg : NH }));
+  // Subs wrap inside the card instead of running past it onto the arrows. The
+  // mono register advances about 0.7em a glyph (0.6em plus 0.1em tracking).
+  const SUB_LH = F.sub + 3;
+  const subMax = Math.max(8, Math.floor((NW - 12) / (F.sub * 0.7)));
+  const wrapSub = (t) => {
+    if (!t) return [];
+    const out = [];
+    String(t).split(/\s+/).forEach((wd) => {
+      const last = out[out.length - 1];
+      if (last != null && (last + ' ' + wd).length <= subMax) out[out.length - 1] = last + ' ' + wd;
+      else out.push(wd);
+    });
+    return out;
+  };
+  const subLines = nodes.map((nd) => wrapSub(nd.sub));
+  const extra = (Math.max(1, ...subLines.map((l) => l.length)) - 1) * SUB_LH;   // every card grows together, so the row stays even
+  const NH = (M ? 54 : 44) + extra, NHg = (M ? 64 : 54) + extra;     // the checkpoint sits a touch taller
+  const pos = nodes.map((nd, i) => ({ ...nd, i, x: pad.l + colW * (i + 0.5), W: NW, y: rowY, gov: i === govIdx, h: i === govIdx ? NHg : NH, subLines: subLines[i] }));
   const byId = (id) => pos.find((p) => p.id === id);
   const PORT = M ? { edge: 3.4, ret: 3.8 } : { edge: 2.2, ret: 2.5 };
 
@@ -974,7 +991,7 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
     const retHead = head(ex, cardBot + 3, -Math.PI / 2, M ? 1.15 : 1.05);
     return { arrows, retD, retHead, cardBot, labX: midX, labY: belly - 16, tickY0: belly - 10, tickY1: belly - 3 };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [VW, VH, M]);
+  }, [VW, VH, M, NH]);
 
   const anchorOf = (a) => { const p = byId(a.id); return p ? { x: p.x, y: p.y } : null; };
   // column hit zones (nearest card by x, no vertical gate) — the approved
@@ -997,7 +1014,7 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${VW} ${VH}`} width="100%" role="group" aria-label="Governed path: a thesis creates exposure and risk; a tripwire checkpoint governs the response, which updates the thesis." style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${VW} ${VH}`} width="100%" role="group" aria-label={spec.ariaSummary || spec.title} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* forward connectors — wipe in left→right after the cards */}
         <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', opacity: entered ? 1 : 0, transition: reduce ? 'opacity 320ms ease' : 'clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 420ms, -webkit-clip-path 900ms cubic-bezier(0.22,0.61,0.36,1) 420ms, opacity 360ms ease 420ms' }}>
           {geom.arrows.map((d, i) => <path key={`ar${i}`} d={d} fill={accent} opacity="0.9" />)}
@@ -1023,8 +1040,8 @@ function GovernanceLoopSvg({ spec, width, height, pal, accent, reduce, entered, 
               {/* checkpoint gate posts — a quiet brush guardrail, not an alarm */}
               {n.gov && [-1, 1].map((s) => <path key={s} d={Brush.brushSegment(n.x + s * (n.W / 2), top - 8, n.x + s * (n.W / 2), bot + 8, { seed: 77 + (s + 1) * 5, weight: 1.05, intensity: 0.55, waver: 0.16 })} fill={pal.bandRegime} opacity={on ? 0.95 : 0.75} />)}
               <rect x={n.x - n.W / 2} y={top} width={n.W} height={n.h} rx={8} fill={pal.surface} stroke={stroke} strokeWidth={on ? 1.7 : n.gov ? 1.4 : 1} style={{ transition: trans('stroke') }} />
-              <text x={n.x} y={n.y - (n.sub ? (M ? 6 : 4) : -4)} textAnchor="middle" style={haloSans(pal, F.label, isP ? accent : pal.text1, 600)}>{n.label}</text>
-              {n.sub && <text x={n.x} y={n.y + (M ? 16 : 13)} textAnchor="middle" style={halo(pal, F.sub, n.gov ? pal.bandRegimeText : pal.text4)}>{n.sub}</text>}
+              <text x={n.x} y={n.y - (n.sub ? (M ? 6 : 4) + extra / 2 : -4)} textAnchor="middle" style={haloSans(pal, F.label, isP ? accent : pal.text1, 600)}>{n.label}</text>
+              {n.subLines.map((ln, k) => <text key={k} x={n.x} y={n.y + (M ? 16 : 13) - extra / 2 + k * SUB_LH} textAnchor="middle" style={halo(pal, F.sub, n.gov ? pal.bandRegimeText : pal.text4)}>{ln}</text>)}
               {/* connection anchors: gap ports on every card edge; the return's
                   departure port on Adjust and landing port on Thesis */}
               {n.i > 0 && <path d={Brush.inkDot(n.x - n.W / 2, rowY, PORT.edge, { seed: 90 + n.i * 7, intensity: 0.7 })} fill={accent} opacity="0.85" />}
@@ -1329,7 +1346,7 @@ function BridgeSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Capital compressing through a bottleneck into investable exposure" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || spec.title} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 80ms' }}>
           {geom.grain.map((gr, i) => <circle key={`g${i}`} cx={gr.x} cy={gr.y} r={gr.r} fill={accent} opacity={gr.op} />)}
           <g style={{ clipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', WebkitClipPath: entered ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: reduce ? 'none' : 'clip-path 1100ms cubic-bezier(0.7,0,0.2,1) 120ms' }}>
@@ -1463,7 +1480,7 @@ function GateSvg({ spec, width, height, pal, accent, reduce, entered, coarse, to
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Thesis validation gauntlet filtering narratives" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || spec.title} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* fragments: weak narratives that fall away at a gate */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 360ms ease' : 'opacity 900ms ease 120ms' }}>
           {geom.frags.map((fr, i) => {
@@ -1587,7 +1604,7 @@ function ScorecardSvg({ spec, width, height, pal, accent, reduce, entered, coars
 
   return (
     <div style={{ position: 'relative' }}>
-      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label="Backbone requirement scorecard across candidate assets" style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary || spec.title} style={{ display: 'block', cursor: coarse ? 'pointer' : 'crosshair', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={() => { if (!coarse && !pinned) onActive(null, 'hover'); }} onClick={onClick}>
         {/* focus column — soft ink-wash, not a spreadsheet cell */}
         {focusJ >= 0 && <path d={Brush.washRect(colX(focusJ) - colW * 0.44, pad.t - 26, colX(focusJ) + colW * 0.44, height - pad.b + 6, { seed: 53, intensity: 0.6, soft: 'both' })} fill={accent} fillOpacity={pal.name === 'light' ? 0.08 : 0.07} />}
         {/* score legend — at the top, before the glyphs it explains */}
@@ -1742,7 +1759,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
     const meta = targetById(activePk); const l = lanes.find((x) => x.pk === activePk);
     if (meta && l) {
       const vt = scaleP && isFinite(l.s.terminal) ? getTooltipValueText(spec, readerContext, { dollars: scaleP * l.s.terminal / 100, rawLabel: `${l.s.terminal} terminal · representative` }) : null;
-      tooltip = <TargetTooltip meta={meta} kindLabel="POSTURE" accentTitle={activePk === spec.primaryKey} xPct={(l.endPt.x / width) * 100} yPct={(l.endPt.y / height) * 100} isPin={!!pinned} pal={pal} accent={accent} reduce={reduce} onUnpin={() => setPinned(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
+      tooltip = <TargetTooltip meta={meta} kindLabel="ALLOCATION" accentTitle={activePk === spec.primaryKey} xPct={(l.endPt.x / width) * 100} yPct={(l.endPt.y / height) * 100} isPin={!!pinned} pal={pal} accent={accent} reduce={reduce} onUnpin={() => setPinned(null)} valueText={vt && vt.primary} valueSub={vt && vt.secondary} />;
     }
   }
   const trans = (p, ms = 200) => (reduce ? undefined : `${p} ${ms}ms ease`);
@@ -1753,8 +1770,8 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         {ctrlRow('STRATEGY', sc.presets.flatMap((p, i) => [dot(i), seg(p.id, p.label, presetId === p.id, setPresetId)]))}
         {ctrlRow('SHOCK', sc.shocks.flatMap((s, i) => [dot(i), seg(s.id, s.label, shockId === s.id, setShockId)]))}
       </div>
-      <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.04em', color: pal.text3, margin: '7px 0 3px' }}>Same shock · three postures enter · one stays usable</div>
-      <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.06em', color: pal.text4, margin: '0 0 9px' }}>Representative postures under stress · illustrative, not a forecast · <span style={{ color: pal.text3 }}>selected posture in colour</span></div>
+      <div style={{ fontFamily: pal.mono, fontSize: 8.5, letterSpacing: '0.04em', color: pal.text3, margin: '7px 0 3px' }}>Same shock · three allocations · which can you still follow</div>
+      <div style={{ fontFamily: pal.mono, fontSize: 8, letterSpacing: '0.06em', color: pal.text4, margin: '0 0 9px' }}>Representative allocations under stress · illustrative, not a forecast · <span style={{ color: pal.text3 }}>selected allocation in color</span></div>
 
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" role="group" aria-label={spec.ariaSummary}
         style={{ display: 'block', cursor: coarse ? 'default' : 'pointer', touchAction: 'manipulation' }} onMouseMove={onMove} onMouseLeave={onLeave} onClick={onClick}>
@@ -1787,7 +1804,7 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
                 {l.forced && (
                   <g>
                     <path d={Brush.enso(l.dipPt.x, l.dipPt.y, 8, { seed: 51, weight: 0.9, intensity: 0.85, gapAngle: -Math.PI / 3 })} fill={pal.bandStress} />
-                    {(l.sel || isHov) && <text x={l.dipPt.x} y={l.dipPt.y + 20} textAnchor="middle" style={halo(pal, 7.5, pal.bandStressText)}>forced — breaks</text>}
+                    {(l.sel || isHov) && <text x={l.dipPt.x} y={l.dipPt.y + 20} textAnchor="middle" style={halo(pal, 7.5, pal.bandStressText)}>forced sale · breaks</text>}
                   </g>
                 )}
                 {!l.forced && l.dryPowder > 0 && (
@@ -1842,13 +1859,13 @@ function ScenarioSvg({ spec, width, height, pal, accent, reduce, entered, coarse
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: 9, alignItems: 'baseline', opacity: 0.72 }}>
           <span style={{ fontFamily: pal.mono, fontSize: 7.5, letterSpacing: '0.14em', color: pal.text4 }}>OUTCOME</span>
           {stat('TERMINAL', termText, pal.text2)}
-          <span style={{ fontFamily: pal.mono, fontSize: 8.5, color: pal.text4 }}>one metric — not the goal</span>
+          <span style={{ fontFamily: pal.mono, fontSize: 8.5, color: pal.text4 }}>one metric, not the goal</span>
         </div>
       </div>
 
       {/* principle caption */}
       <p style={{ margin: '12px 0 0', fontFamily: pal.sans, fontSize: 11.5, lineHeight: 1.5, color: pal.text2, maxWidth: 760 }}>
-        <span style={{ color: pal.text1, fontWeight: 600 }}>Same shock, three postures.</span> Max exposure climbs steepest but breaks under stress; stress-tested barely flinches but climbs slowly (cash drag); the framework bends, stays whole, and keeps its capacity to act. The strategy that survives behaviorally is the one that can compound.
+        <span style={{ color: pal.text1, fontWeight: 600 }}>Same shock, three allocations.</span> Maximum exposure climbs steepest but breaks under stress; the stress-tested reserve dips least but climbs slowly (cash drag); the framework bends, stays whole, and keeps its capacity to act. The allocation you can still follow afterward is the one that can compound.
       </p>
 
       {tooltip}
@@ -1967,11 +1984,11 @@ function HeartbeatSvg({ spec, width, height, pal, accent, reduce, entered, coars
           </g>
         )}
 
-        {/* end readout: framework collected more units */}
+        {/* end readout: the framework's units per dollar against plain DCA (hb.fwPct) */}
         <g style={{ opacity: entered ? 1 : 0, transition: reduce ? 'opacity 280ms ease' : 'opacity 500ms ease 1100ms' }}>
           <text x={width - pad.r + 8} y={pulseTop + 6} style={haloSans(pal, 12, accent, 700)}>+{hb.fwPct}%</text>
           <text x={width - pad.r + 8} y={pulseTop + 19} style={halo(pal, 7.5, pal.text4)}>FRAMEWORK</text>
-          <text x={width - pad.r + 8} y={pulseTop + 29} style={halo(pal, 7.5, pal.text4)}>UNITS</text>
+          <text x={width - pad.r + 8} y={pulseTop + 29} style={halo(pal, 7.5, pal.text4)}>UNITS PER $</text>
         </g>
 
         {/* x ticks */}
@@ -1993,7 +2010,9 @@ function ExplainerBlock({ spec, pal, accent }) {
         <div style={{ fontFamily: pal.sans, fontSize: 14.5, fontWeight: 600, color: pal.text1, letterSpacing: '-0.01em', marginBottom: 6 }}>{spec.explainerHeadline}</div>
         <p style={{ margin: 0, fontFamily: pal.sans, fontSize: 13.5, lineHeight: 1.62, color: pal.text2, maxWidth: 680 }}>
           {spec.explainerBody}
-          {spec.explainerConcept && <span style={{ whiteSpace: 'nowrap' }}>{' '}<span style={{ fontFamily: pal.mono, fontSize: 10.5, letterSpacing: '0.04em', color: pal.text3, borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1 }}>↳ {spec.explainerConcept}</span></span>}
+          {spec.explainerConcept && <span style={{ whiteSpace: 'nowrap' }}>{' '}{CONCEPT_LINKS[spec.explainerConcept]
+            ? <a href={CONCEPT_LINKS[spec.explainerConcept]} className="acf-fx-focusable" style={{ fontFamily: pal.mono, fontSize: 10.5, letterSpacing: '0.04em', color: pal.text3, borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1, textDecoration: 'none' }}>↳ {spec.explainerConcept}</a>
+            : <span style={{ fontFamily: pal.mono, fontSize: 10.5, letterSpacing: '0.04em', color: pal.text3, borderBottom: `1px dotted ${pal.borderHi}`, paddingBottom: 1 }}>↳ {spec.explainerConcept}</span>}</span>}
         </p>
         {spec.readerTakeaway && <div style={{ marginTop: 9, fontFamily: pal.sans, fontSize: 13, fontStyle: 'italic', color: pal.text3 }}>{spec.readerTakeaway}</div>}
       </div>
@@ -2001,7 +2020,7 @@ function ExplainerBlock({ spec, pal, accent }) {
   );
 }
 
-const ROLE_LABEL = { 'verifies-concept': 'SUPPORTS CONCEPT', 'backs-series': 'BACKS SERIES', methodology: 'METHODOLOGY', 'target-source': 'TARGET SERIES' };
+const ROLE_LABEL = { 'verifies-concept': 'SUPPORTS CONCEPT', 'backs-series': 'BACKS SERIES', basis: 'BASIS', methodology: 'METHODOLOGY', 'target-source': 'TARGET SERIES' };
 
 function SourceFooter({ spec, pal, accent }) {
   const [open, setOpen] = useState(false);
@@ -2031,7 +2050,10 @@ function SourceFooter({ spec, pal, accent }) {
               <div key={i} style={{ paddingBottom: i < sources.length - 1 ? 12 : 0, borderBottom: i < sources.length - 1 ? `1px solid ${pal.cardBorder}` : 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, marginBottom: 4 }}>
                   <span style={{ fontFamily: pal.sans, fontSize: 12.5, fontWeight: 600, color: pal.text1 }}>{s.provider}</span>
-                  {s.url && <a href={s.url} target="_blank" rel="noreferrer" style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.04em', color: accent, textDecoration: 'none', borderBottom: `1px dotted ${accent}`, whiteSpace: 'nowrap' }}>Open ↗</a>}
+                  {/* A source inside the book (url starts with '/') is a same-tab Read link; an external source opens a new tab and says so. */}
+                  {s.url && (s.url.startsWith('/')
+                    ? <a href={s.url} style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.04em', color: accent, textDecoration: 'none', borderBottom: `1px dotted ${accent}`, whiteSpace: 'nowrap' }}>Read</a>
+                    : <a href={s.url} target="_blank" rel="noreferrer" style={{ fontFamily: pal.mono, fontSize: 10, letterSpacing: '0.04em', color: accent, textDecoration: 'none', borderBottom: `1px dotted ${accent}`, whiteSpace: 'nowrap' }}>Open ↗</a>)}
                 </div>
                 {(s.seriesId || s.label) && <div style={{ fontFamily: pal.sans, fontSize: 11.5, color: pal.text2, marginBottom: 5 }}>{s.seriesId ? `${s.seriesId} · ` : ''}{s.label}</div>}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px', alignItems: 'center', fontFamily: pal.mono, fontSize: 9.5, letterSpacing: '0.04em', color: pal.text4 }}>
@@ -2091,7 +2113,7 @@ function MobileInsight({ spec, pal, accent, active, order, onStep, onPick, onCle
       ) : (
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.14em', color: accent, marginBottom: 3 }}>FULL VIEW · NOTHING HIDDEN</div>
-          <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.45, color: pal.text2 }}>Tap a point on the chart — or step through below — to inspect each element. The whole chart stays visible.</p>
+          <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.45, color: pal.text2 }}>Tap a point on the chart, or step through below, to inspect each element. The whole chart stays visible.</p>
         </div>
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -2143,8 +2165,14 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
   const goodEnd = goodPath[N].y, badEnd = badPath[N].y;
   let trough = { x: 0, y: Infinity }; badPath.forEach((p) => { if (p.y < trough.y) trough = p; });
   const dataMax = Math.max(...goodPath.map((p) => p.y), ...badPath.map((p) => p.y));
-  const pad = { l: 18, r: 96, t: 18, b: 36 };
+  // Bottom band holds two baselines: the x ticks (pathBot + 20) and, below them,
+  // the start / withdrawal caption (pathBot + 36). Sharing one baseline made the
+  // 'RETIRE' tick and the caption overprint at x = pad.l.
+  const pad = { l: 18, r: 96, t: 18, b: 44 };
   const X = (p) => pad.l + (p / N) * (width - pad.l - pad.r);
+  // In-plot words come from the spec's hover targets, so the chart and its
+  // tooltips cannot name the same element two ways.
+  const tLabel = (id, fallback) => ((targets.find((t) => t.id === id) || {}).label || fallback);
   const dom = { ...spec.domain, yMax: dataMax <= spec.domain.yMax ? spec.domain.yMax : dataMax + 0.15 };
   const deckTop = pad.t + 14, yG = deckTop + 22, yB = deckTop + 66, rowHalf = 15;
   const pathTop = deckTop + 96, pathBot = height - pad.b;
@@ -2212,7 +2240,8 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
 
         {/* depletion threshold */}
         <line x1={pad.l} x2={width - pad.r} y1={Y(seq.depletion)} y2={Y(seq.depletion)} stroke={pal.invalidCharcoal} strokeWidth="0.9" strokeDasharray="5 5" opacity={focusId === 'depletion' ? 0.95 : 0.55} style={{ transition: trans('opacity') }} />
-        <text x={width - pad.r} y={Y(seq.depletion) - 5} textAnchor="end" style={halo(pal, 8.5, pal.invalidCharcoal)}>depletion risk</text>
+        {/* left end: the right end is where the paths' own end labels sit */}
+        <text x={pad.l + 4} y={Y(seq.depletion) - 5} textAnchor="start" style={halo(pal, 8.5, pal.invalidCharcoal)}>{tLabel('depletion', 'zero balance')}</text>
 
         {/* y ticks */}
         {(spec.yTicks || []).map((t, i) => <text key={`yt${i}`} x={width - pad.r + 8} y={Y(t.v) + 3} style={halo(pal, 9, pal.axis, 500)}>{t.label}</text>)}
@@ -2223,7 +2252,7 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
             <path d={geom.good} fill={accent} />
           </g>
           {geom.gpx.slice(1).map((px, i) => wTick(px, i, false))}
-          <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, accent, 600)}>Good sequence</text>
+          <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, accent, 600)}>{tLabel('good', 'Good sequence')}</text>
           <text x={geom.gpx[geom.gpx.length - 1].x - 6} y={geom.gpx[geom.gpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(goodEnd * P)}</text>
         </g>
         <g style={{ opacity: focusId === 'good' ? (coarse ? 0.55 : 0.4) : 1, transition: trans('opacity') }}>
@@ -2232,14 +2261,14 @@ function SequenceRiskSvg({ spec, width, height, pal, accent, reduce, entered, co
           </g>
           {geom.bpx.slice(1).map((px, i) => wTick(px, i, true))}
           <path d={Brush.enso(troughPx.x, troughPx.y, 10, { seed: 51, weight: 0.85, intensity: 0.8, gapAngle: -Math.PI / 3 })} fill={pal.bandStress} opacity={entered ? 1 : 0} style={{ transition: trans('opacity', 400) }} />
-          <text x={geom.bpx[geom.bpx.length - 1].x - 6} y={geom.bpx[geom.bpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, pal.bandStressText, 600)}>Bad sequence</text>
+          <text x={geom.bpx[geom.bpx.length - 1].x - 6} y={geom.bpx[geom.bpx.length - 1].y - 8} textAnchor="end" style={haloSans(pal, 11, pal.bandStressText, 600)}>{tLabel('bad', 'Bad sequence')}</text>
           <text x={geom.bpx[geom.bpx.length - 1].x - 6} y={geom.bpx[geom.bpx.length - 1].y + 6} textAnchor="end" style={halo(pal, 9, pal.text3)}>{fmtMoney(badEnd * P)}</text>
         </g>
 
         {/* annotation + start / withdrawal context */}
         {!coarse && <text x={troughPx.x} y={troughPx.y + 24} textAnchor="middle" style={{ ...haloSans(pal, 9.5, pal.bandStressText, 500), fontStyle: 'italic', opacity: entered ? 1 : 0, transition: trans('opacity', 400) }}>early losses shrink the base</text>}
-        <text x={pad.l} y={pathBot + 22} style={halo(pal, 8.5, pal.text4)}>{fmtMoney(P)} start · {fmtMoney(w * P)}/yr · same withdrawals both paths</text>
-        {(spec.xTicks || []).map((t, i) => { const anc = t.v === 0 ? 'start' : t.v >= N ? 'end' : 'middle'; return <text key={`xt${i}`} x={X(t.v)} y={pathBot + 22} textAnchor={anc} style={halo(pal, 9, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
+        <text x={pad.l} y={pathBot + 36} style={halo(pal, 8.5, pal.text4)}>{fmtMoney(P)} start · {fmtMoney(w * P)}/yr · same withdrawals both paths</text>
+        {(spec.xTicks || []).map((t, i) => { const anc = t.v === 0 ? 'start' : t.v >= N ? 'end' : 'middle'; return <text key={`xt${i}`} x={X(t.v)} y={pathBot + 20} textAnchor={anc} style={halo(pal, 9, pal.axis, 500)}>{t.label.toUpperCase()}</text>; })}
 
         {targets.map((t) => <FocusChip key={`hit${t.id}`} t={t} anchor={anchorOf(t)} coarse={coarse} pinned={pinned} onActive={onActive} onPin={onPin} mkActive={(tt) => ({ ...tt })} />)}
       </svg>
@@ -2632,7 +2661,7 @@ function RadialSvg({ spec, width, height, pal, accent, reduce, entered, coarse, 
         <div style={{ textAlign: 'center', padding: '2px 14px 8px', fontFamily: pal.sans, fontSize: 13, fontStyle: 'italic', color: pal.text2, lineHeight: 1.45 }}>{R.caption}</div>
       )}
       {scales && (
-        <div role="group" aria-label="Time horizon — the share holds; the balance grows" style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', padding: '10px 8px 2px' }}>
+        <div role="group" aria-label="Time horizon: the share holds; the balance grows" style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', padding: '10px 8px 2px' }}>
           <span style={{ fontFamily: pal.mono, fontSize: 9, letterSpacing: '0.12em', color: pal.text4, alignSelf: 'center', marginRight: 2 }}>HORIZON</span>
           {scales.map((s) => (
             <button key={s.id} type="button" className="acf-fx-focusable" aria-pressed={scale && s.id === scale.id} onClick={() => stepScale(s.id)} style={pillBtn(scale && s.id === scale.id)}>{s.label}</button>
