@@ -156,14 +156,17 @@ const review = section('review', 'The Review', 'The questions a model review ask
   ]),
 ].join('\n'));
 
-// Owner-supplied facts only (2026-10-02). Every bracketed field is a fact the
-// owner has not yet supplied; final wording is counsel's. Nothing here is inferred.
+// Built from the disclosure fact packet (2026-10-02): every statement below is
+// supported by a cited record (repositories, the live product site, owner
+// decisions). Holdings are the one fact no accessible authoritative source
+// establishes. The disclosure standard and final wording belong to a
+// compliance review, not to this generator.
 const PH = (t) => `<span class="pilot-ph">[${t}]</span>`;
 const disclosures = section('disclosures', 'Disclosures', 'Holdings, the dashboard, and AI assistance.', prose(
-  PH('Draft for counsel review. Final wording, and the fields below, to be set by the owner and counsel before publication'),
-  `<strong>Holdings.</strong> As of ${PH('as-of date')}, the author holds: Bitcoin, ${PH('yes / no')}; STRC, ${PH('yes / no')}; Strategy (MSTR) common stock or derivatives, ${PH('yes / no')}; other securities named in these pages, ${PH('list / none')}. The author may buy, sell, increase, reduce or otherwise change these positions without updating these pages, except where the forward record&rsquo;s published rules separately require an entry.`,
-  `<strong>The dashboard.</strong> The ACF Dashboard, the portfolio software these pages describe, is currently ${PH('free / private / beta / paid / not yet commercial / other')}. ${PH('The author&rsquo;s current intention: whether it may become a paid product, subscription or business, or remain noncommercial')}. These pages are ${PH('free public material / other')}.`,
-  '<strong>AI assistance.</strong> AI systems were used in developing these materials, for research assistance, drafting, rewriting, source checking, arithmetic and testing, consistency review and adversarial review. The author retained final decision authority over the framework, its thresholds, its named instruments, its corrections and what was published. The AI review was not independent third-party validation, and it was not a professional investment, legal or regulatory review.',
+  PH('Proposed wording. The disclosure standard and final text are pending compliance review'),
+  `<strong>Holdings.</strong> ${PH('Current beneficial holdings require an authoritative portfolio snapshot')} The author may buy, sell, increase, reduce or otherwise change positions without updating these pages, except where the forward record&rsquo;s published rules separately require an entry.`,
+  '<strong>The dashboard.</strong> The author also leads the ACF Dashboard, the portfolio software these pages describe. It is in an invite-only beta and has no billing: nothing can be bought today. Its public site lists planned subscription tiers and prices, so the author has a prospective commercial interest in software built on this framework. These pages are free to read.',
+  '<strong>AI assistance.</strong> AI systems were used throughout these materials: for research assistance, drafting, rewriting, source checking, arithmetic and its tests, consistency review and adversarial review. The author decided the framework&rsquo;s doctrine, its thresholds, its named instruments and its corrections; publication of routine documentation changes has at times been delegated to AI agents under standing rules. The AI review was not independent third-party validation, and it was not a professional investment, legal or regulatory review.',
   '<strong>Status.</strong> The framework has not published a benchmarked backtest or a public real-money track record. The dashboard&rsquo;s source code is private. The tests and evidence calculations are published so that readers can inspect and challenge them. Nothing in these pages is individualized legal, tax or investment advice.',
 ));
 
