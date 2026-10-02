@@ -86,6 +86,56 @@ export function policyGap() {
   return { longestRun: best, coreLow: { month: low, value: core[low] }, latest: { month: latest, gap: gap[latest], core: core[latest] } };
 }
 
+/**
+ * Test 1 ("the central bank stays in charge"), evaluated as Part 1 states it:
+ * a run of at least 24 consecutive months, none before `from`, in which the
+ * funds rate is at least 1 point above 12-month core PCE inflation and federal
+ * interest outlays are at least 3 percent of GDP in the fiscal year that month
+ * falls in (October starts the next fiscal year), with core PCE inflation at
+ * `bar` or below in at least one month of the run.
+ *
+ * `from` defaults to 2026-01, the test's formal window: earlier months are
+ * history and do not count. Months whose fiscal-year interest is not yet
+ * reported count toward a run but leave it `pending`, never `met`.
+ * The monthly series start in 2019, so earlier decades are not evaluated.
+ */
+export function test1({ bar = 2.5, from = '2026-01' } = {}) {
+  const ff = Object.fromEntries(csv('fedfunds-monthly.csv').map((r) => [r.month, Number(r.value)]));
+  const pce = Object.fromEntries(csv('core-pce-index-monthly.csv').map((r) => [r.month, Number(r.value)]));
+  const interest = Object.fromEntries(Object.entries(fiscal()).map(([y, v]) => [Number(y), v.interest]));
+  const back = (m) => `${Number(m.slice(0, 4)) - 1}${m.slice(4)}`;
+  const fy = (m) => Number(m.slice(0, 4)) + (Number(m.slice(5)) >= 10 ? 1 : 0);
+  const months = Object.keys(ff).filter((m) => m >= from && pce[m] && pce[back(m)]).sort();
+  // Two passes over the same months. `strict`: a month whose fiscal-year
+  // interest is unreported breaks the run, so only fully known windows can
+  // meet the test. `lenient`: such a month counts, so a window that would meet
+  // the test once the figure arrives shows as pending.
+  const runsOf = (strict) => {
+    const out = [];
+    let run = null;
+    for (const m of months) {
+      const core = pct(pce[m] / pce[back(m)] - 1);
+      const i = interest[fy(m)];
+      const ok = ff[m] - core >= 1 && (i == null ? !strict : i >= 3);
+      if (!ok) { run = null; continue; }
+      if (!run) { run = { from: m, len: 0, coreLow: Infinity }; out.push(run); }
+      run.to = m;
+      run.len += 1;
+      run.coreLow = Math.min(run.coreLow, core);
+    }
+    return out;
+  };
+  const qualifies = (r) => r.len >= 24 && r.coreLow <= bar;
+  const met = runsOf(true).some(qualifies);
+  const pending = !met && runsOf(false).some(qualifies);
+  const longest = runsOf(true).reduce((a, r) => (r.len > (a?.len ?? 0) ? r : a), null);
+  const gapMax = months.reduce((a, m) => {
+    const gap = ff[m] - pct(pce[m] / pce[back(m)] - 1);
+    return a && a.value >= gap ? a : { month: m, value: gap };
+  }, null);
+  return { bar, from, met, pending, longestRun: longest, gapMax, monthsEvaluated: months.length, lastMonth: months[months.length - 1] ?? null };
+}
+
 /** Monthly effective federal funds rate: { 'YYYY-MM': percent }. */
 export function fedFunds() {
   return Object.fromEntries(csv('fedfunds-monthly.csv').map((r) => [r.month, Number(r.value)]));
@@ -132,6 +182,7 @@ export function readings() {
     cpi1999to2024: pct(cpi[2024] / cpi[1999] - 1),
     cpi2026: { january: cpiYearOverYear('2026-01'), may: cpiYearOverYear('2026-05'), august: cpiYearOverYear('2026-08') },
     policyGap: policyGap(),
+    test1: { formal: test1(), history: test1({ from: '2019-01' }), at2point6: test1({ bar: 2.6, from: '2019-01' }) },
     fiscal: fiscal(),
   };
 }

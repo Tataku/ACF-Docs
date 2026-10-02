@@ -25,7 +25,7 @@ const main = PAGE.slice(PAGE.indexOf('<main'), PAGE.indexOf('</main>'));
 const count = (rel) => (read(rel).match(/^test\(/gm) || []).length;
 
 test('evidence: the recomputation counts are the counts in the test files', () => {
-  for (const rel of ['tests/worked-examples.test.mjs', 'tests/part1-history.test.mjs']) {
+  for (const rel of ['tests/worked-examples.test.mjs', 'tests/part1-history.test.mjs', 'tests/stock-bond-correlation.test.mjs']) {
     // The page counts top-level test() calls; a nested or describe()d check would
     // run without being counted, and the cited number would understate the suite.
     assert.doesNotMatch(read(rel), /^[ \t]+test\(|\bdescribe\(|\bit\(/m, `${rel} keeps every check at top level`);
@@ -37,6 +37,9 @@ test('evidence: the recomputation counts are the counts in the test files', () =
   assert.match(main, new RegExp(`Among the suite&rsquo;s checks, ${worked} recompute the worked examples`), 'open arithmetic cites the worked-example count');
   assert.match(main, new RegExp(`committed public data \\(${history} checks\\)`), 'claims ledger cites the history count');
   assert.match(main, new RegExp(`Another ${history} recompute every figure Part 1 derives`), 'open arithmetic cites the history count');
+  const correlation = count('tests/stock-bond-correlation.test.mjs');
+  assert.ok(correlation > 0);
+  assert.match(main, new RegExp(`A further ${correlation} rebuild the stock-bond correlation`), 'open arithmetic cites the correlation count');
 });
 
 test('evidence: the readings of Part 1’s tests are the computed readings', () => {
@@ -49,7 +52,9 @@ test('evidence: the readings of Part 1’s tests are the computed readings', () 
     `1946&ndash;1974: ${f2(R.mix.liquidation1946to1974)} percent; 1982&ndash;2021: ${f2(R.mix.fallingRates1982to2021)} percent; 2022&ndash;2025: ${f2(R.mix.known2022to2025)} percent (not counted)`,
     `1928&ndash;2025: ${f2(R.bond.since1928)} percent a year; above 1.5 percent in ${R.bond.decadesAbove1point5.hit} of ${R.bond.decadesAbove1point5.n} rolling ten-year periods`,
     `1946&ndash;1974: ${neg(R.bond.liquidation1946to1974)} percent; 2022&ndash;2025: ${neg(R.bond.known2022to2025)} percent (not counted)`,
-    `The gap was 1 point or more for ${g.longestRun.len} months`,
+    `the gap was 1 point or more for ${g.longestRun.len} months`,
+    `From January to ${new Date(`${R.test1.formal.lastMonth}-01T00:00:00Z`).toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })} the gap was below 1 point in every month (largest ${f2(R.test1.formal.gapMax.value)}`,
+    `At a 2.6 percent bar, ${new Date(`${R.test1.at2point6.longestRun.from}-01T00:00:00Z`).toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })} to`,
     `core PCE inflation bottomed at ${f2(g.coreLow.value)} percent`,
     `gap ${f2(g.latest.gap)} points, core PCE inflation ${f2(g.latest.core)} percent`,
   ];

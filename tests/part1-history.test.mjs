@@ -18,7 +18,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readings, fedFunds } from '../scripts/part1-history.mjs';
+import { readings, fedFunds, test1 } from '../scripts/part1-history.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ENTITIES = { '&rsquo;': '’', '&ldquo;': '“', '&rdquo;': '”', '&ndash;': '–', '&amp;': '&', '&middot;': '·', '&nbsp;': ' ' };
@@ -110,11 +110,12 @@ test('part 1: the policy-rate gap behind the first test', () => {
   assert.equal(g.longestRun.from, '2023-08');
   assert.equal(g.longestRun.to, '2025-11');
   assert.ok(R.fiscal[2024].interest >= 3 && R.fiscal[2025].interest >= 3, 'interest past 3 percent of GDP');
-  const t = find(/the gap held for (\d+) months, to November 2025, and core PCE inflation bottomed at ([\d.]+) percent; in August 2026 the gap was ([\d.]+) points/, 'test 1 reading');
+  const t = find(/the gap held for (\d+) months, to November 2025, interest costs were at least 3 percent of GDP in fiscal 2024 and 2025, and core PCE inflation bottomed at ([\d.]+) percent/, 'test 1 history');
   assert.equal(Number(t[1]), g.longestRun.len);
   same(t[2], g.coreLow.value, 'core PCE low in the run');
+  const a = find(/Through August 2026 the gap stayed below a point in every month; it was ([\d.]+) points in August/, 'test 1 reading');
   assert.equal(g.latest.month, '2026-08', 'latest month in the snapshot');
-  same(t[3], g.latest.gap, 'gap in August 2026');
+  same(a[1], g.latest.gap, 'gap in August 2026');
   find(/It then cut three times between September and December 2025, held through the summer of 2026 while core inflation rose back to about 3 percent/, 'after-the-run sentence');
   const ff = fedFunds();
   const fall = ff['2025-08'] - ff['2026-01'];
@@ -122,6 +123,22 @@ test('part 1: the policy-rate gap behind the first test', () => {
   const summer = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08'].map((k) => ff[k]);
   assert.ok(Math.max(...summer) - Math.min(...summer) < 0.05, 'the rate held from January to August 2026');
   assert.ok(Math.abs(g.latest.core - 3) < 0.25, `core PCE inflation is ${g.latest.core.toFixed(2)}`);
+});
+
+test('part 1: test 1 counts from 2026 and is not met; at a 2.6 percent bar the 2023-2025 episode would have met it', () => {
+  find(/Every test counts only from January 1, 2026: what happened before then is reported as history and does not count toward meeting a test/, 'prospective windows');
+  find(/if, from January 2026, the Federal Reserve holds its policy rate at least a point above core PCE inflation for at least 24 consecutive months/, 'test 1 window');
+  const formal = test1();
+  assert.equal(formal.from, '2026-01');
+  assert.equal(formal.met, false, 'the formal test is not met');
+  assert.equal(formal.pending, false, 'and is not pending');
+  assert.equal(formal.lastMonth, R.policyGap.latest.month, 'evaluated through the latest month in the snapshot');
+  const atBar = (bar) => test1({ bar, from: '2019-01' });
+  find(/At a 2\.6 percent bar it would have met the test, and we set the 2\.5 percent bar after that low was known/, 'counterfactual sentence');
+  assert.equal(atBar(2.6).met, true, 'at 2.6 the history meets the test');
+  assert.equal(atBar(2.5).met, false, 'at 2.5 it does not');
+  const w = atBar(2.6).longestRun;
+  assert.deepEqual([w.from, w.to, w.len], ['2023-10', '2025-09', 24], 'the qualifying window is fiscal 2024 and 2025, exactly 24 months');
 });
 
 test('part 1: the thresholds of tests 2 and 4 sit where the page says', () => {
