@@ -156,17 +156,13 @@ const review = section('review', 'The Review', 'The questions a model review ask
   ]),
 ].join('\n'));
 
-// Built from the disclosure fact packet (2026-10-02): every statement below is
-// supported by a cited record (repositories, the live product site, owner
-// decisions). Holdings are the one fact no accessible authoritative source
-// establishes. The disclosure standard and final wording belong to a
-// compliance review, not to this generator.
-const PH = (t) => `<span class="pilot-ph">[${t}]</span>`;
-const disclosures = section('disclosures', 'Disclosures', 'Holdings, the dashboard, and AI assistance.', prose(
-  PH('Proposed wording. The disclosure standard and final text are pending compliance review'),
-  `<strong>Holdings.</strong> ${PH('Current beneficial holdings require an authoritative portfolio snapshot')} The author may buy, sell, increase, reduce or otherwise change positions without updating these pages, except where the forward record&rsquo;s published rules separately require an entry.`,
-  '<strong>The dashboard.</strong> The author also leads the ACF Dashboard, the portfolio software these pages describe. It is in an invite-only beta and has no billing: nothing can be bought today. Its public site lists planned subscription tiers and prices, so the author has a prospective commercial interest in software built on this framework. These pages are free to read.',
-  '<strong>AI assistance.</strong> AI systems were used throughout these materials: for research assistance, drafting, rewriting, source checking, arithmetic and its tests, consistency review and adversarial review. The author decided the framework&rsquo;s doctrine, its thresholds, its named instruments and its corrections; publication of routine documentation changes has at times been delegated to AI agents under standing rules. The AI review was not independent third-party validation, and it was not a professional investment, legal or regulatory review.',
+// PM directive 5955923209 / execution order 5958817633 (2026-10-02): general
+// conflict, product-status and AI disclosures; no position sizes or account
+// details. Wording is held to the sourced fact packet where the two differ.
+const disclosures = section('disclosures', 'Disclosures', 'Conflicts, the dashboard, and AI assistance.', prose(
+  '<strong>Conflicts.</strong> The author has financial interests in some of the assets and securities discussed in these pages, and those interests may change at any time without notice here, except where the forward record&rsquo;s published rules separately require an entry. Position sizes and account details are not published. Evaluate any instrument named in these pages independently.',
+  '<strong>The dashboard.</strong> The author also leads the ACF Dashboard, the portfolio software these pages describe. It is a private, pre-commercial beta: its public beta phase is paused, and the infrastructure for a paid public launch is not complete. These pages are published separately, as public material that is free to read.',
+  '<strong>AI assistance.</strong> AI systems assisted with research, drafting, rewriting, source checking, arithmetic and its tests, consistency review and adversarial review. Final decisions on the framework, its thresholds, its named instruments, its corrections and its publication remained with the author, who has delegated the publication of routine documentation changes to AI agents under standing rules. The AI review is not independent third-party, legal, regulatory, tax or investment-professional validation.',
   '<strong>Status.</strong> The framework has not published a benchmarked backtest or a public real-money track record. The dashboard&rsquo;s source code is private. The tests and evidence calculations are published so that readers can inspect and challenge them. Nothing in these pages is individualized legal, tax or investment advice.',
 ));
 
