@@ -146,8 +146,13 @@ export function readings() {
     const ms = months.filter((m) => m >= a && m <= b);
     return { negativeShare: ms.filter((m) => c[m] < 0).length / ms.length, months: ms.length };
   };
-  const lastNegative = months.filter((m) => m >= '2015-01' && c[m] < 0).pop();
-  const firstPositiveAfter = lastNegative ? months.find((m) => m > lastNegative && c[m] >= 0) : null;
+  // Runs of one sign since 2020, oldest first: { sign: 'positive' | 'negative', from, to, len }.
+  const runs = [];
+  for (const m of months.filter((x) => x >= '2020-01')) {
+    const sign = c[m] < 0 ? 'negative' : 'positive';
+    const last = runs[runs.length - 1];
+    if (last && last.sign === sign) { last.to = m; last.len += 1; } else runs.push({ sign, from: m, to: m, len: 1 });
+  }
   const latest = months[months.length - 1];
   return {
     eras: {
@@ -155,8 +160,7 @@ export function readings() {
       '2000-2020': share('2000-01', '2020-12'),
       since2021: share('2021-01', latest),
     },
-    lastNegative,
-    firstPositiveAfter,
+    runs,
     latest: { month: latest, value: c[latest] },
     formal: test3(),
   };

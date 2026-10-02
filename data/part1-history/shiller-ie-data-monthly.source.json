@@ -1,0 +1,13 @@
+{
+  "upstream": "Robert J. Shiller, ie_data.xls, https://shillerdata.com/",
+  "retrievalPath": "https://github.com/adambnash-afk/shiller-data",
+  "feedCommit": "bfbfb53751634427a7a7ba7763f921d2e127f2ff",
+  "feedFile": "data/stock_market_data.json",
+  "feedFileSha256": "c51c701847220b19057779fc2d90af9da1724e933f3a483c585f04b66d775db4",
+  "feedLastUpdated": "2026-09-29T18:31:18+00:00",
+  "feedLatestMonth": "2026-09",
+  "cutoff": "2026-06",
+  "cutoffRule": "last month with a reported dividend; later months are left out, never estimated",
+  "firstMonth": "1960-01",
+  "months": 798
+}
