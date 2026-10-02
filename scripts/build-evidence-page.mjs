@@ -156,13 +156,20 @@ const review = section('review', 'The Review', 'The questions a model review ask
   ]),
 ].join('\n'));
 
-// PM directive 5955923209 / execution order 5958817633 (2026-10-02): general
-// conflict, product-status and AI disclosures; no position sizes or account
-// details. Wording is held to the sourced fact packet where the two differ.
+// PM directive 5955923209 / execution order 5958817633 and adjudication
+// 5958972502 (2026-10-02): general conflict, product-status and AI disclosures;
+// no position sizes, account details or trading policy. Wording is held to the
+// sourced fact packet where the two differ.
+//
+// A LITERAL date, deliberately, and only on the two statements that depend on
+// state that can change: the author's holdings and the dashboard's status. A
+// person sets it after re-checking both; a build-time date would re-certify
+// facts nobody checked.
+const DISCLOSURES_AS_OF = 'October 2, 2026';
 const disclosures = section('disclosures', 'Disclosures', 'Conflicts, the dashboard, and AI assistance.', prose(
-  '<strong>Conflicts.</strong> The author has financial interests in some of the assets and securities discussed in these pages, and those interests may change at any time without notice here, except where the forward record&rsquo;s published rules separately require an entry. Position sizes and account details are not published. Evaluate any instrument named in these pages independently.',
-  '<strong>The dashboard.</strong> The author also leads the ACF Dashboard, the portfolio software these pages describe. It is a private, pre-commercial beta: its public beta phase is paused, and the infrastructure for a paid public launch is not complete. These pages are published separately, as public material that is free to read.',
-  '<strong>AI assistance.</strong> AI systems assisted with research, drafting, rewriting, source checking, arithmetic and its tests, consistency review and adversarial review. Final decisions on the framework, its thresholds, its named instruments, its corrections and its publication remained with the author, who has delegated the publication of routine documentation changes to AI agents under standing rules. The AI review is not independent third-party, legal, regulatory, tax or investment-professional validation.',
+  `<strong>Conflicts.</strong> As of ${DISCLOSURES_AS_OF}, the author has financial interests in some of the assets and securities discussed in these pages. Those interests can create conflicts of interest. Position sizes and account details are not published. Evaluate any instrument named in these pages independently.`,
+  `<strong>The dashboard.</strong> The author also leads the ACF Dashboard, the portfolio software these pages describe. As of ${DISCLOSURES_AS_OF}, it is a private, pre-commercial beta: its public beta phase is paused, and the infrastructure for a paid public launch is not complete. These pages are published separately, as public material that is free to read.`,
+  '<strong>AI assistance.</strong> AI systems materially assisted with research, drafting, rewriting, source checking, arithmetic and its tests, consistency review and adversarial review. The author made the final decisions on the framework, its thresholds, its named instruments and its corrections, and remains responsible for what these pages publish. The author has delegated the publication of routine documentation changes to AI agents under standing rules, so not every such change is reviewed by the author before it appears. The AI review is not independent third-party, legal, regulatory, tax or investment-professional validation.',
   '<strong>Status.</strong> The framework has not published a benchmarked backtest or a public real-money track record. The dashboard&rsquo;s source code is private. The tests and evidence calculations are published so that readers can inspect and challenge them. Nothing in these pages is individualized legal, tax or investment advice.',
 ));
 
@@ -176,7 +183,7 @@ const main = `<main class="shell-main">
         <p class="doc-byline">By Dale Edward &middot; Corrections and challenges: ${ext(`${REPO}/issues/new`, 'open an issue on GitHub')}</p>
       </div>
       <div class="measure prose">
-        <p class="prose-lead">These pages ask readers to act on them with their own money, so they should show their work. Two gaps come first. The dashboard&rsquo;s code is private, so the formulas these pages describe cannot yet be checked against the software that runs them. And nothing here has a track record: the rules were designed, not fitted, and they have not been tested against a benchmark or run with real money in public. This page sorts the main claims by the kind of evidence behind them, says where each can be checked, lists what cannot be checked yet, and keeps a dated record of every correction and every decision.</p>
+        <p class="prose-lead">Because readers may use these pages when making decisions about their own money, they should be able to inspect the evidence behind them. Two gaps come first. The dashboard&rsquo;s code is private, so the formulas these pages describe cannot yet be checked against the software that runs them. And nothing here has a track record: the rules were designed, not fitted, and they have not been tested against a benchmark or run with real money in public. This page sorts the main claims by the kind of evidence behind them, says where each can be checked, lists what cannot be checked yet, and keeps a dated record of every correction and every decision.</p>
         <p>${ref('#ledger', 'The claims')} ${ref('#limits', 'The limits')} ${ref('#forward', 'The record')} ${ref('#corrections', 'Corrections')} ${ref('#arithmetic', 'Open arithmetic')} ${ref('#tests', 'Part 1&rsquo;s tests')} ${ref('#review', 'The review questions')}</p>
       </div>
     </header>
