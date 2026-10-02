@@ -156,8 +156,15 @@ const review = section('review', 'The Review', 'The questions a model review ask
   ]),
 ].join('\n'));
 
-const disclosures = section('disclosures', 'Disclosures', 'What the author holds and sells.', prose(
-  '<span class="pilot-ph">[To complete with counsel before publication: whether the author holds securities named in these pages (Bitcoin, STRC, MSTR and others) and how holdings are disclosed; whether the dashboard is a paid product; how AI assistance in drafting and review is described.]</span>',
+// Owner-supplied facts only (2026-10-02). Every bracketed field is a fact the
+// owner has not yet supplied; final wording is counsel's. Nothing here is inferred.
+const PH = (t) => `<span class="pilot-ph">[${t}]</span>`;
+const disclosures = section('disclosures', 'Disclosures', 'Holdings, the dashboard, and AI assistance.', prose(
+  PH('Draft for counsel review. Final wording, and the fields below, to be set by the owner and counsel before publication'),
+  `<strong>Holdings.</strong> As of ${PH('as-of date')}, the author holds: Bitcoin, ${PH('yes / no')}; STRC, ${PH('yes / no')}; Strategy (MSTR) common stock or derivatives, ${PH('yes / no')}; other securities named in these pages, ${PH('list / none')}. The author may buy, sell, increase, reduce or otherwise change these positions without updating these pages, except where the forward record&rsquo;s published rules separately require an entry.`,
+  `<strong>The dashboard.</strong> The ACF Dashboard, the portfolio software these pages describe, is currently ${PH('free / private / beta / paid / not yet commercial / other')}. ${PH('The author&rsquo;s current intention: whether it may become a paid product, subscription or business, or remain noncommercial')}. These pages are ${PH('free public material / other')}.`,
+  '<strong>AI assistance.</strong> AI systems were used in developing these materials, for research assistance, drafting, rewriting, source checking, arithmetic and testing, consistency review and adversarial review. The author retained final decision authority over the framework, its thresholds, its named instruments, its corrections and what was published. The AI review was not independent third-party validation, and it was not a professional investment, legal or regulatory review.',
+  '<strong>Status.</strong> The framework has not published a benchmarked backtest or a public real-money track record. The dashboard&rsquo;s source code is private. The tests and evidence calculations are published so that readers can inspect and challenge them. Nothing in these pages is individualized legal, tax or investment advice.',
 ));
 
 const main = `<main class="shell-main">
