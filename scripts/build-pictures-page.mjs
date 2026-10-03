@@ -221,6 +221,7 @@ const sidebarInsert = `
           </li>
           <li><a class="side-part" href="/framework-in-math"><span class="spnum">&middot;</span><span>In Math</span></a></li>
           <li><a class="side-part" href="/glossary"><span class="spnum">&middot;</span><span>Glossary</span></a></li>
+          <li><a class="side-part" href="/evidence"><span class="spnum">&middot;</span><span>Evidence</span></a></li>
         </ul>
       </div>`;
 const navEnd = html.indexOf('</nav>', html.indexOf('<nav class="sidebar"'));

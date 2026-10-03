@@ -1312,10 +1312,10 @@
         listenBtn.setAttribute('aria-pressed', (s === 'playing' || s === 'paused') ? 'true' : 'false');
         if (listenLabel) {
           listenLabel.textContent =
-            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Preparing…' : 'Listen';
+            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Preparing…' : 'Listen · AI voice';
         }
         listenBtn.setAttribute('aria-label',
-          s === 'playing' ? 'Pause narration' : s === 'paused' ? 'Resume narration' : 'Listen to this part');
+          s === 'playing' ? 'Pause AI narration' : s === 'paused' ? 'Resume AI narration' : 'Listen to this part (AI voice)');
         if (onTick) onTick();
       }
 

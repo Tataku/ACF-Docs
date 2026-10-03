@@ -262,6 +262,7 @@ const sidebarInsert = `
 ${onThisPage}
             </ol>
           </li>
+          <li><a class="side-part" href="/evidence"><span class="spnum">&middot;</span><span>Evidence</span></a></li>
         </ul>
       </div>`;
 // Close out the sidebar's last movement block by appending ours before its end.

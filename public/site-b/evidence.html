@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="canonical" href="https://docs.acfdashboard.com/evidence">
+  <!-- BEGIN generated social meta — build-social-meta.mjs. Do not edit by hand. -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="The Adaptive Convexity Framework">
+  <meta property="og:title" content="Evidence &middot; The Adaptive Convexity Framework">
+  <meta property="og:description" content="What these pages can and cannot yet show, every correction, and the tests that would prove the thesis wrong.">
+  <meta property="og:url" content="https://docs.acfdashboard.com/evidence">
+  <meta property="og:image" content="https://docs.acfdashboard.com/site-b/brand/social/evidence-light.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Evidence &middot; The Adaptive Convexity Framework">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Evidence &middot; The Adaptive Convexity Framework">
+  <meta name="twitter:description" content="What these pages can and cannot yet show, every correction, and the tests that would prove the thesis wrong.">
+  <meta name="twitter:image" content="https://docs.acfdashboard.com/site-b/brand/social/evidence-light.png">
+  <!-- END generated social meta -->
+  <!-- Brand / icon identity. The SVG is the mark browsers scale; it carries its
+       own prefers-color-scheme rules because a tab strip's colour is not the
+       page theme and cannot be read from here. The .ico is the raster fallback
+       and apple-touch-icon keeps its plate, which iOS composites onto its own
+       background. -->
+  <link rel="icon" href="/site-b/brand/favicon.svg" type="image/svg+xml">
+  <link rel="shortcut icon" href="/site-b/brand/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/site-b/brand/apple-touch-icon.png">
+  <title>Evidence &middot; The Adaptive Convexity Framework</title>
+  <meta name="description" content="What these pages can and cannot yet show, every correction, and the tests that would prove the thesis wrong.">
+
+  <!-- Set the theme BEFORE first paint: stored preference wins, else system. -->
+  <script>
+    (function () {
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+      try {
+        var stored = localStorage.getItem('acf-theme');
+        var theme = stored
+          || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Fonts: Inter (all language) + JetBrains Mono (tokens/labels/numerals) — ACF design-system §08 -->
+  <!-- Self-hosted webfonts (OFL 1.1 — licenses in fonts/). Inter v4.1 + JetBrains Mono v2.304; replaces the Google Fonts CDN load. -->
+  <link rel="preload" href="/site-b/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/site-b/fonts/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('/site-b/fonts/InterVariable.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('/site-b/fonts/InterVariable-Italic.woff2') format('woff2');
+      font-weight: 100 900;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-SemiBold.woff2') format('woff2');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('/site-b/fonts/JetBrainsMono-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/site-b/tokens.css">
+  <link rel="stylesheet" href="/site-b/reading-system.css">
+  <style id="acf-reference-integrity-fallback">.part-ref.is-pending-reference,.lineage-ref.is-pending-reference{color:inherit!important;border:0!important;background:none!important;text-decoration:none!important;cursor:default!important}.part-ref.is-pending-reference::before,.part-ref.is-pending-reference::after,.lineage-ref.is-pending-reference::before,.lineage-ref.is-pending-reference::after{content:none!important}</style>
+</head>
+<body>
+  <a class="skip-link" href="#ledger">Skip to content</a>
+
+  <!-- Mobile: open the parts sidebar -->
+  <button type="button" class="drawer-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Open parts navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+  </button>
+  <div class="drawer-backdrop" hidden></div>
+
+  <div class="shell">
+    <!-- Sidebar: brand + theme + the six parts (this IS the Part-page nav) -->
+    <nav class="sidebar" id="sidebar" aria-label="Parts">
+      <div class="sidebar-bar">
+        <button type="button" class="sidebar-toggle" aria-pressed="false" aria-label="Collapse sidebar">
+          <svg class="icon-collapse" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 59.01 34.01 Q 49.65 39.65 44.01 49.01 A 1.4 1.4 0 0 1 45.99 50.99 Q 53.89 43.89 60.99 35.99 A 1.4 1.4 0 0 1 59.01 34.01 Z" fill-rule="evenodd"></path><path d="M 44.01 50.99 Q 49.65 60.35 59.01 65.99 A 1.4 1.4 0 0 1 60.99 64.01 Q 53.89 56.11 45.99 49.01 A 1.4 1.4 0 0 1 44.01 50.99 Z" fill-rule="evenodd"></path></svg>
+          <svg class="icon-expand" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 28.6 20 Q 24.8 50 28.6 80 A 1.4 1.4 0 0 1 31.4 80 Q 30.8 50 31.4 20 A 1.4 1.4 0 0 1 28.6 20 Z" fill-rule="evenodd"></path><path d="M 44.01 35.99 Q 49.65 45.35 59.01 50.99 A 1.4 1.4 0 0 1 60.99 49.01 Q 53.89 41.11 45.99 34.01 A 1.4 1.4 0 0 1 44.01 35.99 Z" fill-rule="evenodd"></path><path d="M 59.01 49.01 Q 49.65 54.65 44.01 64.01 A 1.4 1.4 0 0 1 45.99 65.99 Q 53.89 58.89 60.99 50.99 A 1.4 1.4 0 0 1 59.01 49.01 Z" fill-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <div class="sidebar-head">
+        <a class="brand" href="/" aria-label="Adaptive Convexity Framework, home">
+          <svg class="brand-mark" viewBox="45.8 0 164.4 226.6" aria-hidden="true" focusable="false"
+               fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <g stroke-width="8.4">
+              <line x1="128" y1="20" x2="128" y2="38"/>
+              <circle cx="128" cy="14" r="9.8"/>
+              <rect x="50" y="38" width="156" height="74" rx="32"/>
+              <path d="M128 146 C128 158 82 157 68 204"/>
+              <path d="M128 146 L128 204"/>
+              <path d="M128 146 C128 158 174 157 188 204"/>
+              <circle cx="66" cy="214" r="8.4"/>
+              <circle cx="128" cy="214" r="8.4"/>
+              <circle cx="190" cy="214" r="8.4"/>
+            </g>
+            <g stroke-width="7" stroke-linecap="square">
+              <line x1="116" y1="124" x2="140" y2="124"/>
+              <line x1="116" y1="132" x2="140" y2="132"/>
+              <line x1="116" y1="140" x2="140" y2="140"/>
+            </g>
+            <g fill="currentColor" stroke="none">
+              <circle cx="96" cy="76" r="7.7"/>
+              <circle cx="160" cy="76" r="7.7"/>
+            </g>
+          </svg>
+          <span class="brand-word">ACF</span>
+        </a>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"></path>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M20.5 14.4A8.2 8.2 0 0 1 9.6 3.5a8.2 8.2 0 1 0 10.9 10.9z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <p class="side-movement">Philosophy</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-1-foundation"><span class="spnum">01</span><span>Foundation &amp; Philosophy</span></a></li>
+          <li><a class="side-part" href="/part-2-lineage-macro-thesis"><span class="spnum">02</span><span>Lineage &amp; Macro Thesis</span></a></li>
+        </ul>
+
+        <p class="side-movement">Architecture</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-3-bitcoin-convexity-backbone"><span class="spnum">03</span><span>Bitcoin: Convexity Backbone</span></a></li>
+          <li><a class="side-part" href="/part-4-tax-architecture-roc-strategy"><span class="spnum">04</span><span>Tax Architecture &amp; ROC Strategy</span></a></li>
+        </ul>
+
+        <p class="side-movement">Implementation</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/part-5-portfolio-construction-position-management"><span class="spnum">05</span><span>Portfolio Construction &amp; Position Management</span></a></li>
+        </ul>
+
+        <p class="side-movement">Governance</p>
+        <ul class="side-parts">
+          <li>
+            <a class="side-part" href="/part-6-convexity-framework-integrity-scoring">
+              <span class="spnum">06</span><span>Convexity &amp; Framework Integrity Scoring</span>
+            </a>
+          </li>
+        </ul>
+
+        <p class="side-movement">Reference</p>
+        <ul class="side-parts">
+          <li><a class="side-part" href="/framework-in-pictures"><span class="spnum">&middot;</span><span>In Pictures</span></a></li>
+          <li><a class="side-part" href="/framework-in-math"><span class="spnum">&middot;</span><span>In Math</span></a></li>
+          <li><a class="side-part" href="/glossary"><span class="spnum">&middot;</span><span>Glossary</span></a></li>
+          <li>
+            <a class="side-part current" href="/evidence" aria-current="page">
+              <span class="spnum">&middot;</span><span>Evidence</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="shell-main">
+
+    <header class="doc-header">
+      <div class="measure">
+        <p class="doc-eyebrow" data-glyph-text>Framework Reference</p>
+        <p class="doc-kicker">What can be checked, and how</p>
+        <h1 class="doc-title">Evidence</h1>
+        <p class="doc-byline">By Dale Edward &middot; Corrections and challenges: <a href="https://github.com/Tataku/ACF-Docs/issues/new" target="_blank" rel="noopener noreferrer">open an issue on GitHub</a></p>
+      </div>
+      <div class="measure prose">
+        <p class="prose-lead">Because readers may use these pages when making decisions about their own money, they should be able to inspect the evidence behind them. Two gaps come first. The dashboard&rsquo;s code is private, so the formulas these pages describe cannot yet be checked against the software that runs them. And nothing here has a track record: the rules were designed, not fitted, and they have not been tested against a benchmark or run with real money in public. This page sorts the main claims by the kind of evidence behind them, says where each can be checked, lists what cannot be checked yet, and keeps a dated record of every correction and every decision.</p>
+        <p><a class="part-ref" href="#ledger">The claims</a> <a class="part-ref" href="#limits">The limits</a> <a class="part-ref" href="#forward">The record</a> <a class="part-ref" href="#corrections">Corrections</a> <a class="part-ref" href="#arithmetic">Open arithmetic</a> <a class="part-ref" href="#tests">Part 1&rsquo;s tests</a> <a class="part-ref" href="#review">The review questions</a></p>
+      </div>
+    </header>
+
+    <section class="section" id="ledger" aria-labelledby="ledger-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Claims</p>
+        <h2 class="section-title" id="ledger-title">Ordered by how well they can be proved.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Not every claim in these pages carries the same weight. This table sorts them from the most provable to the least, and says where each can be checked.</p>
+      </div>
+
+      <div class="compare compare-wrap compare-prose">
+        <table>
+          <caption>The book&rsquo;s claims, by the kind of evidence behind them</caption>
+          <thead>
+            <tr><th scope="col">Kind of claim</th><th scope="col">What it covers</th><th scope="col">How to check it</th><th scope="col">Where it stands</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Arithmetic</th><td data-label="What it covers">The worked examples: tax drag and wrapper compounding, the Roth case, loan-to-value after a fall, the addressable-market scenario, the sizing and scoring formulas.</td><td data-label="How to check it">A public test suite recomputes each example from the inputs its page states (20 checks), on every pull request and every change to the main branch. It shows that each example follows from the formula these pages state; it does not show that the dashboard runs that formula (see the limits below), or that the inputs are right.</td><td data-label="Where it stands">Checkable today</td></tr>
+            <tr><th scope="row">Historical record</th><td data-label="What it covers">Debt, interest and inflation data; market returns; Bitcoin&rsquo;s cycles; 2022.</td><td data-label="How to check it">Every chart names its sources and says whether it is plotted, drawn through published figures, simulated or conceptual. One chart, Part 1&rsquo;s debt and interest exhibit, is plotted from named public series. The figures Part 1 derives are recomputed from committed public data (8 checks).</td><td data-label="Where it stands">Checkable today</td></tr>
+            <tr><th scope="row">Published research</th><td data-label="What it covers">Fragility (Taleb; Taleb and Douady, 2013), the stock-bond correlation (AQR; BIS), the liquidation of government debt (Reinhart and Sbrancia; Acalin and Ball), fiscal dominance (Sargent and Wallace), and the other works the Parts cite.</td><td data-label="How to check it">Each citation names its source. The findings are theirs; how the framework applies them is ours.</td><td data-label="Where it stands">Checkable today</td></tr>
+            <tr><th scope="row">Design judgment</th><td data-label="What it covers">Postures, sizing bands, the CIS reference weights (40/25/25/10), tripwire thresholds, the thresholds of Part 1&rsquo;s tests.</td><td data-label="How to check it">These are choices, argued in the Parts. None was fitted to past returns. The test thresholds were set with the history in view, and the readings below show that history.</td><td data-label="Where it stands">Argued, not proved</td></tr>
+            <tr><th scope="row">The regime thesis</th><td data-label="What it covers">That fiscal dominance is a governing constraint of this regime, and that the traditional playbook was built for one that has ended.</td><td data-label="How to check it">Part 1&rsquo;s <a class="part-ref" href="/part-1-foundation#falsifiers">four tests</a>, read each February on public data.</td><td data-label="Where it stands">Open; the evidence accumulates forward</td></tr>
+            <tr><th scope="row">The framework as a whole</th><td data-label="What it covers">Whether following it does better than a simple portfolio after costs and taxes.</td><td data-label="How to check it">No backtest and no real-money track record. The forward record below logs decisions, not performance.</td><td data-label="Where it stands">Unproven</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="limits" aria-labelledby="limits-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Limits</p>
+        <h2 class="section-title" id="limits-title">What we cannot show yet.</h2>
+      </div>
+      <div class="measure prose">
+        <p><strong>The dashboard&rsquo;s code is private.</strong> The <a class="part-ref" href="/framework-in-math">Math page</a> transcribes the formulas the dashboard runs, but a reader cannot check that transcription against the code. Publishing the scoring module, or a public harness that reproduces the published examples from the same code, would close the gap.</p>
+        <p><strong>Scores are structured judgment.</strong> Where reported data is missing, sub-scores use AI-generated estimates, at a discount, where they exist, and otherwise defaults set by posture and sector. The score is capped as usable coverage thins (AI estimates count toward it): at 75 below 70 percent coverage, 68 below 50 percent and 60 below 30 percent. The lowest cap still falls in the standard sizing band (60 to 69), so a holding with under 30 percent coverage can be sized as standard. A capped score means &ldquo;not enough data,&rdquo; not &ldquo;average.&rdquo;</p>
+        <p><strong>No backtest and no track record.</strong> The rules were designed, not fitted to past returns, and they have not been tested against a benchmark or run with real money in public.</p>
+        <p><strong>We grade our own tests.</strong> Part 1&rsquo;s tests are scored by us. The data and the script are public so that anyone can rerun them and disagree.</p>
+        <p><strong>No independent review yet.</strong> These pages are published under a pen name. The 2026 review was internal: an AI model checked the claims against primary sources, and the author decided each finding. The corrections below are what it found.</p>
+      </div>
+    </section>
+
+    <section class="section" id="forward" aria-labelledby="forward-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Record</p>
+        <h2 class="section-title" id="forward-title">Every change, and every decision not to change.</h2>
+      </div>
+      <div class="measure prose">
+        <p>This record logs, with date and reason: every change to a rule, weight or threshold published in these pages; every change to a named instrument; each February&rsquo;s readings of Part 1&rsquo;s tests; and every event that tests a named instrument&rsquo;s qualifying criteria (a monthly price move of more than 20 percent; a missed, deferred or reduced distribution; a rating action; a public regulatory investigation or enforcement action involving the issuer or named instrument; a lawsuit filed against the issuer). Each &ldquo;no change&rdquo; entry says what would have changed it. Entries dated before October 2026 were written after the fact, and say so. The record is kept in the <a href="https://github.com/Tataku/ACF-Docs" target="_blank" rel="noopener noreferrer">public repository</a>, where every change carries its date.</p>
+      </div>
+
+      <div class="compare compare-wrap compare-prose">
+        <table>
+          <caption>The forward record, newest first</caption>
+          <thead>
+            <tr><th scope="col">Date</th><th scope="col">Event</th><th scope="col">Decision</th><th scope="col">Reason</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Release date (stamped at release)</th><td data-label="Event">Part 1&rsquo;s four tests published with their first readings (<a class="part-ref" href="#tests">below</a>).</td><td data-label="Decision">None.</td><td data-label="Reason">Baseline.</td></tr>
+            <tr><th scope="row">October 3, 2026</th><td data-label="Event">The ticker-symbol offset removed from the dashboard&rsquo;s scores (engine version 3.2).</td><td data-label="Decision">Removed. Equal inputs now give equal scores, and each holding&rsquo;s score moved once, on its next recalculation.</td><td data-label="Reason">Found by the documentation audit (October 2026): the dashboard added a fixed offset computed from each holding&rsquo;s ticker symbol, at 40 places in its scoring code and up to 20 percent of a sub-score&rsquo;s maximum. In the audit&rsquo;s tests, holdings with identical data scored up to 4.5 points apart on CIS and up to 35 points apart on one component for that reason alone; on the convexity component it could only raise a stock&rsquo;s score. It carried no information about the asset. On the audit&rsquo;s test cases, removing it moved final scores by between &minus;3.8 and +1.9 points and components by up to 17.5. The owner ruled it a model defect.</td></tr>
+            <tr><th scope="row">October 2, 2026</th><td data-label="Event">STRC&rsquo;s slot given a binding exit rule, before publication.</td><td data-label="Decision">Adopted: the &ldquo;stronger candidate&rdquo; test and the logging rule in the STRC entry below.</td><td data-label="Reason">An exit criterion loose enough to protect a favored holding is not a criterion.</td></tr>
+            <tr><th scope="row">October 2, 2026</th><td data-label="Event">Final red-team review tightened named-instrument governance before publication.</td><td data-label="Decision">Quarterly STRC reassessments now require a defined comparison set, and the forward-event triggers now include public regulatory investigations and enforcement actions.</td><td data-label="Reason">A replacement rule cannot depend on an input nobody is required to produce, and event logging should not imply an unproved cause.</td></tr>
+            <tr><th scope="row">October 2, 2026</th><td data-label="Event">Tests 1 and 3 given a prospective window, before publication.</td><td data-label="Decision">Every test now counts only from January 1, 2026; earlier observations are history.</td><td data-label="Reason">Test 1&rsquo;s 2.5 percent bar was set after the 2023&ndash;2025 low of 2.56 percent was known, and test 3 read over history would already be met. Neither should be judged on data seen when it was written.</td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Event">Documentation review published, with the corrections below.</td><td data-label="Decision">Corrections published. Where a stated rule&rsquo;s own arithmetic was wrong, the rule was restated (Part 3&rsquo;s loan-to-value guidance); the structure of the method did not change.</td><td data-label="Reason">Published errors are corrected in public, with dates.</td></tr>
+            <tr><th scope="row">June 26, 2026 (written October 2026)</th><td data-label="Event">STRC closed at $74.57 (intraday low $71.25). It was back above $84 by June 30 and closed at $99.56 on September 29, close to its 52-week high of $100.42. Distributions were paid throughout. On June 29 Strategy raised the rate from 11.5 to 12 percent a year, paid semi-monthly from July 1.</td><td data-label="Decision">No change to STRC&rsquo;s role as the framework&rsquo;s named income Ballast.</td><td data-label="Reason">STRC qualifies as Ballast under the three-of-five rule on durable cash generation (for a preferred, its distribution record: paid in every period since issuance), low factor correlation (the monthly rate reset is designed to hold its price near its $100 stated amount) and a liquidity-resilient valuation (its $100 stated amount and rate-reset support). It carries no agency credit rating as a new instrument; the framework reads the issuer&rsquo;s Bitcoin asset coverage as its measure of balance-sheet strength. What would change it: the commitment is to the slot, not the name. The 12 percent income and deployment slot is a documented exception to the ordinary 10 percent single-Ballast maximum (<a class="part-ref" href="/part-5-portfolio-construction-position-management#ballast">Part 5</a>), reviewed at each quarterly Ballast reassessment and sooner on material deterioration; STRC holds it today. It gives up the slot if it stops meeting three of the five Ballast criteria (a missed, deferred or reduced distribution would end the distribution record that counts as its cash generation), or if a stronger candidate appears. At each quarterly reassessment, STRC is compared with every cash-distributing Ballast candidate in the dashboard&rsquo;s current discovery universe that meets at least three eligibility criteria. A candidate is stronger if it meets more of the five criteria than STRC, or meets as many and has a CIS at least 5 points higher at two consecutive reassessments. The full comparison set and result are logged here, including &ldquo;no eligible alternative&rdquo; when the set is empty.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="corrections" aria-labelledby="corrections-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Corrections</p>
+        <h2 class="section-title" id="corrections-title">What was wrong, and what it says now.</h2>
+      </div>
+      <div class="measure prose">
+        <p>The substantive errors found in published versions of these pages, with the date each fix was published and the change that made it. Wording fixes are not listed. If you set up a Bitcoin-backed loan using the earlier Part 3 text, recheck its liquidation level against the arithmetic now in <a class="part-ref" href="/part-3-bitcoin-convexity-backbone">Part 3</a>.</p>
+      </div>
+
+      <div class="compare compare-wrap compare-prose">
+        <table>
+          <caption>Corrections, newest first</caption>
+          <thead>
+            <tr><th scope="col">Published</th><th scope="col">Where</th><th scope="col">What was wrong, and what it says now</th><th scope="col">Change</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Part 3</td><td data-label="What was wrong, and what it says now">Said a 20 to 35 percent loan-to-value range (50 percent maximum) lets the position &ldquo;withstand the 70%+ drawdowns Bitcoin has historically experienced without a margin call.&rdquo; It does not. Loan-to-value after a fall is the starting ratio divided by one minus the fall, so a 70 percent fall takes 35 percent to about 117 percent. The passage now gives the arithmetic and dated lender terms.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Part 3 chart</td><td data-label="What was wrong, and what it says now">The power-law chart put a &ldquo;now&rdquo; point near $1.1 million while Bitcoin traded near $84,000. It is now a schematic with no price claims; dated readings are in the prose.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Part 4 chart</td><td data-label="What was wrong, and what it says now">The pre-tax line taxed only the gain. A deducted contribution has no basis, so the whole withdrawal is taxed. Fixed, and the chart now states that at equal tax rates Roth and pre-tax end even.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Parts 5, 6, charts</td><td data-label="What was wrong, and what it says now">Momentum gates were described as running in the software. They are written rules the reader carries out; the dashboard does not yet measure the three momentum dimensions.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Parts 1, 5, 6, Math page</td><td data-label="What was wrong, and what it says now">The dashboard was described as enforcing or blocking actions, and Part 1 spoke of automated tripwires. The dashboard records every trade and never blocks one; it flags and displays, and the response is the reader&rsquo;s.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Part 1 charts</td><td data-label="What was wrong, and what it says now">Exhibits cited data series that do not exist or were mislabeled, and one drew federal interest at 3.26 percent of GDP in 1980 against an actual 1.84. Debt and interest are now plotted from FRED/OMB data.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Parts 1, 3, 5, glossary, Math page</td><td data-label="What was wrong, and what it says now">Bitcoin figures (drawdowns, market caps, addressable-market horizons, reserve ranges) disagreed between pages. One dated set is now used everywhere.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Parts 3, 4</td><td data-label="What was wrong, and what it says now">Tax limits and rules were undated or wrong, and an unsourced &ldquo;5 to 8 percent annual tax alpha&rdquo; appeared. Limits are dated to 2026 with statute citations; the figure is gone.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Part 2 and others</td><td data-label="What was wrong, and what it says now">A Druckenmiller quotation joined two separate statements; Edelman&rsquo;s crypto guidance was years out of date; a &ldquo;3 to 5 times&rdquo; liquidity multiple had no source; Dalio&rsquo;s cycle lengths came from two different publications. Each is restored to its source or removed.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Part 6, Math page</td><td data-label="What was wrong, and what it says now">The 40/25/25/10 weights were called the default (they are reference weights), an FIS example could not occur under the rules, and the Math page said one of twelve emergency conditions runs as live code when five are detected. Each is corrected, and the example is recomputed.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">October 1, 2026</th><td data-label="Where">Cover, Part 1</td><td data-label="What was wrong, and what it says now">&ldquo;Fiduciary-grade&rdquo; and &ldquo;survives being wrong&rdquo; were stated as facts, and winners picked in hindsight were offered as evidence. They are now stated as design goals, with a scope note.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/7eb514c" target="_blank" rel="noopener noreferrer">7eb514c</a></td></tr>
+            <tr><th scope="row">September 30, 2026</th><td data-label="Where">Math page</td><td data-label="What was wrong, and what it says now">Worked examples of the headroom formula did not follow from the formula: 10&times; was printed as scoring 27.8 (the formula gives 24.4) and parity as zero (7.1). They were recomputed from the unchanged formula, and a test now recomputes them.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/3604b5f" target="_blank" rel="noopener noreferrer">3604b5f</a></td></tr>
+            <tr><th scope="row">September 30, 2026</th><td data-label="Where">Part 3</td><td data-label="What was wrong, and what it says now">The case study printed position values where prices belonged, valued the end of 2025 at $100,000 a coin (the year closed near $87,500), said a 77 percent fall cost one portfolio only 8 to 10 percent when its own Bitcoin sleeve gives about a quarter, and dated a $2.0 to $2.1 trillion market cap to early 2026, a level January 2026 never reached. Each now follows from its inputs.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/3604b5f" target="_blank" rel="noopener noreferrer">3604b5f</a></td></tr>
+            <tr><th scope="row">September 30, 2026</th><td data-label="Where">Parts 4, 5</td><td data-label="What was wrong, and what it says now">STRC figures from January 2026 were presented as current. They are now dated.</td><td data-label="Change"><a href="https://github.com/Tataku/ACF-Docs/commit/3604b5f" target="_blank" rel="noopener noreferrer">3604b5f</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="arithmetic" aria-labelledby="arithmetic-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Open Arithmetic</p>
+        <h2 class="section-title" id="arithmetic-title">Rerun it yourself.</h2>
+      </div>
+      <div class="measure prose">
+        <p>The documentation is public: <a href="https://github.com/Tataku/ACF-Docs" target="_blank" rel="noopener noreferrer">github.com/Tataku/ACF-Docs</a>. Clone it and run <code>npm test</code>. Among the suite&rsquo;s checks, 20 recompute the worked examples from the inputs each page states: the headroom formula and its examples, the Bitcoin headroom and network-convexity examples, catalyst decay, the FIS floor and multiplier, the sizing bands, the size-opportunity curve, the FIS example book, Part 3&rsquo;s case study, drawdowns, addressable-market and gold scenarios, reserve arithmetic and loan-to-value passage, Part 4&rsquo;s Roth case and tax-wedge charts, Part 5&rsquo;s wrapper compounding (1.10<sup>30</sup> against 1.075<sup>30</sup>) and Part 2&rsquo;s tax-drag multiples.</p>
+        <p>Another 8 recompute every figure Part 1 derives from committed public data (<code>data/part1-history/</code>, read by <code>scripts/part1-history.mjs</code>): the 60/40 and Treasury returns after inflation, the debt and interest checkpoints, the inflation figures, 2022&rsquo;s rank since 1928, and the readings behind Part 1&rsquo;s tests. Part 1&rsquo;s Bitcoin, yield and sequence-of-returns figures are checked against their cited sources, not yet by a test.</p>
+        <p>A further 8 rebuild the stock-bond correlation behind test 3 from Robert Shiller&rsquo;s monthly S&amp;P Composite series and the 10-year Treasury yield (<code>scripts/stock-bond-correlation.mjs</code>): they check the data against its sources, the bond reconstruction, the method and the history the pages state.</p>
+        <p>The same suite confirms that each of the 46 charts declares its data mode and names its sources, and that a chart labeled as plotted data names each series, its range and its retrieval date. It does not compare a drawn line with its sources; the source links are there for that.</p>
+      </div>
+    </section>
+
+    <section class="section" id="tests" aria-labelledby="tests-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Tests</p>
+        <h2 class="section-title" id="tests-title">Part 1&rsquo;s tests: method and readings.</h2>
+      </div>
+      <div class="measure prose">
+        <p>Read each February. Every test counts only from January 1, 2026: earlier observations are shown as history and do not count toward meeting a test. About nine months of that window had passed when the tests were set. 60/40 means 60 percent US stocks (S&amp;P 500 with dividends) and 40 percent 10-year Treasuries, rebalanced each January; returns after inflation are compounded from Aswath Damodaran&rsquo;s annual series (NYU Stern) and the December-to-December change in the BLS consumer price index. The readings below are computed from the committed data when this page is built.</p>
+      </div>
+
+      <div class="compare compare-wrap compare-prose">
+        <table>
+          <caption>The four tests that would prove Part 1&rsquo;s thesis wrong</caption>
+          <thead>
+            <tr><th scope="col">Test</th><th scope="col">Wrong if</th><th scope="col">Data and method</th><th scope="col">History behind the threshold</th><th scope="col">Reading</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">1. The central bank stays in charge</th><td data-label="Wrong if">From January 2026, the policy rate stays at least 1 point above core PCE inflation for at least 24 consecutive months, and within that stretch core PCE inflation reaches 2.5 percent or below, while federal interest outlays are at least 3 percent of GDP in each month&rsquo;s fiscal year.</td><td data-label="Data and method">Monthly effective federal funds rate (FRED FEDFUNDS) less the 12-month change in the core PCE price index (PCEPILFE); interest outlays from FYOIGDA188S. Computed by <code>test1()</code> in <code>scripts/part1-history.mjs</code>.</td><td data-label="History behind the threshold">Interest outlays were 2.4 percent of GDP in fiscal 2023, 3.0 in 2024 and 3.2 in 2025. The 2023&ndash;2025 episode does not count, and it is evidence against our reading: the gap was 1 point or more for 28 months, August 2023 to November 2025, and core PCE inflation bottomed at 2.56 percent (March 2025). At a 2.6 percent bar, October 2023 to September 2025 (24 months, all in fiscal years with interest at 3 percent of GDP or more) would have met the test. We set the 2.5 percent bar after that low was known.</td><td data-label="Reading">Not met. From January to August 2026 the gap was below 1 point in every month (largest 0.70, January 2026); August 2026: gap 0.62 points, core PCE inflation 3.01 percent. On September 16, 2026 the Federal Reserve raised its target range to 3.75&ndash;4.00 percent, its first increase since 2023.</td></tr>
+            <tr><th scope="row">2. Bondholders are not paying</th><td data-label="Wrong if">10-year Treasuries return more than 1.5 percent a year after inflation over 2026&ndash;2035.</td><td data-label="Data and method">Damodaran&rsquo;s 10-year Treasury series; CPI-U December to December.</td><td data-label="History behind the threshold">1928&ndash;2025: 1.45 percent a year; above 1.5 percent in 40 of 89 rolling ten-year periods; 1946&ndash;1974: &minus;1.01 percent; 2022&ndash;2025: &minus;6.06 percent (not counted).</td><td data-label="Reading">First reading February 2027.</td></tr>
+            <tr><th scope="row">3. The hedge returns</th><td data-label="Wrong if">From January 2026, the 24-month correlation of monthly returns on US stocks and 10-year Treasuries is below zero at 12 consecutive month-ends.</td><td data-label="Data and method">Stocks: Robert Shiller&rsquo;s monthly S&amp;P Composite series (ie_data.xls, retrieved through a public GitHub mirror and pinned by commit and file hash), price plus one-twelfth of the annual dividend; the price is the monthly average of daily closes, not a month-end close. Bonds: a 10-year par bond repriced each month from the 10-year Treasury yield (Federal Reserve H.15, FRED GS10, monthly average). Pearson correlation of simple monthly returns over the trailing 24 months. Monthly averages smooth returns and can move the level of the correlation; the test reads its sign. Computed by <code>scripts/stock-bond-correlation.mjs</code>.</td><td data-label="History behind the threshold">In this series the correlation was negative at 5 percent of month-ends from 1970 to 1999 and 83 percent from 2000 to 2020. It was positive from March 2022 to September 2025, and has been negative since October 2025.</td><td data-label="Reading">Not met. Below zero at 6 consecutive month-ends, January 2026 to June 2026; the test needs 12. June 2026: &minus;0.29. Data through June 2026, the last month for which Shiller reports a dividend; later months are not estimated.</td></tr>
+            <tr><th scope="row">4. The old portfolio delivers</th><td data-label="Wrong if">The 60/40 returns at least 4 percent a year after inflation, before fees and taxes, over 2026&ndash;2035.</td><td data-label="Data and method">Damodaran&rsquo;s annual returns; CPI-U December to December.</td><td data-label="History behind the threshold">1928&ndash;2025: 5.15 percent a year; at least 4 percent in 60 of 89 rolling ten-year periods; 1946&ndash;1974: 3.26 percent; 1982&ndash;2021: 7.80 percent; 2022&ndash;2025: 1.84 percent (not counted).</td><td data-label="Reading">First reading February 2027.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="review" aria-labelledby="review-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>The Review</p>
+        <h2 class="section-title" id="review-title">The questions a model review asks.</h2>
+      </div>
+      <div class="measure prose">
+        <p>US bank supervisors ask four questions of any model a bank relies on. They were set out in SR 11-7 (2011), which the Federal Reserve, the OCC and the FDIC replaced in April 2026 with SR 26-2, keeping them. That guidance is written for banks. We use its questions because they apply to any model people act on; we do not claim to meet it, and no regulator has reviewed these pages.</p>
+      </div>
+
+      <div class="compare compare-wrap compare-prose">
+        <table>
+          <caption>Where these pages stand on each question</caption>
+          <thead>
+            <tr><th scope="col">Question</th><th scope="col">Where these pages answer it</th><th scope="col">Where we stand</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Conceptual soundness: is the design sound, and are its assumptions stated?</th><td data-label="Where these pages answer it">The Parts state each rule and its reasoning; the Math page states the formulas; the scope notes state the assumptions.</td><td data-label="Where we stand">Partial: the formulas cannot be checked against the private code</td></tr>
+            <tr><th scope="row">Ongoing monitoring: is it still working as intended?</th><td data-label="Where these pages answer it">The forward record, the February readings and the corrections.</td><td data-label="Where we stand">Starts with the first readings</td></tr>
+            <tr><th scope="row">Outcomes analysis: do its outputs match what happened?</th><td data-label="Where these pages answer it">Not yet possible: no backtest and no real-money record.</td><td data-label="Where we stand">Open</td></tr>
+            <tr><th scope="row">Effective challenge: has someone objective and informed tried to break it?</th><td data-label="Where these pages answer it">The 2026 review was internal. Corrections and challenges are invited as <a href="https://github.com/Tataku/ACF-Docs/issues/new" target="_blank" rel="noopener noreferrer">public GitHub issues</a>.</td><td data-label="Where we stand">Open</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="disclosures" aria-labelledby="disclosures-title">
+      <div class="measure">
+        <p class="section-eyebrow section-signal" data-glyph-text>Disclosures</p>
+        <h2 class="section-title" id="disclosures-title">Conflicts, the dashboard, and AI assistance.</h2>
+      </div>
+      <div class="measure prose">
+        <p><strong>Conflicts.</strong> As of October 2, 2026, the author may have financial interests in assets and securities discussed in these pages. Those interests can create conflicts of interest. Position sizes and account details are not published. Evaluate any instrument named in these pages independently.</p>
+        <p><strong>The dashboard.</strong> The author also leads the ACF Dashboard, the portfolio software these pages describe. As of October 2, 2026, it is a private, pre-commercial beta: its public beta phase is paused, and the infrastructure for a paid public launch is not complete. These pages are published separately, as public material that is free to read.</p>
+        <p><strong>AI assistance.</strong> AI systems materially assisted with research, drafting, rewriting, source checking, arithmetic and its tests, consistency review and adversarial review. The author made the final decisions on the framework, its thresholds, its named instruments and its corrections, and remains responsible for what these pages publish. The author has delegated the publication of routine documentation changes to AI agents under standing rules, so not every such change is reviewed by the author before it appears. The AI review is not independent third-party, legal, regulatory, tax or investment-professional validation.</p>
+        <p><strong>Status.</strong> The framework has not published a benchmarked backtest or a public real-money track record. The dashboard&rsquo;s source code is private. The tests and evidence calculations are published so that readers can inspect and challenge them. Nothing in these pages is individualized legal, tax or investment advice.</p>
+      </div>
+    </section>
+
+  </main>
+  </div>
+
+  <!-- Floating reading nav — home + prev/next part, surfaces while scrolling -->
+  <nav class="floatnav" data-no-series aria-label="Reading navigation" hidden>
+    <div class="floatnav-inner">
+      <button type="button" class="floatnav-top" aria-label="Back to top">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 35.99 60.99 Q 45.35 55.35 50.99 45.99 A 1.4 1.4 0 0 1 49.01 44.01 Q 41.11 51.11 34.01 59.01 A 1.4 1.4 0 0 1 35.99 60.99 Z" fill-rule="evenodd"></path><path d="M 49.01 45.99 Q 54.65 55.35 64.01 60.99 A 1.4 1.4 0 0 1 65.99 59.01 Q 58.89 51.11 50.99 44.01 A 1.4 1.4 0 0 1 49.01 45.99 Z" fill-rule="evenodd"></path></svg>
+      </button>
+      <span class="floatnav-div" aria-hidden="true"></span>
+      <a class="floatnav-home" href="/">
+        <svg class="fn-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 23.5 21.23 Q 47.5 24.42 71.5 21.23 A 1.22 1.22 0 0 1 71.5 18.77 Q 47.5 19.17 23.5 18.77 A 1.22 1.22 0 0 1 23.5 21.23 Z M 68.78 18.5 Q 65.14 50 68.78 81.5 A 1.22 1.22 0 0 1 71.22 81.5 Q 70.39 50 71.22 18.5 A 1.22 1.22 0 0 1 68.78 18.5 Z M 71.5 78.78 Q 47.5 75.59 23.5 78.78 A 1.22 1.22 0 0 1 23.5 81.22 Q 47.5 80.84 71.5 81.22 A 1.22 1.22 0 0 1 71.5 78.78 Z M 26.23 81.5 Q 29.87 50 26.23 18.5 A 1.22 1.22 0 0 1 23.78 18.5 Q 24.62 50 23.78 81.5 A 1.22 1.22 0 0 1 26.23 81.5 Z" fill-rule="evenodd"></path><path d="M 35 21.23 Q 55 22.98 75 21.23 A 1.22 1.22 0 0 1 75 18.77 Q 55 17.73 35 18.77 A 1.22 1.22 0 0 1 35 21.23 Z" fill-rule="evenodd"></path><path d="M 73.78 20 Q 72.03 40 73.78 60 A 1.22 1.22 0 0 1 76.22 60 Q 77.28 40 76.22 20 A 1.22 1.22 0 0 1 73.78 20 Z" fill-rule="evenodd"></path><path d="M 33.5 35.88 Q 47.5 37.97 61.5 35.88 A 0.88 0.88 0 0 1 61.5 34.13 Q 47.5 34.22 33.5 34.13 A 0.88 0.88 0 0 1 33.5 35.88 Z M 59.13 33.5 Q 57.34 42.5 59.13 51.5 A 0.88 0.88 0 0 1 60.88 51.5 Q 61.09 42.5 60.88 33.5 A 0.88 0.88 0 0 1 59.13 33.5 Z M 61.5 49.13 Q 47.5 47.04 33.5 49.13 A 0.88 0.88 0 0 1 33.5 50.88 Q 47.5 50.79 61.5 50.88 A 0.88 0.88 0 0 1 61.5 49.13 Z M 35.88 51.5 Q 37.67 42.5 35.88 33.5 A 0.88 0.88 0 0 1 34.13 33.5 Q 33.92 42.5 34.13 51.5 A 0.88 0.88 0 0 1 35.88 51.5 Z" fill-rule="evenodd"></path><path d="M 46.13 50 Q 44.43 57.5 46.13 65 A 0.88 0.88 0 0 1 47.88 65 Q 48.18 57.5 47.88 50 A 0.88 0.88 0 0 1 46.13 50 Z" fill-rule="evenodd"></path></svg>
+        <span class="fn-home-label">Framework</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Progressive enhancement: theme, scroll-spy, drawer, completion, floatnav -->
+  <script src="/site-b/site-b-charts.js" defer></script>
+  <script src="/site-b/reading.js" defer></script>
+  <script src="/site-b/glyph-text.js" defer></script>
+  <script src="/site-b/plates.js" defer></script>
+  <!-- Deep links land exactly: islands hydrate after the initial anchor jump,
+       so re-anchor once mounting settles — unless the reader has scrolled. -->
+  <script defer>
+    (function () {
+      if (!location.hash) return;
+      var moved = false;
+      addEventListener('wheel', function () { moved = true; }, { once: true, passive: true });
+      addEventListener('touchmove', function () { moved = true; }, { once: true, passive: true });
+      function re() { if (moved) return; var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView(); }
+      addEventListener('load', function () { setTimeout(re, 700); setTimeout(re, 1800); });
+    })();
+  </script>
+
+</body>
+</html>

@@ -70,7 +70,7 @@ test('an integrated control has not been swapped back to a local geometric SVG',
   // markup, and drops a 24-viewBox glyph back into the control. The page still
   // renders, nothing errors, and the family quietly splits.
   const CONTROLS = [
-    ['icon-collapse', 9], ['icon-expand', 9], ['fn-icon', 18],
+    ['icon-collapse', 10], ['icon-expand', 10], ['fn-icon', 20],
   ];
   for (const [cls, expected] of CONTROLS) {
     let zen = 0; let geometric = 0;
