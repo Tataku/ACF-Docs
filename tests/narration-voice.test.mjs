@@ -4,7 +4,7 @@
  * Run: npm run test:narration
  *
  * The docs narrator has one failure mode that matters, and it is silent: the
- * Listen button keeps working, the label still reads "Listen", and the reader
+ * Listen button keeps working, its label does not change, and the reader
  * hears the browser's robotic Web Speech voice instead of the premium one. Every
  * cause — key removed, model or voice mistyped, origin gate refusing, one slow
  * capability probe — arrives looking identical.

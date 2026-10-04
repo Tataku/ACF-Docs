@@ -48,6 +48,10 @@
     "framework-in-pictures": {
       "title": "The Framework in Pictures &middot; The Adaptive Convexity Framework",
       "description": "All 46 charts in book order, grouped by Part, each marked as public data, representative, simulated or a diagram."
+    },
+    "evidence": {
+      "title": "Evidence &middot; The Adaptive Convexity Framework",
+      "description": "What these pages can and cannot yet show, every correction, and the tests that would prove the thesis wrong."
     }
   }
 }

@@ -67,6 +67,12 @@
       "route": "/framework-in-math",
       "file": "framework-in-math.html",
       "title": "The Framework in Math"
+    },
+    {
+      "part": 7,
+      "route": "/evidence",
+      "file": "evidence.html",
+      "title": "Evidence"
     }
   ],
   "aliases": {
@@ -135,7 +141,13 @@
     "framework-in-math.html": "/framework-in-math",
     "/framework-in-math.html": "/framework-in-math",
     "https://docs.acfdashboard.com/framework-in-math": "/framework-in-math",
-    "https://docs.acfdashboard.com/site-b/framework-in-math.html": "/framework-in-math"
+    "https://docs.acfdashboard.com/site-b/framework-in-math.html": "/framework-in-math",
+    "/evidence": "/evidence",
+    "/site-b/evidence.html": "/evidence",
+    "evidence.html": "/evidence",
+    "/evidence.html": "/evidence",
+    "https://docs.acfdashboard.com/evidence": "/evidence",
+    "https://docs.acfdashboard.com/site-b/evidence.html": "/evidence"
   },
   "sections": {
     "/": [
@@ -182,6 +194,8 @@
       "exhibit-06",
       "exhibit-dl-tripwire-loop",
       "exhibit-s1",
+      "falsifiers",
+      "falsifiers-title",
       "manifesto",
       "manifesto-title",
       "ooo-title",
@@ -682,6 +696,27 @@
       "sizing-math-title",
       "tax-math",
       "tax-math-title",
+      "theme-toggle"
+    ],
+    "/evidence": [
+      "acf-reference-integrity-fallback",
+      "arithmetic",
+      "arithmetic-title",
+      "corrections",
+      "corrections-title",
+      "disclosures",
+      "disclosures-title",
+      "forward",
+      "forward-title",
+      "ledger",
+      "ledger-title",
+      "limits",
+      "limits-title",
+      "review",
+      "review-title",
+      "sidebar",
+      "tests",
+      "tests-title",
       "theme-toggle"
     ]
   },
@@ -1715,7 +1750,7 @@
     "volatility-clustering": {
       "later": {
         "href": "/part-1-foundation#manifesto",
-        "label": "Appears in Part 1 · The traditional portfolio playbook is failing quietly"
+        "label": "Appears in Part 1 · The traditional playbook was built for a regime that has ended"
       },
       "chart": null,
       "entry": {
@@ -1740,7 +1775,7 @@
     "survivable-compounding": {
       "later": {
         "href": "/part-1-foundation#manifesto",
-        "label": "Appears in Part 1 · The traditional portfolio playbook is failing quietly"
+        "label": "Appears in Part 1 · The traditional playbook was built for a regime that has ended"
       },
       "chart": {
         "href": "/part-1-foundation#exhibit-06",
@@ -2110,7 +2145,7 @@
     "volatility": {
       "later": {
         "href": "/part-1-foundation#manifesto",
-        "label": "Appears in Part 1 · The traditional portfolio playbook is failing quietly"
+        "label": "Appears in Part 1 · The traditional playbook was built for a regime that has ended"
       },
       "chart": {
         "href": "/part-3-bitcoin-convexity-backbone#exhibit-p3-volatility-is-the-toll",
@@ -2963,13 +2998,13 @@
     }
   },
   "audit": {
-    "pages": 11,
-    "anchors": 1240,
+    "pages": 12,
+    "anchors": 1307,
     "chartSpecs": 46,
     "liveChartMounts": 100,
     "glossaryTerms": 109,
-    "glossaryTermsAlreadyTagged": 33,
-    "glossaryTermsAutoTagEligible": 76,
+    "glossaryTermsAlreadyTagged": 34,
+    "glossaryTermsAutoTagEligible": 75,
     "unresolvedGlossaryCharts": [],
     "warnings": []
   }

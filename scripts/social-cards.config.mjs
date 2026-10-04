@@ -13,6 +13,7 @@ export const PAGES = Object.freeze([
   'cover-docs', 'part-1-foundation', 'part-1-pictures', 'part-2-lineage-macro',
   'part-3-bitcoin-convexity', 'part-4-tax-architecture', 'part-5-portfolio-construction',
   'part-6-convexity-scoring', 'glossary', 'framework-in-math', 'framework-in-pictures',
+  'evidence',
 ]);
 
 /**
