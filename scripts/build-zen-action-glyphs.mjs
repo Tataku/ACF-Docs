@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 /**
  * Draw the Part action bar's Zen glyphs that the Figma pack does not include:
- * play, stop, share-on-X and email.
+ * play, stop and email. (Share-on-X uses the pack's own close.svg mark,
+ * scaled 1.45x about the centre to the old X's size: share-x.svg.)
  *
  * Run: node scripts/build-zen-action-glyphs.mjs   (writes public/site-b/icons/optimized/)
  *
  * WHY DRAWN HERE. The pack (149 exports, design/zen-source-manifest.json) has
- * no play, stop, mail or X mark, so the Listen button and two share links
+ * no play, stop or mail mark, so the Listen button and two share links
  * carried 24-unit geometric line icons beside the pack's brush marks. These
- * four use the pack's own stroke construction, read off its exports
+ * three use the pack's own stroke construction, read off its exports
  * (share.svg, copy.svg, close.svg), so they belong to the same family:
  *
  *   - one tapered stroke per segment, on the 100-unit box;
@@ -71,11 +72,10 @@ function edges(points, over = 0) {
 const rect = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(G);
 
 // Geometric originals (24 box): play M8 5.5 v13 l11 -6.5 z; stop rect 7..17;
-// X M4 4 l16 16 M20 4 L4 20; mail rect 3,5 18x14 + chevron 4,7 12,13 20,7.
+// mail rect 3,5 18x14 + chevron 4,7 12,13 20,7.
 export const GLYPHS = {
   play: edges([[8, 5.5], [8, 18.5], [19, 12]].map(G)),
   stop: edges(rect(7, 7, 17, 17), 1.5),
-  'share-x': [stroke(G([4, 4]), G([20, 20])), stroke(G([20, 4]), G([4, 20]))],
   mail: [
     ...edges(rect(3, 5, 21, 19), 1.5),
     stroke(G([4, 7]), G([12, 13])),

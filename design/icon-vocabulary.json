@@ -96,7 +96,7 @@
       "usage": "share this part on X",
       "control": "[data-share=\"x\"] .pa-icon",
       "shared": false,
-      "drawnBy": "scripts/build-zen-action-glyphs.mjs \u2014 not in the Figma pack; drawn in its stroke construction"
+      "drawnBy": "the Figma pack's close.svg, byte-for-byte to 2 decimals, scaled 1.45x about the centre (the old X's size); exempt from the outline rule"
     },
     {
       "semantic": "mail",

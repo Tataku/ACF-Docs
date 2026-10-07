@@ -134,3 +134,14 @@ test('the drawn action glyphs are exactly what their generator writes', async ()
       `${name}.svg differs from scripts/build-zen-action-glyphs.mjs — rerun it`);
   }
 });
+
+test('share-on-X is the pack\'s own close mark, enlarged, not a redrawn X', () => {
+  const x = fs.readFileSync(path.join(OPT, 'share-x.svg'), 'utf8');
+  // close.svg's first stroke, rounded to 2 decimals like every optimized asset.
+  assert.ok(x.includes('M 28.76 31.24 Q 45.79 54.21 68.76 71.24 A 1.75 1.75 0 0 1 71.24 68.76'),
+    'share-x.svg is no longer the pack close mark');
+  assert.ok(x.includes('<g transform="matrix(1.45 0 0 1.45 -22.5 -22.5)">'), 'scaled 1.45x about the centre');
+  const CSS = fs.readFileSync(path.join(ROOT, 'public/site-b/reading-system.css'), 'utf8');
+  assert.match(CSS, /\.part-actions svg\[viewBox="0 0 100 100"\] g\[transform\] path \{ stroke: none; \}/,
+    'the scaled mark must be exempt from the outline, or it renders ~2px heavy');
+});
