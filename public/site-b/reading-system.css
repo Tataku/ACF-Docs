@@ -2976,17 +2976,22 @@ html { scroll-padding-top: var(--space-10); }
   padding: var(--space-2);
   margin-inline: calc(-1 * var(--space-2));
   border-radius: var(--radius);
-  /* Ported from the dashboard nav-item hover: a quiet accent wash + a 2px slide
-     + a faint accent glow. The dashboard keeps bg/transform instant to avoid
-     ghost-trails in its DENSE nav; this rail has only ~6 items, so the slide is
-     transitioned smoothly for a more premium feel. */
-  transition: color var(--motion-base) var(--ease-standard),
-              background var(--motion-base) var(--ease-standard),
-              box-shadow var(--motion-base) var(--ease-standard),
-              transform var(--motion-base) var(--ease-emphasis);
+  /* The dashboard nav pane's hover contract (Sidebar.css .nav-item), ported:
+     the wash, the glow and the 2px slide are INSTANT, and only colour eases.
+     A transitioned background fades out while the next row fades in, so a
+     cursor swept down the rail leaves a trail of half-lit rows. The dashboard
+     removed those transitions for exactly that reason. This rail used to keep
+     them because it had six rows; with every section entry lit on hover it is
+     a dense list, and the same reasoning applies. */
+  transition: color var(--motion-base) var(--ease-standard);
 }
 .side-part .spnum { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-faint); }
-a.side-part:hover, a.side-part:focus-visible {
+/* Hover only for a pointer that can hover (html[data-pointer], published by
+   reading-core.js from each event's pointerType, as the dashboard's
+   pointerMode does). Until a touch arrives the page counts as fine, so a mouse
+   never meets a dead first frame; after a tap, nothing stays lit. Keyboard
+   focus is never gated. */
+html:not([data-pointer="coarse"]) a.side-part:hover, a.side-part:focus-visible {
   background: var(--accent-faint);
   color: var(--ink);
   transform: translateX(2px);
@@ -3017,10 +3022,21 @@ a.side-part:hover, a.side-part:focus-visible {
   padding: 2px 0 2px var(--space-3);
   margin-left: calc(-1 * var(--space-4) - 1px);
   border-left: 2px solid transparent;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  /* The wash starts after the 2px rail marker, never under it. */
+  background-clip: padding-box;
+  /* Same contract as .side-part: only colour and the marker ease. */
   transition: color var(--motion-fast) var(--ease-standard),
               border-color var(--motion-fast) var(--ease-standard);
 }
-.on-this-page a:hover, .on-this-page a:focus-visible { color: var(--ink-quiet); }
+/* The dashboard's sub-nav hover (.sub-nav-item): the rail's wash, a lighter
+   glow than a Part row, and the same 2px slide, all instant. */
+html:not([data-pointer="coarse"]) .on-this-page a:hover, .on-this-page a:focus-visible {
+  color: var(--ink);
+  background-color: var(--accent-faint);
+  box-shadow: 0 0 6px rgba(52, 211, 153, .06);
+  transform: translateX(2px);
+}
 /* On a phone this list lives inside the off-canvas drawer, where it is the only
    way to jump within a Part — and it was rendering at 23px tall, under the 24px
    WCAG 2.2 AA target and packed tight. The desktop rail keeps its density (the
@@ -3039,6 +3055,10 @@ a.side-part:hover, a.side-part:focus-visible {
   border-left-color: var(--accent);
   font-weight: var(--weight-medium);
 }
+/* The current entry's accent marker sits ON the rail line; sliding it would
+   lift it off the rail. It takes the wash, not the slide. */
+html:not([data-pointer="coarse"]) .on-this-page a[aria-current="true"]:hover,
+.on-this-page a[aria-current="true"]:focus-visible { color: var(--accent); transform: none; }
 
 /* ── Sidebar refinement — a quiet instrument panel ─────────────────────────
    Stealth scrollbar, muted structural labels, one accent marker for the active
@@ -3079,7 +3099,7 @@ a.side-part:hover, a.side-part:focus-visible {
   background: var(--accent);
 }
 /* Hover is a quiet wash; keep it lighter than the active state. */
-a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); }
+html:not([data-pointer="coarse"]) a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); }
 
 /* SOON: borderless, stealth micro-caps — an instrument label, not a pill. */
 .soon {

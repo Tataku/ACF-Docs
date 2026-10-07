@@ -608,6 +608,30 @@
     // the same peek.
     for (k = 0; k < ticks.length; k += 1) wire(ticks[k], ticks[k].getAttribute('data-foot-tick'));
   }
+  /* ---- Pointer mode: what is pointing RIGHT NOW, from evidence ------------
+     Port of the dashboard's ui/runtime/pointerMode.js. Media queries describe
+     the hardware ((hover: hover) and (any-hover: hover) both answer for a
+     Surface's touchscreen while its owner drives a mouse); a pointer event's
+     pointerType describes what just moved. Published as data-pointer on <html>
+     so CSS gates hover on html:not([data-pointer="coarse"]). Absent counts as
+     fine: no hover is happening before the first event, and a mouse user never
+     meets a frame where hover is dead. A finger's first pointerdown corrects it
+     in the capture phase, before any hover state can paint. */
+  function pointerMode() {
+    var root = document.documentElement;
+    var current = null;
+    function onPointer(e) {
+      if (!e || !e.pointerType) return;      // unnamed type is not evidence of touch
+      var mode = e.pointerType === 'touch' ? 'coarse' : 'fine';   // pen hovers
+      if (mode === current) return;
+      current = mode;
+      root.setAttribute('data-pointer', mode);
+    }
+    var opts = { capture: true, passive: true };
+    window.addEventListener('pointerdown', onPointer, opts);
+    window.addEventListener('pointermove', onPointer, opts);
+  }
+
   /* ---- Sidebar collapse/expand (desktop), persisted ---------------------- */
   function sidebarCollapse() {
     var btn = document.querySelector('.sidebar-toggle');
@@ -1855,6 +1879,7 @@
   theme();
   scrollSpy();
   drawer();
+  pointerMode();
   sidebarCollapse();
   floatNav();
   progressWrite();
