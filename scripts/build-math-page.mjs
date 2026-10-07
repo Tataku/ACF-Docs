@@ -48,7 +48,7 @@ const main = `<main class="shell-main">
 
     <header class="doc-header">
       <div class="measure">
-        <p class="doc-eyebrow" data-glyph-text>Framework Reference</p>
+        <div class="doc-signal" data-glyph-text>Framework Reference</div>
         <p class="doc-kicker">The mathematical companion &middot; for readers who want the arithmetic</p>
         <h1 class="doc-title">The Framework in Math</h1>
       </div>
