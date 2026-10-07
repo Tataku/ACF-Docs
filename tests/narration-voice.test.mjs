@@ -118,6 +118,17 @@ test('client: first audio comes fast, and a slow start is waited for, not replac
   assert.ok(dl && Number(dl[1]) >= 30000, 'the deadline is a ceiling for a stuck request, not a race');
 });
 
+test('a segment always fits inside one generation budget', () => {
+  // Measured on production 2026-10-07: ~40s for ~3000 characters, and a
+  // 3500-character segment timed out on every try, so it could never be heard.
+  const max = Number((CLIENT.match(/var API_MAX = (\d+);/) || [])[1]);
+  assert.ok(max > 0 && max <= 2000, `API_MAX ${max} must stay <= 2000`);
+  const caps = (CLIENT.match(/var SEG_CAPS = \[([^\]]+)\]/) || [, ''])[1].split(',').map(Number);
+  assert.ok(caps.length && caps.every((c) => c <= max), 'no ramp step above the ceiling');
+  const timeout = Number((API.match(/const TTS_TIMEOUT_MS = (\d+);/) || [])[1]);
+  assert.ok(timeout > 45000 && timeout < 60000, 'the provider timeout sits inside the 60s function limit');
+});
+
 test('server: the function may run long enough for a full segment', () => {
   // A platform default of 10-15s cut long generations off with Vercel's own 504.
   assert.match(API, /export const config = \{ maxDuration: 60 \};/);

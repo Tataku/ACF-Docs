@@ -70,7 +70,10 @@ const DEFAULT_INSTRUCTIONS =
 // known-legacy tts-1 family (forward-compatible with future gpt models).
 const supportsInstructions = (model) => !/^tts-1/i.test(model || '');
 const MAX_INPUT_LENGTH = 4096; // OpenAI TTS hard limit
-const TTS_TIMEOUT_MS = 45000;  // gpt-4o-mini-tts can take a beat longer than tts-1
+// Inside the 60s function limit (config.maxDuration) with room to answer. The
+// client caps segments at 2000 characters so a generation fits; see API_MAX
+// in reading-core.js for the measurement behind both numbers.
+const TTS_TIMEOUT_MS = 55000;
 
 // The ONE place a voice name is resolved, for both the capability answer and the
 // generation call. It must be one path: a mistyped NARRATION_TTS_VOICE used to

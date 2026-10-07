@@ -41,7 +41,10 @@ jobs:
       (github.event.deployment_status.state == 'success' &&
        github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # A full render of every Part is ~70 generations at up to ~30s each
+    # (measured 2026-10-07: five Parts took 45 minutes). Re-runs after an edit
+    # take minutes, because unchanged segments come from the store.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
 
