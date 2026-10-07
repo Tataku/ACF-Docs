@@ -52,12 +52,12 @@ delete process.env.NARRATION_TTS_VOICE;
 delete process.env.BLOB_READ_WRITE_TOKEN;
 const { default: handler, config } = await import('../pages/api/narration.js');
 
-test('defaults: the December 2025 snapshot, the cedar voice, 60s duration', async () => {
+test('defaults: the December 2025 snapshot, the ash voice, 60s duration', async () => {
   assert.deepEqual(config, { maxDuration: 60 });
   const res = mockRes();
   await handler({ method: 'GET', headers: {} }, res);
   assert.equal(res.body.model, 'gpt-4o-mini-tts-2025-12-15');
-  assert.equal(res.body.voice, 'cedar');
+  assert.equal(res.body.voice, 'ash');
   assert.equal(res.body.configWarning, null);
 });
 
@@ -69,7 +69,7 @@ test('a refused snapshot retries once on the floating alias, and the reader stil
   assert.equal(res.statusCode, 200);
   assert.equal(res.headers['x-narration-model'], 'gpt-4o-mini-tts');
   assert.deepEqual(calls.map((c) => c.model), ['gpt-4o-mini-tts-2025-12-15', 'gpt-4o-mini-tts']);
-  assert.ok(calls.every((c) => c.voice === 'cedar' && c.instructions));
+  assert.ok(calls.every((c) => c.voice === 'ash' && c.instructions));
 });
 
 test('a voice-level rejection on both models is reported as configuration, not retried forever', async () => {
@@ -108,7 +108,7 @@ test('store: a stored segment is served without generating; a new one is generat
   assert.equal(calls.length, 1);
 
   const [[pathname]] = [...blobs];
-  assert.match(pathname, /^narration\/v1\/gpt-4o-mini-tts-2025-12-15\/cedar\/[0-9a-f]{64}\.mp3$/);
+  assert.match(pathname, /^narration\/v1\/gpt-4o-mini-tts-2025-12-15\/ash\/[0-9a-f]{64}\.mp3$/);
 
   // A segment another instance already generated: in the store, not in this
   // instance's memory. It must be served with no provider call at all.

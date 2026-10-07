@@ -37,7 +37,7 @@ const CLIENT = read('public/site-b/reading-core.js');
 // dashboard's floating alias if it is ever refused. Voice and delivery match.
 const CANONICAL_MODEL = 'gpt-4o-mini-tts';               // the dashboard's floating alias
 const DOCS_MODEL = 'gpt-4o-mini-tts-2025-12-15';         // the docs' pinned snapshot of it
-const CANONICAL_VOICE = 'cedar';
+const CANONICAL_VOICE = 'ash';
 const CANONICAL_INSTRUCTIONS =
   'Delivery: calm, low-key authority, like an experienced portfolio manager ' +
   'briefing a capable peer. Plain, precise and understated. Measured, unhurried ' +
@@ -333,4 +333,15 @@ test('chart UI affordances never reach the narrator', () => {
   assert.match(CLIENT, /var UI_GLYPH = /);
   assert.match(CLIENT, /UI_GLYPH\.test\(n\.textContent \|\| ''\)/);
   assert.match(CLIENT, /u21b3\/g, ' '\)/);   // belt and braces: never spoken even if it slips through
+});
+
+test('client: narration opens on the Part title, then the text (owner ruling 2026-10-07)', () => {
+  // "Part 1: Foundation & Philosophy", then straight into the Manifesto. The
+  // header kicker, the byline and Key takeaways are never read aloud.
+  assert.match(CLIENT, /\{ sel: 'h1\.doc-title',\s+kind: 'title' \}/);
+  const mute = (CLIENT.match(/var NARRATION_MUTE = '([^']+)'/) || [, ''])[1].split(',').map((s) => s.trim());
+  for (const sel of ['.doc-kicker', '.doc-byline', '.callout-collapse']) {
+    assert.ok(mute.includes(sel), `${sel} must stay muted`);
+  }
+  assert.match(CLIENT, /if \(kind === 'title'\)/);
 });

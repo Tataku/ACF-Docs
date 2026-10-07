@@ -42,10 +42,10 @@ const OPENAI_TTS_MODEL = process.env.NARRATION_TTS_MODEL || 'gpt-4o-mini-tts-202
 // generation retries once on the floating alias instead of failing every
 // segment. The reader keeps the AI voice; X-Narration-Model says which ran.
 const FALLBACK_TTS_MODEL = 'gpt-4o-mini-tts';
-// cedar: male, and with marin the voice OpenAI recommends for best quality.
-// Chosen for the readership (owner, 2026-10-07): a calm, intelligent male
-// narrator for self-directed investors. Overridable by env.
-const DEFAULT_VOICE = process.env.NARRATION_TTS_VOICE || 'cedar';
+// ash: smooth, confident, male. Owner rulings 2026-10-07: a male narrator for
+// self-directed investors, chosen on listening after cedar ("terrible") and
+// onyx ("bored to death") were rejected. Overridable by env.
+const DEFAULT_VOICE = process.env.NARRATION_TTS_VOICE || 'ash';
 // gpt-4o-mini-tts voice set (superset of the legacy six). Any of these may be
 // requested per-call via body.voice; unknown values resolve via resolveVoice().
 const ALLOWED_VOICES = [
@@ -82,7 +82,7 @@ const TTS_TIMEOUT_MS = 55000;
 function resolveVoice(requested) {
   if (requested && ALLOWED_VOICES.indexOf(requested) >= 0) return requested;
   if (ALLOWED_VOICES.indexOf(DEFAULT_VOICE) >= 0) return DEFAULT_VOICE;
-  return 'cedar'; // env holds a voice the provider does not know — do not forward it
+  return 'ash'; // env holds a voice the provider does not know — do not forward it
 }
 
 // Describe the RESOLVED voice configuration. Returned with every capability
