@@ -32,12 +32,31 @@ const CLIENT = read('public/site-b/reading-core.js');
 // legacy `tts-1` while the improved engine lived only here. Change both or
 // neither; this test is the tripwire.
 // ---------------------------------------------------------------------------
-const CANONICAL_MODEL = 'gpt-4o-mini-tts';
-const CANONICAL_VOICE = 'nova';
+// The MODEL is the one deliberate difference: the docs pin the dated snapshot
+// (stored audio must not change voice underneath readers) and fall back to the
+// dashboard's floating alias if it is ever refused. Voice and delivery match.
+const CANONICAL_MODEL = 'gpt-4o-mini-tts';               // the dashboard's floating alias
+const DOCS_MODEL = 'gpt-4o-mini-tts-2025-12-15';         // the docs' pinned snapshot of it
+const CANONICAL_VOICE = 'cedar';
+const CANONICAL_INSTRUCTIONS =
+  'Delivery: calm, low-key authority, like an experienced portfolio manager ' +
+  'briefing a capable peer. Plain, precise and understated. Measured, unhurried ' +
+  'pace with natural sentence rhythm. Clear enunciation of numbers, tickers and ' +
+  'dates; light emphasis on key terms. Never hyped, salesy, breathless, ' +
+  'theatrical or robotic.';
 
 test('defaults to the current-generation model, never the legacy tts-1 family', () => {
-  assert.match(API, new RegExp(`NARRATION_TTS_MODEL \\|\\| '${CANONICAL_MODEL}'`));
+  assert.match(API, new RegExp(`NARRATION_TTS_MODEL \\|\\| '${DOCS_MODEL}'`));
+  assert.match(API, new RegExp(`FALLBACK_TTS_MODEL = '${CANONICAL_MODEL}'`));
+  assert.ok(DOCS_MODEL.startsWith(CANONICAL_MODEL + '-'), 'the pin is a snapshot OF the shared model');
   assert.match(API, new RegExp(`NARRATION_TTS_VOICE \\|\\| '${CANONICAL_VOICE}'`));
+});
+
+test('delivery instructions are the shared ones, and read as description, not speech', () => {
+  const decl = API.slice(API.indexOf('const DEFAULT_INSTRUCTIONS'));
+  const quoted = [...decl.slice(0, decl.indexOf("';\n") + 2).matchAll(/'([^']*)'/g)].map((m) => m[1]).join('');
+  assert.equal(quoted, CANONICAL_INSTRUCTIONS);
+  assert.doesNotMatch(CANONICAL_INSTRUCTIONS, /\b(you|your|I|we)\b/i, 'no sentence addressed to anyone that could be spoken aloud');
 });
 
 test('sends the delivery steer, and withholds it from models that ignore it', () => {

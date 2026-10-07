@@ -939,6 +939,12 @@
       var FIRST_AUDIO_DEADLINE_MS = 40000;
       var loadTimer = 0;             // the first-audio deadline timer (cleared on success / stop)
       var resumeAt = 0;              // segment to restart from after a mid-Part failure
+      // Voice audition: ?voice=<name> on a Part URL narrates it in that voice.
+      // The server accepts only its own allowlist and otherwise uses its
+      // default, so this cannot reach anything the route would not serve.
+      var auditionVoice = null;
+      try { auditionVoice = new URLSearchParams(location.search).get('voice'); } catch (e) {}
+      if (auditionVoice && !/^[a-z]{2,16}$/.test(auditionVoice)) auditionVoice = null;
 
       // --- which voice are we actually hearing? ------------------------------
       // The premium voice can vanish for reasons no reader can see (key removed,
@@ -1409,7 +1415,7 @@
           return fetch('/api/narration', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text }),
+            body: JSON.stringify(auditionVoice ? { text: text, voice: auditionVoice } : { text: text }),
             signal: ctrl.signal
           }).then(function (r) {
             controllers.delete(ctrl);
@@ -1666,7 +1672,11 @@
         // What the narrator will actually SAY, before any audio is generated.
         // Narration quality is otherwise only checkable by listening to the whole
         // page, which is why half the book could go unread without anyone noticing.
-        script:      function () { return buildBlocks().slice(); }
+        script:      function () { return buildBlocks().slice(); },
+        // The exact strings sent to /api/narration, in order. The pre-render
+        // (scripts/warm-narration.mjs) reads these from the live page, so the
+        // audio it stores is keyed on byte-identical text to what readers send.
+        segments:    function () { return buildSegments().slice(); }
       };
       // Reachable for QA: `ACFNarration.script()` prints what this page will say.
       try { window.ACFNarration = NARRATION; } catch (e) {}

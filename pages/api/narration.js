@@ -30,11 +30,22 @@
 // not depend on a dashboard setting. 60s is within every plan's ceiling.
 export const config = { maxDuration: 60 };
 
-const OPENAI_TTS_ENDPOINT = 'https://api.openai.com/v1/audio/speech';
-// Newest, most human OpenAI speech model (gpt-4o-mini-tts, 2025). Overridable so
-// ops can bump to a still-newer model without touching code.
-const OPENAI_TTS_MODEL = process.env.NARRATION_TTS_MODEL || 'gpt-4o-mini-tts';
-const DEFAULT_VOICE = process.env.NARRATION_TTS_VOICE || 'nova';
+// Overridable only so the route can be exercised end-to-end against a stub
+// (scripts/warm-narration.mjs was verified that way) or sent through a proxy.
+const OPENAI_TTS_ENDPOINT = process.env.NARRATION_TTS_ENDPOINT || 'https://api.openai.com/v1/audio/speech';
+// The dated December 2025 snapshot, OpenAI's newest speech model at the time
+// of writing (reported ~35% lower word error rate than the original release).
+// Pinned rather than the floating alias so the voice does not change under the
+// stored audio without a deliberate edit. Overridable by env.
+const OPENAI_TTS_MODEL = process.env.NARRATION_TTS_MODEL || 'gpt-4o-mini-tts-2025-12-15';
+// If the provider refuses the configured model (a retired snapshot, a typo),
+// generation retries once on the floating alias instead of failing every
+// segment. The reader keeps the AI voice; X-Narration-Model says which ran.
+const FALLBACK_TTS_MODEL = 'gpt-4o-mini-tts';
+// cedar: male, and with marin the voice OpenAI recommends for best quality.
+// Chosen for the readership (owner, 2026-10-07): a calm, intelligent male
+// narrator for self-directed investors. Overridable by env.
+const DEFAULT_VOICE = process.env.NARRATION_TTS_VOICE || 'cedar';
 // gpt-4o-mini-tts voice set (superset of the legacy six). Any of these may be
 // requested per-call via body.voice; unknown values resolve via resolveVoice().
 const ALLOWED_VOICES = [
@@ -44,12 +55,17 @@ const ALLOWED_VOICES = [
 // Delivery steering — how to say it, not just what to say. Honoured by gpt-4o
 // speech models; silently ignored by (and so withheld from) the legacy tts-1
 // family. This is where the "human, not robotic" quality comes from.
+// Kept to a DESCRIPTION of delivery, in fragments, never a sentence the
+// narrator could say: the provider has a known failure mode where instruction
+// prose leaks into the audio. Mirrors DEFAULT_NARRATION_INSTRUCTIONS in
+// ACFDashboard api/lib/narrationVoice.js; the two must stay identical.
 const DEFAULT_INSTRUCTIONS =
   process.env.NARRATION_TTS_INSTRUCTIONS ||
-  'Read as a calm, warm, and authoritative narrator for a serious long-form ' +
-  'investing framework. Measured, articulate pace with natural sentence rhythm; ' +
-  'clear enunciation; subtle emphasis on key terms; confident but unhurried, ' +
-  'and never robotic, breathless, or sing-song.';
+  'Delivery: calm, low-key authority, like an experienced portfolio manager ' +
+  'briefing a capable peer. Plain, precise and understated. Measured, unhurried ' +
+  'pace with natural sentence rhythm. Clear enunciation of numbers, tickers and ' +
+  'dates; light emphasis on key terms. Never hyped, salesy, breathless, ' +
+  'theatrical or robotic.';
 // Instructions are a gpt-4o-era feature: send them for anything that is not the
 // known-legacy tts-1 family (forward-compatible with future gpt models).
 const supportsInstructions = (model) => !/^tts-1/i.test(model || '');
@@ -63,7 +79,7 @@ const TTS_TIMEOUT_MS = 45000;  // gpt-4o-mini-tts can take a beat longer than tt
 function resolveVoice(requested) {
   if (requested && ALLOWED_VOICES.indexOf(requested) >= 0) return requested;
   if (ALLOWED_VOICES.indexOf(DEFAULT_VOICE) >= 0) return DEFAULT_VOICE;
-  return 'nova'; // env holds a voice the provider does not know — do not forward it
+  return 'cedar'; // env holds a voice the provider does not know — do not forward it
 }
 
 // Describe the RESOLVED voice configuration. Returned with every capability
@@ -98,7 +114,11 @@ function describeVoice() {
     configWarning = 'NARRATION_TTS_MODEL="' + model + '" is a legacy model that ignores delivery instructions';
   }
 
-  return { model, voice, instructions: !legacyModel, legacyModel, configWarning };
+  return {
+    model, voice, instructions: !legacyModel, legacyModel, configWarning,
+    fallbackModel: FALLBACK_TTS_MODEL,
+    store: process.env.BLOB_READ_WRITE_TOKEN ? 'blob' : 'memory',
+  };
 }
 
 // Best-effort in-memory rate limit. Serverless instances are ephemeral, so this
@@ -145,6 +165,69 @@ function cacheSet(key, buf) {
   audioCache.set(key, buf);
   while (audioCache.size > AUDIO_CACHE_MAX) {
     audioCache.delete(audioCache.keys().next().value); // evict least-recently-used
+  }
+}
+
+// Persistent audio store (Vercel Blob), content-addressed. The key is a SHA-256
+// of everything that shapes the audio: model, voice, delivery instructions and
+// the exact text of the segment. Consequences, all intended:
+//   - an edit to the docs changes only the edited segments' keys, so only
+//     those are regenerated; every unchanged segment is served from the store;
+//   - a model, voice or instructions change re-keys everything, so old audio
+//     can never play under a new configuration;
+//   - nothing has to be invalidated by hand, ever.
+// Active only when BLOB_READ_WRITE_TOKEN is set (a Vercel Blob store connected
+// to the project). Without it the route behaves exactly as before: generate,
+// with the per-instance memory cache above.
+let blobApi = null;
+async function blobStore() {
+  if (blobApi) return blobApi;
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+  blobApi = await import('@vercel/blob');
+  return blobApi;
+}
+// Test seam: tests/narration-route.test.mjs substitutes an in-memory store.
+export function _setBlobStoreForTests(api) { blobApi = api; }
+async function sha256(str) {
+  const { createHash } = await import('node:crypto');
+  return createHash('sha256').update(str).digest('hex');
+}
+export async function storePath(model, voice, instructions, text) {
+  return 'narration/v1/' + model + '/' + voice + '/' +
+    (await sha256(model + '\u0000' + voice + '\u0000' + (instructions || '') + '\u0000' + text)) + '.mp3';
+}
+// The store path a segment is served from under the CURRENT configuration.
+// Exported so tests and tooling compute keys exactly as the route does.
+export async function segmentStorePath(text, requestedVoice) {
+  const voice = resolveVoice(requestedVoice);
+  const instructions = supportsInstructions(OPENAI_TTS_MODEL) ? DEFAULT_INSTRUCTIONS : '';
+  return storePath(OPENAI_TTS_MODEL, voice, instructions, String(text).slice(0, MAX_INPUT_LENGTH));
+}
+async function storeGet(pathname) {
+  const blob = await blobStore();
+  if (!blob) return null;
+  try {
+    const meta = await blob.head(pathname);
+    const r = await fetch(meta.url);
+    if (!r.ok) return null;
+    return Buffer.from(await r.arrayBuffer());
+  } catch (e) {
+    return null; // not stored yet (BlobNotFoundError) or the store is unreachable: generate
+  }
+}
+async function storePut(pathname, buf) {
+  const blob = await blobStore();
+  if (!blob) return;
+  try {
+    await blob.put(pathname, buf, {
+      access: 'public',
+      contentType: 'audio/mpeg',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      cacheControlMaxAge: 31536000,
+    });
+  } catch (e) {
+    // A failed write costs a regeneration next time, never this reader's audio.
   }
 }
 
@@ -238,13 +321,15 @@ export default async function handler(req, res) {
   // Cache hit → instant, free, identical audio. Served before the rate limiter,
   // so a warmed reader is never throttled.
   const hit = cacheGet(ckey);
-  if (hit) {
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Content-Length', hit.byteLength);
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-    res.setHeader('X-Narration-Cache', 'hit');
-    res.setHeader('X-Narration-Model', OPENAI_TTS_MODEL);
-    return res.status(200).send(hit);
+  if (hit) return sendAudio(res, hit, 'hit', OPENAI_TTS_MODEL);
+
+  // Persistent store: every segment any reader has ever heard, under its
+  // content key. Served before the rate limiter, like the memory cache.
+  const primaryPath = await storePath(OPENAI_TTS_MODEL, voice, instructions, input);
+  const stored = await storeGet(primaryPath);
+  if (stored) {
+    cacheSet(ckey, stored);
+    return sendAudio(res, stored, 'store', OPENAI_TTS_MODEL);
   }
 
   const fwd = req.headers['x-forwarded-for'];
@@ -265,23 +350,21 @@ export default async function handler(req, res) {
   const timer = setTimeout(() => controller.abort(), TTS_TIMEOUT_MS);
 
   try {
-    const payload = {
-      model: OPENAI_TTS_MODEL,
-      input,
-      voice,
-      response_format: 'mp3',
-    };
-    if (instructions) payload.instructions = instructions; // steer delivery (gpt-4o family)
+    let model = OPENAI_TTS_MODEL;
+    let upstream = await callProvider(apiKey, model, voice, instructions, input, controller.signal);
 
-    const upstream = await fetch(OPENAI_TTS_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
+    // The configured model refused (400/404): retry once on the floating alias,
+    // checking the store first, so a retired snapshot never silences the voice.
+    if ((upstream.status === 400 || upstream.status === 404) && model !== FALLBACK_TTS_MODEL) {
+      model = FALLBACK_TTS_MODEL;
+      const fbInstructions = supportsInstructions(model) ? DEFAULT_INSTRUCTIONS : '';
+      const fbStored = await storeGet(await storePath(model, voice, fbInstructions, input));
+      if (fbStored) {
+        cacheSet(ckey, fbStored);
+        return sendAudio(res, fbStored, 'store', model);
+      }
+      upstream = await callProvider(apiKey, model, voice, fbInstructions, input, controller.signal);
+    }
 
     if (!upstream.ok) {
       const status = upstream.status;
@@ -305,7 +388,7 @@ export default async function handler(req, res) {
       if (status === 400 || status === 404) {
         // Fails identically on every retry — a deployment misconfiguration,
         // not a transient blip. Naming it here is what stops it presenting as
-        // an unexplained return of the robotic voice.
+        // an unexplained silence.
         return res.status(502).json({
           error: 'UPSTREAM_CONFIG_REJECTED',
           message: `OpenAI TTS rejected the configured model/voice (HTTP ${status})`,
@@ -323,12 +406,9 @@ export default async function handler(req, res) {
 
     const audioBuffer = Buffer.from(await upstream.arrayBuffer());
     cacheSet(ckey, audioBuffer);
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Content-Length', audioBuffer.byteLength);
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-    res.setHeader('X-Narration-Cache', 'miss');
-    res.setHeader('X-Narration-Model', OPENAI_TTS_MODEL);
-    return res.status(200).send(audioBuffer);
+    const usedInstructions = supportsInstructions(model) ? DEFAULT_INSTRUCTIONS : '';
+    await storePut(await storePath(model, voice, usedInstructions, input), audioBuffer);
+    return sendAudio(res, audioBuffer, 'miss', model);
   } catch (err) {
     if (err && (err.name === 'AbortError' || err.name === 'TimeoutError')) {
       return res.status(504).json({ error: 'UPSTREAM_TIMEOUT', fallback: 'browser' });
@@ -337,4 +417,27 @@ export default async function handler(req, res) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function callProvider(apiKey, model, voice, instructions, input, signal) {
+  const payload = { model, input, voice, response_format: 'mp3' };
+  if (instructions) payload.instructions = instructions; // steer delivery (gpt-4o family)
+  return fetch(OPENAI_TTS_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(payload),
+    signal,
+  });
+}
+
+function sendAudio(res, buf, source, model) {
+  res.setHeader('Content-Type', 'audio/mpeg');
+  res.setHeader('Content-Length', buf.byteLength);
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.setHeader('X-Narration-Cache', source);   // hit (memory) | store (Blob) | miss (generated)
+  res.setHeader('X-Narration-Model', model);
+  return res.status(200).send(buf);
 }
