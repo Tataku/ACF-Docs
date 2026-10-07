@@ -26,6 +26,7 @@ import path from 'node:path';
 const ROOT = process.cwd();
 const VOCAB = JSON.parse(fs.readFileSync(path.join(ROOT, 'design/icon-vocabulary.json'), 'utf8'));
 const OPT = path.join(ROOT, 'public/site-b/icons/optimized');
+const CORE_JS = fs.readFileSync(path.join(ROOT, 'public/site-b/reading-core.js'), 'utf8');
 const PAGES = fs.readdirSync(path.join(ROOT, 'public/site-b'))
   .filter((f) => f.endsWith('.html'))
   .map((f) => ({ name: f, body: fs.readFileSync(path.join(ROOT, 'public/site-b', f), 'utf8') }));
@@ -59,7 +60,8 @@ test('every registered asset is actually inlined in a shipped page', () => {
     // Match on the glyph's first path, which survives inlining unchanged.
     const firstPath = (svg.match(/<path d="([^"]{40,})"/) || [])[1];
     assert.ok(firstPath, `${m.docsAsset}: no path to fingerprint`);
-    if (!PAGES.some((p) => p.body.includes(firstPath))) unused.push(m.semantic);
+    // reading-core.js injects the narration controls (pause), so it counts as a page here.
+    if (!PAGES.some((p) => p.body.includes(firstPath)) && !CORE_JS.includes(firstPath)) unused.push(m.semantic);
   }
   assert.deepEqual(unused, [],
     'registered but inlined nowhere — remove the asset or record why it is staged');
@@ -71,6 +73,10 @@ test('an integrated control has not been swapped back to a local geometric SVG',
   // renders, nothing errors, and the family quietly splits.
   const CONTROLS = [
     ['icon-collapse', 10], ['icon-expand', 10], ['fn-icon', 20],
+    // The Part action bar: play, stop, X, email, copy, share on each of 6 Parts.
+    ['pa-icon', 36],
+    // The dashboard's own live marks, snapshotted (design/dashboard-brush-snapshot.json).
+    ['icon-sun', 12], ['icon-moon', 12], ['drawer-icon', 10],
   ];
   for (const [cls, expected] of CONTROLS) {
     let zen = 0; let geometric = 0;
@@ -97,14 +103,66 @@ test('the raw Figma export stays out of the tree, and stays recoverable', () => 
 });
 
 test('the shared cross-repo vocabulary is declared, and it is the small set', () => {
-  // Three names, not twenty-five. The dashboard draws 25 marks and this repo
-  // ships 6; only these three are the same mark in both, and that is the entire
-  // surface where a cross-repo rename could mean two different things.
+  // Only these are the same mark in both repos, and that is the entire surface
+  // where a cross-repo rename could mean two different things. The last four
+  // are static snapshots of the dashboard's live engine (2026-10-07).
   const shared = VOCAB.marks.filter((m) => m.shared).map((m) => m.semantic).sort();
-  assert.deepEqual(shared, ['collapse-sidebar', 'expand-sidebar', 'framework-docs']);
+  assert.deepEqual(shared, ['check', 'collapse-sidebar', 'dark-mode', 'expand-sidebar', 'framework-docs',
+    'light-mode', 'open-navigation']);
   for (const m of VOCAB.marks) {
     if (m.shared) assert.equal(m.dashboardMark, m.semantic,
       `${m.semantic}: a shared mark whose dashboard name differs needs that recorded, not implied`);
     else assert.equal(m.dashboardMark, null, `${m.semantic}: not shared, so dashboardMark must be null`);
   }
+});
+
+test('Zen marks carry the stroke-weight rule that matches the geometric set', () => {
+  // The pack's strokes render at a mean 0.88px at these sizes: below a device
+  // pixel, so they read grey and soft beside 1.4px line icons (measured
+  // 2026-10-07). The 2-unit outline brings them to ~1.33-1.43px. Losing it
+  // brings the grey back without any error.
+  const CSS = fs.readFileSync(path.join(ROOT, 'public/site-b/reading-system.css'), 'utf8');
+  for (const scope of ['.part-actions', '.floatnav', '.sidebar-toggle']) {
+    assert.ok(CSS.includes(`${scope} svg[viewBox="0 0 100 100"] path`), `${scope}: weight rule missing`);
+  }
+  const rule = CSS.slice(CSS.indexOf('.part-actions svg[viewBox="0 0 100 100"] path'));
+  const body = rule.slice(rule.indexOf('{'), rule.indexOf('}') + 1);
+  assert.match(body, /stroke:\s*currentColor;/);
+  assert.match(body, /stroke-width:\s*2;/);
+  assert.match(body, /stroke-linejoin:\s*round;/);
+});
+
+test('the drawn action glyphs are exactly what their generator writes', async () => {
+  const { GLYPHS, svg } = await import(path.join(ROOT, 'scripts/build-zen-action-glyphs.mjs'));
+  for (const [name, paths] of Object.entries(GLYPHS)) {
+    assert.equal(fs.readFileSync(path.join(OPT, `${name}.svg`), 'utf8'), svg(paths),
+      `${name}.svg differs from scripts/build-zen-action-glyphs.mjs — rerun it`);
+  }
+});
+
+test('share-on-X is the pack\'s own close mark, enlarged, not a redrawn X', () => {
+  const x = fs.readFileSync(path.join(OPT, 'share-x.svg'), 'utf8');
+  // close.svg's first stroke, rounded to 2 decimals like every optimized asset.
+  assert.ok(x.includes('M 28.76 31.24 Q 45.79 54.21 68.76 71.24 A 1.75 1.75 0 0 1 71.24 68.76'),
+    'share-x.svg is no longer the pack close mark');
+  assert.ok(x.includes('<g transform="matrix(1.45 0 0 1.45 -22.5 -22.5)">'), 'scaled 1.45x about the centre');
+  const CSS = fs.readFileSync(path.join(ROOT, 'public/site-b/reading-system.css'), 'utf8');
+  assert.match(CSS, /\.part-actions svg\[viewBox="0 0 100 100"\] g\[transform\] path \{ stroke: none; \}/,
+    'the scaled mark must be exempt from the outline, or it renders ~2px heavy');
+});
+
+test('dashboard snapshots carry their provenance and the live engine filter', () => {
+  const prov = JSON.parse(fs.readFileSync(path.join(ROOT, 'design/dashboard-brush-snapshot.json'), 'utf8'));
+  assert.match(prov.dashboardCommit, /^[0-9a-f]{40}$/);
+  for (const [name, a] of Object.entries(prov.assets)) {
+    const svg = fs.readFileSync(path.join(OPT, a.file), 'utf8');
+    assert.ok(svg.includes(`<filter id="acf-brush-${name}"`), `${a.file}: its own filter id`);
+    assert.ok(svg.includes(`seed="${a.seed}"`), `${a.file}: the dashboard seed`);
+    assert.ok(svg.includes('<feDisplacementMap'), `${a.file}: the brush displacement filter`);
+  }
+});
+
+test('narration controls injected at runtime are brush marks too', () => {
+  const core = fs.readFileSync(path.join(ROOT, 'public/site-b/reading-core.js'), 'utf8');
+  assert.doesNotMatch(core, /viewBox="0 0 24 24"/, 'a geometric icon is back in reading-core.js');
 });

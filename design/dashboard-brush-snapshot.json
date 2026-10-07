@@ -1,0 +1,26 @@
+{
+  "note": "Static snapshots of the ACF Dashboard brush engine. Written by scripts/snapshot-dashboard-brush-glyphs.mjs; refresh by re-running it against a newer dashboard checkout.",
+  "dashboardCommit": "f9504fc5222452f5084116734bad4aee03700484",
+  "assets": {
+    "light-mode": {
+      "file": "light-mode.svg",
+      "source": "railIcons.js 'light-mode' via BrushGlyph (name 'rail:light-mode')",
+      "seed": 3619276625
+    },
+    "dark-mode": {
+      "file": "dark-mode.svg",
+      "source": "railIcons.js 'dark-mode' via BrushGlyph (name 'rail:dark-mode')",
+      "seed": 3385353815
+    },
+    "open-navigation": {
+      "file": "open-navigation.svg",
+      "source": "railIcons.js 'open-navigation' via BrushGlyph (name 'rail:open-navigation')",
+      "seed": 514681930
+    },
+    "check": {
+      "file": "check.svg",
+      "source": "BrushGlyphIcon type='check' (seed 'brush-glyph-check')",
+      "seed": 1620987433
+    }
+  }
+}

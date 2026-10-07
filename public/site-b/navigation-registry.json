@@ -151,6 +151,9 @@
   },
   "sections": {
     "/": [
+      "acf-brush-check",
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
       "acf-reference-integrity-fallback",
       "cta-band-title",
       "dc-g-accent-down",
@@ -179,6 +182,9 @@
     "/part-1-foundation": [
       "abstract",
       "abstract-title",
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "dc-g-accent-down",
       "dc-g-accent-up",
@@ -204,6 +210,8 @@
       "theme-toggle"
     ],
     "/part-1-pictures": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
       "acf-reference-integrity-fallback",
       "exhibit-01",
       "exhibit-02",
@@ -216,6 +224,9 @@
       "theme-toggle"
     ],
     "/part-2-lineage-macro-thesis": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "excludes",
       "excludes-title",
@@ -242,6 +253,9 @@
     "/part-3-bitcoin-convexity-backbone": [
       "accum-title",
       "accumulate",
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "backbone",
       "backbone-title",
@@ -272,6 +286,9 @@
       "valuation"
     ],
     "/part-4-tax-architecture-roc-strategy": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "dc-g-accent-down",
       "dc-g-accent-up",
@@ -299,6 +316,9 @@
       "wrappers-title"
     ],
     "/part-5-portfolio-construction-position-management": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "ballast",
       "ballast-title",
@@ -336,6 +356,9 @@
       "torque-title"
     ],
     "/part-6-convexity-framework-integrity-scoring": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "cis",
       "cis-title",
@@ -366,6 +389,9 @@
       "weekly-title"
     ],
     "/glossary": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "bitcoin",
       "bitcoin-title",
@@ -603,6 +629,9 @@
       "theme-toggle"
     ],
     "/framework-in-pictures": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "backbone",
       "backbone-title",
@@ -668,6 +697,9 @@
       "theme-toggle"
     ],
     "/framework-in-math": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "bitcoin-math",
       "bitcoin-math-title",
@@ -699,6 +731,9 @@
       "theme-toggle"
     ],
     "/evidence": [
+      "acf-brush-dark-mode",
+      "acf-brush-light-mode",
+      "acf-brush-open-navigation",
       "acf-reference-integrity-fallback",
       "arithmetic",
       "arithmetic-title",
