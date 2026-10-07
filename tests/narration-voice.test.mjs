@@ -37,7 +37,7 @@ const CLIENT = read('public/site-b/reading-core.js');
 // dashboard's floating alias if it is ever refused. Voice and delivery match.
 const CANONICAL_MODEL = 'gpt-4o-mini-tts';               // the dashboard's floating alias
 const DOCS_MODEL = 'gpt-4o-mini-tts-2025-12-15';         // the docs' pinned snapshot of it
-const CANONICAL_VOICE = 'cedar';
+const CANONICAL_VOICE = 'onyx';
 const CANONICAL_INSTRUCTIONS =
   'Delivery: calm, low-key authority, like an experienced portfolio manager ' +
   'briefing a capable peer. Plain, precise and understated. Measured, unhurried ' +
