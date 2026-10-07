@@ -16,11 +16,19 @@
 // adopt a still-newer model) with zero code change.
 //
 // Requires env OPENAI_API_KEY. With no key the route stays safe and quiet:
-//   GET  reports { available: false }  (the client falls back to Web Speech)
-//   POST returns 503 { fallback: 'browser' }
+//   GET  reports { available: false }  (the client shows narration unavailable)
+//   POST returns 503 { fallback: 'browser' }  (field kept for the shared error
+//        contract; the docs client no longer plays any browser voice)
 //
 // The key never reaches the client. Reversible: delete this file to remove the
 // API path entirely — the Listen control degrades to the Web Speech fallback.
+
+// Vercel cuts a function off at the project's default duration (as little as
+// 10-15s on older project settings), which a 2000-3000-character generation
+// can exceed. The platform then returns its own 504 before TTS_TIMEOUT_MS
+// below ever fires, and the reader's segment fails. Declared here so it does
+// not depend on a dashboard setting. 60s is within every plan's ceiling.
+export const config = { maxDuration: 60 };
 
 const OPENAI_TTS_ENDPOINT = 'https://api.openai.com/v1/audio/speech';
 // Newest, most human OpenAI speech model (gpt-4o-mini-tts, 2025). Overridable so

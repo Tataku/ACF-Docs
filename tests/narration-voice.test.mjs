@@ -78,12 +78,30 @@ test('client: a config rejection is definitive, not retried as a blip', () => {
   assert.match(CLIENT, /ORIGIN_NOT_ALLOWED/);
 });
 
-test('client: every drop to the browser voice is recorded and reported once', () => {
-  assert.match(CLIENT, /function setVoiceKind\(kind, reason\)/);
-  assert.match(CLIENT, /data-narration-voice/);
+test('client: the browser voice is never used (owner ruling 2026-10-07)', () => {
+  // "i NEVER want it to default to the robotic sounding male voice." The old
+  // contract reported each drop to Web Speech; the new one has no drop at all.
+  assert.doesNotMatch(CLIENT, /speechSynthesis|SpeechSynthesisUtterance/, 'a Web Speech path is back');
+  assert.doesNotMatch(CLIENT, /setVoiceKind\('browser'/, 'a fallback to the browser voice is back');
   assert.match(CLIENT, /setVoiceKind\('premium'\)/);
-  const drops = CLIENT.match(/setVoiceKind\('browser'/g) || [];
-  assert.ok(drops.length >= 3, `every fallback path reports itself (found ${drops.length})`);
+});
+
+test('client: a failed segment stops on Retry and resumes where it failed', () => {
+  assert.match(CLIENT, /resumeAt = i;/);
+  assert.match(CLIENT, /s === 'error' \? 'Retry'/);
+  assert.match(CLIENT, /var from = resumeAt; resumeAt = 0; playApi\(from, myRun\)/);
+});
+
+test('client: first audio comes fast, and a slow start is waited for, not replaced', () => {
+  const caps = CLIENT.match(/var SEG_CAPS = \[(\d+)/);
+  assert.ok(caps && Number(caps[1]) <= 400, 'the first segment stays short so it generates in seconds');
+  const dl = CLIENT.match(/var FIRST_AUDIO_DEADLINE_MS = (\d+);/);
+  assert.ok(dl && Number(dl[1]) >= 30000, 'the deadline is a ceiling for a stuck request, not a race');
+});
+
+test('server: the function may run long enough for a full segment', () => {
+  // A platform default of 10-15s cut long generations off with Vercel's own 504.
+  assert.match(API, /export const config = \{ maxDuration: 60 \};/);
 });
 
 test('an exhausted balance is told apart from a throughput rate limit', () => {
