@@ -2841,6 +2841,23 @@ html.js [data-foot-progress][data-pending] .foot-arc[data-read][data-peek]:not([
 .part-actions svg[viewBox="0 0 100 100"],
 .floatnav svg[viewBox="0 0 100 100"],
 .sidebar-toggle svg[viewBox="0 0 100 100"] { transform: scale(1.15); }
+/* Zen brush icons — stroke weight parity. The pack's strokes are 3.2 units wide
+   at the ends and ~5 at the belly, which at these sizes (1.1-1.2rem, x1.15)
+   renders at a mean 0.88px: under one device pixel, so it antialiases to a
+   grey, soft line beside the geometric icons' 1.4px (measured 2026-10-07: play
+   1.39, X 1.44, email 1.37, share 0.88 css px). A 2-unit outline in the ink
+   colour adds 1 unit to each side of every stroke, uniformly, so the taper and
+   the bowed side survive while the mean lands at 1.32-1.43px (share 1.33),
+   the geometric set's weight. Round joins keep the arc caps round. The bar's
+   play / stop / X / email marks are drawn in the pack's construction by
+   scripts/build-zen-action-glyphs.mjs, so the whole bar is one family. */
+.part-actions svg[viewBox="0 0 100 100"] path,
+.floatnav svg[viewBox="0 0 100 100"] path,
+.sidebar-toggle svg[viewBox="0 0 100 100"] path {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
 
 /* ============================================================================
    PART READING SHELL  (part-1-foundation.html)

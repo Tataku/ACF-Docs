@@ -70,6 +70,42 @@
       "usage": "native share sheet",
       "control": "[data-share-native] .pa-icon",
       "shared": false
+    },
+    {
+      "semantic": "play",
+      "docsAsset": "play.svg",
+      "dashboardMark": null,
+      "usage": "start narration of this part",
+      "control": "[data-listen] .icon-play",
+      "shared": false,
+      "drawnBy": "scripts/build-zen-action-glyphs.mjs \u2014 not in the Figma pack; drawn in its stroke construction"
+    },
+    {
+      "semantic": "stop",
+      "docsAsset": "stop.svg",
+      "dashboardMark": null,
+      "usage": "stop narration",
+      "control": "[data-listen] .icon-stop",
+      "shared": false,
+      "drawnBy": "scripts/build-zen-action-glyphs.mjs \u2014 not in the Figma pack; drawn in its stroke construction"
+    },
+    {
+      "semantic": "share-x",
+      "docsAsset": "share-x.svg",
+      "dashboardMark": null,
+      "usage": "share this part on X",
+      "control": "[data-share=\"x\"] .pa-icon",
+      "shared": false,
+      "drawnBy": "scripts/build-zen-action-glyphs.mjs \u2014 not in the Figma pack; drawn in its stroke construction"
+    },
+    {
+      "semantic": "mail",
+      "docsAsset": "mail.svg",
+      "dashboardMark": null,
+      "usage": "share this part by email",
+      "control": "[data-share=\"email\"] .pa-icon",
+      "shared": false,
+      "drawnBy": "scripts/build-zen-action-glyphs.mjs \u2014 not in the Figma pack; drawn in its stroke construction"
     }
   ]
 }

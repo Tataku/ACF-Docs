@@ -71,6 +71,8 @@ test('an integrated control has not been swapped back to a local geometric SVG',
   // renders, nothing errors, and the family quietly splits.
   const CONTROLS = [
     ['icon-collapse', 10], ['icon-expand', 10], ['fn-icon', 20],
+    // The Part action bar: play, stop, X, email, copy, share on each of 6 Parts.
+    ['pa-icon', 36],
   ];
   for (const [cls, expected] of CONTROLS) {
     let zen = 0; let geometric = 0;
@@ -106,5 +108,29 @@ test('the shared cross-repo vocabulary is declared, and it is the small set', ()
     if (m.shared) assert.equal(m.dashboardMark, m.semantic,
       `${m.semantic}: a shared mark whose dashboard name differs needs that recorded, not implied`);
     else assert.equal(m.dashboardMark, null, `${m.semantic}: not shared, so dashboardMark must be null`);
+  }
+});
+
+test('Zen marks carry the stroke-weight rule that matches the geometric set', () => {
+  // The pack's strokes render at a mean 0.88px at these sizes: below a device
+  // pixel, so they read grey and soft beside 1.4px line icons (measured
+  // 2026-10-07). The 2-unit outline brings them to ~1.33-1.43px. Losing it
+  // brings the grey back without any error.
+  const CSS = fs.readFileSync(path.join(ROOT, 'public/site-b/reading-system.css'), 'utf8');
+  for (const scope of ['.part-actions', '.floatnav', '.sidebar-toggle']) {
+    assert.ok(CSS.includes(`${scope} svg[viewBox="0 0 100 100"] path`), `${scope}: weight rule missing`);
+  }
+  const rule = CSS.slice(CSS.indexOf('.part-actions svg[viewBox="0 0 100 100"] path'));
+  const body = rule.slice(rule.indexOf('{'), rule.indexOf('}') + 1);
+  assert.match(body, /stroke:\s*currentColor;/);
+  assert.match(body, /stroke-width:\s*2;/);
+  assert.match(body, /stroke-linejoin:\s*round;/);
+});
+
+test('the drawn action glyphs are exactly what their generator writes', async () => {
+  const { GLYPHS, svg } = await import(path.join(ROOT, 'scripts/build-zen-action-glyphs.mjs'));
+  for (const [name, paths] of Object.entries(GLYPHS)) {
+    assert.equal(fs.readFileSync(path.join(OPT, `${name}.svg`), 'utf8'), svg(paths),
+      `${name}.svg differs from scripts/build-zen-action-glyphs.mjs — rerun it`);
   }
 });
