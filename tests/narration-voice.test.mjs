@@ -32,12 +32,31 @@ const CLIENT = read('public/site-b/reading-core.js');
 // legacy `tts-1` while the improved engine lived only here. Change both or
 // neither; this test is the tripwire.
 // ---------------------------------------------------------------------------
-const CANONICAL_MODEL = 'gpt-4o-mini-tts';
-const CANONICAL_VOICE = 'nova';
+// The MODEL is the one deliberate difference: the docs pin the dated snapshot
+// (stored audio must not change voice underneath readers) and fall back to the
+// dashboard's floating alias if it is ever refused. Voice and delivery match.
+const CANONICAL_MODEL = 'gpt-4o-mini-tts';               // the dashboard's floating alias
+const DOCS_MODEL = 'gpt-4o-mini-tts-2025-12-15';         // the docs' pinned snapshot of it
+const CANONICAL_VOICE = 'cedar';
+const CANONICAL_INSTRUCTIONS =
+  'Delivery: calm, low-key authority, like an experienced portfolio manager ' +
+  'briefing a capable peer. Plain, precise and understated. Measured, unhurried ' +
+  'pace with natural sentence rhythm. Clear enunciation of numbers, tickers and ' +
+  'dates; light emphasis on key terms. Never hyped, salesy, breathless, ' +
+  'theatrical or robotic.';
 
 test('defaults to the current-generation model, never the legacy tts-1 family', () => {
-  assert.match(API, new RegExp(`NARRATION_TTS_MODEL \\|\\| '${CANONICAL_MODEL}'`));
+  assert.match(API, new RegExp(`NARRATION_TTS_MODEL \\|\\| '${DOCS_MODEL}'`));
+  assert.match(API, new RegExp(`FALLBACK_TTS_MODEL = '${CANONICAL_MODEL}'`));
+  assert.ok(DOCS_MODEL.startsWith(CANONICAL_MODEL + '-'), 'the pin is a snapshot OF the shared model');
   assert.match(API, new RegExp(`NARRATION_TTS_VOICE \\|\\| '${CANONICAL_VOICE}'`));
+});
+
+test('delivery instructions are the shared ones, and read as description, not speech', () => {
+  const decl = API.slice(API.indexOf('const DEFAULT_INSTRUCTIONS'));
+  const quoted = [...decl.slice(0, decl.indexOf("';\n") + 2).matchAll(/'([^']*)'/g)].map((m) => m[1]).join('');
+  assert.equal(quoted, CANONICAL_INSTRUCTIONS);
+  assert.doesNotMatch(CANONICAL_INSTRUCTIONS, /\b(you|your|I|we)\b/i, 'no sentence addressed to anyone that could be spoken aloud');
 });
 
 test('sends the delivery steer, and withholds it from models that ignore it', () => {
@@ -78,12 +97,30 @@ test('client: a config rejection is definitive, not retried as a blip', () => {
   assert.match(CLIENT, /ORIGIN_NOT_ALLOWED/);
 });
 
-test('client: every drop to the browser voice is recorded and reported once', () => {
-  assert.match(CLIENT, /function setVoiceKind\(kind, reason\)/);
-  assert.match(CLIENT, /data-narration-voice/);
+test('client: the browser voice is never used (owner ruling 2026-10-07)', () => {
+  // "i NEVER want it to default to the robotic sounding male voice." The old
+  // contract reported each drop to Web Speech; the new one has no drop at all.
+  assert.doesNotMatch(CLIENT, /speechSynthesis|SpeechSynthesisUtterance/, 'a Web Speech path is back');
+  assert.doesNotMatch(CLIENT, /setVoiceKind\('browser'/, 'a fallback to the browser voice is back');
   assert.match(CLIENT, /setVoiceKind\('premium'\)/);
-  const drops = CLIENT.match(/setVoiceKind\('browser'/g) || [];
-  assert.ok(drops.length >= 3, `every fallback path reports itself (found ${drops.length})`);
+});
+
+test('client: a failed segment stops on Retry and resumes where it failed', () => {
+  assert.match(CLIENT, /resumeAt = i;/);
+  assert.match(CLIENT, /s === 'error' \? 'Retry'/);
+  assert.match(CLIENT, /var from = resumeAt; resumeAt = 0; playApi\(from, myRun\)/);
+});
+
+test('client: first audio comes fast, and a slow start is waited for, not replaced', () => {
+  const caps = CLIENT.match(/var SEG_CAPS = \[(\d+)/);
+  assert.ok(caps && Number(caps[1]) <= 400, 'the first segment stays short so it generates in seconds');
+  const dl = CLIENT.match(/var FIRST_AUDIO_DEADLINE_MS = (\d+);/);
+  assert.ok(dl && Number(dl[1]) >= 30000, 'the deadline is a ceiling for a stuck request, not a race');
+});
+
+test('server: the function may run long enough for a full segment', () => {
+  // A platform default of 10-15s cut long generations off with Vercel's own 504.
+  assert.match(API, /export const config = \{ maxDuration: 60 \};/);
 });
 
 test('an exhausted balance is told apart from a throughput rate limit', () => {

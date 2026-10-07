@@ -1,0 +1,62 @@
+# Pre-render the Parts' AI narration after each production deploy.
+#
+# WHY. /api/narration stores every generated segment in Vercel Blob under a
+# SHA-256 of model + voice + delivery instructions + exact text. A reader who
+# asks for a stored segment gets it at once, with no generation to wait on or
+# fail. This job asks the live site for every segment of every Part, so that
+# after a docs edit only the CHANGED segments are generated (once, here), and
+# no reader is the first to hear them. Unchanged segments cost nothing.
+#
+# It needs no secrets: generation happens server-side with the deployment's
+# own key, through the same same-origin route a reader's click uses.
+#
+# Requires a Vercel Blob store connected to the ACF-Docs project
+# (BLOB_READ_WRITE_TOKEN on Production). Without one, the run still succeeds
+# and warms only the serverless instances it reaches, which do not last.
+name: Narration pre-render
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Site to warm'
+        default: 'https://docs.acfdashboard.com'
+      voice:
+        description: 'Optional voice to render instead of the default (audition)'
+        default: ''
+
+concurrency:
+  group: narration-warm
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  warm:
+    # Vercel reports each deploy to GitHub; act on a successful Production one.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium for playwright-core
+        run: npx playwright-core install --with-deps chromium
+
+      - name: Pre-render narration
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://docs.acfdashboard.com' }}
+          VOICE: ${{ github.event.inputs.voice || '' }}
+        run: node scripts/warm-narration.mjs "$BASE_URL" ${VOICE:+--voice=$VOICE}

@@ -839,8 +839,8 @@
   }
 
   /* ---- Part action bar: Share + Listen --------------------------------------- *
-   * Listen plays AI narration (OpenAI TTS via /api/narration) when a provider key
-   * is configured, and falls back to the browser's Web Speech voice otherwise.
+   * Listen plays AI narration (OpenAI TTS via /api/narration). There is no
+   * browser-voice fallback: when the AI voice cannot play, Listen says so.
    * Audio is generated on click only (never on load), one stream at a time.
    * Feature-detected: a no-op when .part-actions is absent (cover + future pages). */
   function partActions() {
@@ -906,13 +906,17 @@
       });
     }
 
-    // Listen — AI narration (OpenAI TTS) with a Web Speech fallback. The whole
-    // upgrade lives here in JS + CSS, so the Part HTML files stay untouched and
-    // the change is fully reversible (delete /api/narration -> Web Speech only).
+    // Listen — AI narration (OpenAI TTS). It lives here in JS + CSS, so the
+    // Part HTML files stay untouched.
     var listenBtn = bar.querySelector('[data-listen]');
     var listenLabel = bar.querySelector('[data-listen-label]');
     if (listenBtn) {
-      var synth = window.speechSynthesis || null;
+      // The browser's built-in Web Speech voice is NEVER used (owner ruling,
+      // 2026-10-07: "i NEVER want it to default to the robotic sounding male
+      // voice"). Every path that used to reach it — the slow-first-audio timer,
+      // a failed segment, a cold capability probe, a missing key — now waits,
+      // retries the AI voice, or stops with a visible Retry. The
+      // engine below has no Web Speech branch left to fall into.
 
       // --- startup instrumentation (quiet; behind a debug flag) ---------------
       // Enable via window.ACF_NARRATION_DEBUG = true or localStorage
@@ -926,15 +930,28 @@
         var t = window.performance ? performance.now() : Date.now();
         try { console.debug('[narration] ' + label + (markT0 ? ' +' + Math.round(t - markT0) + 'ms' : '') + (extra != null ? ' · ' + extra : '')); } catch (e) {}
       }
-      var SLOW_FALLBACK_MS = 8000;   // if the API hasn't produced first audio by now, fall back to Web Speech (non-sticky; prewarm usually makes this moot)
-      var loadTimer = 0;             // the slow-API safety-net timer (cleared on success / stop)
+      // How long a press waits for the AI voice's first audio before it stops
+      // and offers Retry. It used to be 8s and then switched the whole Part to
+      // the browser voice, which a cold serverless start plus one generation can
+      // exceed on an ordinary day: the main reason the robotic voice kept
+      // turning up. The first segment is now short (SEG_CAPS), so this is a
+      // ceiling for a genuinely stuck request, not a race against a normal one.
+      var FIRST_AUDIO_DEADLINE_MS = 40000;
+      var loadTimer = 0;             // the first-audio deadline timer (cleared on success / stop)
+      var resumeAt = 0;              // segment to restart from after a mid-Part failure
+      // Voice audition: ?voice=<name> on a Part URL narrates it in that voice.
+      // The server accepts only its own allowlist and otherwise uses its
+      // default, so this cannot reach anything the route would not serve.
+      var auditionVoice = null;
+      try { auditionVoice = new URLSearchParams(location.search).get('voice'); } catch (e) {}
+      if (auditionVoice && !/^[a-z]{2,16}$/.test(auditionVoice)) auditionVoice = null;
 
       // --- which voice are we actually hearing? ------------------------------
       // The premium voice can vanish for reasons no reader can see (key removed,
-      // model or voice mistyped, origin gate refusing) and every one of them
-      // arrives as the same robotic Web Speech fallback. `data-narration-voice`
-      // records the truth on the transport, and the reason is warned ONCE so it
-      // is recoverable from a console without a debug flag.
+      // model or voice mistyped, origin gate refusing, balance empty). It no
+      // longer falls back to another voice; `data-narration-voice` records when
+      // the AI voice is playing, and every failure is warned in the console with
+      // its reason, so it is recoverable without a debug flag.
       var warnedVoice = false;
       var voiceInfo = null;      // { model, voice, instructions, configWarning } once the API has answered
       function warnVoice(reason) {
@@ -947,19 +964,18 @@
         if (kind === 'premium' && voiceInfo && voiceInfo.model) {
           bar.setAttribute('data-narration-model', voiceInfo.model);
         }
-        if (kind === 'browser' && reason) warnVoice(reason);
       }
 
       // --- floatnav scrubber: estimated progress clock ------------------------
       // partActions owns the engine; narrationDock() is pure UI that drives it via
       // the NARRATION controller exposed at the end. Progress is a wall-clock
       // estimate (~chars/sec) that runs while STATE==='playing' and re-syncs on
-      // seek — one model across both the API (segment) and Web Speech (block)
-      // engines, neither of which has a single seekable timeline.
+      // seek, measured over the AI segments (there is no single seekable
+      // timeline across them).
       function nowSec() { return (window.performance ? performance.now() : Date.now()) / 1000; }
       function estDur(t) { return Math.max(1.4, (t ? t.length : 0) / 14.5); }
       var clkBase = 0, clkStart = 0, clkRunning = false, progRaf = 0, onTick = null;
-      function units() { return method === 'api' ? buildSegments() : buildBlocks(); }
+      function units() { return buildSegments(); }
       function aggDur() { var u = units(), t = 0, i; for (i = 0; i < u.length; i++) t += estDur(u[i]); return t; }
       function clkNow() { return clkRunning ? clkBase + (nowSec() - clkStart) : clkBase; }
       function progressLoop() { if (onTick) onTick(); if (STATE === 'playing') progRaf = requestAnimationFrame(progressLoop); }
@@ -967,7 +983,7 @@
       // --- readable text -----------------------------------------------------
       var blocks = null;
       // Normalize a few tokens that read awkwardly aloud — applied ONLY to the
-      // narration text (TTS + Web Speech), never to the visible page. Conservative:
+      // narration text (TTS), never to the visible page. Conservative:
       // unambiguous cases only (named ratio, scores, N-times multipliers, ampersand).
       function speakNorm(t) {
         return t
@@ -1284,7 +1300,7 @@
       // of waiting on a full 3500-char generation; steady-state caps at API_MAX
       // (OpenAI TTS limit is 4096). Look-ahead generation (playApi) keeps later
       // segments warm, so the small head never creates a gap.
-      var SEG_CAPS = [700, 1500, 3000]; // ramp for fast time-to-first-audio
+      var SEG_CAPS = [320, 900, 2000, 3000]; // ramp: ~320 chars generates in a couple of seconds, then the look-ahead stays ahead
       var API_MAX = 3500;
       var segs = null;
       function buildSegments() {
@@ -1311,15 +1327,15 @@
         return segs;
       }
 
-      // --- capability (resolved lazily; no audio, and no load-time ping when
-      //     Web Speech already covers us) --------------------------------------
-      var method = null; // 'api' | 'browser' | 'unavailable'
+      // --- capability (resolved lazily on hover/focus or press; no audio, no
+      //     load-time ping) ---------------------------------------------------
+      var method = null; // 'api' | 'unavailable'
       var capabilityPromise = null;
       // A capability verdict reached WITHOUT the server answering (timeout,
       // offline, 5xx on the probe) is a guess made under failure. Remembering
-      // it is how one slow cold start pins the whole visit to the browser
-      // voice long after the API recovered — so a degraded verdict is thrown
-      // away and the next click asks again.
+      // it is how one slow cold start once pinned the whole visit to the
+      // browser voice. A probe that gets no answer is now read as "try the AI
+      // voice", which is the only voice.
       function resolveCapability() {
         if (capabilityPromise) return capabilityPromise;
         var ctrl = new AbortController();
@@ -1333,9 +1349,13 @@
               if (d.available) voiceInfo = d;
               if (d.configWarning) warnVoice('server reports: ' + d.configWarning);
             }
-            method = (d && d.available) ? 'api' : (synth ? 'browser' : 'unavailable');
+            // The server answered "no provider" -> unavailable. No answer at all
+            // (cold start, timeout, 5xx on the probe) -> try the AI voice anyway:
+            // it is the only voice, and a real misconfiguration still fails the
+            // generation request definitively.
+            method = (d && d.available) ? 'api' : (d ? 'unavailable' : 'api');
           })
-          .catch(function () { method = synth ? 'browser' : 'unavailable'; })
+          .catch(function () { method = 'api'; })
           .then(function () {
             clearTimeout(to);
             var m = method;
@@ -1361,7 +1381,7 @@
         listenBtn.setAttribute('aria-pressed', (s === 'playing' || s === 'paused') ? 'true' : 'false');
         if (listenLabel) {
           listenLabel.textContent =
-            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Preparing…' : 'Listen';
+            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Preparing…' : s === 'error' ? 'Retry' : 'Listen';
         }
         listenBtn.setAttribute('aria-label',
           s === 'playing' ? 'Pause AI narration' : s === 'paused' ? 'Resume AI narration' : 'Listen to this part (AI voice)');
@@ -1379,12 +1399,10 @@
       function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; } return h.toString(36); }
 
       // Fetch (and cache) one segment's AI audio. Transient failures — rate
-      // limits, 5xx, timeouts, network blips — are RETRIED on the premium voice
-      // (short backoff, bounded) before anyone considers the browser fallback,
-      // so a momentary hiccup no longer knocks a reader down to the robotic
-      // Web Speech voice. Aborts (Stop) and definitive auth/config failures are
-      // not retried. err.code / err.status are surfaced so the caller can tell a
-      // dead key (stick to browser) from a transient blip (keep the AI voice).
+      // limits, 5xx, timeouts, network blips — are RETRIED on the AI voice
+      // (backoff, four tries) before the press stops with Retry. Aborts (Stop)
+      // and definitive auth/config failures are not retried. err.code /
+      // err.status are surfaced so the caller can tell a dead key from a blip.
       function fetchSegment(text) {
         var key = text.length + ':' + hash(text);        // length + hash → stable, collision-resistant
         if (cache.has(key)) { mark('cache-hit', key); return Promise.resolve(cache.get(key)); }
@@ -1397,7 +1415,7 @@
           return fetch('/api/narration', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text }),
+            body: JSON.stringify(auditionVoice ? { text: text, voice: auditionVoice } : { text: text }),
             signal: ctrl.signal
           }).then(function (r) {
             controllers.delete(ctrl);
@@ -1432,8 +1450,8 @@
             // restores the premium voice without a reload, so capability stays
             // re-probable and only the pointless retries are skipped.
             var noRetry = definitive || (err && err.quotaExhausted === true);
-            if (!aborted && !noRetry && n < 2) {                    // retry transient failures on the AI voice
-              return new Promise(function (r2) { setTimeout(r2, 350 * (n + 1)); }).then(function () { return attempt(n + 1); });
+            if (!aborted && !noRetry && n < 3) {                    // retry transient failures on the AI voice (4 tries)
+              return new Promise(function (r2) { setTimeout(r2, 600 * (n + 1)); }).then(function () { return attempt(n + 1); });
             }
             throw err;
           });
@@ -1468,47 +1486,26 @@
         }).catch(function (err) {
           if (myRun !== runId || (err && err.name === 'AbortError')) { mark('aborted', 'segment ' + i); return; }
           // The segment already retried transient failures on the AI voice; if we
-          // land here it has genuinely failed. Fall back to Web Speech, but only
-          // STICK the session to the browser voice for a DEFINITIVE failure — a
-          // dead / missing key. A transient failure (rate limit, 5xx, timeout)
-          // falls back for THIS attempt only, so the next Listen click retries
-          // the premium AI voice instead of reverting for good. (This is the fix
-          // for "narration keeps reverting to the in-browser voice.")
+          // land here it has genuinely failed, definitively (dead key, config) or
+          // after every retry.
           var definitive = err && (
             err.status === 401 || err.status === 403 || err.status === 503 ||
             err.configRejected === true ||
             err.code === 'PROVIDER_NOT_CONFIGURED' || err.code === 'UPSTREAM_AUTH_FAILED' ||
             err.code === 'UPSTREAM_CONFIG_REJECTED' || err.code === 'ORIGIN_NOT_ALLOWED'
           );
-          if (synth) {
-            if (definitive) { mark('fallback-browser-stick', 'segment ' + i); method = 'browser'; }
-            else mark('fallback-browser-transient', 'segment ' + i);
-            setVoiceKind('browser', (err && err.quotaExhausted)
-              ? 'OpenAI balance exhausted — add credits to restore the premium voice'
-              : ((err && (err.code || err.message)) || 'generation failed'));
-            startBrowser(myRun);
-            return;
-          }
-          setState('error'); announce('Narration unavailable');
+          // No other voice takes over. Stop HERE, remember the segment, and let
+          // Retry pick up exactly where the AI voice left off.
+          clearTimeout(loadTimer);
+          resumeAt = i;
+          var why = (err && err.quotaExhausted)
+            ? 'OpenAI balance exhausted — add credits to restore narration'
+            : ((err && (err.code || err.message)) || 'generation failed');
+          mark(definitive ? 'failed-definitive' : 'failed-transient', 'segment ' + i + ' · ' + why);
+          try { console.warn('[narration] AI voice could not load segment ' + i + ' · ' + why); } catch (e) {}
+          setState('error');
+          announce(definitive ? 'Narration unavailable' : 'Narration paused. Press Retry to continue');
         });
-      }
-
-      // --- Web Speech engine (fallback) -------------------------------------
-      var bIdx = 0, bList = null;
-      function startBrowser(myRun) {
-        if (!synth) { setState('error'); return; }
-        clearTimeout(loadTimer);
-        bList = buildBlocks(); bIdx = 0;
-        synth.cancel(); setState('playing'); announce('Playing audio');
-        speakNext(myRun);
-      }
-      function speakNext(myRun) {
-        if (myRun !== runId) return;
-        if (bIdx >= bList.length) { finish(myRun); return; }
-        var u = new SpeechSynthesisUtterance(bList[bIdx]);
-        u.rate = 1;
-        u.onend = function () { if (myRun === runId) { bIdx++; speakNext(myRun); } };
-        synth.speak(u);
       }
 
       // --- transport ---------------------------------------------------------
@@ -1519,53 +1516,48 @@
         mark('click→start');
         setState('loading'); announce('Preparing narration');
         clearTimeout(loadTimer);
-        loadTimer = setTimeout(function () {        // safety net: API too slow → Web Speech (overlap-safe via runId)
+        loadTimer = setTimeout(function () {        // ceiling for a stuck request: stop and offer Retry, never another voice
           if (myRun !== runId || STATE !== 'loading') return;
-          if (method === 'api' && synth) {
-            mark('slow-fallback');
-            setVoiceKind('browser', 'API did not produce audio within ' + SLOW_FALLBACK_MS + 'ms');
-            runId++; var r2 = runId;                // invalidate the in-flight API attempt
-            controllers.forEach(function (c) { try { c.abort(); } catch (e) {} });
-            controllers.clear(); pending.clear();
-            startBrowser(r2);
-          }
-        }, SLOW_FALLBACK_MS);
+          mark('first-audio-deadline');
+          try { console.warn('[narration] AI voice produced no audio within ' + FIRST_AUDIO_DEADLINE_MS + 'ms'); } catch (e) {}
+          runId++;                                  // invalidate the in-flight attempt
+          controllers.forEach(function (c) { try { c.abort(); } catch (e) {} });
+          controllers.clear(); pending.clear();
+          setState('error'); announce('Narration is taking too long. Press Retry');
+        }, FIRST_AUDIO_DEADLINE_MS);
         (method ? Promise.resolve(method) : resolveCapability()).then(function (m) {
           if (myRun !== runId) { mark('stale-ignored', 'capability'); return; }   // stopped / fell back while resolving
           mark('method', m);
-          if (m === 'api') playApi(0, myRun);
-          else if (m === 'browser') {
+          if (m === 'api') { var from = resumeAt; resumeAt = 0; playApi(from, myRun); }
+          else {
             clearTimeout(loadTimer);
-            setVoiceKind('browser', 'narration API reports no provider configured');
-            startBrowser(myRun);
+            try { console.warn('[narration] the narration API reports no provider configured'); } catch (e) {}
+            setState('error'); announce('Narration unavailable');
           }
-          else { clearTimeout(loadTimer); setState('idle'); announce('Narration unavailable'); }
         });
       }
       function pause() {
         if (STATE !== 'playing') return;
-        if (method === 'api' && audio) audio.pause();
-        else if (synth) synth.pause();
+        if (audio) audio.pause();
         setState('paused'); announce('Audio paused');
       }
       function resume() {
         if (STATE !== 'paused') return;
-        if (method === 'api' && audio) { var p = audio.play(); if (p && p.catch) p.catch(function () { setState('error'); }); }
-        else if (synth) synth.resume();
+        if (audio) { var p = audio.play(); if (p && p.catch) p.catch(function () { setState('error'); }); }
         setState('playing'); announce('Audio resumed');
       }
       function stop() {
         clearTimeout(loadTimer);                  // cancel the slow-API safety net
         runId++;                                  // invalidate async work + onended/onend + in-flight fetches
         if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
-        if (synth) synth.cancel();
         controllers.forEach(function (c) { try { c.abort(); } catch (e) {} });
         controllers.clear(); pending.clear();
+        resumeAt = 0;
         setState('idle'); announce('Audio stopped'); mark('stop');
       }
       function finish(myRun) {
         if (myRun !== runId) return;
-        audio = null; setState('idle'); announce('Audio finished');
+        audio = null; resumeAt = 0; setState('idle'); announce('Audio finished');
       }
       // Seek the estimate to time t by restarting at the segment/block covering it.
       function seekTo(t) {
@@ -1577,8 +1569,7 @@
         clkBase = before; clkStart = nowSec(); clkRunning = false;   // setState('playing') restarts the clock
         runId++; var myRun = runId;
         if (audio) { try { audio.pause(); } catch (e) {} audio = null; }
-        if (method === 'api') { setState('loading'); playApi(j, myRun); }
-        else if (synth) { try { synth.cancel(); } catch (e) {} bIdx = j; setState('playing'); speakNext(myRun); }
+        if (method !== 'unavailable') { setState('loading'); playApi(j, myRun); }
         else { setState('idle'); }
       }
 
@@ -1586,7 +1577,7 @@
       // On hover/focus (clear intent, before the click) resolve capability and
       // warm just the small first segment, so the first click plays almost
       // instantly. Fire-and-forget, runs once, bounded to one segment — no
-      // excessive pre-generation, and a no-op when narration uses Web Speech.
+      // excessive pre-generation.
       var prewarmed = false;
       function prewarm() {
         if (prewarmed) return;
@@ -1681,18 +1672,19 @@
         // What the narrator will actually SAY, before any audio is generated.
         // Narration quality is otherwise only checkable by listening to the whole
         // page, which is why half the book could go unread without anyone noticing.
-        script:      function () { return buildBlocks().slice(); }
+        script:      function () { return buildBlocks().slice(); },
+        // The exact strings sent to /api/narration, in order. The pre-render
+        // (scripts/warm-narration.mjs) reads these from the live page, so the
+        // audio it stores is keyed on byte-identical text to what readers send.
+        segments:    function () { return buildSegments().slice(); }
       };
       // Reachable for QA: `ACFNarration.script()` prints what this page will say.
       try { window.ACFNarration = NARRATION; } catch (e) {}
 
-      // Visibility: Web Speech => usable immediately. Otherwise reveal only if
-      // the capability check confirms a provider (avoid a dead button).
+      // Visible from the start. Hiding it until a load-time probe answered meant
+      // a slow cold start hid narration for the whole visit; a press that cannot
+      // be served now says so (Retry / unavailable) instead.
       setState('idle');
-      if (!synth) {
-        listenBtn.hidden = true;
-        resolveCapability().then(function (m) { if (m === 'api') listenBtn.hidden = false; });
-      }
     }
   }
 
@@ -1781,7 +1773,7 @@
    * The UI appears only once narration is armed, is keyboard-operable, theme-aware,
    * never autoplays, never spawns overlapping playback, and is torn down on unload. */
   /* ---- Voice-narration dock — floating-nav transport for partActions() ------ *
-   * partActions() owns the audio engine (OpenAI TTS / Web Speech) and exposes the
+   * partActions() owns the audio engine (OpenAI TTS) and exposes the
    * NARRATION controller. This builds the floatnav lower rail (play/pause · scrub
    * · time-remaining), mirrors the engine state, and drives that ONE engine — no
    * second audio instance. Pure UI: a no-op without a floatnav or controller.     */

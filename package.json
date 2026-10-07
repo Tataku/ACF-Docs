@@ -59,16 +59,19 @@
     "sync:card-motifs": "node scripts/sync-card-motifs.mjs",
     "audit:card-motifs": "node scripts/sync-card-motifs.mjs --check",
     "build:crawler": "node scripts/build-crawler-files.mjs",
-    "audit:crawler": "node scripts/build-crawler-files.mjs --check"
+    "audit:crawler": "node scripts/build-crawler-files.mjs --check",
+    "narration:warm": "node scripts/warm-narration.mjs"
   },
   "dependencies": {
+    "@vercel/blob": "^2.8.1",
     "next": "14.2.25",
+    "next-mdx-remote": "^6.0.0",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "next-mdx-remote": "^6.0.0"
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "playwright-core": "^1.63.0"
   },
   "overrides": {
     "next-mdx-remote": "^6.0.0"
