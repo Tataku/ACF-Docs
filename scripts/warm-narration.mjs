@@ -34,7 +34,7 @@ const voice = opt('voice');
 const only = opt('pages') ? opt('pages').split(',') : null;
 const executablePath = process.env.CHROMIUM_PATH || undefined;
 
-const PACE_MS = 2300;          // 26 generations a minute, under the route's 30/min/IP
+const PACE_MS = 2300;          // at most 26 generations a minute, under the route's 30/min/IP
 const RATE_WAIT_MS = 61000;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -67,6 +67,7 @@ try {
       let result;
       for (let attempt = 0; attempt < 4; attempt += 1) {
         result = await page.evaluate(async ({ text, voice: v }) => {
+          const t0 = performance.now();
           const r = await fetch('/api/narration', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -75,7 +76,7 @@ try {
           if (r.ok) await r.arrayBuffer();               // drain; the store is the point
           let err = null;
           if (!r.ok) { try { err = await r.json(); } catch (e) { err = null; } }
-          return { status: r.status, source: r.headers.get('x-narration-cache'), model: r.headers.get('x-narration-model'), err };
+          return { status: r.status, source: r.headers.get('x-narration-cache'), model: r.headers.get('x-narration-model'), err, ms: performance.now() - t0 };
         }, { text: segs[i], voice });
         if (result.status === 429 && !(result.err && result.err.quotaExhausted)) { await sleep(RATE_WAIT_MS); continue; }
         if (result.status >= 500 && result.status !== 502) { await sleep(3000 * (attempt + 1)); continue; }
@@ -83,7 +84,10 @@ try {
       }
       if (result.status === 200) {
         counts[result.source === 'store' ? 'store' : result.source === 'hit' ? 'hit' : 'miss'] += 1;
-        if (result.source === 'miss') await sleep(PACE_MS);
+        // A generation already takes seconds (about 40s for a long segment), so
+        // pace only the remainder; a fixed sleep after each one doubled nothing
+        // but the run time.
+        if (result.source === 'miss' && result.ms < PACE_MS) await sleep(PACE_MS - result.ms);
       } else {
         counts.failed += 1; failed = true;
         console.log(`  FAIL  ${p} segment ${i}: HTTP ${result.status} ${result.err ? (result.err.error || '') + ' ' + (result.err.message || '') : ''}`);

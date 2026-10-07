@@ -1300,8 +1300,13 @@
       // of waiting on a full 3500-char generation; steady-state caps at API_MAX
       // (OpenAI TTS limit is 4096). Look-ahead generation (playApi) keeps later
       // segments warm, so the small head never creates a gap.
-      var SEG_CAPS = [320, 900, 2000, 3000]; // ramp: ~320 chars generates in a couple of seconds, then the look-ahead stays ahead
-      var API_MAX = 3500;
+      var SEG_CAPS = [320, 900, 1500]; // ramp: ~320 chars generates in a couple of seconds, then the look-ahead stays ahead
+      // Ceiling per request. Measured on production (2026-10-07 pre-render):
+      // gpt-4o-mini-tts took ~40s for a ~3000-character segment, and one
+      // 3500-character segment timed out on every try, so it could never be
+      // stored or played. 2000 characters keeps each generation well inside the
+      // route's 55s budget (60s function limit).
+      var API_MAX = 2000;
       var segs = null;
       function buildSegments() {
         if (segs) return segs;
