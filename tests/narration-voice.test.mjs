@@ -334,3 +334,14 @@ test('chart UI affordances never reach the narrator', () => {
   assert.match(CLIENT, /UI_GLYPH\.test\(n\.textContent \|\| ''\)/);
   assert.match(CLIENT, /u21b3\/g, ' '\)/);   // belt and braces: never spoken even if it slips through
 });
+
+test('client: narration opens on the Part title, then the text (owner ruling 2026-10-07)', () => {
+  // "Part 1: Foundation & Philosophy", then straight into the Manifesto. The
+  // header kicker, the byline and Key takeaways are never read aloud.
+  assert.match(CLIENT, /\{ sel: 'h1\.doc-title',\s+kind: 'title' \}/);
+  const mute = (CLIENT.match(/var NARRATION_MUTE = '([^']+)'/) || [, ''])[1].split(',').map((s) => s.trim());
+  for (const sel of ['.doc-kicker', '.doc-byline', '.callout-collapse']) {
+    assert.ok(mute.includes(sel), `${sel} must stay muted`);
+  }
+  assert.match(CLIENT, /if \(kind === 'title'\)/);
+});

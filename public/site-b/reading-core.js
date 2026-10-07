@@ -1083,6 +1083,7 @@
       // Order matters — earlier entries claim their subtree, so a container is
       // spoken as one coherent unit and its children are not re-read loose.
       var NARRATION_BLOCKS = [
+        { sel: 'h1.doc-title',          kind: 'title' },    // "Part 1: Foundation & Philosophy." opens every Part
         { sel: '.posture-hero',         kind: 'aria' },     // author wrote the spoken form by hand; use it
         { sel: 'figure.exhibit',        kind: 'exhibit' },  // chart caption; the SVG itself is unspeakable
         { sel: '.failure-modes',        kind: 'sidebyside' },// A-vs-B cards: needs a glide between them
@@ -1103,7 +1104,11 @@
       // Deliberately NOT spoken. "Skipped" must be a decision with a reason, not
       // an accident of the selector — a glyph legend read aloud is noise, and the
       // exhibit's own index/mode chips are already carried by the exhibit handler.
-      var NARRATION_MUTE = '.compare-key, .gl-group-meta, .ex-idx, .ex-mode, .ex-src, .gloss-panel, .fc-legend, figcaption, .sidebar-nav, .on-this-page, .site-footer';
+      // The header's kicker ("Part 1 of 6, ≈ 22 min read, In pictures →") and the
+      // byline are page furniture, and Key takeaways summarise the Part the
+      // listener is about to hear in full; owner ruling 2026-10-07: the
+      // narration opens with the Part's title and goes straight into the text.
+      var NARRATION_MUTE = '.compare-key, .gl-group-meta, .ex-idx, .ex-mode, .ex-src, .gloss-panel, .fc-legend, figcaption, .sidebar-nav, .on-this-page, .site-footer, .doc-kicker, .doc-byline, .callout-collapse';
 
       // A leading ↳ marks a chart's concept chip — a jump affordance for the eye.
       var UI_GLYPH = /^\s*\u21b3/;
@@ -1156,6 +1161,13 @@
 
         if (kind === 'aria') {
           return el.getAttribute('aria-label') || raw(el);
+        }
+
+        if (kind === 'title') {
+          // The Part number lives in the (muted) kicker; say it with the title.
+          var kick = document.querySelector('.doc-kicker');
+          var num = kick && (kick.textContent || '').match(/Part\s+(\d+)\s+of/);
+          return (num ? 'Part ' + num[1] + ': ' : '') + raw(el).replace(/\.$/, '') + '.';
         }
 
         if (kind === 'exhibit') {

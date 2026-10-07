@@ -45,7 +45,7 @@ async function pagesFromSitemap() {
 }
 
 const browser = await chromium.launch({ executablePath });
-const totals = { store: 0, hit: 0, miss: 0, failed: 0 };
+const totals = { store: 0, hit: 0, miss: 0, failed: 0, audioSeconds: 0, words: 0 };
 let failed = false;
 
 try {
@@ -63,6 +63,8 @@ try {
     if (!segs.length) { await page.close(); continue; }
 
     const counts = { store: 0, hit: 0, miss: 0, failed: 0 };
+    let audioSeconds = 0; let measured = 0;
+    const words = segs.join(' ').split(/\s+/).filter(Boolean).length;
     for (let i = 0; i < segs.length; i += 1) {
       let result;
       for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -73,15 +75,25 @@ try {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(v ? { text, voice: v } : { text }),
           });
-          if (r.ok) await r.arrayBuffer();               // drain; the store is the point
+          // Measure the audio as well as storing it: the listening times shown
+          // on the pages are derived from the voice's measured speaking rate.
+          let seconds = null;
+          if (r.ok) {
+            const buf = await r.arrayBuffer();
+            try {
+              const ctx = new OfflineAudioContext(1, 1, 24000);
+              seconds = (await ctx.decodeAudioData(buf)).duration;
+            } catch (e) { seconds = null; }
+          }
           let err = null;
           if (!r.ok) { try { err = await r.json(); } catch (e) { err = null; } }
-          return { status: r.status, source: r.headers.get('x-narration-cache'), model: r.headers.get('x-narration-model'), err, ms: performance.now() - t0 };
+          return { status: r.status, source: r.headers.get('x-narration-cache'), model: r.headers.get('x-narration-model'), err, ms: performance.now() - t0, seconds };
         }, { text: segs[i], voice });
         if (result.status === 429 && !(result.err && result.err.quotaExhausted)) { await sleep(RATE_WAIT_MS); continue; }
         if (result.status >= 500 && result.status !== 502) { await sleep(3000 * (attempt + 1)); continue; }
         break;
       }
+      if (result.status === 200 && result.seconds) { audioSeconds += result.seconds; measured += 1; }
       if (result.status === 200) {
         counts[result.source === 'store' ? 'store' : result.source === 'hit' ? 'hit' : 'miss'] += 1;
         // A generation already takes seconds (about 40s for a long segment), so
@@ -96,8 +108,13 @@ try {
         }
       }
     }
-    for (const k of Object.keys(totals)) totals[k] += counts[k];
+    for (const k of Object.keys(counts)) totals[k] += counts[k];
     console.log(`  ${p.padEnd(56)} ${segs.length} segments · stored ${counts.store} · memory ${counts.hit} · generated ${counts.miss}${counts.failed ? ` · FAILED ${counts.failed}` : ''}`);
+    if (measured === segs.length) {
+      const min = audioSeconds / 60;
+      console.log(`  ${''.padEnd(56)} audio ${Math.floor(min)}m${String(Math.round(audioSeconds % 60)).padStart(2, '0')}s · ${words} spoken words · ${Math.round(words / min)} wpm`);
+      totals.audioSeconds += audioSeconds; totals.words += words;
+    }
     await page.close();
     if (failed && counts.failed && counts.failed === segs.length) break;
   }
@@ -106,6 +123,9 @@ try {
 }
 
 console.log(`\nTotal: stored ${totals.store} · memory ${totals.hit} · generated ${totals.miss} · failed ${totals.failed}`);
+if (totals.audioSeconds) {
+  console.log(`Audio: ${(totals.audioSeconds / 60).toFixed(1)} min for ${totals.words} spoken words = ${Math.round(totals.words / (totals.audioSeconds / 60))} wpm`);
+}
 if (totals.miss && !totals.store && !totals.hit) {
   console.log('Note: nothing came from the store. If this is not the first run, check that a Vercel Blob store is connected (BLOB_READ_WRITE_TOKEN).');
 }
