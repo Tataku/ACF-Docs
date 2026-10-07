@@ -1592,7 +1592,7 @@
       // Inject a pause glyph + a dedicated Stop control so the Part HTML stays
       // untouched. Both inherit the existing .part-action styling.
       var label = listenBtn.querySelector('.part-action-label');
-      var pauseSvg = '<svg class="pa-icon icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7.5" y="6" width="3.2" height="12" rx="1"></rect><rect x="13.3" y="6" width="3.2" height="12" rx="1"></rect></svg>';
+      var pauseSvg = '<svg class="pa-icon icon-pause" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 35.01 28.26 Q 31.47 50 35.01 71.74 A 1.58 1.58 0 0 1 38.17 71.74 Q 38.17 50 38.17 28.26 A 1.58 1.58 0 0 1 35.01 28.26 Z" fill-rule="evenodd"></path><path d="M 61.83 28.26 Q 58.28 50 61.83 71.74 A 1.58 1.58 0 0 1 64.99 71.74 Q 64.99 50 64.99 28.26 A 1.58 1.58 0 0 1 61.83 28.26 Z" fill-rule="evenodd"></path></svg>';
       if (label) label.insertAdjacentHTML('beforebegin', pauseSvg);
       else listenBtn.insertAdjacentHTML('beforeend', pauseSvg);
 
@@ -1601,7 +1601,7 @@
       stopBtn.className = 'part-action part-listen-stop';
       stopBtn.setAttribute('data-listen-stop', '');
       stopBtn.setAttribute('aria-label', 'Stop narration');
-      stopBtn.innerHTML = '<svg class="pa-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7" y="7" width="10" height="10" rx="1.5"></rect></svg>';
+      stopBtn.innerHTML = '<svg class="pa-icon" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 30.38 33.46 Q 50 36.88 69.62 33.46 A 1.58 1.58 0 0 1 69.62 30.3 Q 50 30.3 30.38 30.3 A 1.58 1.58 0 0 1 30.38 33.46 Z" fill-rule="evenodd"></path><path d="M 66.54 30.38 Q 63.12 50 66.54 69.62 A 1.58 1.58 0 0 1 69.7 69.62 Q 69.7 50 69.7 30.38 A 1.58 1.58 0 0 1 66.54 30.38 Z" fill-rule="evenodd"></path><path d="M 69.62 66.54 Q 50 63.12 30.38 66.54 A 1.58 1.58 0 0 1 30.38 69.7 Q 50 69.7 69.62 69.7 A 1.58 1.58 0 0 1 69.62 66.54 Z" fill-rule="evenodd"></path><path d="M 33.46 69.62 Q 36.88 50 33.46 30.38 A 1.58 1.58 0 0 1 30.3 30.38 Q 30.3 50 30.3 69.62 A 1.58 1.58 0 0 1 33.46 69.62 Z" fill-rule="evenodd"></path></svg>';
       listenBtn.insertAdjacentElement('afterend', stopBtn);
 
       listenBtn.addEventListener('click', function () {
@@ -1779,8 +1779,8 @@
     player.setAttribute('data-state', 'idle');
     player.innerHTML =
       '<button type="button" class="floatnav-play" aria-label="Play narration" aria-pressed="false">' +
-        '<svg class="fn-icon fn-ico-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 5.2v13.6L19 12z"/></svg>' +
-        '<svg class="fn-icon fn-ico-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 5h3.1v14H7zM13.9 5H17v14h-3.1z"/></svg>' +
+        '<svg class="fn-icon fn-ico-play" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 33.93 26.45 Q 30.27 50 33.93 73.55 A 1.58 1.58 0 0 1 37.09 73.55 Q 37.09 50 37.09 26.45 A 1.58 1.58 0 0 1 33.93 26.45 Z" fill-rule="evenodd"></path><path d="M 36.31 74.91 Q 58.08 66.26 76.17 51.36 A 1.58 1.58 0 0 1 74.56 48.64 Q 54.63 60.42 34.7 72.19 A 1.58 1.58 0 0 1 36.31 74.91 Z" fill-rule="evenodd"></path><path d="M 76.17 48.64 Q 58.08 33.74 36.31 25.09 A 1.58 1.58 0 0 1 34.7 27.81 Q 54.63 39.58 74.56 51.36 A 1.58 1.58 0 0 1 76.17 48.64 Z" fill-rule="evenodd"></path></svg>' +
+        '<svg class="fn-icon fn-ico-pause" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true" focusable="false"><path d="M 35.01 28.26 Q 31.47 50 35.01 71.74 A 1.58 1.58 0 0 1 38.17 71.74 Q 38.17 50 38.17 28.26 A 1.58 1.58 0 0 1 35.01 28.26 Z" fill-rule="evenodd"></path><path d="M 61.83 28.26 Q 58.28 50 61.83 71.74 A 1.58 1.58 0 0 1 64.99 71.74 Q 64.99 50 64.99 28.26 A 1.58 1.58 0 0 1 61.83 28.26 Z" fill-rule="evenodd"></path></svg>' +
       '</button>' +
       '<input type="range" class="floatnav-progress-input" min="0" max="1000" value="0" step="1" aria-label="Narration position" disabled>' +
       '<span class="floatnav-time" aria-hidden="true">-0:00</span>';

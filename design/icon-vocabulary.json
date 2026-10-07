@@ -20,6 +20,11 @@
       "form": "procedural brush geometry on a 100-unit box, generated at runtime through a turbulence + displacement filter",
       "sizing": "the .acf-icon ladder; xl / 2xl / 3xl only",
       "measuredFloor": "24px. A DIFFERENT number from the docs floor for a different reason: what fails below 24 there is the filter's taper and grain, not coverage. Same visual family, independently measured runtime constraints \u2014 neither floor transfers to the other repo."
+    },
+    "dashboardSnapshot": {
+      "path": "public/site-b/icons/optimized/ (light-mode, dark-mode, open-navigation, check)",
+      "form": "static SVG written from the dashboard's brush engine at a recorded commit: the same paths, seeds and turbulence filter the dashboard renders; no runtime or build dependency on the dashboard",
+      "refresh": "node scripts/snapshot-dashboard-brush-glyphs.mjs <ACFDashboard checkout>"
     }
   },
   "marks": [
@@ -106,6 +111,51 @@
       "control": "[data-share=\"email\"] .pa-icon",
       "shared": false,
       "drawnBy": "scripts/build-zen-action-glyphs.mjs \u2014 not in the Figma pack; drawn in its stroke construction"
+    },
+    {
+      "semantic": "pause",
+      "docsAsset": "pause.svg",
+      "dashboardMark": null,
+      "usage": "pause narration",
+      "control": "[data-listen] .icon-pause, .floatnav-play .fn-ico-pause (injected by reading-core.js)",
+      "shared": false,
+      "drawnBy": "scripts/build-zen-action-glyphs.mjs \u2014 not in the Figma pack; drawn in its stroke construction"
+    },
+    {
+      "semantic": "light-mode",
+      "docsAsset": "light-mode.svg",
+      "dashboardMark": "light-mode",
+      "usage": "theme toggle, light state (sun)",
+      "control": "#theme-toggle .icon-sun",
+      "shared": true,
+      "drawnBy": "snapshot of the dashboard brush engine \u2014 scripts/snapshot-dashboard-brush-glyphs.mjs, provenance in design/dashboard-brush-snapshot.json"
+    },
+    {
+      "semantic": "dark-mode",
+      "docsAsset": "dark-mode.svg",
+      "dashboardMark": "dark-mode",
+      "usage": "theme toggle, dark state (moon)",
+      "control": "#theme-toggle .icon-moon",
+      "shared": true,
+      "drawnBy": "snapshot of the dashboard brush engine \u2014 scripts/snapshot-dashboard-brush-glyphs.mjs, provenance in design/dashboard-brush-snapshot.json"
+    },
+    {
+      "semantic": "open-navigation",
+      "docsAsset": "open-navigation.svg",
+      "dashboardMark": "open-navigation",
+      "usage": "open the parts drawer (mobile)",
+      "control": ".drawer-toggle .drawer-icon",
+      "shared": true,
+      "drawnBy": "snapshot of the dashboard brush engine \u2014 scripts/snapshot-dashboard-brush-glyphs.mjs, provenance in design/dashboard-brush-snapshot.json"
+    },
+    {
+      "semantic": "check",
+      "docsAsset": "check.svg",
+      "dashboardMark": "check",
+      "usage": "footer share confirmation (copied / shared)",
+      "control": ".foot-share-icon--done",
+      "shared": true,
+      "drawnBy": "snapshot of the dashboard BrushGlyphIcon check \u2014 scripts/snapshot-dashboard-brush-glyphs.mjs, provenance in design/dashboard-brush-snapshot.json"
     }
   ]
 }
