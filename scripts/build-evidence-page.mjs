@@ -178,7 +178,7 @@ const main = `<main class="shell-main">
 
     <header class="doc-header">
       <div class="measure">
-        <p class="doc-eyebrow" data-glyph-text>Framework Reference</p>
+        <div class="doc-signal" data-glyph-text>Framework Reference</div>
         <p class="doc-kicker">What can be checked, and how</p>
         <h1 class="doc-title">Evidence</h1>
         <p class="doc-byline">By Dale Edward &middot; Corrections and challenges: ${ext(`${REPO}/issues/new`, 'open an issue on GitHub')}</p>

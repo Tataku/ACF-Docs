@@ -623,9 +623,34 @@
     var stored = null;
     try { stored = localStorage.getItem(KEY); } catch (e) {}
     apply(stored === 'collapsed');
+    // The head reflows between one row (expanded) and a two-row stack
+    // (collapsed). FLIP the mark and the toggle so they glide to their new
+    // places instead of jumping: measure, switch, measure, then animate the
+    // difference back to zero.
+    var movers = [btn, document.querySelector('.sidebar-head .brand')].filter(Boolean);
+    var settle;
+    function flip(change) {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !movers[0].animate) { change(); return; }
+      var before = movers.map(function (el) { return el.getBoundingClientRect(); });
+      shell.classList.add('is-sidebar-moving');
+      change();
+      movers.forEach(function (el, i) {
+        var after = el.getBoundingClientRect();
+        var dx = before[i].left - after.left;
+        var dy = before[i].top - after.top;
+        if (!dx && !dy) return;
+        el.animate(
+          [{ transform: 'translate(' + dx + 'px, ' + dy + 'px)' }, { transform: 'none' }],
+          { duration: 260, easing: 'cubic-bezier(.2, 0, 0, 1)' }
+        );
+      });
+      clearTimeout(settle);
+      settle = setTimeout(function () { shell.classList.remove('is-sidebar-moving'); }, 300);
+    }
     btn.addEventListener('click', function () {
       var next = shell.getAttribute('data-sidebar') !== 'collapsed';
-      apply(next);
+      flip(function () { apply(next); });
       try { localStorage.setItem(KEY, next ? 'collapsed' : 'expanded'); } catch (e) {}
     });
   }
@@ -1312,7 +1337,7 @@
         listenBtn.setAttribute('aria-pressed', (s === 'playing' || s === 'paused') ? 'true' : 'false');
         if (listenLabel) {
           listenLabel.textContent =
-            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Preparing…' : 'Listen · AI voice';
+            s === 'playing' ? 'Pause' : s === 'paused' ? 'Resume' : s === 'loading' ? 'Preparing…' : 'Listen';
         }
         listenBtn.setAttribute('aria-label',
           s === 'playing' ? 'Pause AI narration' : s === 'paused' ? 'Resume AI narration' : 'Listen to this part (AI voice)');

@@ -187,7 +187,7 @@ const main = `<main class="shell-main">
 
     <header class="doc-header">
       <div class="measure">
-        <p class="doc-eyebrow" data-glyph-text>Framework Reference</p>
+        <div class="doc-signal" data-glyph-text>Framework Reference</div>
         <p class="doc-kicker">${total} terms &middot; ${liveGroups.length} Parts &middot; defined where they are taught</p>
         <h1 class="doc-title">Glossary</h1>
       </div>

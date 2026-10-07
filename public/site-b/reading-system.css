@@ -792,6 +792,30 @@ body {
 .callout-info li { padding: var(--space-1) 0; }
 .callout-info li strong { color: var(--ink); font-weight: var(--weight-semibold); }
 
+/* COLLAPSIBLE callout (Key takeaways): closed by default, one click opens it.
+   Same disclosure behaviour as the FAQ: native <details>, the shared
+   .faq-chevron, accent on hover/focus, chevron flips and the body eases in. */
+.callout-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin: 0;
+  cursor: pointer;
+  list-style: none;
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.callout-toggle::-webkit-details-marker { display: none; }
+.callout-toggle::marker { content: ''; }
+.callout-collapse details:hover .callout-toggle,
+.callout-toggle:focus-visible { color: var(--accent-link); }
+.callout-toggle .faq-chevron { width: 1rem; height: 1rem; }
+.callout-collapse details[open] .faq-chevron { transform: rotate(180deg); color: var(--accent); }
+.callout-collapse details[open] .callout-toggle { margin-bottom: var(--space-3); }
+@media (prefers-reduced-motion: no-preference) {
+  .callout-collapse details[open] > ul { animation: faq-in var(--motion-base) var(--ease-standard); }
+}
+
 /* KEY INSIGHT — emphatic CARD in the doctrine family (shares the pull-quote's
    dark feature surface + atmospheric glyph language, at a smaller scale). A mono
    label reads first; the insight body is the hero. The oversized "signal orb" is
@@ -2834,8 +2858,12 @@ html { scroll-padding-top: var(--space-10); }
   transition: grid-template-columns var(--motion-base) var(--ease-standard);
 }
 
-/* Sidebar collapse toggle (desktop) — collapses to a slim rail, persisted */
-.sidebar-bar { display: flex; justify-content: flex-end; margin-bottom: var(--space-4); }
+/* Sidebar collapse toggle (desktop) — collapses to a slim rail, persisted. It
+   sits in the sidebar head, one row with the brand and the theme toggle, and is
+   the right-most control. Collapsed, the rail is too narrow for the mark and the
+   toggle side by side, so the head stacks them: the mark stays on top where it
+   was, the toggle settles beneath it. reading-core.js glides both from their old
+   positions (FLIP); with reduced motion they simply move. */
 .sidebar-toggle {
   display: inline-flex;
   align-items: center;
@@ -2859,12 +2887,29 @@ html { scroll-padding-top: var(--space-10); }
 @media (min-width: 1025px) {
   .shell[data-sidebar="collapsed"] { grid-template-columns: 3.5rem minmax(0, 1fr); }
   .shell[data-sidebar="collapsed"] .sidebar { padding-inline: var(--space-2); }
-  .shell[data-sidebar="collapsed"] .sidebar-bar { justify-content: center; }
-  .shell[data-sidebar="collapsed"] .sidebar-head { justify-content: center; margin-bottom: 0; }
+  /* A fixed 2.5rem column (the rail's inner width): the stack is centred in
+     its final box from the first frame, so it never drifts while the rail
+     narrows around it. */
+  .shell[data-sidebar="collapsed"] .sidebar-head {
+    flex-direction: column;
+    align-items: center;
+    width: 2.5rem;
+    gap: var(--space-3);
+    margin-bottom: 0;
+  }
+  .shell[data-sidebar="collapsed"] .sidebar-head .brand { margin-right: 0; }
   .shell[data-sidebar="collapsed"] .brand-word,
   .shell[data-sidebar="collapsed"] #theme-toggle,
   .shell[data-sidebar="collapsed"] .sidebar-nav { display: none; }
+  /* Expanding: the word and the theme toggle fade back in as the row reforms. */
+  @media (prefers-reduced-motion: no-preference) {
+    .shell.is-sidebar-moving:not([data-sidebar="collapsed"]) .brand-word,
+    .shell.is-sidebar-moving:not([data-sidebar="collapsed"]) #theme-toggle {
+      animation: sidebar-head-in var(--motion-base) var(--ease-standard) both;
+    }
+  }
 }
+@keyframes sidebar-head-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---- Sidebar ------------------------------------------------------------- */
 .sidebar {
@@ -2881,10 +2926,10 @@ html { scroll-padding-top: var(--space-10); }
 .sidebar-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-1);
   margin-bottom: var(--space-10);
 }
+.sidebar-head .brand { margin-right: auto; }
 .sidebar-nav { display: flex; flex-direction: column; gap: var(--space-6); }
 .side-movement {
   font-family: var(--font-sans);
@@ -3087,7 +3132,7 @@ a.side-part:hover, a.side-part:focus-visible { background: var(--accent-faint); 
 
 @media (max-width: 1024px) {
   .shell { grid-template-columns: 1fr; }
-  .sidebar-bar { display: none; }            /* drawer is used on mobile, not collapse */
+  .sidebar-toggle { display: none; }         /* drawer is used on mobile, not collapse */
   .drawer-toggle {
     display: inline-flex;
     position: fixed;
