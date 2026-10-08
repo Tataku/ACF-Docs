@@ -1278,6 +1278,20 @@
         return raw(el); // heading / para
       }
 
+      // A chart island fills its mount with the live chart, whose caption
+      // paragraphs ARE narrated. Until every mount on the page is drawn, the
+      // text is incomplete, so it is built but not kept: keeping it froze a
+      // partial text for the whole visit (2026-10-08). site-b-island.jsx draws
+      // synchronously, so in practice this is already true when the core runs;
+      // this guard keeps a slow or failed island from fixing a partial text.
+      function chartsSettled() {
+        var mounts = document.querySelectorAll('.shell-main [data-fc-chart]');
+        for (var i = 0; i < mounts.length; i++) {
+          if (!mounts[i].classList.contains('fc-live') || !mounts[i].childElementCount) return false;
+        }
+        return true;
+      }
+
       function buildBlocks() {
         if (blocks) return blocks;
         blocks = [];
@@ -1305,6 +1319,7 @@
           if (kind !== 'para' && kind !== 'heading') claimed.push(el);
           if (spoken) blocks.push(spoken);
         }
+        if (!chartsSettled()) { var partial = blocks; blocks = null; return partial; }
         return blocks;
       }
       // Segment the page for the API path. The first segments are deliberately
@@ -1341,6 +1356,7 @@
           }
         });
         flush();
+        if (!chartsSettled()) { var partialSegs = segs; segs = null; return partialSegs; }
         return segs;
       }
 
@@ -1693,7 +1709,8 @@
         // The exact strings sent to /api/narration, in order. The pre-render
         // (scripts/warm-narration.mjs) reads these from the live page, so the
         // audio it stores is keyed on byte-identical text to what readers send.
-        segments:    function () { return buildSegments().slice(); }
+        segments:    function () { return buildSegments().slice(); },
+        settled:     chartsSettled
       };
       // Reachable for QA: `ACFNarration.script()` prints what this page will say.
       try { window.ACFNarration = NARRATION; } catch (e) {}

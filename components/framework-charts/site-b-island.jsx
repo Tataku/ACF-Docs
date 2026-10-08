@@ -17,6 +17,7 @@
  * No Nextra/Next coupling: the static pages stay static; this is an additive,
  * reversible enhancement (remove the <script> + the bundle to fully revert). */
 import React from 'react';
+import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import FrameworkChart from './FrameworkChart';
 import chartCardCss from '../../styles/framework-charts.css';
@@ -51,7 +52,15 @@ function mountAll() {
     el.classList.add('fc-live', 'acf-chart-handoff');
     const root = createRoot(el);
     const render = (theme) => root.render(React.createElement(FrameworkChart, { id, theme, accent }));
-    render(currentTheme());
+    // The FIRST render is synchronous. root.render() alone is scheduled, and
+    // React spreads a page's roots over a few hundred milliseconds; the
+    // narration reads each chart's caption paragraphs from the live DOM and
+    // fixes its text the first time it is built. Measured 2026-10-08 on Part 2:
+    // the narration core arrived with 5 of 9 charts drawn, so the spoken text
+    // (and so every stored segment's key) depended on render timing. Drawing
+    // every chart before this deferred script returns makes the page's text
+    // the same on every load. Theme re-renders stay scheduled.
+    flushSync(() => render(currentTheme()));
     roots.push(render);
   });
   // Keep chart theme in lock-step with the page's data-theme toggle.
