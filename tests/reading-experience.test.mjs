@@ -185,7 +185,7 @@ test('listening time: shown beside every reading time, from the measured narrati
   // audio" — and "read is faster than listen", so both are shown, never one
   // passed off as the other.
   assert.match(SYNC, /const LISTEN_CALIBRATION = new Map\(/, 'each Part carries its measured rate');
-  assert.match(SYNC, /run 37704716706/, 'with the run it was measured from');
+  assert.match(SYNC, /pre-render run \d{9,}/, 'with the run it was measured from');
   for (let n = 1; n <= 6; n += 1) {
     const seg = COVER.slice(COVER.indexOf(`data-part="${n}"`));
     assert.match(seg, /&approx; \d+ min read &middot; &approx; \d+ min listen/, `cover card ${n}`);
