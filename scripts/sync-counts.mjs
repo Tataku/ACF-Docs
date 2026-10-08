@@ -72,7 +72,7 @@ const PART_FILES = [
 
 const CHART_FIGURE = /<figure\b[^>]*\bdata-fc-chart="[^"]*"[^>]*>[\s\S]*?<\/figure>/g;
 
-function readingMinutes(file) {
+function proseWords(file) {
   const html = fs.readFileSync(path.join(SITE, file), 'utf8');
   const main = (html.match(/<main class="shell-main">([\s\S]*?)<\/main>/) || [, ''])[1];
   if (!main) throw new Error(`${file}: no <main class="shell-main"> to measure`);
@@ -84,12 +84,40 @@ function readingMinutes(file) {
     .replace(/<[^>]+>/g, ' ')
     .replace(/&[a-z]+;|&#\d+;/gi, ' ')
     .split(/\s+/).filter(Boolean).length;
-  const minutes = Math.round(words / WPM);
-  if (!Number.isFinite(minutes) || minutes < 1) throw new Error(`${file}: implausible reading time from ${words} words`);
-  return minutes;
+  if (!Number.isFinite(words) || words < 230) throw new Error(`${file}: implausible prose length (${words} words)`);
+  return words;
 }
+const WORDS = new Map(PART_FILES.map(([n, file]) => [n, proseWords(file)]));
+function readingMinutes(n) {
+  return Math.round(WORDS.get(n) / WPM);
+}
+const MINUTES = new Map(PART_FILES.map(([n]) => [n, readingMinutes(n)]));
 
-const MINUTES = new Map(PART_FILES.map(([n, file]) => [n, readingMinutes(file)]));
+// ---- listening time: measured, then scaled with the prose -------------------
+// Listening is slower than reading (owner, 2026-10-07: "we say its a 22
+// minute read, yet its 40 minutes of audio"), so the pages show both. One flat
+// words-per-minute rate predicts the audio badly: the narrator also reads chart
+// captions, which the prose count excludes, so the error ran from -8% to +13%
+// by Part. Each Part therefore carries its own MEASURED rate: prose words per
+// minute of its actual narration. Today that reproduces the recording exactly;
+// after an edit the listening time moves with the prose, like the reading time.
+// Recalibrate when the voice or the narration rules change: the pre-render log
+// (scripts/warm-narration.mjs) prints each Part's audio length.
+// Source: production pre-render run 37704716706 (2026-10-08), voice ash,
+// gpt-4o-mini-tts-2025-12-15. Words = proseWords() at that commit.
+const LISTEN_CALIBRATION = new Map([
+  [1, { words: 5075, minutes: 40 + 8 / 60 }],
+  [2, { words: 3031, minutes: 26 + 28 / 60 }],
+  [3, { words: 4709, minutes: 41 + 59 / 60 }],
+  [4, { words: 3739, minutes: 33 + 28 / 60 }],
+  [5, { words: 6536, minutes: 51 + 28 / 60 }],
+  [6, { words: 4586, minutes: 33 + 4 / 60 }],
+]);
+const LISTEN = new Map(PART_FILES.map(([n]) => {
+  const cal = LISTEN_CALIBRATION.get(n);
+  return [n, Math.round(WORDS.get(n) * (cal.minutes / cal.words))];
+}));
+const TOTAL_LISTEN = [...LISTEN.values()].reduce((a, b) => a + b, 0);
 
 // The cover's footer states what the whole book costs a reader. It is the SUM OF
 // THE SIX CARD TIMES, not a second measurement of the prose: a reader who adds
@@ -129,9 +157,11 @@ const RULES = [
     // One rule per card, anchored on that card's own data-part so a reading time
     // can never be written onto the wrong Part (which is how 1 and 2 were swapped).
     ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*?&approx; )\\d+( min read)`), () => MINUTES.get(n)]),
+    ...PART_FILES.map(([n]) => [new RegExp(`(data-part="${n}"[\\s\\S]*? min read ${DOT} &approx; )\\d+( min listen)`), () => LISTEN.get(n)]),
     // The running head states the size of the book, and it is the one number in
     // the colophon that JS never rewrites — so this is its only writer.
     [/(data-foot-total>&approx; )\d+( min end to end)/, () => TOTAL_MINUTES],
+    [/(data-foot-listen>&approx; )\d+( min to listen)/, () => TOTAL_LISTEN],
     // The stage normalises the ticks' positions to the same total the arcs use.
     [/(class="foot-stage" style="--total: )\d+(")/, () => TOTAL_MINUTES],
     // The ticks: one per Part, each spanning its own columns. Anchored on the
@@ -157,6 +187,7 @@ const RULES = [
   ]],
   ...PART_FILES.map(([n, file]) => [file, [
     [new RegExp(`(Part ${n} of 6 ${DOT} &approx; )\\d+( min read)`), () => MINUTES.get(n)],
+    [new RegExp(`(Part ${n} of 6 ${DOT} &approx; \\d+ min read ${DOT} &approx; )\\d+( min listen)`), () => LISTEN.get(n)],
   ]]),
   ['part-1-foundation.html',             [[new RegExp(`(#foundation">In pictures ${DOT} )\\d+( exhibits)`),   () => perPart(1)]]],
   ['part-1-pictures.html',               [[new RegExp(`(<p class="doc-kicker">Part 1 ${DOT} A visual essay ${DOT} )\\d+( exhibits</p>)`), () => P1_PICTURES]]],

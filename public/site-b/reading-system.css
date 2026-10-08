@@ -2553,6 +2553,8 @@ html.js [data-foot-progress][data-pending] .foot-arc[data-read][data-peek]:not([
   }
   .foot-stage { order: 2; margin-top: 0; --stage-h: 6.5rem; }
   .foot-rh-book { white-space: normal; }
+  /* Wrap between the phrases, never inside one ("119 min end to / end"). */
+  .foot-rh-book > span { white-space: nowrap; display: inline-block; }
   .foot-tick-min { display: none; }
   .foot-arc { stroke-width: 4; }
   .foot-arc[data-read] { stroke-width: 6; }
