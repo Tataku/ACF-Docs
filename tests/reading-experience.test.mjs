@@ -180,6 +180,28 @@ test('reading time: it is derived from the prose, at a rate that is written down
   assert.match(SYNC, /Part \$\{n\} of 6/, 'the page rule is anchored per page');
 });
 
+test('listening time: shown beside every reading time, from the measured narration', () => {
+  // Owner, 2026-10-07: "we say its a 22 minute read, yet its 40 minutes of
+  // audio" — and "read is faster than listen", so both are shown, never one
+  // passed off as the other.
+  assert.match(SYNC, /const LISTEN_CALIBRATION = new Map\(/, 'each Part carries its measured rate');
+  assert.match(SYNC, /run 37704716706/, 'with the run it was measured from');
+  for (let n = 1; n <= 6; n += 1) {
+    const seg = COVER.slice(COVER.indexOf(`data-part="${n}"`));
+    assert.match(seg, /&approx; \d+ min read &middot; &approx; \d+ min listen/, `cover card ${n}`);
+  }
+  for (const f of ['part-1-foundation', 'part-2-lineage-macro', 'part-3-bitcoin-convexity',
+    'part-4-tax-architecture', 'part-5-portfolio-construction', 'part-6-convexity-scoring']) {
+    const html = read(`public/site-b/${f}.html`);
+    const m = html.match(/Part \d of 6 &middot; &approx; (\d+) min read &middot; &approx; (\d+) min listen/);
+    assert.ok(m, `${f}: kicker states both`);
+    assert.ok(Number(m[2]) > Number(m[1]), `${f}: listening is slower than reading`);
+  }
+  const listens = [1, 2, 3, 4, 5, 6].map((n) => Number((COVER.slice(COVER.indexOf(`data-part="${n}"`)).match(/(\d+) min listen/) || [, NaN])[1]));
+  const total = Number((COVER.match(/data-foot-listen>&approx; (\d+) min to listen/) || [, NaN])[1]);
+  assert.equal(total, listens.reduce((a, b) => a + b, 0), 'the footer total is the sum of the cards');
+});
+
 test('reading time: chart fallbacks are not counted as prose', () => {
   // A regenerated chart fallback must never move a reading time: the minutes
   // measure the prose, and the figure's contents are replaced by the live chart.
