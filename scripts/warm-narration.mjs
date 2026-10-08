@@ -57,7 +57,10 @@ try {
     // reading.js loads the narration core AFTER the page's load event (it tags
     // the glossary first), so wait for the controller rather than reading early.
     // Pages without a Listen control never define one; give up on those quietly.
-    const ready = await page.waitForFunction(() => window.ACFNarration && window.ACFNarration.segments, null, { timeout: 15000 })
+    // It also waits for the chart islands: their captions are narrated, and a
+    // text read before they are drawn is not the text a reader hears.
+    const ready = await page.waitForFunction(() => window.ACFNarration && window.ACFNarration.segments
+      && (!window.ACFNarration.settled || window.ACFNarration.settled()), null, { timeout: 15000 })
       .then(() => true, () => false);
     const segs = ready ? await page.evaluate(() => window.ACFNarration.segments()) : [];
     if (!segs.length) { await page.close(); continue; }
